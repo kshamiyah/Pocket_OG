@@ -4,6 +4,10 @@ import ContentBlock from "./ContentBlock";
 const PILL = {
   GL952: "bg-blue-50 text-blue-700 border-blue-100",
   GL787: "bg-emerald-50 text-emerald-700 border-emerald-100",
+  CG565: "bg-violet-50 text-violet-700 border-violet-100",
+  CG621: "bg-rose-50 text-rose-700 border-rose-100",
+  CG623: "bg-orange-50 text-orange-700 border-orange-100",
+  GL895: "bg-sky-50 text-sky-700 border-sky-100",
 };
 
 export default function WikiCard({ page, isExpanded, onToggle, isFallback }) {

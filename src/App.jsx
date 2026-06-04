@@ -1,11 +1,15 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { GL952_SECTIONS } from "./data/GL952";
 import { GL787_SECTIONS } from "./data/GL787";
+import { CG565_SECTIONS } from "./data/CG565";
+import { CG621_SECTIONS } from "./data/CG621";
+import { CG623_SECTIONS } from "./data/CG623";
+import { GL895_SECTIONS } from "./data/GL895";
 import { expandQuery, scoreResult } from "./search/engine";
 import WikiCard from "./components/WikiCard";
 import NoResults from "./components/NoResults";
 
-const WIKI = [...GL952_SECTIONS, ...GL787_SECTIONS];
+const WIKI = [...GL952_SECTIONS, ...GL787_SECTIONS, ...CG565_SECTIONS, ...CG621_SECTIONS, ...CG623_SECTIONS, ...GL895_SECTIONS];
 
 const SUGGESTIONS = [
   "postnatal blood pressure",
@@ -72,7 +76,7 @@ export default function App() {
                 <span className="text-white text-base font-semibold">Rx</span>
               </div>
               <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">ClinRef</h1>
-              <p className="text-sm text-gray-400 mt-1">RBH Maternity guidelines</p>
+              <p className="text-sm text-gray-400 mt-1">RBH · 6 guidelines</p>
             </div>
 
             {/* Search bar */}
@@ -131,20 +135,24 @@ export default function App() {
                 >×</button>
               </div>
               {/* Filter pills */}
-              <div className="flex gap-1 shrink-0">
-                {["ALL","GL952","GL787"].map(f => (
+              <div className="flex gap-1 shrink-0 overflow-x-auto">
+                {[
+                  { id: "ALL", label: "All", active: "bg-gray-900 text-white" },
+                  { id: "GL952", label: "GL952", active: "bg-blue-100 text-blue-700" },
+                  { id: "GL787", label: "GL787", active: "bg-emerald-100 text-emerald-700" },
+                  { id: "CG565", label: "CG565", active: "bg-violet-100 text-violet-700" },
+                  { id: "CG621", label: "CG621", active: "bg-rose-100 text-rose-700" },
+                  { id: "CG623", label: "CG623", active: "bg-orange-100 text-orange-700" },
+                  { id: "GL895", label: "GL895", active: "bg-sky-100 text-sky-700" },
+                ].map(f => (
                   <button
-                    key={f}
-                    onClick={() => { setFilter(f); setExpanded({}); }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
-                      filter === f
-                        ? f === "GL952" ? "bg-blue-100 text-blue-700"
-                          : f === "GL787" ? "bg-emerald-100 text-emerald-700"
-                          : "bg-gray-900 text-white"
-                        : "text-gray-400 hover:text-gray-600"
+                    key={f.id}
+                    onClick={() => { setFilter(f.id); setExpanded({}); }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+                      filter === f.id ? f.active : "text-gray-400 hover:text-gray-600"
                     }`}
                   >
-                    {f === "ALL" ? "All" : f}
+                    {f.label}
                   </button>
                 ))}
               </div>
