@@ -137,13 +137,13 @@ export default function App() {
               {/* Filter pills */}
               <div className="flex gap-1 shrink-0 overflow-x-auto">
                 {[
-                  { id: "ALL", label: "All", active: "bg-gray-900 text-white" },
-                  { id: "GL952", label: "GL952", active: "bg-blue-100 text-blue-700" },
-                  { id: "GL787", label: "GL787", active: "bg-emerald-100 text-emerald-700" },
-                  { id: "CG565", label: "CG565", active: "bg-violet-100 text-violet-700" },
-                  { id: "CG621", label: "CG621", active: "bg-rose-100 text-rose-700" },
-                  { id: "CG623", label: "CG623", active: "bg-orange-100 text-orange-700" },
-                  { id: "GL895", label: "GL895", active: "bg-sky-100 text-sky-700" },
+                  { id: "ALL",   label: "All",           active: "bg-gray-900 text-white" },
+                  { id: "GL952", label: "Hypertension",  active: "bg-blue-100 text-blue-700" },
+                  { id: "GL787", label: "Antibiotics",   active: "bg-emerald-100 text-emerald-700" },
+                  { id: "CG565", label: "Miscarriage",   active: "bg-violet-100 text-violet-700" },
+                  { id: "CG621", label: "Mife/Miso",     active: "bg-rose-100 text-rose-700" },
+                  { id: "CG623", label: "Ectopic",       active: "bg-orange-100 text-orange-700" },
+                  { id: "GL895", label: "PPRoM",         active: "bg-sky-100 text-sky-700" },
                 ].map(f => (
                   <button
                     key={f.id}
