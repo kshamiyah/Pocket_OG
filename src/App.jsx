@@ -92,7 +92,7 @@ export default function App() {
         <div className="flex flex-col items-center justify-center min-h-screen px-4 pb-24">
           <div className="w-full max-w-xl">
             {/* Logo */}
-            <div className="flex flex-col items-center mb-8">
+            <div className="flex flex-col items-center text-center mb-8">
               <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center mb-3 shadow-sm">
                 <span className="text-white text-base font-semibold">Rx</span>
               </div>
@@ -100,20 +100,28 @@ export default function App() {
               <p className="text-sm text-gray-400 mt-1">RBH guidelines — wherever you go, whenever you need them</p>
             </div>
 
-            {/* Search bar */}
-            <div className="relative mb-4">
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-              </svg>
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="Ask a clinical question…"
-                value={inputValue}
-                onChange={e => setInputValue(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && submitSearch()}
-                className="w-full border border-gray-200 rounded-2xl pl-11 pr-4 py-4 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 shadow-sm transition-all"
-              />
+            {/* Search bar + button */}
+            <div className="flex gap-2 mb-4">
+              <div className="relative flex-1">
+                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                </svg>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder="Ask a clinical question…"
+                  value={inputValue}
+                  onChange={e => setInputValue(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && submitSearch()}
+                  className="w-full border border-gray-200 rounded-2xl pl-11 pr-4 py-4 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 shadow-sm transition-all"
+                />
+              </div>
+              <button
+                onClick={() => submitSearch()}
+                className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-5 rounded-2xl shadow-sm transition-colors"
+              >
+                Search
+              </button>
             </div>
 
             {/* Suggestion chips */}
