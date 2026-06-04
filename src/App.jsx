@@ -137,7 +137,7 @@ export default function App() {
                   type="text"
                   value={query}
                   onChange={e => { setQuery(e.target.value); setExpanded({}); }}
-                  className="w-full border border-gray-200 rounded-xl pl-9 pr-8 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                  className="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-8 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
                 />
                 <button
                   onClick={() => { setQuery(""); setExpanded({}); }}
