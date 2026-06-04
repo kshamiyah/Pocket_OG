@@ -204,6 +204,7 @@ export default function App() {
 
             <div className="mt-10 text-center">
               <p className="text-xs text-gray-300">Content derived verbatim from RBH trust guidelines · Not a substitute for clinical judgement · Always escalate when uncertain</p>
+              <p className="text-xs text-gray-300 mt-1">Built by Khalid Shamiyah</p>
             </div>
           </div>
         </>
