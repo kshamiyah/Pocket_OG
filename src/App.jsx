@@ -23,7 +23,8 @@ const SUGGESTIONS = [
 ];
 
 export default function App() {
-  const [query, setQuery] = useState("");
+  const [inputValue, setInputValue] = useState(""); // what the user is typing
+  const [query, setQuery] = useState("");            // what actually drives search (set on Enter)
   const [filter, setFilter] = useState("ALL");
   const [expanded, setExpanded] = useState({});
   const inputRef = useRef(null);
@@ -41,6 +42,17 @@ export default function App() {
       resultsInputRef.current.focus();
     }
   }, [hasQuery]);
+
+  const submitSearch = (val) => {
+    const v = (val ?? inputValue).trim();
+    if (v) { setQuery(v); setExpanded({}); }
+  };
+
+  const clearSearch = () => {
+    setInputValue("");
+    setQuery("");
+    setExpanded({});
+  };
 
   const { primary, fallback } = useMemo(() => {
     const pool = filter === "ALL" ? WIKI : WIKI.filter(p => p.gl === filter);
@@ -97,8 +109,9 @@ export default function App() {
                 ref={inputRef}
                 type="text"
                 placeholder="Ask a clinical question…"
-                value={query}
-                onChange={e => { setQuery(e.target.value); setExpanded({}); }}
+                value={inputValue}
+                onChange={e => setInputValue(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && submitSearch()}
                 className="w-full border border-gray-200 rounded-2xl pl-11 pr-4 py-4 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 shadow-sm transition-all"
               />
             </div>
@@ -108,7 +121,7 @@ export default function App() {
               {SUGGESTIONS.map(s => (
                 <button
                   key={s}
-                  onClick={() => setQuery(s)}
+                  onClick={() => { setInputValue(s); submitSearch(s); }}
                   className="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-xs text-gray-600 transition-colors"
                 >
                   {s}
@@ -135,12 +148,13 @@ export default function App() {
                 <input
                   ref={resultsInputRef}
                   type="text"
-                  value={query}
-                  onChange={e => { setQuery(e.target.value); setExpanded({}); }}
+                  value={inputValue}
+                  onChange={e => setInputValue(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && submitSearch()}
                   className="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-8 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
                 />
                 <button
-                  onClick={() => { setQuery(""); setExpanded({}); }}
+                  onClick={clearSearch}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg leading-none"
                 >×</button>
               </div>
@@ -157,7 +171,7 @@ export default function App() {
                 ].map(f => (
                   <button
                     key={f.id}
-                    onClick={() => { setFilter(f.id); setExpanded({}); }}
+                    onClick={() => { setFilter(f.id); setExpanded({}); submitSearch(); }}
                     className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
                       filter === f.id ? f.active : "text-gray-400 hover:text-gray-600"
                     }`}
