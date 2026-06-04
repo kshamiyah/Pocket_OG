@@ -27,11 +27,20 @@ export default function App() {
   const [filter, setFilter] = useState("ALL");
   const [expanded, setExpanded] = useState({});
   const inputRef = useRef(null);
+  const resultsInputRef = useRef(null);
   const hasQuery = query.trim().length > 0;
 
+  // Focus idle input on mount
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
   }, []);
+
+  // When transitioning to results view, transfer focus to results input
+  useEffect(() => {
+    if (hasQuery && resultsInputRef.current) {
+      resultsInputRef.current.focus();
+    }
+  }, [hasQuery]);
 
   const { primary, fallback } = useMemo(() => {
     const pool = filter === "ALL" ? WIKI : WIKI.filter(p => p.gl === filter);
@@ -124,6 +133,7 @@ export default function App() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
                 </svg>
                 <input
+                  ref={resultsInputRef}
                   type="text"
                   value={query}
                   onChange={e => { setQuery(e.target.value); setExpanded({}); }}
