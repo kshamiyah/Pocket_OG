@@ -96,8 +96,8 @@ export default function App() {
               <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center mb-3 shadow-sm">
                 <span className="text-white text-base font-semibold">Rx</span>
               </div>
-              <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">ClinRef</h1>
-              <p className="text-sm text-gray-400 mt-1">RBH · 6 guidelines</p>
+              <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Pocket O&G</h1>
+              <p className="text-sm text-gray-400 mt-1">RBH guidelines — wherever you go, whenever you need them</p>
             </div>
 
             {/* Search bar */}
