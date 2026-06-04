@@ -15,6 +15,9 @@ export const SYNONYMS = {
   "how long": ["length of stay","discharge","stay","duration"],
   "go home": ["discharge","criteria","length of stay"],
   "when can she leave": ["discharge criteria","discharge","length of stay"],
+  // PET / hypertension
+  "pe":  ["pre-eclampsia","preeclampsia","eclampsia","pet","hypertension in pregnancy"],
+  "pet": ["pre-eclampsia","preeclampsia","hypertension in pregnancy","eclampsia"],
   // BP / medication
   "bp meds": ["antihypertensive","labetalol","nifedipine","medication"],
   "blood pressure tablets": ["antihypertensive","labetalol","nifedipine"],

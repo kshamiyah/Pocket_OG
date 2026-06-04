@@ -1,15 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
-import { GL952_SECTIONS } from "./data/GL952";
-import { GL787_SECTIONS } from "./data/GL787";
-import { CG565_SECTIONS } from "./data/CG565";
-import { CG621_SECTIONS } from "./data/CG621";
-import { CG623_SECTIONS } from "./data/CG623";
-import { GL895_SECTIONS } from "./data/GL895";
-import { expandQuery, scoreResult } from "./search/engine";
+import { SEARCH_INDEX, search } from "./search/engine";
 import WikiCard from "./components/WikiCard";
 import NoResults from "./components/NoResults";
-
-const WIKI = [...GL952_SECTIONS, ...GL787_SECTIONS, ...CG565_SECTIONS, ...CG621_SECTIONS, ...CG623_SECTIONS, ...GL895_SECTIONS];
 
 const SUGGESTIONS = [
   "postnatal blood pressure",
@@ -55,24 +47,8 @@ export default function App() {
   };
 
   const { primary, fallback } = useMemo(() => {
-    const pool = filter === "ALL" ? WIKI : WIKI.filter(p => p.gl === filter);
-    const q = query.trim();
-    if (!q) return { primary: [], fallback: [] };
-
-    const terms = expandQuery(q);
-    const scored = pool.map(p => ({ ...p, score: scoreResult(p, terms) })).sort((a, b) => b.score - a.score);
-    const hits = scored.filter(p => p.score > 0);
-
-    if (hits.length > 0) return { primary: hits, fallback: [] };
-
-    const rawTerms = q.toLowerCase().split(/\s+/);
-    const withPartial = pool.map(p => {
-      const text = [p.title, p.condition, p.setting, ...p.tags].join(" ").toLowerCase();
-      const partialScore = rawTerms.reduce((acc, t) => acc + (text.includes(t.slice(0, 4)) ? 1 : 0), 0);
-      return { ...p, score: partialScore };
-    }).filter(p => p.score > 0).sort((a, b) => b.score - a.score).slice(0, 3);
-
-    return { primary: [], fallback: withPartial };
+    const pool = filter === "ALL" ? SEARCH_INDEX : SEARCH_INDEX.filter(e => e.page.gl === filter);
+    return search(query, pool);
   }, [query, filter]);
 
   const toggle = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
