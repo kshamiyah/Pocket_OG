@@ -4,20 +4,6 @@ import { GUIDELINES } from "./data/guidelines";
 import WikiCard from "./components/WikiCard";
 import NoResults from "./components/NoResults";
 
-const BROWSE_COLORS = {
-  GL952: { card: "border-blue-100 bg-blue-50 hover:bg-blue-100",     dot: "bg-blue-500",   label: "text-blue-800" },
-  GL787: { card: "border-emerald-100 bg-emerald-50 hover:bg-emerald-100", dot: "bg-emerald-500", label: "text-emerald-800" },
-  CG565: { card: "border-violet-100 bg-violet-50 hover:bg-violet-100",   dot: "bg-violet-500", label: "text-violet-800" },
-  CG621: { card: "border-rose-100 bg-rose-50 hover:bg-rose-100",     dot: "bg-rose-500",   label: "text-rose-800" },
-  CG623: { card: "border-orange-100 bg-orange-50 hover:bg-orange-100", dot: "bg-orange-500", label: "text-orange-800" },
-  GL895: { card: "border-sky-100 bg-sky-50 hover:bg-sky-100",       dot: "bg-sky-500",    label: "text-sky-800" },
-};
-
-const SECTION_COUNTS = SEARCH_INDEX.reduce((acc, e) => {
-  acc[e.page.gl] = (acc[e.page.gl] || 0) + 1;
-  return acc;
-}, {});
-
 const SUGGESTIONS = [
   "postnatal blood pressure",
   "caesarean antibiotics",
@@ -36,7 +22,7 @@ export default function App() {
   const [expanded, setExpanded] = useState({});
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
-  const hasQuery = query.trim().length > 0 || filter !== "ALL";
+  const hasQuery = query.trim().length > 0;
 
   // Focus idle input on mount
   useEffect(() => {
@@ -64,12 +50,6 @@ export default function App() {
 
   const { primary, fallback } = useMemo(() => {
     const pool = filter === "ALL" ? SEARCH_INDEX : SEARCH_INDEX.filter(e => e.page.gl === filter);
-    if (!query.trim()) {
-      // Browse mode: show all sections in the selected guideline
-      return filter !== "ALL"
-        ? { primary: pool.map(e => e.page), fallback: [] }
-        : { primary: [], fallback: [] };
-    }
     return search(query, pool);
   }, [query, filter]);
 
@@ -122,6 +102,23 @@ export default function App() {
               </button>
             </div>
 
+            {/* Guideline dropdown */}
+            <div className="relative mb-4">
+              <select
+                value={filter}
+                onChange={e => setFilter(e.target.value)}
+                className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 shadow-sm appearance-none transition-all"
+              >
+                <option value="ALL">All guidelines</option>
+                {Object.values(GUIDELINES).map(gl => (
+                  <option key={gl.code} value={gl.code}>{gl.label}</option>
+                ))}
+              </select>
+              <svg className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+
             {/* Suggestion chips */}
             <div className="flex flex-wrap gap-2 justify-center">
               {SUGGESTIONS.map(s => (
@@ -133,30 +130,6 @@ export default function App() {
                   {s}
                 </button>
               ))}
-            </div>
-
-            {/* Browse guidelines */}
-            <div className="mt-8">
-              <p className="text-xs text-gray-400 uppercase tracking-widest mb-3 text-center">Browse guidelines</p>
-              <div className="space-y-2">
-                {Object.values(GUIDELINES).map(gl => {
-                  const c = BROWSE_COLORS[gl.code];
-                  return (
-                    <button
-                      key={gl.code}
-                      onClick={() => { setFilter(gl.code); setExpanded({}); }}
-                      className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border text-left transition-colors ${c.card}`}
-                    >
-                      <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${c.dot}`} />
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium ${c.label}`}>{gl.label}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">{gl.code} · {gl.version} · {SECTION_COUNTS[gl.code]} sections</p>
-                      </div>
-                      <span className="text-gray-300 text-xl font-light leading-none">›</span>
-                    </button>
-                  );
-                })}
-              </div>
             </div>
           </div>
         </div>
@@ -217,10 +190,8 @@ export default function App() {
           <div className="max-w-2xl mx-auto px-4 py-5">
             {!showNoResults && (
               <p className="text-xs text-gray-400 mb-4">
-                {query.trim()
-                  ? `${primary.length} result${primary.length !== 1 ? "s" : ""} for "${query}"`
-                  : `${primary.length} section${primary.length !== 1 ? "s" : ""} — ${GUIDELINES[filter]?.label}`
-                }
+                {primary.length} result{primary.length !== 1 ? "s" : ""} for "{query}"
+                {filter !== "ALL" && <span className="text-gray-300"> · {GUIDELINES[filter]?.label}</span>}
               </p>
             )}
 
