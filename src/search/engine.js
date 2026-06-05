@@ -62,10 +62,10 @@ function _scoreEntry(entry, termPatterns) {
   for (const { term, re } of termPatterns) {
     if (entry.tagsLower.some(t => t === term)) score += 12;
     else if (entry.tagsLower.some(t => re.test(t))) score += 7;
-    if (entry.titleLower.includes(term)) score += 7;
-    if (entry.settingLower.includes(term)) score += 5;
-    if (entry.conditionLower.includes(term)) score += 5;
-    if (entry.searchableContent.includes(term)) score += 2;
+    if (re.test(entry.titleLower)) score += 7;
+    if (re.test(entry.settingLower)) score += 5;
+    if (re.test(entry.conditionLower)) score += 5;
+    if (re.test(entry.searchableContent)) score += 2;
   }
   return score;
 }
