@@ -16,7 +16,7 @@ export default function NoResults({ query, fallbacks, expanded, onToggle }) {
           <p className="text-xs text-gray-400 uppercase tracking-widest mb-3">Closest matches</p>
           <div className="space-y-3">
             {fallbacks.map(page => (
-              <WikiCard key={page.id} page={page} isFallback={true}
+              <WikiCard key={page.id} page={page} isFallback={true} query={query}
                 isExpanded={!!expanded[page.id]}
                 onToggle={() => onToggle(page.id)} />
             ))}
