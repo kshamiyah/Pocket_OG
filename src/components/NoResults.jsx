@@ -1,6 +1,6 @@
 import WikiCard from "./WikiCard";
 
-export default function NoResults({ query, fallbacks, expanded, onToggle }) {
+export default function NoResults({ query, fallbacks, expanded, onToggle, onOpenFlowchart }) {
   return (
     <div>
       <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5 mb-5">
@@ -18,7 +18,8 @@ export default function NoResults({ query, fallbacks, expanded, onToggle }) {
             {fallbacks.map(page => (
               <WikiCard key={page.id} page={page} isFallback={true} query={query}
                 isExpanded={!!expanded[page.id]}
-                onToggle={() => onToggle(page.id)} />
+                onToggle={() => onToggle(page.id)}
+                onOpenFlowchart={onOpenFlowchart} />
             ))}
           </div>
         </>

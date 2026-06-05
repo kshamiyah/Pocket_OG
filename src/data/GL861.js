@@ -2,6 +2,7 @@ export const GL861_SECTIONS = [
   {
     id: "gl861-indications", gl: "GL861", condition: "Induction of Labour", setting: "Indications & Contraindications",
     title: "IOL — Indications & Contraindications",
+    flowchartId: "GL861_IOL",
     tags: ["induction of labour","iol","indications","post-dates","post-maturity","40+7","rfm","reduced fetal movements","38+6","maternal age","advanced maternal age","diabetes","hypertension","pre-eclampsia","pet","fetal growth restriction","iugr","contraindications","fetal compromise","obstetric cholestasis","bile acids","pcr","aph","iufd","intrauterine fetal death","anticoagulation"],
     content: [
       { type: "subheading", value: "Indications" },

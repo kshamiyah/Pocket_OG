@@ -1,7 +1,9 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { SEARCH_INDEX, search } from "./search/engine";
+import { FLOWCHARTS } from "./data/GL861_FLOWCHART";
 import WikiCard from "./components/WikiCard";
 import NoResults from "./components/NoResults";
+import FlowchartPlayer from "./components/FlowchartPlayer";
 
 const FILTER_OPTIONS = [
   { value: "ALL",         label: "All guidelines",                     pill: "All",         codes: null,               active: "bg-gray-900 text-white" },
@@ -29,6 +31,7 @@ export default function App() {
   const [query, setQuery] = useState("");            // what actually drives search (set on Enter)
   const [filter, setFilter] = useState("ALL");
   const [expanded, setExpanded] = useState({});
+  const [activeFlowchartId, setActiveFlowchartId] = useState(null);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
   const hasQuery = query.trim().length > 0;
@@ -76,6 +79,14 @@ export default function App() {
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
       `}</style>
+
+      {/* Flowchart overlay */}
+      {activeFlowchartId && FLOWCHARTS[activeFlowchartId] && (
+        <FlowchartPlayer
+          flowchart={FLOWCHARTS[activeFlowchartId]}
+          onClose={() => setActiveFlowchartId(null)}
+        />
+      )}
 
       {/* Hero / idle state */}
       {!hasQuery && (
@@ -199,11 +210,11 @@ export default function App() {
             )}
 
             {showNoResults
-              ? <NoResults query={query} fallbacks={fallback} expanded={expanded} onToggle={toggle} />
+              ? <NoResults query={query} fallbacks={fallback} expanded={expanded} onToggle={toggle} onOpenFlowchart={setActiveFlowchartId} />
               : (
                 <div className="space-y-3">
                   {primary.map(page => (
-                    <WikiCard key={page.id} page={page} query={query} isExpanded={!!expanded[page.id]} onToggle={() => toggle(page.id)} />
+                    <WikiCard key={page.id} page={page} query={query} isExpanded={!!expanded[page.id]} onToggle={() => toggle(page.id)} onOpenFlowchart={setActiveFlowchartId} />
                   ))}
                 </div>
               )

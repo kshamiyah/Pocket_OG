@@ -11,7 +11,7 @@ const PILL = {
   GL861: "bg-teal-50 text-teal-700 border-teal-100",
 };
 
-export default function WikiCard({ page, isExpanded, onToggle, isFallback, query = "" }) {
+export default function WikiCard({ page, isExpanded, onToggle, isFallback, query = "", onOpenFlowchart }) {
   const gl = GUIDELINES[page.gl];
   const highlightTerms = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
   return (
@@ -24,6 +24,11 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
             </span>
             <span className="px-2 py-0.5 rounded-full text-xs text-gray-400 bg-gray-100">{page.setting}</span>
             {isFallback && <span className="px-2 py-0.5 rounded-full text-xs text-gray-400 bg-gray-100">closest match</span>}
+            {page.flowchartId && (
+              <span className="px-2 py-0.5 rounded-full text-xs text-teal-600 bg-teal-50 border border-teal-100">
+                ⬡ flowchart
+              </span>
+            )}
           </div>
           <h3 className="text-gray-900 font-semibold text-base leading-snug">{highlightText(page.title, highlightTerms)}</h3>
           <p className="text-xs text-gray-400 mt-0.5">{page.condition}</p>
@@ -32,6 +37,21 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
       </button>
       {isExpanded && (
         <div className="px-5 pb-5 border-t border-gray-100 pt-4">
+          {page.flowchartId && onOpenFlowchart && (
+            <button
+              onClick={() => onOpenFlowchart(page.flowchartId)}
+              className="w-full mb-4 flex items-center justify-between px-4 py-3 rounded-2xl bg-teal-50 border border-teal-100 hover:bg-teal-100 transition-colors group"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="text-teal-600 text-base">⬡</span>
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-teal-700">Interactive flowchart</p>
+                  <p className="text-xs text-teal-500">Follow the IOL algorithm step by step</p>
+                </div>
+              </div>
+              <span className="text-teal-400 group-hover:text-teal-600 transition-colors">→</span>
+            </button>
+          )}
           {page.content.map((block, i) => <ContentBlock key={i} block={block} highlightTerms={highlightTerms} />)}
           <div className="mt-5 pt-3 border-t border-gray-100">
             <p className="text-xs text-gray-400">{gl.code} {gl.version} · {gl.label} · RBH · {gl.date}</p>
