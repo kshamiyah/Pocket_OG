@@ -13,7 +13,7 @@ export const CG623_SECTIONS = [
   {
     id: "ep-protocol", gl: "CG623", condition: "Ectopic Pregnancy", setting: "MTX Treatment Protocol",
     title: "Ectopic Pregnancy — MTX Treatment & Monitoring",
-    tags: ["methotrexate","mtx","50mg","treatment","protocol","day 1","day 4","day 7","bhcg monitoring","second dose","cytotoxic","im injection","intramuscular","registrar","consultant","follow up","bhcg","weekly","15 percent"],
+    tags: ["ectopic","ectopic pregnancy","methotrexate","mtx","50mg","treatment","protocol","day 1","day 4","day 7","bhcg monitoring","second dose","cytotoxic","im injection","intramuscular","registrar","consultant","follow up","bhcg","weekly","15 percent"],
     content: [
       { type: "subheading", value: "Treatment Steps" },
       { type: "list", items: ["Registrar review and Consultant agreement — especially if decision based on single ultrasound scan","Counsel the patient and explain treatment protocol — discuss surgical/medical options","Informed consent using eConsent — include off-label ('off label') use of methotrexate","Record height and weight","Organise baseline blood tests: FBC, G&S, LFTs, U&Es and BHCG","Prescribe methotrexate 50mg/m²","Methotrexate given by appropriately trained staff in line with Trust cytotoxic drug policy","Patient rests for up to 1 hour post administration — check no local reaction before discharge","Do NOT prescribe anti-D for medical management of ectopic pregnancy (NICE 2019)"] },
