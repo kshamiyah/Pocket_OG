@@ -1,8 +1,16 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { SEARCH_INDEX, search } from "./search/engine";
-import { GUIDELINES } from "./data/guidelines";
 import WikiCard from "./components/WikiCard";
 import NoResults from "./components/NoResults";
+
+const FILTER_OPTIONS = [
+  { value: "ALL",         label: "All guidelines",                     pill: "All",         codes: null,               active: "bg-gray-900 text-white" },
+  { value: "GL952",       label: "Pre-Eclampsia / PIH / PET",          pill: "PET / PIH",   codes: ["GL952"],          active: "bg-blue-100 text-blue-700" },
+  { value: "GL787",       label: "Obstetric Infections & Antibiotics", pill: "Antibiotics", codes: ["GL787"],          active: "bg-emerald-100 text-emerald-700" },
+  { value: "MISCARRIAGE", label: "Miscarriage",                        pill: "Miscarriage", codes: ["CG565", "CG621"], active: "bg-violet-100 text-violet-700" },
+  { value: "CG623",       label: "Ectopic Pregnancy",                  pill: "Ectopic",     codes: ["CG623"],          active: "bg-orange-100 text-orange-700" },
+  { value: "GL895",       label: "PPRoM",                              pill: "PPRoM",       codes: ["GL895"],          active: "bg-sky-100 text-sky-700" },
+];
 
 const SUGGESTIONS = [
   "postnatal blood pressure",
@@ -48,8 +56,11 @@ export default function App() {
     setExpanded({});
   };
 
+  const activeOption = FILTER_OPTIONS.find(o => o.value === filter);
   const { primary, fallback } = useMemo(() => {
-    const pool = filter === "ALL" ? SEARCH_INDEX : SEARCH_INDEX.filter(e => e.page.gl === filter);
+    const pool = activeOption?.codes
+      ? SEARCH_INDEX.filter(e => activeOption.codes.includes(e.page.gl))
+      : SEARCH_INDEX;
     return search(query, pool);
   }, [query, filter]);
 
@@ -109,9 +120,8 @@ export default function App() {
                 onChange={e => setFilter(e.target.value)}
                 className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 shadow-sm appearance-none transition-all"
               >
-                <option value="ALL">All guidelines</option>
-                {Object.values(GUIDELINES).map(gl => (
-                  <option key={gl.code} value={gl.code}>{gl.label}</option>
+                {FILTER_OPTIONS.map(o => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
               <svg className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -163,23 +173,15 @@ export default function App() {
               </div>
               {/* Filter pills */}
               <div className="flex gap-1 shrink-0 overflow-x-auto">
-                {[
-                  { id: "ALL",   label: "All",           active: "bg-gray-900 text-white" },
-                  { id: "GL952", label: "Hypertension",  active: "bg-blue-100 text-blue-700" },
-                  { id: "GL787", label: "Antibiotics",   active: "bg-emerald-100 text-emerald-700" },
-                  { id: "CG565", label: "Miscarriage",   active: "bg-violet-100 text-violet-700" },
-                  { id: "CG621", label: "Mife/Miso",     active: "bg-rose-100 text-rose-700" },
-                  { id: "CG623", label: "Ectopic",       active: "bg-orange-100 text-orange-700" },
-                  { id: "GL895", label: "PPRoM",         active: "bg-sky-100 text-sky-700" },
-                ].map(f => (
+                {FILTER_OPTIONS.map(f => (
                   <button
-                    key={f.id}
-                    onClick={() => { setFilter(f.id); setExpanded({}); submitSearch(); }}
+                    key={f.value}
+                    onClick={() => { setFilter(f.value); setExpanded({}); submitSearch(); }}
                     className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
-                      filter === f.id ? f.active : "text-gray-400 hover:text-gray-600"
+                      filter === f.value ? f.active : "text-gray-400 hover:text-gray-600"
                     }`}
                   >
-                    {f.label}
+                    {f.pill}
                   </button>
                 ))}
               </div>
@@ -191,7 +193,7 @@ export default function App() {
             {!showNoResults && (
               <p className="text-xs text-gray-400 mb-4">
                 {primary.length} result{primary.length !== 1 ? "s" : ""} for "{query}"
-                {filter !== "ALL" && <span className="text-gray-300"> · {GUIDELINES[filter]?.label}</span>}
+                {filter !== "ALL" && <span className="text-gray-300"> · {activeOption?.label}</span>}
               </p>
             )}
 
