@@ -8,6 +8,7 @@ const PILL = {
   CG621: "bg-rose-50 text-rose-700 border-rose-100",
   CG623: "bg-orange-50 text-orange-700 border-orange-100",
   GL895: "bg-sky-50 text-sky-700 border-sky-100",
+  GL861: "bg-teal-50 text-teal-700 border-teal-100",
 };
 
 export default function WikiCard({ page, isExpanded, onToggle, isFallback, query = "" }) {

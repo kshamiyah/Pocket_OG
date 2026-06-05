@@ -5,6 +5,7 @@ import { CG565_SECTIONS } from "../data/CG565";
 import { CG621_SECTIONS } from "../data/CG621";
 import { CG623_SECTIONS } from "../data/CG623";
 import { GL895_SECTIONS } from "../data/GL895";
+import { GL861_SECTIONS } from "../data/GL861";
 
 function escapeRe(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -39,7 +40,7 @@ export function expandQuery(q) {
 // Build search index once at module load — content is never flattened again
 const _WIKI = [
   ...GL952_SECTIONS, ...GL787_SECTIONS, ...CG565_SECTIONS,
-  ...CG621_SECTIONS, ...CG623_SECTIONS, ...GL895_SECTIONS,
+  ...CG621_SECTIONS, ...CG623_SECTIONS, ...GL895_SECTIONS, ...GL861_SECTIONS,
 ];
 
 export const SEARCH_INDEX = _WIKI.map(page => ({

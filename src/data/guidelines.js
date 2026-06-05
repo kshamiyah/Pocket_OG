@@ -5,6 +5,7 @@ export const GUIDELINES = {
   CG621: { code: "CG621", label: "Medical Management of Miscarriage", version: "V6", date: "May 2024", color: "rose" },
   CG623: { code: "CG623", label: "Ectopic Pregnancy — Medical Management", version: "V5", date: "June 2025", color: "orange" },
   GL895: { code: "GL895", label: "PPRoM", version: "V7", date: "November 2023", color: "sky" },
+  GL861: { code: "GL861", label: "Induction of Labour & Term PLRoM", version: "V6.10", date: "May 2026", color: "teal" },
 };
 
 export const GL_COLORS = {
@@ -14,4 +15,5 @@ export const GL_COLORS = {
   CG621: { badge: "bg-rose-900/50 text-rose-300 border-rose-600/40", dot: "bg-rose-400" },
   CG623: { badge: "bg-orange-900/50 text-orange-300 border-orange-600/40", dot: "bg-orange-400" },
   GL895: { badge: "bg-sky-900/50 text-sky-300 border-sky-600/40", dot: "bg-sky-400" },
+  GL861: { badge: "bg-teal-900/50 text-teal-300 border-teal-600/40", dot: "bg-teal-400" },
 };

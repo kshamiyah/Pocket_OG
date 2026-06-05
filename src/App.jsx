@@ -10,6 +10,7 @@ const FILTER_OPTIONS = [
   { value: "MISCARRIAGE", label: "Miscarriage",                        pill: "Miscarriage", codes: ["CG565", "CG621"], active: "bg-violet-100 text-violet-700" },
   { value: "CG623",       label: "Ectopic Pregnancy",                  pill: "Ectopic",     codes: ["CG623"],          active: "bg-orange-100 text-orange-700" },
   { value: "GL895",       label: "PPRoM",                              pill: "PPRoM",       codes: ["GL895"],          active: "bg-sky-100 text-sky-700" },
+  { value: "GL861",       label: "Induction of Labour & Term PLRoM",   pill: "IOL / PLRoM", codes: ["GL861"],          active: "bg-teal-100 text-teal-700" },
 ];
 
 const SUGGESTIONS = [
