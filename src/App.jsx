@@ -202,7 +202,7 @@ export default function App() {
               : (
                 <div className="space-y-3">
                   {primary.map(page => (
-                    <WikiCard key={page.id} page={page} isExpanded={!!expanded[page.id]} onToggle={() => toggle(page.id)} />
+                    <WikiCard key={page.id} page={page} query={query} isExpanded={!!expanded[page.id]} onToggle={() => toggle(page.id)} />
                   ))}
                 </div>
               )

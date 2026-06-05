@@ -1,5 +1,5 @@
 import { GUIDELINES } from "../data/guidelines";
-import ContentBlock from "./ContentBlock";
+import ContentBlock, { highlightText } from "./ContentBlock";
 
 const PILL = {
   GL952: "bg-blue-50 text-blue-700 border-blue-100",
@@ -10,8 +10,9 @@ const PILL = {
   GL895: "bg-sky-50 text-sky-700 border-sky-100",
 };
 
-export default function WikiCard({ page, isExpanded, onToggle, isFallback }) {
+export default function WikiCard({ page, isExpanded, onToggle, isFallback, query = "" }) {
   const gl = GUIDELINES[page.gl];
+  const highlightTerms = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
   return (
     <div className={`border rounded-2xl overflow-hidden transition-all ${isFallback ? "border-gray-100 opacity-70" : "border-gray-200 shadow-sm hover:shadow-md"}`}>
       <button onClick={onToggle} className="w-full text-left px-5 py-4 hover:bg-gray-50 transition-colors flex gap-3 items-start">
@@ -23,14 +24,14 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback }) {
             <span className="px-2 py-0.5 rounded-full text-xs text-gray-400 bg-gray-100">{page.setting}</span>
             {isFallback && <span className="px-2 py-0.5 rounded-full text-xs text-gray-400 bg-gray-100">closest match</span>}
           </div>
-          <h3 className="text-gray-900 font-semibold text-base leading-snug">{page.title}</h3>
+          <h3 className="text-gray-900 font-semibold text-base leading-snug">{highlightText(page.title, highlightTerms)}</h3>
           <p className="text-xs text-gray-400 mt-0.5">{page.condition}</p>
         </div>
         <span className="text-gray-300 text-2xl shrink-0 mt-0.5 font-light leading-none">{isExpanded ? "−" : "+"}</span>
       </button>
       {isExpanded && (
         <div className="px-5 pb-5 border-t border-gray-100 pt-4">
-          {page.content.map((block, i) => <ContentBlock key={i} block={block} />)}
+          {page.content.map((block, i) => <ContentBlock key={i} block={block} highlightTerms={highlightTerms} />)}
           <div className="mt-5 pt-3 border-t border-gray-100">
             <p className="text-xs text-gray-400">{gl.code} {gl.version} · {gl.label} · RBH · {gl.date}</p>
           </div>
