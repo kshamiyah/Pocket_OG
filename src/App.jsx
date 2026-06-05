@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { SEARCH_INDEX, search } from "./search/engine";
-import { FLOWCHARTS } from "./data/GL861_FLOWCHART";
+import { FLOWCHARTS } from "./data/flowcharts";
 import WikiCard from "./components/WikiCard";
 import NoResults from "./components/NoResults";
 import FlowchartPlayer from "./components/FlowchartPlayer";

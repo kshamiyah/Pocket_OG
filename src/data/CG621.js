@@ -26,6 +26,7 @@ export const CG621_SECTIONS = [
   },
   {
     id: "mc-med-pathway", gl: "CG621", condition: "Medical Management of Miscarriage", setting: "Outpatient Pathway",
+    flowchartId: "CG621_OUTPATIENT",
     title: "Medical Management — Outpatient Pathway",
     tags: ["pathway","outpatient","consent","econsent","fbc","group and save","blood tests","anti-d","counselling","pre-treatment","steps","follow up","day 7","nursing call","repeat dose","surgical management","smm"],
     content: [
@@ -40,6 +41,7 @@ export const CG621_SECTIONS = [
   },
   {
     id: "mc-med-inpatient", gl: "CG621", condition: "Medical Management of Miscarriage", setting: "Inpatient (>10 weeks)",
+    flowchartId: "CG621_INPATIENT",
     title: "Medical Management — Inpatient Pathway (>10 weeks)",
     tags: ["inpatient","sonning ward","admission","over 10 weeks","crl 31mm","mifepristone","misoprostol","800mcg","repeat dose","3 hours","mews","discharge criteria","heavy bleeding","products of conception"],
     content: [

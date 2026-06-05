@@ -1,6 +1,7 @@
 export const GL952_SECTIONS = [
   {
     id: "pet-definition", gl: "GL952", condition: "Pre-Eclampsia", setting: "General",
+    flowchartId: "GL952_TRIAGE",
     title: "Definition & Classification",
     tags: ["definition","diagnosis","criteria","what is","classify","preeclampsia","pet","severe","hellp","proteinuria","gestational","chronic"],
     content: [
@@ -14,6 +15,7 @@ export const GL952_SECTIONS = [
   },
   {
     id: "pet-postnatal-inpatient", gl: "GL952", condition: "Pre-Eclampsia", setting: "Postnatal — Inpatient",
+    flowchartId: "GL952_POSTNATAL",
     title: "Postnatal Inpatient Management",
     tags: ["postnatal","post natal","after birth","postpartum","ward","iffley","inpatient","discharge","blood pressure","bp","medication","bloods","blood tests","pet screen","stay","how long","length of stay","discharge criteria","methyldopa","labetalol","nifedipine"],
     content: [
@@ -47,6 +49,7 @@ export const GL952_SECTIONS = [
   },
   {
     id: "pet-antenatal-inpatient", gl: "GL952", condition: "Pre-Eclampsia", setting: "Antenatal — Inpatient",
+    flowchartId: "GL952_ACUTE",
     title: "Antenatal Inpatient Management",
     tags: ["antenatal","ante natal","inpatient","admit","admission","bloods","ctg","scan","ultrasound","vte","lmwh","monitoring","timing delivery","when to deliver"],
     content: [
@@ -74,6 +77,7 @@ export const GL952_SECTIONS = [
   },
   {
     id: "pet-severe-lw", gl: "GL952", condition: "Pre-Eclampsia", setting: "Labour Ward — Severe",
+    flowchartId: "GL952_SEVERE_LW",
     title: "Severe PET / Eclampsia — Labour Ward",
     tags: ["severe","labour ward","eclampsia","magnesium","mgso4","fit","seizure","convulsion","emergency","hellp","deteriorating","fluid balance","restrict fluids"],
     content: [
