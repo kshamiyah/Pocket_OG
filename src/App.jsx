@@ -4,6 +4,7 @@ import { FLOWCHARTS } from "./data/flowcharts";
 import WikiCard from "./components/WikiCard";
 import NoResults from "./components/NoResults";
 import FlowchartPlayer from "./components/FlowchartPlayer";
+import FeedbackButton from "./components/FeedbackButton";
 
 const FILTER_OPTIONS = [
   { value: "ALL",         label: "All guidelines",                     pill: "All",          codes: null,               active: "bg-gray-900 text-white" },
@@ -102,6 +103,9 @@ export default function App() {
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
       `}</style>
+
+      {/* Feedback button — always visible */}
+      <FeedbackButton query={query} filter={filter} />
 
       {/* Flowchart overlay */}
       {activeFlowchartId && FLOWCHARTS[activeFlowchartId] && (
