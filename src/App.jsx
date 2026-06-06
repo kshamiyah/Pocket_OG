@@ -102,6 +102,8 @@ export default function App() {
         * { box-sizing: border-box; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
       {/* Feedback button — always visible */}
@@ -117,18 +119,20 @@ export default function App() {
 
       {/* Hero / idle state */}
       {!hasQuery && (
-        <div className="flex flex-col items-center justify-center min-h-screen px-4 pb-16">
-          <div className="w-full max-w-xl">
-            {/* Hero — typography-first */}
-            <div className="mb-8">
-              <h1 className="text-4xl font-bold text-gray-900 tracking-tight leading-tight">Pocket O&G</h1>
-              <div className="mt-3 mb-3 border-b border-gray-100" />
-              <p className="text-sm text-gray-400 leading-relaxed">RBH Maternity guidelines,<br />whenever you need them.</p>
-              <p className="text-xs text-gray-300 mt-1.5">Built by Khalid Shamiyah</p>
+        <div className="flex flex-col items-center justify-center min-h-screen px-5 pb-20">
+          <div className="w-full max-w-lg">
+
+            {/* Hero */}
+            <div className="text-center mb-10">
+              <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Pocket O&G</h1>
+              <p className="text-base text-gray-400 mt-3 leading-relaxed">
+                RBH Maternity guidelines,<br />whenever you need them.
+              </p>
+              <p className="text-xs text-gray-300 mt-2">Built by Khalid Shamiyah</p>
             </div>
 
-            {/* Search bar */}
-            <div className="relative mb-4">
+            {/* Search */}
+            <div className="relative mb-5">
               <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
               </svg>
@@ -139,11 +143,11 @@ export default function App() {
                 value={inputValue}
                 onChange={e => setInputValue(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && submitSearch()}
-                className="w-full border border-gray-200 rounded-2xl pl-11 pr-14 py-4 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 shadow-sm transition-all"
+                className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-14 py-4 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
               />
               <button
                 onClick={() => submitSearch()}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 transition-colors"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all"
               >
                 <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
@@ -151,58 +155,59 @@ export default function App() {
               </button>
             </div>
 
-            {/* Guideline dropdown */}
-            <div className="relative mb-4">
-              <select
-                value={filter}
-                onChange={e => setFilter(e.target.value)}
-                className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 shadow-sm appearance-none transition-all"
-              >
-                {FILTER_OPTIONS.filter(o => !o.resultsOnly).map(o => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-              <svg className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
+            {/* Guideline filter pills */}
+            <div className="flex gap-2 overflow-x-auto -mx-5 px-5 pb-1 mb-8 no-scrollbar">
+              {FILTER_OPTIONS.filter(o => !o.resultsOnly).map(o => (
+                <button
+                  key={o.value}
+                  onClick={() => setFilter(o.value)}
+                  className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    filter === o.value
+                      ? "bg-gray-900 text-white"
+                      : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                  }`}
+                >
+                  {o.pill}
+                </button>
+              ))}
             </div>
 
-            {/* Suggestion chips */}
-            <div className="flex flex-wrap gap-2 justify-center mb-8">
+            {/* Quick searches */}
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Quick searches</p>
+            <div className="flex flex-wrap gap-2 mb-10">
               {SUGGESTIONS.map(s => (
                 <button
                   key={s}
                   onClick={() => { setInputValue(s); submitSearch(s); }}
-                  className="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-xs text-gray-600 transition-colors"
+                  className="px-3.5 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-sm text-gray-600 transition-colors"
                 >
                   {s}
                 </button>
               ))}
             </div>
 
-            {/* Flowchart quick-access */}
-            <div>
-              <p className="text-xs text-gray-400 uppercase tracking-widest mb-3">⬡ Flowcharts</p>
-              <div className="grid grid-cols-2 gap-2">
-                {FLOWCHART_LINKS.map(fc => {
-                  const chart = FLOWCHARTS[fc.id];
-                  const col = FC_GL_COLOR[fc.gl] ?? FC_GL_COLOR.GL861;
-                  return (
-                    <button
-                      key={fc.id}
-                      onClick={() => setActiveFlowchartId(fc.id)}
-                      className="flex items-start gap-2.5 px-3.5 py-3 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-gray-100 hover:border-gray-200 transition-all text-left"
-                    >
-                      <span className={`mt-0.5 text-sm leading-none shrink-0 ${col.icon}`}>⬡</span>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-800 leading-snug truncate">{chart.title}</p>
-                        <span className={`inline-block mt-1 px-1.5 py-0.5 rounded-full text-xs font-medium border ${col.badge}`}>{fc.gl}</span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+            {/* Flowcharts */}
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Flowcharts</p>
+            <div className="grid grid-cols-2 gap-2.5">
+              {FLOWCHART_LINKS.map(fc => {
+                const chart = FLOWCHARTS[fc.id];
+                const col = FC_GL_COLOR[fc.gl] ?? FC_GL_COLOR.GL861;
+                return (
+                  <button
+                    key={fc.id}
+                    onClick={() => setActiveFlowchartId(fc.id)}
+                    className="flex items-start gap-2.5 px-4 py-3.5 rounded-2xl bg-gray-50 hover:bg-gray-100 active:scale-[0.98] transition-all text-left"
+                  >
+                    <span className={`mt-0.5 text-sm leading-none shrink-0 ${col.icon}`}>⬡</span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-800 leading-snug">{chart.title}</p>
+                      <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-xs font-medium border ${col.badge}`}>{fc.gl}</span>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
+
           </div>
         </div>
       )}
