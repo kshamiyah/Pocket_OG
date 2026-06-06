@@ -14,6 +14,10 @@ const FILTER_OPTIONS = [
   { value: "CG623",       label: "Ectopic Pregnancy",                  pill: "Ectopic",      codes: ["CG623"],          active: "bg-orange-100 text-orange-700" },
   { value: "GL895",       label: "PPRoM",                              pill: "PPRoM",        codes: ["GL895"],          active: "bg-sky-100 text-sky-700" },
   { value: "GL861",       label: "Induction of Labour & Term PLRoM",   pill: "IOL / PLRoM",  codes: ["GL861"],          active: "bg-teal-100 text-teal-700" },
+  { value: "GL783",       label: "Iron Deficiency Anaemia",            pill: "Anaemia",      codes: ["GL783"],          active: "bg-amber-100 text-amber-700" },
+  { value: "GL880",       label: "Intrahepatic Cholestasis of Pregnancy", pill: "ICP",       codes: ["GL880"],          active: "bg-yellow-100 text-yellow-700" },
+  { value: "GL891",       label: "VTE in Pregnancy & Postnatal",       pill: "VTE",          codes: ["GL891"],          active: "bg-indigo-100 text-indigo-700" },
+  { value: "GL983",       label: "Diabetes in Pregnancy",              pill: "Diabetes",     codes: ["GL983"],          active: "bg-pink-100 text-pink-700" },
   { value: "FLOWCHARTS",  label: "Pages with flowcharts",              pill: "⬡ Flowcharts", filterFn: e => !!e.page.flowchartId, active: "bg-teal-100 text-teal-700", resultsOnly: true },
 ];
 
