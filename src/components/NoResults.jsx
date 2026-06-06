@@ -3,7 +3,7 @@ import WikiCard from "./WikiCard";
 export default function NoResults({ query, fallbacks, expanded, onToggle, onOpenFlowchart }) {
   return (
     <div>
-      <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5 mb-5">
+      <div className="rounded-3xl bg-gray-50 p-5 mb-5">
         <p className="text-sm text-gray-700 font-medium mb-1">Nothing found for "{query}"</p>
         <p className="text-xs text-gray-400 leading-relaxed">
           This may not have a dedicated section in the current guidelines.

@@ -192,13 +192,11 @@ export default function App() {
       {hasQuery && (
         <>
           {/* Sticky compact header */}
-          <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-gray-100">
-            <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-              <div className="w-7 h-7 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
-                <span className="text-white text-xs font-semibold">Rx</span>
-              </div>
-              <div className="relative flex-1">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md">
+            {/* Search row */}
+            <div className="max-w-2xl mx-auto px-4 pt-3 pb-2">
+              <div className="relative">
+                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
                 </svg>
                 <input
@@ -207,36 +205,42 @@ export default function App() {
                   value={inputValue}
                   onChange={e => setInputValue(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && submitSearch()}
-                  className="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-8 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-10 py-2.5 text-sm text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
                 />
                 <button
                   onClick={clearSearch}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg leading-none"
-                >×</button>
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-gray-300 hover:bg-gray-400 transition-colors"
+                >
+                  <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
               </div>
-              {/* Filter pills */}
-              <div className="flex gap-1 shrink-0 overflow-x-auto">
-                {FILTER_OPTIONS.map(f => (
-                  <button
-                    key={f.value}
-                    onClick={() => { setFilter(f.value); setExpanded({}); submitSearch(); }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
-                      filter === f.value ? f.active : "text-gray-400 hover:text-gray-600"
-                    }`}
-                  >
-                    {f.pill}
-                  </button>
-                ))}
-              </div>
+            </div>
+            {/* Filter pills row */}
+            <div className="flex gap-2 overflow-x-auto px-4 pb-3 no-scrollbar border-b border-gray-100">
+              {FILTER_OPTIONS.map(f => (
+                <button
+                  key={f.value}
+                  onClick={() => { setFilter(f.value); setExpanded({}); }}
+                  className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
+                    filter === f.value ? f.active : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                  }`}
+                >
+                  {f.pill}
+                </button>
+              ))}
             </div>
           </div>
 
           {/* Results */}
           <div className="max-w-2xl mx-auto px-4 py-5 pb-24">
             {!showNoResults && (
-              <p className="text-xs text-gray-400 mb-4">
-                {primary.length} result{primary.length !== 1 ? "s" : ""} for "{query}"
-                {filter !== "ALL" && <span className="text-gray-300"> · {activeOption?.label}</span>}
+              <p className="text-sm text-gray-500 mb-4">
+                <span className="font-semibold text-gray-900">{primary.length}</span>{" "}
+                result{primary.length !== 1 ? "s" : ""} for{" "}
+                <span className="font-semibold text-gray-900">"{query}"</span>
+                {filter !== "ALL" && <span className="text-gray-400"> · {activeOption?.label}</span>}
               </p>
             )}
 
