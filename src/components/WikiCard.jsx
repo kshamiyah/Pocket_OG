@@ -9,6 +9,10 @@ const ACCENT = {
   CG623: "bg-orange-500",
   GL895: "bg-sky-500",
   GL861: "bg-teal-500",
+  GL783: "bg-amber-500",
+  GL880: "bg-yellow-500",
+  GL891: "bg-indigo-500",
+  GL983: "bg-pink-500",
 };
 
 const CONDITION_COLOR = {
@@ -19,6 +23,10 @@ const CONDITION_COLOR = {
   CG623: "text-orange-500",
   GL895: "text-sky-500",
   GL861: "text-teal-500",
+  GL783: "text-amber-500",
+  GL880: "text-yellow-500",
+  GL891: "text-indigo-500",
+  GL983: "text-pink-500",
 };
 
 export default function WikiCard({ page, isExpanded, onToggle, isFallback, query = "", onOpenFlowchart }) {
@@ -48,6 +56,7 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
             </h3>
             <div className="flex flex-wrap gap-1.5 mt-2">
               <span className="px-2 py-0.5 rounded-full text-xs text-gray-400 bg-gray-100">{page.setting}</span>
+              {gl && <span className="px-2 py-0.5 rounded-full text-xs text-gray-400 bg-gray-100">{gl.version} · {gl.date}</span>}
               {isFallback && (
                 <span className="px-2 py-0.5 rounded-full text-xs text-gray-400 bg-gray-100">closest match</span>
               )}
