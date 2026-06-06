@@ -82,6 +82,7 @@ export const GL880_SECTIONS = [
   },
   {
     id: "icp-delivery", gl: "GL880", condition: "Intrahepatic Cholestasis of Pregnancy", setting: "Timing of Delivery & Labour",
+    flowchartId: "GL880_DELIVERY",
     title: "ICP — Timing of Delivery & Labour Monitoring",
     tags: ["icp","delivery","timing","induction","planned birth","40 weeks","38 weeks","39 weeks","35 weeks","36 weeks","bile acid","ba","100 umol","40 umol","cefm","continuous monitoring","meconium","birth centre","homebirth","intermittent auscultation","labour","neonatal care","comorbidities"],
     content: [

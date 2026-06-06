@@ -42,6 +42,10 @@ const FLOWCHART_LINKS = [
   { id: "CG621_OUTPATIENT", gl: "CG621" },
   { id: "CG621_INPATIENT",  gl: "CG621" },
   { id: "CG623_MTX",        gl: "CG623" },
+  { id: "GL891_ANTENATAL",  gl: "GL891" },
+  { id: "GL891_POSTNATAL",  gl: "GL891" },
+  { id: "GL983_DKA",        gl: "GL983" },
+  { id: "GL880_DELIVERY",   gl: "GL880" },
 ];
 
 const FC_GL_COLOR = {
@@ -50,6 +54,9 @@ const FC_GL_COLOR = {
   CG565: { badge: "bg-violet-50 text-violet-700 border-violet-100", icon: "text-violet-400", accent: "bg-violet-400" },
   CG621: { badge: "bg-rose-50 text-rose-700 border-rose-100",       icon: "text-rose-400",   accent: "bg-rose-400" },
   CG623: { badge: "bg-orange-50 text-orange-700 border-orange-100", icon: "text-orange-400", accent: "bg-orange-400" },
+  GL891: { badge: "bg-indigo-50 text-indigo-700 border-indigo-100", icon: "text-indigo-400", accent: "bg-indigo-400" },
+  GL983: { badge: "bg-pink-50 text-pink-700 border-pink-100",       icon: "text-pink-400",   accent: "bg-pink-400" },
+  GL880: { badge: "bg-yellow-50 text-yellow-700 border-yellow-100", icon: "text-yellow-500", accent: "bg-yellow-400" },
 };
 
 const FLOWCHART_GROUPS = [
@@ -58,6 +65,9 @@ const FLOWCHART_GROUPS = [
   { gl: "CG565", label: "First Trimester Miscarriage" },
   { gl: "CG621", label: "Medical Management of Miscarriage" },
   { gl: "CG623", label: "Ectopic Pregnancy" },
+  { gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+  { gl: "GL983", label: "Diabetes in Pregnancy" },
+  { gl: "GL880", label: "Intrahepatic Cholestasis" },
 ];
 
 export default function App() {
