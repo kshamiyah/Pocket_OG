@@ -1,6 +1,7 @@
 export const CG565_SECTIONS = [
   {
     id: "mc-diagnosis", gl: "CG565", condition: "Miscarriage", setting: "General",
+    flowchartId: "CG565_TRIAGE",
     title: "Diagnosis & Classification",
     tags: ["diagnosis","classify","threatened","viable","uncertain viability","puv","pul","gestational sac","fetal heart","heartbeat","complete","incomplete","missed","types","first trimester","early pregnancy","bleeding in pregnancy","miscarriage types"],
     content: [

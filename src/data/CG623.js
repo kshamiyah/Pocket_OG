@@ -1,6 +1,7 @@
 export const CG623_SECTIONS = [
   {
     id: "ep-criteria", gl: "CG623", condition: "Ectopic Pregnancy", setting: "MTX — Selection & Exclusion Criteria",
+    flowchartId: "CG623_MTX",
     title: "Ectopic Pregnancy — MTX Eligibility",
     tags: ["ectopic","ectopic pregnancy","methotrexate","mtx","selection criteria","eligibility","bhcg","beta hcg","unruptured","haemodynamically stable","adnexal mass","35mm","lft","fbc","u+e","folic acid","live ectopic","cardiac activity","exclusion","contraindication","ectopic criteria"],
     content: [

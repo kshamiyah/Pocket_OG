@@ -33,14 +33,18 @@ const FLOWCHART_LINKS = [
   { id: "GL952_ACUTE",      gl: "GL952" },
   { id: "GL952_SEVERE_LW",  gl: "GL952" },
   { id: "GL952_POSTNATAL",  gl: "GL952" },
+  { id: "CG565_TRIAGE",     gl: "CG565" },
   { id: "CG621_OUTPATIENT", gl: "CG621" },
   { id: "CG621_INPATIENT",  gl: "CG621" },
+  { id: "CG623_MTX",        gl: "CG623" },
 ];
 
 const FC_GL_COLOR = {
-  GL861: { badge: "bg-teal-50 text-teal-700 border-teal-100",  icon: "text-teal-400" },
-  GL952: { badge: "bg-blue-50 text-blue-700 border-blue-100",  icon: "text-blue-400" },
-  CG621: { badge: "bg-rose-50 text-rose-700 border-rose-100",  icon: "text-rose-400" },
+  GL861: { badge: "bg-teal-50 text-teal-700 border-teal-100",    icon: "text-teal-400" },
+  GL952: { badge: "bg-blue-50 text-blue-700 border-blue-100",    icon: "text-blue-400" },
+  CG565: { badge: "bg-violet-50 text-violet-700 border-violet-100", icon: "text-violet-400" },
+  CG621: { badge: "bg-rose-50 text-rose-700 border-rose-100",    icon: "text-rose-400" },
+  CG623: { badge: "bg-orange-50 text-orange-700 border-orange-100", icon: "text-orange-400" },
 };
 
 export default function App() {
