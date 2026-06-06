@@ -6,13 +6,14 @@ import NoResults from "./components/NoResults";
 import FlowchartPlayer from "./components/FlowchartPlayer";
 
 const FILTER_OPTIONS = [
-  { value: "ALL",         label: "All guidelines",                     pill: "All",         codes: null,               active: "bg-gray-900 text-white" },
-  { value: "GL952",       label: "Pre-Eclampsia / PIH / PET",          pill: "PET / PIH",   codes: ["GL952"],          active: "bg-blue-100 text-blue-700" },
-  { value: "GL787",       label: "Obstetric Infections & Antibiotics", pill: "Antibiotics", codes: ["GL787"],          active: "bg-emerald-100 text-emerald-700" },
-  { value: "MISCARRIAGE", label: "Miscarriage",                        pill: "Miscarriage", codes: ["CG565", "CG621"], active: "bg-violet-100 text-violet-700" },
-  { value: "CG623",       label: "Ectopic Pregnancy",                  pill: "Ectopic",     codes: ["CG623"],          active: "bg-orange-100 text-orange-700" },
-  { value: "GL895",       label: "PPRoM",                              pill: "PPRoM",       codes: ["GL895"],          active: "bg-sky-100 text-sky-700" },
-  { value: "GL861",       label: "Induction of Labour & Term PLRoM",   pill: "IOL / PLRoM", codes: ["GL861"],          active: "bg-teal-100 text-teal-700" },
+  { value: "ALL",         label: "All guidelines",                     pill: "All",          codes: null,               active: "bg-gray-900 text-white" },
+  { value: "GL952",       label: "Pre-Eclampsia / PIH / PET",          pill: "PET / PIH",    codes: ["GL952"],          active: "bg-blue-100 text-blue-700" },
+  { value: "GL787",       label: "Obstetric Infections & Antibiotics", pill: "Antibiotics",  codes: ["GL787"],          active: "bg-emerald-100 text-emerald-700" },
+  { value: "MISCARRIAGE", label: "Miscarriage",                        pill: "Miscarriage",  codes: ["CG565", "CG621"], active: "bg-violet-100 text-violet-700" },
+  { value: "CG623",       label: "Ectopic Pregnancy",                  pill: "Ectopic",      codes: ["CG623"],          active: "bg-orange-100 text-orange-700" },
+  { value: "GL895",       label: "PPRoM",                              pill: "PPRoM",        codes: ["GL895"],          active: "bg-sky-100 text-sky-700" },
+  { value: "GL861",       label: "Induction of Labour & Term PLRoM",   pill: "IOL / PLRoM",  codes: ["GL861"],          active: "bg-teal-100 text-teal-700" },
+  { value: "FLOWCHARTS",  label: "Pages with flowcharts",              pill: "⬡ Flowcharts", filterFn: e => !!e.page.flowchartId, active: "bg-teal-100 text-teal-700", resultsOnly: true },
 ];
 
 const SUGGESTIONS = [
@@ -25,6 +26,22 @@ const SUGGESTIONS = [
   "fitting on ward",
   "gentamicin weight",
 ];
+
+const FLOWCHART_LINKS = [
+  { id: "GL861_IOL",        gl: "GL861" },
+  { id: "GL952_TRIAGE",     gl: "GL952" },
+  { id: "GL952_ACUTE",      gl: "GL952" },
+  { id: "GL952_SEVERE_LW",  gl: "GL952" },
+  { id: "GL952_POSTNATAL",  gl: "GL952" },
+  { id: "CG621_OUTPATIENT", gl: "CG621" },
+  { id: "CG621_INPATIENT",  gl: "CG621" },
+];
+
+const FC_GL_COLOR = {
+  GL861: { badge: "bg-teal-50 text-teal-700 border-teal-100",  icon: "text-teal-400" },
+  GL952: { badge: "bg-blue-50 text-blue-700 border-blue-100",  icon: "text-blue-400" },
+  CG621: { badge: "bg-rose-50 text-rose-700 border-rose-100",  icon: "text-rose-400" },
+};
 
 export default function App() {
   const [inputValue, setInputValue] = useState(""); // what the user is typing
@@ -62,9 +79,11 @@ export default function App() {
 
   const activeOption = FILTER_OPTIONS.find(o => o.value === filter);
   const { primary, fallback } = useMemo(() => {
-    const pool = activeOption?.codes
-      ? SEARCH_INDEX.filter(e => activeOption.codes.includes(e.page.gl))
-      : SEARCH_INDEX;
+    const pool = activeOption?.filterFn
+      ? SEARCH_INDEX.filter(activeOption.filterFn)
+      : activeOption?.codes
+        ? SEARCH_INDEX.filter(e => activeOption.codes.includes(e.page.gl))
+        : SEARCH_INDEX;
     return search(query, pool);
   }, [query, filter]);
 
@@ -90,7 +109,7 @@ export default function App() {
 
       {/* Hero / idle state */}
       {!hasQuery && (
-        <div className="flex flex-col items-center justify-center min-h-screen px-4 pb-24">
+        <div className="flex flex-col items-center justify-center min-h-screen px-4 pb-16">
           <div className="w-full max-w-xl">
             {/* Logo */}
             <div className="flex flex-col items-center text-center mb-8">
@@ -132,7 +151,7 @@ export default function App() {
                 onChange={e => setFilter(e.target.value)}
                 className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 shadow-sm appearance-none transition-all"
               >
-                {FILTER_OPTIONS.map(o => (
+                {FILTER_OPTIONS.filter(o => !o.resultsOnly).map(o => (
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
@@ -142,7 +161,7 @@ export default function App() {
             </div>
 
             {/* Suggestion chips */}
-            <div className="flex flex-wrap gap-2 justify-center">
+            <div className="flex flex-wrap gap-2 justify-center mb-8">
               {SUGGESTIONS.map(s => (
                 <button
                   key={s}
@@ -152,6 +171,30 @@ export default function App() {
                   {s}
                 </button>
               ))}
+            </div>
+
+            {/* Flowchart quick-access */}
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-widest mb-3">⬡ Flowcharts</p>
+              <div className="grid grid-cols-2 gap-2">
+                {FLOWCHART_LINKS.map(fc => {
+                  const chart = FLOWCHARTS[fc.id];
+                  const col = FC_GL_COLOR[fc.gl] ?? FC_GL_COLOR.GL861;
+                  return (
+                    <button
+                      key={fc.id}
+                      onClick={() => setActiveFlowchartId(fc.id)}
+                      className="flex items-start gap-2.5 px-3.5 py-3 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-gray-100 hover:border-gray-200 transition-all text-left"
+                    >
+                      <span className={`mt-0.5 text-sm leading-none shrink-0 ${col.icon}`}>⬡</span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-800 leading-snug truncate">{chart.title}</p>
+                        <span className={`inline-block mt-1 px-1.5 py-0.5 rounded-full text-xs font-medium border ${col.badge}`}>{fc.gl}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
