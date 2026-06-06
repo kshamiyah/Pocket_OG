@@ -126,6 +126,7 @@ export default function App() {
               </div>
               <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Pocket O&G</h1>
               <p className="text-sm text-gray-400 mt-1">RBH guidelines — wherever you go, whenever you need them</p>
+              <p className="text-xs text-gray-300 mt-2">Built by Khalid Shamiyah</p>
             </div>
 
             {/* Search bar + button */}
