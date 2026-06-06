@@ -37,7 +37,7 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
       {/* Floating trigger */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-5 z-30 flex items-center gap-1.5 bg-white border border-gray-200 shadow-md rounded-full pl-3 pr-3.5 py-2 text-xs font-medium text-gray-400 hover:text-gray-600 hover:shadow-lg transition-all"
+        className="fixed bottom-20 right-5 z-30 flex items-center gap-1.5 bg-white border border-gray-200 shadow-md rounded-full pl-3 pr-3.5 py-2 text-xs font-medium text-gray-400 hover:text-gray-600 hover:shadow-lg transition-all"
       >
         <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />

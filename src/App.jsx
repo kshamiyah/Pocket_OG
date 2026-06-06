@@ -41,12 +41,20 @@ const FLOWCHART_LINKS = [
 ];
 
 const FC_GL_COLOR = {
-  GL861: { badge: "bg-teal-50 text-teal-700 border-teal-100",    icon: "text-teal-400" },
-  GL952: { badge: "bg-blue-50 text-blue-700 border-blue-100",    icon: "text-blue-400" },
-  CG565: { badge: "bg-violet-50 text-violet-700 border-violet-100", icon: "text-violet-400" },
-  CG621: { badge: "bg-rose-50 text-rose-700 border-rose-100",    icon: "text-rose-400" },
-  CG623: { badge: "bg-orange-50 text-orange-700 border-orange-100", icon: "text-orange-400" },
+  GL861: { badge: "bg-teal-50 text-teal-700 border-teal-100",       icon: "text-teal-400",   accent: "bg-teal-400" },
+  GL952: { badge: "bg-blue-50 text-blue-700 border-blue-100",       icon: "text-blue-400",   accent: "bg-blue-400" },
+  CG565: { badge: "bg-violet-50 text-violet-700 border-violet-100", icon: "text-violet-400", accent: "bg-violet-400" },
+  CG621: { badge: "bg-rose-50 text-rose-700 border-rose-100",       icon: "text-rose-400",   accent: "bg-rose-400" },
+  CG623: { badge: "bg-orange-50 text-orange-700 border-orange-100", icon: "text-orange-400", accent: "bg-orange-400" },
 };
+
+const FLOWCHART_GROUPS = [
+  { gl: "GL952", label: "Pre-Eclampsia / Hypertension" },
+  { gl: "GL861", label: "Induction of Labour" },
+  { gl: "CG565", label: "First Trimester Miscarriage" },
+  { gl: "CG621", label: "Medical Management of Miscarriage" },
+  { gl: "CG623", label: "Ectopic Pregnancy" },
+];
 
 export default function App() {
   const [inputValue, setInputValue] = useState(""); // what the user is typing
@@ -54,6 +62,7 @@ export default function App() {
   const [filter, setFilter] = useState("ALL");
   const [expanded, setExpanded] = useState({});
   const [activeFlowchartId, setActiveFlowchartId] = useState(null);
+  const [activeTab, setActiveTab] = useState("search");
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
   const hasQuery = query.trim().length > 0;
@@ -117,100 +126,67 @@ export default function App() {
         />
       )}
 
-      {/* Hero / idle state */}
-      {!hasQuery && (
-        <div className="flex flex-col items-center justify-center min-h-screen px-5 pb-20">
-          <div className="w-full max-w-lg">
+      {/* Search tab — home / results */}
+      {activeTab === "search" && (
+        <>
+          {/* Hero / idle state */}
+          {!hasQuery && (
+            <div className="flex flex-col items-center justify-center min-h-screen px-5 pb-24">
+              <div className="w-full max-w-lg">
 
-            {/* Hero */}
-            <div className="text-center mb-10">
-              <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Pocket O&G</h1>
-              <p className="text-base text-gray-400 mt-3 leading-relaxed">
-                RBH Maternity guidelines,<br />whenever you need them.
-              </p>
-              <p className="text-xs text-gray-300 mt-2">Built by Khalid Shamiyah</p>
-            </div>
+                {/* Hero */}
+                <div className="text-center mb-10">
+                  <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Pocket O&G</h1>
+                  <p className="text-base text-gray-400 mt-3 leading-relaxed">
+                    RBH Maternity guidelines,<br />whenever you need them.
+                  </p>
+                  <p className="text-xs text-gray-300 mt-2">Built by Khalid Shamiyah</p>
+                </div>
 
-            {/* Search */}
-            <div className="relative mb-5">
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-              </svg>
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="Ask a clinical question…"
-                value={inputValue}
-                onChange={e => setInputValue(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && submitSearch()}
-                className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-14 py-4 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
-              />
-              <button
-                onClick={() => submitSearch()}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all"
-              >
-                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Guideline filter pills */}
-            <div className="flex gap-2 overflow-x-auto -mx-5 px-5 pb-1 mb-8 no-scrollbar">
-              {FILTER_OPTIONS.filter(o => !o.resultsOnly).map(o => (
-                <button
-                  key={o.value}
-                  onClick={() => setFilter(o.value)}
-                  className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    filter === o.value
-                      ? "bg-gray-900 text-white"
-                      : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                  }`}
-                >
-                  {o.pill}
-                </button>
-              ))}
-            </div>
-
-            {/* Quick searches */}
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Quick searches</p>
-            <div className="flex flex-wrap gap-2 mb-10">
-              {SUGGESTIONS.map(s => (
-                <button
-                  key={s}
-                  onClick={() => { setInputValue(s); submitSearch(s); }}
-                  className="px-3.5 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-sm text-gray-600 transition-colors"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-
-            {/* Flowcharts */}
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Flowcharts</p>
-            <div className="grid grid-cols-2 gap-2.5">
-              {FLOWCHART_LINKS.map(fc => {
-                const chart = FLOWCHARTS[fc.id];
-                const col = FC_GL_COLOR[fc.gl] ?? FC_GL_COLOR.GL861;
-                return (
+                {/* Search */}
+                <div className="relative mb-5">
+                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                  </svg>
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    placeholder="Ask a clinical question…"
+                    value={inputValue}
+                    onChange={e => setInputValue(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && submitSearch()}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-14 py-4 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                  />
                   <button
-                    key={fc.id}
-                    onClick={() => setActiveFlowchartId(fc.id)}
-                    className="flex items-start gap-2.5 px-4 py-3.5 rounded-2xl bg-gray-50 hover:bg-gray-100 active:scale-[0.98] transition-all text-left"
+                    onClick={() => submitSearch()}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all"
                   >
-                    <span className={`mt-0.5 text-sm leading-none shrink-0 ${col.icon}`}>⬡</span>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-800 leading-snug">{chart.title}</p>
-                      <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-xs font-medium border ${col.badge}`}>{fc.gl}</span>
-                    </div>
+                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
                   </button>
-                );
-              })}
-            </div>
+                </div>
 
-          </div>
-        </div>
-      )}
+                {/* Guideline filter pills */}
+                <div className="flex gap-2 overflow-x-auto -mx-5 px-5 pb-1 no-scrollbar">
+                  {FILTER_OPTIONS.filter(o => !o.resultsOnly).map(o => (
+                    <button
+                      key={o.value}
+                      onClick={() => setFilter(o.value)}
+                      className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                        filter === o.value
+                          ? "bg-gray-900 text-white"
+                          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                      }`}
+                    >
+                      {o.pill}
+                    </button>
+                  ))}
+                </div>
+
+              </div>
+            </div>
+          )}
 
       {/* Results state */}
       {hasQuery && (
@@ -256,7 +232,7 @@ export default function App() {
           </div>
 
           {/* Results */}
-          <div className="max-w-2xl mx-auto px-4 py-5">
+          <div className="max-w-2xl mx-auto px-4 py-5 pb-24">
             {!showNoResults && (
               <p className="text-xs text-gray-400 mb-4">
                 {primary.length} result{primary.length !== 1 ? "s" : ""} for "{query}"
@@ -282,6 +258,85 @@ export default function App() {
           </div>
         </>
       )}
+        </>
+      )}
+
+      {/* Flowcharts tab */}
+      {activeTab === "flowcharts" && (
+        <div className="min-h-screen pb-24">
+          <div className="max-w-lg mx-auto">
+
+            <div className="px-5 pt-16 pb-8">
+              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Flowcharts</h2>
+              <p className="text-sm text-gray-400 mt-1">Interactive clinical decision pathways</p>
+            </div>
+
+            {FLOWCHART_GROUPS.map(group => {
+              const groupLinks = FLOWCHART_LINKS.filter(fc => fc.gl === group.gl);
+              if (!groupLinks.length) return null;
+              const col = FC_GL_COLOR[group.gl];
+              return (
+                <div key={group.gl} className="mb-8 px-5">
+                  <div className="flex items-baseline gap-2 mb-2">
+                    <span className={`text-xs font-bold tracking-wide ${col.icon}`}>{group.gl}</span>
+                    <span className="text-xs text-gray-400">{group.label}</span>
+                  </div>
+                  <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+                    {groupLinks.map((fc, i) => {
+                      const chart = FLOWCHARTS[fc.id];
+                      return (
+                        <button
+                          key={fc.id}
+                          onClick={() => setActiveFlowchartId(fc.id)}
+                          className={`flex items-center gap-3 w-full px-4 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left ${
+                            i > 0 ? "border-t border-gray-50" : ""
+                          }`}
+                        >
+                          <div className={`w-1 h-8 rounded-full shrink-0 ${col.accent}`} />
+                          <p className="flex-1 text-sm font-medium text-gray-900">{chart.title}</p>
+                          <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+
+          </div>
+        </div>
+      )}
+
+      {/* Tab bar */}
+      <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-gray-100">
+        <div className="flex max-w-lg mx-auto">
+          <button
+            onClick={() => setActiveTab("search")}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
+              activeTab === "search" ? "text-blue-600" : "text-gray-400"
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+            </svg>
+            <span className="text-xs font-medium">Search</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("flowcharts")}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
+              activeTab === "flowcharts" ? "text-blue-600" : "text-gray-400"
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l8.5 5v10L12 22 3.5 17V7L12 2z" />
+            </svg>
+            <span className="text-xs font-medium">Flowcharts</span>
+          </button>
+        </div>
+      </div>
+
     </div>
   );
 }
