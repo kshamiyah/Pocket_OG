@@ -213,6 +213,7 @@ export const GL983_SECTIONS = [
   },
   {
     id: "dm-dka", gl: "GL983", condition: "Diabetes in Pregnancy", setting: "Diabetic Ketoacidosis (DKA)",
+    flowchartId: "GL983_DKA",
     title: "Diabetic Ketoacidosis (DKA) in Pregnancy — Diagnosis & Treatment",
     tags: ["dka","diabetic ketoacidosis","ketones","3 mmol","1.5 mmol","ph 7.3","bicarbonate 15","venous gas","blood ketones","urinary ketones","nausea","vomiting","abdominal pain","polyuria","polydipsia","tachypnoea","frii","fixed rate insulin infusion","0.9% sodium chloride","potassium","fluid replacement","mortality","stillbirth","160 per 1000","obstetric registrar","endocrine registrar","itu","hdu","fbc","u&e","lactate","blood gas","mc&s","glucose","insulin infusion","treatment targets","resolution","subcutaneous insulin","t2dm","gestational","normal glucose","any woman","feeling unwell"],
     content: [
