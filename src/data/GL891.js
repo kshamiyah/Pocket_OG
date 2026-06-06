@@ -1,0 +1,149 @@
+export const GL891_SECTIONS = [
+  {
+    id: "vte-risk-assessment", gl: "GL891", condition: "VTE in Pregnancy & Postnatal", setting: "Risk Assessment",
+    title: "VTE — Risk Assessment & Antenatal Prophylaxis Indications",
+    tags: ["vte","thromboembolism","dvt","pe","pulmonary embolism","deep vein thrombosis","risk assessment","lmwh","enoxaparin","prophylaxis","antenatal","booking","admission","booking appointment","thrombophilia","antithrombin","protein c","protein s","antiphospholipid","aps","previous vte","high risk","intermediate risk","ohss","cancer","sle","sickle cell","nephrotic","ivdu","cumulative risk factors","4 risk factors","3 risk factors","28 weeks","first trimester","fayyaz","gajree","haemobs","bridging","gp"],
+    content: [
+      { type: "subheading", value: "When to Perform Risk Assessment" },
+      { type: "list", items: [
+        "At booking",
+        "On each admission",
+        "With development of other intercurrent problems",
+        "Post-delivery (before transfer home/to ward)",
+      ]},
+      { type: "subheading", value: "High Risk — Antenatal LMWH Throughout Pregnancy + 6 Weeks Postnatal" },
+      { type: "list", items: [
+        "Any previous VTE (except single event related to major surgery)",
+        "Already on long-term oral anticoagulation — switch immediately to therapeutic enoxaparin",
+        "GP provides 2-week bridging course of LMWH after positive pregnancy test; DAU appointment then arranged for ongoing supply",
+        "Refer to Miss Fayyaz or Miss Gajree's antenatal clinic",
+      ]},
+      { type: "subheading", value: "Intermediate Risk — Consider Antenatal Prophylaxis" },
+      { type: "list", items: [
+        "Hospital admission",
+        "Single previous VTE related to major surgery",
+        "High-risk thrombophilia with no VTE: antithrombin deficiency, Protein C deficiency, Protein S deficiency, or > 1 thrombophilia",
+        "Medical co-morbidities: cancer, heart failure, active SLE, IBD, nephrotic syndrome, Type 1 DM with nephropathy, sickle cell disease, current IVDU",
+        "Any surgical procedure during pregnancy",
+        "OHSS (first trimester only)",
+        "Refer to Friday am Haematology-Obstetrics clinic if required",
+      ]},
+      { type: "subheading", value: "Cumulative Risk Factor Thresholds" },
+      { type: "table", headers: ["Score", "Action"], rows: [
+        ["≥ 4 cumulative risk factors", "Thromboprophylaxis from 1st trimester — arrange through DAU"],
+        ["3 cumulative risk factors", "Thromboprophylaxis from 28 weeks — refer to any consultant ANC"],
+        ["< 3 cumulative risk factors", "Mobilisation and avoidance of dehydration only"],
+      ]},
+      { type: "subheading", value: "Antenatal Cumulative Risk Factors (each = 1 point unless noted)" },
+      { type: "list", items: [
+        "BMI > 30 kg/m²", "BMI > 40 kg/m² (= 2 risk factors)", "Age > 35", "Parity ≥ 3", "Smoker",
+        "Gross varicose veins", "Current pre-eclampsia", "Immobility (paraplegia, PGP)",
+        "Family history of unprovoked or oestrogen-provoked VTE in 1st degree relative",
+        "Multiple pregnancy", "IVF/ART", "Low-risk thrombophilia",
+        "Transient risk factors: dehydration/hyperemesis (if admitted), current systemic infection, long-distance travel",
+      ]},
+      { type: "alert", value: "Known antithrombin deficiency or APS may need 50–75% above prophylactic dose — manage in collaboration with haematologists." },
+    ]
+  },
+  {
+    id: "vte-dosing-antenatal", gl: "GL891", condition: "VTE in Pregnancy & Postnatal", setting: "Enoxaparin Dosing",
+    title: "VTE — Enoxaparin Dosing (Prophylactic & Therapeutic)",
+    tags: ["enoxaparin","inhixa","lmwh","dose","dosing","prophylactic","therapeutic","weight","20mg","40mg","60mg","80mg","1.5 mg/kg","1 mg/kg","bd","od","creatinine clearance","crcl","renal","anti-xa","trough","50kg","90kg","130kg","170kg","0.6 mg/kg","heparin","osteopenia","bleeding risk","haematology","therapeutic dosing","standard dose","high risk bd"],
+    content: [
+      { type: "subheading", value: "Prophylactic Dosing — CrCl ≥ 30 mL/min" },
+      { type: "table", headers: ["Weight", "Dose"], rows: [
+        ["< 50 kg", "Enoxaparin 20 mg OD"],
+        ["50–89.9 kg", "Enoxaparin 40 mg OD"],
+        ["90–129.9 kg", "Enoxaparin 60 mg OD"],
+        ["130–169.9 kg", "Enoxaparin 80 mg OD"],
+        ["≥ 170 kg", "0.6 mg/kg/day"],
+      ]},
+      { type: "subheading", value: "Prophylactic Dosing — CrCl < 30 mL/min (discuss with Consultant Haematologist)" },
+      { type: "table", headers: ["Weight", "Dose"], rows: [
+        ["< 50 kg", "Enoxaparin 20 mg OD*"],
+        ["50–89.9 kg", "Enoxaparin 20 mg OD"],
+        ["90–129.9 kg", "Enoxaparin 40 mg OD"],
+        ["130–169.9 kg", "Enoxaparin 60 mg OD"],
+        ["≥ 170 kg", "0.5 mg/kg/day"],
+      ]},
+      { type: "text", value: "*CrCl < 30 and < 50 kg: monitor trough anti-Xa on day 5–7. Target ≤ 0.1 units/mL." },
+      { type: "subheading", value: "Therapeutic Dosing — Standard OD (1.5 mg/kg) — CrCl ≥ 30 mL/min" },
+      { type: "table", headers: ["Weight", "OD Dose"], rows: [
+        ["< 46 kg", "60 mg OD"], ["47–59.9 kg", "80 mg OD"], ["60–73.9 kg", "100 mg OD"],
+        ["74–89.9 kg", "120 mg OD"], ["90–109.9 kg", "150 mg OD"], ["110–125.9 kg", "180 mg OD"],
+        ["> 150 kg", "Discuss Haematology"],
+      ]},
+      { type: "subheading", value: "Therapeutic Dosing — High Risk BD (1 mg/kg) — CrCl ≥ 30 mL/min" },
+      { type: "table", headers: ["Weight", "BD Dose"], rows: [
+        ["< 44 kg", "40 mg BD"], ["44–54.9 kg", "50 mg BD*"], ["55–64.9 kg", "60 mg BD"],
+        ["65–74.9 kg", "70 mg BD*"], ["75–84.9 kg", "80 mg BD"], ["85–94.9 kg", "90 mg BD*"],
+        ["95–104.9 kg", "100 mg BD"], ["105–114.9 kg", "112.5 mg BD**"], ["115–134.9 kg", "120 mg BD"],
+        ["135–150 kg", "150 mg BD"], ["> 150 kg", "Discuss Haematology"],
+      ]},
+      { type: "text", value: "* Requires expulsion of 0.1 mL from next syringe size up. ** Expulsion of 0.05 mL from 120 mg/0.8 mL syringe. *** > 150 kg: 0.75 mg/kg BD (standard) or 1 mg/kg BD (high risk), rounded to vial size." },
+    ]
+  },
+  {
+    id: "vte-delivery", gl: "GL891", condition: "VTE in Pregnancy & Postnatal", setting: "Management for Delivery",
+    title: "VTE — Management Around Delivery",
+    tags: ["vte","delivery","labour","stop heparin","regional anaesthetic","epidural","spinal","12 hours","24 hours","prophylactic heparin","therapeutic heparin","planned delivery","enoxaparin","stop 24 hours","3 hours after","operative delivery","4 hours","regional","flowtrons","teds","postpartum","withhold"],
+    content: [
+      { type: "subheading", value: "Stopping Enoxaparin" },
+      { type: "list", items: [
+        "Women in established labour — advise not to inject any further heparin",
+        "Planned delivery — stop enoxaparin 24 hours before admission",
+      ]},
+      { type: "subheading", value: "Regional Anaesthesia Timing" },
+      { type: "list", items: [
+        "Regional anaesthetic NOT to be given until at least 12 hours after last prophylactic LMWH dose",
+        "Regional anaesthetic NOT to be given until at least 24 hours after last therapeutic LMWH dose",
+        "Epidural catheter should NOT be removed within 12 hours of most recent injection",
+        "Prophylactic LMWH: give 3 hours after operative delivery, or 4 hours after regional anaesthetic technique",
+      ]},
+      { type: "subheading", value: "Mechanical Prophylaxis" },
+      { type: "list", items: [
+        "Elective cases: Flowtrons as mechanical prophylaxis until Enoxaparin commenced or mobilisation (whichever first)",
+        "Emergency cases with TEDs already in situ: switch to Enoxaparin post-op if required",
+        "Emergency cases with no TEDs: Flowtrons in theatre, then Enoxaparin",
+        "Delayed Enoxaparin (e.g. uterine tamponade): Flowtrons until Enoxaparin commences",
+      ]},
+      { type: "alert", value: "TEDs and Flowtrons MUST NOT be used together — choose one or the other." },
+    ]
+  },
+  {
+    id: "vte-postnatal", gl: "GL891", condition: "VTE in Pregnancy & Postnatal", setting: "Postnatal Prophylaxis",
+    title: "VTE — Postnatal Risk Scoring & Prophylaxis Duration",
+    tags: ["vte","postnatal","thromboprophylaxis","6 weeks","10 days","intermediate risk","high risk","caesarean section","bmi 40","readmission","surgical procedure","cancer","heart failure","sle","ibd","sickle cell","diabetes nephropathy","ivdu","cumulative risk factors","2 or more","enoxaparin postnatal","flowtrons","epr","4 to 6 hours","secondary care prescription","mbrrace"],
+    content: [
+      { type: "subheading", value: "Timing" },
+      { type: "text", value: "Postnatal VTE assessment must be completed on EPR as soon after delivery as possible — definitely within the first 6 hours. Prescriptions for the entire postnatal LMWH course must be issued in secondary care (MBRRACE 2023)." },
+      { type: "subheading", value: "High Risk — ≥ 6 Weeks Postnatal Thromboprophylaxis" },
+      { type: "list", items: [
+        "Any previous VTE",
+        "Anyone requiring antenatal LMWH",
+        "High-risk thrombophilia (antithrombin, protein S, protein C deficiency)",
+        "Low-risk thrombophilia + family history",
+      ]},
+      { type: "subheading", value: "Intermediate Risk — ≥ 10 Days Postnatal Thromboprophylaxis" },
+      { type: "list", items: [
+        "Caesarean section in labour", "BMI > 40 kg/m²",
+        "Readmission or prolonged admission (≥ 3 days) in puerperium",
+        "Any surgical procedure in puerperium (except immediate perineal repair)",
+        "Medical co-morbidities: cancer, heart failure, active SLE, IBD/inflammatory polyarthropathy, nephrotic syndrome, Type 1 DM with nephropathy, sickle cell disease, current IVDU",
+        "2 or more cumulative risk factors",
+      ]},
+      { type: "subheading", value: "Postnatal Cumulative Risk Factors" },
+      { type: "list", items: [
+        "Age > 35, Obesity BMI ≥ 30, Parity ≥ 3, Smoker",
+        "Elective caesarean section", "Family history of VTE", "Low-risk thrombophilia",
+        "Gross varicose veins", "Current systemic infection", "Immobility (paraplegia, PGP, long-distance travel)",
+        "Current pre-eclampsia", "Multiple pregnancy", "Preterm delivery < 37 weeks",
+        "Stillbirth in this pregnancy", "Mid-cavity rotational or operative delivery",
+        "Prolonged labour > 24 hrs", "PPH > 1 litre or blood transfusion",
+      ]},
+      { type: "subheading", value: "Postnatal Enoxaparin Dosing (same tables as antenatal — CrCl ≥ 30 and < 30 versions)" },
+      { type: "text", value: "Use most recent weight (or booking weight if current not known). Refer to dosing tables in the Enoxaparin Dosing section. For CrCl < 30 mL/min: discuss with Consultant Haematologist via switchboard." },
+      { type: "text", value: "Postpartum thromboprophylaxis: give as soon as possible after delivery; withhold 4–6 hours after insertion or removal of epidural catheter." },
+    ]
+  },
+];
