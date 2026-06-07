@@ -10,10 +10,10 @@ export const GUIDELINES = {
   GL880: { code: "GL880", label: "Intrahepatic Cholestasis of Pregnancy", version: "V6", date: "March 2024", color: "yellow", pdf: true },
   GL891: { code: "GL891", label: "VTE in Pregnancy & Postnatal", version: "V7", date: "October 2024", color: "indigo", pdf: true },
   GL983: { code: "GL983", label: "Diabetes in Pregnancy", version: "V4", date: "February 2025", color: "pink", pdf: true },
-  QS46: { code: "QS46", label: "Multiple Pregnancy (Twins & Triplets)", version: "QS46", date: "September 2019", color: "cyan" },
-  QS22: { code: "QS22", label: "Antenatal Care", version: "QS22", date: "February 2023", color: "lime" },
-  GTG57: { code: "GTG57", label: "Reduced Fetal Movements", version: "GTG57", date: "February 2026", color: "red" },
-  GTG63: { code: "GTG63", label: "Antepartum Haemorrhage", version: "GTG63", date: "November 2011", color: "purple" },
+  QS46: { code: "QS46", label: "Multiple Pregnancy (Twins & Triplets)", version: "QS46", date: "September 2019", color: "cyan", pdf: true },
+  QS22: { code: "QS22", label: "Antenatal Care", version: "QS22", date: "February 2023", color: "lime", pdf: true },
+  GTG57: { code: "GTG57", label: "Reduced Fetal Movements", version: "GTG57", date: "February 2026", color: "red", pdf: true },
+  GTG63: { code: "GTG63", label: "Antepartum Haemorrhage", version: "GTG63", date: "November 2011", color: "purple", pdf: true },
 };
 
 export const GL_COLORS = {
