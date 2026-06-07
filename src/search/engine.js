@@ -12,6 +12,7 @@ import { GL891_SECTIONS } from "../data/GL891";
 import { GL983_SECTIONS } from "../data/GL983";
 import { QS46_SECTIONS } from "../data/QS46";
 import { QS22_SECTIONS } from "../data/QS22";
+import { GTG57_SECTIONS } from "../data/GTG57";
 
 function escapeRe(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -47,7 +48,8 @@ export function expandQuery(q) {
 const _WIKI = [
   ...GL952_SECTIONS, ...GL787_SECTIONS, ...CG565_SECTIONS,
   ...CG621_SECTIONS, ...CG623_SECTIONS, ...GL895_SECTIONS, ...GL861_SECTIONS,
-  ...GL783_SECTIONS, ...GL880_SECTIONS, ...GL891_SECTIONS, ...GL983_SECTIONS, ...QS46_SECTIONS, ...QS22_SECTIONS,
+  ...GL783_SECTIONS, ...GL880_SECTIONS, ...GL891_SECTIONS, ...GL983_SECTIONS,
+  ...QS46_SECTIONS, ...QS22_SECTIONS, ...GTG57_SECTIONS,
 ];
 
 export const SEARCH_INDEX = _WIKI.map(page => ({
