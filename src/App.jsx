@@ -404,6 +404,50 @@ export default function App() {
         </div>
       )}
 
+      {/* Guidelines tab */}
+      {activeTab === "guidelines" && (
+        <div className="min-h-screen pb-24">
+          <div className="max-w-lg mx-auto">
+            <div className="px-5 pt-16 pb-8">
+              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Guidelines</h2>
+              <p className="text-sm text-gray-400 mt-1">All RBH Maternity guidelines</p>
+            </div>
+            <div className="px-5">
+              <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+                {Object.values(GUIDELINES).map((gl, i) => {
+                  const col = FC_GL_COLOR[gl.code] ?? { accent: "bg-gray-300", icon: "text-gray-400" };
+                  return (
+                    <div
+                      key={gl.code}
+                      className={`flex items-center gap-3 px-4 py-4 ${i > 0 ? "border-t border-gray-50" : ""}`}
+                    >
+                      <div className={`w-1 h-10 rounded-full shrink-0 ${col.accent}`} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 leading-snug">{gl.label}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{gl.code} · {gl.version} · {gl.date}</p>
+                      </div>
+                      {gl.pdf && (
+                        <a
+                          href={`/guidelines/${gl.code}.pdf`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors text-xs font-medium text-gray-600 shrink-0"
+                        >
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                          PDF
+                        </a>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Tab bar */}
       <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-gray-100">
         <div className="flex max-w-lg mx-auto">
@@ -428,6 +472,17 @@ export default function App() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l8.5 5v10L12 22 3.5 17V7L12 2z" />
             </svg>
             <span className="text-xs font-medium">Flowcharts</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("guidelines")}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
+              activeTab === "guidelines" ? "text-black" : "text-gray-400"
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span className="text-xs font-medium">Guidelines</span>
           </button>
         </div>
       </div>
