@@ -79,20 +79,20 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
                 if (e.key === "Escape") setOpen(false);
               }}
               placeholder="Describe the issue or suggestion…"
-              className="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm text-gray-900 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+              className="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm text-gray-900 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-gray-400 transition-all"
             />
 
             <div className="flex gap-2 mt-3">
               <button
                 onClick={() => { setOpen(false); setMessage(""); }}
-                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
+                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-500 hover:bg-gray-100 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSend}
                 disabled={!message.trim()}
-                className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-sm font-medium text-white transition-colors"
+                className="flex-1 py-2.5 rounded-xl bg-black hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-sm font-medium text-white transition-colors"
               >
                 Send →
               </button>
