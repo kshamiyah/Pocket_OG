@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { SEARCH_INDEX, search } from "./search/engine";
 import { FLOWCHARTS } from "./data/flowcharts";
+import { GUIDELINES } from "./data/guidelines";
 import WikiCard from "./components/WikiCard";
 import NoResults from "./components/NoResults";
 import FlowchartPlayer from "./components/FlowchartPlayer";
@@ -159,6 +160,7 @@ export default function App() {
           flowchart={FLOWCHARTS[activeFlowchartId]}
           theme={FC_GL_COLOR[FLOWCHART_LINKS.find(fc => fc.id === activeFlowchartId)?.gl]}
           onClose={() => setActiveFlowchartId(null)}
+          pdfUrl={(() => { const gl = FLOWCHART_LINKS.find(fc => fc.id === activeFlowchartId)?.gl; return gl && GUIDELINES[gl]?.pdf ? `/guidelines/${gl}.pdf` : null; })()}
         />
       )}
 
