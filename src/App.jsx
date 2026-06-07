@@ -47,6 +47,8 @@ const FLOWCHART_LINKS = [
   { id: "GL891_POSTNATAL",  gl: "GL891" },
   { id: "GL983_DKA",        gl: "GL983" },
   { id: "GL880_DELIVERY",   gl: "GL880" },
+  { id: "QS46_CARE_PATHWAY", gl: "QS46" },
+  { id: "QS46_TERTIARY",     gl: "QS46" },
 ];
 
 const FC_GL_COLOR = {
@@ -58,6 +60,7 @@ const FC_GL_COLOR = {
   GL891: { badge: "bg-indigo-50 text-indigo-700 border-indigo-100", icon: "text-indigo-400", accent: "bg-indigo-400" },
   GL983: { badge: "bg-pink-50 text-pink-700 border-pink-100",       icon: "text-pink-400",   accent: "bg-pink-400" },
   GL880: { badge: "bg-yellow-50 text-yellow-700 border-yellow-100", icon: "text-yellow-500", accent: "bg-yellow-400" },
+  QS46: { badge: "bg-cyan-50 text-cyan-700 border-cyan-100",       icon: "text-cyan-400",   accent: "bg-cyan-400" },
 };
 
 const FLOWCHART_GROUPS = [
@@ -69,6 +72,7 @@ const FLOWCHART_GROUPS = [
   { gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
   { gl: "GL983", label: "Diabetes in Pregnancy" },
   { gl: "GL880", label: "Intrahepatic Cholestasis" },
+  { gl: "QS46",  label: "Multiple Pregnancy (Twins & Triplets)" },
 ];
 
 export default function App() {
