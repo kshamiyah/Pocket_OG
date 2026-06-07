@@ -31,6 +31,7 @@ export const QS46_SECTIONS = [
     gl: "QS46",
     condition: "Multiple Pregnancy",
     setting: "Antenatal — First Trimester",
+    flowchartId: "QS46_CARE_PATHWAY",
     title: "Chorionicity & Amnionicity",
     tags: [
       "chorionicity", "amnionicity", "monochorionic", "dichorionic", "trichorionic",
@@ -210,6 +211,7 @@ export const QS46_SECTIONS = [
     gl: "QS46",
     condition: "Multiple Pregnancy",
     setting: "Antenatal — High Risk",
+    flowchartId: "QS46_TERTIARY",
     title: "Tertiary Fetal Medicine Centre Involvement",
     tags: [
       "tertiary referral", "fetal medicine", "fetal medicine centre", "fmc", "tertiary centre",
