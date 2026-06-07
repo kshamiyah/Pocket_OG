@@ -11,6 +11,7 @@ export const GUIDELINES = {
   GL891: { code: "GL891", label: "VTE in Pregnancy & Postnatal", version: "V7", date: "October 2024", color: "indigo" },
   GL983: { code: "GL983", label: "Diabetes in Pregnancy", version: "V4", date: "February 2025", color: "pink" },
   QS46: { code: "QS46", label: "Multiple Pregnancy (Twins & Triplets)", version: "QS46", date: "September 2019", color: "cyan" },
+  QS22: { code: "QS22", label: "Antenatal Care", version: "QS22", date: "February 2023", color: "lime" },
 };
 
 export const GL_COLORS = {
@@ -26,4 +27,5 @@ export const GL_COLORS = {
   GL891: { badge: "bg-indigo-900/50 text-indigo-300 border-indigo-600/40", dot: "bg-indigo-400" },
   GL983: { badge: "bg-pink-900/50 text-pink-300 border-pink-600/40", dot: "bg-pink-400" },
   QS46: { badge: "bg-cyan-900/50 text-cyan-300 border-cyan-600/40", dot: "bg-cyan-400" },
+  QS22: { badge: "bg-lime-900/50 text-lime-300 border-lime-600/40", dot: "bg-lime-400" },
 };

@@ -18,7 +18,8 @@ const FILTER_OPTIONS = [
   { value: "GL880",       label: "Intrahepatic Cholestasis of Pregnancy", pill: "ICP",       codes: ["GL880"],          active: "bg-yellow-100 text-yellow-700" },
   { value: "GL891",       label: "VTE in Pregnancy & Postnatal",       pill: "VTE",          codes: ["GL891"],          active: "bg-indigo-100 text-indigo-700" },
   { value: "GL983",       label: "Diabetes in Pregnancy",              pill: "Diabetes",     codes: ["GL983"],          active: "bg-pink-100 text-pink-700" },
-  { value: "QS46",        label: "Multiple Pregnancy (Twins & Triplets)", pill: "Twins / NICE", codes: ["QS46"],           active: "bg-cyan-100 text-cyan-700" },
+  { value: "QS46",        label: "Multiple Pregnancy (Twins & Triplets)", pill: "Twins / NICE",     codes: ["QS46"],       active: "bg-cyan-100 text-cyan-700" },
+  { value: "QS22",        label: "Antenatal Care",                       pill: "Antenatal / NICE", codes: ["QS22"],       active: "bg-lime-100 text-lime-700" },
   { value: "FLOWCHARTS",  label: "Pages with flowcharts",              pill: "⬡ Flowcharts", filterFn: e => !!e.page.flowchartId, active: "bg-teal-100 text-teal-700", resultsOnly: true },
 ];
 
@@ -47,8 +48,9 @@ const FLOWCHART_LINKS = [
   { id: "GL891_POSTNATAL",  gl: "GL891" },
   { id: "GL983_DKA",        gl: "GL983" },
   { id: "GL880_DELIVERY",   gl: "GL880" },
-  { id: "QS46_CARE_PATHWAY", gl: "QS46" },
-  { id: "QS46_TERTIARY",     gl: "QS46" },
+  { id: "QS46_CARE_PATHWAY",   gl: "QS46" },
+  { id: "QS46_TERTIARY",       gl: "QS46" },
+  { id: "QS22_APPOINTMENTS",   gl: "QS22" },
 ];
 
 const FC_GL_COLOR = {
@@ -61,6 +63,7 @@ const FC_GL_COLOR = {
   GL983: { badge: "bg-pink-50 text-pink-700 border-pink-100",       icon: "text-pink-400",   accent: "bg-pink-400" },
   GL880: { badge: "bg-yellow-50 text-yellow-700 border-yellow-100", icon: "text-yellow-500", accent: "bg-yellow-400" },
   QS46: { badge: "bg-cyan-50 text-cyan-700 border-cyan-100",       icon: "text-cyan-400",   accent: "bg-cyan-400" },
+  QS22: { badge: "bg-lime-50 text-lime-700 border-lime-100",       icon: "text-lime-500",   accent: "bg-lime-400" },
 };
 
 const FLOWCHART_GROUPS = [
@@ -73,6 +76,7 @@ const FLOWCHART_GROUPS = [
   { gl: "GL983", label: "Diabetes in Pregnancy" },
   { gl: "GL880", label: "Intrahepatic Cholestasis" },
   { gl: "QS46",  label: "Multiple Pregnancy (Twins & Triplets)" },
+  { gl: "QS22",  label: "Antenatal Care" },
 ];
 
 export default function App() {
