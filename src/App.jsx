@@ -20,6 +20,7 @@ const FILTER_OPTIONS = [
   { value: "GL983",       label: "Diabetes in Pregnancy",              pill: "Diabetes",     codes: ["GL983"],          active: "bg-pink-100 text-pink-700" },
   { value: "QS46",        label: "Multiple Pregnancy (Twins & Triplets)", pill: "Twins / NICE",     codes: ["QS46"],       active: "bg-cyan-100 text-cyan-700" },
   { value: "QS22",        label: "Antenatal Care",                       pill: "Antenatal / NICE", codes: ["QS22"],       active: "bg-lime-100 text-lime-700" },
+  { value: "GTG57",       label: "Reduced Fetal Movements",              pill: "RFM / RCOG",       codes: ["GTG57"],      active: "bg-red-100 text-red-700" },
   { value: "FLOWCHARTS",  label: "Pages with flowcharts",              pill: "⬡ Flowcharts", filterFn: e => !!e.page.flowchartId, active: "bg-teal-100 text-teal-700", resultsOnly: true },
 ];
 
@@ -51,6 +52,9 @@ const FLOWCHART_LINKS = [
   { id: "QS46_CARE_PATHWAY",   gl: "QS46" },
   { id: "QS46_TERTIARY",       gl: "QS46" },
   { id: "QS22_APPOINTMENTS",   gl: "QS22" },
+  { id: "GTG57_CARE_PATHWAY",  gl: "GTG57" },
+  { id: "GTG57_GESTATION",     gl: "GTG57" },
+  { id: "GTG57_RECURRENT",     gl: "GTG57" },
 ];
 
 const FC_GL_COLOR = {
@@ -63,7 +67,8 @@ const FC_GL_COLOR = {
   GL983: { badge: "bg-pink-50 text-pink-700 border-pink-100",       icon: "text-pink-400",   accent: "bg-pink-400" },
   GL880: { badge: "bg-yellow-50 text-yellow-700 border-yellow-100", icon: "text-yellow-500", accent: "bg-yellow-400" },
   QS46: { badge: "bg-cyan-50 text-cyan-700 border-cyan-100",       icon: "text-cyan-400",   accent: "bg-cyan-400" },
-  QS22: { badge: "bg-lime-50 text-lime-700 border-lime-100",       icon: "text-lime-500",   accent: "bg-lime-400" },
+  QS22:  { badge: "bg-lime-50 text-lime-700 border-lime-100",      icon: "text-lime-500",   accent: "bg-lime-400" },
+  GTG57: { badge: "bg-red-50 text-red-700 border-red-100",         icon: "text-red-500",    accent: "bg-red-500" },
 };
 
 const FLOWCHART_GROUPS = [
@@ -77,6 +82,7 @@ const FLOWCHART_GROUPS = [
   { gl: "GL880", label: "Intrahepatic Cholestasis" },
   { gl: "QS46",  label: "Multiple Pregnancy (Twins & Triplets)" },
   { gl: "QS22",  label: "Antenatal Care" },
+  { gl: "GTG57", label: "Reduced Fetal Movements" },
 ];
 
 export default function App() {
