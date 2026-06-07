@@ -10,6 +10,7 @@ export const GUIDELINES = {
   GL880: { code: "GL880", label: "Intrahepatic Cholestasis of Pregnancy", version: "V6", date: "March 2024", color: "yellow" },
   GL891: { code: "GL891", label: "VTE in Pregnancy & Postnatal", version: "V7", date: "October 2024", color: "indigo" },
   GL983: { code: "GL983", label: "Diabetes in Pregnancy", version: "V4", date: "February 2025", color: "pink" },
+  QS46: { code: "QS46", label: "Multiple Pregnancy (Twins & Triplets)", version: "QS46", date: "September 2019", color: "cyan" },
 };
 
 export const GL_COLORS = {
@@ -24,4 +25,5 @@ export const GL_COLORS = {
   GL880: { badge: "bg-yellow-900/50 text-yellow-300 border-yellow-600/40", dot: "bg-yellow-400" },
   GL891: { badge: "bg-indigo-900/50 text-indigo-300 border-indigo-600/40", dot: "bg-indigo-400" },
   GL983: { badge: "bg-pink-900/50 text-pink-300 border-pink-600/40", dot: "bg-pink-400" },
+  QS46: { badge: "bg-cyan-900/50 text-cyan-300 border-cyan-600/40", dot: "bg-cyan-400" },
 };
