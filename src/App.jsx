@@ -58,17 +58,17 @@ const FLOWCHART_LINKS = [
 ];
 
 const FC_GL_COLOR = {
-  GL861: { badge: "bg-teal-50 text-teal-700 border-teal-100",       icon: "text-teal-400",   accent: "bg-teal-400" },
-  GL952: { badge: "bg-blue-50 text-blue-700 border-blue-100",       icon: "text-blue-400",   accent: "bg-blue-400" },
-  CG565: { badge: "bg-violet-50 text-violet-700 border-violet-100", icon: "text-violet-400", accent: "bg-violet-400" },
-  CG621: { badge: "bg-rose-50 text-rose-700 border-rose-100",       icon: "text-rose-400",   accent: "bg-rose-400" },
-  CG623: { badge: "bg-orange-50 text-orange-700 border-orange-100", icon: "text-orange-400", accent: "bg-orange-400" },
-  GL891: { badge: "bg-indigo-50 text-indigo-700 border-indigo-100", icon: "text-indigo-400", accent: "bg-indigo-400" },
-  GL983: { badge: "bg-pink-50 text-pink-700 border-pink-100",       icon: "text-pink-400",   accent: "bg-pink-400" },
-  GL880: { badge: "bg-yellow-50 text-yellow-700 border-yellow-100", icon: "text-yellow-500", accent: "bg-yellow-400" },
-  QS46: { badge: "bg-cyan-50 text-cyan-700 border-cyan-100",       icon: "text-cyan-400",   accent: "bg-cyan-400" },
-  QS22:  { badge: "bg-lime-50 text-lime-700 border-lime-100",      icon: "text-lime-500",   accent: "bg-lime-400" },
-  GTG57: { badge: "bg-red-50 text-red-700 border-red-100",         icon: "text-red-500",    accent: "bg-red-500" },
+  GL861: { badge: "bg-teal-50 text-teal-700 border-teal-100",       icon: "text-teal-400",   accent: "bg-teal-400",   solid: "bg-teal-600",   solidHover: "hover:bg-teal-700" },
+  GL952: { badge: "bg-blue-50 text-blue-700 border-blue-100",       icon: "text-blue-400",   accent: "bg-blue-400",   solid: "bg-blue-600",   solidHover: "hover:bg-blue-700" },
+  CG565: { badge: "bg-violet-50 text-violet-700 border-violet-100", icon: "text-violet-400", accent: "bg-violet-400", solid: "bg-violet-600", solidHover: "hover:bg-violet-700" },
+  CG621: { badge: "bg-rose-50 text-rose-700 border-rose-100",       icon: "text-rose-400",   accent: "bg-rose-400",   solid: "bg-rose-600",   solidHover: "hover:bg-rose-700" },
+  CG623: { badge: "bg-orange-50 text-orange-700 border-orange-100", icon: "text-orange-400", accent: "bg-orange-400", solid: "bg-orange-500", solidHover: "hover:bg-orange-600" },
+  GL891: { badge: "bg-indigo-50 text-indigo-700 border-indigo-100", icon: "text-indigo-400", accent: "bg-indigo-400", solid: "bg-indigo-500", solidHover: "hover:bg-indigo-600" },
+  GL983: { badge: "bg-pink-50 text-pink-700 border-pink-100",       icon: "text-pink-400",   accent: "bg-pink-400",   solid: "bg-pink-500",   solidHover: "hover:bg-pink-600" },
+  GL880: { badge: "bg-yellow-50 text-yellow-700 border-yellow-100", icon: "text-yellow-500", accent: "bg-yellow-400", solid: "bg-yellow-500", solidHover: "hover:bg-yellow-600" },
+  QS46:  { badge: "bg-cyan-50 text-cyan-700 border-cyan-100",       icon: "text-cyan-400",   accent: "bg-cyan-400",   solid: "bg-cyan-500",   solidHover: "hover:bg-cyan-600" },
+  QS22:  { badge: "bg-lime-50 text-lime-700 border-lime-100",       icon: "text-lime-500",   accent: "bg-lime-400",   solid: "bg-lime-500",   solidHover: "hover:bg-lime-600" },
+  GTG57: { badge: "bg-red-50 text-red-700 border-red-100",          icon: "text-red-500",    accent: "bg-red-500",    solid: "bg-red-500",    solidHover: "hover:bg-red-600" },
 };
 
 const FLOWCHART_GROUPS = [
@@ -92,6 +92,7 @@ export default function App() {
   const [expanded, setExpanded] = useState({});
   const [activeFlowchartId, setActiveFlowchartId] = useState(null);
   const [activeTab, setActiveTab] = useState("search");
+  const [guidelinePickerOpen, setGuidelinePickerOpen] = useState(false);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
   const hasQuery = query.trim().length > 0;
@@ -134,9 +135,8 @@ export default function App() {
   const showNoResults = hasQuery && primary.length === 0;
 
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="min-h-screen bg-white" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
         * { box-sizing: border-box; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
@@ -151,6 +151,7 @@ export default function App() {
       {activeFlowchartId && FLOWCHARTS[activeFlowchartId] && (
         <FlowchartPlayer
           flowchart={FLOWCHARTS[activeFlowchartId]}
+          theme={FC_GL_COLOR[FLOWCHART_LINKS.find(fc => fc.id === activeFlowchartId)?.gl]}
           onClose={() => setActiveFlowchartId(null)}
         />
       )}
@@ -165,11 +166,11 @@ export default function App() {
 
                 {/* Hero */}
                 <div className="text-center mb-10">
-                  <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Pocket O&G</h1>
-                  <p className="text-base text-gray-400 mt-3 leading-relaxed">
-                    RBH Maternity guidelines,<br />whenever you need them.
+                  <h1 className="text-[50px] font-[800] tracking-[0.04em] text-[#0E4286]">Pocket O&G</h1>
+                  <p className="mt-3 text-base leading-relaxed text-gray-400">
+                    RBH maternity guidelines.<br />Whenever and wherever you need them.
                   </p>
-                  <p className="text-xs text-gray-300 mt-2">Built by Khalid Shamiyah</p>
+                  <p className="mt-2 text-sm font-medium text-gray-300">Built by Khalid Shamiyah</p>
                 </div>
 
                 {/* Search */}
@@ -188,7 +189,7 @@ export default function App() {
                   />
                   <button
                     onClick={() => submitSearch()}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-xl bg-[#0E4286] hover:bg-[#0B3872] active:scale-95 transition-all"
                   >
                     <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
@@ -196,21 +197,73 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* Guideline filter pills */}
-                <div className="flex gap-2 overflow-x-auto -mx-5 px-5 pb-1 no-scrollbar">
-                  {FILTER_OPTIONS.filter(o => !o.resultsOnly).map(o => (
+                {/* Browse guidelines */}
+                <div className="relative">
+                  {guidelinePickerOpen && (
                     <button
-                      key={o.value}
-                      onClick={() => setFilter(o.value)}
-                      className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                        filter === o.value
-                          ? "bg-gray-900 text-white"
-                          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                      }`}
-                    >
-                      {o.pill}
-                    </button>
-                  ))}
+                      type="button"
+                      aria-label="Close guideline picker"
+                      onClick={() => setGuidelinePickerOpen(false)}
+                      className="fixed inset-0 z-30 cursor-default bg-transparent"
+                    />
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setGuidelinePickerOpen(open => !open)}
+                    className="relative z-40 w-full rounded-xl border border-gray-200 bg-white/92 px-3.5 py-2.5 text-left shadow-sm backdrop-blur-xl transition-all hover:bg-white"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500">
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h10" />
+                        </svg>
+                      </span>
+                      <span className="flex min-w-0 flex-1 flex-col justify-center">
+                        <span className="block text-[13px] font-semibold text-gray-900 leading-tight">Browse guidelines</span>
+                        <span className="mt-0.5 block text-[11px] leading-tight text-gray-400">
+                          {filter === "ALL" ? "All guideline groups" : activeOption?.pill}
+                        </span>
+                      </span>
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400">
+                        <svg className={`h-3 w-3 transition-transform ${guidelinePickerOpen ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </span>
+                    </span>
+                  </button>
+
+                  {guidelinePickerOpen && (
+                    <div className="absolute inset-x-0 top-[calc(100%+0.4rem)] z-40 rounded-[20px] border border-gray-200/80 bg-white/97 p-1 shadow-[0_12px_28px_rgba(15,23,42,0.10)] backdrop-blur-2xl">
+                      <div className="max-h-44 space-y-1 overflow-y-auto overscroll-contain pr-0.5 pb-0.5 no-scrollbar touch-pan-y">
+                        {FILTER_OPTIONS.filter(o => !o.resultsOnly).map(o => (
+                          <button
+                            key={o.value}
+                            type="button"
+                            onClick={() => {
+                              setFilter(o.value);
+                              setGuidelinePickerOpen(false);
+                            }}
+                            className={`flex w-full items-center gap-2 rounded-2xl px-2.5 py-1.5 text-left transition-all ${
+                              filter === o.value
+                                ? "bg-gray-200 text-gray-900"
+                                : "bg-gray-50/90 text-gray-700 hover:bg-gray-100"
+                            }`}
+                          >
+                            <span className={`h-1.5 w-1.5 rounded-full ${filter === o.value ? "bg-gray-500" : "bg-gray-300"}`} />
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-[13px] font-medium leading-tight">{o.pill}</span>
+                              <span className={`block text-[10px] mt-0.5 leading-tight ${filter === o.value ? "text-gray-500" : "text-gray-400"}`}>
+                                {o.label}
+                              </span>
+                            </span>
+                            <span className={`text-[10px] ${filter === o.value ? "text-gray-500" : "text-gray-300"}`}>
+                              {filter === o.value ? "✓" : "›"}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
               </div>
@@ -348,7 +401,7 @@ export default function App() {
           <button
             onClick={() => setActiveTab("search")}
             className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
-              activeTab === "search" ? "text-blue-600" : "text-gray-400"
+              activeTab === "search" ? "text-[#0E4286]" : "text-gray-400"
             }`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -359,7 +412,7 @@ export default function App() {
           <button
             onClick={() => setActiveTab("flowcharts")}
             className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
-              activeTab === "flowcharts" ? "text-blue-600" : "text-gray-400"
+              activeTab === "flowcharts" ? "text-[#0E4286]" : "text-gray-400"
             }`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>

@@ -23,12 +23,13 @@ function getSublabelItems(sublabel) {
     .filter(Boolean);
 }
 
-export default function FlowchartPlayer({ flowchart, onClose }) {
+export default function FlowchartPlayer({ flowchart, theme, onClose }) {
   const [currentId, setCurrentId] = useState(flowchart.startId);
   const [history, setHistory] = useState([]); // [{ nodeId, label }]
 
   const node = flowchart.nodes[currentId];
   const styles = END_STYLE_OVERRIDES[currentId] ?? NODE_STYLES[node.type] ?? NODE_STYLES.action;
+  const accentTheme = theme ?? { solid: "bg-[#0E4286]", solidHover: "hover:bg-[#0B3872]" };
 
   const choose = (option) => {
     setHistory(prev => [...prev, { nodeId: currentId, label: option.label }]);
@@ -56,11 +57,11 @@ export default function FlowchartPlayer({ flowchart, onClose }) {
   const stepNum = history.length + 1;
 
   return (
-    <div className="fixed inset-0 z-50 bg-white flex flex-col" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="fixed inset-0 z-50 bg-white flex flex-col" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
 
       {/* Header */}
       <div className="shrink-0 border-b border-gray-100 px-4 py-3 flex items-center gap-3">
-        <div className="w-7 h-7 rounded-xl bg-teal-600 flex items-center justify-center shrink-0">
+        <div className={`w-7 h-7 rounded-xl ${accentTheme.solid} flex items-center justify-center shrink-0`}>
           <span className="text-white text-xs font-semibold">Rx</span>
         </div>
         <div className="flex-1 min-w-0">
@@ -170,7 +171,7 @@ export default function FlowchartPlayer({ flowchart, onClose }) {
               className={`mt-5 w-full py-3.5 rounded-2xl text-sm font-semibold transition-colors ${
                 node.type === "alert"
                   ? "bg-amber-500 hover:bg-amber-600 text-white"
-                  : "bg-teal-600 hover:bg-teal-700 text-white"
+                  : `${accentTheme.solid} ${accentTheme.solidHover} text-white`
               }`}
             >
               {node.type === "alert" ? "Understood — continue →" : "Continue →"}
@@ -188,7 +189,7 @@ export default function FlowchartPlayer({ flowchart, onClose }) {
               </button>
               <button
                 onClick={onClose}
-                className="flex-1 py-3.5 rounded-2xl text-sm font-semibold bg-teal-600 hover:bg-teal-700 text-white transition-colors"
+                className={`flex-1 py-3.5 rounded-2xl text-sm font-semibold ${accentTheme.solid} ${accentTheme.solidHover} text-white transition-colors`}
               >
                 Close
               </button>
