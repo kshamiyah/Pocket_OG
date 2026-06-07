@@ -401,7 +401,7 @@ export default function App() {
           <button
             onClick={() => setActiveTab("search")}
             className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
-              activeTab === "search" ? "text-[#0E4286]" : "text-gray-400"
+              activeTab === "search" ? "text-black" : "text-gray-400"
             }`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -412,7 +412,7 @@ export default function App() {
           <button
             onClick={() => setActiveTab("flowcharts")}
             className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
-              activeTab === "flowcharts" ? "text-[#0E4286]" : "text-gray-400"
+              activeTab === "flowcharts" ? "text-black" : "text-gray-400"
             }`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
