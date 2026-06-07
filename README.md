@@ -5,7 +5,7 @@ Clinical guideline reference app for RBH Maternity. Built with React + Vite + Ta
 ## Guidelines included
 
 | Code | Title | Version | Date | Flowcharts |
-|------|-------|---------|------|----------|
+|------|-------|---------|------|-----------|
 | GL952 | Hypertension in Pregnancy | V6.3 | March 2026 | Triage, Acute, Severe/LW, Postnatal |
 | GL787 | Obstetric Antibiotics | V6.0 | July 2024 | — |
 | CG565 | First Trimester Miscarriage | V6 | September 2024 | Triage |
@@ -46,7 +46,6 @@ Vercel autodeploys on push to `main`.
 1. Create `src/data/GLXXX_FLOWCHART.js` — each node has `id`, `type` (action/decision/alert/end), `text`, and `options` (for decision nodes)
 2. Export and register it in `src/data/flowcharts.js`
 3. Add `flowchartId: "GLXXX_..."` to the relevant section object in `src/data/GLXXX.js`
-4. Add colour theming to `FC_GL_COLOR` in `src/App.jsx` (badge, icon, accent, solid, solidHover)
 
 ## Tech stack
 
