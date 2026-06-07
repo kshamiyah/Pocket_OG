@@ -292,13 +292,8 @@ export const GL861_TIMING_FLOWCHART = {
 
     "priority-key": {
       type: "action",
-      title: "IOL Priority System",
-      text: "All IOL bookings are assigned a priority. Discuss timing with the woman and document indication clearly.",
-      items: [
-        "Priority 1 — Urgent: book within 24–48 hours",
-        "Priority 2 — Scheduled: book in advance via IOL coordinator",
-        "Routine — standard post-dates pathway",
-      ],
+      title: "IOL Timing by Indication",
+      text: "Select the indication below to see the recommended gestation and IOL priority. Discuss timing with the woman and document the indication clearly in the notes.",
       next: "indication",
     },
 
@@ -328,7 +323,7 @@ export const GL861_TIMING_FLOWCHART = {
       type: "action",
       title: "Post-dates",
       text: "Offer IOL at 40+7 weeks.",
-      items: ["Priority: Routine", "Book via IOL coordinator"],
+      items: ["Priority: Routine"],
       next: "end",
     },
 
@@ -348,7 +343,7 @@ export const GL861_TIMING_FLOWCHART = {
       type: "action",
       title: "Maternal Age 40–44",
       text: "Recommend IOL at 40+0 weeks.",
-      items: ["Priority: 2 (scheduled)", "Book via IOL coordinator in advance"],
+      items: ["Priority: 2"],
       next: "end",
     },
 
@@ -356,7 +351,7 @@ export const GL861_TIMING_FLOWCHART = {
       type: "action",
       title: "Maternal Age ≥45",
       text: "Recommend IOL at 38+0 weeks.",
-      items: ["Priority: 2 (scheduled)", "Book via IOL coordinator in advance"],
+      items: ["Priority: 2"],
       next: "end",
     },
 
@@ -365,7 +360,7 @@ export const GL861_TIMING_FLOWCHART = {
       title: "Pre-existing Diabetes (Type 1 or 2)",
       text: "Offer IOL at 37+0 to 38+6 weeks.",
       items: [
-        "Priority: 1 (urgent — book within 24–48 hours)",
+        "Priority: 1",
         "Refer to GL983 (Diabetes in Pregnancy) for full management",
         "Aim for 37+0 to 38+6 gestation depending on control and complications",
       ],
@@ -378,7 +373,7 @@ export const GL861_TIMING_FLOWCHART = {
       text: "Offer IOL at 40+3 to 40+6 weeks.",
       items: [
         "Low risk = stable glucose levels, normal growth scan",
-        "Priority: 2 (scheduled)",
+        "Priority: 2",
         "Refer to GL983 (Diabetes in Pregnancy) for full management",
       ],
       next: "end",
@@ -390,7 +385,7 @@ export const GL861_TIMING_FLOWCHART = {
       text: "Offer IOL between 37+0 and 40+0 weeks.",
       items: [
         "Macrosomia = EFW ≥90th centile or AC ≥90th centile",
-        "Priority: 2 (scheduled); senior review to determine exact gestation",
+        "Priority: 2 — senior review to determine exact gestation",
         "Refer to GL983 (Diabetes in Pregnancy) for full management",
       ],
       next: "end",
@@ -413,7 +408,7 @@ export const GL861_TIMING_FLOWCHART = {
       title: "Hypertension — Non-proteinuric (Outpatient)",
       text: "Offer IOL at 40+0 to 40+6 weeks.",
       items: [
-        "Priority: 2 (scheduled)",
+        "Priority: 2",
         "Ensure BP well controlled with antihypertensives before IOL",
         "Refer to GL952 (Hypertension in Pregnancy)",
       ],
@@ -426,7 +421,7 @@ export const GL861_TIMING_FLOWCHART = {
       text: "Offer IOL at 37+0 to 39+6 weeks.",
       items: [
         "Only applies when bile acids >100 µmol/l",
-        "Priority: 2 (scheduled)",
+        "Priority: 2",
         "Refer to GL880 (Intrahepatic Cholestasis of Pregnancy)",
       ],
       next: "end",
@@ -438,7 +433,7 @@ export const GL861_TIMING_FLOWCHART = {
       text: "Offer IOL at 39+0 to 40+6 weeks.",
       items: [
         "PCR ≥30 mg/mmol with hypertensive symptoms — discuss with senior",
-        "Priority: 2 (scheduled)",
+        "Priority: 2",
         "Refer to GL952 (Hypertension in Pregnancy)",
       ],
       next: "end",
@@ -461,7 +456,7 @@ export const GL861_TIMING_FLOWCHART = {
       title: "Full Therapeutic Anticoagulation",
       text: "Offer IOL at 39+0 weeks.",
       items: [
-        "Priority: 1 (urgent — coordinate with haematology and anaesthetics)",
+        "Priority: 1",
         "Plan anticoagulation bridging with haematology well in advance",
         "Refer to GL891 (VTE in Pregnancy & Postnatal)",
       ],
@@ -485,7 +480,6 @@ export const GL861_TIMING_FLOWCHART = {
       title: "Book IOL",
       text: "Document indication, priority, and agreed gestation in the notes.",
       items: [
-        "Contact IOL coordinator to book date",
         "Priority 1: aim to book within 24–48 hours",
         "Confirm woman understands the plan and has a contact number",
         "Ensure booking is reflected in the maternity record",
