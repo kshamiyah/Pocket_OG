@@ -21,6 +21,7 @@ const FILTER_OPTIONS = [
   { value: "QS46",        label: "Multiple Pregnancy (Twins & Triplets)", pill: "Twins / NICE",     codes: ["QS46"],       active: "bg-cyan-100 text-cyan-700" },
   { value: "QS22",        label: "Antenatal Care",                       pill: "Antenatal / NICE", codes: ["QS22"],       active: "bg-lime-100 text-lime-700" },
   { value: "GTG57",       label: "Reduced Fetal Movements",              pill: "RFM / RCOG",       codes: ["GTG57"],      active: "bg-red-100 text-red-700" },
+  { value: "GTG63",       label: "Antepartum Haemorrhage",               pill: "APH / RCOG",       codes: ["GTG63"],      active: "bg-purple-100 text-purple-700" },
   { value: "FLOWCHARTS",  label: "Pages with flowcharts",              pill: "⬡ Flowcharts", filterFn: e => !!e.page.flowchartId, active: "bg-teal-100 text-teal-700", resultsOnly: true },
 ];
 
@@ -55,6 +56,9 @@ const FLOWCHART_LINKS = [
   { id: "GTG57_CARE_PATHWAY",  gl: "GTG57" },
   { id: "GTG57_GESTATION",     gl: "GTG57" },
   { id: "GTG57_RECURRENT",     gl: "GTG57" },
+  { id: "GTG63_TRIAGE",        gl: "GTG63" },
+  { id: "GTG63_DELIVERY",      gl: "GTG63" },
+  { id: "GTG63_ANTID",         gl: "GTG63" },
 ];
 
 const FC_GL_COLOR = {
@@ -69,6 +73,7 @@ const FC_GL_COLOR = {
   QS46:  { badge: "bg-cyan-50 text-cyan-700 border-cyan-100",       icon: "text-cyan-400",   accent: "bg-cyan-400",   solid: "bg-cyan-500",   solidHover: "hover:bg-cyan-600" },
   QS22:  { badge: "bg-lime-50 text-lime-700 border-lime-100",       icon: "text-lime-500",   accent: "bg-lime-400",   solid: "bg-lime-500",   solidHover: "hover:bg-lime-600" },
   GTG57: { badge: "bg-red-50 text-red-700 border-red-100",          icon: "text-red-500",    accent: "bg-red-500",    solid: "bg-red-500",    solidHover: "hover:bg-red-600" },
+  GTG63: { badge: "bg-purple-50 text-purple-700 border-purple-100", icon: "text-purple-500", accent: "bg-purple-500", solid: "bg-purple-600", solidHover: "hover:bg-purple-700" },
 };
 
 const FLOWCHART_GROUPS = [
@@ -83,6 +88,7 @@ const FLOWCHART_GROUPS = [
   { gl: "QS46",  label: "Multiple Pregnancy (Twins & Triplets)" },
   { gl: "QS22",  label: "Antenatal Care" },
   { gl: "GTG57", label: "Reduced Fetal Movements" },
+  { gl: "GTG63", label: "Antepartum Haemorrhage" },
 ];
 
 export default function App() {
