@@ -47,7 +47,7 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
 
       {/* Modal */}
       {open && (
-        <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center px-4 pb-4 sm:pb-0">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-4 sm:pb-0">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/20 backdrop-blur-sm"
