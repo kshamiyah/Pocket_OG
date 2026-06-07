@@ -39,6 +39,7 @@ const SUGGESTIONS = [
 
 const FLOWCHART_LINKS = [
   { id: "GL861_IOL",        gl: "GL861" },
+  { id: "GL861_TIMING",     gl: "GL861" },
   { id: "GL952_TRIAGE",     gl: "GL952" },
   { id: "GL952_ACUTE",      gl: "GL952" },
   { id: "GL952_SEVERE_LW",  gl: "GL952" },
