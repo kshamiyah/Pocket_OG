@@ -166,7 +166,7 @@ export default function App() {
 
                 {/* Hero */}
                 <div className="text-center mb-10">
-                  <h1 className="text-[50px] font-[800] tracking-[0.04em] text-[#0E4286]">Pocket O&G</h1>
+                  <h1 className="text-[50px] font-[800] tracking-[0.04em] text-black">Pocket O&G</h1>
                   <p className="mt-3 text-base leading-relaxed text-gray-400">
                     RBH maternity guidelines.<br />Whenever and wherever you need them.
                   </p>
@@ -189,7 +189,7 @@ export default function App() {
                   />
                   <button
                     onClick={() => submitSearch()}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-xl bg-[#0E4286] hover:bg-[#0B3872] active:scale-95 transition-all"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-xl bg-black hover:bg-gray-800 active:scale-95 transition-all"
                   >
                     <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
