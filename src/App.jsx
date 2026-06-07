@@ -8,22 +8,11 @@ import FlowchartPlayer from "./components/FlowchartPlayer";
 import FeedbackButton from "./components/FeedbackButton";
 
 const FILTER_OPTIONS = [
-  { value: "ALL",         label: "All guidelines",                     pill: "All",          codes: null,               active: "bg-gray-900 text-white" },
-  { value: "GL952",       label: "Pre-Eclampsia / PIH / PET",          pill: "PET / PIH",    codes: ["GL952"],          active: "bg-blue-100 text-blue-700" },
-  { value: "GL787",       label: "Obstetric Infections & Antibiotics", pill: "Antibiotics",  codes: ["GL787"],          active: "bg-emerald-100 text-emerald-700" },
-  { value: "MISCARRIAGE", label: "Miscarriage",                        pill: "Miscarriage",  codes: ["CG565", "CG621"], active: "bg-violet-100 text-violet-700" },
-  { value: "CG623",       label: "Ectopic Pregnancy",                  pill: "Ectopic",      codes: ["CG623"],          active: "bg-orange-100 text-orange-700" },
-  { value: "GL895",       label: "PPRoM",                              pill: "PPRoM",        codes: ["GL895"],          active: "bg-sky-100 text-sky-700" },
-  { value: "GL861",       label: "Induction of Labour & Term PLRoM",   pill: "IOL / PLRoM",  codes: ["GL861"],          active: "bg-teal-100 text-teal-700" },
-  { value: "GL783",       label: "Iron Deficiency Anaemia",            pill: "Anaemia",      codes: ["GL783"],          active: "bg-amber-100 text-amber-700" },
-  { value: "GL880",       label: "Intrahepatic Cholestasis of Pregnancy", pill: "ICP",       codes: ["GL880"],          active: "bg-yellow-100 text-yellow-700" },
-  { value: "GL891",       label: "VTE in Pregnancy & Postnatal",       pill: "VTE",          codes: ["GL891"],          active: "bg-indigo-100 text-indigo-700" },
-  { value: "GL983",       label: "Diabetes in Pregnancy",              pill: "Diabetes",     codes: ["GL983"],          active: "bg-pink-100 text-pink-700" },
-  { value: "QS46",        label: "Multiple Pregnancy (Twins & Triplets)", pill: "Twins / NICE",     codes: ["QS46"],       active: "bg-cyan-100 text-cyan-700" },
-  { value: "QS22",        label: "Antenatal Care",                       pill: "Antenatal / NICE", codes: ["QS22"],       active: "bg-lime-100 text-lime-700" },
-  { value: "GTG57",       label: "Reduced Fetal Movements",              pill: "RFM / RCOG",       codes: ["GTG57"],      active: "bg-red-100 text-red-700" },
-  { value: "GTG63",       label: "Antepartum Haemorrhage",               pill: "APH / RCOG",       codes: ["GTG63"],      active: "bg-purple-100 text-purple-700" },
-  { value: "FLOWCHARTS",  label: "Pages with flowcharts",              pill: "⬡ Flowcharts", filterFn: e => !!e.page.flowchartId, active: "bg-teal-100 text-teal-700", resultsOnly: true },
+  { value: "ALL",        label: "All guidelines",      pill: "All",           filterFn: null,                                                    active: "bg-gray-900 text-white" },
+  { value: "RBH",        label: "RBH guidelines",      pill: "RBH",           filterFn: e => GUIDELINES[e.page.gl]?.source === "RBH",            active: "bg-gray-900 text-white" },
+  { value: "RCOG",       label: "RCOG guidelines",     pill: "RCOG",          filterFn: e => GUIDELINES[e.page.gl]?.source === "RCOG",           active: "bg-gray-900 text-white" },
+  { value: "NICE",       label: "NICE guidelines",     pill: "NICE",          filterFn: e => GUIDELINES[e.page.gl]?.source === "NICE",           active: "bg-gray-900 text-white" },
+  { value: "FLOWCHARTS", label: "Pages with flowcharts", pill: "⬡ Flowcharts", filterFn: e => !!e.page.flowchartId,                             active: "bg-teal-100 text-teal-700" },
 ];
 
 const SUGGESTIONS = [
@@ -102,6 +91,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState("search");
   const [guidelinePickerOpen, setGuidelinePickerOpen] = useState(false);
   const [glSourceFilter, setGlSourceFilter] = useState("ALL");
+  const [fcSourceFilter, setFcSourceFilter] = useState("ALL");
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
   const hasQuery = query.trim().length > 0;
@@ -132,11 +122,7 @@ export default function App() {
 
   const activeOption = FILTER_OPTIONS.find(o => o.value === filter);
   const { primary, fallback } = useMemo(() => {
-    const pool = activeOption?.filterFn
-      ? SEARCH_INDEX.filter(activeOption.filterFn)
-      : activeOption?.codes
-        ? SEARCH_INDEX.filter(e => activeOption.codes.includes(e.page.gl))
-        : SEARCH_INDEX;
+    const pool = activeOption?.filterFn ? SEARCH_INDEX.filter(activeOption.filterFn) : SEARCH_INDEX;
     return search(query, pool);
   }, [query, filter]);
 
@@ -362,12 +348,26 @@ export default function App() {
         <div className="min-h-screen pb-24">
           <div className="max-w-lg mx-auto">
 
-            <div className="px-5 pt-16 pb-8">
+            <div className="px-5 pt-16 pb-4">
               <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Flowcharts</h2>
               <p className="text-sm text-gray-400 mt-1">Interactive clinical decision pathways</p>
             </div>
 
-            {FLOWCHART_GROUPS.map(group => {
+            <div className="px-5 pb-4 flex gap-2">
+              {["ALL", "RBH", "RCOG", "NICE"].map(src => (
+                <button
+                  key={src}
+                  onClick={() => setFcSourceFilter(src)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                    fcSourceFilter === src ? "bg-black text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                  }`}
+                >
+                  {src}
+                </button>
+              ))}
+            </div>
+
+            {FLOWCHART_GROUPS.filter(group => fcSourceFilter === "ALL" || GUIDELINES[group.gl]?.source === fcSourceFilter).map(group => {
               const groupLinks = FLOWCHART_LINKS.filter(fc => fc.gl === group.gl);
               if (!groupLinks.length) return null;
               const col = FC_GL_COLOR[group.gl];
