@@ -4,22 +4,29 @@ Clinical guideline reference app for RBH Maternity. Built with React + Vite + Ta
 
 ## Guidelines included
 
-| Code | Title | Version | Date |
-|------|-------|---------|------|
-| GL952 | Hypertension in Pregnancy (PET / PIH) | V6.3 | March 2026 |
-| GL787 | Obstetric Antibiotics | V6.0 | July 2024 |
-| CG565 | First Trimester Miscarriage | V6 | September 2024 |
-| CG621 | Medical Management of Miscarriage | V6 | May 2024 |
-| CG623 | Ectopic Pregnancy — Medical Management | V5 | June 2025 |
-| GL895 | Preterm Pre-Labour Rupture of Membranes (PPRoM) | V7 | November 2023 |
-| GL861 | Induction of Labour & Term PLRoM | V6.10 | May 2026 |
+| Code | Title | Version | Date | Flowcharts |
+|------|-------|---------|------|----------|
+| GL952 | Hypertension in Pregnancy | V6.3 | March 2026 | Triage, Acute, Severe/LW, Postnatal |
+| GL787 | Obstetric Antibiotics | V6.0 | July 2024 | — |
+| CG565 | First Trimester Miscarriage | V6 | September 2024 | Triage |
+| CG621 | Medical Management of Miscarriage | V6 | May 2024 | Outpatient, Inpatient |
+| CG623 | Ectopic Pregnancy — Medical Management | V5 | June 2025 | MTX pathway |
+| GL895 | Preterm Pre-Labour Rupture of Membranes (PPRoM) | V7 | November 2023 | — |
+| GL861 | Induction of Labour & Term PLRoM | V6.10 | May 2026 | IOL pathway |
+| GL783 | Iron Deficiency Anaemia | V5 | January 2024 | — |
+| GL880 | Intrahepatic Cholestasis of Pregnancy | V6 | March 2024 | Delivery timing |
+| GL891 | VTE in Pregnancy & Postnatal | V7 | October 2024 | Antenatal risk, Postnatal risk |
+| GL983 | Diabetes in Pregnancy | V4 | February 2025 | DKA pathway |
+| QS46 | Multiple Pregnancy (Twins & Triplets) — NICE | QS46 | September 2019 | Care pathway, Tertiary FMC referral |
+| QS22 | Antenatal Care — NICE | QS22 | February 2023 | Appointment schedule |
+| GTG57 | Reduced Fetal Movements — RCOG | GTG57 | February 2026 | Care pathway, Gestation triage, Recurrent RFM |
 
 ## Features
 
-- Full-text search across all guideline sections with fuzzy matching and synonym expansion
-- Filter by guideline or topic
-- Interactive decision flowcharts for key clinical pathways
-- Works offline (PWA-ready static build)
+- Full-text search across all guideline sections with synonym expansion and word-boundary scoring
+- Guideline picker to browse and filter by topic
+- Interactive decision flowcharts with per-guideline colour theming
+- System font stack (SF Pro / Helvetica Neue) for a native feel on iOS/macOS
 
 ## Adding a new guideline
 
@@ -39,6 +46,7 @@ Vercel autodeploys on push to `main`.
 1. Create `src/data/GLXXX_FLOWCHART.js` — each node has `id`, `type` (action/decision/alert/end), `text`, and `options` (for decision nodes)
 2. Export and register it in `src/data/flowcharts.js`
 3. Add `flowchartId: "GLXXX_..."` to the relevant section object in `src/data/GLXXX.js`
+4. Add colour theming to `FC_GL_COLOR` in `src/App.jsx` (badge, icon, accent, solid, solidHover)
 
 ## Tech stack
 
