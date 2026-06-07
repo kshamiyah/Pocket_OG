@@ -14,6 +14,15 @@ const END_STYLE_OVERRIDES = {
   "end-mlu":          { badge: "bg-teal-100 text-teal-700", icon: "✓", bar: "bg-teal-500" },
 };
 
+function getSublabelItems(sublabel) {
+  if (Array.isArray(sublabel)) return sublabel.filter(Boolean);
+  if (typeof sublabel !== "string") return [];
+  return sublabel
+    .split("·")
+    .map(item => item.trim())
+    .filter(Boolean);
+}
+
 export default function FlowchartPlayer({ flowchart, onClose }) {
   const [currentId, setCurrentId] = useState(flowchart.startId);
   const [history, setHistory] = useState([]); // [{ nodeId, label }]
@@ -126,18 +135,31 @@ export default function FlowchartPlayer({ flowchart, onClose }) {
           {/* Decision options */}
           {node.type === "decision" && node.options && (
             <div className="mt-5 space-y-2.5">
-              {node.options.map((opt, i) => (
-                <button
-                  key={i}
-                  onClick={() => choose(opt)}
-                  className="w-full text-left px-4 py-3.5 rounded-2xl border-2 border-gray-200 hover:border-teal-400 hover:bg-teal-50 transition-all group"
-                >
-                  <p className="text-sm font-medium text-gray-800 group-hover:text-teal-700 leading-snug">{opt.label}</p>
-                  {opt.sublabel && (
-                    <p className="text-xs text-gray-400 mt-0.5 group-hover:text-teal-600">{opt.sublabel}</p>
-                  )}
-                </button>
-              ))}
+              {node.options.map((opt, i) => {
+                const sublabelItems = getSublabelItems(opt.sublabel);
+
+                return (
+                  <button
+                    key={i}
+                    onClick={() => choose(opt)}
+                    className="w-full text-left px-4 py-3.5 rounded-2xl border-2 border-gray-200 hover:border-teal-400 hover:bg-teal-50 transition-all group"
+                  >
+                    <p className="text-sm font-medium text-gray-800 group-hover:text-teal-700 leading-snug">{opt.label}</p>
+                    {sublabelItems.length > 1 && (
+                      <ul className="mt-1 space-y-1 pl-4 text-xs text-gray-400 group-hover:text-teal-600 list-disc">
+                        {sublabelItems.map((item, itemIndex) => (
+                          <li key={itemIndex} className="leading-snug marker:text-gray-300 group-hover:marker:text-teal-300">
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {sublabelItems.length === 1 && (
+                      <p className="text-xs text-gray-400 mt-0.5 group-hover:text-teal-600">{sublabelItems[0]}</p>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
 
