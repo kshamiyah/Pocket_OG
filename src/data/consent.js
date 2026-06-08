@@ -17,20 +17,8 @@ export const FREQ = {
 // ─── CAESAREAN SECTION ────────────────────────────────────────────────────────
 
 export const CS_CONTEXT_OPTIONS = [
-  {
-    id: "elective",
-    label: "Elective",
-    description: "Planned, not urgent",
-    color: "text-emerald-600",
-    dot: "bg-emerald-500",
-  },
-  {
-    id: "emergency",
-    label: "Emergency",
-    description: "Delivery needed now",
-    color: "text-red-600",
-    dot: "bg-red-500",
-  },
+  { id: "elective",  label: "Elective",   description: "Planned, not urgent",     color: "text-emerald-600", dot: "bg-emerald-500" },
+  { id: "emergency", label: "Emergency",  description: "Delivery needed now",     color: "text-red-600",     dot: "bg-red-500" },
 ];
 
 export const CS_PATIENT_FACTORS = [
@@ -42,291 +30,400 @@ export const CS_PATIENT_FACTORS = [
   { id: "general_anaes",    label: "General anaesthetic needed" },
 ];
 
-// Source: NICE NG192 Caesarean Birth, Appendix A (2021)
-// Source: RCOG Consent Advice No. 12 — CS for Placenta Praevia (2010)
-export const CS_RISKS = {
-  common: [
-    {
-      id: "wound_infection",
-      name: "Wound infection",
-      freq: "COMMON",
-      rate: null,
-      source: "NICE NG192",
-      plain: "The wound on your abdomen can become infected, causing redness, pain, or discharge. Most infections are treated with antibiotics.",
-      conditions: [],
-    },
-    {
-      id: "heavy_bleeding",
-      name: "Heavy bleeding (haemorrhage)",
-      freq: "COMMON",
-      rate: "~340 per 100,000 require transfusion",
-      source: "NICE NG192 Appendix A",
-      plain: "Some bleeding is expected. In some cases it can be heavy enough to need a blood transfusion.",
-      conditions: [],
-    },
-    {
-      id: "baby_cut",
-      name: "Baby cut during surgery",
-      freq: "COMMON",
-      rate: "2 in 100",
-      source: "NICE NG192",
-      plain: "Small cuts to the baby's skin can happen when opening the uterus. Most heal quickly without long-term effects.",
-      conditions: [],
-    },
-    {
-      id: "pain_recovery",
-      name: "Pain and slow recovery",
-      freq: "COMMON",
-      rate: null,
-      source: "NICE NG192",
-      plain: "Most women need pain relief for several days. Full recovery usually takes 6 weeks. Driving and heavy lifting should be avoided during this time.",
-      conditions: [],
-    },
-    {
-      id: "longer_stay",
-      name: "Longer hospital stay",
-      freq: "COMMON",
-      rate: "~4 days vs ~2.5 days for vaginal birth",
-      source: "NICE NG192 Appendix A",
-      plain: "A caesarean usually means staying in hospital longer than after a vaginal birth.",
-      conditions: [],
-    },
-  ],
-  serious: [
-    {
-      id: "bladder_injury",
-      name: "Bladder injury",
-      freq: "UNCOMMON",
-      rate: "1 in 1,000",
-      source: "NICE NG192",
-      plain: "The bladder lies close to the uterus and can occasionally be nicked. This usually requires repair during the same operation.",
-      conditions: [],
-    },
-    {
-      id: "vte",
-      name: "Blood clot (DVT / pulmonary embolism)",
-      freq: "COMMON",
-      rate: "Up to 3 in 100",
-      source: "RCOG Consent Advice No. 12",
-      plain: "Clots can form in the leg (DVT) or travel to the lung (PE). You will be given blood-thinning injections and stockings to reduce this risk.",
-      conditions: [],
-    },
-    {
-      id: "hysterectomy",
-      name: "Emergency hysterectomy",
-      freq: "RARE",
-      rate: "~200 per 100,000",
-      source: "NICE NG192 Appendix A",
-      plain: "Very rarely, heavy bleeding cannot be controlled and the uterus needs to be removed. This would mean you could not have further pregnancies.",
-      conditions: [],
-      modifiers: {
-        placenta_praevia: {
-          rate: "Up to 11 in 100",
-          freq: "VERY_COMMON",
-          source: "RCOG Consent Advice No. 12",
-          note: "Risk significantly increased with placenta praevia",
-        },
-        placenta_praevia_prev_cs: {
-          rate: "Up to 27 in 100",
-          freq: "VERY_COMMON",
-          source: "RCOG Consent Advice No. 12",
-          note: "Risk further increased with placenta praevia + previous caesarean",
-        },
-      },
-    },
-    {
-      id: "massive_haemorrhage_pp",
-      name: "Massive obstetric haemorrhage",
-      freq: "VERY_COMMON",
-      rate: "21 in 100",
-      source: "RCOG Consent Advice No. 12",
-      plain: "Life-threatening bleeding requiring emergency treatment. Risk is significantly higher with placenta praevia.",
-      conditions: ["placenta_praevia"],
-    },
-    {
-      id: "bladder_injury_pp",
-      name: "Bladder or ureteric injury",
-      freq: "COMMON",
-      rate: "Up to 6 in 100",
-      source: "RCOG Consent Advice No. 12",
-      plain: "The bladder and the tube connecting kidney to bladder (ureter) are at higher risk of injury when there is placenta praevia.",
-      conditions: ["placenta_praevia"],
-    },
-    {
-      id: "cardiac_arrest",
-      name: "Cardiac arrest",
-      freq: "VERY_RARE",
-      rate: "~20 per 100,000",
-      source: "NICE NG192 Appendix A",
-      plain: "Extremely rare but serious complication. The theatre team is trained to respond immediately.",
-      conditions: [],
-    },
-    {
-      id: "maternal_death",
-      name: "Maternal death",
-      freq: "VERY_RARE",
-      rate: "~25 per 100,000 (CS) vs ~4 per 100,000 (vaginal birth)",
-      source: "NICE NG192 Appendix A",
-      plain: "Caesarean carries a higher risk of maternal death compared with vaginal birth, though both are very rare.",
-      conditions: [],
-    },
-  ],
-  future: [
-    {
-      id: "uterine_rupture",
-      name: "Uterine rupture in future labour",
-      freq: "RARE",
-      rate: "~200 per 100,000 (CS) vs ~7 per 100,000 (no CS)",
-      source: "NICE NG192 Appendix A",
-      plain: "The scar on your womb can occasionally open during a future labour. This is a reason why future labours may be monitored more closely.",
-      conditions: [],
-    },
-    {
-      id: "placenta_praevia_future",
-      name: "Placenta praevia in future pregnancy",
-      freq: "RARE",
-      rate: "~310 per 100,000 (CS) vs ~190 per 100,000 (no CS)",
-      source: "NICE NG192 Appendix A",
-      plain: "The caesarean scar slightly increases the chance of the placenta lying low in a future pregnancy.",
-      conditions: [],
-    },
-    {
-      id: "placenta_accreta_future",
-      name: "Placenta accreta spectrum in future pregnancy",
-      freq: "VERY_RARE",
-      rate: "~60 per 100,000 (CS) vs ~3 per 100,000 (no CS)",
-      source: "NICE NG192 Appendix A",
-      plain: "The placenta can grow into the caesarean scar in a future pregnancy, which can cause severe bleeding and may require hysterectomy.",
-      conditions: [],
-    },
-  ],
-};
+// ─── CS RISK SECTIONS ─────────────────────────────────────────────────────────
+// Standard CS: NICE NG192 Appendix A (2021) structure
+// PP CS overlay: RCOG Consent Advice No. 12 (2010) structure
 
-export const CS_ALTERNATIVES = [
-  { id: "instrumental", label: "Instrumental delivery (forceps or ventouse)" },
-  { id: "expectant",    label: "Continued expectant management" },
-  { id: "none",         label: "Not appropriate in this clinical situation" },
+// type "comparison" — side-by-side CS vs vaginal birth (NICE NG192 App A)
+// type "list"       — risk rows with freq badges (RCOG format)
+// type "simple"     — plain bullet list (no freq data given in source)
+
+export const CS_RISK_SECTIONS = [
+  {
+    id: "more_likely_women",
+    heading: "More likely with caesarean — Women",
+    type: "comparison",
+    source: "NICE NG192 Appendix A (2021)",
+    risks: [
+      {
+        id: "hysterectomy",
+        name: "Peripartum hysterectomy",
+        cs: "About 200 per 100,000",
+        vaginal: "About 100 per 100,000",
+        cs_higher: true,
+        plain: "Very rarely, heavy bleeding cannot be controlled and the uterus needs to be removed. This would mean you could not have further pregnancies.",
+      },
+      {
+        id: "maternal_death",
+        name: "Maternal death",
+        cs: "About 25 per 100,000",
+        vaginal: "About 4 per 100,000",
+        cs_higher: true,
+        plain: "Caesarean carries a higher risk of maternal death compared with vaginal birth, though both are very rare.",
+      },
+      {
+        id: "hospital_stay",
+        name: "Length of hospital stay",
+        cs: "About 4 days on average",
+        vaginal: "About 2½ days on average",
+        cs_higher: true,
+        plain: "A caesarean usually means a longer stay in hospital than after a vaginal birth.",
+      },
+      {
+        id: "placenta_accreta_future",
+        name: "Placenta accreta in any future pregnancy",
+        cs: "About 100 per 100,000",
+        vaginal: "About 30 per 100,000",
+        cs_higher: true,
+        plain: "The placenta can grow into the caesarean scar in a future pregnancy, which can cause severe bleeding and may require hysterectomy.",
+      },
+      {
+        id: "uterine_rupture_future",
+        name: "Uterine rupture in any future pregnancy",
+        cs: "About 200 per 100,000",
+        vaginal: "About 7 per 100,000",
+        cs_higher: true,
+        plain: "The scar on your womb can occasionally open during a future labour. Future labours will be monitored more closely as a result.",
+      },
+    ],
+  },
+  {
+    id: "more_likely_baby",
+    heading: "More likely with caesarean — Baby",
+    type: "comparison",
+    source: "NICE NG192 Appendix A (2021)",
+    risks: [
+      {
+        id: "neonatal_mortality",
+        name: "Neonatal mortality",
+        cs: "About 58 per 100,000",
+        vaginal: "About 30 per 100,000",
+        cs_higher: true,
+        plain: "Neonatal death is rare with either mode of birth. The figures reflect the overall population and include cases where caesarean was performed because of serious complications.",
+      },
+      {
+        id: "asthma",
+        name: "Childhood asthma",
+        cs: "About 1,809 per 100,000",
+        vaginal: "About 1,500 per 100,000",
+        cs_higher: true,
+        plain: "There is a small increase in the risk of childhood asthma in babies born by caesarean. The reason for this is not fully understood.",
+      },
+    ],
+  },
+  {
+    id: "less_likely_women",
+    heading: "Less likely with caesarean — Women",
+    type: "comparison",
+    source: "NICE NG192 Appendix A (2021)",
+    risks: [
+      {
+        id: "urinary_incont_unassisted",
+        name: "Urinary incontinence >1 year (vs unassisted vaginal birth)",
+        cs: "About 19,600 per 100,000",
+        vaginal: "About 48,700 per 100,000",
+        cs_higher: false,
+        plain: "Caesarean birth is associated with a lower risk of long-term urinary incontinence compared with unassisted vaginal birth.",
+      },
+      {
+        id: "urinary_incont_assisted",
+        name: "Urinary incontinence >1 year (vs assisted vaginal birth)",
+        cs: "About 7,300 per 100,000",
+        vaginal: "About 19,800 per 100,000",
+        cs_higher: false,
+        plain: "Compared with forceps or ventouse delivery, caesarean carries a lower risk of long-term urinary incontinence.",
+      },
+      {
+        id: "faecal_incont",
+        name: "Faecal incontinence >1 year (vs assisted vaginal birth)",
+        cs: "About 7,800 per 100,000",
+        vaginal: "About 15,100 per 100,000",
+        cs_higher: false,
+        plain: "Compared with assisted vaginal birth, caesarean carries a lower risk of long-term faecal incontinence.",
+      },
+      {
+        id: "vaginal_tear",
+        name: "Vaginal tear",
+        cs: "About 0 per 100,000",
+        vaginal: "About 560 per 100,000",
+        cs_higher: false,
+        plain: "Vaginal tears do not occur with caesarean birth.",
+      },
+      {
+        id: "perineal_pain",
+        name: "Perineal/abdominal pain during birth",
+        cs: "Median pain score 1.0",
+        vaginal: "Median pain score 7.3",
+        cs_higher: false,
+        plain: "Pain during the birth itself is much lower with caesarean under spinal anaesthetic. However, abdominal wound pain afterwards is common.",
+      },
+    ],
+  },
+  {
+    id: "similar",
+    heading: "Likely to be similar for both",
+    type: "simple",
+    source: "NICE NG192 Appendix A (2021)",
+    items: [
+      "Thromboembolic disease",
+      "Major obstetric haemorrhage",
+      "Postnatal depression",
+      "Faecal incontinence >1 year (vs unassisted vaginal birth)",
+      "Admission to neonatal unit",
+      "Infection",
+    ],
+  },
+];
+
+// RCOG Consent Advice No. 12 — shown additionally when placenta praevia factor active
+export const CS_PP_RISK_SECTIONS = [
+  {
+    id: "serious_maternal_pp",
+    heading: "Serious risks — Maternal",
+    type: "list",
+    source: "RCOG Consent Advice No. 12 (2010)",
+    note: "These risks apply specifically because of placenta praevia and differ from those of a caesarean with a normally sited placenta.",
+    risks: [
+      {
+        id: "massive_haem",
+        name: "Massive obstetric haemorrhage",
+        freq: "VERY_COMMON",
+        rate: "21 in 100",
+        plain: "Life-threatening bleeding requiring emergency treatment including blood transfusion.",
+      },
+      {
+        id: "hysterectomy_all_pp",
+        name: "Emergency hysterectomy",
+        freq: "VERY_COMMON",
+        rate: "Up to 11 in 100",
+        plain: "Heavy bleeding that cannot be controlled may require removal of the uterus. This would mean you could not have further pregnancies.",
+      },
+      {
+        id: "hysterectomy_pp_prev_cs",
+        name: "Emergency hysterectomy (with previous caesarean)",
+        freq: "VERY_COMMON",
+        rate: "Up to 27 in 100",
+        conditions: ["prev_cs_1", "prev_cs_2plus"],
+        plain: "The risk of needing a hysterectomy increases further if you have had a previous caesarean section.",
+      },
+      {
+        id: "hysterectomy_accreta",
+        name: "Emergency hysterectomy (abnormally adherent placenta / accreta)",
+        freq: null,
+        rate: null,
+        note: "Hysterectomy is highly likely",
+        conditions: ["placenta_praevia"],
+        plain: "If the placenta has grown into the wall of the womb, a hysterectomy is almost always required to prevent life-threatening bleeding.",
+      },
+      {
+        id: "further_laparotomy",
+        name: "Need for further laparotomy during recovery",
+        freq: "COMMON",
+        rate: "75 in 1,000",
+        plain: "A return to theatre for a further open operation may be needed to manage ongoing bleeding or other complications.",
+      },
+      {
+        id: "vte_pp",
+        name: "Thromboembolic disease",
+        freq: "COMMON",
+        rate: "Up to 3 in 100",
+        plain: "Clots can form in the leg (DVT) or travel to the lung (PE). Blood-thinning injections and stockings reduce this risk.",
+      },
+      {
+        id: "bladder_ureteric",
+        name: "Bladder or ureteric injury",
+        freq: "COMMON",
+        rate: "Up to 6 in 100",
+        plain: "The bladder and the tube connecting the kidney to the bladder are at higher risk of injury when there is placenta praevia.",
+      },
+      {
+        id: "future_pp",
+        name: "Placenta praevia in a future pregnancy",
+        freq: "COMMON",
+        rate: "23 in 1,000",
+        plain: "There is an increased chance that the placenta will lie low in a future pregnancy.",
+      },
+      {
+        id: "death_pp",
+        name: "Death (all caesarean sections)",
+        freq: "VERY_RARE",
+        rate: "1 in 12,000",
+        plain: "The risk of maternal death from caesarean section is very rare.",
+      },
+    ],
+  },
+  {
+    id: "frequent_maternal_pp",
+    heading: "Frequent risks — Maternal",
+    type: "simple",
+    source: "RCOG Consent Advice No. 12 (2010)",
+    items: ["Admission to intensive care", "Infection", "Blood transfusion"],
+  },
+  {
+    id: "frequent_fetal_pp",
+    heading: "Frequent risks — Fetal",
+    type: "simple",
+    source: "RCOG Consent Advice No. 12 (2010)",
+    items: ["Admission to neonatal intensive care"],
+  },
 ];
 
 // ─── OPERATIVE VAGINAL DELIVERY ───────────────────────────────────────────────
-// Source: RCOG Consent Advice No. 11 — Operative Vaginal Delivery (2010)
+// Source: RCOG Consent Advice No. 11 (2010)
+// Structure follows: Serious risks (Maternal / Fetal) → Frequent risks (Maternal / Fetal)
 
 export const OVD_CONTEXT_OPTIONS = [
-  {
-    id: "ventouse",
-    label: "Ventouse",
-    description: "Vacuum-assisted delivery",
-    color: "text-blue-600",
-    dot: "bg-blue-500",
-  },
-  {
-    id: "forceps",
-    label: "Forceps",
-    description: "Instrument-assisted delivery",
-    color: "text-indigo-600",
-    dot: "bg-indigo-500",
-  },
+  { id: "ventouse", label: "Ventouse", description: "Vacuum-assisted delivery",   color: "text-blue-600",   dot: "bg-blue-500" },
+  { id: "forceps",  label: "Forceps",  description: "Instrument-assisted delivery", color: "text-indigo-600", dot: "bg-indigo-500" },
 ];
 
 export const OVD_PATIENT_FACTORS = [
-  { id: "prev_3rd_degree", label: "Previous 3rd/4th degree tear" },
-  { id: "coagulopathy",    label: "Fetal coagulopathy" },
-  { id: "prematurity",     label: "Preterm (< 34 weeks)" },
+  { id: "high_bmi",         label: "High maternal BMI" },
+  { id: "large_baby",       label: "Estimated fetal weight > 4,000 g" },
+  { id: "op_position",      label: "Occipitoposterior position" },
+  { id: "mid_cavity",       label: "Mid-cavity delivery" },
 ];
 
-export const OVD_RISKS = {
-  common: [
-    {
-      id: "episiotomy",
-      name: "Episiotomy",
-      freq: { ventouse: "VERY_COMMON", forceps: "VERY_COMMON" },
-      rate: { ventouse: "5–6 in 10", forceps: "9 in 10" },
-      source: "RCOG Consent Advice No. 11",
-      plain: "A cut to the perineum (skin between the vagina and anus) to help deliver the baby. It is stitched under local anaesthetic after delivery.",
-    },
-    {
-      id: "pph",
-      name: "Postpartum haemorrhage",
-      freq: { ventouse: "VERY_COMMON", forceps: "VERY_COMMON" },
-      rate: { ventouse: "1–4 in 10", forceps: "1–4 in 10" },
-      source: "RCOG Consent Advice No. 11",
-      plain: "Heavy bleeding after delivery. The team is trained to manage this and blood transfusion is available if needed.",
-    },
-    {
-      id: "vaginal_tear",
-      name: "Significant vaginal, vulval or labial tear",
-      freq: { ventouse: "VERY_COMMON", forceps: "VERY_COMMON" },
-      rate: { ventouse: "1 in 10", forceps: "1 in 5" },
-      source: "RCOG Consent Advice No. 11",
-      plain: "Tears to the vaginal area are common and are repaired with stitches. Most heal well.",
-    },
-    {
-      id: "retinal_haemorrhage",
-      name: "Baby — retinal haemorrhage",
-      freq: { ventouse: "VERY_COMMON", forceps: "VERY_COMMON" },
-      rate: { ventouse: "17–38 in 100", forceps: null },
-      source: "RCOG Consent Advice No. 11",
-      plain: "Bleeding behind the eye is common but almost always resolves on its own without treatment or lasting effect.",
-    },
-    {
-      id: "cephalhaematoma",
-      name: "Baby — cephalhaematoma",
-      freq: { ventouse: "COMMON", forceps: "COMMON" },
-      rate: { ventouse: "1–12 in 100", forceps: null },
-      source: "RCOG Consent Advice No. 11",
-      plain: "A collection of blood under the scalp. It looks like a swelling on the head and usually resolves without treatment over a few weeks.",
-    },
-  ],
-  serious: [
-    {
-      id: "third_fourth_degree",
-      name: "3rd or 4th degree perineal tear",
-      freq: { ventouse: "COMMON", forceps: "VERY_COMMON" },
-      rate: { ventouse: "1–4 in 100", forceps: "8–12 in 100" },
-      source: "RCOG Consent Advice No. 11",
-      plain: "A tear that extends into or through the anal sphincter. Repaired by a specialist surgeon. Can cause short-term bowel symptoms in some women.",
-    },
-    {
-      id: "failed_attempt",
-      name: "Failed attempt — requires caesarean section",
-      freq: { ventouse: "COMMON", forceps: "UNCOMMON" },
-      rate: { ventouse: null, forceps: null },
-      source: "RCOG Consent Advice No. 11",
-      plain: "If the instrument delivery is not successful, a caesarean section will be performed.",
-    },
-    {
-      id: "subgaleal",
-      name: "Baby — subgaleal haematoma",
-      freq: { ventouse: "UNCOMMON", forceps: "UNCOMMON" },
-      rate: { ventouse: "3–6 in 1,000", forceps: null },
-      source: "RCOG Consent Advice No. 11",
-      plain: "Serious bleeding beneath the scalp. Rarer than cephalhaematoma but can be significant. The baby will be closely monitored after delivery.",
-    },
-    {
-      id: "intracranial",
-      name: "Baby — intracranial haemorrhage",
-      freq: { ventouse: "UNCOMMON", forceps: "UNCOMMON" },
-      rate: { ventouse: "5–15 in 10,000", forceps: null },
-      source: "RCOG Consent Advice No. 11",
-      plain: "Bleeding inside the skull. Uncommon but serious — the baby would need specialist neonatal review.",
-    },
-    {
-      id: "facial_nerve",
-      name: "Baby — facial nerve palsy",
-      freq: { ventouse: "RARE", forceps: "RARE" },
-      rate: { ventouse: null, forceps: null },
-      source: "RCOG Consent Advice No. 11",
-      plain: "Temporary weakness of the muscles on one side of the baby's face. Usually resolves within a few weeks.",
-    },
-  ],
-};
-
-export const OVD_ALTERNATIVES = [
-  { id: "cs",        label: "Caesarean section" },
-  { id: "expectant", label: "Continued pushing — if appropriate" },
+// Risk items use `byInstrument` where rates differ; plain `freq`/`rate` where they are the same.
+// `instrumentOnly` marks risks that apply to one instrument only.
+export const OVD_RISK_SECTIONS = [
+  {
+    id: "serious_maternal",
+    heading: "Serious risks — Maternal",
+    type: "list",
+    source: "RCOG Consent Advice No. 11 (2010)",
+    risks: [
+      {
+        id: "third_fourth_degree",
+        name: "3rd and 4th degree perineal tear",
+        byInstrument: {
+          ventouse: { freq: "COMMON",      rate: "1–4 in 100" },
+          forceps:  { freq: "VERY_COMMON", rate: "8–12 in 100" },
+        },
+        plain: "A tear that extends into or through the anal sphincter. Repaired by a specialist surgeon. Can cause short-term bowel symptoms in some women.",
+      },
+      {
+        id: "vaginal_vulval_tear",
+        name: "Extensive or significant vaginal/vulval tear",
+        byInstrument: {
+          ventouse: { freq: "VERY_COMMON", rate: "1 in 10" },
+          forceps:  { freq: "VERY_COMMON", rate: "1 in 5" },
+        },
+        plain: "A significant tear to the vaginal area requiring repair with stitches.",
+      },
+    ],
+  },
+  {
+    id: "serious_fetal",
+    heading: "Serious risks — Fetal",
+    type: "list",
+    source: "RCOG Consent Advice No. 11 (2010)",
+    risks: [
+      {
+        id: "subgaleal",
+        name: "Subgaleal haematoma",
+        freq: "UNCOMMON",
+        rate: "3–6 in 1,000",
+        plain: "Serious bleeding beneath the scalp aponeurosis. Rarer than cephalhaematoma but can be significant. The baby will be closely monitored after delivery.",
+      },
+      {
+        id: "intracranial",
+        name: "Intracranial haemorrhage",
+        freq: "UNCOMMON",
+        rate: "5–15 in 10,000",
+        plain: "Bleeding inside the skull. Uncommon but serious — the baby would need specialist neonatal review.",
+      },
+      {
+        id: "facial_nerve",
+        name: "Facial nerve palsy",
+        freq: "RARE",
+        rate: null,
+        plain: "Temporary weakness of the muscles on one side of the baby's face. Usually resolves within a few weeks.",
+      },
+    ],
+  },
+  {
+    id: "frequent_maternal",
+    heading: "Frequent risks — Maternal",
+    type: "list",
+    source: "RCOG Consent Advice No. 11 (2010)",
+    risks: [
+      {
+        id: "pph",
+        name: "Postpartum haemorrhage",
+        freq: "VERY_COMMON",
+        rate: "1–4 in 10",
+        plain: "Heavy bleeding after delivery. Ten times more common than after a normal delivery. The team is trained to manage this.",
+      },
+      {
+        id: "vaginal_tear_abrasion",
+        name: "Vaginal tear / abrasion",
+        freq: "VERY_COMMON",
+        rate: null,
+        plain: "Minor tears and grazes to the vaginal area are very common and are repaired with stitches.",
+      },
+      {
+        id: "sphincter_voiding",
+        name: "Anal sphincter dysfunction / voiding dysfunction",
+        freq: null,
+        rate: null,
+        plain: "Some women experience short-term difficulty with bladder or bowel control following instrumental delivery. This usually improves with time and physiotherapy.",
+      },
+    ],
+  },
+  {
+    id: "frequent_fetal",
+    heading: "Frequent risks — Fetal",
+    type: "list",
+    source: "RCOG Consent Advice No. 11 (2010)",
+    risks: [
+      {
+        id: "forceps_marks",
+        name: "Forceps marks on face",
+        freq: "VERY_COMMON",
+        rate: null,
+        instrumentOnly: "forceps",
+        plain: "Temporary marks or bruising on the baby's face from the forceps blades. These almost always resolve within a few days.",
+      },
+      {
+        id: "chignon",
+        name: "Chignon / cup marking on scalp",
+        freq: "VERY_COMMON",
+        rate: "Practically all cases",
+        instrumentOnly: "ventouse",
+        plain: "A temporary swelling on the scalp at the site of the suction cup. This resolves on its own within a few days.",
+      },
+      {
+        id: "cephalhaematoma",
+        name: "Cephalhaematoma",
+        freq: "COMMON",
+        rate: "1–12 in 100",
+        plain: "A collection of blood under the scalp that looks like a firm swelling. Usually resolves without treatment over a few weeks.",
+      },
+      {
+        id: "lacerations",
+        name: "Facial or scalp lacerations",
+        freq: "COMMON",
+        rate: "1 in 10",
+        plain: "Small cuts to the face or scalp. Most heal quickly without treatment.",
+      },
+      {
+        id: "jaundice",
+        name: "Neonatal jaundice / hyperbilirubinaemia",
+        freq: "COMMON",
+        rate: "5–15 in 100",
+        plain: "Yellowing of the skin and eyes in the newborn, more common after instrumental delivery. Usually treated with phototherapy (light therapy) if needed.",
+      },
+      {
+        id: "retinal_haem",
+        name: "Retinal haemorrhage",
+        freq: "VERY_COMMON",
+        rate: "17–38 in 100",
+        plain: "Bleeding behind the eye is very common but almost always resolves on its own without treatment or lasting effect.",
+      },
+    ],
+  },
 ];
-
-// ─── PROCEDURE LIST ───────────────────────────────────────────────────────────
 
 // ─── WHAT / WHY / DECLINE ────────────────────────────────────────────────────
 
@@ -452,21 +549,21 @@ export const OVD_FAQ = [
   },
 ];
 
+// ─── PROCEDURE LIST ───────────────────────────────────────────────────────────
+
 export const CONSENT_PROCEDURES = [
   {
     id: "CS",
     title: "Caesarean Section",
     subtypes: "Elective · Emergency",
     source: "NICE NG192 · RCOG CA No. 12",
-    pdf: null,
-    color: { accent: "bg-teal-500", bg: "bg-white", text: "text-teal-700" },
+    color: { accent: "bg-teal-500", text: "text-teal-700" },
   },
   {
     id: "OVD",
     title: "Instrumental Delivery",
     subtypes: "Forceps · Ventouse",
     source: "RCOG Consent Advice No. 11",
-    pdf: null,
-    color: { accent: "bg-blue-500", bg: "bg-white", text: "text-blue-700" },
+    color: { accent: "bg-blue-500", text: "text-blue-700" },
   },
 ];
