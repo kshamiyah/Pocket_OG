@@ -38,9 +38,89 @@ export const CS_PATIENT_FACTORS = [
 // type "list"       — risk rows with freq badges (RCOG format)
 // type "simple"     — plain bullet list (no freq data given in source)
 
-// Absolute CS risks — shown by default on the Risks page
-// (RCOG CA No. 7 data to be added — currently using RCOG No. 12 serious risks as placeholder)
-export const CS_RISK_SECTIONS = [];
+// Absolute CS risks from NICE NG192 Appendix A (2021)
+export const CS_RISK_SECTIONS = [
+  {
+    id: "cs_maternal",
+    heading: "Risks to you",
+    type: "list",
+    source: "NICE NG192 Appendix A (2021)",
+    risks: [
+      {
+        id: "hysterectomy",
+        name: "Peripartum hysterectomy",
+        freq: "UNCOMMON",
+        rate: "About 200 per 100,000 (1 in 500)",
+        plain: "Very rarely, heavy bleeding cannot be controlled and the uterus needs to be removed. This would mean you could not have further pregnancies.",
+      },
+      {
+        id: "maternal_death",
+        name: "Maternal death",
+        freq: "RARE",
+        rate: "About 25 per 100,000 (1 in 4,000)",
+        plain: "Death from caesarean section is very rare. The theatre team is trained to manage serious complications.",
+      },
+      {
+        id: "urinary_incontinence",
+        name: "Urinary incontinence >1 year after birth",
+        freq: "VERY_COMMON",
+        rate: "About 19,600 per 100,000 (1 in 5)",
+        plain: "Around 1 in 5 women experience urinary incontinence more than a year after a caesarean. This is lower than after unassisted vaginal birth.",
+      },
+      {
+        id: "hospital_stay",
+        name: "Longer hospital stay",
+        freq: null,
+        rate: "About 4 days on average",
+        plain: "A caesarean usually means staying in hospital around 4 days — approximately 1 to 2 days longer than after a vaginal birth.",
+      },
+    ],
+  },
+  {
+    id: "cs_baby",
+    heading: "Risks to your baby",
+    type: "list",
+    source: "NICE NG192 Appendix A (2021)",
+    risks: [
+      {
+        id: "neonatal_mortality",
+        name: "Neonatal mortality",
+        freq: "RARE",
+        rate: "About 58 per 100,000 (1 in 1,700)",
+        plain: "Neonatal death following caesarean is rare. These figures reflect the overall population including cases where caesarean was performed because of serious complications.",
+      },
+      {
+        id: "asthma",
+        name: "Childhood asthma",
+        freq: "COMMON",
+        rate: "About 1,809 per 100,000 (1 in 55)",
+        plain: "There is a small increase in the risk of childhood asthma in babies born by caesarean. The reason is not fully understood.",
+      },
+    ],
+  },
+  {
+    id: "cs_future",
+    heading: "Future pregnancies",
+    type: "list",
+    source: "NICE NG192 Appendix A (2021)",
+    risks: [
+      {
+        id: "uterine_rupture_future",
+        name: "Uterine rupture in future pregnancy",
+        freq: "UNCOMMON",
+        rate: "About 200 per 100,000 (1 in 500)",
+        plain: "The scar on your womb can occasionally open during a future labour. Future pregnancies will be monitored more closely as a result.",
+      },
+      {
+        id: "placenta_accreta_future",
+        name: "Placenta accreta in future pregnancy",
+        freq: "RARE",
+        rate: "About 100 per 100,000 (1 in 1,000)",
+        plain: "The placenta can grow into the caesarean scar in a future pregnancy, which can cause severe bleeding and may require hysterectomy.",
+      },
+    ],
+  },
+];
 
 // Comparison sections — shown only when user taps "Compare with vaginal birth"
 export const CS_COMPARISON_SECTIONS = [
