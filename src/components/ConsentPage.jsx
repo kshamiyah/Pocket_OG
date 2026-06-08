@@ -2,19 +2,80 @@ import { useState } from "react";
 import {
   CONSENT_PROCEDURES,
   FREQ,
-  CS_CONTEXT_OPTIONS,
-  CS_PATIENT_FACTORS,
-  CS_RISK_SECTIONS,
-  CS_COMPARISON_SECTIONS,
-  CS_PP_RISK_SECTIONS,
-  CS_FAQ,
-  CS_PAGES,
-  OVD_CONTEXT_OPTIONS,
-  OVD_PATIENT_FACTORS,
-  OVD_RISK_SECTIONS,
-  OVD_FAQ,
-  OVD_PAGES,
+  CS_CONTEXT_OPTIONS, CS_PATIENT_FACTORS, CS_RISK_SECTIONS,
+  CS_COMPARISON_SECTIONS, CS_PP_RISK_SECTIONS, CS_FAQ, CS_PAGES,
+  OVD_CONTEXT_OPTIONS, OVD_PATIENT_FACTORS, OVD_RISK_SECTIONS, OVD_FAQ, OVD_PAGES,
+  SURG_MISC_PATIENT_FACTORS, SURG_MISC_RISK_SECTIONS, SURG_MISC_FAQ, SURG_MISC_PAGES,
+  MED_MISC_PATIENT_FACTORS, MED_MISC_RISK_SECTIONS, MED_MISC_FAQ, MED_MISC_PAGES,
+  LAPAROSCOPY_PATIENT_FACTORS, LAPAROSCOPY_RISK_SECTIONS, LAPAROSCOPY_FAQ, LAPAROSCOPY_PAGES,
+  HYSTEROSCOPY_CONTEXT_OPTIONS, HYSTEROSCOPY_PATIENT_FACTORS,
+  HYSTEROSCOPY_RISK_SECTIONS, HYSTEROSCOPY_FAQ, HYSTEROSCOPY_PAGES,
 } from "../data/consent";
+
+// Central config lookup — avoids long chains of isCS/isOVD checks
+const PROCEDURE_CONFIG = {
+  CS: {
+    contextOptions: CS_CONTEXT_OPTIONS,
+    patientFactors: CS_PATIENT_FACTORS,
+    getRiskSections: (_ctx, factors) =>
+      factors.has("placenta_praevia") ? CS_PP_RISK_SECTIONS : CS_RISK_SECTIONS,
+    comparisonSections: CS_COMPARISON_SECTIONS,
+    getPages: (ctx) => CS_PAGES[ctx],
+    faq: CS_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "NICE NG192 · RCOG CA14",
+  },
+  OVD: {
+    contextOptions: OVD_CONTEXT_OPTIONS,
+    patientFactors: OVD_PATIENT_FACTORS,
+    getRiskSections: () => OVD_RISK_SECTIONS,
+    comparisonSections: null,
+    getPages: (ctx) => OVD_PAGES[ctx],
+    faq: OVD_FAQ,
+    getInstrument: (ctx) => ctx,
+    sourceLabel: "RCOG GTG26",
+  },
+  SURG_MISC: {
+    contextOptions: null,
+    patientFactors: SURG_MISC_PATIENT_FACTORS,
+    getRiskSections: () => SURG_MISC_RISK_SECTIONS,
+    comparisonSections: null,
+    getPages: () => SURG_MISC_PAGES,
+    faq: SURG_MISC_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "RCOG CA10",
+  },
+  MED_MISC: {
+    contextOptions: null,
+    patientFactors: MED_MISC_PATIENT_FACTORS,
+    getRiskSections: () => MED_MISC_RISK_SECTIONS,
+    comparisonSections: null,
+    getPages: () => MED_MISC_PAGES,
+    faq: MED_MISC_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "RCOG GTG25",
+  },
+  LAPAROSCOPY: {
+    contextOptions: null,
+    patientFactors: LAPAROSCOPY_PATIENT_FACTORS,
+    getRiskSections: () => LAPAROSCOPY_RISK_SECTIONS,
+    comparisonSections: null,
+    getPages: () => LAPAROSCOPY_PAGES,
+    faq: LAPAROSCOPY_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "RCOG CA2",
+  },
+  HYSTEROSCOPY: {
+    contextOptions: HYSTEROSCOPY_CONTEXT_OPTIONS,
+    patientFactors: HYSTEROSCOPY_PATIENT_FACTORS,
+    getRiskSections: () => HYSTEROSCOPY_RISK_SECTIONS,
+    comparisonSections: null,
+    getPages: (ctx) => HYSTEROSCOPY_PAGES[ctx],
+    faq: HYSTEROSCOPY_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "RCOG CA1 · GTG59",
+  },
+};
 
 // ─── shared small components ──────────────────────────────────────────────────
 
@@ -83,7 +144,7 @@ function ProcedureList({ onSelect }) {
 
 function ContextPicker({ procedureId, onSelect, onBack }) {
   const proc = CONSENT_PROCEDURES.find(p => p.id === procedureId);
-  const options = procedureId === "CS" ? CS_CONTEXT_OPTIONS : OVD_CONTEXT_OPTIONS;
+  const options = PROCEDURE_CONFIG[procedureId]?.contextOptions ?? [];
 
   return (
     <div className="min-h-screen flex flex-col pb-24">
@@ -132,10 +193,10 @@ function ContextPicker({ procedureId, onSelect, onBack }) {
 
 function PatientFactors({ procedureId, context, factors, onToggle, onContinue, onBack }) {
   const proc = CONSENT_PROCEDURES.find(p => p.id === procedureId);
-  const allFactors = procedureId === "CS" ? CS_PATIENT_FACTORS : OVD_PATIENT_FACTORS;
-  const contextLabel = procedureId === "CS"
-    ? (context === "elective" ? "Elective" : "Emergency")
-    : (context === "ventouse" ? "Ventouse" : "Forceps");
+  const cfg = PROCEDURE_CONFIG[procedureId] ?? {};
+  const allFactors = cfg.patientFactors ?? [];
+  const contextOpt = cfg.contextOptions?.find(o => o.id === context);
+  const contextLabel = contextOpt?.label ?? null;
 
   return (
     <div className="min-h-screen pb-24">
@@ -149,7 +210,7 @@ function PatientFactors({ procedureId, context, factors, onToggle, onContinue, o
               </svg>
             </button>
             <div>
-              <p className="text-xs text-gray-400">{proc?.title} · <span className="font-semibold text-gray-600">{contextLabel}</span></p>
+              <p className="text-xs text-gray-400">{proc?.title}{contextLabel ? <> · <span className="font-semibold text-gray-600">{contextLabel}</span></> : null}</p>
             </div>
           </div>
           <h3 className="text-2xl font-bold text-gray-900 mb-1">Any of the following apply?</h3>
@@ -682,23 +743,19 @@ function RisksPage({ sections, comparisonSections, instrument, activeFactors }) 
 function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
   const [activeTab, setActiveTab] = useState("what");
 
-  const proc    = CONSENT_PROCEDURES.find(p => p.id === procedureId);
-  const isCS    = procedureId === "CS";
-  const isOVD   = procedureId === "OVD";
-
-  const contextLabel = isCS
-    ? (context === "elective" ? "Elective" : "Emergency")
-    : (context === "ventouse" ? "Ventouse" : "Forceps");
-
-  const faqs      = isCS  ? CS_FAQ          : OVD_FAQ;
-  const pages     = isCS  ? CS_PAGES[context] : OVD_PAGES[context];
-  const source    = isCS  ? "NICE NG192 · RCOG Consent Advice No. 12"
-                           : "RCOG Consent Advice No. 11 (2010)";
-  const instrument    = isOVD ? context : null;
+  const proc         = CONSENT_PROCEDURES.find(p => p.id === procedureId);
+  const cfg          = PROCEDURE_CONFIG[procedureId] ?? {};
   const activeFactors = factors;
-  const hasPP             = isCS && activeFactors.has("placenta_praevia");
-  const riskSections      = isCS ? (hasPP ? CS_PP_RISK_SECTIONS : CS_RISK_SECTIONS) : OVD_RISK_SECTIONS;
-  const comparisonSections = isCS ? CS_COMPARISON_SECTIONS : null;
+
+  const contextOpt   = cfg.contextOptions?.find(o => o.id === context);
+  const contextLabel = contextOpt?.label ?? null;
+
+  const faqs             = cfg.faq ?? [];
+  const pages            = cfg.getPages?.(context) ?? {};
+  const source           = cfg.sourceLabel ?? "";
+  const instrument       = cfg.getInstrument?.(context) ?? null;
+  const riskSections     = cfg.getRiskSections?.(context, activeFactors) ?? [];
+  const comparisonSections = cfg.comparisonSections ?? null;
 
   const currentIdx = CONSENT_TABS.findIndex(t => t.id === activeTab);
   const canPrev = currentIdx > 0;
@@ -733,7 +790,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
             {/* Active factors chips */}
             {activeFactors.size > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-2">
-                {[...(isCS ? CS_PATIENT_FACTORS : OVD_PATIENT_FACTORS)]
+                {[...(cfg.patientFactors ?? [])]
                   .filter(f => activeFactors.has(f.id))
                   .map(f => (
                     <span key={f.id} className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200">
@@ -766,7 +823,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
         <div className="px-5 pt-6">
           {activeTab === "what"    && <WhatPage    pages={pages} />}
           {activeTab === "why"     && <WhyPage     pages={pages} />}
-          {activeTab === "risks"   && <RisksPage   sections={riskSections} comparisonSections={comparisonSections} instrument={instrument} activeFactors={activeFactors} />}
+          {activeTab === "risks"   && <RisksPage   sections={riskSections} comparisonSections={comparisonSections} instrument={instrument ?? context} activeFactors={activeFactors} />}
           {activeTab === "decline" && <DeclinePage pages={pages} />}
           {activeTab === "faq"     && <FAQSection  faqs={faqs} />}
         </div>
@@ -835,8 +892,13 @@ export default function ConsentPage() {
   const [context, setContext]     = useState(null);
   const [factors, setFactors]     = useState(new Set());
 
-  const selectProcedure = id => { setProcId(id); setStep(1); };
-  const selectContext   = ctx => { setContext(ctx); setStep(2); };
+  const selectProcedure = id => {
+    setProcId(id);
+    // skip context step if procedure has no context options
+    const hasContext = (PROCEDURE_CONFIG[id]?.contextOptions?.length ?? 0) > 0;
+    setStep(hasContext ? 1 : 2);
+  };
+  const selectContext = ctx => { setContext(ctx); setStep(2); };
   const toggleFactor    = id => setFactors(prev => {
     const s = new Set(prev);
     s.has(id) ? s.delete(id) : s.add(id);
@@ -855,7 +917,10 @@ export default function ConsentPage() {
       factors={factors}
       onToggle={toggleFactor}
       onContinue={showSummary}
-      onBack={() => setStep(1)}
+      onBack={() => {
+        const hasContext = (PROCEDURE_CONFIG[procedureId]?.contextOptions?.length ?? 0) > 0;
+        setStep(hasContext ? 1 : 0);
+      }}
     />
   );
   if (step === 3) return (

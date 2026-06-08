@@ -946,6 +946,645 @@ export const OVD_FAQ = [
   },
 ];
 
+// ─── SURGICAL MANAGEMENT OF MISCARRIAGE ──────────────────────────────────────
+// Source: RCOG Consent Advice No. 10 (2018)
+
+export const SURG_MISC_PATIENT_FACTORS = [
+  { id: "prev_cs_surg",    label: "Previous caesarean section" },
+  { id: "repeat_erpc",     label: "Repeat surgical evacuation" },
+  { id: "prev_uterine_sx", label: "Other previous uterine surgery" },
+];
+
+export const SURG_MISC_RISK_SECTIONS = [
+  {
+    id: "surg_misc_maternal",
+    heading: "Risks",
+    type: "list",
+    risks: [
+      {
+        id: "surg_misc_bleeding",
+        name: "Bleeding for up to 2 weeks",
+        freq: "VERY_COMMON",
+        rate: null,
+        source: "RCOG CA10",
+        plain: "Some vaginal bleeding lasting up to 2 weeks is expected after the procedure. This is normal. Contact your unit if bleeding is heavier than a normal period.",
+      },
+      {
+        id: "surg_misc_infection",
+        name: "Pelvic infection",
+        freq: "COMMON",
+        rate: "Up to 40 in 1,000",
+        source: "RCOG CA10",
+        plain: "Infection of the pelvis or uterus can occur. It is usually treated successfully with antibiotics. Signs include fever, pelvic pain, or offensive discharge.",
+      },
+      {
+        id: "surg_misc_adhesions",
+        name: "Intrauterine adhesions (Asherman syndrome)",
+        freq: "COMMON",
+        rate: "Up to 190 in 1,000",
+        source: "RCOG CA10",
+        plain: "Scar tissue can form inside the uterus after the procedure. This can occasionally affect future periods or fertility. The risk is higher with repeat procedures and with sharp curettage (which is no longer used routinely).",
+      },
+      {
+        id: "surg_misc_repeat",
+        name: "Need for repeat surgical procedure",
+        freq: "UNCOMMON",
+        rate: "3 in 1,000",
+        source: "RCOG CA10",
+        plain: "Occasionally, not all tissue is removed at the first procedure and a further operation is needed.",
+      },
+      {
+        id: "surg_misc_transfusion",
+        name: "Blood transfusion",
+        freq: "UNCOMMON",
+        rate: "0–3 in 1,000",
+        source: "RCOG CA10",
+        plain: "Significant bleeding requiring a blood transfusion is uncommon. Risk is higher with abnormal placentation or if haemodynamically unstable at the time of surgery.",
+      },
+      {
+        id: "surg_misc_perforation",
+        name: "Uterine perforation",
+        freq: "UNCOMMON",
+        rate: "Up to 1 in 1,000",
+        source: "RCOG CA10",
+        plain: "The instrument can occasionally make a small hole in the wall of the uterus. Most perforations are small, heal without treatment, and are managed conservatively. Larger perforations may need a laparoscopy to check for internal damage.",
+      },
+      {
+        id: "surg_misc_cervical",
+        name: "Significant cervical laceration",
+        freq: "RARE",
+        rate: "Less than 0.1 in 1,000",
+        source: "RCOG CA10",
+        plain: "A tear to the cervix requiring stitches is rare. The risk is reduced by using cervical preparation (misoprostol) before the procedure.",
+      },
+      {
+        id: "surg_misc_organ",
+        name: "Damage to bowel, bladder or other organs",
+        freq: "RARE",
+        rate: null,
+        source: "RCOG CA10",
+        plain: "If a perforation occurs, nearby structures can rarely be damaged. This would usually be identified and repaired at the time, often requiring a laparoscopy or open surgery.",
+      },
+      {
+        id: "surg_misc_hysterectomy",
+        name: "Hysterectomy",
+        freq: "VERY_RARE",
+        rate: null,
+        source: "RCOG CA10",
+        plain: "Very rarely, uncontrolled bleeding may require removal of the uterus as a life-saving measure.",
+      },
+      {
+        id: "surg_misc_anaes",
+        name: "Serious anaesthetic complications",
+        freq: "VERY_RARE",
+        rate: null,
+        source: "RCOG CA10",
+        plain: "Serious complications from the anaesthetic are very rare. Your anaesthetist will discuss the specific anaesthetic risks with you separately.",
+      },
+      {
+        id: "surg_misc_preterm",
+        name: "Increased risk of preterm birth in future pregnancies",
+        freq: "UNCOMMON",
+        rate: null,
+        conditions: ["repeat_erpc"],
+        source: "RCOG CA10",
+        plain: "Repeated surgical uterine procedures are associated with a small increased risk of preterm birth in future pregnancies.",
+      },
+    ],
+  },
+];
+
+export const SURG_MISC_PAGES = {
+  what: {
+    heading: "Surgical Management of Miscarriage",
+    body: "Surgical management of miscarriage involves a procedure to remove the pregnancy tissue from the uterus. This is performed using vacuum aspiration — either electric (EVA) or manual (MVA) — under general or local anaesthetic. The procedure typically takes 5–15 minutes.\n\nSharp curettage (scraping) is no longer used routinely. You will usually be able to go home the same day.",
+  },
+  why: {
+    heading: "Why is this being recommended?",
+    body: "Surgical management may be recommended when:\n\n• There is heavy or persistent bleeding from retained pregnancy tissue\n• The pregnancy has not passed on its own (missed miscarriage)\n• Expectant or medical management has not been successful\n• There are signs of infection with retained tissue\n• You are haemodynamically unstable\n• It is your preference after being counselled about all three options (expectant, medical, and surgical)",
+  },
+  decline: {
+    heading: "If you decide not to proceed",
+    body: "You have the right to decline surgical management.\n\nAlternatives include:\n\n• Expectant management — waiting for the tissue to pass naturally (successful in around 50–80% of women within 2 weeks)\n• Medical management — misoprostol tablets to stimulate the uterus to empty (successful in around 85 in 100 women)\n\nIf you decline all treatment, retained products carry ongoing risk of bleeding, infection, and rarely coagulopathy. Your team will explain what to watch for and how to access help.",
+  },
+};
+
+export const SURG_MISC_FAQ = [
+  {
+    q: "Do I need a general anaesthetic?",
+    a: "Not necessarily. The procedure can be done under general anaesthetic (fully asleep) or under local anaesthetic while you are awake. Manual vacuum aspiration (MVA) under local anaesthetic is safe and effective for most women with early miscarriage.",
+  },
+  {
+    q: "Will it affect my ability to have a baby in the future?",
+    a: "The procedure is generally safe for future fertility. However, there is a risk of intrauterine scarring (Asherman syndrome) in up to 190 in 1,000 women, which can occasionally affect future periods or fertility. This risk is higher with repeat procedures. (RCOG CA10)",
+  },
+  {
+    q: "How long will I bleed afterwards?",
+    a: "Bleeding for up to 2 weeks is normal. Contact your unit if you are soaking more than one pad per hour for 2 hours, develop a fever, or have severe pain — these may be signs of infection or retained tissue.",
+  },
+  {
+    q: "What are the chances of needing a second procedure?",
+    a: "Around 3 in 1,000 women need a repeat surgical procedure because not all tissue was removed at the first attempt. (RCOG CA10)",
+  },
+  {
+    q: "What is the alternative?",
+    a: "The alternatives are expectant management (waiting) and medical management (misoprostol tablets). Expectant management is successful in around 50–80% of women; medical management in around 85 in 100 women. If these fail, surgery may still be needed.",
+  },
+];
+
+// ─── MEDICAL MANAGEMENT OF MISCARRIAGE ───────────────────────────────────────
+// Source: RCOG Green-top Guideline No. 25 (Management of Early Pregnancy Loss)
+
+export const MED_MISC_PATIENT_FACTORS = [
+  { id: "prev_cs_med",     label: "Previous caesarean section or uterine scar" },
+  { id: "gestation_gt12",  label: "Gestation ≥12 weeks" },
+];
+
+export const MED_MISC_RISK_SECTIONS = [
+  {
+    id: "med_misc_maternal",
+    heading: "Risks and side effects",
+    type: "list",
+    risks: [
+      {
+        id: "med_misc_pain",
+        name: "Uterine cramping / pain",
+        freq: "VERY_COMMON",
+        rate: null,
+        source: "RCOG GTG25",
+        plain: "Cramping more severe than a normal period is expected and occurs in virtually all women. Regular analgesia (ibuprofen and paracetamol) should be taken before the bleeding starts. Stronger pain relief may be prescribed.",
+      },
+      {
+        id: "med_misc_bleeding",
+        name: "Vaginal bleeding",
+        freq: "VERY_COMMON",
+        rate: null,
+        source: "RCOG GTG25",
+        plain: "Heavier bleeding than a normal period, with clots, is expected and indicates the treatment is working. Bleeding typically lasts up to 2 weeks.",
+      },
+      {
+        id: "med_misc_nausea",
+        name: "Nausea",
+        freq: "COMMON",
+        rate: null,
+        source: "RCOG GTG25",
+        plain: "Nausea is common with misoprostol. Anti-sickness medication will be prescribed.",
+      },
+      {
+        id: "med_misc_vomiting",
+        name: "Vomiting",
+        freq: "COMMON",
+        rate: null,
+        source: "RCOG GTG25",
+        plain: "Vomiting can occur after misoprostol, particularly with the oral or sublingual route. Anti-sickness medication will be prescribed.",
+      },
+      {
+        id: "med_misc_diarrhoea",
+        name: "Diarrhoea",
+        freq: "COMMON",
+        rate: null,
+        source: "RCOG GTG25",
+        plain: "Diarrhoea is common, especially with the oral route. It is usually short-lived.",
+      },
+      {
+        id: "med_misc_fever",
+        name: "Fever and chills",
+        freq: "COMMON",
+        rate: null,
+        source: "RCOG GTG25",
+        plain: "A low-grade temperature and shivering are caused by misoprostol itself and are usually short-lived. A persistent high temperature may indicate infection and should be assessed.",
+      },
+      {
+        id: "med_misc_failure",
+        name: "Treatment failure — need for further treatment",
+        freq: "COMMON",
+        rate: "15 in 100",
+        source: "RCOG GTG25",
+        plain: "Around 15 in 100 women will not pass the pregnancy completely with one dose of misoprostol and will need a second dose or a surgical procedure. A follow-up ultrasound is performed 1–2 weeks after treatment.",
+      },
+      {
+        id: "med_misc_infection",
+        name: "Pelvic infection",
+        freq: "COMMON",
+        rate: "Up to 40 in 1,000",
+        source: "RCOG GTG25",
+        plain: "Infection of the pelvis or uterus can occur. Signs include fever, pelvic pain, or offensive discharge. Usually treated successfully with antibiotics.",
+      },
+      {
+        id: "med_misc_transfusion",
+        name: "Blood transfusion",
+        freq: "UNCOMMON",
+        rate: "0–3 in 1,000",
+        source: "RCOG GTG25",
+        plain: "Heavy bleeding requiring a blood transfusion is uncommon. Seek emergency help if you are soaking more than one pad per hour for 2 hours.",
+      },
+      {
+        id: "med_misc_rupture",
+        name: "Uterine rupture",
+        freq: "RARE",
+        rate: null,
+        conditions: ["prev_cs_med", "gestation_gt12"],
+        source: "RCOG GTG25",
+        plain: "In women with a previous uterine scar or at later gestations, there is a rare risk of the uterus rupturing. This risk is very low in the first trimester but increases at later gestations.",
+      },
+    ],
+  },
+];
+
+export const MED_MISC_PAGES = {
+  what: {
+    heading: "Medical Management of Miscarriage",
+    body: "Medical management of miscarriage uses a tablet called misoprostol to help your uterus contract and expel the pregnancy tissue. The standard dose is 800 micrograms given vaginally (inserted in the vagina) — this can be self-administered at home in many units.\n\nBleeding and cramping usually begin within a few hours and the process typically takes 24–48 hours. A follow-up ultrasound scan is arranged 1–2 weeks later to confirm the uterus is empty.",
+  },
+  why: {
+    heading: "Why is this being recommended?",
+    body: "Medical management may be recommended when:\n\n• You have a missed miscarriage (the pregnancy has stopped developing but has not passed)\n• You have an incomplete miscarriage and prefer medication to surgery\n• Expectant management has not been successful\n• You wish to avoid a surgical procedure and general anaesthetic\n\nMisoprostol is successful in approximately 85 in 100 women. If treatment is not complete, a further dose of medication or a surgical procedure may be needed.",
+  },
+  decline: {
+    heading: "If you decide not to proceed",
+    body: "You have the right to decline medical management.\n\nAlternatives include:\n\n• Expectant management — waiting for the tissue to pass naturally (successful in around 50–80% of women within 2 weeks)\n• Surgical management — vacuum aspiration to remove the tissue under local or general anaesthetic (success rate approximately 95–99%)\n\nIf you decline all treatment, retained products carry ongoing risk of bleeding, infection, and rarely coagulopathy. Your team will advise on what to watch for.",
+  },
+};
+
+export const MED_MISC_FAQ = [
+  {
+    q: "How will I know it has worked?",
+    a: "Misoprostol is successful in approximately 85 in 100 women. A follow-up ultrasound scan will be arranged 1–2 weeks after treatment to confirm the uterus is empty. Around 15 in 100 women need further treatment. (RCOG GTG25)",
+  },
+  {
+    q: "Can I be at home when I take it?",
+    a: "Yes, in many units misoprostol can be self-administered at home. You will be given detailed written instructions, emergency contact numbers, and clear guidance on when to go to hospital.",
+  },
+  {
+    q: "How painful will it be?",
+    a: "Most women experience cramping more severe than a normal period. Take your prescribed pain relief (ibuprofen and paracetamol) regularly, starting before the bleeding begins. Stronger pain relief is available if needed.",
+  },
+  {
+    q: "What side effects should I expect?",
+    a: "Nausea, vomiting, diarrhoea, chills, and a low-grade temperature are common and caused by the medication. They are usually short-lived. Anti-sickness medication will be prescribed.",
+  },
+  {
+    q: "What signs should prompt me to go to hospital?",
+    a: "Seek urgent medical help if you: soak more than one pad per hour for 2 hours; develop a fever above 38°C; have severe pain not controlled by your pain relief; or have foul-smelling discharge.",
+  },
+];
+
+// ─── DIAGNOSTIC LAPAROSCOPY ───────────────────────────────────────────────────
+// Source: RCOG Consent Advice No. 2 (2017) · GIRFT/RCOG Best Practice Guide (2026)
+
+export const LAPAROSCOPY_PATIENT_FACTORS = [
+  { id: "prev_abdo_sx",  label: "Previous abdominal or pelvic surgery" },
+  { id: "high_bmi_lap",  label: "High BMI" },
+  { id: "prev_lap",      label: "Previous laparoscopy" },
+];
+
+export const LAPAROSCOPY_RISK_SECTIONS = [
+  {
+    id: "lap_frequent",
+    heading: "Frequent risks",
+    type: "list",
+    risks: [
+      {
+        id: "lap_shoulder",
+        name: "Shoulder tip pain",
+        freq: "VERY_COMMON",
+        rate: null,
+        source: "RCOG CA2",
+        plain: "Pain at the tip of the shoulder after the procedure is very common and is caused by residual carbon dioxide gas used to inflate the abdomen irritating the diaphragm. It resolves on its own, usually within 24–48 hours.",
+      },
+      {
+        id: "lap_bruising",
+        name: "Bruising at port sites",
+        freq: "COMMON",
+        rate: null,
+        source: "RCOG CA2",
+        plain: "Bruising around the small incision sites is common and settles without treatment.",
+      },
+      {
+        id: "lap_wound_infection",
+        name: "Wound infection",
+        freq: "COMMON",
+        rate: null,
+        source: "RCOG CA2",
+        plain: "Infection at the port site incisions can occur. Usually minor and treated with a short course of antibiotics.",
+      },
+      {
+        id: "lap_wound_gaping",
+        name: "Wound gaping",
+        freq: "COMMON",
+        rate: null,
+        source: "RCOG CA2",
+        plain: "Small port site wounds can occasionally open or fail to heal cleanly. Usually managed with wound care.",
+      },
+    ],
+  },
+  {
+    id: "lap_serious",
+    heading: "Serious risks",
+    type: "list",
+    risks: [
+      {
+        id: "lap_serious_overall",
+        name: "Serious complications (overall)",
+        freq: "UNCOMMON",
+        rate: "2 in 1,000",
+        source: "RCOG CA2",
+        plain: "Serious complications requiring further treatment occur in approximately 2 in every 1,000 women. These include the specific risks listed below.",
+      },
+      {
+        id: "lap_organ_damage",
+        name: "Damage to bowel, bladder, ureter or blood vessels",
+        freq: "UNCOMMON",
+        rate: null,
+        source: "RCOG CA2",
+        plain: "Injury to internal organs or major blood vessels can occur when the instruments are inserted or used. If this happens it is repaired immediately, usually by laparoscopy or open surgery. Importantly, up to 15% of bowel injuries may not be recognised at the time and may present later.",
+      },
+      {
+        id: "lap_hernia",
+        name: "Port-site hernia",
+        freq: "UNCOMMON",
+        rate: "Less than 1 in 100",
+        source: "RCOG CA2",
+        plain: "A hernia can develop at one of the port site incisions, requiring surgical repair.",
+      },
+      {
+        id: "lap_failed_entry",
+        name: "Failure to complete the procedure",
+        freq: "UNCOMMON",
+        rate: null,
+        source: "RCOG CA2",
+        plain: "Occasionally it is not possible to gain entry to the abdominal cavity or complete the intended procedure safely. This may be due to adhesions from previous surgery.",
+      },
+      {
+        id: "lap_vte",
+        name: "Thromboembolic disease (DVT / PE)",
+        freq: "RARE",
+        rate: null,
+        source: "RCOG CA2",
+        plain: "Blood clots in the legs or lungs are rare but possible after any surgical procedure. Preventative measures are used routinely.",
+      },
+      {
+        id: "lap_death",
+        name: "Death",
+        freq: "VERY_RARE",
+        rate: "3–8 in 100,000",
+        source: "RCOG CA2",
+        plain: "Death as a direct result of laparoscopy is very rare. It is most commonly associated with unrecognised injury to a major blood vessel or bowel.",
+      },
+    ],
+  },
+];
+
+export const LAPAROSCOPY_PAGES = {
+  what: {
+    heading: "Diagnostic Laparoscopy",
+    body: "Diagnostic laparoscopy is a minimally invasive surgical procedure performed under general anaesthetic. A thin telescope (laparoscope) is inserted through a small incision, usually at the umbilicus, to directly inspect the pelvic and abdominal organs.\n\nCarbon dioxide gas is used to inflate the abdomen and create a working space. Additional small incisions (ports) may be made to allow instruments to be passed to move structures during the examination.\n\nThe procedure usually takes 15–30 minutes. Most women go home the same day.",
+  },
+  why: {
+    heading: "Why is this being recommended?",
+    body: "A diagnostic laparoscopy may be recommended to investigate:\n\n• Pelvic pain (acute or chronic)\n• Suspected endometriosis\n• Suspected pelvic inflammatory disease\n• Infertility — including tubal patency testing (dye test)\n• Adnexal (ovarian) masses\n• Suspected ectopic pregnancy\n\nLaparoscopy allows direct visualisation of the pelvis and is more accurate than imaging alone for conditions such as endometriosis and adhesions.",
+  },
+  decline: {
+    heading: "If you decide not to proceed",
+    body: "You have the right to decline this procedure.\n\nAlternatives that may provide some information include:\n\n• Transvaginal ultrasound\n• MRI of the pelvis\n• Empirical medical treatment (e.g. for suspected endometriosis)\n• HSG (dye test via X-ray) for tubal assessment\n\nHowever, these cannot replace the direct visualisation that laparoscopy provides. Some conditions — particularly peritoneal endometriosis and pelvic adhesions — can only be reliably diagnosed laparoscopically.",
+  },
+};
+
+export const LAPAROSCOPY_FAQ = [
+  {
+    q: "Will I be awake?",
+    a: "No. Diagnostic laparoscopy is always performed under general anaesthetic. You will be completely asleep throughout.",
+  },
+  {
+    q: "How long will recovery take?",
+    a: "Most women feel well enough to return to light activities within 1–2 days and to normal activities within 1–2 weeks. You may have abdominal discomfort and shoulder tip pain for 24–48 hours after the procedure.",
+  },
+  {
+    q: "Will there be visible scars?",
+    a: "The incisions are small — usually 5–10 mm. They are typically at the umbilicus and occasionally in the lower abdomen. Scars are usually minimal and fade over time.",
+  },
+  {
+    q: "What if something is found and needs treating?",
+    a: "If a treatable condition is found (such as an endometriotic cyst), the surgeon may be able to treat it during the same operation if you have consented to this in advance. Unexpected findings will be discussed with you afterwards and a treatment plan made.",
+  },
+  {
+    q: "What is the risk of serious injury?",
+    a: "Serious complications occur in approximately 2 in every 1,000 women. These include rare damage to the bowel, bladder, or blood vessels. Death as a direct result is very rare — approximately 3–8 in every 100,000 women. (RCOG CA2)",
+  },
+];
+
+// ─── HYSTEROSCOPY ─────────────────────────────────────────────────────────────
+// Source: RCOG Consent Advice No. 1 (2009/2011) · RCOG GTG59 · BSGE/ESGE (2016)
+// GIRFT/RCOG Best Practice Guide (2026)
+
+export const HYSTEROSCOPY_CONTEXT_OPTIONS = [
+  { id: "diagnostic", label: "Diagnostic",  description: "Visual inspection only",       color: "text-violet-600", dot: "bg-violet-500" },
+  { id: "operative",  label: "Operative",   description: "With treatment (e.g. polyp removal)", color: "text-purple-600", dot: "bg-purple-500" },
+];
+
+export const HYSTEROSCOPY_PATIENT_FACTORS = [
+  { id: "nulliparous",   label: "Nulliparous (never given birth)" },
+  { id: "postmenopausal", label: "Postmenopausal" },
+  { id: "prev_cx_sx",    label: "Previous cervical surgery or stenosis" },
+];
+
+export const HYSTEROSCOPY_RISK_SECTIONS = [
+  {
+    id: "hyst_frequent",
+    heading: "Frequent risks",
+    type: "list",
+    risks: [
+      {
+        id: "hyst_cramping",
+        name: "Uterine cramping / pelvic pain",
+        freq: "VERY_COMMON",
+        rate: null,
+        source: "RCOG CA1",
+        plain: "Cramping similar to period pain is very common during and after the procedure. It is usually brief and managed with over-the-counter analgesia.",
+      },
+      {
+        id: "hyst_spotting",
+        name: "Vaginal spotting or light bleeding",
+        freq: "COMMON",
+        rate: null,
+        source: "RCOG CA1",
+        plain: "Light vaginal bleeding or spotting after the procedure is common and usually settles within a few days.",
+      },
+      {
+        id: "hyst_vasovagal",
+        name: "Vasovagal response (outpatient)",
+        freq: "COMMON",
+        rate: "Up to 1–2 in 100",
+        source: "RCOG CA1",
+        plain: "Feeling faint, dizzy, or nauseous during or after the procedure is common, particularly in outpatient settings. It usually resolves quickly with rest.",
+      },
+    ],
+  },
+  {
+    id: "hyst_serious",
+    heading: "Serious risks",
+    type: "list",
+    risks: [
+      {
+        id: "hyst_serious_overall",
+        name: "Serious complications (overall)",
+        freq: "UNCOMMON",
+        rate: "2 in 1,000",
+        source: "RCOG CA1",
+        plain: "Serious complications requiring further treatment occur in approximately 2 in every 1,000 diagnostic hysteroscopies.",
+      },
+      {
+        id: "hyst_perforation",
+        name: "Uterine perforation",
+        freq: "UNCOMMON",
+        rate: "Less than 1 in 200",
+        source: "RCOG CA1",
+        plain: "A small hole can occasionally be made in the wall of the uterus. Most small perforations heal without treatment. If a larger perforation occurs, a laparoscopy or open surgery may be needed to check for and repair any internal damage. Risk is higher with operative procedures.",
+      },
+      {
+        id: "hyst_infection",
+        name: "Pelvic infection",
+        freq: "COMMON",
+        rate: "Less than 3 in 100",
+        source: "RCOG CA1",
+        plain: "Infection of the uterus or pelvis can occur. Usually treated successfully with antibiotics.",
+      },
+      {
+        id: "hyst_cervical",
+        name: "Cervical trauma / false passage",
+        freq: "UNCOMMON",
+        rate: null,
+        source: "RCOG CA1",
+        plain: "Difficulty or injury during passage of the telescope through the cervix can occur, particularly in nulliparous or postmenopausal women with a narrow cervix.",
+      },
+      {
+        id: "hyst_haematometra",
+        name: "Haematometra",
+        freq: "RARE",
+        rate: null,
+        source: "RCOG CA1",
+        plain: "Rarely, blood can accumulate inside the uterine cavity. This may require drainage.",
+      },
+      {
+        id: "hyst_fluid_overload",
+        name: "Clinically significant fluid overload",
+        freq: "RARE",
+        rate: "0.1–0.2 in 100",
+        source: "BSGE/ESGE",
+        instrumentOnly: "operative",
+        plain: "During operative hysteroscopy, fluid used to distend the uterine cavity can be absorbed into the bloodstream. Significant absorption occurs in approximately 1 in 100 operative procedures and can, in rare cases, cause serious changes in blood sodium levels. Fluid balance is carefully monitored throughout.",
+      },
+      {
+        id: "hyst_haemorrhage",
+        name: "Excessive bleeding / haemorrhage",
+        freq: "UNCOMMON",
+        rate: "3 in 100",
+        source: "RCOG GTG59",
+        instrumentOnly: "operative",
+        plain: "Significant bleeding can occur during operative hysteroscopy, particularly with fibroid resection. It may require further treatment.",
+      },
+      {
+        id: "hyst_incomplete",
+        name: "Incomplete treatment — repeat procedure needed",
+        freq: "COMMON",
+        rate: "Up to 15–20 in 100",
+        source: "RCOG GTG59",
+        instrumentOnly: "operative",
+        plain: "For large fibroids in particular, full resection may not be possible in one procedure and a further operation may be required.",
+      },
+      {
+        id: "hyst_hysterectomy",
+        name: "Emergency hysterectomy",
+        freq: "UNCOMMON",
+        rate: "2 in 100",
+        source: "RCOG GTG59",
+        instrumentOnly: "operative",
+        plain: "Very rarely, uncontrolled bleeding or perforation requires emergency removal of the uterus.",
+      },
+      {
+        id: "hyst_air_embolism",
+        name: "Air embolism",
+        freq: "VERY_RARE",
+        rate: null,
+        source: "RCOG GTG59",
+        plain: "Air entering the bloodstream is a very rare but serious complication. Fatalities have been reported.",
+      },
+      {
+        id: "hyst_electrosurgical",
+        name: "Electrosurgical injury",
+        freq: "VERY_RARE",
+        rate: null,
+        source: "RCOG GTG59",
+        instrumentOnly: "operative",
+        plain: "Burns or injuries from the electrical instruments used during operative procedures are very rare.",
+      },
+      {
+        id: "hyst_death",
+        name: "Death",
+        freq: "RARE",
+        rate: "Approximately 0.1 in 100",
+        source: "RCOG GTG59",
+        instrumentOnly: "operative",
+        plain: "Death related to operative hysteroscopy is rare and most commonly associated with sepsis or severe fluid overload.",
+      },
+    ],
+  },
+];
+
+export const HYSTEROSCOPY_PAGES = {
+  diagnostic: {
+    what: {
+      heading: "Diagnostic Hysteroscopy",
+      body: "Hysteroscopy is a procedure in which a thin telescope (hysteroscope) is passed through the cervix into the uterine cavity to allow direct visual inspection of the lining of the womb (endometrium).\n\nIt can be performed under general anaesthetic as a day-case procedure, or as an outpatient procedure without anaesthetic. A fluid medium is used to distend the cavity and provide a clear view.\n\nThe procedure itself usually takes 5–10 minutes. You can usually go home the same day.",
+    },
+    why: {
+      heading: "Why is this being recommended?",
+      body: "A diagnostic hysteroscopy may be recommended to investigate:\n\n• Abnormal uterine bleeding (heavy, irregular, or postmenopausal)\n• Suspected intrauterine pathology (polyps, fibroids, adhesions)\n• Recurrent miscarriage or infertility\n• Abnormal endometrial thickness seen on ultrasound\n• Assessment before IVF\n\nHysteroscopy allows direct visualisation of the uterine cavity and is more accurate than ultrasound alone for identifying intrauterine conditions.",
+    },
+    decline: {
+      heading: "If you decide not to proceed",
+      body: "You have the right to decline this procedure.\n\nAlternatives include:\n\n• Transvaginal ultrasound — useful first-line test but may miss small or flat intrauterine lesions\n• Saline infusion sonography (SIS) — can identify polyps and fibroids\n• Endometrial biopsy (Pipelle) — samples the lining but has a miss rate of up to 30% for focal lesions\n\nIf you decline, intrauterine pathology may go undiagnosed and treatment cannot be tailored to a confirmed diagnosis.",
+    },
+  },
+  operative: {
+    what: {
+      heading: "Operative Hysteroscopy",
+      body: "Operative hysteroscopy is a procedure in which a thin telescope (hysteroscope) is passed through the cervix into the uterine cavity to visualise and treat intrauterine conditions.\n\nInstruments are passed alongside or through the hysteroscope to remove polyps, fibroids, or adhesions, or to perform other treatments. It is usually performed under general anaesthetic as a day-case.\n\nThe procedure typically takes 20–45 minutes depending on what is being treated.",
+    },
+    why: {
+      heading: "Why is this being recommended?",
+      body: "Operative hysteroscopy may be recommended to treat:\n\n• Endometrial polyps\n• Submucous fibroids causing symptoms or affecting fertility\n• Intrauterine adhesions (Asherman syndrome)\n• Removal of a lost or displaced intrauterine device\n\nOperative hysteroscopy is a minimally invasive approach to treating intrauterine conditions that avoids the need for open surgery.",
+    },
+    decline: {
+      heading: "If you decide not to proceed",
+      body: "You have the right to decline this procedure.\n\nAlternatives depend on your condition:\n\n• Medical management (e.g. hormonal treatment for heavy bleeding)\n• Endometrial ablation (for bleeding, if fertility is not required)\n• Observation — for small polyps that may resolve spontaneously\n• Open or laparoscopic surgery for larger fibroids not accessible hysteroscopically\n\nUntreated intrauterine pathology may continue to cause symptoms and, in some cases, may affect fertility.",
+    },
+  },
+};
+
+export const HYSTEROSCOPY_FAQ = [
+  {
+    q: "Will it be painful?",
+    a: "Under general anaesthetic there is no pain during the procedure. As an outpatient without anaesthetic, most women experience period-like cramping during and briefly after the procedure. Pain is usually short-lived and manageable. You always have the option to stop.",
+  },
+  {
+    q: "Can I go home the same day?",
+    a: "Yes, in most cases — both under general anaesthetic (day-case) and as an outpatient. Arrange for someone to take you home, especially if a general anaesthetic is used.",
+  },
+  {
+    q: "What if a polyp or fibroid is found?",
+    a: "If a small polyp is found during a diagnostic hysteroscopy, the surgeon may be able to remove it at the same time if you have consented to this. Larger lesions typically require a separate planned operative hysteroscopy.",
+  },
+  {
+    q: "Is there a risk of the womb being perforated?",
+    a: "Yes, but it is uncommon — less than 1 in 200 for a diagnostic procedure and slightly higher for operative procedures. Most small perforations heal without treatment. (RCOG CA1)",
+  },
+  {
+    q: "What is the fluid risk during operative hysteroscopy?",
+    a: "During operative procedures, fluid used to distend the cavity can occasionally be absorbed into the bloodstream. Clinically significant fluid overload occurs in approximately 0.1–0.2 in 100 operative cases and is carefully monitored throughout. (BSGE/ESGE)",
+  },
+];
+
 // ─── PROCEDURE LIST ───────────────────────────────────────────────────────────
 
 export const CONSENT_PROCEDURES = [
@@ -953,14 +1592,42 @@ export const CONSENT_PROCEDURES = [
     id: "CS",
     title: "Caesarean Section",
     subtypes: "Elective · Emergency",
-    source: "NICE NG192 · RCOG CA No. 12",
+    source: "NICE NG192 · RCOG CA14",
     color: { accent: "bg-teal-500", text: "text-teal-700" },
   },
   {
     id: "OVD",
     title: "Instrumental Delivery",
     subtypes: "Forceps · Ventouse",
-    source: "RCOG Consent Advice No. 11",
+    source: "RCOG GTG26",
     color: { accent: "bg-blue-500", text: "text-blue-700" },
+  },
+  {
+    id: "SURG_MISC",
+    title: "Surgical Miscarriage",
+    subtypes: "EVA · MVA",
+    source: "RCOG CA10",
+    color: { accent: "bg-rose-500", text: "text-rose-700" },
+  },
+  {
+    id: "MED_MISC",
+    title: "Medical Miscarriage",
+    subtypes: "Misoprostol",
+    source: "RCOG GTG25",
+    color: { accent: "bg-pink-500", text: "text-pink-700" },
+  },
+  {
+    id: "LAPAROSCOPY",
+    title: "Diagnostic Laparoscopy",
+    subtypes: "General anaesthetic",
+    source: "RCOG CA2",
+    color: { accent: "bg-amber-500", text: "text-amber-700" },
+  },
+  {
+    id: "HYSTEROSCOPY",
+    title: "Hysteroscopy",
+    subtypes: "Diagnostic · Operative",
+    source: "RCOG CA1 · GTG59",
+    color: { accent: "bg-violet-500", text: "text-violet-700" },
   },
 ];
