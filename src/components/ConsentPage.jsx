@@ -462,7 +462,17 @@ function DeclinePage({ pages }) {
   );
 }
 
-// ─── Risk renderers — Apple-style, no cards ───────────────────────────────────
+// ─── Risk renderers — Direction 1 layout + Direction 3 grouping ──────────────
+
+const FREQ_ORDER = ["VERY_COMMON", "COMMON", "UNCOMMON", "RARE", "VERY_RARE"];
+
+const FREQ_DOT = {
+  VERY_COMMON: "bg-red-400",
+  COMMON:      "bg-orange-400",
+  UNCOMMON:    "bg-yellow-400",
+  RARE:        "bg-gray-300",
+  VERY_RARE:   "bg-gray-200",
+};
 
 const FREQ_RATE_COLOR = {
   VERY_COMMON: "text-red-500",
@@ -472,31 +482,54 @@ const FREQ_RATE_COLOR = {
   VERY_RARE:   "text-gray-300",
 };
 
-function ListRiskRow({ risk, instrument, activeFactors }) {
+function flattenRisks(sections, instrument, activeFactors) {
+  const risks = [];
+  for (const section of sections) {
+    if (section.type !== "list") continue;
+    for (const r of section.risks) {
+      if (r.instrumentOnly && instrument !== r.instrumentOnly) continue;
+      if (r.conditions?.length > 0 && !r.conditions.some(c => activeFactors.has(c))) continue;
+      const freqKey = r.byInstrument ? r.byInstrument[instrument]?.freq : r.freq;
+      const rate    = r.byInstrument ? r.byInstrument[instrument]?.rate : r.rate;
+      risks.push({ ...r, _freqKey: freqKey, _rate: rate });
+    }
+  }
+  return risks;
+}
+
+function groupByFreq(risks) {
+  const groups = {};
+  for (const r of risks) {
+    const key = r._freqKey ?? "__none";
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(r);
+  }
+  return groups;
+}
+
+function FreqRiskRow({ risk }) {
   const [expanded, setExpanded] = useState(false);
-
-  if (risk.instrumentOnly && instrument !== risk.instrumentOnly) return null;
-  if (risk.conditions?.length > 0 && !risk.conditions.some(c => activeFactors.has(c))) return null;
-
-  const freqKey  = risk.byInstrument ? risk.byInstrument[instrument]?.freq : risk.freq;
-  const rate     = risk.byInstrument ? risk.byInstrument[instrument]?.rate : risk.rate;
-  const rateColor = FREQ_RATE_COLOR[freqKey] ?? "text-gray-400";
-  const freqLabel = FREQ[freqKey]?.label;
+  const dot   = FREQ_DOT[risk._freqKey]   ?? "bg-gray-200";
+  const color = FREQ_RATE_COLOR[risk._freqKey] ?? "text-gray-300";
 
   return (
-    <div className="py-4 border-b border-gray-100 last:border-0">
-      <button onClick={() => setExpanded(e => !e)} className="w-full text-left">
-        <p className="text-[15px] font-semibold text-gray-900 leading-snug tracking-[-0.01em]">{risk.name}</p>
-        {risk.note && <p className="text-xs text-orange-500 font-medium mt-0.5">{risk.note}</p>}
-        <div className="flex items-baseline gap-2 mt-1.5">
-          {rate     && <span className={`text-[22px] font-bold leading-none tracking-tight ${rateColor}`}>{rate}</span>}
-          {freqLabel && <span className="text-xs text-gray-400 font-medium">{freqLabel}</span>}
-          {!rate && freqLabel && <span className={`text-base font-semibold ${rateColor}`}>{freqLabel}</span>}
+    <div className={`border-b border-gray-100 last:border-0 ${expanded ? "bg-gray-50/40" : ""}`}>
+      <button onClick={() => setExpanded(e => !e)} className="w-full flex items-center gap-3 py-3.5 text-left">
+        <span className={`w-2 h-2 rounded-full shrink-0 ${dot}`} />
+        <p className="flex-1 text-[14px] text-gray-900 font-medium leading-snug">{risk.name}</p>
+        {risk.note && <p className="text-[10px] text-orange-500 font-semibold shrink-0">{risk.note}</p>}
+        <div className="text-right shrink-0 ml-2">
+          {risk._rate
+            ? <p className={`text-[13px] font-bold tabular-nums leading-none ${color}`}>{risk._rate}</p>
+            : risk._freqKey
+              ? <p className={`text-[12px] font-semibold ${color}`}>{FREQ[risk._freqKey]?.label}</p>
+              : null
+          }
         </div>
-        {expanded && risk.plain && (
-          <p className="text-sm text-gray-500 leading-relaxed mt-3">{risk.plain}</p>
-        )}
       </button>
+      {expanded && risk.plain && (
+        <p className="text-[13px] text-gray-500 leading-relaxed pb-3.5 ml-5">{risk.plain}</p>
+      )}
     </div>
   );
 }
@@ -504,69 +537,21 @@ function ListRiskRow({ risk, instrument, activeFactors }) {
 function ComparisonRiskRow({ risk }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <div className="py-4 border-b border-gray-100 last:border-0">
-      <button onClick={() => setExpanded(e => !e)} className="w-full text-left">
-        <p className="text-[15px] font-semibold text-gray-900 leading-snug tracking-[-0.01em] mb-2">{risk.name}</p>
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Caesarean</p>
-            <p className={`text-base font-bold leading-snug ${risk.cs_higher ? "text-red-500" : "text-teal-500"}`}>{risk.cs}</p>
-          </div>
-          <div className="w-px bg-gray-100 self-stretch" />
-          <div className="flex-1">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Vaginal</p>
-            <p className={`text-base font-bold leading-snug ${risk.cs_higher ? "text-teal-500" : "text-red-500"}`}>{risk.vaginal}</p>
-          </div>
+    <div className={`border-b border-gray-100 last:border-0 ${expanded ? "bg-gray-50/40" : ""}`}>
+      <button onClick={() => setExpanded(e => !e)} className="w-full flex items-center gap-3 py-3.5 text-left">
+        <span className="w-2 h-2 rounded-full shrink-0 bg-gray-200" />
+        <p className="flex-1 text-[14px] text-gray-900 font-medium leading-snug">{risk.name}</p>
+        <div className="text-right shrink-0 ml-2 space-y-0.5">
+          <p className={`text-[11px] font-bold tabular-nums leading-none ${risk.cs_higher ? "text-rose-500" : "text-teal-500"}`}>
+            CS {risk.cs.replace("About ", "").replace(" on average", "")}
+          </p>
+          <p className={`text-[11px] font-semibold tabular-nums leading-none ${risk.cs_higher ? "text-teal-400" : "text-rose-400"}`}>
+            VB {risk.vaginal.replace("About ", "").replace(" on average", "")}
+          </p>
         </div>
-        {expanded && risk.plain && (
-          <p className="text-sm text-gray-500 leading-relaxed mt-3">{risk.plain}</p>
-        )}
       </button>
-    </div>
-  );
-}
-
-function RiskSectionBlock({ section, instrument, activeFactors }) {
-  const hasVisible = section.type === "list"
-    ? section.risks.some(r => {
-        if (r.instrumentOnly && instrument !== r.instrumentOnly) return false;
-        if (r.conditions?.length > 0 && !r.conditions.some(c => activeFactors.has(c))) return false;
-        return true;
-      })
-    : true;
-
-  if (!hasVisible) return null;
-
-  return (
-    <div className="mb-8">
-      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.12em] mb-1">{section.heading}</p>
-      {section.note && (
-        <p className="text-xs text-amber-600 mb-3 leading-snug">{section.note}</p>
-      )}
-
-      {section.type === "list" && (
-        <div>
-          {section.risks.map(r => (
-            <ListRiskRow key={r.id} risk={r} instrument={instrument} activeFactors={activeFactors} />
-          ))}
-        </div>
-      )}
-
-      {section.type === "comparison" && (
-        <div>
-          {section.risks.map(r => <ComparisonRiskRow key={r.id} risk={r} />)}
-        </div>
-      )}
-
-      {section.type === "simple" && (
-        <div>
-          {section.items.map((item, i) => (
-            <div key={i} className="flex items-center gap-3 py-3 border-b border-gray-100 last:border-0">
-              <span className="w-1 h-1 rounded-full bg-gray-300 shrink-0" />
-              <p className="text-[15px] text-gray-700 font-medium">{item}</p>
-            </div>
-          ))}
-        </div>
+      {expanded && risk.plain && (
+        <p className="text-[13px] text-gray-500 leading-relaxed pb-3.5 ml-5">{risk.plain}</p>
       )}
     </div>
   );
@@ -575,36 +560,74 @@ function RiskSectionBlock({ section, instrument, activeFactors }) {
 function RisksPage({ sections, comparisonSections, instrument, activeFactors }) {
   const [showComparison, setShowComparison] = useState(false);
 
+  const allRisks = flattenRisks(sections, instrument, activeFactors);
+  const grouped  = groupByFreq(allRisks);
+
+  // also collect simple items from "simple" type sections
+  const simpleItems = sections
+    .filter(s => s.type === "simple")
+    .flatMap(s => s.items.map(item => ({ id: item, name: item, _freqKey: null, _rate: null })));
+
   return (
     <div className="pb-4">
-      {sections.map(s => (
-        <RiskSectionBlock key={s.id} section={s} instrument={instrument} activeFactors={activeFactors} />
-      ))}
+      {FREQ_ORDER.map(key => {
+        const risks = grouped[key];
+        if (!risks?.length) return null;
+        const f = FREQ[key];
+        return (
+          <div key={key} className="mb-7">
+            <div className="flex items-center gap-2 mb-3">
+              <span className={`w-2 h-2 rounded-full shrink-0 ${FREQ_DOT[key]}`} />
+              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.1em]">
+                {f.label} · {risks.length}
+              </p>
+            </div>
+            <div>
+              {risks.map(r => <FreqRiskRow key={r.id} risk={r} />)}
+            </div>
+          </div>
+        );
+      })}
+
+      {simpleItems.length > 0 && (
+        <div className="mb-7">
+          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.1em] mb-3">Also reported</p>
+          <div>
+            {simpleItems.map(r => (
+              <div key={r.id} className="flex items-center gap-3 py-3 border-b border-gray-100 last:border-0">
+                <span className="w-2 h-2 rounded-full shrink-0 bg-gray-200" />
+                <p className="text-[14px] text-gray-700 font-medium">{r.name}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {comparisonSections && (
         <>
           <button
             onClick={() => setShowComparison(v => !v)}
-            className="w-full flex items-center justify-between py-4 border-t border-gray-100 mt-2 mb-2"
+            className="w-full flex items-center justify-between py-3.5 border-t border-gray-100 mt-1"
           >
-            <span className="text-sm font-semibold text-gray-500">Compare with vaginal birth</span>
-            <svg className={`w-4 h-4 text-gray-400 transition-transform ${showComparison ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <span className="text-[13px] font-semibold text-gray-400">Compare with vaginal birth</span>
+            <svg className={`w-3.5 h-3.5 text-gray-300 transition-transform ${showComparison ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
           </button>
-
           {showComparison && (
-            <div className="mb-4">
-              <p className="text-[11px] text-gray-400 mb-4 leading-snug">For context only — based on NICE NG192 Appendix A (2021). These figures reflect population averages and are not specific to your situation.</p>
-              {comparisonSections.map(s => (
-                <RiskSectionBlock key={s.id} section={s} instrument={null} activeFactors={activeFactors} />
+            <div className="mt-2 mb-4">
+              <p className="text-[11px] text-gray-400 mb-4 leading-snug">NICE NG192 Appendix A (2021) — population averages, not specific to your situation.</p>
+              {comparisonSections.flatMap(s => s.risks).map(r => (
+                <ComparisonRiskRow key={r.id} risk={r} />
               ))}
             </div>
           )}
         </>
       )}
 
-      <FreqKey />
+      <div className="mt-6">
+        <FreqKey />
+      </div>
     </div>
   );
 }
