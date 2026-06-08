@@ -38,7 +38,12 @@ export const CS_PATIENT_FACTORS = [
 // type "list"       — risk rows with freq badges (RCOG format)
 // type "simple"     — plain bullet list (no freq data given in source)
 
-export const CS_RISK_SECTIONS = [
+// Absolute CS risks — shown by default on the Risks page
+// (RCOG CA No. 7 data to be added — currently using RCOG No. 12 serious risks as placeholder)
+export const CS_RISK_SECTIONS = [];
+
+// Comparison sections — shown only when user taps "Compare with vaginal birth"
+export const CS_COMPARISON_SECTIONS = [
   {
     id: "more_likely_women",
     heading: "More likely with caesarean — Women",
@@ -175,7 +180,7 @@ export const CS_RISK_SECTIONS = [
   },
 ];
 
-// RCOG Consent Advice No. 12 — shown additionally when placenta praevia factor active
+// RCOG Consent Advice No. 12 — shown when placenta praevia factor active
 export const CS_PP_RISK_SECTIONS = [
   {
     id: "serious_maternal_pp",

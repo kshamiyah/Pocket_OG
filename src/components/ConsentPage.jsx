@@ -5,6 +5,7 @@ import {
   CS_CONTEXT_OPTIONS,
   CS_PATIENT_FACTORS,
   CS_RISK_SECTIONS,
+  CS_COMPARISON_SECTIONS,
   CS_PP_RISK_SECTIONS,
   CS_FAQ,
   CS_PAGES,
@@ -571,12 +572,38 @@ function RiskSectionBlock({ section, instrument, activeFactors }) {
   );
 }
 
-function RisksPage({ sections, instrument, activeFactors }) {
+function RisksPage({ sections, comparisonSections, instrument, activeFactors }) {
+  const [showComparison, setShowComparison] = useState(false);
+
   return (
     <div className="pb-4">
       {sections.map(s => (
         <RiskSectionBlock key={s.id} section={s} instrument={instrument} activeFactors={activeFactors} />
       ))}
+
+      {comparisonSections && (
+        <>
+          <button
+            onClick={() => setShowComparison(v => !v)}
+            className="w-full flex items-center justify-between py-4 border-t border-gray-100 mt-2 mb-2"
+          >
+            <span className="text-sm font-semibold text-gray-500">Compare with vaginal birth</span>
+            <svg className={`w-4 h-4 text-gray-400 transition-transform ${showComparison ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          {showComparison && (
+            <div className="mb-4">
+              <p className="text-[11px] text-gray-400 mb-4 leading-snug">For context only — based on NICE NG192 Appendix A (2021). These figures reflect population averages and are not specific to your situation.</p>
+              {comparisonSections.map(s => (
+                <RiskSectionBlock key={s.id} section={s} instrument={null} activeFactors={activeFactors} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
       <FreqKey />
     </div>
   );
@@ -599,10 +626,9 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
                            : "RCOG Consent Advice No. 11 (2010)";
   const instrument    = isOVD ? context : null;
   const activeFactors = factors;
-  const hasPP         = isCS && activeFactors.has("placenta_praevia");
-  const riskSections  = isCS
-    ? (hasPP ? CS_PP_RISK_SECTIONS : CS_RISK_SECTIONS)
-    : OVD_RISK_SECTIONS;
+  const hasPP             = isCS && activeFactors.has("placenta_praevia");
+  const riskSections      = isCS ? (hasPP ? CS_PP_RISK_SECTIONS : CS_RISK_SECTIONS) : OVD_RISK_SECTIONS;
+  const comparisonSections = isCS ? CS_COMPARISON_SECTIONS : null;
 
   const currentIdx = CONSENT_TABS.findIndex(t => t.id === activeTab);
   const canPrev = currentIdx > 0;
@@ -670,7 +696,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
         <div className="px-5 pt-6">
           {activeTab === "what"    && <WhatPage    pages={pages} />}
           {activeTab === "why"     && <WhyPage     pages={pages} />}
-          {activeTab === "risks"   && <RisksPage   sections={riskSections} instrument={instrument} activeFactors={activeFactors} />}
+          {activeTab === "risks"   && <RisksPage   sections={riskSections} comparisonSections={comparisonSections} instrument={instrument} activeFactors={activeFactors} />}
           {activeTab === "decline" && <DeclinePage pages={pages} />}
           {activeTab === "faq"     && <FAQSection  faqs={faqs} />}
         </div>
