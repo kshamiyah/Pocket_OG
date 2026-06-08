@@ -1594,6 +1594,11 @@ export const CONSENT_PROCEDURES = [
     subtypes: "Elective · Emergency",
     source: "NICE NG192 · RCOG CA14",
     color: { accent: "bg-teal-500", text: "text-teal-700" },
+    pdfs: [
+      { label: "NICE NG192", file: "NG192.pdf" },
+      { label: "NG192 Appendix A", file: "NG192-appendix-a.pdf" },
+      { label: "RCOG CA12", file: "CA12.pdf" },
+    ],
   },
   {
     id: "OVD",
@@ -1601,6 +1606,44 @@ export const CONSENT_PROCEDURES = [
     subtypes: "Forceps · Ventouse",
     source: "RCOG GTG26",
     color: { accent: "bg-blue-500", text: "text-blue-700" },
+    pdfs: [],
+  },
+  {
+    id: "SURG_MISC",
+    title: "Surgical Miscarriage",
+    subtypes: "EVA · MVA",
+    source: "RCOG CA10",
+    color: { accent: "bg-rose-500", text: "text-rose-700" },
+    pdfs: [],
+  },
+  {
+    id: "MED_MISC",
+    title: "Medical Miscarriage",
+    subtypes: "Misoprostol",
+    source: "RCOG GTG25",
+    color: { accent: "bg-pink-500", text: "text-pink-700" },
+    pdfs: [],
+  },
+  {
+    id: "LAPAROSCOPY",
+    title: "Diagnostic Laparoscopy",
+    subtypes: "General anaesthetic",
+    source: "RCOG CA2",
+    color: { accent: "bg-amber-500", text: "text-amber-700" },
+    pdfs: [
+      { label: "RCOG CA2", file: "CA2.pdf" },
+    ],
+  },
+  {
+    id: "HYSTEROSCOPY",
+    title: "Hysteroscopy",
+    subtypes: "Diagnostic · Operative",
+    source: "RCOG CA1 · GTG59",
+    color: { accent: "bg-violet-500", text: "text-violet-700" },
+    pdfs: [
+      { label: "RCOG CA1", file: "CA1.pdf" },
+      { label: "GTG59", file: "GTG59.pdf" },
+    ],
   },
   {
     id: "SURG_MISC",
@@ -1631,3 +1674,4 @@ export const CONSENT_PROCEDURES = [
     color: { accent: "bg-violet-500", text: "text-violet-700" },
   },
 ];
+
