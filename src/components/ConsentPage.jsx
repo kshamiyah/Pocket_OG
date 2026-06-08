@@ -482,16 +482,25 @@ const FREQ_RATE_COLOR = {
   VERY_RARE:   "text-gray-300",
 };
 
+function inferCategory(sectionId) {
+  if (!sectionId) return null;
+  const id = sectionId.toLowerCase();
+  if (id.includes("fetal") || id.includes("baby") || id.includes("neonatal")) return "fetal";
+  if (id.includes("maternal") || id.includes("women") || id.includes("woman")) return "maternal";
+  return null;
+}
+
 function flattenRisks(sections, instrument, activeFactors) {
   const risks = [];
   for (const section of sections) {
     if (section.type !== "list") continue;
+    const category = inferCategory(section.id);
     for (const r of section.risks) {
       if (r.instrumentOnly && instrument !== r.instrumentOnly) continue;
       if (r.conditions?.length > 0 && !r.conditions.some(c => activeFactors.has(c))) continue;
       const freqKey = r.byInstrument ? r.byInstrument[instrument]?.freq : r.freq;
       const rate    = r.byInstrument ? r.byInstrument[instrument]?.rate : r.rate;
-      risks.push({ ...r, _freqKey: freqKey, _rate: rate });
+      risks.push({ ...r, _freqKey: freqKey, _rate: rate, _category: category });
     }
   }
   return risks;
@@ -557,44 +566,77 @@ function ComparisonRiskRow({ risk }) {
   );
 }
 
+function FreqGroup({ risks, freqKey }) {
+  if (!risks?.length) return null;
+  const f = FREQ[freqKey];
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-2 mb-2">
+        <span className={`w-2 h-2 rounded-full shrink-0 ${FREQ_DOT[freqKey]}`} />
+        <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.1em]">
+          {f.label} · {risks.length}
+        </p>
+      </div>
+      <div className="rounded-xl overflow-hidden bg-white border border-gray-100">
+        {risks.map(r => <FreqRiskRow key={r.id} risk={r} />)}
+      </div>
+    </div>
+  );
+}
+
 function RisksPage({ sections, comparisonSections, instrument, activeFactors }) {
   const [showComparison, setShowComparison] = useState(false);
+  const [catTab, setCatTab] = useState("maternal");
 
   const allRisks = flattenRisks(sections, instrument, activeFactors);
-  const grouped  = groupByFreq(allRisks);
 
-  // also collect simple items from "simple" type sections
+  const hasCats = allRisks.some(r => r._category !== null);
+  const maternalRisks = allRisks.filter(r => r._category === "maternal" || r._category === null);
+  const fetalRisks    = allRisks.filter(r => r._category === "fetal");
+  const showTabs = hasCats && fetalRisks.length > 0;
+
+  const visibleRisks = showTabs
+    ? (catTab === "maternal" ? maternalRisks : fetalRisks)
+    : allRisks;
+  const grouped = groupByFreq(visibleRisks);
+
   const simpleItems = sections
     .filter(s => s.type === "simple")
     .flatMap(s => s.items.map(item => ({ id: item, name: item, _freqKey: null, _rate: null })));
 
   return (
     <div className="pb-4">
-      {FREQ_ORDER.map(key => {
-        const risks = grouped[key];
-        if (!risks?.length) return null;
-        const f = FREQ[key];
-        return (
-          <div key={key} className="mb-7">
-            <div className="flex items-center gap-2 mb-3">
-              <span className={`w-2 h-2 rounded-full shrink-0 ${FREQ_DOT[key]}`} />
-              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.1em]">
-                {f.label} · {risks.length}
-              </p>
-            </div>
-            <div>
-              {risks.map(r => <FreqRiskRow key={r.id} risk={r} />)}
-            </div>
-          </div>
-        );
-      })}
+      {showTabs && (
+        <div className="flex gap-1 mb-5 p-1 bg-gray-100 rounded-xl">
+          {[
+            { id: "maternal", label: `Maternal (${maternalRisks.length})` },
+            { id: "fetal",    label: `Fetal (${fetalRisks.length})` },
+          ].map(t => (
+            <button
+              key={t.id}
+              onClick={() => setCatTab(t.id)}
+              className={`flex-1 py-1.5 rounded-lg text-[13px] font-semibold transition-colors ${
+                catTab === t.id
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-400 hover:text-gray-600"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      )}
 
-      {simpleItems.length > 0 && (
+      {FREQ_ORDER.map(key => (
+        <FreqGroup key={key} risks={grouped[key]} freqKey={key} />
+      ))}
+
+      {!showTabs && simpleItems.length > 0 && (
         <div className="mb-7">
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.1em] mb-3">Also reported</p>
-          <div>
+          <div className="rounded-xl overflow-hidden bg-white border border-gray-100">
             {simpleItems.map(r => (
-              <div key={r.id} className="flex items-center gap-3 py-3 border-b border-gray-100 last:border-0">
+              <div key={r.id} className="flex items-center gap-3 py-3 px-4 border-b border-gray-100 last:border-0">
                 <span className="w-2 h-2 rounded-full shrink-0 bg-gray-200" />
                 <p className="text-[14px] text-gray-700 font-medium">{r.name}</p>
               </div>
