@@ -482,9 +482,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
           <RiskSection title="Common risks" risks={risks.common} instrument={instrument} activeFactors={activeFactors} />
           <RiskSection title="Serious risks" risks={risks.serious} instrument={instrument} activeFactors={activeFactors} />
           {risks.future && <RiskSection title="Future pregnancies" risks={risks.future} instrument={instrument} activeFactors={activeFactors} />}
-          <AlternativesSection alternatives={alts} />
           <FAQSection faqs={faqs} />
-          <DocChecklist />
           <FreqKey />
 
           {/* Reset */}
