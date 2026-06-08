@@ -7,11 +7,13 @@ import {
   CS_RISKS,
   CS_ALTERNATIVES,
   CS_FAQ,
+  CS_PAGES,
   OVD_CONTEXT_OPTIONS,
   OVD_PATIENT_FACTORS,
   OVD_RISKS,
   OVD_ALTERNATIVES,
   OVD_FAQ,
+  OVD_PAGES,
 } from "../data/consent";
 
 // ─── shared small components ──────────────────────────────────────────────────
@@ -419,32 +421,92 @@ function FreqKey() {
   );
 }
 
+const CONSENT_TABS = [
+  { id: "what",    label: "What" },
+  { id: "why",     label: "Why" },
+  { id: "risks",   label: "Risks" },
+  { id: "decline", label: "Decline" },
+  { id: "faq",     label: "FAQ" },
+];
+
+function WhatPage({ pages }) {
+  return (
+    <div className="space-y-4">
+      <h3 className="text-xl font-bold text-gray-900 leading-snug">{pages.what.heading}</h3>
+      {pages.what.body.split("\n\n").map((para, i) => (
+        <p key={i} className="text-sm text-gray-600 leading-relaxed">{para}</p>
+      ))}
+    </div>
+  );
+}
+
+function WhyPage({ pages }) {
+  return (
+    <div className="space-y-4">
+      <h3 className="text-xl font-bold text-gray-900 leading-snug">{pages.why.heading}</h3>
+      {pages.why.body.split("\n\n").map((para, i) => (
+        <p key={i} className="text-sm text-gray-600 leading-relaxed">{para}</p>
+      ))}
+    </div>
+  );
+}
+
+function DeclinePage({ pages }) {
+  return (
+    <div className="space-y-4">
+      <h3 className="text-xl font-bold text-gray-900 leading-snug">{pages.decline.heading}</h3>
+      {pages.decline.body.split("\n\n").map((para, i) => (
+        <p key={i} className="text-sm text-gray-600 leading-relaxed">{para}</p>
+      ))}
+    </div>
+  );
+}
+
+function RisksPage({ risks, instrument, activeFactors }) {
+  return (
+    <div className="space-y-5">
+      <RiskSection title="Common risks"      risks={risks.common}  instrument={instrument} activeFactors={activeFactors} />
+      <RiskSection title="Serious risks"     risks={risks.serious} instrument={instrument} activeFactors={activeFactors} />
+      {risks.future && (
+        <RiskSection title="Future pregnancies" risks={risks.future} instrument={instrument} activeFactors={activeFactors} />
+      )}
+      <FreqKey />
+    </div>
+  );
+}
+
 function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
-  const proc = CONSENT_PROCEDURES.find(p => p.id === procedureId);
-  const isCS = procedureId === "CS";
-  const isOVD = procedureId === "OVD";
+  const [activeTab, setActiveTab] = useState("what");
+  const tabRef = useState(null);
+
+  const proc    = CONSENT_PROCEDURES.find(p => p.id === procedureId);
+  const isCS    = procedureId === "CS";
+  const isOVD   = procedureId === "OVD";
 
   const contextLabel = isCS
     ? (context === "elective" ? "Elective" : "Emergency")
     : (context === "ventouse" ? "Ventouse" : "Forceps");
 
-  const risks  = isCS  ? CS_RISKS        : OVD_RISKS;
-  const alts   = isCS  ? CS_ALTERNATIVES : OVD_ALTERNATIVES;
-  const faqs   = isCS  ? CS_FAQ          : OVD_FAQ;
+  const risks  = isCS  ? CS_RISKS  : OVD_RISKS;
+  const faqs   = isCS  ? CS_FAQ    : OVD_FAQ;
+  const pages  = isCS  ? CS_PAGES[context]  : OVD_PAGES[context];
   const source = isCS  ? "NICE NG192 · RCOG Consent Advice No. 12"
                        : "RCOG Consent Advice No. 11 (2010)";
-
-  const instrument = isOVD ? context : null;
+  const instrument    = isOVD ? context : null;
   const activeFactors = factors;
 
+  const currentIdx = CONSENT_TABS.findIndex(t => t.id === activeTab);
+  const canPrev = currentIdx > 0;
+  const canNext = currentIdx < CONSENT_TABS.length - 1;
+
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-28">
       <div className="max-w-lg mx-auto">
 
         {/* Sticky header */}
         <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-gray-100">
-          <div className="px-5 pt-10 pb-3">
-            <div className="flex items-center gap-3 mb-3">
+          <div className="px-5 pt-10 pb-2">
+            <div className="flex items-center gap-3 mb-2">
               <button onClick={onBack} className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors shrink-0">
                 <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -465,7 +527,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
 
             {/* Active factors chips */}
             {activeFactors.size > 0 && (
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1.5 mb-2">
                 {[...(isCS ? CS_PATIENT_FACTORS : OVD_PATIENT_FACTORS)]
                   .filter(f => activeFactors.has(f.id))
                   .map(f => (
@@ -476,22 +538,84 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
               </div>
             )}
           </div>
+
+          {/* Tab pills */}
+          <div className="flex gap-2 overflow-x-auto px-5 pb-3 no-scrollbar">
+            {CONSENT_TABS.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  activeTab === tab.id
+                    ? "bg-gray-900 text-white"
+                    : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="px-5 pt-5">
-          <RiskSection title="Common risks" risks={risks.common} instrument={instrument} activeFactors={activeFactors} />
-          <RiskSection title="Serious risks" risks={risks.serious} instrument={instrument} activeFactors={activeFactors} />
-          {risks.future && <RiskSection title="Future pregnancies" risks={risks.future} instrument={instrument} activeFactors={activeFactors} />}
-          <FAQSection faqs={faqs} />
-          <FreqKey />
+        {/* Page content */}
+        <div className="px-5 pt-6">
+          {activeTab === "what"    && <WhatPage    pages={pages} />}
+          {activeTab === "why"     && <WhyPage     pages={pages} />}
+          {activeTab === "risks"   && <RisksPage   risks={risks} instrument={instrument} activeFactors={activeFactors} />}
+          {activeTab === "decline" && <DeclinePage pages={pages} />}
+          {activeTab === "faq"     && <FAQSection  faqs={faqs} />}
+        </div>
+      </div>
 
-          {/* Reset */}
+      {/* Prev / Next bar */}
+      <div className="fixed bottom-16 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-gray-100">
+        <div className="max-w-lg mx-auto flex items-center gap-3 px-5 py-3">
           <button
-            onClick={onReset}
-            className="w-full py-3 rounded-2xl border border-gray-200 text-sm text-gray-400 hover:bg-gray-50 transition-colors mb-6"
+            onClick={() => canPrev && setActiveTab(CONSENT_TABS[currentIdx - 1].id)}
+            disabled={!canPrev}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+              canPrev ? "bg-gray-100 text-gray-700 hover:bg-gray-200" : "bg-gray-50 text-gray-300 cursor-default"
+            }`}
           >
-            Start new consent
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
           </button>
+
+          <div className="flex-1 flex justify-center gap-1.5">
+            {CONSENT_TABS.map((tab, i) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`w-1.5 h-1.5 rounded-full transition-all ${
+                  activeTab === tab.id ? "bg-gray-900 w-4" : "bg-gray-300"
+                }`}
+              />
+            ))}
+          </div>
+
+          {canNext ? (
+            <button
+              onClick={() => setActiveTab(CONSENT_TABS[currentIdx + 1].id)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-800 transition-all"
+            >
+              Next
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          ) : (
+            <button
+              onClick={onReset}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-800 transition-all"
+            >
+              Done
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
     </div>
