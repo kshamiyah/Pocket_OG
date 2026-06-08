@@ -490,13 +490,35 @@ const CONSENT_TABS = [
   { id: "faq",     label: "FAQ" },
 ];
 
+function BodyBlock({ text }) {
+  return (
+    <div className="space-y-3">
+      {text.split("\n\n").map((block, i) => {
+        const lines = block.split("\n");
+        const isList = lines.every(l => l.trimStart().startsWith("•"));
+        if (isList) {
+          return (
+            <ul key={i} className="space-y-1.5 pl-1">
+              {lines.map((l, j) => (
+                <li key={j} className="flex items-start gap-2 text-sm text-gray-600 leading-relaxed">
+                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0" />
+                  <span>{l.replace(/^•\s*/, "")}</span>
+                </li>
+              ))}
+            </ul>
+          );
+        }
+        return <p key={i} className="text-sm text-gray-600 leading-relaxed">{block}</p>;
+      })}
+    </div>
+  );
+}
+
 function WhatPage({ pages }) {
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-bold text-gray-900 leading-snug">{pages.what.heading}</h3>
-      {pages.what.body.split("\n\n").map((para, i) => (
-        <p key={i} className="text-sm text-gray-600 leading-relaxed">{para}</p>
-      ))}
+      <BodyBlock text={pages.what.body} />
     </div>
   );
 }
@@ -505,9 +527,7 @@ function WhyPage({ pages }) {
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-bold text-gray-900 leading-snug">{pages.why.heading}</h3>
-      {pages.why.body.split("\n\n").map((para, i) => (
-        <p key={i} className="text-sm text-gray-600 leading-relaxed">{para}</p>
-      ))}
+      <BodyBlock text={pages.why.body} />
     </div>
   );
 }
@@ -516,9 +536,7 @@ function DeclinePage({ pages }) {
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-bold text-gray-900 leading-snug">{pages.decline.heading}</h3>
-      {pages.decline.body.split("\n\n").map((para, i) => (
-        <p key={i} className="text-sm text-gray-600 leading-relaxed">{para}</p>
-      ))}
+      <BodyBlock text={pages.decline.body} />
     </div>
   );
 }
