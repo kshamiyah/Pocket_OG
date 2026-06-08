@@ -328,6 +328,66 @@ export const OVD_ALTERNATIVES = [
 
 // ─── PROCEDURE LIST ───────────────────────────────────────────────────────────
 
+// ─── FAQ ─────────────────────────────────────────────────────────────────────
+
+export const CS_FAQ = [
+  {
+    q: "Is it safe?",
+    a: "Caesarean section is a very common operation and is generally safe. Like all surgery it carries risks, which is why we go through them with you now. The team is experienced and trained to manage complications if they arise.",
+  },
+  {
+    q: "What are my chances of dying?",
+    a: "Maternal death from caesarean section is very rare — around 25 per 100,000. That is less than a 1 in 4,000 chance. For context, the risk from vaginal birth is also very low, around 4 per 100,000. (NICE NG192 Appendix A)",
+  },
+  {
+    q: "Will it affect future pregnancies?",
+    a: "Yes, in some ways. The scar on your womb slightly increases the risk of the placenta lying low or growing into the scar in a future pregnancy, and the risk of the scar opening during a future labour — though all of these remain uncommon. Future pregnancies will be monitored more closely. (NICE NG192 Appendix A)",
+  },
+  {
+    q: "Can I refuse?",
+    a: "Yes. Every patient with capacity has the right to refuse any procedure, even if that decision carries risk. If you are unsure, please say so — we want you to have time to ask questions and feel comfortable before signing.",
+  },
+  {
+    q: "What is the alternative?",
+    a: "The alternatives depend on your situation and will have been discussed with your consultant. They may include vaginal birth, instrumental delivery, or continued monitoring — your doctor can explain which apply to you.",
+  },
+  {
+    q: "Will I be awake?",
+    a: "Most caesareans are performed under a spinal anaesthetic, which means you are awake but numb from the waist down. You will feel pressure but not pain. A general anaesthetic (fully asleep) is sometimes needed and your anaesthetist will explain which is planned for you.",
+  },
+  {
+    q: "How long is the recovery?",
+    a: "Most women stay in hospital around 4 days. Full recovery usually takes about 6 weeks. You should avoid driving and heavy lifting during this time. (NICE NG192 Appendix A)",
+  },
+];
+
+export const OVD_FAQ = [
+  {
+    q: "Why can't I just have a caesarean?",
+    a: "An instrumental delivery, when it is safe to attempt, avoids the risks and longer recovery of abdominal surgery. If the attempt is not successful, a caesarean will be performed.",
+  },
+  {
+    q: "Will it hurt my baby?",
+    a: "Most babies do very well after instrumental delivery. Some marks or swelling on the head are common and almost always resolve within days. Serious injury to the baby is uncommon. (RCOG Consent Advice No. 11)",
+  },
+  {
+    q: "What is the difference between forceps and ventouse?",
+    a: "A ventouse is a small cup attached to the baby's head by suction. Forceps are two curved metal instruments placed around the sides of the baby's head. Your doctor will recommend whichever is most appropriate for your situation.",
+  },
+  {
+    q: "What if it doesn't work?",
+    a: "If the instrument delivery is not successful, a caesarean section will be performed. This is planned for in advance — the theatre team is ready. (RCOG Consent Advice No. 11)",
+  },
+  {
+    q: "Can I refuse?",
+    a: "Yes. You have the right to refuse any procedure. Your doctor will explain the risks of not proceeding so you can make an informed decision.",
+  },
+  {
+    q: "Will I need stitches?",
+    a: "Most women need some stitches — either from an episiotomy (a cut to help delivery) or a natural tear. These are repaired straight after delivery under local anaesthetic. (RCOG Consent Advice No. 11)",
+  },
+];
+
 export const CONSENT_PROCEDURES = [
   {
     id: "CS",

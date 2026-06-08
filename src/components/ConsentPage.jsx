@@ -6,10 +6,12 @@ import {
   CS_PATIENT_FACTORS,
   CS_RISKS,
   CS_ALTERNATIVES,
+  CS_FAQ,
   OVD_CONTEXT_OPTIONS,
   OVD_PATIENT_FACTORS,
   OVD_RISKS,
   OVD_ALTERNATIVES,
+  OVD_FAQ,
 } from "../data/consent";
 
 // ─── shared small components ──────────────────────────────────────────────────
@@ -361,6 +363,39 @@ function DocChecklist() {
   );
 }
 
+function FAQSection({ faqs }) {
+  const [openId, setOpenId] = useState(null);
+  return (
+    <div className="mb-4">
+      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Common patient questions</p>
+      <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm divide-y divide-gray-50">
+        {faqs.map((item, i) => {
+          const open = openId === i;
+          return (
+            <div key={i} className={open ? "bg-gray-50/60" : ""}>
+              <button
+                onClick={() => setOpenId(open ? null : i)}
+                className="flex items-center gap-3 w-full px-4 py-3.5 text-left"
+              >
+                <span className="text-base leading-none text-gray-300 shrink-0">?</span>
+                <p className="flex-1 text-sm font-medium text-gray-900">{item.q}</p>
+                <svg className={`w-3.5 h-3.5 text-gray-300 shrink-0 transition-transform ${open ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              {open && (
+                <div className="px-4 pb-4 ml-7">
+                  <p className="text-sm text-gray-600 leading-relaxed">{item.a}</p>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function FreqKey() {
   return (
     <div className="rounded-xl bg-gray-50 border border-gray-100 p-3.5 mb-4">
@@ -393,8 +428,9 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
     ? (context === "elective" ? "Elective" : "Emergency")
     : (context === "ventouse" ? "Ventouse" : "Forceps");
 
-  const risks  = isCS  ? CS_RISKS  : OVD_RISKS;
+  const risks  = isCS  ? CS_RISKS        : OVD_RISKS;
   const alts   = isCS  ? CS_ALTERNATIVES : OVD_ALTERNATIVES;
+  const faqs   = isCS  ? CS_FAQ          : OVD_FAQ;
   const source = isCS  ? "NICE NG192 · RCOG Consent Advice No. 12"
                        : "RCOG Consent Advice No. 11 (2010)";
 
@@ -447,6 +483,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
           <RiskSection title="Serious risks" risks={risks.serious} instrument={instrument} activeFactors={activeFactors} />
           {risks.future && <RiskSection title="Future pregnancies" risks={risks.future} instrument={instrument} activeFactors={activeFactors} />}
           <AlternativesSection alternatives={alts} />
+          <FAQSection faqs={faqs} />
           <DocChecklist />
           <FreqKey />
 
