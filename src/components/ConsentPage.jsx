@@ -194,7 +194,7 @@ function PatientFactors({ procedureId, context, factors, onToggle, onContinue, o
 
 // ─── Step 3: consent summary ──────────────────────────────────────────────────
 
-function RiskRow({ risk, instrument, showIfConditions, activeFactors }) {
+function _RiskRow_UNUSED({ risk, instrument, showIfConditions, activeFactors }) {
   const [expanded, setExpanded] = useState(false);
 
   // For condition-gated risks, only show if any condition active
@@ -461,42 +461,41 @@ function DeclinePage({ pages }) {
   );
 }
 
-// ─── Risk renderers — one per section type ────────────────────────────────────
+// ─── Risk renderers — Apple-style, no cards ───────────────────────────────────
+
+const FREQ_RATE_COLOR = {
+  VERY_COMMON: "text-red-500",
+  COMMON:      "text-orange-500",
+  UNCOMMON:    "text-yellow-600",
+  RARE:        "text-gray-400",
+  VERY_RARE:   "text-gray-300",
+};
 
 function ListRiskRow({ risk, instrument, activeFactors }) {
   const [expanded, setExpanded] = useState(false);
 
-  // instrument-only risks
   if (risk.instrumentOnly && instrument !== risk.instrumentOnly) return null;
-
-  // condition-gated risks
   if (risk.conditions?.length > 0 && !risk.conditions.some(c => activeFactors.has(c))) return null;
 
-  const freqKey = risk.byInstrument ? risk.byInstrument[instrument]?.freq : risk.freq;
-  const rate    = risk.byInstrument ? risk.byInstrument[instrument]?.rate : risk.rate;
-  const f       = FREQ[freqKey];
+  const freqKey  = risk.byInstrument ? risk.byInstrument[instrument]?.freq : risk.freq;
+  const rate     = risk.byInstrument ? risk.byInstrument[instrument]?.rate : risk.rate;
+  const rateColor = FREQ_RATE_COLOR[freqKey] ?? "text-gray-400";
+  const freqLabel = FREQ[freqKey]?.label;
 
   return (
-    <div className={`border-b border-gray-50 last:border-0 ${expanded ? "bg-gray-50/50" : ""}`}>
-      <button onClick={() => setExpanded(e => !e)} className="w-full flex items-center gap-3 px-4 py-3 text-left">
-        <span className={`w-2 h-2 rounded-full shrink-0 mt-0.5 ${f?.dot ?? "bg-gray-200"}`} />
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900 leading-snug">{risk.name}</p>
-          {risk.note && <p className="text-[10px] text-orange-600 font-semibold mt-0.5">{risk.note}</p>}
+    <div className="py-4 border-b border-gray-100 last:border-0">
+      <button onClick={() => setExpanded(e => !e)} className="w-full text-left">
+        <p className="text-[15px] font-semibold text-gray-900 leading-snug tracking-[-0.01em]">{risk.name}</p>
+        {risk.note && <p className="text-xs text-orange-500 font-medium mt-0.5">{risk.note}</p>}
+        <div className="flex items-baseline gap-2 mt-1.5">
+          {rate     && <span className={`text-[22px] font-bold leading-none tracking-tight ${rateColor}`}>{rate}</span>}
+          {freqLabel && <span className="text-xs text-gray-400 font-medium">{freqLabel}</span>}
+          {!rate && freqLabel && <span className={`text-base font-semibold ${rateColor}`}>{freqLabel}</span>}
         </div>
-        <div className="flex flex-col items-end gap-1 shrink-0 ml-2">
-          {freqKey  && <FreqPill freqKey={freqKey} />}
-          {rate     && <span className="text-[10px] text-gray-400 font-mono">{rate}</span>}
-        </div>
-        <svg className={`w-3.5 h-3.5 text-gray-300 shrink-0 ml-1 transition-transform ${expanded ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
+        {expanded && risk.plain && (
+          <p className="text-sm text-gray-500 leading-relaxed mt-3">{risk.plain}</p>
+        )}
       </button>
-      {expanded && risk.plain && (
-        <div className="px-4 pb-3 ml-5">
-          <p className="text-sm text-gray-600 leading-relaxed">{risk.plain}</p>
-        </div>
-      )}
     </div>
   );
 }
@@ -504,27 +503,30 @@ function ListRiskRow({ risk, instrument, activeFactors }) {
 function ComparisonRiskRow({ risk }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <div className={`border-b border-gray-50 last:border-0 ${expanded ? "bg-gray-50/50" : ""}`}>
-      <button onClick={() => setExpanded(e => !e)} className="w-full grid grid-cols-[1fr_auto_auto] gap-2 px-4 py-3 text-left items-center">
-        <p className="text-sm font-medium text-gray-900 leading-snug pr-1">{risk.name}</p>
-        <div className="w-[90px] text-center">
-          <p className={`text-[11px] font-semibold leading-snug ${risk.cs_higher ? "text-rose-600" : "text-teal-600"}`}>{risk.cs}</p>
+    <div className="py-4 border-b border-gray-100 last:border-0">
+      <button onClick={() => setExpanded(e => !e)} className="w-full text-left">
+        <p className="text-[15px] font-semibold text-gray-900 leading-snug tracking-[-0.01em] mb-2">{risk.name}</p>
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Caesarean</p>
+            <p className={`text-base font-bold leading-snug ${risk.cs_higher ? "text-red-500" : "text-teal-500"}`}>{risk.cs}</p>
+          </div>
+          <div className="w-px bg-gray-100 self-stretch" />
+          <div className="flex-1">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Vaginal</p>
+            <p className={`text-base font-bold leading-snug ${risk.cs_higher ? "text-teal-500" : "text-red-500"}`}>{risk.vaginal}</p>
+          </div>
         </div>
-        <div className="w-[90px] text-center">
-          <p className={`text-[11px] font-semibold leading-snug ${risk.cs_higher ? "text-teal-600" : "text-rose-600"}`}>{risk.vaginal}</p>
-        </div>
+        {expanded && risk.plain && (
+          <p className="text-sm text-gray-500 leading-relaxed mt-3">{risk.plain}</p>
+        )}
       </button>
-      {expanded && risk.plain && (
-        <div className="px-4 pb-3">
-          <p className="text-sm text-gray-600 leading-relaxed">{risk.plain}</p>
-        </div>
-      )}
     </div>
   );
 }
 
 function RiskSectionBlock({ section, instrument, activeFactors }) {
-  const hasVisibleRisks = section.type === "list"
+  const hasVisible = section.type === "list"
     ? section.risks.some(r => {
         if (r.instrumentOnly && instrument !== r.instrumentOnly) return false;
         if (r.conditions?.length > 0 && !r.conditions.some(c => activeFactors.has(c))) return false;
@@ -532,19 +534,17 @@ function RiskSectionBlock({ section, instrument, activeFactors }) {
       })
     : true;
 
-  if (!hasVisibleRisks) return null;
+  if (!hasVisible) return null;
 
   return (
-    <div className="mb-5">
-      <div className="flex items-baseline justify-between mb-1.5 px-0.5">
-        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">{section.heading}</p>
-      </div>
+    <div className="mb-8">
+      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.12em] mb-1">{section.heading}</p>
+      {section.note && (
+        <p className="text-xs text-amber-600 mb-3 leading-snug">{section.note}</p>
+      )}
 
       {section.type === "list" && (
-        <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
-          {section.note && (
-            <p className="px-4 py-2.5 text-[11px] text-amber-700 bg-amber-50 border-b border-amber-100 leading-snug">{section.note}</p>
-          )}
+        <div>
           {section.risks.map(r => (
             <ListRiskRow key={r.id} risk={r} instrument={instrument} activeFactors={activeFactors} />
           ))}
@@ -552,35 +552,28 @@ function RiskSectionBlock({ section, instrument, activeFactors }) {
       )}
 
       {section.type === "comparison" && (
-        <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
-          <div className="grid grid-cols-[1fr_auto_auto] gap-2 px-4 py-2 bg-gray-50 border-b border-gray-100">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Outcome</span>
-            <span className="w-[90px] text-center text-[10px] font-bold text-teal-700 uppercase tracking-wide">CS</span>
-            <span className="w-[90px] text-center text-[10px] font-bold text-gray-400 uppercase tracking-wide">Vaginal</span>
-          </div>
+        <div>
           {section.risks.map(r => <ComparisonRiskRow key={r.id} risk={r} />)}
         </div>
       )}
 
       {section.type === "simple" && (
-        <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm divide-y divide-gray-50">
+        <div>
           {section.items.map((item, i) => (
-            <div key={i} className="flex items-center gap-3 px-4 py-3">
-              <span className="w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0" />
-              <p className="text-sm text-gray-700">{item}</p>
+            <div key={i} className="flex items-center gap-3 py-3 border-b border-gray-100 last:border-0">
+              <span className="w-1 h-1 rounded-full bg-gray-300 shrink-0" />
+              <p className="text-[15px] text-gray-700 font-medium">{item}</p>
             </div>
           ))}
         </div>
       )}
-
-      <p className="text-[9px] text-gray-300 mt-1.5 px-0.5 uppercase tracking-wide font-bold">{section.source}</p>
     </div>
   );
 }
 
 function RisksPage({ sections, instrument, activeFactors }) {
   return (
-    <div className="space-y-1 pb-2">
+    <div className="pb-4">
       {sections.map(s => (
         <RiskSectionBlock key={s.id} section={s} instrument={instrument} activeFactors={activeFactors} />
       ))}
