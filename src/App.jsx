@@ -6,6 +6,7 @@ import WikiCard from "./components/WikiCard";
 import NoResults from "./components/NoResults";
 import FlowchartPlayer from "./components/FlowchartPlayer";
 import FeedbackButton from "./components/FeedbackButton";
+import ConsentPage from "./components/ConsentPage";
 
 const FILTER_OPTIONS = [
   { value: "ALL",        label: "All guidelines",      pill: "All",           filterFn: null,                                                    active: "bg-gray-900 text-white" },
@@ -405,6 +406,9 @@ export default function App() {
         </div>
       )}
 
+      {/* Consent tab */}
+      {activeTab === "consent" && <ConsentPage />}
+
       {/* Guidelines tab */}
       {activeTab === "guidelines" && (
         <div className="min-h-screen pb-24">
@@ -499,6 +503,17 @@ export default function App() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <span className="text-xs font-medium">Guidelines</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("consent")}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
+              activeTab === "consent" ? "text-black" : "text-gray-400"
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+            <span className="text-xs font-medium">Consent</span>
           </button>
         </div>
       </div>
