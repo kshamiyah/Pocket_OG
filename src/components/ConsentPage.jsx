@@ -523,26 +523,26 @@ function FreqRiskRow({ risk }) {
 
   return (
     <div className={`border-b border-gray-100 last:border-0 ${expanded ? "bg-gray-50/40" : ""}`}>
-      <button onClick={() => setExpanded(e => !e)} className="w-full flex items-center gap-3 py-3.5 px-4 text-left">
-        <span className={`w-2 h-2 rounded-full shrink-0 ${dot}`} />
-        <div className="flex-1 min-w-0">
+      <button onClick={() => setExpanded(e => !e)} className="w-full flex items-start gap-3 py-3.5 px-4 text-left">
+        <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${dot}`} />
+        <div className="flex-1 min-w-0 pr-2">
           <p className="text-[14px] text-gray-900 font-medium leading-snug">{risk.name}</p>
           {risk.source && (
             <p className="text-[10px] text-gray-300 font-medium mt-0.5">{risk.source}</p>
           )}
         </div>
-        {risk.note && <p className="text-[10px] text-orange-500 font-semibold shrink-0">{risk.note}</p>}
-        <div className="text-right shrink-0 ml-2">
+        <div className="shrink-0 text-right max-w-[120px]">
+          {risk.note && <p className="text-[10px] text-orange-500 font-semibold leading-snug mb-0.5">{risk.note}</p>}
           {risk._rate
-            ? <p className={`text-[13px] font-bold tabular-nums leading-none ${color}`}>{risk._rate}</p>
+            ? <p className={`text-[12px] font-bold tabular-nums leading-snug ${color}`}>{risk._rate}</p>
             : risk._freqKey
-              ? <p className={`text-[12px] font-semibold ${color}`}>{FREQ[risk._freqKey]?.label}</p>
+              ? <p className={`text-[11px] font-semibold ${color}`}>{FREQ[risk._freqKey]?.label}</p>
               : null
           }
         </div>
       </button>
       {expanded && risk.plain && (
-        <p className="text-[13px] text-gray-500 leading-relaxed pb-3.5 px-4 ml-5">{risk.plain}</p>
+        <p className="text-[13px] text-gray-500 leading-relaxed pb-3.5 px-4 pl-9">{risk.plain}</p>
       )}
     </div>
   );
@@ -552,20 +552,20 @@ function ComparisonRiskRow({ risk }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <div className={`border-b border-gray-100 last:border-0 ${expanded ? "bg-gray-50/40" : ""}`}>
-      <button onClick={() => setExpanded(e => !e)} className="w-full flex items-center gap-3 py-3.5 text-left">
-        <span className="w-2 h-2 rounded-full shrink-0 bg-gray-200" />
-        <p className="flex-1 text-[14px] text-gray-900 font-medium leading-snug">{risk.name}</p>
-        <div className="text-right shrink-0 ml-2 space-y-0.5">
-          <p className={`text-[11px] font-bold tabular-nums leading-none ${risk.cs_higher ? "text-rose-500" : "text-teal-500"}`}>
+      <button onClick={() => setExpanded(e => !e)} className="w-full flex items-start gap-3 py-3.5 px-4 text-left">
+        <span className="w-2 h-2 rounded-full shrink-0 mt-1.5 bg-gray-200" />
+        <p className="flex-1 min-w-0 text-[14px] text-gray-900 font-medium leading-snug pr-2">{risk.name}</p>
+        <div className="shrink-0 text-right max-w-[130px] space-y-0.5">
+          <p className={`text-[11px] font-bold tabular-nums leading-snug ${risk.cs_higher ? "text-rose-500" : "text-teal-500"}`}>
             CS {risk.cs.replace("About ", "").replace(" on average", "")}
           </p>
-          <p className={`text-[11px] font-semibold tabular-nums leading-none ${risk.cs_higher ? "text-teal-400" : "text-rose-400"}`}>
+          <p className={`text-[11px] font-semibold tabular-nums leading-snug ${risk.cs_higher ? "text-teal-400" : "text-rose-400"}`}>
             VB {risk.vaginal.replace("About ", "").replace(" on average", "")}
           </p>
         </div>
       </button>
       {expanded && risk.plain && (
-        <p className="text-[13px] text-gray-500 leading-relaxed pb-3.5 ml-5">{risk.plain}</p>
+        <p className="text-[13px] text-gray-500 leading-relaxed pb-3.5 px-4 pl-9">{risk.plain}</p>
       )}
     </div>
   );
