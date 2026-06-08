@@ -4,14 +4,13 @@ import {
   FREQ,
   CS_CONTEXT_OPTIONS,
   CS_PATIENT_FACTORS,
-  CS_RISKS,
-  CS_ALTERNATIVES,
+  CS_RISK_SECTIONS,
+  CS_PP_RISK_SECTIONS,
   CS_FAQ,
   CS_PAGES,
   OVD_CONTEXT_OPTIONS,
   OVD_PATIENT_FACTORS,
-  OVD_RISKS,
-  OVD_ALTERNATIVES,
+  OVD_RISK_SECTIONS,
   OVD_FAQ,
   OVD_PAGES,
 } from "../data/consent";
@@ -462,14 +461,129 @@ function DeclinePage({ pages }) {
   );
 }
 
-function RisksPage({ risks, instrument, activeFactors }) {
+// ─── Risk renderers — one per section type ────────────────────────────────────
+
+function ListRiskRow({ risk, instrument, activeFactors }) {
+  const [expanded, setExpanded] = useState(false);
+
+  // instrument-only risks
+  if (risk.instrumentOnly && instrument !== risk.instrumentOnly) return null;
+
+  // condition-gated risks
+  if (risk.conditions?.length > 0 && !risk.conditions.some(c => activeFactors.has(c))) return null;
+
+  const freqKey = risk.byInstrument ? risk.byInstrument[instrument]?.freq : risk.freq;
+  const rate    = risk.byInstrument ? risk.byInstrument[instrument]?.rate : risk.rate;
+  const f       = FREQ[freqKey];
+
   return (
-    <div className="space-y-5">
-      <RiskSection title="Common risks"      risks={risks.common}  instrument={instrument} activeFactors={activeFactors} />
-      <RiskSection title="Serious risks"     risks={risks.serious} instrument={instrument} activeFactors={activeFactors} />
-      {risks.future && (
-        <RiskSection title="Future pregnancies" risks={risks.future} instrument={instrument} activeFactors={activeFactors} />
+    <div className={`border-b border-gray-50 last:border-0 ${expanded ? "bg-gray-50/50" : ""}`}>
+      <button onClick={() => setExpanded(e => !e)} className="w-full flex items-center gap-3 px-4 py-3 text-left">
+        <span className={`w-2 h-2 rounded-full shrink-0 mt-0.5 ${f?.dot ?? "bg-gray-200"}`} />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-gray-900 leading-snug">{risk.name}</p>
+          {risk.note && <p className="text-[10px] text-orange-600 font-semibold mt-0.5">{risk.note}</p>}
+        </div>
+        <div className="flex flex-col items-end gap-1 shrink-0 ml-2">
+          {freqKey  && <FreqPill freqKey={freqKey} />}
+          {rate     && <span className="text-[10px] text-gray-400 font-mono">{rate}</span>}
+        </div>
+        <svg className={`w-3.5 h-3.5 text-gray-300 shrink-0 ml-1 transition-transform ${expanded ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+      {expanded && risk.plain && (
+        <div className="px-4 pb-3 ml-5">
+          <p className="text-sm text-gray-600 leading-relaxed">{risk.plain}</p>
+        </div>
       )}
+    </div>
+  );
+}
+
+function ComparisonRiskRow({ risk }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className={`border-b border-gray-50 last:border-0 ${expanded ? "bg-gray-50/50" : ""}`}>
+      <button onClick={() => setExpanded(e => !e)} className="w-full grid grid-cols-[1fr_auto_auto] gap-2 px-4 py-3 text-left items-center">
+        <p className="text-sm font-medium text-gray-900 leading-snug pr-1">{risk.name}</p>
+        <div className="w-[90px] text-center">
+          <p className={`text-[11px] font-semibold leading-snug ${risk.cs_higher ? "text-rose-600" : "text-teal-600"}`}>{risk.cs}</p>
+        </div>
+        <div className="w-[90px] text-center">
+          <p className={`text-[11px] font-semibold leading-snug ${risk.cs_higher ? "text-teal-600" : "text-rose-600"}`}>{risk.vaginal}</p>
+        </div>
+      </button>
+      {expanded && risk.plain && (
+        <div className="px-4 pb-3">
+          <p className="text-sm text-gray-600 leading-relaxed">{risk.plain}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RiskSectionBlock({ section, instrument, activeFactors }) {
+  const hasVisibleRisks = section.type === "list"
+    ? section.risks.some(r => {
+        if (r.instrumentOnly && instrument !== r.instrumentOnly) return false;
+        if (r.conditions?.length > 0 && !r.conditions.some(c => activeFactors.has(c))) return false;
+        return true;
+      })
+    : true;
+
+  if (!hasVisibleRisks) return null;
+
+  return (
+    <div className="mb-5">
+      <div className="flex items-baseline justify-between mb-1.5 px-0.5">
+        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">{section.heading}</p>
+      </div>
+
+      {section.type === "list" && (
+        <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+          {section.note && (
+            <p className="px-4 py-2.5 text-[11px] text-amber-700 bg-amber-50 border-b border-amber-100 leading-snug">{section.note}</p>
+          )}
+          {section.risks.map(r => (
+            <ListRiskRow key={r.id} risk={r} instrument={instrument} activeFactors={activeFactors} />
+          ))}
+        </div>
+      )}
+
+      {section.type === "comparison" && (
+        <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+          <div className="grid grid-cols-[1fr_auto_auto] gap-2 px-4 py-2 bg-gray-50 border-b border-gray-100">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Outcome</span>
+            <span className="w-[90px] text-center text-[10px] font-bold text-teal-700 uppercase tracking-wide">CS</span>
+            <span className="w-[90px] text-center text-[10px] font-bold text-gray-400 uppercase tracking-wide">Vaginal</span>
+          </div>
+          {section.risks.map(r => <ComparisonRiskRow key={r.id} risk={r} />)}
+        </div>
+      )}
+
+      {section.type === "simple" && (
+        <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm divide-y divide-gray-50">
+          {section.items.map((item, i) => (
+            <div key={i} className="flex items-center gap-3 px-4 py-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0" />
+              <p className="text-sm text-gray-700">{item}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <p className="text-[9px] text-gray-300 mt-1.5 px-0.5 uppercase tracking-wide font-bold">{section.source}</p>
+    </div>
+  );
+}
+
+function RisksPage({ sections, instrument, activeFactors }) {
+  return (
+    <div className="space-y-1 pb-2">
+      {sections.map(s => (
+        <RiskSectionBlock key={s.id} section={s} instrument={instrument} activeFactors={activeFactors} />
+      ))}
       <FreqKey />
     </div>
   );
@@ -477,7 +591,6 @@ function RisksPage({ risks, instrument, activeFactors }) {
 
 function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
   const [activeTab, setActiveTab] = useState("what");
-  const tabRef = useState(null);
 
   const proc    = CONSENT_PROCEDURES.find(p => p.id === procedureId);
   const isCS    = procedureId === "CS";
@@ -487,13 +600,16 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
     ? (context === "elective" ? "Elective" : "Emergency")
     : (context === "ventouse" ? "Ventouse" : "Forceps");
 
-  const risks  = isCS  ? CS_RISKS  : OVD_RISKS;
-  const faqs   = isCS  ? CS_FAQ    : OVD_FAQ;
-  const pages  = isCS  ? CS_PAGES[context]  : OVD_PAGES[context];
-  const source = isCS  ? "NICE NG192 · RCOG Consent Advice No. 12"
-                       : "RCOG Consent Advice No. 11 (2010)";
+  const faqs      = isCS  ? CS_FAQ          : OVD_FAQ;
+  const pages     = isCS  ? CS_PAGES[context] : OVD_PAGES[context];
+  const source    = isCS  ? "NICE NG192 · RCOG Consent Advice No. 12"
+                           : "RCOG Consent Advice No. 11 (2010)";
   const instrument    = isOVD ? context : null;
   const activeFactors = factors;
+  const hasPP         = isCS && activeFactors.has("placenta_praevia");
+  const riskSections  = isCS
+    ? (hasPP ? CS_PP_RISK_SECTIONS : CS_RISK_SECTIONS)
+    : OVD_RISK_SECTIONS;
 
   const currentIdx = CONSENT_TABS.findIndex(t => t.id === activeTab);
   const canPrev = currentIdx > 0;
@@ -561,7 +677,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
         <div className="px-5 pt-6">
           {activeTab === "what"    && <WhatPage    pages={pages} />}
           {activeTab === "why"     && <WhyPage     pages={pages} />}
-          {activeTab === "risks"   && <RisksPage   risks={risks} instrument={instrument} activeFactors={activeFactors} />}
+          {activeTab === "risks"   && <RisksPage   sections={riskSections} instrument={instrument} activeFactors={activeFactors} />}
           {activeTab === "decline" && <DeclinePage pages={pages} />}
           {activeTab === "faq"     && <FAQSection  faqs={faqs} />}
         </div>
