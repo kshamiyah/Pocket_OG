@@ -1,19 +1,15 @@
-import { Capacitor } from "@capacitor/core";
-
-// WKWebView blocks capacitor:// URLs in iframes (subframe sandbox restriction).
-// Fix: fetch the file from the Capacitor server into memory, create a blob URL,
-// which iframes can load freely. On web, just use window.open.
+// WKWebView blocks capacitor:// URLs in iframe subframes.
+// Fix: always fetch the file into a blob URL — works on both web and native,
+// no Capacitor API needed.
 export async function openUrl(url) {
-  if (Capacitor.isNativePlatform()) {
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      window.dispatchEvent(new CustomEvent("open-pdf", { detail: { url: blobUrl } }));
-    } catch (e) {
-      console.error("Failed to load PDF", e);
-    }
-  } else {
-    window.dispatchEvent(new CustomEvent("open-pdf", { detail: { url } }));
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    window.dispatchEvent(new CustomEvent("open-pdf", { detail: { url: blobUrl } }));
+  } catch {
+    // Fallback for any fetch failure
+    window.open(url, "_blank", "noopener,noreferrer");
   }
 }
