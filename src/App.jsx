@@ -109,6 +109,7 @@ export default function App() {
 
   const closePdf = () => {
     if (viewportMeta) viewportMeta.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover";
+    if (pdfUrl?.startsWith("blob:")) URL.revokeObjectURL(pdfUrl);
     setPdfUrl(null);
   };
 
