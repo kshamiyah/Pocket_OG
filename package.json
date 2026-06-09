@@ -7,9 +7,16 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cap:build": "vite build && npx cap sync",
+    "cap:ios": "vite build && npx cap sync ios && npx cap open ios",
+    "cap:android": "vite build && npx cap sync android && npx cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.0",
+    "@capacitor/cli": "^8.4.0",
+    "@capacitor/core": "^8.4.0",
+    "@capacitor/ios": "^8.4.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },
