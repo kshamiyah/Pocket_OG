@@ -24,6 +24,5 @@ dist-ssr
 *.sw?
 .vercel
 
-# Capacitor native projects (generated locally via npx cap add ios/android)
-ios/
-android/
+# Capacitor build caches
+.gradle/
