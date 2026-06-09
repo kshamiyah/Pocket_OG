@@ -1953,7 +1953,10 @@ export const CONSENT_PROCEDURES = [
     source: "RCOG GTG (Stock 2022)",
     color: { accent: "bg-sky-500", text: "text-sky-700" },
     pdfs: [
-      { label: "RCOG GTG (ACS)", file: "GTG-ACS.pdf" },
+      {
+        label: "RCOG GTG (ACS)",
+        url: "/guidelines/BJOG - 2022 - Stock - Antenatal corticosteroids to reduce neonatal morbidity and mortality.pdf",
+      },
     ],
   },
 ];

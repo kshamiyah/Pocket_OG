@@ -911,8 +911,8 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
                   <p className="text-[10px] text-gray-400 uppercase tracking-wide font-bold">{source}</p>
                   {proc?.pdfs?.map(pdf => (
                     <a
-                      key={pdf.file}
-                      href={`/consent-sources/${pdf.file}`}
+                      key={pdf.label}
+                      href={pdf.url ?? `/consent-sources/${pdf.file}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-1 text-[10px] text-blue-400 font-semibold hover:text-blue-600 transition-colors"
