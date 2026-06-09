@@ -10,6 +10,8 @@ import {
   LAPAROSCOPY_PATIENT_FACTORS, LAPAROSCOPY_RISK_SECTIONS, LAPAROSCOPY_FAQ, LAPAROSCOPY_PAGES,
   HYSTEROSCOPY_CONTEXT_OPTIONS, HYSTEROSCOPY_PATIENT_FACTORS,
   HYSTEROSCOPY_RISK_SECTIONS, HYSTEROSCOPY_FAQ, HYSTEROSCOPY_PAGES,
+  ACS_CONTEXT_OPTIONS, ACS_PATIENT_FACTORS,
+  ACS_RISK_SECTIONS, ACS_FAQ, ACS_PAGES,
 } from "../data/consent";
 
 // Central config lookup — avoids long chains of isCS/isOVD checks
@@ -74,6 +76,16 @@ const PROCEDURE_CONFIG = {
     faq: HYSTEROSCOPY_FAQ,
     getInstrument: () => null,
     sourceLabel: "RCOG CA1 · GTG59",
+  },
+  ACS: {
+    contextOptions: ACS_CONTEXT_OPTIONS,
+    patientFactors: ACS_PATIENT_FACTORS,
+    getRiskSections: (ctx) => ACS_RISK_SECTIONS[ctx] ?? [],
+    comparisonSections: null,
+    getPages: (ctx) => ACS_PAGES[ctx],
+    faq: ACS_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "RCOG GTG (Stock 2022)",
   },
 };
 
