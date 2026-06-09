@@ -12,6 +12,7 @@ import {
   HYSTEROSCOPY_RISK_SECTIONS, HYSTEROSCOPY_FAQ, HYSTEROSCOPY_PAGES,
   ACS_CONTEXT_OPTIONS, ACS_PATIENT_FACTORS,
   ACS_RISK_SECTIONS, ACS_BENEFITS, ACS_FAQ, ACS_PAGES,
+  CERTAINTY,
 } from "../data/consent";
 
 // Central config lookup — avoids long chains of isCS/isOVD checks
@@ -513,26 +514,84 @@ function buildTabs(hasBenefits) {
   ];
 }
 
+const CERTAINTY_ORDER = ["HIGH", "MODERATE", "LOW"];
+
+const CERTAINTY_DOT = {
+  HIGH:     "bg-emerald-500",
+  MODERATE: "bg-emerald-400",
+  LOW:      "bg-emerald-200",
+};
+
+const CERTAINTY_RATE_COLOR = {
+  HIGH:     "text-emerald-600",
+  MODERATE: "text-emerald-500",
+  LOW:      "text-emerald-400",
+};
+
+function BenefitRow({ benefit }) {
+  const [expanded, setExpanded] = useState(false);
+  const color = CERTAINTY_RATE_COLOR[benefit.certainty] ?? "text-gray-300";
+  const dot   = CERTAINTY_DOT[benefit.certainty] ?? "bg-gray-200";
+  return (
+    <div className={`border-b border-gray-100 last:border-0 ${expanded ? "bg-gray-50/40" : ""}`}>
+      <button onClick={() => setExpanded(e => !e)} className="w-full flex items-start gap-3 py-3.5 px-4 text-left">
+        <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${dot}`} />
+        <div className="flex-1 min-w-0 pr-2">
+          <p className="text-[14px] text-gray-900 font-medium leading-snug">{benefit.name}</p>
+          {benefit.source && (
+            <p className="text-[10px] text-gray-300 font-medium mt-0.5">{benefit.source}</p>
+          )}
+        </div>
+        <div className="shrink-0 text-right max-w-[130px]">
+          {benefit.rate && (
+            <p className={`text-[12px] font-bold tabular-nums leading-snug ${color}`}>{benefit.rate}</p>
+          )}
+          {benefit.detail && (
+            <p className={`text-[10px] font-semibold tabular-nums leading-snug ${color}`}>{benefit.detail}</p>
+          )}
+        </div>
+      </button>
+      {expanded && benefit.plain && (
+        <p className="text-[13px] text-gray-500 leading-relaxed pb-3.5 px-4 pl-9">{benefit.plain}</p>
+      )}
+    </div>
+  );
+}
+
+function CertaintyGroup({ benefits, certaintyKey }) {
+  if (!benefits?.length) return null;
+  const c = CERTAINTY[certaintyKey];
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-2 mb-2">
+        <span className={`w-2 h-2 rounded-full shrink-0 ${CERTAINTY_DOT[certaintyKey]}`} />
+        <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.1em]">
+          {c.label} · {benefits.length}
+        </p>
+      </div>
+      <div className="rounded-xl overflow-hidden bg-white border border-gray-100">
+        {benefits.map(b => <BenefitRow key={b.id} benefit={b} />)}
+      </div>
+    </div>
+  );
+}
+
 function BenefitsPage({ benefits }) {
   if (!benefits?.length) return null;
+  const grouped = {};
+  for (const b of benefits) {
+    const key = b.certainty ?? "LOW";
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(b);
+  }
   return (
     <div className="pb-4">
-      <p className="text-xs text-gray-400 mb-4 leading-relaxed">
-        Likely effects of a single course of antenatal corticosteroids on the baby — verbatim from RCOG GTG (Stock 2022) Table 1.
+      {CERTAINTY_ORDER.map(key => (
+        <CertaintyGroup key={key} benefits={grouped[key]} certaintyKey={key} />
+      ))}
+      <p className="text-[10px] text-gray-300 text-center mt-2 leading-relaxed">
+        Certainty ratings follow the GRADE system as used in RCOG GTG (Stock 2022). Tap any row to read the verbatim guideline wording.
       </p>
-      <div className="rounded-2xl overflow-hidden bg-emerald-50/40 border border-emerald-100">
-        {benefits.map((b, i) => (
-          <div key={b.id} className={`px-4 py-4 ${i > 0 ? "border-t border-emerald-100" : ""}`}>
-            <div className="flex items-baseline justify-between gap-3 mb-1.5">
-              <p className="text-[15px] font-semibold text-gray-900 leading-snug">{b.name}</p>
-              {b.rate && (
-                <p className="text-[11px] font-bold text-emerald-700 shrink-0 text-right">{b.rate}</p>
-              )}
-            </div>
-            {b.plain && <p className="text-[13px] text-gray-600 leading-relaxed">{b.plain}</p>}
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

@@ -1602,30 +1602,56 @@ export const ACS_PATIENT_FACTORS = [
   { id: "acs_multiple",     label: "Multiple pregnancy" },
 ];
 
+// GRADE certainty mapping from RCOG GTG (Stock 2022):
+//   HIGH     — "Highly likely"
+//   MODERATE — "Likely"
+//   LOW      — "May"
+export const CERTAINTY = {
+  HIGH:     { label: "Highly likely",   short: "High certainty"     },
+  MODERATE: { label: "Likely",          short: "Moderate certainty" },
+  LOW:      { label: "May",             short: "Low certainty"      },
+};
+
 export const ACS_BENEFITS = {
   preterm: [
-    { id: "acs_perinatal_death", name: "Perinatal death", rate: "2.3 in 100 fewer (NNT 43.5)",
-      plain: "Highly likely to reduce perinatal mortality — RR 0.85 (95% CI 0.77–0.93)." },
-    { id: "acs_neonatal_death", name: "Neonatal death", rate: "2.6 in 100 fewer (NNT 38.5)",
-      plain: "Highly likely to reduce neonatal death — RR 0.78 (95% CI 0.70–0.87)." },
-    { id: "acs_rds", name: "Respiratory distress syndrome", rate: "4.3 in 100 fewer (NNT 23.3)",
-      plain: "Highly likely to reduce neonatal respiratory distress — RR 0.71 (95% CI 0.65–0.78)." },
-    { id: "acs_ivh", name: "Intraventricular haemorrhage", rate: "1.4 in 100 fewer (NNT 71.4)",
-      plain: "Likely to reduce bleeding into the brain ventricles — RR 0.58 (95% CI 0.45–0.75)." },
-    { id: "acs_dev_delay", name: "Developmental delay in childhood", rate: "NNT 27",
+    { id: "acs_perinatal_death", name: "Perinatal death", certainty: "HIGH",
+      rate: "2.3 in 100 fewer", detail: "NNT 43.5",
+      source: "RCOG GTG (Stock 2022) Table 1",
+      plain: "Highly likely to reduce perinatal mortality — RR 0.85 (95% CI 0.77–0.93). About 2.3 in 100 fewer babies will die around the time of birth. 43.5 women need to be treated to prevent one death." },
+    { id: "acs_neonatal_death", name: "Neonatal death", certainty: "HIGH",
+      rate: "2.6 in 100 fewer", detail: "NNT 38.5",
+      source: "RCOG GTG (Stock 2022) Table 1",
+      plain: "Highly likely to reduce neonatal death — RR 0.78 (95% CI 0.70–0.87). About 2.6 in 100 fewer babies will die in the newborn period. 38.5 women need to be treated to prevent one death." },
+    { id: "acs_rds", name: "Respiratory distress syndrome", certainty: "HIGH",
+      rate: "4.3 in 100 fewer", detail: "NNT 23.3",
+      source: "RCOG GTG (Stock 2022) Table 1",
+      plain: "Highly likely to reduce neonatal respiratory distress — RR 0.71 (95% CI 0.65–0.78). About 4.3 in 100 fewer babies will develop RDS. 23.3 women need to be treated to prevent one case." },
+    { id: "acs_ivh", name: "Intraventricular haemorrhage", certainty: "MODERATE",
+      rate: "1.4 in 100 fewer", detail: "NNT 71.4",
+      source: "RCOG GTG (Stock 2022) Table 1",
+      plain: "Likely to reduce bleeding into the brain ventricles — RR 0.58 (95% CI 0.45–0.75). 71.4 women need to be treated to prevent one case." },
+    { id: "acs_dev_delay", name: "Developmental delay in childhood", certainty: "MODERATE",
+      rate: "NNT 27", detail: null,
+      source: "RCOG GTG (Stock 2022) Table 1",
       plain: "Likely to reduce developmental delay in childhood — RR 0.51 (95% CI 0.27–0.97)." },
   ],
   late_preterm: [
-    { id: "acs_late_resp_support", name: "Need for respiratory support", rate: "from 146 to 116 in 1,000 (NNT 33.3)",
-      plain: "Likely to reduce the need for respiratory support — RR 0.80 (95% CI 0.66–0.97)." },
+    { id: "acs_late_resp_support", name: "Need for respiratory support", certainty: "MODERATE",
+      rate: "146 → 116 / 1,000", detail: "NNT 33.3",
+      source: "RCOG GTG (Stock 2022) Table 1",
+      plain: "Likely to reduce the need for respiratory support — RR 0.80 (95% CI 0.66–0.97). The rate falls from 146 to 116 per 1,000. 33.3 women need to be treated to prevent one case." },
   ],
   term_cs: [
-    { id: "acs_term_nnu", name: "NNU admission for respiratory morbidity", rate: "from 51 to 23 in 1,000 (NNT 35.7)",
-      plain: "May decrease NNU admission with respiratory morbidity — RR 0.45 (95% CI 0.22–0.90). Single-trial, moderate certainty." },
+    { id: "acs_term_nnu", name: "NNU admission for respiratory morbidity", certainty: "LOW",
+      rate: "51 → 23 / 1,000", detail: "NNT 35.7",
+      source: "RCOG GTG (Stock 2022) Table 1",
+      plain: "May decrease NNU admission with respiratory morbidity — RR 0.45 (95% CI 0.22–0.90). Single-centre trial with high risk of bias, so low certainty around the estimate." },
   ],
   rescue: [
-    { id: "acs_rescue_resp", name: "Need for respiratory support", rate: "from 395 to 311 in 1,000 (NNT 11.9)",
-      plain: "Likely to reduce the need for respiratory support — RR 0.91 (95% CI 0.85–0.97)." },
+    { id: "acs_rescue_resp", name: "Need for respiratory support", certainty: "MODERATE",
+      rate: "395 → 311 / 1,000", detail: "NNT 11.9",
+      source: "RCOG GTG (Stock 2022) Table 1",
+      plain: "Likely to reduce the need for respiratory support — RR 0.91 (95% CI 0.85–0.97). The rate falls from 395 to 311 per 1,000. 11.9 women need to be treated to prevent one case." },
   ],
 };
 
