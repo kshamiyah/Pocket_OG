@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { openUrl } from "../utils/openUrl";
 
 const NODE_STYLES = {
   action:  { badge: "bg-blue-100 text-blue-700",   icon: "→", bar: "bg-blue-500" },
@@ -69,17 +70,15 @@ export default function FlowchartPlayer({ flowchart, theme, onClose, pdfUrl }) {
           <p className="text-xs text-gray-400">{flowchart.subtitle}</p>
         </div>
         {pdfUrl && (
-          <a
-            href={pdfUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() => openUrl(pdfUrl)}
             className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors shrink-0 px-1"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
             PDF
-          </a>
+          </button>
         )}
         <button
           onClick={onClose}
