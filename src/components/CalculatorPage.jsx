@@ -41,6 +41,24 @@ function ScenarioList({ onSelect }) {
                   <p className="text-sm font-semibold text-gray-900 leading-snug">{s.title}</p>
                   <p className="text-xs text-gray-400 mt-0.5">{s.subtitle}</p>
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mt-1.5">{s.source}</p>
+                  {s.pdfs?.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2" onClick={e => e.stopPropagation()}>
+                      {s.pdfs.map(pdf => (
+                        <a
+                          key={pdf.label}
+                          href={pdf.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 hover:bg-gray-200 text-[10px] font-semibold text-gray-500 transition-colors"
+                        >
+                          <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                          </svg>
+                          {pdf.label}
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <svg className="w-4 h-4 text-gray-300 shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -60,10 +78,10 @@ function ScenarioList({ onSelect }) {
 
 // ─── Shared chrome ────────────────────────────────────────────────────
 
-function StepHeader({ title, subtitle, onBack }) {
+function StepHeader({ title, subtitle, onBack, pdfs }) {
   return (
-    <div className="px-5 pt-14 pb-2 flex items-center gap-3">
-      <button onClick={onBack} className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors shrink-0">
+    <div className="px-5 pt-14 pb-2 flex items-start gap-3">
+      <button onClick={onBack} className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors shrink-0 mt-0.5">
         <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
@@ -71,6 +89,24 @@ function StepHeader({ title, subtitle, onBack }) {
       <div>
         <p className="text-xs text-gray-400 font-medium">{title}</p>
         {subtitle && <p className="text-[10px] text-gray-300 font-medium mt-0.5">{subtitle}</p>}
+        {pdfs?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {pdfs.map(pdf => (
+              <a
+                key={pdf.label}
+                href={pdf.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 hover:bg-gray-200 text-[10px] font-semibold text-gray-500 transition-colors"
+              >
+                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                {pdf.label}
+              </a>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -156,7 +192,7 @@ function ResultCard({ result }) {
 
 // ─── Scenario 1: PUL ──────────────────────────────────────────────────
 
-function PulCalculator({ onBack }) {
+function PulCalculator({ onBack, pdfs }) {
   const [hcg1, setHcg1] = useState("");
   const [hcg2, setHcg2] = useState("");
   const [hours, setHours] = useState("48");
@@ -180,7 +216,7 @@ function PulCalculator({ onBack }) {
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <StepHeader title="PUL — serial hCG" subtitle="NICE NG126 §1.4.27–1.4.32" onBack={onBack} />
+        <StepHeader title="PUL — serial hCG" subtitle="NICE NG126 §1.4.27–1.4.32" onBack={onBack} pdfs={pdfs} />
 
         <div className="px-5 pt-6">
           {!result && (
@@ -235,7 +271,7 @@ function PulCalculator({ onBack }) {
 
 // ─── Scenario 2: Ectopic decision ─────────────────────────────────────
 
-function EctopicDecisionCalculator({ onBack }) {
+function EctopicDecisionCalculator({ onBack, pdfs }) {
   const [hcg, setHcg] = useState("");
   const [massSize, setMassSize] = useState("");
   const [significantPain, setSignificantPain] = useState(null);
@@ -273,7 +309,7 @@ function EctopicDecisionCalculator({ onBack }) {
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <StepHeader title="Tubal ectopic — initial management" subtitle="NICE NG126 §1.6.3–1.6.10 · RCOG GTG21 §5.1" onBack={onBack} />
+        <StepHeader title="Tubal ectopic — initial management" subtitle="NICE NG126 §1.6.3–1.6.10 · RCOG GTG21 §5.1" onBack={onBack} pdfs={pdfs} />
 
         <div className="px-5 pt-6">
           {!result && (
@@ -346,7 +382,7 @@ function EctopicDecisionCalculator({ onBack }) {
 
 // ─── Scenario 3: Expectant surveillance ───────────────────────────────
 
-function ExpectantSurveillanceCalculator({ onBack }) {
+function ExpectantSurveillanceCalculator({ onBack, pdfs }) {
   const [day0, setDay0] = useState("");
   const [day2, setDay2] = useState("");
   const [day4, setDay4] = useState("");
@@ -361,7 +397,7 @@ function ExpectantSurveillanceCalculator({ onBack }) {
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <StepHeader title="Expectant management surveillance" subtitle="NICE NG126 §1.6.5" onBack={onBack} />
+        <StepHeader title="Expectant management surveillance" subtitle="NICE NG126 §1.6.5" onBack={onBack} pdfs={pdfs} />
 
         <div className="px-5 pt-6">
           <h3 className="text-2xl font-bold text-gray-900 mb-1">Serial hCG values</h3>
@@ -397,7 +433,7 @@ function ExpectantSurveillanceCalculator({ onBack }) {
 
 // ─── Scenario 4: Post-MTX surveillance ────────────────────────────────
 
-function MtxSurveillanceCalculator({ onBack }) {
+function MtxSurveillanceCalculator({ onBack, pdfs }) {
   const [day1, setDay1] = useState("");
   const [day4, setDay4] = useState("");
   const [day7, setDay7] = useState("");
@@ -413,7 +449,7 @@ function MtxSurveillanceCalculator({ onBack }) {
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <StepHeader title="Post-methotrexate surveillance" subtitle="NICE NG126 §1.6.11 · RCOG GTG21 App II" onBack={onBack} />
+        <StepHeader title="Post-methotrexate surveillance" subtitle="NICE NG126 §1.6.11 · RCOG GTG21 App II" onBack={onBack} pdfs={pdfs} />
 
         <div className="px-5 pt-6">
           <h3 className="text-2xl font-bold text-gray-900 mb-1">hCG after MTX</h3>
@@ -450,7 +486,7 @@ function MtxSurveillanceCalculator({ onBack }) {
 
 // ─── Scenario 5: VTE risk score (GTG37a) ──────────────────────────────
 
-function VteRiskCalculator({ onBack }) {
+function VteRiskCalculator({ onBack, pdfs }) {
   const [phase, setPhase] = useState(null); // "antenatal" | "postnatal"
   const [ticked, setTicked] = useState(new Set());
   const [weight, setWeight] = useState("");
@@ -460,7 +496,7 @@ function VteRiskCalculator({ onBack }) {
     return (
       <div className="min-h-screen pb-24">
         <div className="max-w-lg mx-auto">
-          <StepHeader title="VTE risk score" subtitle="RCOG GTG37a Appendix III" onBack={onBack} />
+          <StepHeader title="VTE risk score" subtitle="RCOG GTG37a Appendix III" onBack={onBack} pdfs={pdfs} />
           <div className="px-5 pt-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-1">When are you assessing?</h3>
             <p className="text-sm text-gray-400 mb-6">GTG37a uses different thresholds for antenatal and postnatal assessment.</p>
@@ -677,12 +713,13 @@ export default function CalculatorPage() {
   if (!scenarioId) return <ScenarioList onSelect={setScenarioId} />;
 
   const back = () => setScenarioId(null);
+  const pdfs = CALCULATOR_SCENARIOS.find(s => s.id === scenarioId)?.pdfs ?? [];
 
-  if (scenarioId === "PUL") return <PulCalculator onBack={back} />;
-  if (scenarioId === "ECTOPIC_DECISION") return <EctopicDecisionCalculator onBack={back} />;
-  if (scenarioId === "EXPECTANT_SURVEILLANCE") return <ExpectantSurveillanceCalculator onBack={back} />;
-  if (scenarioId === "MTX_SURVEILLANCE") return <MtxSurveillanceCalculator onBack={back} />;
-  if (scenarioId === "VTE_RISK") return <VteRiskCalculator onBack={back} />;
+  if (scenarioId === "PUL") return <PulCalculator onBack={back} pdfs={pdfs} />;
+  if (scenarioId === "ECTOPIC_DECISION") return <EctopicDecisionCalculator onBack={back} pdfs={pdfs} />;
+  if (scenarioId === "EXPECTANT_SURVEILLANCE") return <ExpectantSurveillanceCalculator onBack={back} pdfs={pdfs} />;
+  if (scenarioId === "MTX_SURVEILLANCE") return <MtxSurveillanceCalculator onBack={back} pdfs={pdfs} />;
+  if (scenarioId === "VTE_RISK") return <VteRiskCalculator onBack={back} pdfs={pdfs} />;
 
   return <ScenarioList onSelect={setScenarioId} />;
 }

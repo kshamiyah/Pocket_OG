@@ -18,6 +18,9 @@ export const CALCULATOR_SCENARIOS = [
     source: "NICE NG126 §1.4.27–1.4.31",
     color: { accent: "bg-amber-500", text: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200" },
     description: "Use serial hCG to determine subsequent management of a pregnancy of unknown location.",
+    pdfs: [
+      { label: "NICE NG126", url: "/guidelines/ectopic-pregnancy-and-miscarriage-diagnosis-and-initial-management-pdf-66141662244037.pdf" },
+    ],
   },
   {
     id: "ECTOPIC_DECISION",
@@ -26,6 +29,10 @@ export const CALCULATOR_SCENARIOS = [
     source: "NICE NG126 §1.6.3–1.6.10 · RCOG GTG21 §5.1",
     color: { accent: "bg-rose-500", text: "text-rose-700", bg: "bg-rose-50", border: "border-rose-200" },
     description: "Allocate a woman with an ultrasound-diagnosed tubal ectopic pregnancy to expectant, medical or surgical management.",
+    pdfs: [
+      { label: "NICE NG126", url: "/guidelines/ectopic-pregnancy-and-miscarriage-diagnosis-and-initial-management-pdf-66141662244037.pdf" },
+      { label: "RCOG GTG21", url: "/guidelines/BJOG - 2016 -  - Diagnosis and Management of Ectopic Pregnancy.pdf" },
+    ],
   },
   {
     id: "EXPECTANT_SURVEILLANCE",
@@ -34,6 +41,10 @@ export const CALCULATOR_SCENARIOS = [
     source: "NICE NG126 §1.6.5",
     color: { accent: "bg-teal-500", text: "text-teal-700", bg: "bg-teal-50", border: "border-teal-200" },
     description: "Interpret serial hCG during expectant management of a tubal ectopic pregnancy.",
+    pdfs: [
+      { label: "NICE NG126", url: "/guidelines/ectopic-pregnancy-and-miscarriage-diagnosis-and-initial-management-pdf-66141662244037.pdf" },
+      { label: "RCOG GTG21", url: "/guidelines/BJOG - 2016 -  - Diagnosis and Management of Ectopic Pregnancy.pdf" },
+    ],
   },
   {
     id: "MTX_SURVEILLANCE",
@@ -42,6 +53,10 @@ export const CALCULATOR_SCENARIOS = [
     source: "NICE NG126 §1.6.11 · RCOG GTG21 Appendix II",
     color: { accent: "bg-violet-500", text: "text-violet-700", bg: "bg-violet-50", border: "border-violet-200" },
     description: "Interpret day 4 → day 7 hCG following single-dose methotrexate for tubal ectopic pregnancy.",
+    pdfs: [
+      { label: "NICE NG126", url: "/guidelines/ectopic-pregnancy-and-miscarriage-diagnosis-and-initial-management-pdf-66141662244037.pdf" },
+      { label: "RCOG GTG21", url: "/guidelines/BJOG - 2016 -  - Diagnosis and Management of Ectopic Pregnancy.pdf" },
+    ],
   },
   {
     id: "VTE_RISK",
@@ -50,6 +65,9 @@ export const CALCULATOR_SCENARIOS = [
     source: "RCOG GTG37a Appendix III (April 2015)",
     color: { accent: "bg-indigo-500", text: "text-indigo-700", bg: "bg-indigo-50", border: "border-indigo-200" },
     description: "Formal VTE risk assessment with numerical scoring for pregnant and postpartum women.",
+    pdfs: [
+      { label: "RCOG GTG37a", url: "/guidelines/gtg-37a.pdf" },
+    ],
   },
 ];
 
