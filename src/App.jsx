@@ -444,7 +444,7 @@ export default function App() {
                     return (
                       <div
                         key={gl.code}
-                        className={`flex items-center gap-3 px-4 py-4 ${i > 0 ? "border-t border-gray-50" : ""}`}
+                        className={`flex items-center gap-3 px-4 py-4 min-h-[80px] ${i > 0 ? "border-t border-gray-50" : ""}`}
                       >
                         <div className={`w-1 h-10 rounded-full shrink-0 ${col.accent}`} />
                         <div className="flex-1 min-w-0">

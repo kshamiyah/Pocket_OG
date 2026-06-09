@@ -127,7 +127,7 @@ function ProcedureList({ onSelect }) {
               <button
                 key={proc.id}
                 onClick={() => onSelect(proc.id)}
-                className="flex items-center gap-3 w-full px-4 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
+                className="flex items-center gap-3 w-full px-4 py-4 min-h-[80px] hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
               >
                 <div className={`w-1 h-10 rounded-full shrink-0 ${proc.color.accent}`} />
                 <div className="flex-1 min-w-0">
