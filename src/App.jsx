@@ -7,6 +7,7 @@ import NoResults from "./components/NoResults";
 import FlowchartPlayer from "./components/FlowchartPlayer";
 import FeedbackButton from "./components/FeedbackButton";
 import ConsentPage from "./components/ConsentPage";
+import { openUrl } from "./utils/openUrl";
 
 const FILTER_OPTIONS = [
   { value: "ALL",        label: "All guidelines",      pill: "All",           filterFn: null,                                                    active: "bg-gray-900 text-white" },
@@ -484,17 +485,15 @@ export default function App() {
                           <p className="text-xs text-gray-400 mt-0.5">{gl.code} · {gl.version} · {gl.date}</p>
                         </div>
                         {gl.pdf && (
-                          <a
-                            href={`/guidelines/${gl.code}.pdf`}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <button
+                            onClick={() => openUrl(`/guidelines/${gl.code}.pdf`)}
                             className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors text-xs font-medium text-gray-600 shrink-0"
                           >
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                             </svg>
                             PDF
-                          </a>
+                          </button>
                         )}
                       </div>
                     );
