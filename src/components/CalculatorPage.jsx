@@ -32,7 +32,7 @@ function ScenarioList({ onSelect }) {
 
         <div className="px-5">
           <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm divide-y divide-gray-100">
-            {CALCULATOR_SCENARIOS.map(s => (
+            {[...CALCULATOR_SCENARIOS].sort((a, b) => a.title.localeCompare(b.title)).map(s => (
               <button
                 key={s.id}
                 onClick={() => onSelect(s.id)}

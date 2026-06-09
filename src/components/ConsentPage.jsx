@@ -123,7 +123,7 @@ function ProcedureList({ onSelect }) {
 
         <div className="px-5">
           <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm divide-y divide-gray-100">
-            {CONSENT_PROCEDURES.map(proc => (
+            {[...CONSENT_PROCEDURES].sort((a, b) => a.title.localeCompare(b.title)).map(proc => (
               <button
                 key={proc.id}
                 onClick={() => onSelect(proc.id)}

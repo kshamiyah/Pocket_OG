@@ -438,6 +438,7 @@ export default function App() {
               <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
                 {Object.values(GUIDELINES)
                   .filter(gl => glSourceFilter === "ALL" || gl.source === glSourceFilter)
+                  .sort((a, b) => a.label.localeCompare(b.label))
                   .map((gl, i) => {
                     const col = FC_GL_COLOR[gl.code] ?? { accent: "bg-gray-300", icon: "text-gray-400" };
                     return (
