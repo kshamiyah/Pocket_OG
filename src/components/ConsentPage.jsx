@@ -11,7 +11,7 @@ import {
   HYSTEROSCOPY_CONTEXT_OPTIONS, HYSTEROSCOPY_PATIENT_FACTORS,
   HYSTEROSCOPY_RISK_SECTIONS, HYSTEROSCOPY_FAQ, HYSTEROSCOPY_PAGES,
   ACS_CONTEXT_OPTIONS, ACS_PATIENT_FACTORS,
-  ACS_RISK_SECTIONS, ACS_FAQ, ACS_PAGES,
+  ACS_RISK_SECTIONS, ACS_BENEFITS, ACS_FAQ, ACS_PAGES,
 } from "../data/consent";
 
 // Central config lookup — avoids long chains of isCS/isOVD checks
@@ -81,6 +81,7 @@ const PROCEDURE_CONFIG = {
     contextOptions: ACS_CONTEXT_OPTIONS,
     patientFactors: ACS_PATIENT_FACTORS,
     getRiskSections: (ctx) => ACS_RISK_SECTIONS[ctx] ?? [],
+    getBenefits: (ctx) => ACS_BENEFITS[ctx] ?? [],
     comparisonSections: null,
     getPages: (ctx) => ACS_PAGES[ctx],
     faq: ACS_FAQ,
@@ -680,7 +681,7 @@ function FreqGroup({ risks, freqKey }) {
   );
 }
 
-function RisksPage({ sections, comparisonSections, instrument, activeFactors }) {
+function RisksPage({ sections, benefits = [], comparisonSections, instrument, activeFactors }) {
   const [showComparison, setShowComparison] = useState(false);
   const [catTab, setCatTab] = useState("maternal");
 
@@ -702,6 +703,35 @@ function RisksPage({ sections, comparisonSections, instrument, activeFactors }) 
 
   return (
     <div className="pb-4">
+      {benefits.length > 0 && (
+        <div className="mb-7">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <p className="text-[11px] font-semibold text-emerald-700 uppercase tracking-[0.1em]">Benefits</p>
+          </div>
+          <div className="rounded-xl overflow-hidden bg-emerald-50/50 border border-emerald-100">
+            {benefits.map((b, i) => (
+              <div key={b.id} className={`px-4 py-3 ${i > 0 ? "border-t border-emerald-100" : ""}`}>
+                <div className="flex items-baseline justify-between gap-3 mb-1">
+                  <p className="text-[14px] font-semibold text-gray-900 leading-snug">{b.name}</p>
+                  {b.rate && (
+                    <p className="text-[11px] font-bold text-emerald-700 shrink-0">{b.rate}</p>
+                  )}
+                </div>
+                {b.plain && <p className="text-[12px] text-gray-600 leading-relaxed">{b.plain}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {benefits.length > 0 && sections.length > 0 && (
+        <div className="flex items-center gap-2 mb-3">
+          <span className="w-2 h-2 rounded-full bg-rose-500" />
+          <p className="text-[11px] font-semibold text-rose-700 uppercase tracking-[0.1em]">Risks &amp; harms</p>
+        </div>
+      )}
+
       {showTabs && (
         <div className="flex gap-1 mb-5 p-1 bg-gray-100 rounded-xl">
           {[
@@ -785,6 +815,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
   const source           = cfg.sourceLabel ?? "";
   const instrument       = cfg.getInstrument?.(context) ?? null;
   const riskSections     = cfg.getRiskSections?.(context, activeFactors) ?? [];
+  const benefits         = cfg.getBenefits?.(context, activeFactors) ?? [];
   const comparisonSections = cfg.comparisonSections ?? null;
 
   const currentIdx = CONSENT_TABS.findIndex(t => t.id === activeTab);
@@ -867,7 +898,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
         <div className="px-5 pt-6">
           {activeTab === "what"    && <WhatPage    pages={pages} />}
           {activeTab === "why"     && <WhyPage     pages={pages} />}
-          {activeTab === "risks"   && <RisksPage   sections={riskSections} comparisonSections={comparisonSections} instrument={instrument ?? context} activeFactors={activeFactors} />}
+          {activeTab === "risks"   && <RisksPage   sections={riskSections} benefits={benefits} comparisonSections={comparisonSections} instrument={instrument ?? context} activeFactors={activeFactors} />}
           {activeTab === "decline" && <DeclinePage pages={pages} />}
           {activeTab === "faq"     && <FAQSection  faqs={faqs} />}
         </div>

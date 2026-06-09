@@ -1602,55 +1602,35 @@ export const ACS_PATIENT_FACTORS = [
   { id: "acs_multiple",     label: "Multiple pregnancy" },
 ];
 
+export const ACS_BENEFITS = {
+  preterm: [
+    { id: "acs_perinatal_death", name: "Perinatal death", rate: "2.3 in 100 fewer (NNT 43.5)",
+      plain: "Highly likely to reduce perinatal mortality — RR 0.85 (95% CI 0.77–0.93)." },
+    { id: "acs_neonatal_death", name: "Neonatal death", rate: "2.6 in 100 fewer (NNT 38.5)",
+      plain: "Highly likely to reduce neonatal death — RR 0.78 (95% CI 0.70–0.87)." },
+    { id: "acs_rds", name: "Respiratory distress syndrome", rate: "4.3 in 100 fewer (NNT 23.3)",
+      plain: "Highly likely to reduce neonatal respiratory distress — RR 0.71 (95% CI 0.65–0.78)." },
+    { id: "acs_ivh", name: "Intraventricular haemorrhage", rate: "1.4 in 100 fewer (NNT 71.4)",
+      plain: "Likely to reduce bleeding into the brain ventricles — RR 0.58 (95% CI 0.45–0.75)." },
+    { id: "acs_dev_delay", name: "Developmental delay in childhood", rate: "NNT 27",
+      plain: "Likely to reduce developmental delay in childhood — RR 0.51 (95% CI 0.27–0.97)." },
+  ],
+  late_preterm: [
+    { id: "acs_late_resp_support", name: "Need for respiratory support", rate: "from 146 to 116 in 1,000 (NNT 33.3)",
+      plain: "Likely to reduce the need for respiratory support — RR 0.80 (95% CI 0.66–0.97)." },
+  ],
+  term_cs: [
+    { id: "acs_term_nnu", name: "NNU admission for respiratory morbidity", rate: "from 51 to 23 in 1,000 (NNT 35.7)",
+      plain: "May decrease NNU admission with respiratory morbidity — RR 0.45 (95% CI 0.22–0.90). Single-trial, moderate certainty." },
+  ],
+  rescue: [
+    { id: "acs_rescue_resp", name: "Need for respiratory support", rate: "from 395 to 311 in 1,000 (NNT 11.9)",
+      plain: "Likely to reduce the need for respiratory support — RR 0.91 (95% CI 0.85–0.97)." },
+  ],
+};
+
 export const ACS_RISK_SECTIONS = {
   preterm: [
-    {
-      id: "acs_preterm_benefits",
-      heading: "Benefits to the baby",
-      type: "list",
-      risks: [
-        {
-          id: "acs_perinatal_death",
-          name: "Reduction in perinatal death",
-          freq: "COMMON",
-          rate: "2.3 in 100 fewer (NNT 43.5)",
-          source: "RCOG GTG (Stock 2022) Table 1",
-          plain: "Highly likely to reduce perinatal mortality (RR 0.85, 95% CI 0.77–0.93). About 2.3 in 100 fewer babies will die around the time of birth, with 43.5 women needing to be treated to prevent one death.",
-        },
-        {
-          id: "acs_neonatal_death",
-          name: "Reduction in neonatal death",
-          freq: "COMMON",
-          rate: "2.6 in 100 fewer (NNT 38.5)",
-          source: "RCOG GTG (Stock 2022) Table 1",
-          plain: "Highly likely to reduce neonatal death (RR 0.78, 95% CI 0.70–0.87). About 2.6 in 100 fewer babies will die in the newborn period, with 38.5 women needing to be treated to prevent one death.",
-        },
-        {
-          id: "acs_rds",
-          name: "Reduction in respiratory distress syndrome",
-          freq: "COMMON",
-          rate: "4.3 in 100 fewer (NNT 23.3)",
-          source: "RCOG GTG (Stock 2022) Table 1",
-          plain: "Highly likely to reduce neonatal respiratory distress (RR 0.71, 95% CI 0.65–0.78). About 4.3 in 100 fewer babies will develop RDS, with 23.3 women needing to be treated to prevent one case.",
-        },
-        {
-          id: "acs_ivh",
-          name: "Reduction in intraventricular haemorrhage",
-          freq: "COMMON",
-          rate: "1.4 in 100 fewer (NNT 71.4)",
-          source: "RCOG GTG (Stock 2022) Table 1",
-          plain: "Likely to reduce bleeding into the brain ventricles (RR 0.58, 95% CI 0.45–0.75). About 1.4 in 100 fewer babies will have IVH, with 71.4 women needing to be treated to prevent one case.",
-        },
-        {
-          id: "acs_dev_delay",
-          name: "Reduction in developmental delay in childhood",
-          freq: "COMMON",
-          rate: "NNT 27",
-          source: "RCOG GTG (Stock 2022) Table 1",
-          plain: "Likely to reduce developmental delay in childhood (RR 0.51, 95% CI 0.27–0.97).",
-        },
-      ],
-    },
     {
       id: "acs_preterm_harms",
       heading: "Possible harms",
@@ -1705,21 +1685,6 @@ export const ACS_RISK_SECTIONS = {
 
   late_preterm: [
     {
-      id: "acs_late_benefits",
-      heading: "Benefits to the baby",
-      type: "list",
-      risks: [
-        {
-          id: "acs_late_resp_support",
-          name: "Reduction in need for respiratory support",
-          freq: "COMMON",
-          rate: "from 146 to 116 in 1,000 (NNT 33.3)",
-          source: "RCOG GTG (Stock 2022) Table 1",
-          plain: "Likely to reduce the need for respiratory support (RR 0.80, 95% CI 0.66–0.97). The rate falls from 146 to 116 per 1,000, with 33.3 women needing to be treated to prevent one case.",
-        },
-      ],
-    },
-    {
       id: "acs_late_harms",
       heading: "Possible harms",
       type: "list",
@@ -1754,21 +1719,6 @@ export const ACS_RISK_SECTIONS = {
   ],
 
   term_cs: [
-    {
-      id: "acs_term_benefits",
-      heading: "Possible benefits to the baby",
-      type: "list",
-      risks: [
-        {
-          id: "acs_term_nnu",
-          name: "Possible reduction in NNU admission for respiratory morbidity",
-          freq: "COMMON",
-          rate: "from 51 to 23 in 1,000 (NNT 35.7)",
-          source: "RCOG GTG (Stock 2022) Table 1",
-          plain: "May decrease admission to the neonatal unit with respiratory morbidity (RR 0.45, 95% CI 0.22–0.90). The rate falls from 51 to 23 per 1,000, with 35.7 women needing to be treated to prevent one admission.",
-        },
-      ],
-    },
     {
       id: "acs_term_harms",
       heading: "Possible harms",
@@ -1806,21 +1756,6 @@ export const ACS_RISK_SECTIONS = {
   ],
 
   rescue: [
-    {
-      id: "acs_rescue_benefits",
-      heading: "Benefits to the baby",
-      type: "list",
-      risks: [
-        {
-          id: "acs_rescue_resp",
-          name: "Reduction in need for respiratory support",
-          freq: "COMMON",
-          rate: "from 395 to 311 in 1,000 (NNT 11.9)",
-          source: "RCOG GTG (Stock 2022) Table 1",
-          plain: "Likely to reduce the need for respiratory support (RR 0.91, 95% CI 0.85–0.97). The rate falls from 395 to 311 per 1,000, with 11.9 women needing to be treated to prevent one case.",
-        },
-      ],
-    },
     {
       id: "acs_rescue_harms",
       heading: "Possible harms",
