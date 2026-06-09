@@ -93,11 +93,18 @@ export default function App() {
   const [guidelinePickerOpen, setGuidelinePickerOpen] = useState(false);
   const [glSourceFilter, setGlSourceFilter] = useState("ALL");
   const [fcSourceFilter, setFcSourceFilter] = useState("ALL");
+  const [pdfUrl, setPdfUrl] = useState(null);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
   const hasQuery = query.trim().length > 0;
 
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  useEffect(() => {
+    const handler = (e) => setPdfUrl(e.detail.url);
+    window.addEventListener("open-pdf", handler);
+    return () => window.removeEventListener("open-pdf", handler);
+  }, []);
 
   // Focus idle input on mount (desktop only — mobile would open keyboard immediately)
   useEffect(() => {
@@ -144,6 +151,21 @@ export default function App() {
 
       {/* Feedback button — always visible */}
       <FeedbackButton query={query} filter={filter} />
+
+      {/* PDF viewer overlay (native only) */}
+      {pdfUrl && (
+        <div className="fixed inset-0 z-[60] bg-white flex flex-col" style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}>
+          <div className="shrink-0 flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+            <button onClick={() => setPdfUrl(null)} className="flex items-center gap-1.5 text-sm text-blue-500 font-medium">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+              Close
+            </button>
+          </div>
+          <iframe src={pdfUrl} className="flex-1 w-full border-0" title="PDF viewer" />
+        </div>
+      )}
 
       {/* Flowchart overlay */}
       {activeFlowchartId && FLOWCHARTS[activeFlowchartId] && (
