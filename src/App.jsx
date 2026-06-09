@@ -100,8 +100,20 @@ export default function App() {
 
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
+  const viewportMeta = document.querySelector("meta[name=viewport]");
+
+  const openPdf = (url) => {
+    if (viewportMeta) viewportMeta.content = "width=device-width, initial-scale=1.0, viewport-fit=cover";
+    setPdfUrl(url);
+  };
+
+  const closePdf = () => {
+    if (viewportMeta) viewportMeta.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover";
+    setPdfUrl(null);
+  };
+
   useEffect(() => {
-    const handler = (e) => setPdfUrl(e.detail.url);
+    const handler = (e) => openPdf(e.detail.url);
     window.addEventListener("open-pdf", handler);
     return () => window.removeEventListener("open-pdf", handler);
   }, []);
@@ -152,11 +164,11 @@ export default function App() {
       {/* Feedback button — always visible */}
       <FeedbackButton query={query} filter={filter} />
 
-      {/* PDF viewer overlay (native only) */}
+      {/* PDF viewer overlay */}
       {pdfUrl && (
         <div className="fixed inset-0 z-[60] bg-white flex flex-col" style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}>
           <div className="shrink-0 flex items-center gap-3 px-4 py-3 border-b border-gray-100">
-            <button onClick={() => setPdfUrl(null)} className="flex items-center gap-1.5 text-sm text-blue-500 font-medium">
+            <button onClick={closePdf} className="flex items-center gap-1.5 text-sm text-blue-500 font-medium">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
