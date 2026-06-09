@@ -8,6 +8,13 @@ import {
   interpretExpectantStep,
   interpretMtxStep,
   MTX_GENERAL_ADVICE,
+  VTE_RISK_FACTORS,
+  VTE_ADMISSION_NOTES,
+  interpretVteAntenatal,
+  interpretVtePostnatal,
+  lmwhDoseForWeight,
+  LMWH_HIGH_PROPHYLACTIC_50_TO_90,
+  LMWH_CONTRAINDICATIONS,
 } from "../data/calculator";
 
 // ─── Step 0: scenario picker ──────────────────────────────────────────
@@ -441,6 +448,227 @@ function MtxSurveillanceCalculator({ onBack }) {
   );
 }
 
+// ─── Scenario 5: VTE risk score (GTG37a) ──────────────────────────────
+
+function VteRiskCalculator({ onBack }) {
+  const [phase, setPhase] = useState(null); // "antenatal" | "postnatal"
+  const [ticked, setTicked] = useState(new Set());
+  const [weight, setWeight] = useState("");
+  const [showResult, setShowResult] = useState(false);
+
+  if (!phase) {
+    return (
+      <div className="min-h-screen pb-24">
+        <div className="max-w-lg mx-auto">
+          <StepHeader title="VTE risk score" subtitle="RCOG GTG37a Appendix III" onBack={onBack} />
+          <div className="px-5 pt-6">
+            <h3 className="text-2xl font-bold text-gray-900 mb-1">When are you assessing?</h3>
+            <p className="text-sm text-gray-400 mb-6">GTG37a uses different thresholds for antenatal and postnatal assessment.</p>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => setPhase("antenatal")}
+                className="w-full flex items-start gap-4 px-5 py-5 rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 active:scale-[0.99] transition-all text-left shadow-sm"
+              >
+                <span className="w-3 h-3 rounded-full bg-amber-500 shrink-0 mt-1.5" />
+                <div>
+                  <p className="text-base font-bold text-amber-700">Antenatal</p>
+                  <p className="text-sm text-gray-500 mt-0.5">Booking, hospital admission, or any change in clinical status. Threshold: ≥4 = first trimester LMWH; 3 = from 28 weeks.</p>
+                </div>
+              </button>
+              <button
+                onClick={() => setPhase("postnatal")}
+                className="w-full flex items-start gap-4 px-5 py-5 rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 active:scale-[0.99] transition-all text-left shadow-sm"
+              >
+                <span className="w-3 h-3 rounded-full bg-rose-500 shrink-0 mt-1.5" />
+                <div>
+                  <p className="text-base font-bold text-rose-700">Postnatal</p>
+                  <p className="text-sm text-gray-500 mt-0.5">Delivery suite assessment. Threshold: ≥2 = at least 10 days of LMWH; ≥4 (high-risk categories) = 6 weeks.</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const visible = VTE_RISK_FACTORS.filter(f => f.phases.includes(phase));
+  const groups = ["Pre-existing", "Obstetric", "Transient"];
+
+  const toggle = (factor) => {
+    const next = new Set(ticked);
+    if (next.has(factor.id)) {
+      next.delete(factor.id);
+    } else {
+      next.add(factor.id);
+      // Mutually exclusive items (e.g. BMI bands)
+      if (factor.exclusiveWith) {
+        factor.exclusiveWith.forEach(id => next.delete(id));
+      }
+    }
+    setTicked(next);
+  };
+
+  const total = visible
+    .filter(f => ticked.has(f.id))
+    .reduce((sum, f) => sum + f.score, 0);
+
+  const result = phase === "antenatal" ? interpretVteAntenatal(total) : interpretVtePostnatal(total);
+  const dose = lmwhDoseForWeight(parseFloat(weight));
+
+  const reset = () => {
+    setPhase(null); setTicked(new Set()); setWeight(""); setShowResult(false);
+  };
+
+  return (
+    <div className="min-h-screen pb-24">
+      <div className="max-w-lg mx-auto">
+        <StepHeader
+          title={`VTE risk score — ${phase}`}
+          subtitle="RCOG GTG37a Appendix III"
+          onBack={() => setPhase(null)}
+        />
+
+        <div className="px-5 pt-6">
+          {!showResult && (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-2xl font-bold text-gray-900">Tick all that apply</h3>
+                <div className="text-right">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Score</p>
+                  <p className="text-2xl font-bold text-gray-900 tabular-nums">{total}</p>
+                </div>
+              </div>
+
+              {groups.map(group => {
+                const items = visible.filter(f => f.group === group);
+                if (items.length === 0) return null;
+                return (
+                  <div key={group} className="mb-5">
+                    <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">{group} risk factors</p>
+                    <div className="rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm divide-y divide-gray-100">
+                      {items.map(f => {
+                        const checked = ticked.has(f.id);
+                        return (
+                          <button
+                            key={f.id}
+                            onClick={() => toggle(f)}
+                            className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors ${checked ? "bg-indigo-50" : "hover:bg-gray-50"}`}
+                          >
+                            <span className={`w-5 h-5 rounded-md border-2 shrink-0 flex items-center justify-center mt-0.5 transition-colors ${checked ? "bg-indigo-600 border-indigo-600" : "border-gray-300 bg-white"}`}>
+                              {checked && (
+                                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm text-gray-900 leading-snug">{f.label}</p>
+                              {f.note && <p className="text-xs text-gray-400 mt-0.5 leading-snug">{f.note}</p>}
+                            </div>
+                            <span className="text-xs font-bold text-gray-400 tabular-nums shrink-0">+{f.score}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+
+              <div className="rounded-2xl bg-gray-50 border border-gray-100 p-4 mb-4">
+                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">Admission-based recommendations</p>
+                <ul className="space-y-1.5">
+                  {VTE_ADMISSION_NOTES.map((n, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs text-gray-600 leading-relaxed">
+                      <span className="text-gray-300 mt-0.5 shrink-0">•</span>
+                      <span>{n}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <button
+                onClick={() => setShowResult(true)}
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3.5 rounded-2xl transition-colors"
+              >
+                Show recommendation
+              </button>
+            </>
+          )}
+
+          {showResult && (
+            <>
+              <div className="flex items-baseline justify-between mb-2">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Total score</p>
+                <p className="text-3xl font-bold text-gray-900 tabular-nums">{total}</p>
+              </div>
+
+              <ResultCard result={result} />
+
+              {(result.category === "HIGH" || result.category === "INTERMEDIATE" || result.category === "INTERMEDIATE_28W") && (
+                <>
+                  <div className="mt-2 mb-4">
+                    <NumberField label="Booking or current weight (for LMWH dose — GTG37a Table 3)" value={weight} onChange={setWeight} suffix="kg" />
+                  </div>
+
+                  {dose && (
+                    <div className="rounded-2xl bg-indigo-50 border border-indigo-200 p-4 mb-3">
+                      <p className="text-[11px] font-bold text-indigo-700 uppercase tracking-wide mb-3">LMWH prophylactic dose — GTG37a Table 3</p>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between gap-2">
+                          <span className="text-gray-600">Enoxaparin</span>
+                          <span className="font-semibold text-gray-900 text-right">{dose.enoxaparin}</span>
+                        </div>
+                        <div className="flex justify-between gap-2">
+                          <span className="text-gray-600">Dalteparin</span>
+                          <span className="font-semibold text-gray-900 text-right">{dose.dalteparin}</span>
+                        </div>
+                        <div className="flex justify-between gap-2">
+                          <span className="text-gray-600">Tinzaparin</span>
+                          <span className="font-semibold text-gray-900 text-right">{dose.tinzaparin}</span>
+                        </div>
+                        <p className="text-[10px] text-gray-500 mt-2 leading-relaxed">
+                          * may be given in 2 divided doses. High prophylactic dose for women weighing 50–90 kg: enoxaparin {LMWH_HIGH_PROPHYLACTIC_50_TO_90.enoxaparin}, dalteparin {LMWH_HIGH_PROPHYLACTIC_50_TO_90.dalteparin}, tinzaparin {LMWH_HIGH_PROPHYLACTIC_50_TO_90.tinzaparin}.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              <div className="rounded-2xl bg-gray-50 border border-gray-100 p-4 mb-3">
+                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">Contraindications / cautions to LMWH — GTG37a App III</p>
+                <ul className="space-y-1.5">
+                  {LMWH_CONTRAINDICATIONS.map((c, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs text-gray-600 leading-relaxed">
+                      <span className="text-gray-300 mt-0.5 shrink-0">•</span>
+                      <span>{c}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <button
+                onClick={() => setShowResult(false)}
+                className="w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-3 rounded-2xl transition-colors text-sm mb-2"
+              >
+                Back to risk factors
+              </button>
+              <button
+                onClick={reset}
+                className="w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-3 rounded-2xl transition-colors text-sm"
+              >
+                New assessment
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Entry point ──────────────────────────────────────────────────────
 
 export default function CalculatorPage() {
@@ -454,6 +682,7 @@ export default function CalculatorPage() {
   if (scenarioId === "ECTOPIC_DECISION") return <EctopicDecisionCalculator onBack={back} />;
   if (scenarioId === "EXPECTANT_SURVEILLANCE") return <ExpectantSurveillanceCalculator onBack={back} />;
   if (scenarioId === "MTX_SURVEILLANCE") return <MtxSurveillanceCalculator onBack={back} />;
+  if (scenarioId === "VTE_RISK") return <VteRiskCalculator onBack={back} />;
 
   return <ScenarioList onSelect={setScenarioId} />;
 }

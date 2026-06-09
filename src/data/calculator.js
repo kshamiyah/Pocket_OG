@@ -43,6 +43,14 @@ export const CALCULATOR_SCENARIOS = [
     color: { accent: "bg-violet-500", text: "text-violet-700", bg: "bg-violet-50", border: "border-violet-200" },
     description: "Interpret day 4 → day 7 hCG following single-dose methotrexate for tubal ectopic pregnancy.",
   },
+  {
+    id: "VTE_RISK",
+    title: "VTE risk score",
+    subtitle: "Antenatal & postnatal thromboprophylaxis",
+    source: "RCOG GTG37a Appendix III (April 2015)",
+    color: { accent: "bg-indigo-500", text: "text-indigo-700", bg: "bg-indigo-50", border: "border-indigo-200" },
+    description: "Formal VTE risk assessment with numerical scoring for pregnant and postpartum women.",
+  },
 ];
 
 // ──────────────────────────────────────────────────────────────────────
@@ -484,4 +492,374 @@ export const MTX_GENERAL_ADVICE = [
   "RCOG GTG21 §5.1.2: avoid alcohol and folate-containing vitamins during treatment.",
   "RCOG GTG21 §8: wait at least 3 months before trying to conceive again.",
   "NICE NG126 §1.6.11: take 2 serum hCG measurements in the first week (days 4 and 7) after treatment, then 1 per week until a negative result is obtained.",
+];
+
+// ──────────────────────────────────────────────────────────────────────
+// Scenario 5 — VTE risk score (RCOG GTG37a, April 2015)
+// Risk factors and scores taken verbatim from Appendix III, page 36.
+// Thresholds for management from the box at the top of Appendix III.
+// ──────────────────────────────────────────────────────────────────────
+
+// Group labels and risk factors exactly as listed in GTG37a Appendix III.
+// Items marked phase-specific match the parenthetical notes in the table
+// or the antenatal vs postnatal columns of Appendix I (pages 33).
+
+export const VTE_RISK_FACTORS = [
+  // ─── Pre-existing risk factors ────────────────────────────────────
+  {
+    group: "Pre-existing",
+    id: "previous_vte_not_major_surgery",
+    label: "Previous VTE (except a single event related to major surgery)",
+    score: 4,
+    phases: ["antenatal", "postnatal"],
+  },
+  {
+    group: "Pre-existing",
+    id: "previous_vte_major_surgery",
+    label: "Previous VTE provoked by major surgery",
+    score: 3,
+    phases: ["antenatal", "postnatal"],
+  },
+  {
+    group: "Pre-existing",
+    id: "high_risk_thrombophilia",
+    label: "Known high-risk thrombophilia",
+    note: "Antithrombin / protein C / protein S deficiency; compound or homozygous for low-risk thrombophilias.",
+    score: 3,
+    phases: ["antenatal", "postnatal"],
+  },
+  {
+    group: "Pre-existing",
+    id: "medical_comorbidities",
+    label: "Medical comorbidities",
+    note: "Cancer; heart failure; active SLE, inflammatory polyarthropathy or IBD; nephrotic syndrome; type I diabetes mellitus with nephropathy; sickle cell disease; current intravenous drug user.",
+    score: 3,
+    phases: ["antenatal", "postnatal"],
+  },
+  {
+    group: "Pre-existing",
+    id: "family_history_vte",
+    label: "Family history of unprovoked or estrogen-related VTE in first-degree relative",
+    score: 1,
+    phases: ["antenatal", "postnatal"],
+  },
+  {
+    group: "Pre-existing",
+    id: "low_risk_thrombophilia",
+    label: "Known low-risk thrombophilia (no VTE)",
+    note: "Heterozygous for factor V Leiden or prothrombin G20210A. If a first-degree relative has had VTE, postpartum prophylaxis should be continued for 6 weeks (Appendix III, footnote a).",
+    score: 1,
+    phases: ["antenatal", "postnatal"],
+  },
+  {
+    group: "Pre-existing",
+    id: "age_over_35",
+    label: "Age > 35 years",
+    score: 1,
+    phases: ["antenatal", "postnatal"],
+  },
+  {
+    group: "Pre-existing",
+    id: "bmi_30_to_39",
+    label: "Obesity — BMI ≥ 30 kg/m² (below 40)",
+    note: "Based on booking weight. BMI ≥ 30 scores 1; BMI ≥ 40 scores 2 (only tick one).",
+    score: 1,
+    phases: ["antenatal", "postnatal"],
+    exclusiveWith: ["bmi_40_plus"],
+  },
+  {
+    group: "Pre-existing",
+    id: "bmi_40_plus",
+    label: "Obesity — BMI ≥ 40 kg/m²",
+    note: "Based on booking weight.",
+    score: 2,
+    phases: ["antenatal", "postnatal"],
+    exclusiveWith: ["bmi_30_to_39"],
+  },
+  {
+    group: "Pre-existing",
+    id: "parity_3_plus",
+    label: "Parity ≥ 3",
+    note: "A woman becomes para 3 after her third delivery.",
+    score: 1,
+    phases: ["antenatal", "postnatal"],
+  },
+  {
+    group: "Pre-existing",
+    id: "smoker",
+    label: "Smoker",
+    score: 1,
+    phases: ["antenatal", "postnatal"],
+  },
+  {
+    group: "Pre-existing",
+    id: "gross_varicose_veins",
+    label: "Gross varicose veins",
+    note: "Symptomatic, above knee or with associated phlebitis/oedema/skin changes.",
+    score: 1,
+    phases: ["antenatal", "postnatal"],
+  },
+
+  // ─── Obstetric risk factors ───────────────────────────────────────
+  {
+    group: "Obstetric",
+    id: "pre_eclampsia",
+    label: "Pre-eclampsia in current pregnancy",
+    score: 1,
+    phases: ["antenatal", "postnatal"],
+  },
+  {
+    group: "Obstetric",
+    id: "art_ivf",
+    label: "ART / IVF",
+    note: "Antenatal only.",
+    score: 1,
+    phases: ["antenatal"],
+  },
+  {
+    group: "Obstetric",
+    id: "multiple_pregnancy",
+    label: "Multiple pregnancy",
+    score: 1,
+    phases: ["antenatal", "postnatal"],
+  },
+  {
+    group: "Obstetric",
+    id: "cs_in_labour",
+    label: "Caesarean section in labour",
+    score: 2,
+    phases: ["postnatal"],
+  },
+  {
+    group: "Obstetric",
+    id: "elective_cs",
+    label: "Elective caesarean section",
+    score: 1,
+    phases: ["postnatal"],
+  },
+  {
+    group: "Obstetric",
+    id: "mid_cavity_rotational",
+    label: "Mid-cavity or rotational operative delivery",
+    score: 1,
+    phases: ["postnatal"],
+  },
+  {
+    group: "Obstetric",
+    id: "prolonged_labour",
+    label: "Prolonged labour (> 24 hours)",
+    score: 1,
+    phases: ["postnatal"],
+  },
+  {
+    group: "Obstetric",
+    id: "pph",
+    label: "PPH (> 1 litre or transfusion)",
+    score: 1,
+    phases: ["postnatal"],
+  },
+  {
+    group: "Obstetric",
+    id: "preterm_birth",
+    label: "Preterm birth < 37+0 weeks in current pregnancy",
+    score: 1,
+    phases: ["postnatal"],
+  },
+  {
+    group: "Obstetric",
+    id: "stillbirth",
+    label: "Stillbirth in current pregnancy",
+    score: 1,
+    phases: ["postnatal"],
+  },
+
+  // ─── Transient risk factors ───────────────────────────────────────
+  {
+    group: "Transient",
+    id: "surgical_procedure",
+    label: "Any surgical procedure in pregnancy or puerperium except immediate repair of the perineum (e.g. appendicectomy, postpartum sterilisation)",
+    score: 3,
+    phases: ["antenatal", "postnatal"],
+  },
+  {
+    group: "Transient",
+    id: "hyperemesis",
+    label: "Hyperemesis",
+    score: 3,
+    phases: ["antenatal"],
+  },
+  {
+    group: "Transient",
+    id: "ohss",
+    label: "OHSS (first trimester only)",
+    score: 4,
+    phases: ["antenatal"],
+  },
+  {
+    group: "Transient",
+    id: "current_systemic_infection",
+    label: "Current systemic infection",
+    score: 1,
+    phases: ["antenatal", "postnatal"],
+  },
+  {
+    group: "Transient",
+    id: "immobility_dehydration",
+    label: "Immobility, dehydration",
+    score: 1,
+    phases: ["antenatal", "postnatal"],
+  },
+];
+
+// GTG37a Appendix III — additional admission-based recommendations
+export const VTE_ADMISSION_NOTES = [
+  "If admitted to hospital antenatally, consider thromboprophylaxis.",
+  "If prolonged admission (≥ 3 days) or readmission to hospital within the puerperium, consider thromboprophylaxis.",
+];
+
+export function interpretVteAntenatal(total) {
+  // GTG37a Appendix III thresholds, verbatim:
+  // "If total score ≥ 4 antenatally, consider thromboprophylaxis from the first trimester."
+  // "If total score 3 antenatally, consider thromboprophylaxis from 28 weeks."
+  // (else mobilisation and avoidance of dehydration — Appendix I, "LOWER RISK")
+  if (total >= 4) {
+    return {
+      category: "HIGH",
+      title: "Consider thromboprophylaxis from the first trimester",
+      color: "text-rose-700",
+      bg: "bg-rose-50",
+      border: "border-rose-300",
+      summary: `Antenatal score ${total} (≥ 4).`,
+      detail:
+        "RCOG GTG37a Appendix III: if total score ≥ 4 antenatally, consider thromboprophylaxis from the first trimester. Recommendation 4.1 also states: any woman with four or more current risk factors (other than previous VTE or thrombophilia) should be considered for prophylactic LMWH throughout the antenatal period and will usually require prophylactic LMWH for 6 weeks postnatally, but a postnatal risk reassessment should be made.",
+      actions: [
+        "Start LMWH from the first trimester at weight-appropriate prophylactic dose.",
+        "Continue antenatally throughout pregnancy.",
+        "Reassess postnatally — usually requires 6 weeks of postnatal LMWH.",
+      ],
+      citation: "RCOG GTG37a Appendix III · §4.1",
+    };
+  }
+  if (total === 3) {
+    return {
+      category: "INTERMEDIATE_28W",
+      title: "Consider thromboprophylaxis from 28 weeks",
+      color: "text-amber-700",
+      bg: "bg-amber-50",
+      border: "border-amber-300",
+      summary: "Antenatal score 3.",
+      detail:
+        "RCOG GTG37a Appendix III: if total score 3 antenatally, consider thromboprophylaxis from 28 weeks. Recommendation 4.1: any woman with three current risk factors (other than previous VTE or thrombophilia) should be considered for prophylactic LMWH from 28 weeks and will usually require prophylactic LMWH for 6 weeks postnatally.",
+      actions: [
+        "Start LMWH at 28 weeks at weight-appropriate prophylactic dose.",
+        "Reassess postnatally — usually requires 6 weeks of postnatal LMWH.",
+      ],
+      citation: "RCOG GTG37a Appendix III · §4.1",
+    };
+  }
+  return {
+    category: "LOW",
+    title: "Lower risk — mobilisation and avoidance of dehydration",
+    color: "text-teal-700",
+    bg: "bg-teal-50",
+    border: "border-teal-300",
+    summary: `Antenatal score ${total} (< 3).`,
+    detail:
+      "RCOG GTG37a Appendix I: lower-risk women should be advised on mobilisation and avoidance of dehydration. Risk assessment should be repeated if she is admitted to hospital or develops other intercurrent problems, and again intrapartum or immediately postpartum.",
+    actions: [
+      "No routine pharmacological thromboprophylaxis.",
+      "Repeat risk assessment on admission and postpartum.",
+    ],
+    citation: "RCOG GTG37a Appendix I · §4.1",
+  };
+}
+
+export function interpretVtePostnatal(total) {
+  // GTG37a Appendix III:
+  // "If total score ≥ 2 postnatally, consider thromboprophylaxis for at least 10 days."
+  // 6 weeks (high-risk) vs 10 days (intermediate) distinction comes from §7.5 / Appendix IV.
+  if (total >= 4) {
+    return {
+      category: "HIGH",
+      title: "Consider at least 6 weeks of postnatal prophylactic LMWH",
+      color: "text-rose-700",
+      bg: "bg-rose-50",
+      border: "border-rose-300",
+      summary: `Postnatal score ${total} (≥ 4).`,
+      detail:
+        "RCOG GTG37a Appendix I categorises women requiring antenatal LMWH or with previous VTE / high-risk thrombophilia as HIGH RISK requiring at least 6 weeks of postnatal prophylactic LMWH. §7.5: thromboprophylaxis should be continued for 6 weeks in high-risk women and for 10 days in intermediate-risk women.",
+      actions: [
+        "Postnatal LMWH at weight-appropriate prophylactic dose for at least 6 weeks.",
+        "Extend up to 6 weeks (or until risk factors resolve) if additional persistent risk factors lasting >10 days postpartum (prolonged admission, wound infection, surgery).",
+      ],
+      citation: "RCOG GTG37a §7.5 · Appendix I",
+    };
+  }
+  if (total >= 2) {
+    return {
+      category: "INTERMEDIATE",
+      title: "Consider thromboprophylaxis for at least 10 days postpartum",
+      color: "text-amber-700",
+      bg: "bg-amber-50",
+      border: "border-amber-300",
+      summary: `Postnatal score ${total} (≥ 2).`,
+      detail:
+        "RCOG GTG37a Appendix III: if total score ≥ 2 postnatally, consider thromboprophylaxis for at least 10 days. Recommendation 4.1: any woman with two current risk factors (other than previous VTE or thrombophilia) should be considered for prophylactic LMWH for at least 10 days postpartum.",
+      actions: [
+        "Postnatal LMWH at weight-appropriate prophylactic dose for at least 10 days.",
+        "If risk factors persist or there are > 3 risk factors, consider extending thromboprophylaxis (Appendix I).",
+      ],
+      citation: "RCOG GTG37a Appendix III · §4.1",
+    };
+  }
+  return {
+    category: "LOW",
+    title: "Lower risk — early mobilisation and avoidance of dehydration",
+    color: "text-teal-700",
+    bg: "bg-teal-50",
+    border: "border-teal-300",
+    summary: `Postnatal score ${total} (< 2).`,
+    detail:
+      "RCOG GTG37a Appendix I: early mobilisation and avoidance of dehydration.",
+    actions: ["No routine pharmacological thromboprophylaxis."],
+    citation: "RCOG GTG37a Appendix I",
+  };
+}
+
+// LMWH prophylactic dosing — Table 3, GTG37a §8.1, verbatim.
+// Weight bands and doses copied exactly.
+export const LMWH_DOSE_BANDS = [
+  { max: 50,  enoxaparin: "20 mg daily",     dalteparin: "2,500 units daily",  tinzaparin: "3,500 units daily" },
+  { max: 90,  enoxaparin: "40 mg daily",     dalteparin: "5,000 units daily",  tinzaparin: "4,500 units daily" },
+  { max: 130, enoxaparin: "60 mg daily*",    dalteparin: "7,500 units daily",  tinzaparin: "7,000 units daily*" },
+  { max: 170, enoxaparin: "80 mg daily*",    dalteparin: "10,000 units daily", tinzaparin: "9,000 units daily*" },
+  { max: Infinity, enoxaparin: "0.6 mg/kg/day*", dalteparin: "75 u/kg/day",   tinzaparin: "75 u/kg/day*" },
+];
+// * may be given in 2 divided doses (GTG37a Table 3 footnote).
+
+export const LMWH_HIGH_PROPHYLACTIC_50_TO_90 = {
+  enoxaparin: "40 mg 12-hourly",
+  dalteparin: "5,000 units 12-hourly",
+  tinzaparin: "4,500 units 12-hourly",
+};
+// Source: GTG37a Table 3, "High prophylactic dose for women weighing 50–90 kg".
+
+export function lmwhDoseForWeight(weightKg) {
+  if (!weightKg || weightKg <= 0) return null;
+  for (const band of LMWH_DOSE_BANDS) {
+    if (weightKg < band.max || band.max === Infinity) return band;
+  }
+  return null;
+}
+
+// GTG37a Appendix III — contraindications / cautions to LMWH, verbatim.
+export const LMWH_CONTRAINDICATIONS = [
+  "Known bleeding disorder (e.g. haemophilia, von Willebrand's disease or acquired coagulopathy)",
+  "Active antenatal or postpartum bleeding",
+  "Women considered at increased risk of major haemorrhage (e.g. placenta praevia)",
+  "Thrombocytopenia (platelet count < 75 × 10⁹/L)",
+  "Acute stroke in previous 4 weeks (haemorrhagic or ischaemic)",
+  "Severe renal disease (GFR < 30 ml/minute/1.73m²)",
+  "Severe liver disease (prothrombin time above normal range or known varices)",
+  "Uncontrolled hypertension (blood pressure > 200 mmHg systolic or > 120 mmHg diastolic)",
 ];
