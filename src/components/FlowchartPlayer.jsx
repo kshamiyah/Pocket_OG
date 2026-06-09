@@ -57,7 +57,7 @@ export default function FlowchartPlayer({ flowchart, theme, onClose, pdfUrl }) {
   const stepNum = history.length + 1;
 
   return (
-    <div className="fixed inset-0 z-50 bg-white flex flex-col" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
+    <div className="fixed inset-0 z-50 bg-white flex flex-col" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif", paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}>
 
       {/* Header */}
       <div className="shrink-0 border-b border-gray-100 px-4 py-3 flex items-center gap-3">

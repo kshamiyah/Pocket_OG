@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { openUrl } from "../utils/openUrl";
 import {
   CONSENT_PROCEDURES,
   FREQ,
@@ -802,18 +803,16 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
                 <div className="flex items-center gap-2 flex-wrap mt-0.5">
                   <p className="text-[10px] text-gray-400 uppercase tracking-wide font-bold">{source}</p>
                   {proc?.pdfs?.map(pdf => (
-                    <a
+                    <button
                       key={pdf.file}
-                      href={`/consent-sources/${pdf.file}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      onClick={() => openUrl(`/consent-sources/${pdf.file}`)}
                       className="flex items-center gap-1 text-[10px] text-blue-400 font-semibold hover:text-blue-600 transition-colors"
                     >
                       <svg className="w-2.5 h-2.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                       </svg>
                       {pdf.label}
-                    </a>
+                    </button>
                   ))}
                 </div>
               </div>

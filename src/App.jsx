@@ -97,14 +97,16 @@ export default function App() {
   const resultsInputRef = useRef(null);
   const hasQuery = query.trim().length > 0;
 
-  // Focus idle input on mount
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  // Focus idle input on mount (desktop only — mobile would open keyboard immediately)
   useEffect(() => {
-    if (inputRef.current) inputRef.current.focus();
+    if (!isMobile && inputRef.current) inputRef.current.focus();
   }, []);
 
-  // When transitioning to results view, transfer focus to results input
+  // When transitioning to results view, transfer focus to results input (desktop only)
   useEffect(() => {
-    if (hasQuery && resultsInputRef.current) {
+    if (!isMobile && hasQuery && resultsInputRef.current) {
       resultsInputRef.current.focus();
     }
   }, [hasQuery]);
