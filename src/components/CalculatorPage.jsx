@@ -27,7 +27,7 @@ function ScenarioList({ onSelect }) {
       <div className="max-w-lg mx-auto">
         <div className="px-5 pt-16 pb-6">
           <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Calculator</h2>
-          <p className="text-sm text-gray-400 mt-1">β-hCG — verbatim from NICE NG126 & RCOG GTG21</p>
+          <p className="text-sm text-gray-400 mt-1">Decision-support calculators — verbatim from NICE & RCOG</p>
         </div>
 
         <div className="px-5">
@@ -36,7 +36,7 @@ function ScenarioList({ onSelect }) {
               <button
                 key={s.id}
                 onClick={() => onSelect(s.id)}
-                className="flex items-start gap-3 w-full px-4 py-4 min-h-[128px] hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
+                className="flex items-start gap-3 w-full px-4 py-4 h-[160px] hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
               >
                 <div className={`w-1 h-12 rounded-full shrink-0 ${s.color.accent}`} />
                 <div className="flex-1 min-w-0">
