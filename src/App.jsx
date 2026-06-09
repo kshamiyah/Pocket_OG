@@ -7,6 +7,7 @@ import NoResults from "./components/NoResults";
 import FlowchartPlayer from "./components/FlowchartPlayer";
 import FeedbackButton from "./components/FeedbackButton";
 import ConsentPage from "./components/ConsentPage";
+import CalculatorPage from "./components/CalculatorPage";
 
 const FILTER_OPTIONS = [
   { value: "ALL",        label: "All guidelines",      pill: "All",           filterFn: null,                                                    active: "bg-gray-900 text-white" },
@@ -409,6 +410,9 @@ export default function App() {
       {/* Consent tab */}
       {activeTab === "consent" && <ConsentPage />}
 
+      {/* Calculator tab */}
+      {activeTab === "calculator" && <CalculatorPage />}
+
       {/* Guidelines tab */}
       {activeTab === "guidelines" && (
         <div className="min-h-screen pb-24">
@@ -514,6 +518,17 @@ export default function App() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
             <span className="text-xs font-medium">Consent</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("calculator")}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
+              activeTab === "calculator" ? "text-black" : "text-gray-400"
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m-6 5h6m-6 5h6M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" />
+            </svg>
+            <span className="text-xs font-medium">Calculator</span>
           </button>
         </div>
       </div>

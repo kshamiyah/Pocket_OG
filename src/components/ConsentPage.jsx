@@ -2,18 +2,80 @@ import { useState } from "react";
 import {
   CONSENT_PROCEDURES,
   FREQ,
-  CS_CONTEXT_OPTIONS,
-  CS_PATIENT_FACTORS,
-  CS_RISK_SECTIONS,
-  CS_PP_RISK_SECTIONS,
-  CS_FAQ,
-  CS_PAGES,
-  OVD_CONTEXT_OPTIONS,
-  OVD_PATIENT_FACTORS,
-  OVD_RISK_SECTIONS,
-  OVD_FAQ,
-  OVD_PAGES,
+  CS_CONTEXT_OPTIONS, CS_PATIENT_FACTORS, CS_RISK_SECTIONS,
+  CS_COMPARISON_SECTIONS, CS_PP_RISK_SECTIONS, CS_FAQ, CS_PAGES,
+  OVD_CONTEXT_OPTIONS, OVD_PATIENT_FACTORS, OVD_RISK_SECTIONS, OVD_FAQ, OVD_PAGES,
+  SURG_MISC_PATIENT_FACTORS, SURG_MISC_RISK_SECTIONS, SURG_MISC_FAQ, SURG_MISC_PAGES,
+  MED_MISC_PATIENT_FACTORS, MED_MISC_RISK_SECTIONS, MED_MISC_FAQ, MED_MISC_PAGES,
+  LAPAROSCOPY_PATIENT_FACTORS, LAPAROSCOPY_RISK_SECTIONS, LAPAROSCOPY_FAQ, LAPAROSCOPY_PAGES,
+  HYSTEROSCOPY_CONTEXT_OPTIONS, HYSTEROSCOPY_PATIENT_FACTORS,
+  HYSTEROSCOPY_RISK_SECTIONS, HYSTEROSCOPY_FAQ, HYSTEROSCOPY_PAGES,
 } from "../data/consent";
+
+// Central config lookup — avoids long chains of isCS/isOVD checks
+const PROCEDURE_CONFIG = {
+  CS: {
+    contextOptions: CS_CONTEXT_OPTIONS,
+    patientFactors: CS_PATIENT_FACTORS,
+    getRiskSections: (_ctx, factors) =>
+      factors.has("placenta_praevia") ? CS_PP_RISK_SECTIONS : CS_RISK_SECTIONS,
+    comparisonSections: CS_COMPARISON_SECTIONS,
+    getPages: (ctx) => CS_PAGES[ctx],
+    faq: CS_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "NICE NG192 · RCOG CA14",
+  },
+  OVD: {
+    contextOptions: OVD_CONTEXT_OPTIONS,
+    patientFactors: OVD_PATIENT_FACTORS,
+    getRiskSections: () => OVD_RISK_SECTIONS,
+    comparisonSections: null,
+    getPages: (ctx) => OVD_PAGES[ctx],
+    faq: OVD_FAQ,
+    getInstrument: (ctx) => ctx,
+    sourceLabel: "RCOG GTG26",
+  },
+  SURG_MISC: {
+    contextOptions: null,
+    patientFactors: SURG_MISC_PATIENT_FACTORS,
+    getRiskSections: () => SURG_MISC_RISK_SECTIONS,
+    comparisonSections: null,
+    getPages: () => SURG_MISC_PAGES,
+    faq: SURG_MISC_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "RCOG CA10",
+  },
+  MED_MISC: {
+    contextOptions: null,
+    patientFactors: MED_MISC_PATIENT_FACTORS,
+    getRiskSections: () => MED_MISC_RISK_SECTIONS,
+    comparisonSections: null,
+    getPages: () => MED_MISC_PAGES,
+    faq: MED_MISC_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "RCOG GTG25",
+  },
+  LAPAROSCOPY: {
+    contextOptions: null,
+    patientFactors: LAPAROSCOPY_PATIENT_FACTORS,
+    getRiskSections: () => LAPAROSCOPY_RISK_SECTIONS,
+    comparisonSections: null,
+    getPages: () => LAPAROSCOPY_PAGES,
+    faq: LAPAROSCOPY_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "RCOG CA2",
+  },
+  HYSTEROSCOPY: {
+    contextOptions: HYSTEROSCOPY_CONTEXT_OPTIONS,
+    patientFactors: HYSTEROSCOPY_PATIENT_FACTORS,
+    getRiskSections: () => HYSTEROSCOPY_RISK_SECTIONS,
+    comparisonSections: null,
+    getPages: (ctx) => HYSTEROSCOPY_PAGES[ctx],
+    faq: HYSTEROSCOPY_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "RCOG CA1 · GTG59",
+  },
+};
 
 // ─── shared small components ──────────────────────────────────────────────────
 
@@ -82,7 +144,7 @@ function ProcedureList({ onSelect }) {
 
 function ContextPicker({ procedureId, onSelect, onBack }) {
   const proc = CONSENT_PROCEDURES.find(p => p.id === procedureId);
-  const options = procedureId === "CS" ? CS_CONTEXT_OPTIONS : OVD_CONTEXT_OPTIONS;
+  const options = PROCEDURE_CONFIG[procedureId]?.contextOptions ?? [];
 
   return (
     <div className="min-h-screen flex flex-col pb-24">
@@ -131,10 +193,10 @@ function ContextPicker({ procedureId, onSelect, onBack }) {
 
 function PatientFactors({ procedureId, context, factors, onToggle, onContinue, onBack }) {
   const proc = CONSENT_PROCEDURES.find(p => p.id === procedureId);
-  const allFactors = procedureId === "CS" ? CS_PATIENT_FACTORS : OVD_PATIENT_FACTORS;
-  const contextLabel = procedureId === "CS"
-    ? (context === "elective" ? "Elective" : "Emergency")
-    : (context === "ventouse" ? "Ventouse" : "Forceps");
+  const cfg = PROCEDURE_CONFIG[procedureId] ?? {};
+  const allFactors = cfg.patientFactors ?? [];
+  const contextOpt = cfg.contextOptions?.find(o => o.id === context);
+  const contextLabel = contextOpt?.label ?? null;
 
   return (
     <div className="min-h-screen pb-24">
@@ -148,7 +210,7 @@ function PatientFactors({ procedureId, context, factors, onToggle, onContinue, o
               </svg>
             </button>
             <div>
-              <p className="text-xs text-gray-400">{proc?.title} · <span className="font-semibold text-gray-600">{contextLabel}</span></p>
+              <p className="text-xs text-gray-400">{proc?.title}{contextLabel ? <> · <span className="font-semibold text-gray-600">{contextLabel}</span></> : null}</p>
             </div>
           </div>
           <h3 className="text-2xl font-bold text-gray-900 mb-1">Any of the following apply?</h3>
@@ -428,13 +490,35 @@ const CONSENT_TABS = [
   { id: "faq",     label: "FAQ" },
 ];
 
+function BodyBlock({ text }) {
+  return (
+    <div className="space-y-3">
+      {text.split("\n\n").map((block, i) => {
+        const lines = block.split("\n");
+        const isList = lines.every(l => l.trimStart().startsWith("•"));
+        if (isList) {
+          return (
+            <ul key={i} className="space-y-1.5 pl-1">
+              {lines.map((l, j) => (
+                <li key={j} className="flex items-start gap-2 text-sm text-gray-600 leading-relaxed">
+                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0" />
+                  <span>{l.replace(/^•\s*/, "")}</span>
+                </li>
+              ))}
+            </ul>
+          );
+        }
+        return <p key={i} className="text-sm text-gray-600 leading-relaxed">{block}</p>;
+      })}
+    </div>
+  );
+}
+
 function WhatPage({ pages }) {
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-bold text-gray-900 leading-snug">{pages.what.heading}</h3>
-      {pages.what.body.split("\n\n").map((para, i) => (
-        <p key={i} className="text-sm text-gray-600 leading-relaxed">{para}</p>
-      ))}
+      <BodyBlock text={pages.what.body} />
     </div>
   );
 }
@@ -443,9 +527,7 @@ function WhyPage({ pages }) {
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-bold text-gray-900 leading-snug">{pages.why.heading}</h3>
-      {pages.why.body.split("\n\n").map((para, i) => (
-        <p key={i} className="text-sm text-gray-600 leading-relaxed">{para}</p>
-      ))}
+      <BodyBlock text={pages.why.body} />
     </div>
   );
 }
@@ -454,14 +536,22 @@ function DeclinePage({ pages }) {
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-bold text-gray-900 leading-snug">{pages.decline.heading}</h3>
-      {pages.decline.body.split("\n\n").map((para, i) => (
-        <p key={i} className="text-sm text-gray-600 leading-relaxed">{para}</p>
-      ))}
+      <BodyBlock text={pages.decline.body} />
     </div>
   );
 }
 
-// ─── Risk renderers — Apple-style, no cards ───────────────────────────────────
+// ─── Risk renderers — Direction 1 layout + Direction 3 grouping ──────────────
+
+const FREQ_ORDER = ["VERY_COMMON", "COMMON", "UNCOMMON", "RARE", "VERY_RARE"];
+
+const FREQ_DOT = {
+  VERY_COMMON: "bg-red-400",
+  COMMON:      "bg-orange-400",
+  UNCOMMON:    "bg-yellow-400",
+  RARE:        "bg-gray-300",
+  VERY_RARE:   "bg-gray-200",
+};
 
 const FREQ_RATE_COLOR = {
   VERY_COMMON: "text-red-500",
@@ -471,31 +561,68 @@ const FREQ_RATE_COLOR = {
   VERY_RARE:   "text-gray-300",
 };
 
-function ListRiskRow({ risk, instrument, activeFactors }) {
+function inferCategory(sectionId) {
+  if (!sectionId) return null;
+  const id = sectionId.toLowerCase();
+  if (id.includes("fetal") || id.includes("baby") || id.includes("neonatal")) return "fetal";
+  if (id.includes("maternal") || id.includes("women") || id.includes("woman")) return "maternal";
+  return null;
+}
+
+function flattenRisks(sections, instrument, activeFactors) {
+  const risks = [];
+  for (const section of sections) {
+    if (section.type !== "list") continue;
+    const category = inferCategory(section.id);
+    for (const r of section.risks) {
+      if (r.instrumentOnly && instrument !== r.instrumentOnly) continue;
+      if (r.conditions?.length > 0 && !r.conditions.some(c => activeFactors.has(c))) continue;
+      const freqKey = r.byInstrument ? r.byInstrument[instrument]?.freq : r.freq;
+      const rate    = r.byInstrument ? r.byInstrument[instrument]?.rate : r.rate;
+      risks.push({ ...r, _freqKey: freqKey, _rate: rate, _category: category });
+    }
+  }
+  return risks;
+}
+
+function groupByFreq(risks) {
+  const groups = {};
+  for (const r of risks) {
+    const key = r._freqKey ?? "__none";
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(r);
+  }
+  return groups;
+}
+
+function FreqRiskRow({ risk }) {
   const [expanded, setExpanded] = useState(false);
-
-  if (risk.instrumentOnly && instrument !== risk.instrumentOnly) return null;
-  if (risk.conditions?.length > 0 && !risk.conditions.some(c => activeFactors.has(c))) return null;
-
-  const freqKey  = risk.byInstrument ? risk.byInstrument[instrument]?.freq : risk.freq;
-  const rate     = risk.byInstrument ? risk.byInstrument[instrument]?.rate : risk.rate;
-  const rateColor = FREQ_RATE_COLOR[freqKey] ?? "text-gray-400";
-  const freqLabel = FREQ[freqKey]?.label;
+  const dot   = FREQ_DOT[risk._freqKey]   ?? "bg-gray-200";
+  const color = FREQ_RATE_COLOR[risk._freqKey] ?? "text-gray-300";
 
   return (
-    <div className="py-4 border-b border-gray-100 last:border-0">
-      <button onClick={() => setExpanded(e => !e)} className="w-full text-left">
-        <p className="text-[15px] font-semibold text-gray-900 leading-snug tracking-[-0.01em]">{risk.name}</p>
-        {risk.note && <p className="text-xs text-orange-500 font-medium mt-0.5">{risk.note}</p>}
-        <div className="flex items-baseline gap-2 mt-1.5">
-          {rate     && <span className={`text-[22px] font-bold leading-none tracking-tight ${rateColor}`}>{rate}</span>}
-          {freqLabel && <span className="text-xs text-gray-400 font-medium">{freqLabel}</span>}
-          {!rate && freqLabel && <span className={`text-base font-semibold ${rateColor}`}>{freqLabel}</span>}
+    <div className={`border-b border-gray-100 last:border-0 ${expanded ? "bg-gray-50/40" : ""}`}>
+      <button onClick={() => setExpanded(e => !e)} className="w-full flex items-start gap-3 py-3.5 px-4 text-left">
+        <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${dot}`} />
+        <div className="flex-1 min-w-0 pr-2">
+          <p className="text-[14px] text-gray-900 font-medium leading-snug">{risk.name}</p>
+          {risk.source && (
+            <p className="text-[10px] text-gray-300 font-medium mt-0.5">{risk.source}</p>
+          )}
         </div>
-        {expanded && risk.plain && (
-          <p className="text-sm text-gray-500 leading-relaxed mt-3">{risk.plain}</p>
-        )}
+        <div className="shrink-0 text-right max-w-[120px]">
+          {risk.note && <p className="text-[10px] text-orange-500 font-semibold leading-snug mb-0.5">{risk.note}</p>}
+          {risk._rate
+            ? <p className={`text-[12px] font-bold tabular-nums leading-snug ${color}`}>{risk._rate}</p>
+            : risk._freqKey
+              ? <p className={`text-[11px] font-semibold ${color}`}>{FREQ[risk._freqKey]?.label}</p>
+              : null
+          }
+        </div>
       </button>
+      {expanded && risk.plain && (
+        <p className="text-[13px] text-gray-500 leading-relaxed pb-3.5 px-4 pl-9">{risk.plain}</p>
+      )}
     </div>
   );
 }
@@ -503,81 +630,130 @@ function ListRiskRow({ risk, instrument, activeFactors }) {
 function ComparisonRiskRow({ risk }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <div className="py-4 border-b border-gray-100 last:border-0">
-      <button onClick={() => setExpanded(e => !e)} className="w-full text-left">
-        <p className="text-[15px] font-semibold text-gray-900 leading-snug tracking-[-0.01em] mb-2">{risk.name}</p>
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Caesarean</p>
-            <p className={`text-base font-bold leading-snug ${risk.cs_higher ? "text-red-500" : "text-teal-500"}`}>{risk.cs}</p>
-          </div>
-          <div className="w-px bg-gray-100 self-stretch" />
-          <div className="flex-1">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Vaginal</p>
-            <p className={`text-base font-bold leading-snug ${risk.cs_higher ? "text-teal-500" : "text-red-500"}`}>{risk.vaginal}</p>
-          </div>
+    <div className={`border-b border-gray-100 last:border-0 ${expanded ? "bg-gray-50/40" : ""}`}>
+      <button onClick={() => setExpanded(e => !e)} className="w-full flex items-start gap-3 py-3.5 px-4 text-left">
+        <span className="w-2 h-2 rounded-full shrink-0 mt-1.5 bg-gray-200" />
+        <p className="flex-1 min-w-0 text-[14px] text-gray-900 font-medium leading-snug pr-2">{risk.name}</p>
+        <div className="shrink-0 text-right max-w-[130px] space-y-0.5">
+          <p className={`text-[11px] font-bold tabular-nums leading-snug ${risk.cs_higher ? "text-rose-500" : "text-teal-500"}`}>
+            CS {risk.cs.replace("About ", "").replace(" on average", "")}
+          </p>
+          <p className={`text-[11px] font-semibold tabular-nums leading-snug ${risk.cs_higher ? "text-teal-400" : "text-rose-400"}`}>
+            VB {risk.vaginal.replace("About ", "").replace(" on average", "")}
+          </p>
         </div>
-        {expanded && risk.plain && (
-          <p className="text-sm text-gray-500 leading-relaxed mt-3">{risk.plain}</p>
-        )}
       </button>
+      {expanded && risk.plain && (
+        <p className="text-[13px] text-gray-500 leading-relaxed pb-3.5 px-4 pl-9">{risk.plain}</p>
+      )}
     </div>
   );
 }
 
-function RiskSectionBlock({ section, instrument, activeFactors }) {
-  const hasVisible = section.type === "list"
-    ? section.risks.some(r => {
-        if (r.instrumentOnly && instrument !== r.instrumentOnly) return false;
-        if (r.conditions?.length > 0 && !r.conditions.some(c => activeFactors.has(c))) return false;
-        return true;
-      })
-    : true;
-
-  if (!hasVisible) return null;
-
+function FreqGroup({ risks, freqKey }) {
+  if (!risks?.length) return null;
+  const f = FREQ[freqKey];
   return (
-    <div className="mb-8">
-      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.12em] mb-1">{section.heading}</p>
-      {section.note && (
-        <p className="text-xs text-amber-600 mb-3 leading-snug">{section.note}</p>
-      )}
-
-      {section.type === "list" && (
-        <div>
-          {section.risks.map(r => (
-            <ListRiskRow key={r.id} risk={r} instrument={instrument} activeFactors={activeFactors} />
-          ))}
-        </div>
-      )}
-
-      {section.type === "comparison" && (
-        <div>
-          {section.risks.map(r => <ComparisonRiskRow key={r.id} risk={r} />)}
-        </div>
-      )}
-
-      {section.type === "simple" && (
-        <div>
-          {section.items.map((item, i) => (
-            <div key={i} className="flex items-center gap-3 py-3 border-b border-gray-100 last:border-0">
-              <span className="w-1 h-1 rounded-full bg-gray-300 shrink-0" />
-              <p className="text-[15px] text-gray-700 font-medium">{item}</p>
-            </div>
-          ))}
-        </div>
-      )}
+    <div className="mb-6">
+      <div className="flex items-center gap-2 mb-2">
+        <span className={`w-2 h-2 rounded-full shrink-0 ${FREQ_DOT[freqKey]}`} />
+        <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.1em]">
+          {f.label} · {risks.length}
+        </p>
+      </div>
+      <div className="rounded-xl overflow-hidden bg-white border border-gray-100">
+        {risks.map(r => <FreqRiskRow key={r.id} risk={r} />)}
+      </div>
     </div>
   );
 }
 
-function RisksPage({ sections, instrument, activeFactors }) {
+function RisksPage({ sections, comparisonSections, instrument, activeFactors }) {
+  const [showComparison, setShowComparison] = useState(false);
+  const [catTab, setCatTab] = useState("maternal");
+
+  const allRisks = flattenRisks(sections, instrument, activeFactors);
+
+  const hasCats = allRisks.some(r => r._category !== null);
+  const maternalRisks = allRisks.filter(r => r._category === "maternal" || r._category === null);
+  const fetalRisks    = allRisks.filter(r => r._category === "fetal");
+  const showTabs = hasCats && fetalRisks.length > 0;
+
+  const visibleRisks = showTabs
+    ? (catTab === "maternal" ? maternalRisks : fetalRisks)
+    : allRisks;
+  const grouped = groupByFreq(visibleRisks);
+
+  const simpleItems = sections
+    .filter(s => s.type === "simple")
+    .flatMap(s => s.items.map(item => ({ id: item, name: item, _freqKey: null, _rate: null })));
+
   return (
     <div className="pb-4">
-      {sections.map(s => (
-        <RiskSectionBlock key={s.id} section={s} instrument={instrument} activeFactors={activeFactors} />
+      {showTabs && (
+        <div className="flex gap-1 mb-5 p-1 bg-gray-100 rounded-xl">
+          {[
+            { id: "maternal", label: `Maternal (${maternalRisks.length})` },
+            { id: "fetal",    label: `Fetal (${fetalRisks.length})` },
+          ].map(t => (
+            <button
+              key={t.id}
+              onClick={() => setCatTab(t.id)}
+              className={`flex-1 py-1.5 rounded-lg text-[13px] font-semibold transition-colors ${
+                catTab === t.id
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-400 hover:text-gray-600"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {FREQ_ORDER.map(key => (
+        <FreqGroup key={key} risks={grouped[key]} freqKey={key} />
       ))}
-      <FreqKey />
+
+      {!showTabs && simpleItems.length > 0 && (
+        <div className="mb-7">
+          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.1em] mb-3">Also reported</p>
+          <div className="rounded-xl overflow-hidden bg-white border border-gray-100">
+            {simpleItems.map(r => (
+              <div key={r.id} className="flex items-center gap-3 py-3 px-4 border-b border-gray-100 last:border-0">
+                <span className="w-2 h-2 rounded-full shrink-0 bg-gray-200" />
+                <p className="text-[14px] text-gray-700 font-medium">{r.name}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {comparisonSections && (
+        <>
+          <button
+            onClick={() => setShowComparison(v => !v)}
+            className="w-full flex items-center justify-between py-3.5 border-t border-gray-100 mt-1"
+          >
+            <span className="text-[13px] font-semibold text-gray-400">Compare with vaginal birth</span>
+            <svg className={`w-3.5 h-3.5 text-gray-300 transition-transform ${showComparison ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          {showComparison && (
+            <div className="mt-2 mb-4">
+              <p className="text-[11px] text-gray-400 mb-4 leading-snug">NICE NG192 Appendix A (2021) — population averages, not specific to your situation.</p>
+              {comparisonSections.flatMap(s => s.risks).map(r => (
+                <ComparisonRiskRow key={r.id} risk={r} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      <div className="mt-6">
+        <FreqKey />
+      </div>
     </div>
   );
 }
@@ -585,24 +761,19 @@ function RisksPage({ sections, instrument, activeFactors }) {
 function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
   const [activeTab, setActiveTab] = useState("what");
 
-  const proc    = CONSENT_PROCEDURES.find(p => p.id === procedureId);
-  const isCS    = procedureId === "CS";
-  const isOVD   = procedureId === "OVD";
-
-  const contextLabel = isCS
-    ? (context === "elective" ? "Elective" : "Emergency")
-    : (context === "ventouse" ? "Ventouse" : "Forceps");
-
-  const faqs      = isCS  ? CS_FAQ          : OVD_FAQ;
-  const pages     = isCS  ? CS_PAGES[context] : OVD_PAGES[context];
-  const source    = isCS  ? "NICE NG192 · RCOG Consent Advice No. 12"
-                           : "RCOG Consent Advice No. 11 (2010)";
-  const instrument    = isOVD ? context : null;
+  const proc         = CONSENT_PROCEDURES.find(p => p.id === procedureId);
+  const cfg          = PROCEDURE_CONFIG[procedureId] ?? {};
   const activeFactors = factors;
-  const hasPP         = isCS && activeFactors.has("placenta_praevia");
-  const riskSections  = isCS
-    ? (hasPP ? CS_PP_RISK_SECTIONS : CS_RISK_SECTIONS)
-    : OVD_RISK_SECTIONS;
+
+  const contextOpt   = cfg.contextOptions?.find(o => o.id === context);
+  const contextLabel = contextOpt?.label ?? null;
+
+  const faqs             = cfg.faq ?? [];
+  const pages            = cfg.getPages?.(context) ?? {};
+  const source           = cfg.sourceLabel ?? "";
+  const instrument       = cfg.getInstrument?.(context) ?? null;
+  const riskSections     = cfg.getRiskSections?.(context, activeFactors) ?? [];
+  const comparisonSections = cfg.comparisonSections ?? null;
 
   const currentIdx = CONSENT_TABS.findIndex(t => t.id === activeTab);
   const canPrev = currentIdx > 0;
@@ -624,20 +795,34 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="text-base font-bold text-gray-900">{proc?.title}</h3>
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                    context === "emergency" ? "bg-red-100 text-red-700" :
-                    context === "forceps"   ? "bg-indigo-100 text-indigo-700" :
-                    "bg-emerald-100 text-emerald-700"
-                  }`}>{contextLabel}</span>
+                  {contextLabel && (
+                    <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600">{contextLabel}</span>
+                  )}
                 </div>
-                <p className="text-[10px] text-gray-400 mt-0.5 uppercase tracking-wide font-bold">{source}</p>
+                <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wide font-bold">{source}</p>
+                  {proc?.pdfs?.map(pdf => (
+                    <a
+                      key={pdf.file}
+                      href={`/consent-sources/${pdf.file}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-[10px] text-blue-400 font-semibold hover:text-blue-600 transition-colors"
+                    >
+                      <svg className="w-2.5 h-2.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      {pdf.label}
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Active factors chips */}
             {activeFactors.size > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-2">
-                {[...(isCS ? CS_PATIENT_FACTORS : OVD_PATIENT_FACTORS)]
+                {[...(cfg.patientFactors ?? [])]
                   .filter(f => activeFactors.has(f.id))
                   .map(f => (
                     <span key={f.id} className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200">
@@ -670,7 +855,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
         <div className="px-5 pt-6">
           {activeTab === "what"    && <WhatPage    pages={pages} />}
           {activeTab === "why"     && <WhyPage     pages={pages} />}
-          {activeTab === "risks"   && <RisksPage   sections={riskSections} instrument={instrument} activeFactors={activeFactors} />}
+          {activeTab === "risks"   && <RisksPage   sections={riskSections} comparisonSections={comparisonSections} instrument={instrument ?? context} activeFactors={activeFactors} />}
           {activeTab === "decline" && <DeclinePage pages={pages} />}
           {activeTab === "faq"     && <FAQSection  faqs={faqs} />}
         </div>
@@ -739,8 +924,13 @@ export default function ConsentPage() {
   const [context, setContext]     = useState(null);
   const [factors, setFactors]     = useState(new Set());
 
-  const selectProcedure = id => { setProcId(id); setStep(1); };
-  const selectContext   = ctx => { setContext(ctx); setStep(2); };
+  const selectProcedure = id => {
+    setProcId(id);
+    // skip context step if procedure has no context options
+    const hasContext = (PROCEDURE_CONFIG[id]?.contextOptions?.length ?? 0) > 0;
+    setStep(hasContext ? 1 : 2);
+  };
+  const selectContext = ctx => { setContext(ctx); setStep(2); };
   const toggleFactor    = id => setFactors(prev => {
     const s = new Set(prev);
     s.has(id) ? s.delete(id) : s.add(id);
@@ -759,7 +949,10 @@ export default function ConsentPage() {
       factors={factors}
       onToggle={toggleFactor}
       onContinue={showSummary}
-      onBack={() => setStep(1)}
+      onBack={() => {
+        const hasContext = (PROCEDURE_CONFIG[procedureId]?.contextOptions?.length ?? 0) > 0;
+        setStep(hasContext ? 1 : 0);
+      }}
     />
   );
   if (step === 3) return (
