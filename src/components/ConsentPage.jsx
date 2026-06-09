@@ -495,13 +495,47 @@ function FreqKey() {
   );
 }
 
-const CONSENT_TABS = [
+const CONSENT_TABS_BASE = [
   { id: "what",    label: "What" },
   { id: "why",     label: "Why" },
   { id: "risks",   label: "Risks" },
   { id: "decline", label: "Decline" },
   { id: "faq",     label: "FAQ" },
 ];
+
+function buildTabs(hasBenefits) {
+  if (!hasBenefits) return CONSENT_TABS_BASE;
+  const idx = CONSENT_TABS_BASE.findIndex(t => t.id === "risks");
+  return [
+    ...CONSENT_TABS_BASE.slice(0, idx),
+    { id: "benefits", label: "Benefits" },
+    ...CONSENT_TABS_BASE.slice(idx),
+  ];
+}
+
+function BenefitsPage({ benefits }) {
+  if (!benefits?.length) return null;
+  return (
+    <div className="pb-4">
+      <p className="text-xs text-gray-400 mb-4 leading-relaxed">
+        Likely effects of a single course of antenatal corticosteroids on the baby — verbatim from RCOG GTG (Stock 2022) Table 1.
+      </p>
+      <div className="rounded-2xl overflow-hidden bg-emerald-50/40 border border-emerald-100">
+        {benefits.map((b, i) => (
+          <div key={b.id} className={`px-4 py-4 ${i > 0 ? "border-t border-emerald-100" : ""}`}>
+            <div className="flex items-baseline justify-between gap-3 mb-1.5">
+              <p className="text-[15px] font-semibold text-gray-900 leading-snug">{b.name}</p>
+              {b.rate && (
+                <p className="text-[11px] font-bold text-emerald-700 shrink-0 text-right">{b.rate}</p>
+              )}
+            </div>
+            {b.plain && <p className="text-[13px] text-gray-600 leading-relaxed">{b.plain}</p>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function BodyBlock({ text }) {
   return (
@@ -681,7 +715,7 @@ function FreqGroup({ risks, freqKey }) {
   );
 }
 
-function RisksPage({ sections, benefits = [], comparisonSections, instrument, activeFactors }) {
+function RisksPage({ sections, comparisonSections, instrument, activeFactors }) {
   const [showComparison, setShowComparison] = useState(false);
   const [catTab, setCatTab] = useState("maternal");
 
@@ -703,35 +737,6 @@ function RisksPage({ sections, benefits = [], comparisonSections, instrument, ac
 
   return (
     <div className="pb-4">
-      {benefits.length > 0 && (
-        <div className="mb-7">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <p className="text-[11px] font-semibold text-emerald-700 uppercase tracking-[0.1em]">Benefits</p>
-          </div>
-          <div className="rounded-xl overflow-hidden bg-emerald-50/50 border border-emerald-100">
-            {benefits.map((b, i) => (
-              <div key={b.id} className={`px-4 py-3 ${i > 0 ? "border-t border-emerald-100" : ""}`}>
-                <div className="flex items-baseline justify-between gap-3 mb-1">
-                  <p className="text-[14px] font-semibold text-gray-900 leading-snug">{b.name}</p>
-                  {b.rate && (
-                    <p className="text-[11px] font-bold text-emerald-700 shrink-0">{b.rate}</p>
-                  )}
-                </div>
-                {b.plain && <p className="text-[12px] text-gray-600 leading-relaxed">{b.plain}</p>}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {benefits.length > 0 && sections.length > 0 && (
-        <div className="flex items-center gap-2 mb-3">
-          <span className="w-2 h-2 rounded-full bg-rose-500" />
-          <p className="text-[11px] font-semibold text-rose-700 uppercase tracking-[0.1em]">Risks &amp; harms</p>
-        </div>
-      )}
-
       {showTabs && (
         <div className="flex gap-1 mb-5 p-1 bg-gray-100 rounded-xl">
           {[
@@ -818,9 +823,10 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
   const benefits         = cfg.getBenefits?.(context, activeFactors) ?? [];
   const comparisonSections = cfg.comparisonSections ?? null;
 
-  const currentIdx = CONSENT_TABS.findIndex(t => t.id === activeTab);
+  const tabs = buildTabs(benefits.length > 0);
+  const currentIdx = tabs.findIndex(t => t.id === activeTab);
   const canPrev = currentIdx > 0;
-  const canNext = currentIdx < CONSENT_TABS.length - 1;
+  const canNext = currentIdx < tabs.length - 1;
 
   return (
     <div className="min-h-screen pb-28">
@@ -878,7 +884,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
 
           {/* Tab pills */}
           <div className="flex gap-2 overflow-x-auto px-5 pb-3 no-scrollbar">
-            {CONSENT_TABS.map(tab => (
+            {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -896,11 +902,12 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
 
         {/* Page content */}
         <div className="px-5 pt-6">
-          {activeTab === "what"    && <WhatPage    pages={pages} />}
-          {activeTab === "why"     && <WhyPage     pages={pages} />}
-          {activeTab === "risks"   && <RisksPage   sections={riskSections} benefits={benefits} comparisonSections={comparisonSections} instrument={instrument ?? context} activeFactors={activeFactors} />}
-          {activeTab === "decline" && <DeclinePage pages={pages} />}
-          {activeTab === "faq"     && <FAQSection  faqs={faqs} />}
+          {activeTab === "what"     && <WhatPage     pages={pages} />}
+          {activeTab === "why"      && <WhyPage      pages={pages} />}
+          {activeTab === "benefits" && <BenefitsPage benefits={benefits} />}
+          {activeTab === "risks"    && <RisksPage    sections={riskSections} comparisonSections={comparisonSections} instrument={instrument ?? context} activeFactors={activeFactors} />}
+          {activeTab === "decline"  && <DeclinePage  pages={pages} />}
+          {activeTab === "faq"      && <FAQSection   faqs={faqs} />}
         </div>
       </div>
 
@@ -908,7 +915,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
       <div className="fixed bottom-16 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-gray-100">
         <div className="max-w-lg mx-auto flex items-center gap-3 px-5 py-3">
           <button
-            onClick={() => canPrev && setActiveTab(CONSENT_TABS[currentIdx - 1].id)}
+            onClick={() => canPrev && setActiveTab(tabs[currentIdx - 1].id)}
             disabled={!canPrev}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
               canPrev ? "bg-gray-100 text-gray-700 hover:bg-gray-200" : "bg-gray-50 text-gray-300 cursor-default"
@@ -921,7 +928,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
           </button>
 
           <div className="flex-1 flex justify-center gap-1.5">
-            {CONSENT_TABS.map((tab, i) => (
+            {tabs.map((tab, i) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -934,7 +941,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
 
           {canNext ? (
             <button
-              onClick={() => setActiveTab(CONSENT_TABS[currentIdx + 1].id)}
+              onClick={() => setActiveTab(tabs[currentIdx + 1].id)}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-800 transition-all"
             >
               Next
