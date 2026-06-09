@@ -101,15 +101,23 @@ export default function App() {
 
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-  const viewportMeta = document.querySelector("meta[name=viewport]");
+  // iOS WKWebView ignores in-place viewport changes; must remove + re-insert
+  const setViewport = (content) => {
+    const old = document.querySelector("meta[name=viewport]");
+    if (old) old.remove();
+    const meta = document.createElement("meta");
+    meta.name = "viewport";
+    meta.content = content;
+    document.head.appendChild(meta);
+  };
 
   const openPdf = (url) => {
-    if (viewportMeta) viewportMeta.content = "width=device-width, initial-scale=1.0, viewport-fit=cover";
+    setViewport("width=device-width, initial-scale=1.0, viewport-fit=cover");
     setPdfUrl(url);
   };
 
   const closePdf = () => {
-    if (viewportMeta) viewportMeta.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover";
+    setViewport("width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover");
     if (pdfUrl?.startsWith("blob:")) URL.revokeObjectURL(pdfUrl);
     setPdfUrl(null);
   };
