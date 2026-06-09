@@ -1585,6 +1585,307 @@ export const HYSTEROSCOPY_FAQ = [
   },
 ];
 
+// ─── ANTENATAL CORTICOSTEROIDS ────────────────────────────────────────────────
+// Source: RCOG Green-top Guideline (Stock et al., BJOG 2022;129:e35–e60)
+// Antenatal corticosteroids to reduce neonatal morbidity and mortality.
+// All numerical risk figures verbatim from Table 1 of the guideline.
+
+export const ACS_CONTEXT_OPTIONS = [
+  { id: "preterm",       label: "22⁺⁰–34⁺⁶ weeks (preterm)" },
+  { id: "late_preterm",  label: "35⁺⁰–36⁺⁶ weeks (late preterm)" },
+  { id: "term_cs",       label: "37⁺⁰–38⁺⁶ weeks (planned caesarean)" },
+  { id: "rescue",        label: "Rescue course (>7 days since last)" },
+];
+
+export const ACS_PATIENT_FACTORS = [
+  { id: "acs_diabetes",     label: "Diabetes (pre-existing or gestational)" },
+  { id: "acs_multiple",     label: "Multiple pregnancy" },
+];
+
+// GRADE certainty mapping from RCOG GTG (Stock 2022):
+//   HIGH     — "Highly likely"
+//   MODERATE — "Likely"
+//   LOW      — "May"
+export const CERTAINTY = {
+  HIGH:     { label: "Highly likely",   short: "High certainty"     },
+  MODERATE: { label: "Likely",          short: "Moderate certainty" },
+  LOW:      { label: "May",             short: "Low certainty"      },
+};
+
+export const ACS_BENEFITS = {
+  preterm: [
+    { id: "acs_perinatal_death", name: "Perinatal death", certainty: "HIGH",
+      rate: "2.3 in 100 fewer", detail: "NNT 43.5",
+      source: "RCOG GTG (Stock 2022) Table 1",
+      plain: "Highly likely to reduce perinatal mortality — RR 0.85 (95% CI 0.77–0.93). About 2.3 in 100 fewer babies will die around the time of birth. 43.5 women need to be treated to prevent one death." },
+    { id: "acs_neonatal_death", name: "Neonatal death", certainty: "HIGH",
+      rate: "2.6 in 100 fewer", detail: "NNT 38.5",
+      source: "RCOG GTG (Stock 2022) Table 1",
+      plain: "Highly likely to reduce neonatal death — RR 0.78 (95% CI 0.70–0.87). About 2.6 in 100 fewer babies will die in the newborn period. 38.5 women need to be treated to prevent one death." },
+    { id: "acs_rds", name: "Respiratory distress syndrome", certainty: "HIGH",
+      rate: "4.3 in 100 fewer", detail: "NNT 23.3",
+      source: "RCOG GTG (Stock 2022) Table 1",
+      plain: "Highly likely to reduce neonatal respiratory distress — RR 0.71 (95% CI 0.65–0.78). About 4.3 in 100 fewer babies will develop RDS. 23.3 women need to be treated to prevent one case." },
+    { id: "acs_ivh", name: "Intraventricular haemorrhage", certainty: "MODERATE",
+      rate: "1.4 in 100 fewer", detail: "NNT 71.4",
+      source: "RCOG GTG (Stock 2022) Table 1",
+      plain: "Likely to reduce bleeding into the brain ventricles — RR 0.58 (95% CI 0.45–0.75). 71.4 women need to be treated to prevent one case." },
+    { id: "acs_dev_delay", name: "Developmental delay in childhood", certainty: "MODERATE",
+      rate: "NNT 27", detail: null,
+      source: "RCOG GTG (Stock 2022) Table 1",
+      plain: "Likely to reduce developmental delay in childhood — RR 0.51 (95% CI 0.27–0.97)." },
+  ],
+  late_preterm: [
+    { id: "acs_late_resp_support", name: "Need for respiratory support", certainty: "MODERATE",
+      rate: "146 → 116 / 1,000", detail: "NNT 33.3",
+      source: "RCOG GTG (Stock 2022) Table 1",
+      plain: "Likely to reduce the need for respiratory support — RR 0.80 (95% CI 0.66–0.97). The rate falls from 146 to 116 per 1,000. 33.3 women need to be treated to prevent one case." },
+  ],
+  term_cs: [
+    { id: "acs_term_nnu", name: "NNU admission for respiratory morbidity", certainty: "LOW",
+      rate: "51 → 23 / 1,000", detail: "NNT 35.7",
+      source: "RCOG GTG (Stock 2022) Table 1",
+      plain: "May decrease NNU admission with respiratory morbidity — RR 0.45 (95% CI 0.22–0.90). Single-centre trial with high risk of bias, so low certainty around the estimate." },
+  ],
+  rescue: [
+    { id: "acs_rescue_resp", name: "Need for respiratory support", certainty: "MODERATE",
+      rate: "395 → 311 / 1,000", detail: "NNT 11.9",
+      source: "RCOG GTG (Stock 2022) Table 1",
+      plain: "Likely to reduce the need for respiratory support — RR 0.91 (95% CI 0.85–0.97). The rate falls from 395 to 311 per 1,000. 11.9 women need to be treated to prevent one case." },
+  ],
+};
+
+export const ACS_RISK_SECTIONS = {
+  preterm: [
+    {
+      id: "acs_preterm_harms",
+      heading: "Possible harms",
+      type: "list",
+      risks: [
+        {
+          id: "acs_mat_glucose",
+          name: "Maternal hyperglycaemia for up to 5 days",
+          freq: "COMMON",
+          rate: null,
+          conditions: ["acs_diabetes"],
+          source: "RCOG GTG (Stock 2022) Table 1",
+          plain: "Likely to affect maternal glucose tolerance for up to 5 days after administration, with a higher risk in diabetic women. Blood sugars will be monitored and your insulin or treatment may need adjusting.",
+        },
+        {
+          id: "acs_birthweight",
+          name: "Lower birthweight if birth >7 days after steroids",
+          freq: "COMMON",
+          rate: null,
+          source: "RCOG GTG (Stock 2022) Table 1",
+          plain: "Likely to reduce birthweight by about 147 g (95% CI -291.97 to -2.05) if birth occurs more than 7 days after steroids were given.",
+        },
+        {
+          id: "acs_no_benefit_late",
+          name: "No benefit if birth >7 days after starting treatment",
+          freq: null,
+          rate: null,
+          source: "RCOG GTG (Stock 2022) Table 1",
+          plain: "Reductions in mortality and respiratory morbidity are most likely if birth occurs 24–48 hours after starting treatment. No benefits are likely to be seen if birth is more than 7 days after starting treatment.",
+        },
+        {
+          id: "acs_psych",
+          name: "Possible increase in psychiatric/behavioural diagnoses if born at term",
+          freq: "UNCOMMON",
+          rate: "NNH 38.8",
+          source: "RCOG GTG (Stock 2022) Table 1",
+          plain: "If the baby is ultimately born at term despite the steroids, there may be a small increase in psychiatric and behavioural diagnoses (number needed to harm 38.8, 95% CI 30–52.4).",
+        },
+      ],
+    },
+    {
+      id: "acs_preterm_unknowns",
+      heading: "What we don't yet know",
+      type: "simple",
+      items: [
+        "There is less evidence for women with multiple pregnancy.",
+        "Effects of unnecessary antenatal corticosteroids (if birth is more than 7 days after steroids) are not well described.",
+        "While no long-term harms have been proven, large-scale observational studies needed for pharmacovigilance are lacking.",
+      ],
+    },
+  ],
+
+  late_preterm: [
+    {
+      id: "acs_late_harms",
+      heading: "Possible harms",
+      type: "list",
+      risks: [
+        {
+          id: "acs_late_hypo",
+          name: "Neonatal hypoglycaemia",
+          freq: "VERY_COMMON",
+          rate: "from 150 to 240 in 1,000 (NNH 11.1)",
+          source: "RCOG GTG (Stock 2022) Table 1",
+          plain: "Likely to increase neonatal low blood sugar (RR 1.60, 95% CI 1.37–1.87). The rate rises from 150 to 240 per 1,000, with 11.1 women treated for each extra case of hypoglycaemia.",
+        },
+        {
+          id: "acs_late_psych",
+          name: "Possible increase in psychiatric/behavioural diagnoses if born at term",
+          freq: "UNCOMMON",
+          rate: "NNH 38.8",
+          source: "RCOG GTG (Stock 2022) Table 1",
+          plain: "If the baby is ultimately born at term, there may be a small increase in psychiatric and behavioural diagnoses (NNH 38.8, 95% CI 30.5–52.4).",
+        },
+      ],
+    },
+    {
+      id: "acs_late_unknowns",
+      heading: "What we don't yet know",
+      type: "simple",
+      items: [
+        "Benefits seem unlikely if birth is more than 7 days after starting treatment, but this has not been studied in women at this gestation.",
+        "Large-scale observational studies needed for pharmacovigilance are lacking.",
+      ],
+    },
+  ],
+
+  term_cs: [
+    {
+      id: "acs_term_harms",
+      heading: "Possible harms",
+      type: "list",
+      risks: [
+        {
+          id: "acs_term_school",
+          name: "Possible reduction in school-age educational attainment",
+          freq: null,
+          rate: null,
+          source: "RCOG GTG (Stock 2022) Table 1",
+          plain: "May reduce educational attainment at school age — in one observational study, the proportion ranked in the lower quartile of academic ability rose from 9% to 18%, and the proportion obtaining English proficiency fell from 13% to 7%.",
+        },
+        {
+          id: "acs_term_hypo",
+          name: "Likely neonatal hypoglycaemia",
+          freq: null,
+          rate: null,
+          source: "RCOG GTG (Stock 2022) Table 1",
+          plain: "Short-term complications such as hypoglycaemia have not been rigorously studied at these gestations, but are likely to apply (as for late preterm).",
+        },
+      ],
+    },
+    {
+      id: "acs_term_unknowns",
+      heading: "What we don't yet know",
+      type: "simple",
+      items: [
+        "There is uncertainty as to whether there is any reduction in RDS, TTN or NNU admission overall.",
+        "Risk of bias in the single-centre trial means there is low certainty around the estimates.",
+        "Benefits seem unlikely if birth is more than 7 days after starting treatment, but this has not been studied at this gestation.",
+        "Large-scale observational studies needed for pharmacovigilance are lacking.",
+      ],
+    },
+  ],
+
+  rescue: [
+    {
+      id: "acs_rescue_harms",
+      heading: "Possible harms",
+      type: "list",
+      risks: [
+        {
+          id: "acs_rescue_growth",
+          name: "Reduced birthweight, head circumference and length",
+          freq: "COMMON",
+          rate: "mean difference -80 g",
+          source: "RCOG GTG (Stock 2022) Table 1",
+          plain: "Likely to reduce birthweight (mean difference about 80 g lower), head circumference and length, and neonatal blood pressure. Dose effects are seen for harms.",
+        },
+      ],
+    },
+  ],
+};
+
+export const ACS_PAGES = {
+  preterm: {
+    what: {
+      heading: "Antenatal Corticosteroids (preterm)",
+      body: "Antenatal corticosteroids are steroid injections given to you before your baby is born to help your baby's lungs and other organs mature. The UK regimen is either:\n\n• Dexamethasone phosphate 24 mg IM — two 12 mg doses 24 hours apart (or four 6 mg doses 12 hours apart), or\n• Betamethasone sodium phosphate/acetate 24 mg IM — two 12 mg doses 24 hours apart.\n\nThe injections work best if the baby is born between 24 hours and 7 days after starting the course.",
+    },
+    why: {
+      heading: "Why are they being offered?",
+      body: "Corticosteroids are offered to women between 24⁺⁰ and 34⁺⁶ weeks in whom imminent preterm birth is anticipated (established preterm labour, PPROM, or planned preterm birth). At 22⁺⁰–23⁺⁶ weeks they are discussed in the context of individual circumstances and the wider decision about active care for the baby.\n\nA Cochrane review of 27 studies (11,272 women and 11,925 babies) found high-certainty evidence that they reduce perinatal death, neonatal death and respiratory distress syndrome, with moderate-certainty evidence for reductions in intraventricular haemorrhage and developmental delay.",
+    },
+    decline: {
+      heading: "If you decide not to proceed",
+      body: "You have the right to decline antenatal corticosteroids.\n\nIf you decline, the risk of neonatal death, respiratory distress syndrome, intraventricular haemorrhage and developmental delay is higher than it would be with treatment. The size of these risks depends on how preterm your baby is born.\n\nYour obstetric and neonatal team will continue to support you and your baby whatever you decide.",
+    },
+  },
+  late_preterm: {
+    what: {
+      heading: "Antenatal Corticosteroids (late preterm)",
+      body: "Antenatal corticosteroids are steroid injections (dexamethasone or betamethasone, 24 mg IM total over 24 hours) given before birth to help your baby's lungs mature.",
+    },
+    why: {
+      heading: "Why are they being offered?",
+      body: "Between 35⁺⁰ and 36⁺⁶ weeks the benefits and harms are more finely balanced. They may reduce the need for respiratory support, but they also increase the risk of low blood sugar in the newborn. The discussion should cover both — the guideline recommends an individualised, informed decision.",
+    },
+    decline: {
+      heading: "If you decide not to proceed",
+      body: "You have the right to decline.\n\nThe risk of needing respiratory support is higher without steroids, but the risk of neonatal hypoglycaemia is lower. Your team will continue routine monitoring of the baby's breathing and blood sugars after birth whatever you decide.",
+    },
+  },
+  term_cs: {
+    what: {
+      heading: "Antenatal Corticosteroids (term caesarean)",
+      body: "Antenatal corticosteroids are steroid injections (dexamethasone or betamethasone, 24 mg IM total over 24 hours) given before a planned caesarean at term to reduce the chance of breathing problems in the newborn.",
+    },
+    why: {
+      heading: "Why are they being discussed?",
+      body: "NICE CG132 recommends planned caesarean birth should not routinely be carried out before 39⁺⁰ weeks. For women undergoing a planned caesarean between 37⁺⁰ and 38⁺⁶ weeks, the guideline recommends an informed discussion about steroids.\n\nThe evidence is uncertain: steroids may reduce neonatal unit admission for respiratory morbidity (5.1% → 2.3%) but it is unclear if they reduce RDS, transient tachypnoea of the newborn or overall NNU admissions, and they may cause harm (hypoglycaemia, possible developmental effects).",
+    },
+    decline: {
+      heading: "If you decide not to proceed",
+      body: "You have the right to decline.\n\nThe risk of respiratory morbidity at term is low overall (~5%) and decreases with advancing gestation. Where possible, planning caesarean birth at or after 39⁺⁰ weeks is an alternative way to reduce this risk without using steroids.",
+    },
+  },
+  rescue: {
+    what: {
+      heading: "Rescue course of antenatal corticosteroids",
+      body: "A rescue (repeat) course is a second course of antenatal corticosteroids given when more than 7 days have passed since the original course and there is renewed concern about imminent preterm birth.",
+    },
+    why: {
+      heading: "Why is it being offered?",
+      body: "The benefit of a single course of antenatal corticosteroids fades after about 7 days. If preterm birth is again anticipated and the previous course was given more than 7 days ago, a rescue course is likely to reduce the baby's need for respiratory support (395 → 311 per 1,000).",
+    },
+    decline: {
+      heading: "If you decide not to proceed",
+      body: "You have the right to decline a rescue course.\n\nWithout a repeat course, the protective effect of the first course is likely to have largely worn off, and the baby's risk of needing respiratory support is higher. Dose effects are seen for harms — every additional course may further reduce birthweight, head circumference, length and neonatal blood pressure.",
+    },
+  },
+};
+
+export const ACS_FAQ = [
+  {
+    q: "When do the steroids start working?",
+    a: "The protective effects begin to appear within 24 hours of the first injection and are greatest if the baby is born between 24 hours and 7 days after starting treatment. (RCOG GTG, Stock 2022)",
+  },
+  {
+    q: "What if my baby is born within 24 hours of the first dose?",
+    a: "There is still likely to be some benefit even if the full course has not been completed, particularly for respiratory distress. Your team will give the second dose if there is time.",
+  },
+  {
+    q: "What if my baby isn't born for more than 7 days?",
+    a: "If birth happens more than 7 days after the course, the benefits are largely lost. The baby may also be smaller (mean about 147 g lower birthweight). A rescue course may be considered if there is renewed concern about imminent preterm birth.",
+  },
+  {
+    q: "I have diabetes — will the steroids affect my blood sugars?",
+    a: "Yes — antenatal corticosteroids are likely to affect glucose tolerance for up to 5 days, and the effect is greater in women with diabetes. Your blood sugars will be monitored closely and you may need a variable-rate intravenous insulin infusion. (RCOG GTG, Stock 2022)",
+  },
+  {
+    q: "Are there long-term effects on my baby?",
+    a: "No long-term harms have been proven, but large-scale observational studies needed for pharmacovigilance are lacking. There is some evidence of a small increase in psychiatric and behavioural diagnoses if the baby is ultimately born at term (NNH 38.8). At term, one observational study suggested a possible reduction in school-age educational attainment.",
+  },
+  {
+    q: "Which steroid will I be given?",
+    a: "In the UK, either dexamethasone phosphate 24 mg IM (two 12 mg doses 24 hours apart, or four 6 mg doses 12 hours apart) or betamethasone sodium phosphate/acetate 24 mg IM (two 12 mg doses 24 hours apart). Oral and transplacental routes are not recommended.",
+  },
+];
+
 // ─── PROCEDURE LIST ───────────────────────────────────────────────────────────
 
 export const CONSENT_PROCEDURES = [
@@ -1646,32 +1947,17 @@ export const CONSENT_PROCEDURES = [
     ],
   },
   {
-    id: "SURG_MISC",
-    title: "Surgical Miscarriage",
-    subtypes: "EVA · MVA",
-    source: "RCOG CA10",
-    color: { accent: "bg-rose-500", text: "text-rose-700" },
-  },
-  {
-    id: "MED_MISC",
-    title: "Medical Miscarriage",
-    subtypes: "Misoprostol",
-    source: "RCOG GTG25",
-    color: { accent: "bg-pink-500", text: "text-pink-700" },
-  },
-  {
-    id: "LAPAROSCOPY",
-    title: "Diagnostic Laparoscopy",
-    subtypes: "General anaesthetic",
-    source: "RCOG CA2",
-    color: { accent: "bg-amber-500", text: "text-amber-700" },
-  },
-  {
-    id: "HYSTEROSCOPY",
-    title: "Hysteroscopy",
-    subtypes: "Diagnostic · Operative",
-    source: "RCOG CA1 · GTG59",
-    color: { accent: "bg-violet-500", text: "text-violet-700" },
+    id: "ACS",
+    title: "Antenatal Corticosteroids",
+    subtypes: "Preterm · Late preterm · Term CS · Rescue",
+    source: "RCOG GTG (Stock 2022)",
+    color: { accent: "bg-sky-500", text: "text-sky-700" },
+    pdfs: [
+      {
+        label: "RCOG GTG (ACS)",
+        url: "/guidelines/BJOG - 2022 - Stock - Antenatal corticosteroids to reduce neonatal morbidity and mortality.pdf",
+      },
+    ],
   },
 ];
 

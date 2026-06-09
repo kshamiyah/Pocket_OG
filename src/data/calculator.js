@@ -18,6 +18,9 @@ export const CALCULATOR_SCENARIOS = [
     source: "NICE NG126 §1.4.27–1.4.31",
     color: { accent: "bg-amber-500", text: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200" },
     description: "Use serial hCG to determine subsequent management of a pregnancy of unknown location.",
+    pdfs: [
+      { label: "NICE NG126", url: "/guidelines/ectopic-pregnancy-and-miscarriage-diagnosis-and-initial-management-pdf-66141662244037.pdf" },
+    ],
   },
   {
     id: "ECTOPIC_DECISION",
@@ -26,6 +29,10 @@ export const CALCULATOR_SCENARIOS = [
     source: "NICE NG126 §1.6.3–1.6.10 · RCOG GTG21 §5.1",
     color: { accent: "bg-rose-500", text: "text-rose-700", bg: "bg-rose-50", border: "border-rose-200" },
     description: "Allocate a woman with an ultrasound-diagnosed tubal ectopic pregnancy to expectant, medical or surgical management.",
+    pdfs: [
+      { label: "NICE NG126", url: "/guidelines/ectopic-pregnancy-and-miscarriage-diagnosis-and-initial-management-pdf-66141662244037.pdf" },
+      { label: "RCOG GTG21", url: "/guidelines/BJOG - 2016 -  - Diagnosis and Management of Ectopic Pregnancy.pdf" },
+    ],
   },
   {
     id: "EXPECTANT_SURVEILLANCE",
@@ -34,6 +41,10 @@ export const CALCULATOR_SCENARIOS = [
     source: "NICE NG126 §1.6.5",
     color: { accent: "bg-teal-500", text: "text-teal-700", bg: "bg-teal-50", border: "border-teal-200" },
     description: "Interpret serial hCG during expectant management of a tubal ectopic pregnancy.",
+    pdfs: [
+      { label: "NICE NG126", url: "/guidelines/ectopic-pregnancy-and-miscarriage-diagnosis-and-initial-management-pdf-66141662244037.pdf" },
+      { label: "RCOG GTG21", url: "/guidelines/BJOG - 2016 -  - Diagnosis and Management of Ectopic Pregnancy.pdf" },
+    ],
   },
   {
     id: "MTX_SURVEILLANCE",
@@ -42,6 +53,10 @@ export const CALCULATOR_SCENARIOS = [
     source: "NICE NG126 §1.6.11 · RCOG GTG21 Appendix II",
     color: { accent: "bg-violet-500", text: "text-violet-700", bg: "bg-violet-50", border: "border-violet-200" },
     description: "Interpret day 4 → day 7 hCG following single-dose methotrexate for tubal ectopic pregnancy.",
+    pdfs: [
+      { label: "NICE NG126", url: "/guidelines/ectopic-pregnancy-and-miscarriage-diagnosis-and-initial-management-pdf-66141662244037.pdf" },
+      { label: "RCOG GTG21", url: "/guidelines/BJOG - 2016 -  - Diagnosis and Management of Ectopic Pregnancy.pdf" },
+    ],
   },
   {
     id: "VTE_RISK",
@@ -50,12 +65,107 @@ export const CALCULATOR_SCENARIOS = [
     source: "RCOG GTG37a Appendix III (April 2015)",
     color: { accent: "bg-indigo-500", text: "text-indigo-700", bg: "bg-indigo-50", border: "border-indigo-200" },
     description: "Formal VTE risk assessment with numerical scoring for pregnant and postpartum women.",
+    pdfs: [
+      { label: "RCOG GTG37a", url: "/guidelines/gtg-37a.pdf" },
+    ],
   },
 ];
 
 // ──────────────────────────────────────────────────────────────────────
 // Scenario 1 — PUL serial hCG (NG126 §1.4.27–1.4.32)
 // ──────────────────────────────────────────────────────────────────────
+
+// Clinical-symptom override — NG126 §1.4.25, §1.4.28, §1.6.4
+//   "Place more importance on clinical symptoms than on serum hCG results;
+//    review the woman's condition if any symptoms change."
+//   "Regardless of serum hCG levels, give written information about what
+//    to do if new or worsening symptoms occur, including how to access
+//    emergency care 24 hours a day."
+export function symptomOverride({ worseningPain, heavyBleeding, haemodynamicInstability }) {
+  if (!worseningPain && !heavyBleeding && !haemodynamicInstability) return null;
+  const triggers = [];
+  if (haemodynamicInstability) triggers.push("haemodynamic instability");
+  if (worseningPain) triggers.push("worsening pain");
+  if (heavyBleeding) triggers.push("heavy vaginal bleeding");
+  return {
+    category: "SYMPTOM_OVERRIDE",
+    title: haemodynamicInstability
+      ? "Emergency — resuscitate and arrange immediate surgical review"
+      : "Refer for clinical review — symptoms override biochemistry",
+    color: "text-red-700",
+    bg: "bg-red-50",
+    border: "border-red-200",
+    summary: `Reported: ${triggers.join(", ")}.`,
+    detail:
+      "NICE NG126 §1.4.25: place more importance on clinical symptoms than on serum hCG results; review the woman's condition if any symptoms change. §1.4.28: regardless of serum hCG levels, give written information about what to do if new or worsening symptoms occur, including how to access emergency care 24 hours a day.",
+    actions: haemodynamicInstability
+      ? [
+          "Resuscitate (IV access, fluids, group & save / crossmatch).",
+          "Arrange immediate senior gynaecology and theatre review for suspected ruptured ectopic.",
+        ]
+      : [
+          "Bring the woman in for clinical review now — do not wait for the next scheduled hCG.",
+          "Repeat TVS if not already done today.",
+          "Manage symptoms and arrange senior gynaecology review.",
+        ],
+    citation: "NICE NG126 §1.4.25 & §1.4.28",
+  };
+}
+
+// TVS-based PUL triage — NG126 §1.4.7, §1.4.9, §1.4.16
+//   IUP seen on TVS → no longer a PUL.
+//   Adnexal mass / free fluid on TVS → suspected ectopic, leaves the PUL pathway.
+//   Only if TVS is non-diagnostic does the serial-hCG algorithm apply.
+export function pulTvsTriage({ tvsDone, iupSeen, adnexalMassOrFreeFluid }) {
+  if (!tvsDone) {
+    return {
+      category: "TVS_PENDING",
+      title: "Arrange transvaginal ultrasound",
+      color: "text-amber-700",
+      bg: "bg-amber-50",
+      border: "border-amber-200",
+      summary: "TVS is the first-line diagnostic test before serial hCG.",
+      detail:
+        "NICE NG126 §1.4.7: offer all women with a suspected early pregnancy complication a transvaginal ultrasound scan as the first-line diagnostic test. Use serial hCG only when TVS does not identify the location of the pregnancy.",
+      actions: ["Arrange TVS in the early pregnancy assessment service."],
+      citation: "NICE NG126 §1.4.7",
+    };
+  }
+  if (iupSeen) {
+    return {
+      category: "IUP_CONFIRMED",
+      title: "Intrauterine pregnancy seen — not a PUL",
+      color: "text-emerald-700",
+      bg: "bg-emerald-50",
+      border: "border-emerald-200",
+      summary: "Manage as confirmed IUP — serial hCG is not indicated.",
+      detail:
+        "NICE NG126 §1.4.9: if an intrauterine pregnancy is identified on the transvaginal ultrasound scan, the pregnancy is no longer of unknown location.",
+      actions: [
+        "Manage according to viability findings (viable IUP → routine antenatal care; non-viable IUP → miscarriage pathway).",
+      ],
+      citation: "NICE NG126 §1.4.9",
+    };
+  }
+  if (adnexalMassOrFreeFluid) {
+    return {
+      category: "SUSPECTED_ECTOPIC",
+      title: "Adnexal mass or free fluid — suspected ectopic",
+      color: "text-rose-700",
+      bg: "bg-rose-50",
+      border: "border-rose-200",
+      summary: "Leave the PUL pathway and use the tubal ectopic decision calculator.",
+      detail:
+        "NICE NG126 §1.4.16: if an adnexal mass or free fluid is identified on transvaginal ultrasound scan, suspect an ectopic pregnancy.",
+      actions: [
+        "Use the Tubal ectopic — initial management calculator.",
+        "Senior gynaecology review.",
+      ],
+      citation: "NICE NG126 §1.4.16",
+    };
+  }
+  return null; // TVS done, non-diagnostic → proceed to serial-hCG algorithm
+}
 
 export function interpretPUL({ hcg1, hcg2, hoursBetween }) {
   // NG126 1.4.27: "Take 2 serum hCG measurements as near as possible to
