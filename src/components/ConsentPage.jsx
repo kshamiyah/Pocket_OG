@@ -5,6 +5,7 @@ import {
   CS_CONTEXT_OPTIONS, CS_PATIENT_FACTORS, CS_RISK_SECTIONS,
   CS_COMPARISON_SECTIONS, CS_PP_RISK_SECTIONS, CS_FAQ, CS_PAGES,
   OVD_CONTEXT_OPTIONS, OVD_PATIENT_FACTORS, OVD_RISK_SECTIONS, OVD_FAQ, OVD_PAGES,
+  IOL_CONTEXT_OPTIONS, IOL_PATIENT_FACTORS, IOL_RISK_SECTIONS, IOL_FAQ, IOL_PAGES,
   SURG_MISC_PATIENT_FACTORS, SURG_MISC_RISK_SECTIONS, SURG_MISC_FAQ, SURG_MISC_PAGES,
   MED_MISC_PATIENT_FACTORS, MED_MISC_RISK_SECTIONS, MED_MISC_FAQ, MED_MISC_PAGES,
   LAPAROSCOPY_PATIENT_FACTORS, LAPAROSCOPY_RISK_SECTIONS, LAPAROSCOPY_FAQ, LAPAROSCOPY_PAGES,
@@ -34,6 +35,17 @@ const PROCEDURE_CONFIG = {
     faq: OVD_FAQ,
     getInstrument: (ctx) => ctx,
     sourceLabel: "RCOG GTG26",
+  },
+  IOL: {
+    contextOptions: IOL_CONTEXT_OPTIONS,
+    patientFactors: IOL_PATIENT_FACTORS,
+    getRiskSections: (_ctx, factors) =>
+      IOL_RISK_SECTIONS.filter(s => !s.factorOnly || factors.has(s.factorOnly)),
+    comparisonSections: null,
+    getPages: (ctx) => IOL_PAGES[ctx],
+    faq: IOL_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "NICE NG207",
   },
   SURG_MISC: {
     contextOptions: null,
