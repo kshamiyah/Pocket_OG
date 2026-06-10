@@ -1209,9 +1209,155 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
   );
 }
 
+// ─── Handover generator ───────────────────────────────────────────────────
+
+function generateHandover(beds, alertsMap) {
+  const now = new Date();
+  const dd   = String(now.getDate()).padStart(2, "0");
+  const mm   = String(now.getMonth() + 1).padStart(2, "0");
+  const yyyy = now.getFullYear();
+  const hhmm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+
+  const bedList = Object.values(beds).sort((a, b) =>
+    a.bedNumber.localeCompare(b.bedNumber, undefined, { numeric: true })
+  );
+
+  const parShort = p =>
+    ({ "Para 0": "P0", "Para 1": "P1", "Para 2+": "P2+" }[p] ?? p ?? "?");
+
+  const stageShort = s =>
+    ({
+      "Latent":               "Latent",
+      "Active first stage":   "Active 1st",
+      "Passive second stage": "Passive 2nd",
+      "Active second stage":  "Active 2nd",
+    }[s] ?? s ?? "—");
+
+  const isGestPreterm = g => {
+    if (!g) return false;
+    const plus = g.match(/^(\d+)\+(\d)$/);
+    if (plus) return parseInt(plus[1]) < 37;
+    const w = g.match(/^(\d+)w$/);
+    if (w) return parseInt(w[1]) < 37;
+    return false;
+  };
+
+  const DIV = "─".repeat(38);
+  const lines = [`LABOUR WARD HANDOVER`, `${dd}/${mm}/${yyyy}  ${hhmm}`, ""];
+
+  if (bedList.length === 0) {
+    lines.push("No patients on board.");
+  } else {
+    bedList.forEach(bed => {
+      lines.push(DIV);
+
+      const isDelivered = !!bed.delivery;
+      const ptTag = isGestPreterm(bed.gestation) ? " [PRETERM]" : "";
+
+      lines.push(
+        `BED ${bed.bedNumber}  ${parShort(bed.parity)}  ${bed.gestation ?? "?"}${ptTag}  ${
+          isDelivered ? "Delivered" : stageShort(bed.labourStage)
+        }`
+      );
+
+      if (isDelivered) {
+        const d = bed.delivery;
+        const pphTag = d.ebl >= 1000 ? " ⚠ Major PPH" : d.ebl >= 500 ? " (PPH ≥500)" : "";
+        lines.push(
+          `${d.mode} · ${fmtTime(d.time)}${d.ebl != null ? ` · EBL ${d.ebl} mL${pphTag}` : ""}`
+        );
+        const ptFlags = [
+          bed.neonatalTeamAlerted     && "Neonatal ✓",
+          bed.corticosteroidsConfirmed && "Steroids ✓",
+          bed.mgso4Given               && "MgSO4 ✓",
+        ].filter(Boolean);
+        if (ptFlags.length) lines.push(ptFlags.join(" · "));
+        if (d.notes) lines.push(`Notes: ${d.notes}`);
+      } else {
+        const lastVE = bed.ves?.[bed.ves.length - 1];
+        if (lastVE) {
+          const ago = fmtAge(Date.now() - new Date(lastVE.time).getTime());
+          const stn = lastVE.station > 0 ? `+${lastVE.station}` : `${lastVE.station}`;
+          const cx  = lastVE.contractions != null ? ` · ${lastVE.contractions}cx/10` : "";
+          lines.push(`VE: ${lastVE.dilation}cm / ${stn} / ${lastVE.presentation ?? "Ceph"} (${ago} ago)${cx}`);
+        } else {
+          lines.push("VE: none recorded");
+        }
+
+        const obs = bed.observations ?? {};
+        const obsParts = [
+          obs.bpSystolic && obs.bpDiastolic && `BP ${obs.bpSystolic}/${obs.bpDiastolic}`,
+          obs.pulseValue  && `P${obs.pulseValue}`,
+          obs.tempValue   && `T${obs.tempValue}°C`,
+          obs.bglValue    && `BGL ${obs.bglValue}`,
+          bed.analgesia && bed.analgesia !== "None" && bed.analgesia,
+        ].filter(Boolean);
+        if (obsParts.length) lines.push(obsParts.join(" | "));
+
+        const flagParts = [
+          ...(bed.riskFlags ?? []),
+          bed.gbsAntibioticsStarted  && "IAP ✓",
+          bed.tocolysisOffered        && "Tocolysis offered ✓",
+        ].filter(Boolean);
+        if (flagParts.length) lines.push(flagParts.join(" · "));
+
+        const activeAlerts = (alertsMap[bed.id] ?? []).filter(
+          a => a.severity === "urgent" || a.severity === "warning"
+        );
+        activeAlerts.forEach(a =>
+          lines.push(`${a.severity === "urgent" ? "⚠⚠" : "⚠"} ${a.title}`)
+        );
+      }
+
+      lines.push("");
+    });
+  }
+
+  lines.push(DIV);
+  lines.push("Pocket O&G · Not a substitute for clinical judgement");
+  return lines.join("\n");
+}
+
+function HandoverSheet({ beds, alertsMap }) {
+  const text = useMemo(() => generateHandover(beds, alertsMap), [beds, alertsMap]);
+  const [copied, setCopied] = useState(false);
+
+  const copy = () => {
+    navigator.clipboard.writeText(text)
+      .then(() => { setCopied(true); setTimeout(() => setCopied(false), 2500); })
+      .catch(() => {});
+  };
+
+  const share = () => {
+    if (navigator.share) navigator.share({ title: "Labour Ward Handover", text });
+  };
+
+  return (
+    <>
+      <div className="px-5 pt-4 pb-3 flex gap-2 shrink-0">
+        <button onClick={copy}
+          className={`flex-1 py-3.5 rounded-2xl text-sm font-bold transition-colors active:scale-95 ${copied ? "bg-green-600 text-white" : "bg-gray-900 text-white"}`}>
+          {copied ? "Copied ✓" : "Copy"}
+        </button>
+        {typeof navigator !== "undefined" && navigator.share && (
+          <button onClick={share}
+            className="px-5 py-3.5 rounded-2xl text-sm font-bold border border-gray-200 text-gray-700 active:scale-95 transition-all">
+            Share
+          </button>
+        )}
+      </div>
+      <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-8 min-h-0">
+        <pre className="text-xs text-gray-700 font-mono leading-relaxed whitespace-pre-wrap break-words bg-gray-50 rounded-2xl p-4 border border-gray-100">
+          {text}
+        </pre>
+      </div>
+    </>
+  );
+}
+
 // ─── Board view ───────────────────────────────────────────────────────────
 
-function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE }) {
+function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, onHandover }) {
   const bedList      = Object.values(beds).sort((a,b) => a.bedNumber.localeCompare(b.bedNumber, undefined, {numeric:true}));
   const totalUrgent  = Object.values(alertsMap).flat().filter(a => a.severity === "urgent").length;
   const now          = Date.now();
@@ -1229,6 +1375,10 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE }) 
             </p>
           </div>
           <div className="flex gap-2">
+            {bedList.length > 0 && (
+              <button onClick={onHandover}
+                className="px-3 py-2 rounded-xl bg-gray-100 text-xs font-semibold text-gray-600">Handover</button>
+            )}
             {bedList.length > 0 && (
               <button onClick={() => { if (window.confirm("Clear all beds?")) onClear(); }}
                 className="px-3 py-2 rounded-xl bg-gray-100 text-xs font-semibold text-gray-600">Clear</button>
@@ -1432,6 +1582,7 @@ export default function WardPage() {
           onAddBed={() => setView("wizard")}
           onClear={() => setBeds({})}
           onQuickVE={id => openSheet("ve", id)}
+          onHandover={() => setSheet("handover")}
         />
       )}
 
@@ -1466,6 +1617,12 @@ export default function WardPage() {
       <BottomSheet open={sheet === "delivery" && !!sheetBed} onClose={closeSheet}
         title={`${sheetBed?.delivery ? "Delivery record" : "Mark delivered"} — Bed ${sheetBed?.bedNumber ?? ""}`}>
         {sheetBed && <DeliverySheet bed={sheetBed} onSave={saveDelivery} />}
+      </BottomSheet>
+
+      <BottomSheet open={sheet === "handover"} onClose={closeSheet}
+        title="Ward Handover"
+        sub={`${Object.keys(beds).length} patient${Object.keys(beds).length !== 1 ? "s" : ""}`}>
+        <HandoverSheet beds={beds} alertsMap={alertsMap} />
       </BottomSheet>
     </div>
   );
