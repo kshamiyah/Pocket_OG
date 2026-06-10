@@ -1,4 +1,4 @@
-// Alert engine — all rules cited from NICE NG235 (Intrapartum Care, Sept 2023)
+// Alert engine — rules from NICE NG235 (Intrapartum Care, Sept 2023) and NICE NG25 (Preterm Labour, Nov 2022)
 
 const MIN = 60 * 1000;
 const HOUR = 60 * MIN;
@@ -16,6 +16,16 @@ function findMembranesTime(ves) {
   for (let i = ves.length - 1; i >= 0; i--) {
     if (ves[i].membranesTime) return ves[i].membranesTime;
   }
+  return null;
+}
+
+// Parses "32+4" or legacy "40w" → decimal weeks (e.g. 32.571)
+function parseGestWeeks(str) {
+  if (!str) return null;
+  const plus = str.match(/^(\d+)\+(\d)$/);
+  if (plus) return parseInt(plus[1]) + parseInt(plus[2]) / 7;
+  const w = str.match(/^(\d+)w$/);
+  if (w) return parseInt(w[1]);
   return null;
 }
 
@@ -38,6 +48,54 @@ export function computeAlerts(bed) {
   const isGBSPos = flags.includes("GBS+");
   const membranesTime = findMembranesTime(ves);
   const membranesRuptured = lastVE?.membranes === "SROM" || lastVE?.membranes === "AROM";
+
+  const gestWks = parseGestWeeks(bed.gestation);
+  const isPreterm = gestWks !== null && gestWks < 37;
+  const gest = bed.gestation ?? "";
+
+  // ─── Preterm — neonatal team (< 34 weeks) ───────────────────────────
+  if (isPreterm && gestWks < 34) {
+    alerts.push({
+      id: "preterm-neonatal",
+      severity: "urgent",
+      title: `Preterm ${gest} — alert neonatal team`,
+      body: "Ensure NICU/neonatologist notified. Confirm delivery in appropriate setting with resuscitation team present.",
+      citation: "NICE NG25 §1.1.4 [2022]",
+    });
+  }
+
+  // ─── Preterm — MgSO4 neuroprotection (< 30 weeks) ───────────────────
+  if (isPreterm && gestWks < 30) {
+    alerts.push({
+      id: "preterm-mgso4",
+      severity: "urgent",
+      title: `MgSO4 neuroprotection — ${gest} weeks`,
+      body: "Offer IV magnesium sulphate if delivery expected within 24 h: 4 g loading dose over 15 min, then 1 g/hr maintenance until delivery or 24 h. Reduces risk of cerebral palsy.",
+      citation: "NICE NG25 §1.6.1 [2022]",
+    });
+  }
+
+  // ─── Preterm — antenatal corticosteroids (< 34+6) ───────────────────
+  if (isPreterm && gestWks < 34 + 6 / 7) {
+    alerts.push({
+      id: "preterm-steroids",
+      severity: "urgent",
+      title: `Antenatal corticosteroids — confirm given (${gest})`,
+      body: "Offer betamethasone 12 mg IM, repeat after 24 h if delivery expected within 7 days and gestation < 34+6. Document if already given or not indicated.",
+      citation: "NICE NG25 §1.7.1 [2022]",
+    });
+  }
+
+  // ─── Preterm — tocolysis consideration (28–33+6, active labour) ─────
+  if (isPreterm && gestWks >= 28 && gestWks < 34 && bed.labourStage === "Active first stage") {
+    alerts.push({
+      id: "preterm-tocolysis",
+      severity: "warning",
+      title: `Consider tocolysis — active preterm labour (${gest})`,
+      body: "Offer tocolysis (nifedipine 20 mg oral, repeat after 30 min if needed, or atosiban) to allow corticosteroids to work and/or facilitate in utero transfer to appropriate unit.",
+      citation: "NICE NG25 §1.8.1–1.8.2 [2022]",
+    });
+  }
 
   // ─── VE overdue (active first stage) ────────────────────────────────
   if (bed.labourStage === "Active first stage") {

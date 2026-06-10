@@ -155,6 +155,51 @@ function Stepper({ value, onChange, min, max, labelFn }) {
   );
 }
 
+/** Weeks + days gestation input */
+function GestationInput({ weeks, days, onChange }) {
+  const btnCls = "w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-xl font-bold text-gray-700 disabled:opacity-30 active:scale-95 transition-all";
+  const adjW = d => {
+    const w = Math.max(24, Math.min(42, weeks + d));
+    onChange({ weeks: w, days });
+  };
+  const adjD = d => {
+    let nd = days + d, nw = weeks;
+    if (nd > 6) { nd = 0; nw = Math.min(42, nw + 1); }
+    if (nd < 0) { nd = 6; nw = Math.max(24, nw - 1); }
+    onChange({ weeks: nw, days: nd });
+  };
+  const unsupported = weeks < 28;
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <div className="flex-1">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide text-center mb-1.5">Weeks</p>
+          <div className="flex items-center gap-1">
+            <button onClick={() => adjW(-1)} disabled={weeks <= 24} className={btnCls}>−</button>
+            <p className="flex-1 text-center text-3xl font-bold text-gray-900">{weeks}</p>
+            <button onClick={() => adjW(1)}  disabled={weeks >= 42} className={btnCls}>+</button>
+          </div>
+        </div>
+        <p className="text-2xl font-bold text-gray-300 mt-5">+</p>
+        <div className="flex-1">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide text-center mb-1.5">Days</p>
+          <div className="flex items-center gap-1">
+            <button onClick={() => adjD(-1)} disabled={weeks <= 24 && days === 0} className={btnCls}>−</button>
+            <p className="flex-1 text-center text-3xl font-bold text-gray-900">{days}</p>
+            <button onClick={() => adjD(1)}  disabled={weeks >= 42 && days >= 6} className={btnCls}>+</button>
+          </div>
+        </div>
+      </div>
+      {unsupported && (
+        <div className="rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3 text-center">
+          <p className="text-sm font-bold text-amber-700">Gestations below 28+0 are not yet supported</p>
+          <p className="text-xs text-amber-600 mt-0.5">Clinical alerts will not fire for this patient.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** Multi-select chips */
 function ChipGroup({ options, selected, onChange }) {
   const toggle = o => onChange(selected.includes(o) ? selected.filter(s => s !== o) : [...selected, o]);
@@ -416,11 +461,12 @@ function WizardDots({ step, total = 4 }) {
 }
 
 function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
-  const [step, setStep]     = useState(1);
-  const [bedNum, setBedNum] = useState("");
-  const [parity, setParity] = useState("Para 0");
-  const [gestation, setGest]= useState(40);
-  const [err, setErr]       = useState("");
+  const [step, setStep]       = useState(1);
+  const [bedNum, setBedNum]   = useState("");
+  const [parity, setParity]   = useState("Para 0");
+  const [gestWeeks, setGestW] = useState(40);
+  const [gestDays,  setGestD] = useState(0);
+  const [err, setErr]         = useState("");
   const [stage, setStage]   = useState("Active first stage");
   const [mode, setMode]     = useState("Spontaneous");
   const [indMethod, setIndM]= useState("Dinoprostone");
@@ -433,6 +479,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
       const n = bedNum.trim();
       if (!n) { setErr("Enter a bed number"); return; }
       if (existingNumbers.includes(n)) { setErr("Already in use"); return; }
+      if (gestWeeks < 28) { setErr("Gestation below 28+0 is not yet supported"); return; }
       setErr(""); setStep(2);
     } else if (step === 2) {
       setStep(3);
@@ -443,7 +490,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
       onSave({
         id, bedNumber: bedNum.trim(),
         admissionTime: timeToISO(admTime),
-        parity, gestation: `${gestation}w`,
+        parity, gestation: `${gestWeeks}+${gestDays}`,
         modeOfOnset: mode,
         inductionMethod: mode === "Induced" ? indMethod : null,
         analgesia, riskFlags: flags, labourStage: stage,
@@ -493,7 +540,10 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
 
             <div>
               <SLabel className="mb-4">Gestation</SLabel>
-              <Stepper value={gestation} onChange={setGest} min={37} max={42} labelFn={v => `${v} weeks`} />
+              <GestationInput
+                weeks={gestWeeks} days={gestDays}
+                onChange={({ weeks, days }) => { setGestW(weeks); setGestD(days); setErr(""); }}
+              />
             </div>
           </>
         )}
