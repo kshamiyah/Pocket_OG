@@ -448,6 +448,98 @@ function OxySheet({ bed, onSave }) {
   );
 }
 
+// ─── Delivery sheet ───────────────────────────────────────────────────────
+
+const DELIVERY_MODES = ["SVD", "Forceps", "Ventouse", "Em LSCS", "El LSCS"];
+const EBL_PRESETS = [200, 500, 1000, 1500];
+
+function DeliverySheet({ bed, onSave }) {
+  const ex = bed.delivery ?? null;
+  const [delivTime, setDelivTime] = useState(timeInputNow);
+  const [mode, setMode]           = useState(ex?.mode ?? "SVD");
+  const [ebl, setEbl]             = useState(ex?.ebl != null ? String(ex.ebl) : "");
+  const [notes, setNotes]         = useState(ex?.notes ?? "");
+
+  const eblNum = ebl ? parseFloat(ebl) : null;
+
+  const save = () => onSave({
+    time:  timeToISO(delivTime),
+    mode,
+    ebl:   eblNum,
+    notes: notes.trim() || null,
+  });
+
+  return (
+    <>
+      <div className="overflow-y-auto overscroll-contain flex-1 min-h-0">
+        <div className="px-5 pt-4 pb-4 space-y-5">
+
+          <NowField label="Time of delivery" value={delivTime} onChange={setDelivTime} />
+
+          <div>
+            <SLabel className="mb-2">Mode of delivery</SLabel>
+            <div className="grid grid-cols-3 gap-2 mb-2">
+              {["SVD","Forceps","Ventouse"].map(m => (
+                <button key={m} onClick={() => setMode(m)}
+                  className={`py-3.5 rounded-2xl border text-sm font-bold transition-colors active:scale-95 ${mode === m ? "bg-gray-900 border-gray-900 text-white" : "bg-white border-gray-200 text-gray-700"}`}>
+                  {m}
+                </button>
+              ))}
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {["Em LSCS","El LSCS"].map(m => (
+                <button key={m} onClick={() => setMode(m)}
+                  className={`py-3.5 rounded-2xl border text-sm font-bold transition-colors active:scale-95 ${mode === m ? "bg-gray-900 border-gray-900 text-white" : "bg-white border-gray-200 text-gray-700"}`}>
+                  {m}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <SLabel className="mb-2">Estimated blood loss (mL)</SLabel>
+            <div className="grid grid-cols-4 gap-2 mb-2">
+              {EBL_PRESETS.map(v => (
+                <button key={v} onClick={() => setEbl(String(v))}
+                  className={`py-2.5 rounded-xl border text-xs font-bold transition-colors active:scale-95 ${ebl === String(v) ? "bg-gray-900 border-gray-900 text-white" : "bg-gray-50 border-gray-200 text-gray-600"}`}>
+                  {v}
+                </button>
+              ))}
+            </div>
+            <input type="number" inputMode="numeric" value={ebl}
+              onChange={e => setEbl(e.target.value)}
+              placeholder="Or type exact mL"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-gray-400" />
+            {eblNum !== null && eblNum >= 1000 && (
+              <p className="text-xs font-bold text-red-600 mt-1.5">Major PPH ≥ 1000 mL — activate PPH protocol</p>
+            )}
+            {eblNum !== null && eblNum >= 500 && eblNum < 1000 && (
+              <p className="text-xs font-bold text-amber-600 mt-1.5">PPH ≥ 500 mL — monitor closely</p>
+            )}
+          </div>
+
+          <div>
+            <SLabel className="mb-2">Notes (optional)</SLabel>
+            <textarea value={notes} onChange={e => setNotes(e.target.value)}
+              placeholder="e.g. shoulder dystocia, perineal tear, PPH managed…"
+              rows={3}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-gray-400 resize-none" />
+          </div>
+
+        </div>
+      </div>
+
+      <div className="px-5 pt-3 border-t border-gray-100 shrink-0"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}>
+        <button onClick={save}
+          className="w-full py-4 rounded-2xl text-base font-bold bg-green-700 text-white active:scale-95 transition-all">
+          {ex ? "Update delivery record" : "Mark as delivered"}
+        </button>
+      </div>
+    </>
+  );
+}
+
 // ─── Admission wizard — 4 steps ───────────────────────────────────────────
 
 function WizardDots({ step, total = 4 }) {
@@ -822,7 +914,7 @@ function ObsDots({ bed, now }) {
 
 // ─── Bed detail view — 3 inner tabs ──────────────────────────────────────
 
-function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOpenOxy }) {
+function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOpenOxy, onOpenDelivery }) {
   const status   = bedStatusColor(alerts);
   const sc       = STATUS[status];
   const currentOx= bed.oxytocinLog?.[bed.oxytocinLog.length - 1];
@@ -936,6 +1028,33 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
                 <PillRow value={bed.analgesia} onChange={a => onUpdate({ analgesia: a })} options={["None","Entonox","Pethidine"]} />
                 <PillRow value={bed.analgesia} onChange={a => onUpdate({ analgesia: a })} options={["Epidural","Remifentanil PCA"]} />
               </div>
+            </div>
+
+            {/* Delivery status */}
+            <div>
+              {bed.delivery ? (
+                <div className="rounded-2xl border border-green-200 bg-green-50 p-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-sm font-bold text-green-800">Delivered {fmtTime(bed.delivery.time)}</p>
+                    <button onClick={onOpenDelivery}
+                      className="text-xs font-semibold text-green-600 px-2 py-0.5 rounded-lg border border-green-200 bg-white">
+                      Edit
+                    </button>
+                  </div>
+                  <p className="text-xs text-green-700">{bed.delivery.mode}{bed.delivery.ebl != null ? ` · EBL ${bed.delivery.ebl} mL` : ""}</p>
+                  {bed.delivery.ebl >= 1000 && (
+                    <p className="text-xs font-bold text-red-600 mt-1">Major PPH ≥ 1000 mL</p>
+                  )}
+                  {bed.delivery.notes && (
+                    <p className="text-xs text-green-600 mt-1 italic">{bed.delivery.notes}</p>
+                  )}
+                </div>
+              ) : (
+                <button onClick={onOpenDelivery}
+                  className="w-full py-4 rounded-2xl bg-green-700 text-white font-bold text-base active:scale-95 transition-all">
+                  Mark Delivered
+                </button>
+              )}
             </div>
 
             {/* Discharge */}
@@ -1085,54 +1204,86 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE }) 
 
         <div className="px-5 space-y-3">
           {bedList.map(bed => {
-            const alerts  = alertsMap[bed.id] ?? [];
-            const status  = bedStatusColor(alerts);
-            const sc      = STATUS[status];
-            const lastVE  = bed.ves?.[bed.ves.length - 1];
-            const urgentN = alerts.filter(a => a.severity === "urgent").length;
-            const msSinceVE = lastVE ? now - new Date(lastVE.time).getTime() : null;
+            const alerts     = alertsMap[bed.id] ?? [];
+            const status     = bedStatusColor(alerts);
+            const sc         = STATUS[status];
+            const lastVE     = bed.ves?.[bed.ves.length - 1];
+            const urgentN    = alerts.filter(a => a.severity === "urgent").length;
+            const msSinceVE  = lastVE ? now - new Date(lastVE.time).getTime() : null;
+            const isDelivered = !!bed.delivery;
+
+            const cardCls = isDelivered
+              ? "border-green-200 bg-green-50"
+              : sc.card;
 
             return (
-              <div key={bed.id} className={`rounded-2xl border ${sc.card} overflow-hidden`}>
+              <div key={bed.id} className={`rounded-2xl border ${cardCls} overflow-hidden`}>
                 {/* Main tap area → detail */}
                 <button onClick={() => onSelect(bed.id)} className="w-full p-4 text-left">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="text-xl font-bold text-gray-900">Bed {bed.bedNumber}</span>
-                      <span className={`w-2 h-2 rounded-full ${sc.dot} shrink-0`} />
+                      {isDelivered
+                        ? <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+                        : <span className={`w-2 h-2 rounded-full ${sc.dot} shrink-0`} />}
                     </div>
-                    {alerts.length > 0 && (
+                    {isDelivered ? (
+                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-green-600 text-white shrink-0">
+                        Delivered
+                      </span>
+                    ) : alerts.length > 0 && (
                       <span className={`px-2.5 py-1 rounded-full text-xs font-bold shrink-0 ${sc.badge}`}>
                         {urgentN > 0 ? `${urgentN} urgent` : `${alerts.length} alert${alerts.length!==1?"s":""}`}
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">{bed.parity} · {bed.gestation} · {bed.labourStage}</p>
-                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                    {lastVE && <span className="text-sm font-semibold text-gray-800">{lastVE.dilation} cm</span>}
-                    {msSinceVE !== null && (
-                      <span className={`text-xs ${msSinceVE > 3.5 * 3600000 ? "font-bold text-red-500" : "text-gray-400"}`}>
-                        {fmtAge(msSinceVE)} ago
-                      </span>
-                    )}
-                    {bed.riskFlags?.map(f => (
-                      <span key={f} className="text-[10px] font-semibold text-gray-500 bg-white/80 border border-gray-200 px-1.5 py-0.5 rounded-full">{f}</span>
-                    ))}
-                  </div>
-                  <ObsDots bed={bed} now={now} />
+
+                  {isDelivered ? (
+                    <div className="mt-1">
+                      <p className="text-sm text-gray-600">
+                        {bed.delivery.mode}
+                        {bed.delivery.ebl != null ? ` · EBL ${bed.delivery.ebl} mL` : ""}
+                        {" · "}{fmtTime(bed.delivery.time)}
+                      </p>
+                      {bed.delivery.ebl >= 1000 && (
+                        <p className="text-xs font-bold text-red-600 mt-0.5">Major PPH</p>
+                      )}
+                      {bed.delivery.notes && (
+                        <p className="text-xs text-gray-400 mt-0.5 italic truncate">{bed.delivery.notes}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-sm text-gray-500 mt-1">{bed.parity} · {bed.gestation} · {bed.labourStage}</p>
+                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                        {lastVE && <span className="text-sm font-semibold text-gray-800">{lastVE.dilation} cm</span>}
+                        {msSinceVE !== null && (
+                          <span className={`text-xs ${msSinceVE > 3.5 * 3600000 ? "font-bold text-red-500" : "text-gray-400"}`}>
+                            {fmtAge(msSinceVE)} ago
+                          </span>
+                        )}
+                        {bed.riskFlags?.map(f => (
+                          <span key={f} className="text-[10px] font-semibold text-gray-500 bg-white/80 border border-gray-200 px-1.5 py-0.5 rounded-full">{f}</span>
+                        ))}
+                      </div>
+                      <ObsDots bed={bed} now={now} />
+                    </>
+                  )}
                 </button>
 
                 {/* Quick actions bar */}
                 <div className="border-t border-black/5 px-4 py-2.5 flex items-center justify-between">
                   <p className="text-xs text-gray-400">
-                    {bed.analgesia !== "None" ? bed.analgesia : "No analgesia"}
-                    {bed.modeOfOnset === "Induced" ? ` · ${bed.inductionMethod ?? "Induced"}` : ""}
+                    {bed.parity} · {bed.gestation}
+                    {!isDelivered && bed.analgesia !== "None" ? ` · ${bed.analgesia}` : ""}
                   </p>
-                  <button
-                    onClick={e => { e.stopPropagation(); onQuickVE(bed.id); }}
-                    className="px-4 py-1.5 rounded-full bg-gray-900 text-white text-xs font-bold active:scale-95 transition-all">
-                    + VE
-                  </button>
+                  {!isDelivered && (
+                    <button
+                      onClick={e => { e.stopPropagation(); onQuickVE(bed.id); }}
+                      className="px-4 py-1.5 rounded-full bg-gray-900 text-white text-xs font-bold active:scale-95 transition-all">
+                      + VE
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -1193,6 +1344,12 @@ export default function WardPage() {
     closeSheet();
   };
 
+  const saveDelivery = record => {
+    if (!sheetBed) return;
+    updateBed(sheetBedId, { delivery: record });
+    closeSheet();
+  };
+
   const saveNewBed = bed => {
     setBeds(prev => ({ ...prev, [bed.id]: bed }));
     setView("board");
@@ -1237,6 +1394,7 @@ export default function WardPage() {
           }}
           onOpenVE={() => openSheet("ve", selectedId)}
           onOpenOxy={() => openSheet("oxy", selectedId)}
+          onOpenDelivery={() => openSheet("delivery", selectedId)}
         />
       )}
 
@@ -1251,6 +1409,11 @@ export default function WardPage() {
         title={`Oxytocin — Bed ${sheetBed?.bedNumber ?? ""}`}
         sub="NICE NG235 §1.5.6 — increment every 30 min minimum">
         {sheetBed && <OxySheet bed={sheetBed} onSave={saveOxy} />}
+      </BottomSheet>
+
+      <BottomSheet open={sheet === "delivery" && !!sheetBed} onClose={closeSheet}
+        title={`${sheetBed?.delivery ? "Delivery record" : "Mark delivered"} — Bed ${sheetBed?.bedNumber ?? ""}`}>
+        {sheetBed && <DeliverySheet bed={sheetBed} onSave={saveDelivery} />}
       </BottomSheet>
     </div>
   );
