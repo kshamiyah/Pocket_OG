@@ -95,7 +95,7 @@ export function computeAlerts(bed) {
           id: "slow-progress",
           severity: "urgent",
           title: "Slow labour progress",
-          body: `Progress ${rate.toFixed(1)} cm/hr — below the 0.5 cm/hr threshold. If membranes intact, offer ARM then reassess after 2h. If still < 1 cm progress, offer oxytocin augmentation.`,
+          body: `Progress ${rate === 0 ? "0 cm" : `${rate.toFixed(1)} cm/hr`}${rate === 0 ? ` in ${diffHours.toFixed(1)}h — no cervical change` : " — below the 0.5 cm/hr threshold"}. If membranes intact, offer ARM then reassess after 2h. If still < 1 cm progress, offer oxytocin augmentation.`,
           citation: "NICE NG235 §1.5.1–1.5.4 [2023]",
         });
       }
