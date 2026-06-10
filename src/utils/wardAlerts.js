@@ -290,6 +290,83 @@ export function computeAlerts(bed) {
     });
   }
 
+  // ─── Abnormal observation values ─────────────────────────────────────
+  const pulse = obs.pulseValue  ? parseFloat(obs.pulseValue)  : null;
+  const bpSys = obs.bpSystolic  ? parseFloat(obs.bpSystolic)  : null;
+  const bpDia = obs.bpDiastolic ? parseFloat(obs.bpDiastolic) : null;
+  const temp  = obs.tempValue   ? parseFloat(obs.tempValue)   : null;
+  const bgl   = obs.bglValue    ? parseFloat(obs.bglValue)    : null;
+
+  if (temp !== null && temp >= 38.0) {
+    alerts.push({
+      id: "temp-38",
+      severity: "urgent",
+      title: `Pyrexia ${temp}°C — probable intrauterine infection`,
+      body: "Temperature ≥ 38.0°C in labour. Escalate to obstetric consultant immediately. Commence broad-spectrum IV antibiotics per local protocol. Consider expediting delivery.",
+      citation: "NICE NG235 §1.4.6 [2023]",
+    });
+  } else if (temp !== null && temp >= 37.5) {
+    alerts.push({
+      id: "temp-375",
+      severity: "warning",
+      title: `Temperature ${temp}°C — possible infection`,
+      body: "Temperature 37.5–37.9°C in labour. Repeat in 1 hour. Review clinical picture for chorioamnionitis (fetal tachycardia, uterine tenderness, offensive liquor).",
+      citation: "NICE NG235 §1.4.6 [2023]",
+    });
+  }
+
+  if (pulse !== null && pulse > 120) {
+    alerts.push({
+      id: "tachycardia",
+      severity: "urgent",
+      title: `Maternal tachycardia — pulse ${pulse} bpm`,
+      body: "Pulse > 120 bpm. Assess for haemorrhage, sepsis, pulmonary embolism, or pain. Escalate to senior clinician.",
+      citation: "NICE NG235 §1.4.5 [2023]",
+    });
+  }
+
+  if (bpSys !== null && bpDia !== null) {
+    if (bpSys >= 160 || bpDia >= 110) {
+      alerts.push({
+        id: "bp-severe",
+        severity: "urgent",
+        title: `Severe hypertension — BP ${bpSys}/${bpDia} mmHg`,
+        body: "BP ≥ 160/110 mmHg — urgent antihypertensive treatment required within 30–60 min. Give labetalol 200 mg oral or nifedipine MR 10 mg. Aim < 150/100. Involve obstetric consultant.",
+        citation: "NICE NG133 §1.5 [2023] · NICE NG235 §1.4.5",
+      });
+    } else if (bpSys >= 140 || bpDia >= 90) {
+      alerts.push({
+        id: "bp-elevated",
+        severity: isHypertensive ? "urgent" : "warning",
+        title: `Hypertension — BP ${bpSys}/${bpDia} mmHg`,
+        body: isHypertensive
+          ? `BP ≥ 140/90 in known hypertensive patient. Review antihypertensive regime. Target < 135/85.`
+          : `New BP ≥ 140/90 in labour. Assess for pre-eclampsia (proteinuria, headache, visual disturbance). Repeat in 15–30 min.`,
+        citation: "NICE NG133 §1.4 [2023] · NICE NG235 §1.4.5",
+      });
+    }
+  }
+
+  if (bgl !== null) {
+    if (bgl < 4.0) {
+      alerts.push({
+        id: "bgl-low",
+        severity: "urgent",
+        title: `Hypoglycaemia — BGL ${bgl} mmol/L`,
+        body: "Blood glucose < 4.0 mmol/L. Give 150 mL of 10% glucose IV or sugary drink if tolerated. Recheck in 15 min. Adjust VRII.",
+        citation: "GL983 §Intrapartum [2023]",
+      });
+    } else if (bgl > 7.0) {
+      alerts.push({
+        id: "bgl-high",
+        severity: "urgent",
+        title: `Hyperglycaemia — BGL ${bgl} mmol/L`,
+        body: `Blood glucose ${bgl} mmol/L — above VRII target range (4.0–7.0 mmol/L). Increase VRII rate. Recheck in 1 hour.`,
+        citation: "GL983 §Intrapartum [2023]",
+      });
+    }
+  }
+
   // ─── Maternal observations ───────────────────────────────────────────
   if (bed.labourStage !== "Latent") {
     if (obs.lastPulse) {
