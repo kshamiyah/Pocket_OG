@@ -228,7 +228,7 @@ function BottomSheet({ open, onClose, title, sub, children }) {
             {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
           </div>
         )}
-        <div className="overflow-y-auto overscroll-contain flex-1" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>{children}</div>
+        <div className="flex-1 flex flex-col min-h-0">{children}</div>
       </div>
     </>
   );
@@ -265,53 +265,60 @@ function VESheet({ bed, onSave }) {
   };
 
   return (
-    <div className="px-5 pt-4 pb-10 space-y-6">
-      <NowField label="Time of VE" value={veTime} onChange={setVETime} />
+    <>
+      <div className="overflow-y-auto overscroll-contain flex-1 min-h-0">
+        <div className="px-5 pt-4 pb-4 space-y-6">
+          <NowField label="Time of VE" value={veTime} onChange={setVETime} />
 
-      <div>
-        <div className="flex items-baseline justify-between mb-3">
-          <SLabel>Dilation (cm)</SLabel>
-          {dilation !== null
-            ? <span className="text-2xl font-bold text-gray-900">{dilation} cm</span>
-            : <span className="text-xs text-gray-400">tap a circle</span>}
-        </div>
-        <NumberGrid value={dilation} onChange={setDil} />
-      </div>
-
-      <div>
-        <SLabel className="mb-3">Station</SLabel>
-        <StationStrip value={station} onChange={setStn} />
-      </div>
-
-      <div>
-        <SLabel className="mb-2">Presentation</SLabel>
-        <PillRow value={presentation} onChange={setPres} options={["Cephalic","Breech","Other"]} />
-      </div>
-
-      <div>
-        <SLabel className="mb-2">Membranes</SLabel>
-        <PillRow value={membranes} onChange={setMemb} options={["Intact","SROM","AROM"]} />
-        {membranes !== "Intact" && (
-          <div className="mt-3">
-            <NowField label={`Time of ${membranes}`} value={membTime} onChange={setMembTime} />
+          <div>
+            <div className="flex items-baseline justify-between mb-3">
+              <SLabel>Dilation (cm)</SLabel>
+              {dilation !== null
+                ? <span className="text-2xl font-bold text-gray-900">{dilation} cm</span>
+                : <span className="text-xs text-gray-400">tap a circle</span>}
+            </div>
+            <NumberGrid value={dilation} onChange={setDil} />
           </div>
-        )}
-      </div>
 
-      <div>
-        <div className="flex items-baseline justify-between mb-3">
-          <SLabel>Contractions / 10 min</SLabel>
-          {contractions > 5 && <span className="text-[10px] font-bold text-red-500 uppercase tracking-wide">Hyperstim · NG235 §1.5.7</span>}
+          <div>
+            <SLabel className="mb-3">Station</SLabel>
+            <StationStrip value={station} onChange={setStn} />
+          </div>
+
+          <div>
+            <SLabel className="mb-2">Presentation</SLabel>
+            <PillRow value={presentation} onChange={setPres} options={["Cephalic","Breech","Other"]} />
+          </div>
+
+          <div>
+            <SLabel className="mb-2">Membranes</SLabel>
+            <PillRow value={membranes} onChange={setMemb} options={["Intact","SROM","AROM"]} />
+            {membranes !== "Intact" && (
+              <div className="mt-3">
+                <NowField label={`Time of ${membranes}`} value={membTime} onChange={setMembTime} />
+              </div>
+            )}
+          </div>
+
+          <div>
+            <div className="flex items-baseline justify-between mb-3">
+              <SLabel>Contractions / 10 min</SLabel>
+              {contractions > 5 && <span className="text-[10px] font-bold text-red-500 uppercase tracking-wide">Hyperstim · NG235 §1.5.7</span>}
+            </div>
+            <Stepper value={contractions} onChange={setContr} min={1} max={8} />
+          </div>
         </div>
-        <Stepper value={contractions} onChange={setContr} min={1} max={8} />
       </div>
 
-      <button onClick={save} disabled={dilation === null}
-        className="w-full py-4 rounded-2xl text-base font-bold bg-gray-900 disabled:bg-gray-200 disabled:text-gray-400 text-white active:scale-95 transition-all">
-        Save VE
-      </button>
-      <p className="text-[10px] text-gray-300 text-center -mt-2 pb-2">NICE NG235 §1.4.1 — 4-hourly VE in active labour</p>
-    </div>
+      <div className="px-5 pt-3 border-t border-gray-100 shrink-0"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}>
+        <button onClick={save} disabled={dilation === null}
+          className="w-full py-4 rounded-2xl text-base font-bold bg-gray-900 disabled:bg-gray-200 disabled:text-gray-400 text-white active:scale-95 transition-all">
+          Save VE
+        </button>
+        <p className="text-[10px] text-gray-300 text-center mt-2">NICE NG235 §1.4.1 — 4-hourly VE in active labour</p>
+      </div>
+    </>
   );
 }
 
@@ -325,34 +332,41 @@ function OxySheet({ bed, onSave }) {
   const save = () => onSave({ id:`ox-${Date.now()}`, startTime: timeToISO(oxyTime), dose, lastIncrementTime: timeToISO(oxyTime) });
 
   return (
-    <div className="px-5 pt-4 pb-10 space-y-5">
-      <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
-        <SLabel className="text-amber-600 mb-2">NICE NG235 §1.5.6 — Protocol</SLabel>
-        <ul className="space-y-1">
-          {["Start 1–2 mU/min · increase by 1–2 mU every 30 min minimum",
-            "Target 3–4 contractions/10 min, each 40–60 sec",
-            "Maximum 20 mU/min — escalate to registrar at max",
-            "Do NOT routinely use in 2nd stage with regional analgesia [2023]",
-          ].map((t,i) => <li key={i} className="flex gap-2 text-xs text-amber-800"><span className="text-amber-400 shrink-0">›</span>{t}</li>)}
-        </ul>
-      </div>
+    <>
+      <div className="overflow-y-auto overscroll-contain flex-1 min-h-0">
+        <div className="px-5 pt-4 pb-4 space-y-5">
+          <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
+            <SLabel className="text-amber-600 mb-2">NICE NG235 §1.5.6 — Protocol</SLabel>
+            <ul className="space-y-1">
+              {["Start 1–2 mU/min · increase by 1–2 mU every 30 min minimum",
+                "Target 3–4 contractions/10 min, each 40–60 sec",
+                "Maximum 20 mU/min — escalate to registrar at max",
+                "Do NOT routinely use in 2nd stage with regional analgesia [2023]",
+              ].map((t,i) => <li key={i} className="flex gap-2 text-xs text-amber-800"><span className="text-amber-400 shrink-0">›</span>{t}</li>)}
+            </ul>
+          </div>
 
-      <NowField label="Time of dose change" value={oxyTime} onChange={setOTime} />
+          <NowField label="Time of dose change" value={oxyTime} onChange={setOTime} />
 
-      <div>
-        <div className="flex items-baseline justify-between mb-3">
-          <SLabel>Current dose</SLabel>
-          <span className={`text-2xl font-bold ${dose >= 20 ? "text-red-600" : "text-gray-900"}`}>{dose} mU/min</span>
+          <div>
+            <div className="flex items-baseline justify-between mb-3">
+              <SLabel>Current dose</SLabel>
+              <span className={`text-2xl font-bold ${dose >= 20 ? "text-red-600" : "text-gray-900"}`}>{dose} mU/min</span>
+            </div>
+            <Stepper value={dose} onChange={setDose} min={1} max={20} />
+            {dose >= 20 && <p className="text-xs font-bold text-red-600 text-center mt-2">Maximum — escalate to registrar · NG235 §1.5.6</p>}
+          </div>
         </div>
-        <Stepper value={dose} onChange={setDose} min={1} max={20} />
-        {dose >= 20 && <p className="text-xs font-bold text-red-600 text-center mt-2">Maximum — escalate to registrar · NG235 §1.5.6</p>}
       </div>
 
-      <button onClick={save}
-        className="w-full py-4 rounded-2xl text-base font-bold bg-gray-900 text-white active:scale-95 transition-all">
-        Log dose
-      </button>
-    </div>
+      <div className="px-5 pt-3 border-t border-gray-100 shrink-0"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}>
+        <button onClick={save}
+          className="w-full py-4 rounded-2xl text-base font-bold bg-gray-900 text-white active:scale-95 transition-all">
+          Log dose
+        </button>
+      </div>
+    </>
   );
 }
 
@@ -408,7 +422,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
   const titles = ["", "Who?", "Where are they?", "Any concerns?"];
 
   return (
-    <div className="fixed inset-0 z-40 bg-white flex flex-col">
+    <div className="fixed inset-0 z-50 bg-white flex flex-col">
       {/* Top bar */}
       <div className="px-5 pb-4 flex items-center gap-3 border-b border-gray-100 shrink-0" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}>
         <button onClick={step === 1 ? onCancel : () => setStep(s => s - 1)}
