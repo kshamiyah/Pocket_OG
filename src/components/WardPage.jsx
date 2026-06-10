@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { computeAlerts, bedStatusColor } from "../utils/wardAlerts";
 
 // ─── Storage ─────────────────────────────────────────────────────────────
@@ -55,6 +55,9 @@ const STAGE_SUB = {
   "Passive second stage": "Fully dilated · no urge to push",
   "Active second stage":  "Pushing / baby visible",
 };
+
+const STAGES   = ["Latent","Active first stage","Passive second stage","Active second stage"];
+const ANALGS   = ["None","Entonox","Pethidine","Epidural","Remifentanil PCA"]; // eslint-disable-line no-unused-vars
 
 // ─── Input atoms ──────────────────────────────────────────────────────────
 
@@ -123,7 +126,7 @@ function NumberGrid({ value, onChange }) {
 function StationStrip({ value, onChange }) {
   return (
     <div className="flex rounded-xl overflow-hidden border border-gray-200">
-      {[-3,-2,-1,0,1,2,3].map((o, i) => (
+      {[-3,-2,-1,0,1,2,3].map((o) => (
         <button key={o} onClick={() => onChange(o)}
           className={`flex-1 py-3.5 text-sm font-bold text-center transition-colors border-r border-gray-200 last:border-r-0 ${value === o ? "bg-gray-900 text-white" : "bg-white text-gray-600"}`}>
           {o > 0 ? `+${o}` : o}
@@ -234,7 +237,7 @@ function BottomSheet({ open, onClose, title, sub, children }) {
   );
 }
 
-// ─── VE sheet content ─────────────────────────────────────────────────────
+// ─── VE sheet — 2-page pagination ─────────────────────────────────────────
 
 function VESheet({ bed, onSave }) {
   const lastVE = bed.ves?.[bed.ves.length - 1];
@@ -244,13 +247,14 @@ function VESheet({ bed, onSave }) {
     return null;
   })();
 
-  const [veTime, setVETime]       = useState(timeInputNow);
-  const [dilation, setDil]        = useState(lastVE?.dilation ?? null);
-  const [station, setStn]         = useState(lastVE?.station ?? 0);
-  const [presentation, setPres]   = useState(lastVE?.presentation ?? "Cephalic");
-  const [membranes, setMemb]      = useState(lastVE?.membranes ?? "Intact");
-  const [membTime, setMembTime]   = useState(timeInputNow);
-  const [contractions, setContr]  = useState(lastVE?.contractions ?? 3);
+  const [page, setPage]          = useState(1);
+  const [dilation, setDil]       = useState(lastVE?.dilation ?? null);
+  const [membranes, setMemb]     = useState(lastVE?.membranes ?? "Intact");
+  const [membTime, setMembTime]  = useState(timeInputNow);
+  const [veTime, setVETime]      = useState(timeInputNow);
+  const [station, setStn]        = useState(lastVE?.station ?? 0);
+  const [presentation, setPres]  = useState("Cephalic");
+  const [contractions, setContr] = useState(lastVE?.contractions ?? 3);
 
   const save = () => {
     if (dilation === null) return;
@@ -266,56 +270,85 @@ function VESheet({ bed, onSave }) {
 
   return (
     <>
-      <div className="overflow-y-auto overscroll-contain flex-1 min-h-0">
-        <div className="px-5 pt-4 pb-4 space-y-6">
-          <NowField label="Time of VE" value={veTime} onChange={setVETime} />
-
-          <div>
-            <div className="flex items-baseline justify-between mb-3">
-              <SLabel>Dilation (cm)</SLabel>
-              {dilation !== null
-                ? <span className="text-2xl font-bold text-gray-900">{dilation} cm</span>
-                : <span className="text-xs text-gray-400">tap a circle</span>}
-            </div>
-            <NumberGrid value={dilation} onChange={setDil} />
-          </div>
-
-          <div>
-            <SLabel className="mb-3">Station</SLabel>
-            <StationStrip value={station} onChange={setStn} />
-          </div>
-
-          <div>
-            <SLabel className="mb-2">Presentation</SLabel>
-            <PillRow value={presentation} onChange={setPres} options={["Cephalic","Breech","Other"]} />
-          </div>
-
-          <div>
-            <SLabel className="mb-2">Membranes</SLabel>
-            <PillRow value={membranes} onChange={setMemb} options={["Intact","SROM","AROM"]} />
-            {membranes !== "Intact" && (
-              <div className="mt-3">
-                <NowField label={`Time of ${membranes}`} value={membTime} onChange={setMembTime} />
-              </div>
-            )}
-          </div>
-
-          <div>
-            <div className="flex items-baseline justify-between mb-3">
-              <SLabel>Contractions / 10 min</SLabel>
-              {contractions > 5 && <span className="text-[10px] font-bold text-red-500 uppercase tracking-wide">Hyperstim · NG235 §1.5.7</span>}
-            </div>
-            <Stepper value={contractions} onChange={setContr} min={1} max={8} />
-          </div>
-        </div>
+      {/* Page dots */}
+      <div className="flex justify-center gap-2 py-3 shrink-0">
+        {[1, 2].map(p => (
+          <div key={p} className={`rounded-full transition-all duration-300 ${p === page ? "w-5 h-1.5 bg-gray-900" : "w-1.5 h-1.5 bg-gray-200"}`} />
+        ))}
       </div>
 
+      <div className="overflow-y-auto overscroll-contain flex-1 min-h-0">
+        {page === 1 && (
+          <div className="px-5 pt-2 pb-4 space-y-6">
+            <div>
+              <div className="flex items-baseline justify-between mb-3">
+                <SLabel>Dilation (cm)</SLabel>
+                {dilation !== null
+                  ? <span className="text-2xl font-bold text-gray-900">{dilation} cm</span>
+                  : <span className="text-xs text-gray-400">tap a circle</span>}
+              </div>
+              <NumberGrid value={dilation} onChange={setDil} />
+            </div>
+
+            <div>
+              <SLabel className="mb-2">Membranes</SLabel>
+              <PillRow value={membranes} onChange={setMemb} options={["Intact","SROM","AROM"]} />
+              {membranes !== "Intact" && (
+                <div className="mt-3">
+                  <NowField label={`Time of ${membranes}`} value={membTime} onChange={setMembTime} />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {page === 2 && (
+          <div className="px-5 pt-2 pb-4 space-y-6">
+            <NowField label="Time of VE" value={veTime} onChange={setVETime} />
+
+            <div>
+              <SLabel className="mb-3">Station</SLabel>
+              <StationStrip value={station} onChange={setStn} />
+            </div>
+
+            <div>
+              <SLabel className="mb-2">Presentation</SLabel>
+              <PillRow value={presentation} onChange={setPres} options={["Cephalic","Breech","Other"]} />
+            </div>
+
+            <div>
+              <div className="flex items-baseline justify-between mb-3">
+                <SLabel>Contractions / 10 min</SLabel>
+                {contractions > 5 && <span className="text-[10px] font-bold text-red-500 uppercase tracking-wide">Hyperstim · NG235 §1.5.7</span>}
+              </div>
+              <Stepper value={contractions} onChange={setContr} min={1} max={8} />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Sticky footer */}
       <div className="px-5 pt-3 border-t border-gray-100 shrink-0"
         style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}>
-        <button onClick={save} disabled={dilation === null}
-          className="w-full py-4 rounded-2xl text-base font-bold bg-gray-900 disabled:bg-gray-200 disabled:text-gray-400 text-white active:scale-95 transition-all">
-          Save VE
-        </button>
+        {page === 1 ? (
+          <button onClick={() => setPage(2)} disabled={dilation === null}
+            className="w-full py-4 rounded-2xl text-base font-bold bg-gray-900 disabled:bg-gray-200 disabled:text-gray-400 text-white active:scale-95 transition-all">
+            Next →
+          </button>
+        ) : (
+          <div className="flex gap-3">
+            <button onClick={() => setPage(1)}
+              className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center shrink-0 active:scale-95 transition-all">
+              <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button onClick={save}
+              className="flex-1 py-4 rounded-2xl text-base font-bold bg-gray-900 text-white active:scale-95 transition-all">
+              Save VE
+            </button>
+          </div>
+        )}
         <p className="text-[10px] text-gray-300 text-center mt-2">NICE NG235 §1.4.1 — 4-hourly VE in active labour</p>
       </div>
     </>
@@ -370,12 +403,12 @@ function OxySheet({ bed, onSave }) {
   );
 }
 
-// ─── Admission wizard ─────────────────────────────────────────────────────
+// ─── Admission wizard — 4 steps ───────────────────────────────────────────
 
-function WizardDots({ step }) {
+function WizardDots({ step, total = 4 }) {
   return (
     <div className="flex gap-1.5">
-      {[1,2,3].map(i => (
+      {Array.from({ length: total }, (_, i) => i + 1).map(i => (
         <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i <= step ? "w-5 bg-gray-900" : "w-1.5 bg-gray-200"}`} />
       ))}
     </div>
@@ -403,6 +436,8 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
       setErr(""); setStep(2);
     } else if (step === 2) {
       setStep(3);
+    } else if (step === 3) {
+      setStep(4);
     } else {
       const id = `bed-${Date.now()}`;
       onSave({
@@ -419,7 +454,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
     }
   };
 
-  const titles = ["", "Who?", "Where are they?", "Any concerns?"];
+  const titles = ["", "Who?", "What stage?", "Setup", "Any concerns?"];
 
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col">
@@ -432,7 +467,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
           </svg>
         </button>
         <p className="flex-1 text-base font-bold text-gray-900">{titles[step]}</p>
-        <WizardDots step={step} />
+        <WizardDots step={step} total={4} />
       </div>
 
       {/* Step content */}
@@ -464,12 +499,25 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
         )}
 
         {step === 2 && (
+          <div>
+            <SLabel className="mb-3">Labour stage — NICE NG235 §1.1</SLabel>
+            <TileGrid value={stage} onChange={setStage} cols={2}
+              options={["Latent","Active first stage","Passive second stage","Active second stage"]}
+              subFn={o => STAGE_SUB[o]} />
+          </div>
+        )}
+
+        {step === 3 && (
           <>
             <div>
-              <SLabel className="mb-3">Labour stage — NICE NG235 §1.1</SLabel>
-              <TileGrid value={stage} onChange={setStage} cols={2}
-                options={["Latent","Active first stage","Passive second stage","Active second stage"]}
-                subFn={o => STAGE_SUB[o]} />
+              <SLabel className="mb-2">Analgesia</SLabel>
+              <div className="space-y-2">
+                <PillRow value={analgesia} onChange={setAnal} options={["None","Entonox","Pethidine"]} />
+                <PillRow value={analgesia} onChange={setAnal} options={["Epidural","Remifentanil PCA"]} />
+              </div>
+              {(analgesia==="Epidural"||analgesia==="Remifentanil PCA") && (
+                <p className="text-[10px] text-gray-400 mt-1.5">Regional analgesia — 2nd stage time limits extended · NG235 §1.6.5</p>
+              )}
             </div>
 
             <div>
@@ -486,21 +534,10 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
                   options={["Dinoprostone","Balloon","Misoprostol","ARM+Synto"]} />
               </div>
             )}
-
-            <div>
-              <SLabel className="mb-2">Analgesia</SLabel>
-              <div className="space-y-2">
-                <PillRow value={analgesia} onChange={setAnal} options={["None","Entonox","Pethidine"]} />
-                <PillRow value={analgesia} onChange={setAnal} options={["Epidural","Remifentanil PCA"]} />
-              </div>
-              {(analgesia==="Epidural"||analgesia==="Remifentanil PCA") && (
-                <p className="text-[10px] text-gray-400 mt-1.5">Regional analgesia — 2nd stage time limits extended · NG235 §1.6.5</p>
-              )}
-            </div>
           </>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <>
             <div>
               <SLabel className="mb-3">Risk flags — select all that apply</SLabel>
@@ -534,7 +571,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
       <div className="px-5 pt-4 border-t border-gray-100 shrink-0" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.25rem)' }}>
         <button onClick={goNext}
           className="w-full py-4 rounded-2xl text-base font-bold bg-gray-900 text-white active:scale-95 transition-all">
-          {step < 3 ? "Next" : "Add to ward"}
+          {step < 4 ? "Next" : "Add to ward"}
         </button>
       </div>
     </div>
@@ -559,65 +596,193 @@ function AlertCard({ alert }) {
   );
 }
 
+// ─── Obs items config helper ──────────────────────────────────────────────
+
+function getObsItems(bed) {
+  const isDiabetic     = (bed.riskFlags ?? []).some(f => f.startsWith("Diabetic"));
+  const isHypertensive = (bed.riskFlags ?? []).includes("Hypertensive");
+  return [
+    { key: "lastPulse", vk: "pulseValue",  label: "Pulse", unit: "bpm",     limit: 60,                        type: "int"   },
+    { key: "lastBP",    vk: "bpSystolic",  label: "BP",    unit: "mmHg",    limit: isHypertensive ? 60 : 240, type: "bp"    },
+    { key: "lastTemp",  vk: "tempValue",   label: "Temp",  unit: "°C",      limit: 240,                       type: "float" },
+    ...(isDiabetic ? [{ key: "lastBGL", vk: "bglValue", label: "BGL", unit: "mmol/L", limit: 60, type: "float" }] : []),
+  ];
+}
+
 // ─── Inline observation row ────────────────────────────────────────────────
 
 function ObsRow({ bed, onUpdate }) {
   const obs = bed.observations ?? {};
-  const isDiabetic     = (bed.riskFlags ?? []).some(f => f.startsWith("Diabetic"));
-  const isHypertensive = (bed.riskFlags ?? []).includes("Hypertensive");
   const now = Date.now();
+  const items = getObsItems(bed);
 
-  const items = [
-    { key: "lastPulse", label: "Pulse", limitMin: 60, citation: "§1.4.5" },
-    { key: "lastBP",    label: "BP",    limitMin: isHypertensive ? 60 : 240, citation: "§1.4.5" },
-    { key: "lastTemp",  label: "Temp",  limitMin: 240, citation: "§1.4.5" },
-    ...(isDiabetic ? [{ key: "lastBGL", label: "BGL", limitMin: 60, citation: "GL983" }] : []),
-  ];
+  const [activeKey, setActiveKey] = useState(null);
+  const [v1, setV1] = useState("");
+  const [v2, setV2] = useState("");
+  const v1Ref = useRef(null);
 
-  const tap = key => onUpdate({ ...obs, [key]: nowISO() });
+  const activeItem = items.find(it => it.key === activeKey);
+
+  const handleTap = (key) => {
+    if (activeKey === key) {
+      setActiveKey(null);
+      setV1(""); setV2("");
+    } else {
+      setActiveKey(key);
+      setV1(""); setV2("");
+    }
+  };
+
+  // autoFocus when activeKey changes
+  useEffect(() => {
+    if (activeKey && v1Ref.current) {
+      setTimeout(() => v1Ref.current?.focus(), 50);
+    }
+  }, [activeKey]);
+
+  const confirm = () => {
+    if (!activeItem) return;
+    const ts = nowISO();
+    let updates = { ...obs, [activeItem.key]: ts };
+    if (activeItem.type === "bp") {
+      if (v1) updates.bpSystolic = v1;
+      if (v2) updates.bpDiastolic = v2;
+    } else if (activeItem.type === "int" || activeItem.type === "float") {
+      if (v1) updates[activeItem.vk] = v1;
+    }
+    onUpdate(updates);
+    setActiveKey(null);
+    setV1(""); setV2("");
+  };
+
+  const getDisplayVal = (item) => {
+    const o = obs;
+    if (item.type === "bp") {
+      if (o.bpSystolic && o.bpDiastolic) return `${o.bpSystolic}/${o.bpDiastolic}`;
+      if (o.bpSystolic) return `${o.bpSystolic}/—`;
+    } else {
+      if (o[item.vk]) return o[item.vk];
+    }
+    return null;
+  };
 
   return (
-    <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0,1fr))` }}>
-      {items.map(({ key, label, limitMin }) => {
-        const lastISO = obs[key];
-        const ageMin  = lastISO ? (now - new Date(lastISO).getTime()) / 60000 : Infinity;
-        const pct     = ageMin / limitMin;
-        const st      = !lastISO ? "none" : pct < 0.8 ? "ok" : pct < 1 ? "warn" : "over";
-        return (
-          <button key={key} onClick={() => tap(key)}
-            className={`py-3.5 rounded-2xl border flex flex-col items-center gap-0.5 active:scale-95 transition-all ${
-              st==="ok"   ? "bg-green-50 border-green-200" :
-              st==="warn" ? "bg-amber-50 border-amber-200" :
-              st==="over" ? "bg-red-50   border-red-200"   :
-              "bg-gray-50 border-gray-200"
-            }`}>
-            <p className={`text-xs font-bold ${
-              st==="ok" ? "text-green-700" : st==="warn" ? "text-amber-700" : st==="over" ? "text-red-700" : "text-gray-500"
-            }`}>{label}</p>
-            <p className={`text-[11px] font-medium ${
-              st==="ok" ? "text-green-500" : st==="warn" ? "text-amber-500" : st==="over" ? "text-red-500" : "text-gray-400"
-            }`}>{lastISO ? fmtTime(lastISO) : "—"}</p>
+    <div className="space-y-2">
+      <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0,1fr))` }}>
+        {items.map((item) => {
+          const lastISO = obs[item.key];
+          const ageMin  = lastISO ? (now - new Date(lastISO).getTime()) / 60000 : Infinity;
+          const pct     = ageMin / item.limit;
+          const st      = !lastISO ? "none" : pct < 0.8 ? "ok" : pct < 1 ? "warn" : "over";
+          const isActive = activeKey === item.key;
+          const displayVal = getDisplayVal(item);
+
+          return (
+            <button key={item.key} onClick={() => handleTap(item.key)}
+              className={`py-3.5 rounded-2xl border flex flex-col items-center gap-0.5 active:scale-95 transition-all ${
+                isActive ? "bg-gray-900 border-gray-900" :
+                st==="ok"   ? "bg-green-50 border-green-200" :
+                st==="warn" ? "bg-amber-50 border-amber-200" :
+                st==="over" ? "bg-red-50   border-red-200"   :
+                "bg-gray-50 border-gray-200"
+              }`}>
+              <p className={`text-xs font-bold ${
+                isActive ? "text-white" :
+                st==="ok" ? "text-green-700" : st==="warn" ? "text-amber-700" : st==="over" ? "text-red-700" : "text-gray-500"
+              }`}>{item.label}</p>
+              <p className={`text-[11px] font-medium ${
+                isActive ? "text-gray-300" :
+                st==="ok" ? "text-green-500" : st==="warn" ? "text-amber-500" : st==="over" ? "text-red-500" : "text-gray-400"
+              }`}>
+                {displayVal ? displayVal : (lastISO ? fmtTime(lastISO) : "—")}
+              </p>
+            </button>
+          );
+        })}
+      </div>
+
+      {activeKey && activeItem && (
+        <div className="flex gap-2 items-center">
+          {activeItem.type === "bp" ? (
+            <>
+              <input
+                ref={v1Ref}
+                type="number"
+                inputMode="numeric"
+                placeholder="Sys"
+                value={v1}
+                onChange={e => setV1(e.target.value)}
+                className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-gray-800 text-center"
+              />
+              <span className="text-gray-400 font-bold">/</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                placeholder="Dia"
+                value={v2}
+                onChange={e => setV2(e.target.value)}
+                className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-gray-800 text-center"
+              />
+            </>
+          ) : (
+            <input
+              ref={v1Ref}
+              type="number"
+              inputMode={activeItem.type === "float" ? "decimal" : "numeric"}
+              placeholder={`${activeItem.label} (${activeItem.unit})`}
+              value={v1}
+              onChange={e => setV1(e.target.value)}
+              className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-gray-800"
+            />
+          )}
+          <button onClick={confirm}
+            className="w-12 h-10 rounded-xl bg-gray-900 text-white text-base font-bold flex items-center justify-center active:scale-95 transition-all">
+            ✓
           </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Obs dots for board view ──────────────────────────────────────────────
+
+function ObsDots({ bed, now }) {
+  const obs   = bed.observations ?? {};
+  const items = getObsItems(bed);
+
+  return (
+    <div className="flex gap-1.5 mt-2 flex-wrap">
+      {items.map(item => {
+        const lastISO = obs[item.key];
+        const ageMin  = lastISO ? (now - new Date(lastISO).getTime()) / 60000 : Infinity;
+        const pct     = ageMin / item.limit;
+        const dotCls  = !lastISO ? "bg-gray-300" : pct < 0.8 ? "bg-green-400" : pct < 1 ? "bg-amber-400" : "bg-red-500";
+        const letter  = item.label[0];
+        return (
+          <div key={item.key} className="flex items-center gap-0.5">
+            <div className={`w-2 h-2 rounded-full ${dotCls}`} />
+            <span className="text-[10px] text-gray-400 font-semibold">{letter}</span>
+          </div>
         );
       })}
     </div>
   );
 }
 
-// ─── Bed detail view ──────────────────────────────────────────────────────
-
-const STAGES   = ["Latent","Active first stage","Passive second stage","Active second stage"];
-const ANALGS   = ["None","Entonox","Pethidine","Epidural","Remifentanil PCA"];
+// ─── Bed detail view — 3 inner tabs ──────────────────────────────────────
 
 function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOpenOxy }) {
   const status   = bedStatusColor(alerts);
   const sc       = STATUS[status];
-  const lastVE   = bed.ves?.[bed.ves.length - 1];
   const currentOx= bed.oxytocinLog?.[bed.oxytocinLog.length - 1];
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow]       = useState(Date.now());
   const [urineVal, setUrineVal] = useState(String(bed.observations?.urineOutput ?? ""));
+  const [innerTab, setInnerTab] = useState("overview"); // overview | ves | obs
 
   useEffect(() => { const id = setInterval(() => setNow(Date.now()), 30000); return () => clearInterval(id); }, []);
+
+  const urgentCount = alerts.filter(a => a.severity === "urgent").length;
 
   const setStage = s => {
     const u = { labourStage: s };
@@ -635,149 +800,184 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
     <div className="min-h-screen bg-white pb-36">
       <div className="max-w-lg mx-auto">
 
-        {/* Header */}
-        <div className="px-5 pb-4 border-b border-gray-100" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}>
-          <div className="flex items-start gap-3">
-            <button onClick={onBack} className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 shrink-0 mt-0.5">
-              <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <div className="flex-1">
-              <div className="flex items-center gap-2.5">
-                <h2 className="text-2xl font-bold text-gray-900">Bed {bed.bedNumber}</h2>
-                <span className={`w-2.5 h-2.5 rounded-full ${sc.dot}`} />
-              </div>
-              <p className="text-sm text-gray-500 mt-0.5">{bed.parity} · {bed.gestation} · admitted {fmtTime(bed.admissionTime)}</p>
-              {bed.riskFlags?.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  {bed.riskFlags.map(f => <span key={f} className="px-2 py-0.5 bg-gray-100 rounded-full text-xs font-semibold text-gray-600">{f}</span>)}
+        {/* Sticky header + tab bar */}
+        <div className="sticky top-0 z-20 bg-white">
+          {/* Header */}
+          <div className="px-5 pb-3 border-b border-gray-100" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}>
+            <div className="flex items-start gap-3">
+              <button onClick={onBack} className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 shrink-0 mt-0.5">
+                <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div className="flex-1">
+                <div className="flex items-center gap-2.5">
+                  <h2 className="text-2xl font-bold text-gray-900">Bed {bed.bedNumber}</h2>
+                  <span className={`w-2.5 h-2.5 rounded-full ${sc.dot}`} />
+                  {urgentCount > 0 && (
+                    <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-red-500 text-white">{urgentCount} urgent</span>
+                  )}
                 </div>
-              )}
+                <p className="text-sm text-gray-500 mt-0.5">{bed.parity} · {bed.gestation} · admitted {fmtTime(bed.admissionTime)}</p>
+                {bed.riskFlags?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {bed.riskFlags.map(f => <span key={f} className="px-2 py-0.5 bg-gray-100 rounded-full text-xs font-semibold text-gray-600">{f}</span>)}
+                  </div>
+                )}
+              </div>
             </div>
+          </div>
+
+          {/* Inner tab bar */}
+          <div className="flex border-b border-gray-100">
+            {[
+              { key: "overview", label: "Overview" },
+              { key: "ves",      label: "VEs" },
+              { key: "obs",      label: "Obs" },
+            ].map(tab => (
+              <button key={tab.key} onClick={() => setInnerTab(tab.key)}
+                className={`flex-1 py-3 text-sm font-semibold relative transition-colors ${innerTab === tab.key ? "text-gray-900 border-b-2 border-gray-900" : "text-gray-400"}`}>
+                {tab.label}
+                {tab.key === "overview" && urgentCount > 0 && (
+                  <span className="absolute top-2 right-3 w-2 h-2 rounded-full bg-red-500" />
+                )}
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="px-5 pt-5 space-y-6">
+        {/* Overview tab */}
+        {innerTab === "overview" && (
+          <div className="px-5 pt-4 space-y-5 pb-8">
+            {/* Alerts */}
+            {alerts.length > 0
+              ? <div className="space-y-2">{alerts.map(a => <AlertCard key={a.id} alert={a} />)}</div>
+              : <div className="rounded-2xl bg-green-50 border border-green-200 p-4">
+                  <p className="text-sm font-bold text-green-700">All clear</p>
+                  <p className="text-xs text-green-600 mt-0.5">No alerts — all timers within normal limits.</p>
+                </div>
+            }
 
-          {/* Alerts */}
-          {alerts.length > 0
-            ? <div className="space-y-2">{alerts.map(a => <AlertCard key={a.id} alert={a} />)}</div>
-            : <div className="rounded-2xl bg-green-50 border border-green-200 p-4">
-                <p className="text-sm font-bold text-green-700">All clear</p>
-                <p className="text-xs text-green-600 mt-0.5">No alerts — all timers within normal limits.</p>
+            {/* Stage */}
+            <div>
+              <SLabel className="mb-2">Labour stage — NICE NG235 §1.1</SLabel>
+              <div className="grid grid-cols-2 gap-2">
+                {STAGES.map(s => {
+                  const active = bed.labourStage === s;
+                  const sub =
+                    s === "Active second stage"  && bed.pushingStartTime  ? `Pushing: ${fmtAge(now - new Date(bed.pushingStartTime).getTime())}` :
+                    s === "Passive second stage" && bed.passiveStartTime  ? `Passive: ${fmtAge(now - new Date(bed.passiveStartTime).getTime())}` :
+                    STAGE_SUB[s];
+                  return (
+                    <button key={s} onClick={() => setStage(s)}
+                      className={`py-3.5 px-3 rounded-2xl border text-left transition-colors active:scale-95 ${active ? "bg-gray-900 border-gray-900" : "bg-white border-gray-200"}`}>
+                      <p className={`text-xs font-bold leading-snug ${active ? "text-white" : "text-gray-800"}`}>{s}</p>
+                      <p className={`text-[10px] mt-0.5 leading-tight ${active ? "text-gray-400" : "text-gray-400"}`}>{sub}</p>
+                    </button>
+                  );
+                })}
               </div>
-          }
+            </div>
 
-          {/* Stage */}
-          <div>
-            <SLabel className="mb-2">Labour stage — NICE NG235 §1.1</SLabel>
-            <div className="grid grid-cols-2 gap-2">
-              {STAGES.map(s => {
-                const active = bed.labourStage === s;
-                const sub =
-                  s === "Active second stage"  && bed.pushingStartTime  ? `Pushing: ${fmtAge(now - new Date(bed.pushingStartTime).getTime())}` :
-                  s === "Passive second stage" && bed.passiveStartTime  ? `Passive: ${fmtAge(now - new Date(bed.passiveStartTime).getTime())}` :
-                  STAGE_SUB[s];
-                return (
-                  <button key={s} onClick={() => setStage(s)}
-                    className={`py-3.5 px-3 rounded-2xl border text-left transition-colors active:scale-95 ${active ? "bg-gray-900 border-gray-900" : "bg-white border-gray-200"}`}>
-                    <p className={`text-xs font-bold leading-snug ${active ? "text-white" : "text-gray-800"}`}>{s}</p>
-                    <p className={`text-[10px] mt-0.5 leading-tight ${active ? "text-gray-400" : "text-gray-400"}`}>{sub}</p>
-                  </button>
-                );
-              })}
+            {/* Analgesia */}
+            <div>
+              <SLabel className="mb-2">Analgesia</SLabel>
+              <div className="space-y-2">
+                <PillRow value={bed.analgesia} onChange={a => onUpdate({ analgesia: a })} options={["None","Entonox","Pethidine"]} />
+                <PillRow value={bed.analgesia} onChange={a => onUpdate({ analgesia: a })} options={["Epidural","Remifentanil PCA"]} />
+              </div>
+            </div>
+
+            {/* Discharge */}
+            <div className="space-y-2 pt-2">
+              <button onClick={() => { if (window.confirm(`Discharge Bed ${bed.bedNumber}?`)) onDelete(); }}
+                className="w-full border border-red-200 text-red-500 font-medium py-3 rounded-2xl text-sm active:bg-red-50">
+                Discharge / Remove bed
+              </button>
+              <p className="text-[10px] text-gray-300 text-center leading-relaxed pb-2">
+                NICE NG235 (Sept 2023) · GL983 · GL787 · Not a substitute for clinical judgement
+              </p>
             </div>
           </div>
+        )}
 
-          {/* Analgesia */}
-          <div>
-            <SLabel className="mb-2">Analgesia</SLabel>
-            <div className="space-y-2">
-              <PillRow value={bed.analgesia} onChange={a => onUpdate({ analgesia: a })} options={["None","Entonox","Pethidine"]} />
-              <PillRow value={bed.analgesia} onChange={a => onUpdate({ analgesia: a })} options={["Epidural","Remifentanil PCA"]} />
-            </div>
-          </div>
+        {/* VEs tab */}
+        {innerTab === "ves" && (
+          <div className="px-5 pt-4 pb-8 space-y-4">
+            <button onClick={onOpenVE}
+              className="w-full py-4 rounded-2xl text-base font-bold bg-gray-900 text-white active:scale-95 transition-all">
+              Record VE
+            </button>
 
-          {/* Observations */}
-          <div>
-            <SLabel className="mb-2">Observations — tap to mark done now · NG235 §1.4.5</SLabel>
-            <ObsRow bed={bed} onUpdate={obs => onUpdate({ observations: obs })} />
-            {/* Urine output */}
-            <div className="mt-2 flex gap-2">
-              <input type="number" inputMode="numeric" value={urineVal}
-                onChange={e => setUrineVal(e.target.value)} placeholder="Urine output mL/hr"
-                className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-gray-400" />
-              <button onClick={saveUrine} className="px-4 py-2.5 rounded-xl bg-gray-900 text-white text-xs font-bold">Set</button>
-            </div>
-            {bed.observations?.urineOutput !== undefined && bed.observations.urineOutput < 30 && (
-              <p className="text-xs font-bold text-red-600 mt-1">Oliguria {bed.observations.urineOutput} mL/hr — escalate · NG235 §1.4.5</p>
-            )}
-          </div>
-
-          {/* VE log */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <SLabel>VE log — NG235 §1.4.1 [4-hourly]</SLabel>
-              <button onClick={onOpenVE} className="px-3 py-1.5 rounded-full bg-gray-900 text-white text-xs font-bold">+ VE</button>
-            </div>
             {!bed.ves?.length
-              ? <button onClick={onOpenVE} className="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 text-sm text-gray-400 font-medium">
-                  Tap to record first VE
-                </button>
-              : <div className="rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm">
+              ? <p className="text-sm text-gray-400 text-center py-8">No VEs recorded yet</p>
+              : (
+                <div className="rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm">
                   {[...bed.ves].reverse().map((ve, i) => (
                     <div key={ve.id} className={`px-4 py-3 ${i > 0 ? "border-t border-gray-50" : ""}`}>
                       <div className="flex items-baseline justify-between">
-                        <p className="text-sm font-bold text-gray-900">{ve.dilation} cm</p>
+                        <p className="text-2xl font-bold text-gray-900">{ve.dilation} cm</p>
                         <p className="text-xs text-gray-400">{fmtTime(ve.time)}</p>
                       </div>
                       <p className="text-xs text-gray-500 mt-0.5">
-                        Station {ve.station > 0 ? `+${ve.station}` : ve.station} · {ve.presentation} · {ve.contractions}/10 min · {ve.membranes}
-                        {ve.membranesTime ? ` at ${fmtTime(ve.membranesTime)}` : ""}
+                        Station {ve.station > 0 ? `+${ve.station}` : ve.station} · {ve.membranes}
+                        {ve.membranesTime ? ` at ${fmtTime(ve.membranesTime)}` : ""} · {ve.contractions}/10 min
                       </p>
                     </div>
                   ))}
                 </div>
+              )
             }
-          </div>
 
-          {/* Oxytocin */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <SLabel>Oxytocin — NG235 §1.5.6 [30-min increments]</SLabel>
-              <button onClick={onOpenOxy} className="px-3 py-1.5 rounded-full bg-gray-900 text-white text-xs font-bold">+ Log</button>
+            <p className="text-[10px] text-gray-300 text-center">NICE NG235 §1.4.1 — 4-hourly VE in active labour</p>
+          </div>
+        )}
+
+        {/* Obs tab */}
+        {innerTab === "obs" && (
+          <div className="px-5 pt-4 pb-8 space-y-5">
+            <ObsRow bed={bed} onUpdate={obs => onUpdate({ observations: { ...bed.observations, ...obs } })} />
+
+            {/* Urine output */}
+            <div>
+              <SLabel className="mb-2">Urine output</SLabel>
+              <div className="flex gap-2">
+                <input type="number" inputMode="numeric" value={urineVal}
+                  onChange={e => setUrineVal(e.target.value)} placeholder="mL/hr"
+                  className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-gray-400" />
+                <button onClick={saveUrine} className="px-4 py-2.5 rounded-xl bg-gray-900 text-white text-xs font-bold">Set</button>
+              </div>
+              {bed.observations?.urineOutput !== undefined && bed.observations.urineOutput < 30 && (
+                <p className="text-xs font-bold text-red-600 mt-1">Oliguria {bed.observations.urineOutput} mL/hr — escalate · NG235 §1.4.5</p>
+              )}
             </div>
-            {!currentOx
-              ? <button onClick={onOpenOxy} className="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 text-sm text-gray-400 font-medium">
-                  Tap to start oxytocin log
-                </button>
-              : <div className="rounded-2xl border border-gray-100 bg-white shadow-sm p-4">
-                  <div className="flex items-baseline justify-between">
-                    <p className={`text-xl font-bold ${currentOx.dose >= 20 ? "text-red-600" : "text-gray-900"}`}>{currentOx.dose} mU/min</p>
-                    <p className="text-xs text-gray-400">since {fmtTime(currentOx.startTime)}</p>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Last increment: {fmtTime(currentOx.lastIncrementTime)} · {fmtAge(now - new Date(currentOx.lastIncrementTime).getTime())} ago
-                  </p>
-                </div>
-            }
-          </div>
 
-          {/* Discharge */}
-          <div className="space-y-2 pt-2">
-            <button onClick={() => { if (window.confirm(`Discharge Bed ${bed.bedNumber}?`)) onDelete(); }}
-              className="w-full border border-red-200 text-red-500 font-medium py-3 rounded-2xl text-sm active:bg-red-50">
-              Discharge / Remove bed
-            </button>
-            <p className="text-[10px] text-gray-300 text-center leading-relaxed pb-2">
-              NICE NG235 (Sept 2023) · GL983 · GL787 · Not a substitute for clinical judgement
-            </p>
+            {/* Oxytocin */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <SLabel>Oxytocin — NG235 §1.5.6 [30-min increments]</SLabel>
+                <button onClick={onOpenOxy} className="px-3 py-1.5 rounded-full bg-gray-900 text-white text-xs font-bold">+ Log</button>
+              </div>
+              {!currentOx
+                ? <button onClick={onOpenOxy} className="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 text-sm text-gray-400 font-medium">
+                    Tap to start oxytocin log
+                  </button>
+                : <div className="rounded-2xl border border-gray-100 bg-white shadow-sm p-4">
+                    <div className="flex items-baseline justify-between">
+                      <p className={`text-xl font-bold ${currentOx.dose >= 20 ? "text-red-600" : "text-gray-900"}`}>{currentOx.dose} mU/min</p>
+                      <p className="text-xs text-gray-400">since {fmtTime(currentOx.startTime)}</p>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Last increment: {fmtTime(currentOx.lastIncrementTime)} · {fmtAge(now - new Date(currentOx.lastIncrementTime).getTime())} ago
+                    </p>
+                  </div>
+              }
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* FAB */}
+      {/* FAB — always shows VE */}
       <div className="fixed bottom-24 right-5 z-30">
         <button onClick={onOpenVE}
           className="w-14 h-14 rounded-full bg-gray-900 text-white shadow-lg text-sm font-bold flex items-center justify-center active:scale-95 transition-all">
@@ -869,6 +1069,7 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE }) 
                       <span key={f} className="text-[10px] font-semibold text-gray-500 bg-white/80 border border-gray-200 px-1.5 py-0.5 rounded-full">{f}</span>
                     ))}
                   </div>
+                  <ObsDots bed={bed} now={now} />
                 </button>
 
                 {/* Quick actions bar */}
