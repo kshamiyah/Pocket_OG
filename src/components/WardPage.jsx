@@ -564,7 +564,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
   const [indMethod, setIndM]= useState("Dinoprostone");
   const [analgesia, setAnal]= useState("None");
   const [flags, setFlags]   = useState([]);
-  const [admTime, setAdmT]  = useState(timeInputNow);
+  const [admTime, setAdmT]  = useState("");
 
   const goNext = () => {
     if (step === 1) {
@@ -581,7 +581,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
       const id = `bed-${Date.now()}`;
       onSave({
         id, bedNumber: bedNum.trim(),
-        admissionTime: timeToISO(admTime),
+        admissionTime: admTime ? timeToISO(admTime) : null,
         parity, gestation: `${gestWeeks}+${gestDays}`,
         modeOfOnset: mode,
         inductionMethod: mode === "Induced" ? indMethod : null,
@@ -700,8 +700,17 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
             </div>
 
             <div>
-              <SLabel className="mb-2">Admission time</SLabel>
+              <div className="flex items-baseline justify-between mb-2">
+                <SLabel>Admission time</SLabel>
+                <span className="text-[10px] text-gray-400">optional</span>
+              </div>
               <NowField value={admTime} onChange={setAdmT} />
+              {admTime && (
+                <button onClick={() => setAdmT("")}
+                  className="text-[11px] text-gray-400 mt-1.5 ml-1">
+                  Clear — not known
+                </button>
+              )}
             </div>
 
             <p className="text-[10px] text-gray-300 text-center">Bed number only — no patient identifiers stored on this device</p>
@@ -722,8 +731,28 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
 
 // ─── Alert card ───────────────────────────────────────────────────────────
 
-function AlertCard({ alert }) {
+function AlertCard({ alert, onAcknowledge }) {
+  const [done, setDone] = useState(false);
   const s = SEV[alert.severity];
+
+  const handleDone = () => {
+    setDone(true);
+    if (onAcknowledge) setTimeout(() => onAcknowledge(alert.id), 500);
+  };
+
+  if (done) {
+    return (
+      <div className="rounded-2xl border border-green-200 bg-green-50 p-4 flex items-center gap-3">
+        <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center shrink-0">
+          <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <p className="text-sm font-bold text-green-700">Done</p>
+      </div>
+    );
+  }
+
   return (
     <div className={`rounded-2xl border ${s.border} ${s.bg} p-4`}>
       <div className="flex items-start gap-3">
@@ -733,6 +762,12 @@ function AlertCard({ alert }) {
           <p className="text-xs text-gray-600 mt-1 leading-relaxed">{alert.body}</p>
           <p className={`text-[10px] font-bold uppercase tracking-wide mt-2 ${s.cite}`}>{alert.citation}</p>
         </div>
+        <button onClick={handleDone}
+          className={`w-8 h-8 rounded-full border-2 ${s.border} flex items-center justify-center shrink-0 mt-0.5 active:scale-95 transition-all`}>
+          <svg className={`w-3.5 h-3.5 ${s.text}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </button>
       </div>
     </div>
   );
@@ -915,7 +950,11 @@ function ObsDots({ bed, now }) {
 // ─── Bed detail view — 3 inner tabs ──────────────────────────────────────
 
 function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOpenOxy, onOpenDelivery }) {
-  const status   = bedStatusColor(alerts);
+  const [ackedIds, setAckedIds] = useState(new Set());
+  const ackAlert = id => setAckedIds(prev => new Set([...prev, id]));
+  const visibleAlerts = alerts.filter(a => !ackedIds.has(a.id));
+
+  const status   = bedStatusColor(visibleAlerts);
   const sc       = STATUS[status];
   const currentOx= bed.oxytocinLog?.[bed.oxytocinLog.length - 1];
   const [now, setNow]       = useState(Date.now());
@@ -924,7 +963,7 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
 
   useEffect(() => { const id = setInterval(() => setNow(Date.now()), 30000); return () => clearInterval(id); }, []);
 
-  const urgentCount = alerts.filter(a => a.severity === "urgent").length;
+  const urgentCount = visibleAlerts.filter(a => a.severity === "urgent").length;
 
   const setStage = s => {
     const u = { labourStage: s };
@@ -992,11 +1031,11 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
         {innerTab === "overview" && (
           <div className="px-5 pt-4 space-y-5 pb-8">
             {/* Alerts */}
-            {alerts.length > 0
-              ? <div className="space-y-2">{alerts.map(a => <AlertCard key={a.id} alert={a} />)}</div>
+            {visibleAlerts.length > 0
+              ? <div className="space-y-2">{visibleAlerts.map(a => <AlertCard key={a.id} alert={a} onAcknowledge={ackAlert} />)}</div>
               : <div className="rounded-2xl bg-green-50 border border-green-200 p-4">
                   <p className="text-sm font-bold text-green-700">All clear</p>
-                  <p className="text-xs text-green-600 mt-0.5">No alerts — all timers within normal limits.</p>
+                  <p className="text-xs text-green-600 mt-0.5">No active alerts.</p>
                 </div>
             }
 
