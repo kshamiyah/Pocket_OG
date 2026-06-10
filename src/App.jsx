@@ -478,73 +478,74 @@ export default function App() {
       )}
 
       {/* Tab bar */}
-      <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-gray-100">
+      <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-gray-100"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="flex max-w-lg mx-auto">
           <button
             onClick={() => setActiveTab("search")}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
+            className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
               activeTab === "search" ? "text-black" : "text-gray-400"
             }`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
             </svg>
-            <span className="text-xs font-medium">Search</span>
+            <span className="text-[10px] font-medium">Search</span>
           </button>
           <button
             onClick={() => setActiveTab("flowcharts")}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
+            className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
               activeTab === "flowcharts" ? "text-black" : "text-gray-400"
             }`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l8.5 5v10L12 22 3.5 17V7L12 2z" />
             </svg>
-            <span className="text-xs font-medium">Flowcharts</span>
+            <span className="text-[10px] font-medium">Charts</span>
           </button>
           <button
             onClick={() => setActiveTab("guidelines")}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
+            className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
               activeTab === "guidelines" ? "text-black" : "text-gray-400"
             }`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <span className="text-xs font-medium">Guidelines</span>
+            <span className="text-[10px] font-medium">Guides</span>
           </button>
           <button
             onClick={() => setActiveTab("consent")}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
+            className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
               activeTab === "consent" ? "text-black" : "text-gray-400"
             }`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
-            <span className="text-xs font-medium">Consent</span>
+            <span className="text-[10px] font-medium">Consent</span>
           </button>
           <button
             onClick={() => setActiveTab("calculator")}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
+            className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
               activeTab === "calculator" ? "text-black" : "text-gray-400"
             }`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m-6 5h6m-6 5h6M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" />
             </svg>
-            <span className="text-xs font-medium">Calculator</span>
+            <span className="text-[10px] font-medium">Calc</span>
           </button>
           <button
             onClick={() => setActiveTab("ward")}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
+            className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
               activeTab === "ward" ? "text-black" : "text-gray-400"
             }`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
-            <span className="text-xs font-medium">Ward</span>
+            <span className="text-[10px] font-medium">Ward</span>
           </button>
         </div>
       </div>

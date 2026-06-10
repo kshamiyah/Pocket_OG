@@ -228,7 +228,7 @@ function BottomSheet({ open, onClose, title, sub, children }) {
             {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
           </div>
         )}
-        <div className="overflow-y-auto overscroll-contain flex-1">{children}</div>
+        <div className="overflow-y-auto overscroll-contain flex-1" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>{children}</div>
       </div>
     </>
   );
@@ -410,7 +410,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
   return (
     <div className="fixed inset-0 z-40 bg-white flex flex-col">
       {/* Top bar */}
-      <div className="px-5 pt-14 pb-4 flex items-center gap-3 border-b border-gray-100 shrink-0">
+      <div className="px-5 pb-4 flex items-center gap-3 border-b border-gray-100 shrink-0" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}>
         <button onClick={step === 1 ? onCancel : () => setStep(s => s - 1)}
           className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 shrink-0">
           <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -517,7 +517,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
       </div>
 
       {/* CTA */}
-      <div className="px-5 pt-4 pb-10 border-t border-gray-100 shrink-0">
+      <div className="px-5 pt-4 border-t border-gray-100 shrink-0" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.25rem)' }}>
         <button onClick={goNext}
           className="w-full py-4 rounded-2xl text-base font-bold bg-gray-900 text-white active:scale-95 transition-all">
           {step < 3 ? "Next" : "Add to ward"}
@@ -622,7 +622,7 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
       <div className="max-w-lg mx-auto">
 
         {/* Header */}
-        <div className="px-5 pt-14 pb-4 border-b border-gray-100">
+        <div className="px-5 pb-4 border-b border-gray-100" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}>
           <div className="flex items-start gap-3">
             <button onClick={onBack} className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 shrink-0 mt-0.5">
               <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -764,7 +764,7 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
       </div>
 
       {/* FAB */}
-      <div className="fixed bottom-20 right-5 z-30">
+      <div className="fixed bottom-24 right-5 z-30">
         <button onClick={onOpenVE}
           className="w-14 h-14 rounded-full bg-gray-900 text-white shadow-lg text-sm font-bold flex items-center justify-center active:scale-95 transition-all">
           VE
@@ -784,7 +784,7 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE }) 
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <div className="px-5 pt-16 pb-4 flex items-center justify-between">
+        <div className="px-5 pb-4 flex items-center justify-between" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}>
           <div>
             <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Labour Ward</h2>
             <p className="text-sm text-gray-400 mt-0.5">
