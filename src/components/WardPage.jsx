@@ -762,12 +762,14 @@ function AlertCard({ alert, onAcknowledge }) {
           <p className="text-xs text-gray-600 mt-1 leading-relaxed">{alert.body}</p>
           <p className={`text-[10px] font-bold uppercase tracking-wide mt-2 ${s.cite}`}>{alert.citation}</p>
         </div>
-        <button onClick={handleDone}
-          className={`w-8 h-8 rounded-full border-2 ${s.border} flex items-center justify-center shrink-0 mt-0.5 active:scale-95 transition-all`}>
-          <svg className={`w-3.5 h-3.5 ${s.text}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-        </button>
+        {onAcknowledge && (
+          <button onClick={handleDone}
+            className={`w-8 h-8 rounded-full border-2 ${s.border} flex items-center justify-center shrink-0 mt-0.5 active:scale-95 transition-all`}>
+            <svg className={`w-3.5 h-3.5 ${s.text}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );
@@ -950,11 +952,19 @@ function ObsDots({ bed, now }) {
 // ─── Bed detail view — 3 inner tabs ──────────────────────────────────────
 
 function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOpenOxy, onOpenDelivery }) {
-  const [ackedIds, setAckedIds] = useState(new Set());
-  const ackAlert = id => setAckedIds(prev => new Set([...prev, id]));
-  const visibleAlerts = alerts.filter(a => !ackedIds.has(a.id));
+  const PERSISTENT_FLAGS = {
+    "gbs-iap":          "gbsAntibioticsStarted",
+    "preterm-neonatal": "neonatalTeamAlerted",
+    "preterm-mgso4":    "mgso4Given",
+    "preterm-steroids": "corticosteroidsConfirmed",
+    "preterm-tocolysis":"tocolysisOffered",
+  };
+  const ackAlert = id => {
+    const flag = PERSISTENT_FLAGS[id];
+    if (flag) onUpdate({ [flag]: true });
+  };
 
-  const status   = bedStatusColor(visibleAlerts);
+  const status   = bedStatusColor(alerts);
   const sc       = STATUS[status];
   const currentOx= bed.oxytocinLog?.[bed.oxytocinLog.length - 1];
   const [now, setNow]       = useState(Date.now());
@@ -963,7 +973,7 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
 
   useEffect(() => { const id = setInterval(() => setNow(Date.now()), 30000); return () => clearInterval(id); }, []);
 
-  const urgentCount = visibleAlerts.filter(a => a.severity === "urgent").length;
+  const urgentCount = alerts.filter(a => a.severity === "urgent").length;
 
   const setStage = s => {
     const u = { labourStage: s };
@@ -1031,8 +1041,11 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
         {innerTab === "overview" && (
           <div className="px-5 pt-4 space-y-5 pb-8">
             {/* Alerts */}
-            {visibleAlerts.length > 0
-              ? <div className="space-y-2">{visibleAlerts.map(a => <AlertCard key={a.id} alert={a} onAcknowledge={ackAlert} />)}</div>
+            {alerts.length > 0
+              ? <div className="space-y-2">{alerts.map(a => (
+                  <AlertCard key={a.id} alert={a}
+                    onAcknowledge={PERSISTENT_FLAGS[a.id] ? ackAlert : undefined} />
+                ))}</div>
               : <div className="rounded-2xl bg-green-50 border border-green-200 p-4">
                   <p className="text-sm font-bold text-green-700">All clear</p>
                   <p className="text-xs text-green-600 mt-0.5">No active alerts.</p>

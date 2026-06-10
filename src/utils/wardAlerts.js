@@ -54,7 +54,7 @@ export function computeAlerts(bed) {
   const gest = bed.gestation ?? "";
 
   // ─── Preterm — neonatal team (< 34 weeks) ───────────────────────────
-  if (isPreterm && gestWks < 34) {
+  if (isPreterm && gestWks < 34 && !bed.neonatalTeamAlerted) {
     alerts.push({
       id: "preterm-neonatal",
       severity: "urgent",
@@ -65,7 +65,7 @@ export function computeAlerts(bed) {
   }
 
   // ─── Preterm — MgSO4 neuroprotection (< 30 weeks) ───────────────────
-  if (isPreterm && gestWks < 30) {
+  if (isPreterm && gestWks < 30 && !bed.mgso4Given) {
     alerts.push({
       id: "preterm-mgso4",
       severity: "urgent",
@@ -76,7 +76,7 @@ export function computeAlerts(bed) {
   }
 
   // ─── Preterm — antenatal corticosteroids (< 34+6) ───────────────────
-  if (isPreterm && gestWks < 34 + 6 / 7) {
+  if (isPreterm && gestWks < 34 + 6 / 7 && !bed.corticosteroidsConfirmed) {
     alerts.push({
       id: "preterm-steroids",
       severity: "urgent",
@@ -87,7 +87,7 @@ export function computeAlerts(bed) {
   }
 
   // ─── Preterm — tocolysis consideration (28–33+6, active labour) ─────
-  if (isPreterm && gestWks >= 28 && gestWks < 34 && bed.labourStage === "Active first stage") {
+  if (isPreterm && gestWks >= 28 && gestWks < 34 && bed.labourStage === "Active first stage" && !bed.tocolysisOffered) {
     alerts.push({
       id: "preterm-tocolysis",
       severity: "warning",
@@ -280,7 +280,7 @@ export function computeAlerts(bed) {
   }
 
   // ─── GBS+ — antibiotics required ────────────────────────────────────
-  if (isGBSPos && membranesRuptured && !alerts.find(a => a.id === "prom-18h" || a.id === "prom-24h")) {
+  if (isGBSPos && membranesRuptured && !bed.gbsAntibioticsStarted && !alerts.find(a => a.id === "prom-18h" || a.id === "prom-24h")) {
     alerts.push({
       id: "gbs-iap",
       severity: "urgent",
