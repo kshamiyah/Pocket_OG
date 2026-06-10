@@ -1,0 +1,316 @@
+// Alert engine — all rules cited from NICE NG235 (Intrapartum Care, Sept 2023)
+
+const MIN = 60 * 1000;
+const HOUR = 60 * MIN;
+
+function formatAge(ms) {
+  const totalMin = Math.floor(ms / MIN);
+  if (totalMin < 60) return `${totalMin}m`;
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
+function findMembranesTime(ves) {
+  if (!ves?.length) return null;
+  for (let i = ves.length - 1; i >= 0; i--) {
+    if (ves[i].membranesTime) return ves[i].membranesTime;
+  }
+  return null;
+}
+
+export function computeAlerts(bed) {
+  const alerts = [];
+  const now = Date.now();
+
+  const ves = bed.ves ?? [];
+  const lastVE = ves.length > 0 ? ves[ves.length - 1] : null;
+  const prevVE = ves.length > 1 ? ves[ves.length - 2] : null;
+  const oxyLog = bed.oxytocinLog ?? [];
+  const currentOx = oxyLog.length > 0 ? oxyLog[oxyLog.length - 1] : null;
+  const obs = bed.observations ?? {};
+
+  const hasRegionalAnalgesia = bed.analgesia === "Epidural" || bed.analgesia === "Remifentanil PCA";
+  const isNullip = bed.parity === "Para 0";
+  const flags = bed.riskFlags ?? [];
+  const isDiabetic = flags.some(f => f.startsWith("Diabetic"));
+  const isHypertensive = flags.includes("Hypertensive");
+  const isGBSPos = flags.includes("GBS+");
+  const membranesTime = findMembranesTime(ves);
+  const membranesRuptured = lastVE?.membranes === "SROM" || lastVE?.membranes === "AROM";
+
+  // ─── VE overdue (active first stage) ────────────────────────────────
+  if (bed.labourStage === "Active first stage") {
+    if (!lastVE) {
+      alerts.push({
+        id: "ve-never",
+        severity: "urgent",
+        title: "No VE recorded",
+        body: "Offer vaginal examination on admission to active labour.",
+        citation: "NICE NG235 §1.4.1 [2023]",
+      });
+    } else {
+      const ms = now - new Date(lastVE.time).getTime();
+      if (ms >= 4 * HOUR) {
+        alerts.push({
+          id: "ve-overdue",
+          severity: "urgent",
+          title: `VE overdue (${formatAge(ms)} ago)`,
+          body: "Offer 4-hourly vaginal examination in active first stage of labour.",
+          citation: "NICE NG235 §1.4.1 [2023]",
+        });
+      } else if (ms >= 3.5 * HOUR) {
+        alerts.push({
+          id: "ve-due-soon",
+          severity: "warning",
+          title: "VE due in 30 min",
+          body: "Approaching 4-hour vaginal examination interval.",
+          citation: "NICE NG235 §1.4.1 [2023]",
+        });
+      }
+    }
+  }
+
+  // ─── Latent phase reassessment ───────────────────────────────────────
+  if (bed.labourStage === "Latent" && bed.admissionTime) {
+    const ms = now - new Date(bed.admissionTime).getTime();
+    if (ms >= 4 * HOUR) {
+      alerts.push({
+        id: "latent-reassess",
+        severity: "warning",
+        title: "Latent phase — reassess now",
+        body: `${formatAge(ms)} since admission. Offer reassessment to confirm or exclude active labour.`,
+        citation: "NICE NG235 §1.3.3 [2023]",
+      });
+    }
+  }
+
+  // ─── Slow progress ───────────────────────────────────────────────────
+  if (bed.labourStage === "Active first stage" && lastVE && prevVE) {
+    const diffHours = (new Date(lastVE.time) - new Date(prevVE.time)) / HOUR;
+    if (diffHours >= 2) {
+      const rate = (lastVE.dilation - prevVE.dilation) / diffHours;
+      if (rate < 0.5) {
+        alerts.push({
+          id: "slow-progress",
+          severity: "urgent",
+          title: "Slow labour progress",
+          body: `Progress ${rate.toFixed(1)} cm/hr — below the 0.5 cm/hr threshold. If membranes intact, offer ARM then reassess after 2h. If still < 1 cm progress, offer oxytocin augmentation.`,
+          citation: "NICE NG235 §1.5.1–1.5.4 [2023]",
+        });
+      }
+    }
+  }
+
+  // ─── Hyperstimulation ────────────────────────────────────────────────
+  if (lastVE && typeof lastVE.contractions === "number" && lastVE.contractions > 5) {
+    alerts.push({
+      id: "hyperstim",
+      severity: "urgent",
+      title: "Uterine hyperstimulation",
+      body: `${lastVE.contractions} contractions/10 min recorded. Stop or reduce oxytocin. Consider terbutaline 250 mcg SC if hyperstimulation persists.`,
+      citation: "NICE NG235 §1.5.7 [2023]",
+    });
+  }
+
+  // ─── Oxytocin increment due ──────────────────────────────────────────
+  if (currentOx) {
+    if (currentOx.dose >= 20) {
+      alerts.push({
+        id: "oxytocin-max",
+        severity: "urgent",
+        title: "Oxytocin at maximum dose",
+        body: `Current dose ${currentOx.dose} mU/min — at or above maximum (20 mU/min). Escalate to registrar / consultant.`,
+        citation: "NICE NG235 §1.5.6 [2023]",
+      });
+    } else {
+      const msSinceIncrement = now - new Date(currentOx.lastIncrementTime).getTime();
+      if (msSinceIncrement >= 30 * MIN) {
+        alerts.push({
+          id: "oxytocin-increment",
+          severity: "warning",
+          title: `Oxytocin increment due (${formatAge(msSinceIncrement)} ago)`,
+          body: `Increase by 1–2 mU/min if contractions < 4/10 min. Current dose ${currentOx.dose} mU/min. Increment every 30 min minimum. Target 3–4 contractions/10 min, each 40–60 sec.`,
+          citation: "NICE NG235 §1.5.6 [2023]",
+        });
+      }
+    }
+  }
+
+  // ─── Second stage — passive limit ────────────────────────────────────
+  if (bed.labourStage === "Passive second stage" && bed.passiveStartTime) {
+    const limit = isNullip ? 2 * HOUR : 1 * HOUR;
+    const ms = now - new Date(bed.passiveStartTime).getTime();
+    const limitLabel = isNullip ? "2 hours" : "1 hour";
+    if (ms >= limit) {
+      alerts.push({
+        id: "passive-limit",
+        severity: "urgent",
+        title: `Passive second stage limit reached (${formatAge(ms)})`,
+        body: `${limitLabel} passive second stage for ${isNullip ? "nulliparous" : "multiparous"} woman. Encourage active pushing if no urge, or reassess for descent.`,
+        citation: "NICE NG235 §1.6.3 [2023]",
+      });
+    } else if (ms >= limit - 15 * MIN) {
+      alerts.push({
+        id: "passive-limit-soon",
+        severity: "warning",
+        title: `Passive second stage limit approaching`,
+        body: `${formatAge(limit - ms)} until ${limitLabel} limit. Prepare to encourage pushing.`,
+        citation: "NICE NG235 §1.6.3 [2023]",
+      });
+    }
+  }
+
+  // ─── Second stage — active pushing limit ────────────────────────────
+  if (bed.labourStage === "Active second stage" && bed.pushingStartTime) {
+    let limit;
+    if (isNullip && hasRegionalAnalgesia) limit = 2 * HOUR;
+    else if (isNullip) limit = 1 * HOUR;
+    else if (!isNullip && hasRegionalAnalgesia) limit = 1 * HOUR;
+    else limit = 30 * MIN;
+
+    const ms = now - new Date(bed.pushingStartTime).getTime();
+    const limitLabel = limit === 30 * MIN ? "30 minutes" : limit === HOUR ? "1 hour" : "2 hours";
+
+    if (ms >= limit) {
+      alerts.push({
+        id: "pushing-limit",
+        severity: "urgent",
+        title: `Active pushing limit reached (${formatAge(ms)})`,
+        body: `${limitLabel} active pushing ${hasRegionalAnalgesia ? "with regional analgesia" : "without epidural"}. Senior review required — consider instrumental delivery.`,
+        citation: "NICE NG235 §1.6.5–1.6.6 [2023]",
+      });
+    } else if (ms >= limit - 15 * MIN) {
+      alerts.push({
+        id: "pushing-limit-soon",
+        severity: "warning",
+        title: "Active pushing limit approaching",
+        body: `${formatAge(limit - ms)} until ${limitLabel} limit. Alert senior if not progressing.`,
+        citation: "NICE NG235 §1.6.5–1.6.6 [2023]",
+      });
+    }
+  }
+
+  // ─── PROM duration alerts ────────────────────────────────────────────
+  if (membranesTime) {
+    const ms = now - new Date(membranesTime).getTime();
+    if (ms >= 24 * HOUR && bed.labourStage === "Latent") {
+      alerts.push({
+        id: "prom-24h",
+        severity: "urgent",
+        title: "PROM > 24 hours — offer induction",
+        body: "Prelabour rupture of membranes for > 24h without established labour. Offer induction of labour. If GBS+, offer immediate induction with IV benzylpenicillin.",
+        citation: "NICE NG235 §1.2.11 [2023]",
+      });
+    } else if (ms >= 18 * HOUR) {
+      alerts.push({
+        id: "prom-18h",
+        severity: "urgent",
+        title: `Membranes ruptured > 18 hours (${formatAge(ms)})`,
+        body: "Increased GBS risk. Review GBS status. Offer IV benzylpenicillin 3g stat then 1.5g every 4h until delivery if GBS+ or risk factors present.",
+        citation: "NICE NG235 §1.2.9 [2023] · GL787",
+      });
+    } else if (ms >= 16 * HOUR) {
+      alerts.push({
+        id: "prom-16h",
+        severity: "warning",
+        title: `Membranes ruptured ${formatAge(ms)} — approaching 18h`,
+        body: "Review GBS status. Prepare for intrapartum antibiotic prophylaxis if GBS+ or risk factors.",
+        citation: "NICE NG235 §1.2.9 [2023] · GL787",
+      });
+    }
+  }
+
+  // ─── GBS+ — antibiotics required ────────────────────────────────────
+  if (isGBSPos && membranesRuptured && !alerts.find(a => a.id === "prom-18h" || a.id === "prom-24h")) {
+    alerts.push({
+      id: "gbs-iap",
+      severity: "urgent",
+      title: "GBS+ — IV antibiotic prophylaxis required",
+      body: "Offer IV benzylpenicillin 3g stat, then 1.5g every 4 hours until delivery. If penicillin-allergic: clindamycin 900 mg IV 8-hourly.",
+      citation: "GL787 · NICE NG235 §1.2.12 [2023]",
+    });
+  }
+
+  // ─── Maternal observations ───────────────────────────────────────────
+  if (bed.labourStage !== "Latent") {
+    if (obs.lastPulse) {
+      const ms = now - new Date(obs.lastPulse).getTime();
+      if (ms >= HOUR) {
+        alerts.push({ id: "pulse-due", severity: "info", title: "Maternal pulse check due", body: `Last recorded ${formatAge(ms)} ago. Hourly pulse in active labour.`, citation: "NICE NG235 §1.4.5 [2023]" });
+      }
+    } else {
+      alerts.push({ id: "pulse-never", severity: "info", title: "Pulse not recorded", body: "Hourly maternal pulse required in active labour.", citation: "NICE NG235 §1.4.5 [2023]" });
+    }
+
+    if (obs.lastBP) {
+      const limit = isHypertensive ? HOUR : 4 * HOUR;
+      const ms = now - new Date(obs.lastBP).getTime();
+      if (ms >= limit) {
+        alerts.push({
+          id: "bp-due",
+          severity: isHypertensive ? "urgent" : "info",
+          title: isHypertensive ? "BP check overdue (hypertensive patient)" : "BP check due",
+          body: isHypertensive ? `Hourly BP required. Last ${formatAge(ms)} ago.` : `4-hourly BP in active labour. Last ${formatAge(ms)} ago.`,
+          citation: "NICE NG235 §1.4.5 [2023]",
+        });
+      }
+    } else {
+      alerts.push({ id: "bp-never", severity: isHypertensive ? "urgent" : "info", title: "BP not recorded", body: isHypertensive ? "Hourly BP required (hypertensive patient)." : "4-hourly BP required in active labour.", citation: "NICE NG235 §1.4.5 [2023]" });
+    }
+
+    if (obs.lastTemp) {
+      const ms = now - new Date(obs.lastTemp).getTime();
+      if (ms >= 4 * HOUR) {
+        alerts.push({ id: "temp-due", severity: "info", title: "Temperature check due", body: `4-hourly temperature in active labour. Last ${formatAge(ms)} ago.`, citation: "NICE NG235 §1.4.5 [2023]" });
+      }
+    } else {
+      alerts.push({ id: "temp-never", severity: "info", title: "Temperature not recorded", body: "4-hourly temperature required in active labour.", citation: "NICE NG235 §1.4.5 [2023]" });
+    }
+  }
+
+  // ─── Diabetic BGL ────────────────────────────────────────────────────
+  if (isDiabetic) {
+    if (obs.lastBGL) {
+      const ms = now - new Date(obs.lastBGL).getTime();
+      if (ms >= HOUR) {
+        alerts.push({
+          id: "bgl-due",
+          severity: "urgent",
+          title: `BGL check due (${formatAge(ms)} ago)`,
+          body: "Hourly blood glucose in active labour. Target 4.0–7.0 mmol/L. Start VRII if outside target range.",
+          citation: "GL983 §Intrapartum [2023]",
+        });
+      }
+    } else {
+      alerts.push({
+        id: "bgl-never",
+        severity: "urgent",
+        title: "BGL not recorded (diabetic patient)",
+        body: "Hourly blood glucose required. Target 4.0–7.0 mmol/L. Start VRII if outside target range.",
+        citation: "GL983 §Intrapartum [2023]",
+      });
+    }
+  }
+
+  // ─── Urine output ────────────────────────────────────────────────────
+  if (obs.urineOutput !== undefined && obs.urineOutput < 30) {
+    alerts.push({
+      id: "oliguria",
+      severity: "urgent",
+      title: "Oliguria",
+      body: `Urine output ${obs.urineOutput} mL/hr — below 30 mL/hr threshold. Escalate to medical team.`,
+      citation: "NICE NG235 §1.4.5 [2023]",
+    });
+  }
+
+  const order = { urgent: 0, warning: 1, info: 2 };
+  return alerts.sort((a, b) => order[a.severity] - order[b.severity]);
+}
+
+export function bedStatusColor(alerts) {
+  if (alerts.some(a => a.severity === "urgent")) return "urgent";
+  if (alerts.some(a => a.severity === "warning")) return "warning";
+  if (alerts.length > 0) return "info";
+  return "ok";
+}
