@@ -29,9 +29,8 @@ function parseGestWeeks(str) {
   return null;
 }
 
-export function computeAlerts(bed) {
+export function computeAlerts(bed, now = Date.now()) {
   const alerts = [];
-  const now = Date.now();
 
   const ves = bed.ves ?? [];
   const lastVE = ves.length > 0 ? ves[ves.length - 1] : null;
