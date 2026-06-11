@@ -40,26 +40,36 @@ const STAGE_SHORT = {
   "Active second stage":  "Active 2nd",
 };
 
+const PAR_SHORT = { "Para 0": "P0", "Para 1": "P1", "Para 2+": "P2+" };
+
 function bedSummary(bed) {
+  // Background: who is this patient
+  const bg = [];
+  if (bed.parity)   bg.push(PAR_SHORT[bed.parity] ?? bed.parity);
+  if (bed.gestation) bg.push(bed.gestation);
+  (bed.riskFlags ?? []).forEach(f => bg.push(f));
+
+  // Situation: what is happening
+  const sit = [];
   if (bed.delivery) {
     const d = bed.delivery;
-    const parts = [d.mode, fmtTime(d.time)];
-    if (d.ebl != null) parts.push(`EBL ${d.ebl} mL`);
-    if (d.ebl >= 1000) parts.push("⚠ Major PPH");
-    return parts.join(" · ");
-  }
-  const lastVE = bed.ves?.[bed.ves.length - 1];
-  const parts = [];
-  if (bed.labourStage) parts.push(STAGE_SHORT[bed.labourStage] ?? bed.labourStage);
-  if (lastVE) {
-    const ago = fmtAge(Date.now() - new Date(lastVE.time).getTime());
-    parts.push(`${lastVE.dilation}cm ${ago} ago`);
+    sit.push(d.mode, fmtTime(d.time));
+    if (d.ebl != null) sit.push(`EBL ${d.ebl} mL`);
   } else {
-    parts.push("No VE");
+    if (bed.labourStage) sit.push(STAGE_SHORT[bed.labourStage] ?? bed.labourStage);
+    const lastVE = bed.ves?.[bed.ves.length - 1];
+    if (lastVE) {
+      const ago = fmtAge(Date.now() - new Date(lastVE.time).getTime());
+      sit.push(`${lastVE.dilation}cm ${ago} ago`);
+    } else {
+      sit.push("No VE");
+    }
+    if (bed.analgesia && bed.analgesia !== "None") sit.push(bed.analgesia);
   }
-  if (bed.analgesia && bed.analgesia !== "None") parts.push(bed.analgesia);
-  (bed.riskFlags ?? []).slice(0, 2).forEach(f => parts.push(f));
-  return parts.join(" · ");
+
+  const bgStr  = bg.join(" · ");
+  const sitStr = sit.join(" · ");
+  return bgStr && sitStr ? `${bgStr} — ${sitStr}` : bgStr || sitStr;
 }
 
 // ─── Status colours ───────────────────────────────────────────────────────
@@ -1534,19 +1544,15 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
                 </button>
 
                 {/* Quick actions bar */}
-                <div className="border-t border-black/5 px-4 py-2.5 flex items-center justify-between">
-                  <p className="text-xs text-gray-400">
-                    {bed.parity} · {bed.gestation}
-                    {!isDelivered && bed.analgesia !== "None" ? ` · ${bed.analgesia}` : ""}
-                  </p>
-                  {!isDelivered && (
+                {!isDelivered && (
+                  <div className="border-t border-black/5 px-4 py-2.5 flex items-center justify-end">
                     <button
                       onClick={e => { e.stopPropagation(); onQuickVE(bed.id); }}
                       className="px-4 py-1.5 rounded-full bg-gray-900 text-white text-xs font-bold active:scale-95 transition-all">
                       + VE
                     </button>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             );
           })}
