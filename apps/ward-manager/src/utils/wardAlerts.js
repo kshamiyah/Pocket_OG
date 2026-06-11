@@ -96,6 +96,45 @@ export function computeAlerts(bed, now = Date.now()) {
     });
   }
 
+  // ─── Active first stage duration (NICE NG235 §1.5.1) ───────────────────
+  if (bed.activeFirstStageStartTime && bed.labourStage === "Active first stage") {
+    const limit      = isNullip ? 12 * HOUR : 10 * HOUR;
+    const limitLabel = isNullip ? "12 hours" : "10 hours";
+    const ms = now - new Date(bed.activeFirstStageStartTime).getTime();
+    if (ms >= limit) {
+      alerts.push({
+        id: "active-phase-limit",
+        severity: "urgent",
+        title: `Active first stage > ${limitLabel} (${formatAge(ms)})`,
+        body: `Active labour has exceeded ${limitLabel} for ${isNullip ? "nulliparous" : "multiparous"} woman. Senior/consultant review required. Assess for CPD and consider caesarean section if no progress despite augmentation.`,
+        citation: "NICE NG235 §1.5.1 [2023]",
+      });
+    } else if (ms >= limit - HOUR) {
+      alerts.push({
+        id: "active-phase-limit-soon",
+        severity: "warning",
+        title: `Active first stage approaching ${limitLabel} limit`,
+        body: `${formatAge(limit - ms)} remaining. Review progress and plan escalation if no change.`,
+        citation: "NICE NG235 §1.5.1 [2023]",
+      });
+    }
+  }
+
+  // ─── ARM reassessment at 2h (NICE NG235 §1.5.3–1.5.4) ──────────────────
+  if (bed.armTime && bed.labourStage === "Active first stage") {
+    const ms = now - new Date(bed.armTime).getTime();
+    const veAfterARM = ves.filter(ve => new Date(ve.time) > new Date(bed.armTime));
+    if (ms >= 2 * HOUR && veAfterARM.length === 0) {
+      alerts.push({
+        id: "arm-reassess",
+        severity: "warning",
+        title: `Reassess 2h after ARM (${formatAge(ms)} ago)`,
+        body: "No VE recorded since ARM. If contractions still inadequate at 2h post-ARM, offer oxytocin augmentation.",
+        citation: "NICE NG235 §1.5.3–1.5.4 [2023]",
+      });
+    }
+  }
+
   // ─── VE overdue (active first stage) ────────────────────────────────
   if (bed.labourStage === "Active first stage") {
     if (!lastVE) {

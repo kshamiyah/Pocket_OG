@@ -609,6 +609,76 @@ describe("Oliguria", () => {
   })
 })
 
+// ─── Active first stage duration (NICE NG235 §1.5.1) ─────────────────────────
+
+describe("Active first stage duration", () => {
+  const activePhaseBed = (parity, hoursIn) => activeBed({
+    parity,
+    activeFirstStageStartTime: t(hoursIn * HOUR),
+  })
+
+  // Nulliparous: 12h limit
+  it("nullip — no alert at 10h 59m", () => {
+    expect(hasNot(computeAlerts(activePhaseBed("Para 0", 10.98), NOW), "active-phase-limit")).toBe(true)
+  })
+  it("nullip — fires warning at 11h (1h before limit)", () => {
+    expect(has(computeAlerts(activePhaseBed("Para 0", 11), NOW), "active-phase-limit-soon")).toBe(true)
+  })
+  it("nullip — fires urgent at exactly 12h", () => {
+    expect(has(computeAlerts(activePhaseBed("Para 0", 12), NOW), "active-phase-limit")).toBe(true)
+  })
+  it("nullip — limit alert is urgent not warning", () => {
+    const alert = computeAlerts(activePhaseBed("Para 0", 13), NOW).find(a => a.id === "active-phase-limit")
+    expect(alert?.severity).toBe("urgent")
+  })
+
+  // Multiparous: 10h limit
+  it("multip — no alert at 8h 59m", () => {
+    expect(hasNot(computeAlerts(activePhaseBed("Para 1", 8.98), NOW), "active-phase-limit")).toBe(true)
+  })
+  it("multip — fires warning at 9h (1h before limit)", () => {
+    expect(has(computeAlerts(activePhaseBed("Para 1", 9), NOW), "active-phase-limit-soon")).toBe(true)
+  })
+  it("multip — fires urgent at exactly 10h", () => {
+    expect(has(computeAlerts(activePhaseBed("Para 1", 10), NOW), "active-phase-limit")).toBe(true)
+  })
+
+  it("no alert when activeFirstStageStartTime not set", () => {
+    const bed = activeBed({ activeFirstStageStartTime: null })
+    expect(hasNot(computeAlerts(bed, NOW), "active-phase-limit")).toBe(true)
+  })
+})
+
+// ─── ARM reassessment at 2h (NICE NG235 §1.5.3–1.5.4) ────────────────────────
+
+describe("ARM reassessment", () => {
+  const armBed = (hoursAgoARM, vesAfterARM = []) => activeBed({
+    armTime: t(hoursAgoARM * HOUR),
+    ves: [
+      { time: t(hoursAgoARM * HOUR + 30 * MIN), dilation: 5 }, // VE before ARM
+      ...vesAfterARM,
+    ],
+  })
+
+  it("no alert at 1h 59m after ARM with no subsequent VE", () => {
+    expect(hasNot(computeAlerts(armBed(1.98), NOW), "arm-reassess")).toBe(true)
+  })
+
+  it("fires warning at exactly 2h after ARM with no subsequent VE", () => {
+    expect(has(computeAlerts(armBed(2), NOW), "arm-reassess")).toBe(true)
+  })
+
+  it("no alert at 3h after ARM if VE has been done since ARM", () => {
+    const veAfter = [{ time: t(1 * HOUR), dilation: 6 }] // 1h ago, after ARM which was 3h ago
+    expect(hasNot(computeAlerts(armBed(3, veAfter), NOW), "arm-reassess")).toBe(true)
+  })
+
+  it("no alert when no ARM recorded", () => {
+    const bed = activeBed({ armTime: null })
+    expect(hasNot(computeAlerts(bed, NOW), "arm-reassess")).toBe(true)
+  })
+})
+
 // ─── Alert severity ordering ──────────────────────────────────────────────────
 
 describe("Alert ordering", () => {

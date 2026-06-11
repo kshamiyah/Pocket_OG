@@ -625,8 +625,11 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
         modeOfOnset: mode,
         inductionMethod: mode === "Induced" ? indMethod : null,
         analgesia, riskFlags: flags, labourStage: stage,
+        activeFirstStageStartTime: stage === "Active first stage"
+          ? (admTime ? timeToISO(admTime) : nowISO()) : null,
         passiveStartTime: stage === "Passive second stage" ? nowISO() : null,
         pushingStartTime: stage === "Active second stage"  ? nowISO() : null,
+        armTime: null, oxytocinStartTime: null,
         ves: [], oxytocinLog: [], observations: {},
       });
     }
@@ -1016,8 +1019,9 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
 
   const setStage = s => {
     const u = { labourStage: s };
-    if (s === "Passive second stage" && !bed.passiveStartTime) u.passiveStartTime = nowISO();
-    if (s === "Active second stage"  && !bed.pushingStartTime)  u.pushingStartTime  = nowISO();
+    if (s === "Active first stage"   && !bed.activeFirstStageStartTime) u.activeFirstStageStartTime = nowISO();
+    if (s === "Passive second stage" && !bed.passiveStartTime)          u.passiveStartTime          = nowISO();
+    if (s === "Active second stage"  && !bed.pushingStartTime)          u.pushingStartTime          = nowISO();
     onUpdate(u);
   };
 
@@ -1602,13 +1606,17 @@ export default function WardPage({ shift, onEndShift }) {
 
   const saveVE = ve => {
     if (!sheetBed) return;
-    updateBed(sheetBedId, { ves: [...sheetBed.ves, ve] });
+    const updates = { ves: [...sheetBed.ves, ve] };
+    if (ve.membranes === "AROM" && !sheetBed.armTime) updates.armTime = ve.membranesTime;
+    updateBed(sheetBedId, updates);
     closeSheet();
   };
 
   const saveOxy = entry => {
     if (!sheetBed) return;
-    updateBed(sheetBedId, { oxytocinLog: [...sheetBed.oxytocinLog, entry] });
+    const updates = { oxytocinLog: [...sheetBed.oxytocinLog, entry] };
+    if (sheetBed.oxytocinLog.length === 0) updates.oxytocinStartTime = entry.startTime;
+    updateBed(sheetBedId, updates);
     closeSheet();
   };
 
