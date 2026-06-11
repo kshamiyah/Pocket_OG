@@ -8,7 +8,6 @@ import FlowchartPlayer from "./components/FlowchartPlayer";
 import FeedbackButton from "./components/FeedbackButton";
 import ConsentPage from "./components/ConsentPage";
 import CalculatorPage from "./components/CalculatorPage";
-import WardPage from "./components/WardPage";
 
 const FILTER_OPTIONS = [
   { value: "ALL",        label: "All guidelines",      pill: "All",           filterFn: null,                                                    active: "bg-gray-900 text-white" },
@@ -414,9 +413,6 @@ export default function App() {
       {/* Calculator tab */}
       {activeTab === "calculator" && <CalculatorPage />}
 
-      {/* Ward tab */}
-      {activeTab === "ward" && <WardPage />}
-
       {/* Guidelines tab */}
       {activeTab === "guidelines" && (
         <div className="min-h-screen pb-24">
@@ -535,17 +531,6 @@ export default function App() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m-6 5h6m-6 5h6M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" />
             </svg>
             <span className="text-[10px] font-medium">Calc</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("ward")}
-            className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
-              activeTab === "ward" ? "text-black" : "text-gray-400"
-            }`}
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            <span className="text-[10px] font-medium">Ward</span>
           </button>
         </div>
       </div>
