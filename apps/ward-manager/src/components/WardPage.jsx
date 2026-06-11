@@ -1780,12 +1780,83 @@ function formatCountdown(ms) {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
+// ─── Tasks view ───────────────────────────────────────────────────────────────
+
+const TASK_LEVELS = [
+  { key: "urgent",  label: "Urgent",  dotCls: "bg-red-500",   barCls: "bg-red-400",   hdrCls: "text-red-600",   bdgCls: "bg-red-500 text-white",   divCls: "border-red-100",  cardCls: "border-red-100 bg-red-50"   },
+  { key: "warning", label: "Warning", dotCls: "bg-amber-400", barCls: "bg-amber-400", hdrCls: "text-amber-600", bdgCls: "bg-amber-400 text-white", divCls: "border-amber-100", cardCls: "border-amber-100 bg-amber-50" },
+  { key: "info",    label: "Routine", dotCls: "bg-blue-400",  barCls: "bg-blue-300",  hdrCls: "text-blue-500",  bdgCls: "bg-blue-100 text-blue-600", divCls: "border-blue-100",  cardCls: "border-blue-100 bg-blue-50"  },
+];
+
+function TasksView({ beds, alertsMap, onSelect }) {
+  const allTasks = Object.entries(alertsMap).flatMap(([bedId, alerts]) => {
+    const bed = beds[bedId];
+    if (!bed || bed.delivery) return [];
+    return alerts.map(a => ({ ...a, bed }));
+  });
+
+  if (allTasks.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 px-8 text-center">
+        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+          <svg className="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <p className="text-gray-900 font-bold text-lg">All clear</p>
+        <p className="text-gray-400 text-sm mt-1">No pending tasks across the ward</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-5 pb-8 pt-1 space-y-5">
+      {TASK_LEVELS.map(lv => {
+        const tasks = allTasks.filter(t => t.severity === lv.key);
+        if (!tasks.length) return null;
+        return (
+          <div key={lv.key}>
+            <div className="flex items-center gap-2 mb-2 px-1">
+              <span className={`text-[11px] font-black uppercase tracking-widest ${lv.hdrCls}`}>{lv.label}</span>
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${lv.bdgCls}`}>{tasks.length}</span>
+            </div>
+            <div className={`rounded-2xl border ${lv.cardCls} overflow-hidden`}>
+              {tasks.map((task, i) => (
+                <button key={`${task.bed.id}-${task.id}`}
+                  onClick={() => onSelect(task.bed.id)}
+                  className={`w-full flex items-stretch text-left transition-colors active:bg-black/5 ${i > 0 ? `border-t ${lv.divCls}` : ""}`}>
+                  <div className={`w-1 shrink-0 ${lv.barCls}`} />
+                  <div className="flex-1 px-4 py-3 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                      <span className="text-[10px] font-bold bg-white border border-gray-200 text-gray-600 rounded-md px-1.5 py-0.5 shrink-0">
+                        Bed {task.bed.bedNumber}
+                      </span>
+                      <p className="text-sm font-bold text-gray-900 leading-snug">{task.title}</p>
+                    </div>
+                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mt-0.5">{task.citation}</p>
+                  </div>
+                  <div className="flex items-center pr-4 pl-2 shrink-0">
+                    <svg className="w-3.5 h-3.5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, onQuickCTG, onHandover, shift, onEndShift }) {
   const bedList      = Object.values(beds).sort((a,b) => a.bedNumber.localeCompare(b.bedNumber, undefined, {numeric:true}));
   const totalUrgent  = Object.values(alertsMap).flat().filter(a => a.severity === "urgent").length;
   const now          = Date.now();
   const msLeft       = useCountdown(shift?.shiftEnd);
   const nearEnd      = msLeft != null && msLeft > 0 && msLeft <= 30 * 60 * 1000;
+  const [boardTab, setBoardTab] = useState("board");
   const overTime     = msLeft != null && msLeft <= 0;
 
   return (
@@ -1827,7 +1898,7 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
             <p className="text-xs text-gray-400 min-w-0 truncate">
               {bedList.length === 0
                 ? "No patients"
-                : `${bedList.length} patient${bedList.length !== 1 ? "s" : ""}${totalUrgent > 0 ? ` · ${totalUrgent} urgent` : ""}`}
+                : `${bedList.length} patient${bedList.length !== 1 ? "s" : ""}`}
             </p>
             <div className="flex gap-2 shrink-0">
               {bedList.length > 0 && (
@@ -1845,6 +1916,40 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
             </div>
           </div>
         </div>
+
+        {/* Board / Tasks tab bar */}
+        {bedList.length > 0 && (
+          <div className="px-5 pb-3">
+            <div className="flex bg-gray-100 dark:bg-gray-900 rounded-xl p-1 gap-1">
+              {[
+                { key: "board", label: "Board" },
+                { key: "tasks", label: "Tasks" },
+              ].map(tab => {
+                const isActive = boardTab === tab.key;
+                return (
+                  <button key={tab.key} onClick={() => setBoardTab(tab.key)}
+                    className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                      isActive ? "bg-white shadow-sm text-gray-900" : "text-gray-500"
+                    }`}>
+                    {tab.label}
+                    {tab.key === "tasks" && totalUrgent > 0 && (
+                      <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none ${
+                        isActive ? "bg-red-500 text-white" : "bg-red-100 text-red-500"
+                      }`}>
+                        {totalUrgent}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {boardTab === "tasks" ? (
+          <TasksView beds={beds} alertsMap={alertsMap} onSelect={onSelect} />
+        ) : (
+        <>
 
         {bedList.length === 0 && (
           <div className="px-5 mt-16 text-center">
@@ -1923,6 +2028,9 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
           <p className="text-[10px] text-gray-300 text-center mt-6 px-5 pb-4 leading-relaxed">
             NICE NG235 (Sept 2023) · GL983 · GL787 · Not a substitute for clinical judgement
           </p>
+        )}
+
+        </>
         )}
       </div>
     </div>
