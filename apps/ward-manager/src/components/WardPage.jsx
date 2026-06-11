@@ -294,32 +294,85 @@ function ChipGroup({ options, selected, onChange }) {
   );
 }
 
-/** Time field — big "Now" default, small "Edit" escape hatch */
+/** Time field — Now default + quick offset pills + ago confirmation */
 function NowField({ label, value, onChange }) {
-  const [editing, setEditing] = useState(false);
-  const markNow = () => { onChange(timeInputNow()); setEditing(false); };
+  const [modified, setModified]     = useState(false);
+  const [showCustom, setShowCustom] = useState(false);
+
+  // How long ago is the currently selected time?
+  const agoLabel = (() => {
+    if (!modified || !value) return null;
+    const now = new Date();
+    const [h, m] = value.split(":").map(Number);
+    const sel = new Date();
+    sel.setHours(h, m, 0, 0);
+    const mins = Math.round((now - sel) / 60000);
+    if (mins <= 0) return null;
+    if (mins < 60) return `${mins}m ago`;
+    const hh = Math.floor(mins / 60), mm = mins % 60;
+    return mm > 0 ? `${hh}h ${mm}m ago` : `${hh}h ago`;
+  })();
+
+  const setOffset = mins => {
+    const d = new Date(Date.now() - mins * 60000);
+    onChange(`${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`);
+    setModified(true);
+    setShowCustom(false);
+  };
+
+  const setNow = () => {
+    onChange(timeInputNow());
+    setModified(false);
+    setShowCustom(false);
+  };
+
   return (
-    <div>
-      {label && <p className="text-xs font-semibold text-gray-500 mb-2">{label}</p>}
-      {editing ? (
-        <div className="flex gap-2">
-          <input type="time" autoFocus defaultValue={value || timeInputNow()}
-            onChange={e => onChange(e.target.value)}
-            className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-gray-800" />
-          <button onClick={() => setEditing(false)}
-            className="px-4 py-3 rounded-xl bg-gray-900 text-white text-sm font-semibold">Done</button>
-        </div>
-      ) : (
-        <div className="flex gap-2">
-          <button onClick={markNow}
+    <div className="space-y-2">
+      {label && <p className="text-xs font-semibold text-gray-500">{label}</p>}
+
+      {/* Main time row */}
+      <div className="flex gap-2">
+        {!modified ? (
+          <button onClick={setNow}
             className="flex-1 py-3.5 rounded-xl bg-gray-900 text-white text-sm font-bold active:scale-95 transition-all">
             Now &nbsp;·&nbsp; {timeInputNow()}
           </button>
-          <button onClick={() => setEditing(true)}
-            className="px-4 py-3.5 rounded-xl border border-gray-200 text-sm text-gray-500">
-            {value && !editing ? value : "Edit"}
+        ) : (
+          <>
+            <div className="flex-1 py-3.5 px-4 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-between">
+              <span className="text-sm font-bold text-gray-900">{value}</span>
+              {agoLabel && <span className="text-xs font-semibold text-gray-500">{agoLabel}</span>}
+            </div>
+            <button onClick={setNow}
+              className="px-4 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-600 active:scale-95 transition-all">
+              Now
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Quick offset pills */}
+      <div className="flex gap-1.5">
+        {[15, 30, 60, 120, 180, 240].map(mins => (
+          <button key={mins} onClick={() => setOffset(mins)}
+            className="flex-1 py-3 rounded-xl bg-gray-100 text-xs font-bold text-gray-600 active:scale-95 transition-all">
+            {mins < 60 ? `−${mins}m` : `−${mins / 60}h`}
           </button>
+        ))}
+      </div>
+
+      {/* Custom time entry */}
+      {showCustom ? (
+        <div className="flex gap-2">
+          <input type="time" autoFocus defaultValue={value || timeInputNow()}
+            onChange={e => { onChange(e.target.value); setModified(true); }}
+            className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-gray-800" />
+          <button onClick={() => setShowCustom(false)}
+            className="px-4 py-3 rounded-xl bg-gray-900 text-white text-sm font-semibold">Done</button>
         </div>
+      ) : (
+        <button onClick={() => setShowCustom(true)}
+          className="text-[11px] text-gray-400 ml-0.5">Custom time…</button>
       )}
     </div>
   );
