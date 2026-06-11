@@ -1211,7 +1211,7 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
 
 // ─── Handover generator ───────────────────────────────────────────────────
 
-function generateHandover(beds, alertsMap) {
+function generateHandover(beds, alertsMap, shift) {
   const now = new Date();
   const dd   = String(now.getDate()).padStart(2, "0");
   const mm   = String(now.getMonth() + 1).padStart(2, "0");
@@ -1243,7 +1243,10 @@ function generateHandover(beds, alertsMap) {
   };
 
   const DIV = "─".repeat(38);
-  const lines = [`LABOUR WARD HANDOVER`, `${dd}/${mm}/${yyyy}  ${hhmm}`, ""];
+  const heading = shift
+    ? `DR. ${shift.doctorName.toUpperCase()} — ${shift.shiftType.toUpperCase()} SHIFT`
+    : `LABOUR WARD HANDOVER`;
+  const lines = [heading, `${dd}/${mm}/${yyyy}  ${hhmm}`, ""];
 
   if (bedList.length === 0) {
     lines.push("No patients on board.");
@@ -1313,13 +1316,20 @@ function generateHandover(beds, alertsMap) {
     });
   }
 
+  if (shift?.shiftStart && shift?.shiftEnd) {
+    const start = new Date(shift.shiftStart);
+    const end   = new Date(shift.shiftEnd);
+    const fmtT  = d => `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+    lines.push(DIV);
+    lines.push(`Shift: ${fmtT(start)} → ${fmtT(end)}`);
+  }
   lines.push(DIV);
-  lines.push("Pocket O&G · Not a substitute for clinical judgement");
+  lines.push("PocketSuite · Not a substitute for clinical judgement");
   return lines.join("\n");
 }
 
-function HandoverSheet({ beds, alertsMap }) {
-  const text = useMemo(() => generateHandover(beds, alertsMap), [beds, alertsMap]);
+function HandoverSheet({ beds, alertsMap, shift }) {
+  const text = useMemo(() => generateHandover(beds, alertsMap, shift), [beds, alertsMap, shift]);
   const [copied, setCopied] = useState(false);
 
   const copy = () => {
@@ -1357,15 +1367,66 @@ function HandoverSheet({ beds, alertsMap }) {
 
 // ─── Board view ───────────────────────────────────────────────────────────
 
-function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, onHandover }) {
+function useCountdown(shiftEnd) {
+  const [msLeft, setMsLeft] = useState(() => shiftEnd ? new Date(shiftEnd) - Date.now() : null);
+  useEffect(() => {
+    if (!shiftEnd) return;
+    const id = setInterval(() => setMsLeft(new Date(shiftEnd) - Date.now()), 30000);
+    return () => clearInterval(id);
+  }, [shiftEnd]);
+  return msLeft;
+}
+
+function formatCountdown(ms) {
+  if (ms == null || ms <= 0) return "0m";
+  const totalMin = Math.floor(ms / 60000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, onHandover, shift, onEndShift }) {
   const bedList      = Object.values(beds).sort((a,b) => a.bedNumber.localeCompare(b.bedNumber, undefined, {numeric:true}));
   const totalUrgent  = Object.values(alertsMap).flat().filter(a => a.severity === "urgent").length;
   const now          = Date.now();
+  const msLeft       = useCountdown(shift?.shiftEnd);
+  const nearEnd      = msLeft != null && msLeft > 0 && msLeft <= 30 * 60 * 1000;
+  const overTime     = msLeft != null && msLeft <= 0;
 
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <div className="px-5 pb-4 flex items-center justify-between" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}>
+        {/* Shift info row */}
+        {shift && (
+          <div className="px-5 flex items-center justify-between gap-2"
+            style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}>
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-xs font-semibold text-gray-500 truncate">
+                Dr. {shift.doctorName} · {shift.shiftType === "night" ? "Night" : "Day"}
+              </span>
+              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                overTime ? "bg-red-100 text-red-600" : nearEnd ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-500"
+              }`}>
+                {overTime ? "Overtime" : formatCountdown(msLeft)}
+              </span>
+            </div>
+            <button onClick={() => { if (window.confirm("End your shift? This will log you out of the board.")) onEndShift(); }}
+              className="text-xs font-semibold text-gray-400 px-3 py-1.5 rounded-xl border border-gray-200 active:scale-95 transition-all shrink-0">
+              End shift
+            </button>
+          </div>
+        )}
+
+        {/* 30-min warning banner */}
+        {nearEnd && (
+          <div className="mx-5 mt-3 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center gap-2">
+            <span className="text-amber-600 text-sm">⏰</span>
+            <p className="text-amber-800 text-xs font-semibold">Handover in {formatCountdown(msLeft)} — prepare handover</p>
+            <button onClick={onHandover} className="ml-auto text-xs font-bold text-amber-700 underline">Open</button>
+          </div>
+        )}
+
+        <div className="px-5 pb-4 flex items-center justify-between" style={{ paddingTop: shift ? '0.75rem' : 'calc(env(safe-area-inset-top) + 1rem)' }}>
           <div>
             <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Labour Ward</h2>
             <p className="text-sm text-gray-400 mt-0.5">
@@ -1504,7 +1565,7 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
 
 // ─── Root ─────────────────────────────────────────────────────────────────
 
-export default function WardPage() {
+export default function WardPage({ shift, onEndShift }) {
   const [beds, setBeds]            = useState(loadBeds);
   const [selectedId, setSelId]     = useState(null);
   const [view, setView]            = useState("board"); // board | detail | wizard
@@ -1583,6 +1644,8 @@ export default function WardPage() {
           onClear={() => setBeds({})}
           onQuickVE={id => openSheet("ve", id)}
           onHandover={() => setSheet("handover")}
+          shift={shift}
+          onEndShift={onEndShift}
         />
       )}
 
@@ -1622,7 +1685,7 @@ export default function WardPage() {
       <BottomSheet open={sheet === "handover"} onClose={closeSheet}
         title="Ward Handover"
         sub={`${Object.keys(beds).length} patient${Object.keys(beds).length !== 1 ? "s" : ""}`}>
-        <HandoverSheet beds={beds} alertsMap={alertsMap} />
+        <HandoverSheet beds={beds} alertsMap={alertsMap} shift={shift} />
       </BottomSheet>
     </div>
   );
