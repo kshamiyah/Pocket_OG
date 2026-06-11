@@ -27,15 +27,15 @@ export default function LandingScreen({ onBegin }) {
   const dateStr = `${DAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center px-6"
+    <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center px-6"
       style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}>
 
       {/* Clock */}
       <div className="text-center mb-14">
-        <p className="font-mono text-white leading-none select-none"
+        <p className="font-mono text-gray-900 dark:text-white leading-none select-none"
           style={{ fontSize: "clamp(80px, 22vw, 128px)", fontWeight: 700, letterSpacing: "-0.02em" }}>
           {hh}:{mm}
-          <span className="text-gray-700">:{ss}</span>
+          <span className="text-gray-300 dark:text-gray-700">:{ss}</span>
         </p>
         <p className="text-gray-500 text-lg mt-3 font-medium">{dateStr}</p>
       </div>
@@ -43,7 +43,7 @@ export default function LandingScreen({ onBegin }) {
       {/* Patients hint */}
       {count > 0 && (
         <div className="mb-8">
-          <span className="px-4 py-2 rounded-full bg-gray-900 border border-gray-800 text-gray-400 text-sm font-medium">
+          <span className="px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400 text-sm font-medium">
             {count} patient{count !== 1 ? "s" : ""} on board
           </span>
         </div>
@@ -51,11 +51,11 @@ export default function LandingScreen({ onBegin }) {
 
       {/* CTA */}
       <button onClick={onBegin}
-        className="w-full max-w-sm py-5 rounded-3xl bg-white text-gray-950 text-lg font-bold tracking-tight active:scale-95 transition-all shadow-xl">
+        className="w-full max-w-sm py-5 rounded-3xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-lg font-bold tracking-tight active:scale-95 transition-all shadow-xl">
         Begin Shift
       </button>
 
-      <p className="text-gray-700 text-[11px] font-semibold tracking-widest uppercase mt-10">
+      <p className="text-gray-400 dark:text-gray-700 text-[11px] font-semibold tracking-widest uppercase mt-10">
         PocketSuite · Labour Ward
       </p>
     </div>

@@ -33,6 +33,35 @@ function fmtAge(ms) {
   return rm > 0 ? `${h}h ${rm}m` : `${h}h`;
 }
 
+const STAGE_SHORT = {
+  "Latent":               "Latent",
+  "Active first stage":   "Active 1st",
+  "Passive second stage": "Passive 2nd",
+  "Active second stage":  "Active 2nd",
+};
+
+function bedSummary(bed) {
+  if (bed.delivery) {
+    const d = bed.delivery;
+    const parts = [d.mode, fmtTime(d.time)];
+    if (d.ebl != null) parts.push(`EBL ${d.ebl} mL`);
+    if (d.ebl >= 1000) parts.push("⚠ Major PPH");
+    return parts.join(" · ");
+  }
+  const lastVE = bed.ves?.[bed.ves.length - 1];
+  const parts = [];
+  if (bed.labourStage) parts.push(STAGE_SHORT[bed.labourStage] ?? bed.labourStage);
+  if (lastVE) {
+    const ago = fmtAge(Date.now() - new Date(lastVE.time).getTime());
+    parts.push(`${lastVE.dilation}cm ${ago} ago`);
+  } else {
+    parts.push("No VE");
+  }
+  if (bed.analgesia && bed.analgesia !== "None") parts.push(bed.analgesia);
+  (bed.riskFlags ?? []).slice(0, 2).forEach(f => parts.push(f));
+  return parts.join(" · ");
+}
+
 // ─── Status colours ───────────────────────────────────────────────────────
 
 const STATUS = {
@@ -1483,7 +1512,7 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
               <div key={bed.id} className={`rounded-2xl border ${cardCls} overflow-hidden`}>
                 {/* Main tap area → detail */}
                 <button onClick={() => onSelect(bed.id)} className="w-full p-4 text-left">
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="text-xl font-bold text-gray-900">Bed {bed.bedNumber}</span>
                       {isDelivered
@@ -1500,38 +1529,8 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
                       </span>
                     )}
                   </div>
-
-                  {isDelivered ? (
-                    <div className="mt-1">
-                      <p className="text-sm text-gray-600">
-                        {bed.delivery.mode}
-                        {bed.delivery.ebl != null ? ` · EBL ${bed.delivery.ebl} mL` : ""}
-                        {" · "}{fmtTime(bed.delivery.time)}
-                      </p>
-                      {bed.delivery.ebl >= 1000 && (
-                        <p className="text-xs font-bold text-red-600 mt-0.5">Major PPH</p>
-                      )}
-                      {bed.delivery.notes && (
-                        <p className="text-xs text-gray-400 mt-0.5 italic truncate">{bed.delivery.notes}</p>
-                      )}
-                    </div>
-                  ) : (
-                    <>
-                      <p className="text-sm text-gray-500 mt-1">{bed.parity} · {bed.gestation} · {bed.labourStage}</p>
-                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                        {lastVE && <span className="text-sm font-semibold text-gray-800">{lastVE.dilation} cm</span>}
-                        {msSinceVE !== null && (
-                          <span className={`text-xs ${msSinceVE > 3.5 * 3600000 ? "font-bold text-red-500" : "text-gray-400"}`}>
-                            {fmtAge(msSinceVE)} ago
-                          </span>
-                        )}
-                        {bed.riskFlags?.map(f => (
-                          <span key={f} className="text-[10px] font-semibold text-gray-500 bg-white/80 border border-gray-200 px-1.5 py-0.5 rounded-full">{f}</span>
-                        ))}
-                      </div>
-                      <ObsDots bed={bed} now={now} />
-                    </>
-                  )}
+                  <p className="text-sm text-gray-500 mt-1.5 truncate">{bedSummary(bed)}</p>
+                  {!isDelivered && <ObsDots bed={bed} now={now} />}
                 </button>
 
                 {/* Quick actions bar */}

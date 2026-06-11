@@ -60,13 +60,13 @@ export default function ShiftSetup({ onComplete }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col px-6"
+    <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col px-6"
       style={{ paddingTop: "calc(env(safe-area-inset-top) + 3rem)", paddingBottom: "calc(env(safe-area-inset-bottom) + 2rem)" }}>
 
       {/* Progress dots */}
       <div className="flex gap-1.5 mb-12">
         {[1, 2].map(p => (
-          <div key={p} className={`h-1 rounded-full transition-all duration-300 ${p === page ? "w-6 bg-white" : "w-1.5 bg-gray-700"}`} />
+          <div key={p} className={`h-1 rounded-full transition-all duration-300 ${p === page ? "w-6 bg-gray-900 dark:bg-white" : "w-1.5 bg-gray-300 dark:bg-gray-700"}`} />
         ))}
       </div>
 
@@ -74,7 +74,7 @@ export default function ShiftSetup({ onComplete }) {
       {page === 1 && (
         <div className="flex-1 flex flex-col">
           <p className="text-gray-500 text-base mb-2">Good {greeting}, Doctor.</p>
-          <h1 className="text-white text-3xl font-bold leading-tight mb-10">
+          <h1 className="text-gray-900 dark:text-white text-3xl font-bold leading-tight mb-10">
             What should we<br />call you?
           </h1>
 
@@ -89,13 +89,13 @@ export default function ShiftSetup({ onComplete }) {
               onChange={e => setName(e.target.value)}
               onKeyDown={e => e.key === "Enter" && setPage(2)}
               placeholder="Your name"
-              className="w-full bg-gray-900 border border-gray-800 text-white placeholder-gray-600 rounded-2xl pl-12 pr-4 py-4 text-lg font-medium focus:outline-none focus:border-gray-600 transition-colors"
+              className="w-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 rounded-2xl pl-12 pr-4 py-4 text-lg font-medium focus:outline-none focus:border-gray-400 dark:focus:border-gray-600 transition-colors"
             />
           </div>
 
           <div className="mt-auto pt-8">
             <button onClick={() => setPage(2)}
-              className="w-full py-4 rounded-2xl bg-white text-gray-950 text-base font-bold active:scale-95 transition-all">
+              className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all">
               Continue →
             </button>
           </div>
@@ -105,7 +105,7 @@ export default function ShiftSetup({ onComplete }) {
       {/* ── Page 2: Shift ──────────────────────────────── */}
       {page === 2 && (
         <div className="flex-1 flex flex-col">
-          <h1 className="text-white text-3xl font-bold leading-tight mb-1">Your shift</h1>
+          <h1 className="text-gray-900 dark:text-white text-3xl font-bold leading-tight mb-1">Your shift</h1>
           <p className="text-gray-500 text-base mb-8">Dr. {name.trim() || "Doctor"}</p>
 
           {/* Day / Night */}
@@ -119,8 +119,8 @@ export default function ShiftSetup({ onComplete }) {
                 onClick={() => { setShiftType(key); setDurationH(key === "night" ? 12 : 8); setUseCustom(false); }}
                 className={`flex-1 py-3.5 rounded-xl text-sm font-bold transition-colors ${
                   shiftType === key
-                    ? "bg-white text-gray-950"
-                    : "bg-gray-900 text-gray-500 border border-gray-800"
+                    ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950"
+                    : "bg-gray-100 dark:bg-gray-900 text-gray-500 border border-gray-200 dark:border-gray-800"
                 }`}>
                 {icon} {label}
               </button>
@@ -135,8 +135,8 @@ export default function ShiftSetup({ onComplete }) {
                 onClick={() => { setDurationH(h); setUseCustom(false); }}
                 className={`flex-1 py-3.5 rounded-xl text-sm font-bold transition-colors ${
                   !useCustom && durationH === h
-                    ? "bg-white text-gray-950"
-                    : "bg-gray-900 text-gray-500 border border-gray-800"
+                    ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950"
+                    : "bg-gray-100 dark:bg-gray-900 text-gray-500 border border-gray-200 dark:border-gray-800"
                 }`}>
                 {h}h
               </button>
@@ -148,31 +148,31 @@ export default function ShiftSetup({ onComplete }) {
             <button onClick={() => { setUseCustom(true); }}
               className={`px-4 py-3 rounded-xl text-sm font-bold transition-colors ${
                 useCustom
-                  ? "bg-white text-gray-950"
-                  : "bg-gray-900 text-gray-500 border border-gray-800"
+                  ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950"
+                  : "bg-gray-100 dark:bg-gray-900 text-gray-500 border border-gray-200 dark:border-gray-800"
               }`}>
               Custom
             </button>
             {useCustom && (
               <input type="time" autoFocus value={customTime}
                 onChange={e => setCustomTime(e.target.value)}
-                className="flex-1 bg-gray-900 border border-gray-700 text-white rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-gray-500" />
+                className="flex-1 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-gray-400 dark:focus:border-gray-500" />
             )}
           </div>
 
           {/* End time preview */}
-          <div className="p-5 rounded-2xl bg-gray-900 border border-gray-800">
+          <div className="p-5 rounded-2xl bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
             <p className="text-gray-600 text-[11px] font-bold uppercase tracking-widest mb-1">Handing over at</p>
-            <p className="text-white text-3xl font-bold tracking-tight">{fmtEndPreview(endTime)}</p>
+            <p className="text-gray-900 dark:text-white text-3xl font-bold tracking-tight">{fmtEndPreview(endTime)}</p>
           </div>
 
           <div className="mt-auto pt-8 flex gap-3">
             <button onClick={() => setPage(1)}
-              className="w-12 h-14 rounded-2xl bg-gray-900 border border-gray-800 flex items-center justify-center text-gray-500 shrink-0 active:scale-95 transition-all">
+              className="w-12 h-14 rounded-2xl bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 flex items-center justify-center text-gray-500 shrink-0 active:scale-95 transition-all">
               ←
             </button>
             <button onClick={start}
-              className="flex-1 py-4 rounded-2xl bg-white text-gray-950 text-base font-bold active:scale-95 transition-all">
+              className="flex-1 py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all">
               Start Shift
             </button>
           </div>
