@@ -479,6 +479,36 @@ export function computeAlerts(bed, now = Date.now()) {
     }
   }
 
+  // ─── Active second stage pushing time ────────────────────────────────
+  if (bed.labourStage === "Active second stage" && bed.pushingStartTime) {
+    const pushMs     = now - new Date(bed.pushingStartTime).getTime();
+    const isNullipara = bed.parity === "Para 0";
+    const warnMs     = isNullipara ? 45 * MIN : 20 * MIN;
+    const urgentMs   = isNullipara ? 60 * MIN : 30 * MIN;
+
+    if (pushMs >= urgentMs) {
+      alerts.push({
+        id: "pushing-urgent",
+        severity: "urgent",
+        title: `Active pushing ${formatAge(pushMs)} — senior review`,
+        body: isNullipara
+          ? `Nulliparous — pushing for ${formatAge(pushMs)}. NICE NG235 recommends offering instrumental assessment after 1 h active pushing with no birth.`
+          : `Multiparous — pushing for ${formatAge(pushMs)}. Consider instrumental assessment after 30 min active pushing.`,
+        citation: "NICE NG235 §1.6.2 [2023]",
+      });
+    } else if (pushMs >= warnMs) {
+      alerts.push({
+        id: "pushing-warning",
+        severity: "warning",
+        title: `Active pushing ${formatAge(pushMs)}`,
+        body: isNullipara
+          ? `Approaching 1-hour limit. Document fetal position, descent, and progress.`
+          : `Approaching 30-min assessment point. Review progress and maternal position.`,
+        citation: "NICE NG235 §1.6.2 [2023]",
+      });
+    }
+  }
+
   // ─── Diabetic BGL ────────────────────────────────────────────────────
   if (isDiabetic) {
     if (obs.lastBGL) {

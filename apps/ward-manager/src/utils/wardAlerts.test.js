@@ -914,6 +914,88 @@ describe("CTG — normal review overdue", () => {
   })
 })
 
+// ─── Active second stage pushing time (NICE NG235 §1.6.2) ───────────────────────
+
+function pushBed(parity, pushingMinutes, overrides = {}) {
+  return activeBed({
+    parity,
+    labourStage: "Active second stage",
+    pushingStartTime: t(pushingMinutes * MIN),
+    ves: [{ time: t(1 * HOUR), dilation: 10, station: 0 }],
+    ...overrides,
+  })
+}
+
+describe("Second stage pushing time — nulliparous (Para 0)", () => {
+  it("no alert before 45 min", () => {
+    const alerts = computeAlerts(pushBed("Para 0", 30), NOW)
+    expect(hasNot(alerts, "pushing-warning")).toBe(true)
+    expect(hasNot(alerts, "pushing-urgent")).toBe(true)
+  })
+
+  it("warning alert at 45 min", () => {
+    const alerts = computeAlerts(pushBed("Para 0", 45), NOW)
+    expect(has(alerts, "pushing-warning")).toBe(true)
+    expect(hasNot(alerts, "pushing-urgent")).toBe(true)
+  })
+
+  it("warning alert at 59 min", () => {
+    const alerts = computeAlerts(pushBed("Para 0", 59), NOW)
+    expect(has(alerts, "pushing-warning")).toBe(true)
+    expect(hasNot(alerts, "pushing-urgent")).toBe(true)
+  })
+
+  it("urgent alert at 60 min", () => {
+    const alerts = computeAlerts(pushBed("Para 0", 60), NOW)
+    expect(has(alerts, "pushing-urgent")).toBe(true)
+    expect(hasNot(alerts, "pushing-warning")).toBe(true)
+  })
+
+  it("urgent alert at 90 min", () => {
+    expect(has(computeAlerts(pushBed("Para 0", 90), NOW), "pushing-urgent")).toBe(true)
+  })
+})
+
+describe("Second stage pushing time — multiparous (Para 1)", () => {
+  it("no alert before 20 min", () => {
+    const alerts = computeAlerts(pushBed("Para 1", 15), NOW)
+    expect(hasNot(alerts, "pushing-warning")).toBe(true)
+    expect(hasNot(alerts, "pushing-urgent")).toBe(true)
+  })
+
+  it("warning alert at 20 min", () => {
+    const alerts = computeAlerts(pushBed("Para 1", 20), NOW)
+    expect(has(alerts, "pushing-warning")).toBe(true)
+    expect(hasNot(alerts, "pushing-urgent")).toBe(true)
+  })
+
+  it("urgent alert at 30 min", () => {
+    const alerts = computeAlerts(pushBed("Para 1", 30), NOW)
+    expect(has(alerts, "pushing-urgent")).toBe(true)
+    expect(hasNot(alerts, "pushing-warning")).toBe(true)
+  })
+
+  it("Para 2+ treated same as multiparous", () => {
+    expect(has(computeAlerts(pushBed("Para 2+", 30), NOW), "pushing-urgent")).toBe(true)
+  })
+})
+
+describe("Second stage pushing time — edge cases", () => {
+  it("no alert when not in active second stage", () => {
+    const bed = activeBed({ pushingStartTime: t(90 * MIN) }) // first stage but has pushingStartTime
+    const alerts = computeAlerts(bed, NOW)
+    expect(hasNot(alerts, "pushing-warning")).toBe(true)
+    expect(hasNot(alerts, "pushing-urgent")).toBe(true)
+  })
+
+  it("no alert when pushingStartTime missing", () => {
+    const bed = activeBed({ labourStage: "Active second stage", pushingStartTime: null })
+    const alerts = computeAlerts(bed, NOW)
+    expect(hasNot(alerts, "pushing-warning")).toBe(true)
+    expect(hasNot(alerts, "pushing-urgent")).toBe(true)
+  })
+})
+
 // ─── Alert severity ordering ──────────────────────────────────────────────────
 
 describe("Alert ordering", () => {

@@ -1161,52 +1161,43 @@ function ObsRow({ bed, onUpdate }) {
   const now = Date.now();
   const items = getObsItems(bed);
 
-  const [activeKey, setActiveKey] = useState(null);
+  const [valueKey, setValueKey] = useState(null); // which card has the value-entry open
   const [v1, setV1] = useState("");
   const [v2, setV2] = useState("");
   const v1Ref = useRef(null);
 
-  const activeItem = items.find(it => it.key === activeKey);
+  const activeItem = items.find(it => it.key === valueKey);
 
-  const handleTap = (key) => {
-    if (activeKey === key) {
-      setActiveKey(null);
-      setV1(""); setV2("");
-    } else {
-      setActiveKey(key);
-      setV1(""); setV2("");
-    }
+  useEffect(() => {
+    if (valueKey && v1Ref.current) setTimeout(() => v1Ref.current?.focus(), 50);
+  }, [valueKey]);
+
+  // Tap the card → mark done immediately (just stamp the time)
+  const markDone = (item) => {
+    onUpdate({ ...obs, [item.key]: nowISO() });
+    if (valueKey === item.key) { setValueKey(null); setV1(""); setV2(""); }
   };
 
-  // autoFocus when activeKey changes
-  useEffect(() => {
-    if (activeKey && v1Ref.current) {
-      setTimeout(() => v1Ref.current?.focus(), 50);
-    }
-  }, [activeKey]);
-
-  const confirm = () => {
+  // Save with optional value
+  const saveValue = () => {
     if (!activeItem) return;
-    const ts = nowISO();
-    let updates = { ...obs, [activeItem.key]: ts };
+    const updates = { ...obs, [activeItem.key]: nowISO() };
     if (activeItem.type === "bp") {
       if (v1) updates.bpSystolic = v1;
       if (v2) updates.bpDiastolic = v2;
-    } else if (activeItem.type === "int" || activeItem.type === "float") {
-      if (v1) updates[activeItem.vk] = v1;
+    } else if (v1) {
+      updates[activeItem.vk] = v1;
     }
     onUpdate(updates);
-    setActiveKey(null);
-    setV1(""); setV2("");
+    setValueKey(null); setV1(""); setV2("");
   };
 
   const getDisplayVal = (item) => {
-    const o = obs;
     if (item.type === "bp") {
-      if (o.bpSystolic && o.bpDiastolic) return `${o.bpSystolic}/${o.bpDiastolic}`;
-      if (o.bpSystolic) return `${o.bpSystolic}/—`;
-    } else {
-      if (o[item.vk]) return o[item.vk];
+      if (obs.bpSystolic && obs.bpDiastolic) return `${obs.bpSystolic}/${obs.bpDiastolic}`;
+      if (obs.bpSystolic) return `${obs.bpSystolic}/—`;
+    } else if (obs[item.vk]) {
+      return obs[item.vk];
     }
     return null;
   };
@@ -1215,77 +1206,71 @@ function ObsRow({ bed, onUpdate }) {
     <div className="space-y-2">
       <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0,1fr))` }}>
         {items.map((item) => {
-          const lastISO = obs[item.key];
-          const ageMin  = lastISO ? (now - new Date(lastISO).getTime()) / 60000 : Infinity;
-          const pct     = ageMin / item.limit;
-          const st      = !lastISO ? "none" : pct < 0.8 ? "ok" : pct < 1 ? "warn" : "over";
-          const isActive = activeKey === item.key;
+          const lastISO  = obs[item.key];
+          const ageMin   = lastISO ? (now - new Date(lastISO).getTime()) / 60000 : Infinity;
+          const pct      = ageMin / item.limit;
+          const st       = !lastISO ? "none" : pct < 0.8 ? "ok" : pct < 1 ? "warn" : "over";
           const displayVal = getDisplayVal(item);
 
           return (
-            <button key={item.key} onClick={() => handleTap(item.key)}
+            <button key={item.key}
+              onClick={() => markDone(item)}
               className={`py-3.5 rounded-2xl border flex flex-col items-center gap-0.5 active:scale-95 transition-all ${
-                isActive ? "bg-gray-900 border-gray-900" :
                 st==="ok"   ? "bg-green-50 border-green-200" :
                 st==="warn" ? "bg-amber-50 border-amber-200" :
                 st==="over" ? "bg-red-50   border-red-200"   :
                 "bg-gray-50 border-gray-200"
               }`}>
               <p className={`text-xs font-bold ${
-                isActive ? "text-white" :
                 st==="ok" ? "text-green-700" : st==="warn" ? "text-amber-700" : st==="over" ? "text-red-700" : "text-gray-500"
               }`}>{item.label}</p>
               <p className={`text-[11px] font-medium ${
-                isActive ? "text-gray-300" :
                 st==="ok" ? "text-green-500" : st==="warn" ? "text-amber-500" : st==="over" ? "text-red-500" : "text-gray-400"
               }`}>
-                {displayVal ? displayVal : (lastISO ? fmtTime(lastISO) : "—")}
+                {displayVal ?? (lastISO ? fmtTime(lastISO) : "tap to clear")}
               </p>
             </button>
           );
         })}
       </div>
 
-      {activeKey && activeItem && (
-        <div className="flex gap-2 items-center">
-          {activeItem.type === "bp" ? (
-            <>
-              <input
-                ref={v1Ref}
-                type="number"
-                inputMode="numeric"
-                placeholder="Sys"
-                value={v1}
-                onChange={e => setV1(e.target.value)}
-                className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-gray-800 text-center"
-              />
-              <span className="text-gray-400 font-bold">/</span>
-              <input
-                type="number"
-                inputMode="numeric"
-                placeholder="Dia"
-                value={v2}
-                onChange={e => setV2(e.target.value)}
-                className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-gray-800 text-center"
-              />
-            </>
-          ) : (
-            <input
-              ref={v1Ref}
-              type="number"
-              inputMode={activeItem.type === "float" ? "decimal" : "numeric"}
-              placeholder={`${activeItem.label} (${activeItem.unit})`}
-              value={v1}
-              onChange={e => setV1(e.target.value)}
-              className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-gray-800"
-            />
-          )}
-          <button onClick={confirm}
-            className="w-12 h-10 rounded-xl bg-gray-900 text-white text-base font-bold flex items-center justify-center active:scale-95 transition-all">
-            ✓
-          </button>
-        </div>
-      )}
+      {/* Optional value entry */}
+      <div className="flex items-center gap-2">
+        {valueKey && activeItem ? (
+          <>
+            {activeItem.type === "bp" ? (
+              <>
+                <input ref={v1Ref} type="number" inputMode="numeric" placeholder="Sys"
+                  value={v1} onChange={e => setV1(e.target.value)}
+                  className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-gray-800 text-center" />
+                <span className="text-gray-400 font-bold">/</span>
+                <input type="number" inputMode="numeric" placeholder="Dia"
+                  value={v2} onChange={e => setV2(e.target.value)}
+                  className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-gray-800 text-center" />
+              </>
+            ) : (
+              <input ref={v1Ref} type="number" inputMode={activeItem.type === "float" ? "decimal" : "numeric"}
+                placeholder={`${activeItem.label} (${activeItem.unit})`}
+                value={v1} onChange={e => setV1(e.target.value)}
+                className="flex-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-gray-800" />
+            )}
+            <button onClick={saveValue}
+              className="w-12 h-10 rounded-xl bg-gray-900 text-white text-base font-bold flex items-center justify-center active:scale-95">✓</button>
+            <button onClick={() => { setValueKey(null); setV1(""); setV2(""); }}
+              className="w-12 h-10 rounded-xl border border-gray-200 text-gray-400 text-base font-bold flex items-center justify-center active:scale-95">✕</button>
+          </>
+        ) : (
+          <div className="flex gap-2">
+            {items.map(item => (
+              <button key={item.key}
+                onClick={() => { setValueKey(item.key); setV1(""); setV2(""); }}
+                className="text-[11px] text-gray-400 font-medium px-2 py-1 rounded-lg border border-gray-100 active:scale-95">
+                + {item.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
