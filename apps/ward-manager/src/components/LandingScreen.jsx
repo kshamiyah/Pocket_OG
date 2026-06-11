@@ -33,11 +33,14 @@ export default function LandingScreen({ onBegin }) {
       {/* Clock */}
       <div className="text-center mb-14">
         <p className="font-mono text-gray-900 dark:text-white leading-none select-none"
-          style={{ fontSize: "clamp(80px, 22vw, 128px)", fontWeight: 700, letterSpacing: "-0.02em" }}>
+          style={{ fontSize: "clamp(72px, 19vw, 110px)", fontWeight: 700, letterSpacing: "-0.02em" }}>
           {hh}:{mm}
-          <span className="text-gray-300 dark:text-gray-700">:{ss}</span>
         </p>
-        <p className="text-gray-500 text-lg mt-3 font-medium">{dateStr}</p>
+        <p className="font-mono text-gray-300 dark:text-gray-700 select-none -mt-1"
+          style={{ fontSize: "clamp(28px, 7vw, 42px)", fontWeight: 700, letterSpacing: "-0.02em" }}>
+          :{ss}
+        </p>
+        <p className="text-gray-500 text-lg mt-2 font-medium">{dateStr}</p>
       </div>
 
       {/* Patients hint */}

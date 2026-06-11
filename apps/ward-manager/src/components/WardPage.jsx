@@ -162,8 +162,8 @@ function TileGrid({ value, onChange, options, labelFn, subFn, cols = 2 }) {
         const on = value === o;
         return (
           <button key={o} onClick={() => onChange(o)} type="button"
-            className={`py-4 px-3 rounded-2xl border text-left transition-colors active:scale-95 ${on ? "bg-gray-900 border-gray-900" : "bg-white border-gray-200"}`}>
-            <p className={`text-sm font-bold leading-snug ${on ? "text-white" : "text-gray-800"}`}>
+            className={`py-4 px-3 rounded-2xl border text-left transition-colors active:scale-95 overflow-hidden ${on ? "bg-gray-900 border-gray-900" : "bg-white border-gray-200"}`}>
+            <p className={`text-sm font-bold leading-snug break-words ${on ? "text-white" : "text-gray-800"}`}>
               {labelFn ? labelFn(o) : o}
             </p>
             {subFn && <p className={`text-[11px] mt-0.5 leading-tight ${on ? "text-gray-400" : "text-gray-400"}`}>{subFn(o)}</p>}
@@ -1416,7 +1416,7 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
 
         {/* Overview tab */}
         {innerTab === "overview" && (
-          <div className="px-5 pt-4 space-y-5 pb-8">
+          <div className="px-5 pt-4 space-y-5 pb-24">
             {/* Alerts */}
             {alerts.length > 0
               ? <div className="space-y-2">{alerts.map(a => (
@@ -1836,28 +1836,28 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
           </div>
         )}
 
-        <div className="px-5 pb-4 flex items-center justify-between" style={{ paddingTop: shift ? '0.75rem' : 'calc(env(safe-area-inset-top) + 1rem)' }}>
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Labour Ward</h2>
-            <p className="text-sm text-gray-400 mt-0.5">
+        <div className="px-5 pb-3" style={{ paddingTop: shift ? '0.75rem' : 'calc(env(safe-area-inset-top) + 1rem)' }}>
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Labour Ward</h2>
+          <div className="flex items-center justify-between mt-1 gap-2">
+            <p className="text-xs text-gray-400 min-w-0 truncate">
               {bedList.length === 0
                 ? "No patients"
-                : `${bedList.length} patient${bedList.length !== 1 ? "s" : ""}${totalUrgent > 0 ? ` · ${totalUrgent} urgent` : " · all clear"}`}
+                : `${bedList.length} patient${bedList.length !== 1 ? "s" : ""}${totalUrgent > 0 ? ` · ${totalUrgent} urgent` : ""}`}
             </p>
-          </div>
-          <div className="flex gap-2">
-            {bedList.length > 0 && (
-              <button onClick={onHandover}
-                className="px-3 py-2 rounded-xl bg-gray-100 text-xs font-semibold text-gray-600">Handover</button>
-            )}
-            {bedList.length > 0 && (
-              <button onClick={() => { if (window.confirm("Clear all beds?")) onClear(); }}
-                className="px-3 py-2 rounded-xl bg-gray-100 text-xs font-semibold text-gray-600">Clear</button>
-            )}
-            <button onClick={onAddBed}
-              className="px-4 py-2 rounded-xl bg-gray-900 text-white text-sm font-bold active:scale-95 transition-all">
-              + Add
-            </button>
+            <div className="flex gap-2 shrink-0">
+              {bedList.length > 0 && (
+                <button onClick={onHandover}
+                  className="px-3 py-1.5 rounded-xl bg-gray-100 text-xs font-semibold text-gray-600">Handover</button>
+              )}
+              {bedList.length > 0 && (
+                <button onClick={() => { if (window.confirm("Clear all beds?")) onClear(); }}
+                  className="px-3 py-1.5 rounded-xl bg-gray-100 text-xs font-semibold text-gray-600">Clear</button>
+              )}
+              <button onClick={onAddBed}
+                className="px-3 py-1.5 rounded-xl bg-gray-900 text-white text-xs font-bold active:scale-95 transition-all">
+                + Add
+              </button>
+            </div>
           </div>
         </div>
 
