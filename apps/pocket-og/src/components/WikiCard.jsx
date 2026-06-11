@@ -1,4 +1,4 @@
-import { GUIDELINES } from "../data/guidelines";
+import { GUIDELINES } from "@pocket-og/guidelines";
 import ContentBlock, { highlightText } from "./ContentBlock";
 
 const ACCENT = {

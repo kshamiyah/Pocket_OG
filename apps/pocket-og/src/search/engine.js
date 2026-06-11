@@ -1,19 +1,11 @@
 import { SYNONYMS } from "./synonyms";
-import { GL952_SECTIONS } from "../data/GL952";
-import { GL787_SECTIONS } from "../data/GL787";
-import { CG565_SECTIONS } from "../data/CG565";
-import { CG621_SECTIONS } from "../data/CG621";
-import { CG623_SECTIONS } from "../data/CG623";
-import { GL895_SECTIONS } from "../data/GL895";
-import { GL861_SECTIONS } from "../data/GL861";
-import { GL783_SECTIONS } from "../data/GL783";
-import { GL880_SECTIONS } from "../data/GL880";
-import { GL891_SECTIONS } from "../data/GL891";
-import { GL983_SECTIONS } from "../data/GL983";
-import { QS46_SECTIONS } from "../data/QS46";
-import { QS22_SECTIONS } from "../data/QS22";
-import { GTG57_SECTIONS } from "../data/GTG57";
-import { GTG63_SECTIONS } from "../data/GTG63";
+import {
+  GL952_SECTIONS, GL787_SECTIONS, GL895_SECTIONS, GL861_SECTIONS,
+  GL783_SECTIONS, GL880_SECTIONS, GL891_SECTIONS, GL983_SECTIONS,
+  CG565_SECTIONS, CG621_SECTIONS, CG623_SECTIONS,
+  QS46_SECTIONS, QS22_SECTIONS,
+  GTG57_SECTIONS, GTG63_SECTIONS,
+} from "@pocket-og/guidelines";
 
 function escapeRe(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
