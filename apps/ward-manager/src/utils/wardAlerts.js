@@ -29,6 +29,43 @@ function parseGestWeeks(str) {
   return null;
 }
 
+// ─── CTG feature classification (NICE NG229 §1.4.16–1.4.31) ────────────────
+export function classifyCTGEntry(entry, prevBaselineHR = null) {
+  const features = [];
+
+  // Baseline HR
+  const hr   = entry.baselineHR ?? 140;
+  const rise = prevBaselineHR != null ? hr - prevBaselineHR : 0;
+  if (hr < 100 || hr > 160)       features.push("red");
+  else if (hr < 110 || rise >= 20) features.push("amber");
+  else                             features.push("white");
+
+  // Variability
+  const v    = entry.variability ?? "5-25";
+  const vMin = entry.variabilityMinutes ?? 0;
+  if (v === "sinusoidal")     features.push("red");
+  else if (v === "<5")        features.push(vMin > 50 ? "red" : vMin >= 30 ? "amber" : "white");
+  else if (v === ">25")       features.push(vMin > 10 ? "red" : "amber");
+  else                        features.push("white");
+
+  // Decelerations
+  const d    = entry.decelerations ?? "none";
+  const dMin = entry.decelerationMinutes ?? 0;
+  if (d === "none" || d === "early" || d === "variable") features.push("white");
+  else if (d === "variable-concerning") features.push(dMin >= 30 ? "red" : "amber");
+  else if (d === "late" || d === "prolonged") features.push("red");
+  else features.push("white");
+
+  // Contractions (≥5/10 min = non-reassuring tachysystole)
+  if ((entry.contractionsPerTen ?? 0) >= 5) features.push("amber");
+
+  const reds   = features.filter(f => f === "red").length;
+  const ambers = features.filter(f => f === "amber").length;
+  if (reds >= 1 || ambers >= 2) return "pathological";
+  if (ambers === 1)             return "suspicious";
+  return "normal";
+}
+
 export function computeAlerts(bed, now = Date.now()) {
   const alerts = [];
 
@@ -475,6 +512,80 @@ export function computeAlerts(bed, now = Date.now()) {
       body: `Urine output ${obs.urineOutput} mL/hr — below 30 mL/hr threshold. Escalate to medical team.`,
       citation: "NICE NG235 §1.4.5 [2023]",
     });
+  }
+
+  // ─── CTG monitoring (NICE NG229, Dec 2022) ───────────────────────────────
+  const ctgLog = bed.ctgLog ?? [];
+  const lastCTG = ctgLog.length > 0 ? ctgLog[ctgLog.length - 1] : null;
+
+  const needsContinuousCTG = !!(
+    flags.some(f => f === "VBAC" || f === "Previous LSCS") ||
+    isDiabetic || isHypertensive || isGBSPos || isPreterm ||
+    bed.analgesia === "Epidural" ||
+    bed.modeOfOnset === "PPROM" ||
+    bed.oxytocinStartTime
+  );
+
+  if (bed.labourStage && bed.labourStage !== "Latent") {
+    if (needsContinuousCTG && !lastCTG) {
+      const reasons = [
+        flags.includes("VBAC") && "VBAC",
+        flags.includes("Previous LSCS") && "Previous CS",
+        isDiabetic && "Diabetes",
+        isHypertensive && "Hypertension",
+        isPreterm && `Preterm (${gest})`,
+        isGBSPos && "GBS+",
+        bed.analgesia === "Epidural" && "Epidural",
+        bed.oxytocinStartTime && "Oxytocin",
+        bed.modeOfOnset === "PPROM" && "PPROM",
+      ].filter(Boolean).join(", ");
+      alerts.push({
+        id: "ctg-not-documented",
+        severity: "info",
+        title: "Continuous CTG indicated — not yet documented",
+        body: `Indication: ${reasons}. Log a CTG review to track fetal wellbeing.`,
+        citation: "NICE NG229 §1.3.2 [2022]",
+      });
+    }
+
+    if (lastCTG) {
+      const msCTG = now - new Date(lastCTG.time).getTime();
+      if (lastCTG.classification === "pathological") {
+        alerts.push({
+          id: "ctg-pathological",
+          severity: "urgent",
+          title: `Pathological CTG — immediate action (${formatAge(msCTG)} ago)`,
+          body: "≥2 non-reassuring features OR ≥1 abnormal feature. Immediate senior/consultant review. Consider fetal scalp stimulation → if no acceleration, proceed to FBS or expedite birth.",
+          citation: "NICE NG229 §1.5.3 [2022]",
+        });
+      } else if (lastCTG.classification === "suspicious") {
+        if (msCTG >= 30 * MIN) {
+          alerts.push({
+            id: "ctg-suspicious-overdue",
+            severity: "urgent",
+            title: `Suspicious CTG — not reassessed (${formatAge(msCTG)} ago)`,
+            body: "Suspicious CTG must be reassessed within 30 minutes. Conservative measures: reposition, IV fluids, reduce/stop oxytocin. Escalate to senior if persisting.",
+            citation: "NICE NG229 §1.5.2 [2022]",
+          });
+        } else {
+          alerts.push({
+            id: "ctg-suspicious",
+            severity: "warning",
+            title: `Suspicious CTG — reassess within ${formatAge(30 * MIN - msCTG)}`,
+            body: `1 non-reassuring feature. Conservative measures: reposition, IV fluids, reduce/stop oxytocin. Logged ${formatAge(msCTG)} ago.`,
+            citation: "NICE NG229 §1.5.2 [2022]",
+          });
+        }
+      } else if (needsContinuousCTG && msCTG >= 60 * MIN) {
+        alerts.push({
+          id: "ctg-review-due",
+          severity: "info",
+          title: `CTG documentation overdue (${formatAge(msCTG)} ago)`,
+          body: "Hourly CTG classification documentation recommended for continuous fetal monitoring.",
+          citation: "NICE NG229 §1.4 [2022]",
+        });
+      }
+    }
   }
 
   const order = { urgent: 0, warning: 1, info: 2 };

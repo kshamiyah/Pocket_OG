@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { computeAlerts, bedStatusColor } from "../utils/wardAlerts";
+import { computeAlerts, bedStatusColor, classifyCTGEntry } from "../utils/wardAlerts";
 
 // ─── Storage ─────────────────────────────────────────────────────────────
 
@@ -85,6 +85,43 @@ const SEV = {
   warning: { bg:"bg-amber-50", border:"border-amber-200", text:"text-amber-800", bar:"bg-amber-400", cite:"text-amber-400" },
   info:    { bg:"bg-blue-50",  border:"border-blue-200",  text:"text-blue-800",  bar:"bg-blue-400",  cite:"text-blue-400"  },
 };
+
+// ─── CTG constants ────────────────────────────────────────────────────────
+
+const CTG_CLASS_STYLE = {
+  normal:       { bg: "bg-green-50",  border: "border-green-200",  text: "text-green-800",  dot: "bg-green-500"  },
+  suspicious:   { bg: "bg-amber-50",  border: "border-amber-200",  text: "text-amber-800",  dot: "bg-amber-400"  },
+  pathological: { bg: "bg-red-50",    border: "border-red-200",    text: "text-red-800",    dot: "bg-red-500"    },
+};
+
+const CTG_CLASS_DESC = {
+  normal:       "All features reassuring — continue monitoring",
+  suspicious:   "1 non-reassuring feature — conservative measures · reassess in 30 min",
+  pathological: "2+ abnormal features — immediate senior review · consider FBS",
+};
+
+function ctgEntryLabel(e) {
+  const varLbl = {
+    "5-25":     "Var: normal",
+    "<5":       `Var: <5 bpm ${e.variabilityMinutes > 50 ? ">50m" : e.variabilityMinutes >= 30 ? "30–50m" : "<30m"}`,
+    ">25":      `Var: >25 bpm ${e.variabilityMinutes > 10 ? ">10m" : "≤10m"}`,
+    sinusoidal: "Sinusoidal",
+  };
+  const dLbl = {
+    none:                 "No decels",
+    early:                "Early decels",
+    variable:             "Variable",
+    "variable-concerning":`Concern decels ${e.decelerationMinutes >= 30 ? "≥30m" : "<30m"}`,
+    late:                 "Late decels",
+    prolonged:            "Prolonged",
+  };
+  return [
+    `HR ${e.baselineHR}`,
+    varLbl[e.variability] ?? e.variability,
+    dLbl[e.decelerations] ?? e.decelerations,
+    e.accelerations ? "Accels ✓" : "No accels",
+  ].join(" · ");
+}
 
 // ─── Clinical metadata ────────────────────────────────────────────────────
 
@@ -579,6 +616,240 @@ function DeliverySheet({ bed, onSave }) {
   );
 }
 
+// ─── CTG sheet ───────────────────────────────────────────────────────────
+
+function CTGSheet({ bed, onSave }) {
+  const prevEntry = (bed.ctgLog ?? []).slice(-1)[0] ?? null;
+  const prevHR    = prevEntry?.baselineHR ?? null;
+
+  const [ctgTime, setCTGTime]     = useState(timeInputNow);
+  const [hr, setHR]               = useState(prevHR ?? 140);
+  const [variability, setVar]     = useState("5-25");
+  const [varMin, setVarMin]       = useState(0);
+  const [decels, setDecels]       = useState("none");
+  const [decelMin, setDecelMin]   = useState(0);
+  const [accelerations, setAccel] = useState(true);
+  const [ctxPer10, setCtx]        = useState(3);
+
+  const classification = useMemo(() =>
+    classifyCTGEntry(
+      { baselineHR: hr, variability, variabilityMinutes: varMin,
+        decelerations: decels, decelerationMinutes: decelMin,
+        accelerations, contractionsPerTen: ctxPer10 },
+      prevHR
+    ),
+    [hr, variability, varMin, decels, decelMin, accelerations, ctxPer10, prevHR]
+  );
+
+  const cs   = CTG_CLASS_STYLE[classification];
+  const rise = prevHR != null ? hr - prevHR : 0;
+  const hrColor = hr < 100 || hr > 160 ? "text-red-600" : hr < 110 ? "text-amber-500" : "text-gray-900";
+  const hrHint  = hr < 100 ? "RED — bradycardia < 100 bpm"
+                : hr > 160 ? "RED — tachycardia > 160 bpm"
+                : hr < 110 ? "AMBER — 100–109 bpm" : "White — normal 110–160 bpm";
+
+  const save = () => onSave({
+    id: `ctg-${Date.now()}`,
+    time: timeToISO(ctgTime),
+    baselineHR: hr, variability, variabilityMinutes: varMin,
+    decelerations: decels, decelerationMinutes: decelMin,
+    accelerations, contractionsPerTen: ctxPer10,
+    classification,
+  });
+
+  return (
+    <>
+      <div className="overflow-y-auto overscroll-contain flex-1 min-h-0">
+        <div className="px-5 pt-4 pb-4 space-y-6">
+
+          {/* Live classification banner */}
+          <div className={`rounded-2xl border ${cs.border} ${cs.bg} px-4 py-3 flex items-center gap-3`}>
+            <div className={`w-3 h-3 rounded-full ${cs.dot} shrink-0`} />
+            <div className="flex-1">
+              <p className={`text-sm font-bold ${cs.text} capitalize`}>{classification} CTG</p>
+              <p className={`text-xs ${cs.text} opacity-80 mt-0.5 leading-snug`}>{CTG_CLASS_DESC[classification]}</p>
+            </div>
+          </div>
+
+          <NowField label="Time of CTG review" value={ctgTime} onChange={setCTGTime} />
+
+          {/* Baseline HR */}
+          <div>
+            <div className="flex items-baseline justify-between mb-3">
+              <SLabel>Baseline HR</SLabel>
+              {prevHR != null && (
+                <span className={`text-xs ${rise >= 20 ? "text-amber-500 font-bold" : "text-gray-400"}`}>
+                  Last {prevHR} bpm {rise !== 0 ? (rise > 0 ? `↑${rise}` : `↓${Math.abs(rise)}`) : "="}
+                  {rise >= 20 && " · AMBER"}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button onClick={() => setHR(h => Math.max(60, h - 10))}
+                className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-700 active:scale-95 transition-all">
+                −10
+              </button>
+              <button onClick={() => setHR(h => Math.max(60, h - 1))}
+                className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-xl font-bold text-gray-700 active:scale-95 transition-all">
+                −
+              </button>
+              <p className={`flex-1 text-center text-3xl font-bold ${hrColor}`}>{hr}</p>
+              <button onClick={() => setHR(h => Math.min(200, h + 1))}
+                className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-xl font-bold text-gray-700 active:scale-95 transition-all">
+                +
+              </button>
+              <button onClick={() => setHR(h => Math.min(200, h + 10))}
+                className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-700 active:scale-95 transition-all">
+                +10
+              </button>
+            </div>
+            <p className="text-[10px] text-gray-400 text-center mt-1.5">{hrHint}</p>
+          </div>
+
+          {/* Variability */}
+          <div>
+            <SLabel className="mb-2">Variability</SLabel>
+            <div className="grid grid-cols-4 gap-1.5">
+              {["5-25", "<5", ">25", "sinusoidal"].map(o => {
+                const label = { "5-25": "5–25 bpm", "<5": "< 5 bpm", ">25": "> 25 bpm", sinusoidal: "Sinusoidal" }[o];
+                const on = variability === o;
+                return (
+                  <button key={o} onClick={() => { setVar(o); setVarMin(0); }}
+                    className={`py-2.5 rounded-xl border text-xs font-semibold transition-colors active:scale-95 ${on ? "bg-gray-900 border-gray-900 text-white" : "bg-white border-gray-200 text-gray-700"}`}>
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {variability === "<5" && (
+              <div className="mt-3">
+                <SLabel className="mb-2">Duration of reduced variability</SLabel>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[{ val: 15, label: "< 30 min", hint: "Acceptable" },
+                    { val: 40, label: "30–50 min", hint: "AMBER" },
+                    { val: 60, label: "> 50 min",  hint: "RED" }].map(({ val, label, hint }) => {
+                    const on = (val === 15 && varMin < 30) || (val === 40 && varMin >= 30 && varMin <= 50) || (val === 60 && varMin > 50);
+                    return (
+                      <button key={val} onClick={() => setVarMin(val)}
+                        className={`py-2.5 rounded-xl border text-center transition-colors active:scale-95 ${on ? "bg-gray-900 border-gray-900" : "bg-white border-gray-200"}`}>
+                        <p className={`text-xs font-bold ${on ? "text-white" : "text-gray-800"}`}>{label}</p>
+                        <p className={`text-[10px] ${on ? "text-gray-400" : "text-gray-400"}`}>{hint}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {variability === ">25" && (
+              <div className="mt-3">
+                <SLabel className="mb-2">Duration of saltatory variability</SLabel>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[{ val: 5, label: "≤ 10 min", hint: "AMBER" },
+                    { val: 15, label: "> 10 min", hint: "RED"  }].map(({ val, label, hint }) => {
+                    const on = (val === 5 && varMin <= 10) || (val === 15 && varMin > 10);
+                    return (
+                      <button key={val} onClick={() => setVarMin(val)}
+                        className={`py-2.5 rounded-xl border text-center transition-colors active:scale-95 ${on ? "bg-gray-900 border-gray-900" : "bg-white border-gray-200"}`}>
+                        <p className={`text-xs font-bold ${on ? "text-white" : "text-gray-800"}`}>{label}</p>
+                        <p className={`text-[10px] ${on ? "text-gray-400" : "text-gray-400"}`}>{hint}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Decelerations */}
+          <div>
+            <SLabel className="mb-2">Decelerations</SLabel>
+            <div className="space-y-1.5">
+              <div className="grid grid-cols-3 gap-1.5">
+                {["none", "early", "variable"].map(o => {
+                  const label = { none: "None", early: "Early", variable: "Variable" }[o];
+                  const on = decels === o;
+                  return (
+                    <button key={o} onClick={() => { setDecels(o); setDecelMin(0); }}
+                      className={`py-2.5 rounded-xl border text-xs font-semibold transition-colors active:scale-95 ${on ? "bg-gray-900 border-gray-900 text-white" : "bg-white border-gray-200 text-gray-700"}`}>
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="grid grid-cols-3 gap-1.5">
+                {["variable-concerning", "late", "prolonged"].map(o => {
+                  const label = { "variable-concerning": "Var (concerns)", late: "Late", prolonged: "Prolonged ≥3m" }[o];
+                  const on = decels === o;
+                  return (
+                    <button key={o} onClick={() => { setDecels(o); setDecelMin(0); }}
+                      className={`py-2.5 rounded-xl border text-xs font-semibold transition-colors active:scale-95 ${on ? "bg-gray-900 border-gray-900 text-white" : "bg-white border-gray-200 text-gray-700"}`}>
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {decels === "variable-concerning" && (
+              <div className="mt-3">
+                <SLabel className="mb-2">Duration of concerning variable decels</SLabel>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[{ val: 15, label: "< 30 min", hint: "AMBER" },
+                    { val: 30, label: "≥ 30 min", hint: "RED"   }].map(({ val, label, hint }) => {
+                    const on = (val === 15 && decelMin < 30) || (val === 30 && decelMin >= 30);
+                    return (
+                      <button key={val} onClick={() => setDecelMin(val)}
+                        className={`py-2.5 rounded-xl border text-center transition-colors active:scale-95 ${on ? "bg-gray-900 border-gray-900" : "bg-white border-gray-200"}`}>
+                        <p className={`text-xs font-bold ${on ? "text-white" : "text-gray-800"}`}>{label}</p>
+                        <p className={`text-[10px] ${on ? "text-gray-400" : "text-gray-400"}`}>{hint}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Accelerations */}
+          <div>
+            <SLabel className="mb-2">Accelerations (≥15 bpm for ≥15 sec)</SLabel>
+            <PillRow value={accelerations ? "present" : "absent"}
+              onChange={v => setAccel(v === "present")}
+              options={["present", "absent"]}
+              labelFn={o => o === "present" ? "Present ✓" : "Absent"} />
+          </div>
+
+          {/* Contractions */}
+          <div>
+            <div className="flex items-baseline justify-between mb-3">
+              <SLabel>Contractions / 10 min</SLabel>
+              {ctxPer10 >= 5 && (
+                <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wide">Tachysystole · NG229 §1.4</span>
+              )}
+            </div>
+            <Stepper value={ctxPer10} onChange={setCtx} min={0} max={10} />
+          </div>
+
+        </div>
+      </div>
+
+      <div className="px-5 pt-3 border-t border-gray-100 shrink-0"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}>
+        <button onClick={save}
+          className={`w-full py-4 rounded-2xl text-base font-bold text-white active:scale-95 transition-all ${
+            classification === "pathological" ? "bg-red-600" :
+            classification === "suspicious"   ? "bg-amber-500" : "bg-gray-900"
+          }`}>
+          Log {classification === "pathological" ? "⚠ Pathological" : classification === "suspicious" ? "Suspicious" : "Normal"} CTG
+        </button>
+        <p className="text-[10px] text-gray-300 text-center mt-2">NICE NG229 — Fetal Monitoring in Labour [Dec 2022]</p>
+      </div>
+    </>
+  );
+}
+
 // ─── Admission wizard — 4 steps ───────────────────────────────────────────
 
 function WizardDots({ step, total = 4 }) {
@@ -630,7 +901,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
         passiveStartTime: stage === "Passive second stage" ? nowISO() : null,
         pushingStartTime: stage === "Active second stage"  ? nowISO() : null,
         armTime: null, oxytocinStartTime: null,
-        ves: [], oxytocinLog: [], observations: {},
+        ves: [], oxytocinLog: [], ctgLog: [], observations: {},
       });
     }
   };
@@ -993,7 +1264,7 @@ function ObsDots({ bed, now }) {
 
 // ─── Bed detail view — 3 inner tabs ──────────────────────────────────────
 
-function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOpenOxy, onOpenDelivery }) {
+function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOpenOxy, onOpenDelivery, onOpenCTG }) {
   const PERSISTENT_FLAGS = {
     "gbs-iap":          "gbsAntibioticsStarted",
     "preterm-neonatal": "neonatalTeamAlerted",
@@ -1068,15 +1339,25 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
               { key: "overview", label: "Overview" },
               { key: "ves",      label: "VEs" },
               { key: "obs",      label: "Obs" },
-            ].map(tab => (
-              <button key={tab.key} onClick={() => setInnerTab(tab.key)}
-                className={`flex-1 py-3 text-sm font-semibold relative transition-colors ${innerTab === tab.key ? "text-gray-900 border-b-2 border-gray-900" : "text-gray-400"}`}>
-                {tab.label}
-                {tab.key === "overview" && urgentCount > 0 && (
-                  <span className="absolute top-2 right-3 w-2 h-2 rounded-full bg-red-500" />
-                )}
-              </button>
-            ))}
+              { key: "ctg",      label: "CTG" },
+            ].map(tab => {
+              const lastCTG = tab.key === "ctg" ? bed.ctgLog?.[bed.ctgLog.length - 1] : null;
+              return (
+                <button key={tab.key} onClick={() => setInnerTab(tab.key)}
+                  className={`flex-1 py-3 text-sm font-semibold relative transition-colors ${innerTab === tab.key ? "text-gray-900 border-b-2 border-gray-900" : "text-gray-400"}`}>
+                  {tab.label}
+                  {tab.key === "overview" && urgentCount > 0 && (
+                    <span className="absolute top-2 right-3 w-2 h-2 rounded-full bg-red-500" />
+                  )}
+                  {lastCTG?.classification === "pathological" && (
+                    <span className="absolute top-2 right-1 w-2 h-2 rounded-full bg-red-500" />
+                  )}
+                  {lastCTG?.classification === "suspicious" && (
+                    <span className="absolute top-2 right-1 w-2 h-2 rounded-full bg-amber-400" />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -1194,6 +1475,39 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
             }
 
             <p className="text-[10px] text-gray-300 text-center">NICE NG235 §1.4.1 — 4-hourly VE in active labour</p>
+          </div>
+        )}
+
+        {/* CTG tab */}
+        {innerTab === "ctg" && (
+          <div className="px-5 pt-4 pb-8 space-y-4">
+            <button onClick={onOpenCTG}
+              className="w-full py-4 rounded-2xl text-base font-bold bg-gray-900 text-white active:scale-95 transition-all">
+              Log CTG Review
+            </button>
+
+            {!bed.ctgLog?.length
+              ? <p className="text-sm text-gray-400 text-center py-8">No CTG entries recorded</p>
+              : (
+                <div className="rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm">
+                  {[...bed.ctgLog].reverse().map((entry, i) => {
+                    const cs = CTG_CLASS_STYLE[entry.classification];
+                    return (
+                      <div key={entry.id} className={`px-4 py-3 ${i > 0 ? "border-t border-gray-50" : ""}`}>
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="text-sm font-bold text-gray-900">{fmtTime(entry.time)}</p>
+                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${cs.border} ${cs.bg} ${cs.text} capitalize`}>
+                            {entry.classification}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-gray-500 leading-snug">{ctgEntryLabel(entry)}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )
+            }
+            <p className="text-[10px] text-gray-300 text-center">NICE NG229 — Fetal Monitoring in Labour [Dec 2022]</p>
           </div>
         )}
 
@@ -1428,7 +1742,7 @@ function formatCountdown(ms) {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
-function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, onHandover, shift, onEndShift }) {
+function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, onQuickCTG, onHandover, shift, onEndShift }) {
   const bedList      = Object.values(beds).sort((a,b) => a.bedNumber.localeCompare(b.bedNumber, undefined, {numeric:true}));
   const totalUrgent  = Object.values(alertsMap).flat().filter(a => a.severity === "urgent").length;
   const now          = Date.now();
@@ -1549,7 +1863,12 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
 
                 {/* Quick actions bar */}
                 {!isDelivered && (
-                  <div className="border-t border-black/5 px-4 py-2.5 flex items-center justify-end">
+                  <div className="border-t border-black/5 px-4 py-2.5 flex items-center justify-end gap-2">
+                    <button
+                      onClick={e => { e.stopPropagation(); onQuickCTG(bed.id); }}
+                      className="px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 text-xs font-bold active:scale-95 transition-all">
+                      + CTG
+                    </button>
                     <button
                       onClick={e => { e.stopPropagation(); onQuickVE(bed.id); }}
                       className="px-4 py-1.5 rounded-full bg-gray-900 text-white text-xs font-bold active:scale-95 transition-all">
@@ -1626,6 +1945,13 @@ export default function WardPage({ shift, onEndShift }) {
     closeSheet();
   };
 
+  const saveCTG = entry => {
+    if (!sheetBed) return;
+    const ctgLog = sheetBed.ctgLog ?? [];
+    updateBed(sheetBedId, { ctgLog: [...ctgLog, entry] });
+    closeSheet();
+  };
+
   const saveNewBed = bed => {
     setBeds(prev => ({ ...prev, [bed.id]: bed }));
     setView("board");
@@ -1656,6 +1982,7 @@ export default function WardPage({ shift, onEndShift }) {
           onAddBed={() => setView("wizard")}
           onClear={() => setBeds({})}
           onQuickVE={id => openSheet("ve", id)}
+          onQuickCTG={id => openSheet("ctg", id)}
           onHandover={() => setSheet("handover")}
           shift={shift}
           onEndShift={onEndShift}
@@ -1674,6 +2001,7 @@ export default function WardPage({ shift, onEndShift }) {
           onOpenVE={() => openSheet("ve", selectedId)}
           onOpenOxy={() => openSheet("oxy", selectedId)}
           onOpenDelivery={() => openSheet("delivery", selectedId)}
+          onOpenCTG={() => openSheet("ctg", selectedId)}
         />
       )}
 
@@ -1693,6 +2021,12 @@ export default function WardPage({ shift, onEndShift }) {
       <BottomSheet open={sheet === "delivery" && !!sheetBed} onClose={closeSheet}
         title={`${sheetBed?.delivery ? "Delivery record" : "Mark delivered"} — Bed ${sheetBed?.bedNumber ?? ""}`}>
         {sheetBed && <DeliverySheet bed={sheetBed} onSave={saveDelivery} />}
+      </BottomSheet>
+
+      <BottomSheet open={sheet === "ctg" && !!sheetBed} onClose={closeSheet}
+        title={`CTG Review — Bed ${sheetBed?.bedNumber ?? ""}`}
+        sub="NICE NG229 — Fetal Monitoring in Labour [Dec 2022]">
+        {sheetBed && <CTGSheet bed={sheetBed} onSave={saveCTG} />}
       </BottomSheet>
 
       <BottomSheet open={sheet === "handover"} onClose={closeSheet}

@@ -13,7 +13,7 @@
  */
 
 import { describe, it, expect } from "vitest"
-import { computeAlerts } from "./wardAlerts.js"
+import { computeAlerts, classifyCTGEntry } from "./wardAlerts.js"
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -676,6 +676,241 @@ describe("ARM reassessment", () => {
   it("no alert when no ARM recorded", () => {
     const bed = activeBed({ armTime: null })
     expect(hasNot(computeAlerts(bed, NOW), "arm-reassess")).toBe(true)
+  })
+})
+
+// ─── CTG classification engine (NICE NG229 §1.4.16–1.4.31) ───────────────────
+
+describe("classifyCTGEntry — baseline HR", () => {
+  const entry = (baselineHR, prevHR = null) =>
+    classifyCTGEntry({ baselineHR, variability: "5-25", variabilityMinutes: 0,
+                       decelerations: "none", decelerationMinutes: 0,
+                       accelerations: true, contractionsPerTen: 3 }, prevHR)
+
+  it("110 bpm — normal", () => expect(entry(110)).toBe("normal"))
+  it("160 bpm — normal", () => expect(entry(160)).toBe("normal"))
+  it("109 bpm — suspicious (AMBER baseline)", () => expect(entry(109)).toBe("suspicious"))
+  it("100 bpm — suspicious", () => expect(entry(100)).toBe("suspicious"))
+  it("99 bpm — pathological (RED baseline)", () => expect(entry(99)).toBe("pathological"))
+  it("161 bpm — pathological", () => expect(entry(161)).toBe("pathological"))
+  it("rise ≥ 20 bpm from previous — suspicious", () => expect(entry(155, 135)).toBe("suspicious"))
+  it("rise = 19 bpm — still normal", () => expect(entry(154, 135)).toBe("normal"))
+  it("rise ≥ 20 but HR still in normal range — suspicious (1 amber: baseline)", () =>
+    expect(entry(135, 114)).toBe("suspicious"))
+})
+
+describe("classifyCTGEntry — variability", () => {
+  const entry = (variability, variabilityMinutes) =>
+    classifyCTGEntry({ baselineHR: 140, variability, variabilityMinutes,
+                       decelerations: "none", decelerationMinutes: 0,
+                       accelerations: true, contractionsPerTen: 3 })
+
+  it("5-25 bpm — normal (white)", () => expect(entry("5-25", 0)).toBe("normal"))
+  it("<5 bpm for < 30 min — acceptable (white)", () => expect(entry("<5", 29)).toBe("normal"))
+  it("<5 bpm for 30 min — AMBER → suspicious", () => expect(entry("<5", 30)).toBe("suspicious"))
+  it("<5 bpm for 50 min — AMBER → suspicious", () => expect(entry("<5", 50)).toBe("suspicious"))
+  it("<5 bpm for 51 min — RED → pathological", () => expect(entry("<5", 51)).toBe("pathological"))
+  it(">25 bpm for ≤ 10 min — AMBER → suspicious", () => expect(entry(">25", 10)).toBe("suspicious"))
+  it(">25 bpm for 11 min — RED → pathological", () => expect(entry(">25", 11)).toBe("pathological"))
+  it("sinusoidal — RED → pathological", () => expect(entry("sinusoidal", 0)).toBe("pathological"))
+})
+
+describe("classifyCTGEntry — decelerations", () => {
+  const entry = (decelerations, decelerationMinutes) =>
+    classifyCTGEntry({ baselineHR: 140, variability: "5-25", variabilityMinutes: 0,
+                       decelerations, decelerationMinutes,
+                       accelerations: true, contractionsPerTen: 3 })
+
+  it("none — normal", () => expect(entry("none", 0)).toBe("normal"))
+  it("early — normal (white)", () => expect(entry("early", 0)).toBe("normal"))
+  it("variable without concerns — normal (white)", () => expect(entry("variable", 0)).toBe("normal"))
+  it("variable-concerning < 30 min — AMBER → suspicious", () => expect(entry("variable-concerning", 29)).toBe("suspicious"))
+  it("variable-concerning at exactly 30 min — RED → pathological", () => expect(entry("variable-concerning", 30)).toBe("pathological"))
+  it("late decelerations — RED → pathological", () => expect(entry("late", 0)).toBe("pathological"))
+  it("prolonged deceleration — RED → pathological", () => expect(entry("prolonged", 0)).toBe("pathological"))
+})
+
+describe("classifyCTGEntry — contractions", () => {
+  const entry = (contractionsPerTen) =>
+    classifyCTGEntry({ baselineHR: 140, variability: "5-25", variabilityMinutes: 0,
+                       decelerations: "none", decelerationMinutes: 0,
+                       accelerations: true, contractionsPerTen })
+
+  it("4 contractions/10 min — normal", () => expect(entry(4)).toBe("normal"))
+  it("5 contractions/10 min — AMBER → suspicious", () => expect(entry(5)).toBe("suspicious"))
+  it("6 contractions/10 min with reduced-var too — pathological (2 ambers)", () =>
+    expect(classifyCTGEntry({
+      baselineHR: 140, variability: "<5", variabilityMinutes: 35,
+      decelerations: "none", decelerationMinutes: 0,
+      accelerations: true, contractionsPerTen: 6,
+    })).toBe("pathological"))
+})
+
+describe("classifyCTGEntry — overall formula", () => {
+  it("all white features → normal", () => {
+    expect(classifyCTGEntry({
+      baselineHR: 140, variability: "5-25", variabilityMinutes: 0,
+      decelerations: "none", decelerationMinutes: 0,
+      accelerations: true, contractionsPerTen: 3,
+    })).toBe("normal")
+  })
+
+  it("1 amber feature → suspicious", () => {
+    expect(classifyCTGEntry({
+      baselineHR: 105, variability: "5-25", variabilityMinutes: 0,
+      decelerations: "none", decelerationMinutes: 0,
+      accelerations: true, contractionsPerTen: 3,
+    })).toBe("suspicious")
+  })
+
+  it("2 amber features → pathological", () => {
+    expect(classifyCTGEntry({
+      baselineHR: 105, variability: "<5", variabilityMinutes: 35,
+      decelerations: "none", decelerationMinutes: 0,
+      accelerations: true, contractionsPerTen: 3,
+    })).toBe("pathological")
+  })
+
+  it("1 red feature → pathological regardless of other features being white", () => {
+    expect(classifyCTGEntry({
+      baselineHR: 90, variability: "5-25", variabilityMinutes: 0,
+      decelerations: "none", decelerationMinutes: 0,
+      accelerations: true, contractionsPerTen: 3,
+    })).toBe("pathological")
+  })
+})
+
+// ─── CTG alert rules (NICE NG229 §1.3–1.5) ───────────────────────────────────
+
+function ctgBed(overrides = {}) {
+  return {
+    parity: "Para 0", gestation: "39+2",
+    labourStage: "Active first stage", analgesia: "None",
+    riskFlags: [], modeOfOnset: "Spontaneous",
+    ves: [{ time: t(1 * HOUR), dilation: 5 }],
+    oxytocinLog: [], oxytocinStartTime: null, ctgLog: [],
+    observations: { lastPulse: t(30*MIN), lastBP: t(30*MIN), lastTemp: t(30*MIN) },
+    ...overrides,
+  }
+}
+
+const normalCTG = (minsAgo) => ({
+  id: `ctg-${minsAgo}`, time: t(minsAgo * MIN),
+  baselineHR: 140, variability: "5-25", variabilityMinutes: 0,
+  decelerations: "none", decelerationMinutes: 0,
+  accelerations: true, contractionsPerTen: 3,
+  classification: "normal",
+})
+
+const suspiciousCTG = (minsAgo) => ({
+  id: `ctg-s-${minsAgo}`, time: t(minsAgo * MIN),
+  baselineHR: 105, variability: "5-25", variabilityMinutes: 0,
+  decelerations: "none", decelerationMinutes: 0,
+  accelerations: true, contractionsPerTen: 3,
+  classification: "suspicious",
+})
+
+const pathologicalCTG = (minsAgo) => ({
+  id: `ctg-p-${minsAgo}`, time: t(minsAgo * MIN),
+  baselineHR: 90, variability: "5-25", variabilityMinutes: 0,
+  decelerations: "none", decelerationMinutes: 0,
+  accelerations: true, contractionsPerTen: 3,
+  classification: "pathological",
+})
+
+describe("CTG — continuous monitoring indication", () => {
+  it("no ctg-not-documented alert when patient has no indication and no CTG", () => {
+    const bed = ctgBed()
+    expect(hasNot(computeAlerts(bed, NOW), "ctg-not-documented")).toBe(true)
+  })
+
+  it("fires ctg-not-documented (info) for epidural patient with no CTG", () => {
+    const bed = ctgBed({ analgesia: "Epidural" })
+    const a = computeAlerts(bed, NOW).find(b => b.id === "ctg-not-documented")
+    expect(a?.severity).toBe("info")
+  })
+
+  it("fires ctg-not-documented for oxytocin patient", () => {
+    const bed = ctgBed({ oxytocinStartTime: t(30 * MIN) })
+    expect(has(computeAlerts(bed, NOW), "ctg-not-documented")).toBe(true)
+  })
+
+  it("fires ctg-not-documented for VBAC patient", () => {
+    const bed = ctgBed({ riskFlags: ["VBAC"] })
+    expect(has(computeAlerts(bed, NOW), "ctg-not-documented")).toBe(true)
+  })
+
+  it("fires ctg-not-documented for preterm patient", () => {
+    const bed = ctgBed({ gestation: "34+2" })
+    expect(has(computeAlerts(bed, NOW), "ctg-not-documented")).toBe(true)
+  })
+
+  it("does not fire ctg-not-documented if CTG already logged", () => {
+    const bed = ctgBed({ analgesia: "Epidural", ctgLog: [normalCTG(20)] })
+    expect(hasNot(computeAlerts(bed, NOW), "ctg-not-documented")).toBe(true)
+  })
+
+  it("does not fire ctg-not-documented in Latent phase", () => {
+    const bed = ctgBed({ labourStage: "Latent", analgesia: "Epidural" })
+    expect(hasNot(computeAlerts(bed, NOW), "ctg-not-documented")).toBe(true)
+  })
+})
+
+describe("CTG — pathological", () => {
+  it("fires ctg-pathological (urgent) for pathological CTG", () => {
+    const bed = ctgBed({ ctgLog: [pathologicalCTG(10)] })
+    const a = computeAlerts(bed, NOW).find(b => b.id === "ctg-pathological")
+    expect(a?.severity).toBe("urgent")
+  })
+
+  it("ctg-pathological fires regardless of time since logged", () => {
+    const bed = ctgBed({ ctgLog: [pathologicalCTG(120)] })
+    expect(has(computeAlerts(bed, NOW), "ctg-pathological")).toBe(true)
+  })
+})
+
+describe("CTG — suspicious", () => {
+  it("fires ctg-suspicious (warning) when < 30 min after logging", () => {
+    const bed = ctgBed({ ctgLog: [suspiciousCTG(20)] })
+    const a = computeAlerts(bed, NOW).find(b => b.id === "ctg-suspicious")
+    expect(a?.severity).toBe("warning")
+  })
+
+  it("fires ctg-suspicious-overdue (urgent) when > 30 min with no new CTG", () => {
+    const bed = ctgBed({ ctgLog: [suspiciousCTG(31)] })
+    const a = computeAlerts(bed, NOW).find(b => b.id === "ctg-suspicious-overdue")
+    expect(a?.severity).toBe("urgent")
+  })
+
+  it("ctg-suspicious escalates to ctg-suspicious-overdue at exactly 30 min", () => {
+    const before = ctgBed({ ctgLog: [suspiciousCTG(29)] })
+    const after  = ctgBed({ ctgLog: [suspiciousCTG(30)] })
+    expect(has(computeAlerts(before, NOW), "ctg-suspicious")).toBe(true)
+    expect(has(computeAlerts(after,  NOW), "ctg-suspicious-overdue")).toBe(true)
+  })
+
+  it("no suspicious alert if follow-up CTG is normal", () => {
+    const bed = ctgBed({ ctgLog: [suspiciousCTG(60), normalCTG(10)] })
+    expect(hasNot(computeAlerts(bed, NOW), "ctg-suspicious")).toBe(true)
+    expect(hasNot(computeAlerts(bed, NOW), "ctg-suspicious-overdue")).toBe(true)
+  })
+})
+
+describe("CTG — normal review overdue", () => {
+  it("no ctg-review-due for non-indicated patient even if 90 min since CTG", () => {
+    const bed = ctgBed({ ctgLog: [normalCTG(90)] })
+    expect(hasNot(computeAlerts(bed, NOW), "ctg-review-due")).toBe(true)
+  })
+
+  it("fires ctg-review-due (info) for indicated patient at 60+ min since normal CTG", () => {
+    const bed = ctgBed({ analgesia: "Epidural", ctgLog: [normalCTG(61)] })
+    const a = computeAlerts(bed, NOW).find(b => b.id === "ctg-review-due")
+    expect(a?.severity).toBe("info")
+  })
+
+  it("no ctg-review-due at 59 min for indicated patient", () => {
+    const bed = ctgBed({ analgesia: "Epidural", ctgLog: [normalCTG(59)] })
+    expect(hasNot(computeAlerts(bed, NOW), "ctg-review-due")).toBe(true)
   })
 })
 
