@@ -922,12 +922,24 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
   const [gestWeeks, setGestW] = useState(40);
   const [gestDays,  setGestD] = useState(0);
   const [err, setErr]         = useState("");
-  const [stage, setStage]   = useState("Active first stage");
-  const [mode, setMode]     = useState("Spontaneous");
-  const [indMethod, setIndM]= useState("Dinoprostone");
-  const [analgesia, setAnal]= useState("None");
-  const [flags, setFlags]   = useState([]);
-  const [admTime, setAdmT]  = useState("");
+  const [stage, setStage]     = useState("Active first stage");
+  const [mode, setMode]       = useState("Spontaneous");
+  const [indMethod, setIndM]  = useState("Dinoprostone");
+  const [analgesia, setAnal]  = useState("None");
+  const [flags, setFlags]     = useState([]);
+  const [admTime, setAdmT]    = useState("");
+
+  // Admission VE (captured inline in step 2 for non-latent stages)
+  const [admDilation, setAdmDil]   = useState(null);
+  const [admMembranes, setAdmMemb] = useState("Intact");
+  const [admStation, setAdmStn]    = useState(0);
+  const [admContracts, setAdmContr]= useState(3);
+
+  const handleStageChange = (s) => {
+    setStage(s);
+    if (s === "Active second stage") setAdmDil(10);
+    else if (admDilation === 10 && stage === "Active second stage") setAdmDil(null);
+  };
 
   const goNext = () => {
     if (step === 1) {
@@ -942,6 +954,17 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
       setStep(4);
     } else {
       const id = `bed-${Date.now()}`;
+      const stageTime = admTime ? timeToISO(admTime) : nowISO();
+      const admVE = stage !== "Latent" && admDilation !== null ? [{
+        id: `ve-${Date.now()}`,
+        time: stageTime,
+        dilation: admDilation,
+        membranes: admMembranes,
+        membranesTime: admMembranes !== "Intact" ? stageTime : null,
+        station: admStation,
+        presentation: "Cephalic",
+        contractions: admContracts,
+      }] : [];
       onSave({
         id, bedNumber: bedNum.trim(),
         admissionTime: admTime ? timeToISO(admTime) : null,
@@ -949,12 +972,11 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
         modeOfOnset: mode,
         inductionMethod: mode === "Induced" ? indMethod : null,
         analgesia, riskFlags: flags, labourStage: stage,
-        activeFirstStageStartTime: stage === "Active first stage"
-          ? (admTime ? timeToISO(admTime) : nowISO()) : null,
-        passiveStartTime: stage === "Passive second stage" ? nowISO() : null,
-        pushingStartTime: stage === "Active second stage"  ? nowISO() : null,
+        activeFirstStageStartTime: stage === "Active first stage" ? stageTime : null,
+        passiveStartTime: stage === "Passive second stage" ? stageTime : null,
+        pushingStartTime: stage === "Active second stage"  ? stageTime : null,
         armTime: null, oxytocinStartTime: null,
-        ves: [], oxytocinLog: [], ctgLog: [], observations: {},
+        ves: admVE, oxytocinLog: [], ctgLog: [], observations: {},
       });
     }
   };
@@ -1007,11 +1029,48 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
         )}
 
         {step === 2 && (
-          <div>
-            <SLabel className="mb-3">Labour stage — NICE NG235 §1.1</SLabel>
-            <TileGrid value={stage} onChange={setStage} cols={2}
-              options={["Latent","Active first stage","Passive second stage","Active second stage"]}
-              subFn={o => STAGE_SUB[o]} />
+          <div className="space-y-6">
+            <div>
+              <SLabel className="mb-3">Labour stage — NICE NG235 §1.1</SLabel>
+              <TileGrid value={stage} onChange={handleStageChange} cols={2}
+                options={["Latent","Active first stage","Passive second stage","Active second stage"]}
+                subFn={o => STAGE_SUB[o]} />
+            </div>
+
+            {stage !== "Latent" && (
+              <>
+                <div className="h-px bg-gray-100" />
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest -mb-2">Admission findings</p>
+
+                <div>
+                  <div className="flex items-baseline justify-between mb-3">
+                    <SLabel>Dilation</SLabel>
+                    {admDilation !== null
+                      ? <span className="text-xl font-bold text-gray-900">{admDilation} cm</span>
+                      : <span className="text-xs text-gray-400">tap a circle</span>}
+                  </div>
+                  <NumberGrid value={admDilation} onChange={setAdmDil} />
+                </div>
+
+                <div>
+                  <SLabel className="mb-2">Membranes</SLabel>
+                  <PillRow value={admMembranes} onChange={setAdmMemb} options={["Intact","SROM","AROM"]} />
+                </div>
+
+                <div>
+                  <SLabel className="mb-3">Station</SLabel>
+                  <StationStrip value={admStation} onChange={setAdmStn} />
+                </div>
+
+                <div>
+                  <div className="flex items-baseline justify-between mb-3">
+                    <SLabel>Contractions / 10 min</SLabel>
+                    <span className="text-xl font-bold text-gray-900">{admContracts}</span>
+                  </div>
+                  <Stepper value={admContracts} onChange={setAdmContr} min={0} max={10} />
+                </div>
+              </>
+            )}
           </div>
         )}
 
