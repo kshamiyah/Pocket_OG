@@ -1361,9 +1361,18 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
     "preterm-steroids": "corticosteroidsConfirmed",
     "preterm-tocolysis":"tocolysisOffered",
   };
+  const OBS_STAMP = {
+    "pulse-never": "lastPulse", "pulse-due": "lastPulse",
+    "bp-never":    "lastBP",    "bp-due":    "lastBP",
+    "temp-never":  "lastTemp",  "temp-due":  "lastTemp",
+    "bgl-never":   "lastBGL",   "bgl-due":   "lastBGL",
+  };
   const ackAlert = id => {
-    const flag = PERSISTENT_FLAGS[id];
-    if (flag) onUpdate({ [flag]: true });
+    if (PERSISTENT_FLAGS[id]) {
+      onUpdate({ [PERSISTENT_FLAGS[id]]: true });
+    } else if (OBS_STAMP[id]) {
+      onUpdate({ observations: { ...bed.observations, [OBS_STAMP[id]]: nowISO() } });
+    }
   };
 
   const status   = bedStatusColor(alerts);
@@ -1457,7 +1466,7 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
             {alerts.length > 0
               ? <div className="space-y-2">{alerts.map(a => (
                   <AlertCard key={a.id} alert={a}
-                    onAcknowledge={PERSISTENT_FLAGS[a.id] ? ackAlert : undefined} />
+                    onAcknowledge={(PERSISTENT_FLAGS[a.id] || OBS_STAMP[a.id]) ? ackAlert : undefined} />
                 ))}</div>
               : <div className="rounded-2xl bg-green-50 border border-green-200 p-4">
                   <p className="text-sm font-bold text-green-700">All clear</p>
