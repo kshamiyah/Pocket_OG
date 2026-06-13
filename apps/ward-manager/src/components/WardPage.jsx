@@ -903,7 +903,7 @@ function CTGSheet({ bed, onSave }) {
   );
 }
 
-// ─── Admission wizard — 4 steps ───────────────────────────────────────────
+// ─── Admission wizard — 2 steps ───────────────────────────────────────────
 
 function WizardDots({ step, total = 4 }) {
   return (
@@ -922,23 +922,49 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
   const [gestWeeks, setGestW] = useState(40);
   const [gestDays,  setGestD] = useState(0);
   const [err, setErr]         = useState("");
-  const [stage, setStage]     = useState("Active first stage");
+  const [stage, setStage]     = useState(null);
   const [mode, setMode]       = useState("Spontaneous");
   const [indMethod, setIndM]  = useState("Dinoprostone");
   const [analgesia, setAnal]  = useState("None");
   const [flags, setFlags]     = useState([]);
-  const [admTime, setAdmT]    = useState("");
+  const [admTime, setAdmT]    = useState(timeInputNow);
 
-  // Admission VE (captured inline in step 2 for non-latent stages)
+  // Admission VE — dilation drives stage deduction
   const [admDilation, setAdmDil]   = useState(null);
   const [admMembranes, setAdmMemb] = useState("Intact");
   const [admStation, setAdmStn]    = useState(0);
   const [admContracts, setAdmContr]= useState(3);
+  const [admPushing, setAdmPush]   = useState(false);
+
+  const deduceStage = (d, ctx, isPushing) => {
+    if (d === null) return null; // no dilation → stage not yet determined
+    if (d <= 2) return "Latent";
+    // 3 cm: latent unless contractions are regular/established (≥ 4/10 min)
+    if (d === 3) return ctx.contractions >= 4 ? "Active first stage" : "Latent";
+    if (d <= 9) return "Active first stage";
+    return isPushing ? "Active second stage" : "Passive second stage";
+  };
+
+  const handleDilationChange = (d) => {
+    setAdmDil(d);
+    setStage(deduceStage(d, { contractions: admContracts }, admPushing));
+  };
+
+  const handleContractionChange = (c) => {
+    setAdmContr(c);
+    // Re-deduce at the 3 cm boundary when contractions change
+    if (admDilation === 3) setStage(deduceStage(3, { contractions: c }, admPushing));
+  };
+
+  const handlePushingChange = (isPushing) => {
+    setAdmPush(isPushing);
+    if (admDilation === 10) setStage(isPushing ? "Active second stage" : "Passive second stage");
+  };
 
   const handleStageChange = (s) => {
     setStage(s);
+    // Manual override from fallback picker — also set dilation hint at 10 for 2nd stage
     if (s === "Active second stage") setAdmDil(10);
-    else if (admDilation === 10 && stage === "Active second stage") setAdmDil(null);
   };
 
   const goNext = () => {
@@ -949,13 +975,12 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
       if (gestWeeks < 28) { setErr("Gestation below 28+0 is not yet supported"); return; }
       setErr(""); setStep(2);
     } else if (step === 2) {
-      setStep(3);
-    } else if (step === 3) {
-      setStep(4);
+      if (!stage) { setErr("Enter dilation or select a stage"); return; }
+      setErr(""); setStep(3);
     } else {
       const id = `bed-${Date.now()}`;
       const stageTime = admTime ? timeToISO(admTime) : nowISO();
-      const admVE = stage !== "Latent" && admDilation !== null ? [{
+      const admVE = admDilation !== null ? [{
         id: `ve-${Date.now()}`,
         time: stageTime,
         dilation: admDilation,
@@ -981,7 +1006,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
     }
   };
 
-  const titles = ["", "Who?", "What stage?", "Setup", "Any concerns?"];
+  const titles = ["", "Patient", "Examination", "Context"];
 
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col">
@@ -994,12 +1019,13 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
           </svg>
         </button>
         <p className="flex-1 text-base font-bold text-gray-900">{titles[step]}</p>
-        <WizardDots step={step} total={4} />
+        <WizardDots step={step} total={3} />
       </div>
 
       {/* Step content */}
       <div className="flex-1 overflow-y-auto px-5 py-6 space-y-7">
 
+        {/* ── Step 1: Patient ─────────────────────────────────────── */}
         {step === 1 && (
           <>
             <div>
@@ -1028,29 +1054,66 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
           </>
         )}
 
+        {/* ── Step 2: Examination ─────────────────────────────────── */}
         {step === 2 && (
-          <div className="space-y-6">
+          <>
+            {/* Dilation — the hero question on this screen */}
             <div>
-              <SLabel className="mb-3">Labour stage — NICE NG235 §1.1</SLabel>
-              <TileGrid value={stage} onChange={handleStageChange} cols={2}
-                options={["Latent","Active first stage","Passive second stage","Active second stage"]}
-                subFn={o => STAGE_SUB[o]} />
+              <div className="flex items-end justify-between mb-4">
+                <SLabel>Dilation</SLabel>
+                {admDilation !== null
+                  ? <span className="text-3xl font-black text-gray-900 leading-none">{admDilation} <span className="text-lg font-semibold text-gray-400">cm</span></span>
+                  : <span className="text-xs text-gray-400">tap a circle</span>}
+              </div>
+              <NumberGrid value={admDilation} onChange={handleDilationChange} />
+
+              {/* Stage chip — appears as soon as dilation is tapped */}
+              {admDilation !== null && (() => {
+                const chipCls = {
+                  "Latent":               "bg-gray-100 text-gray-600",
+                  "Active first stage":   "bg-blue-100 text-blue-700",
+                  "Passive second stage": "bg-violet-100 text-violet-700",
+                  "Active second stage":  "bg-violet-200 text-violet-800",
+                }[stage] ?? "bg-gray-100 text-gray-600";
+                return (
+                  <div className="flex items-center gap-2 mt-3">
+                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold ${chipCls}`}>{stage}</span>
+                    {admDilation === 3 && (
+                      <span className="text-[11px] text-gray-400">
+                        {admContracts >= 4 ? "≥ 4 ctx/10 min" : "adjust contractions below to refine"}
+                      </span>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
-            {stage !== "Latent" && (
+            {/* Pushing? — only at 10 cm */}
+            {admDilation === 10 && (
+              <div>
+                <SLabel className="mb-3">Actively pushing?</SLabel>
+                <PillRow value={admPushing ? "Yes" : "No"}
+                  onChange={v => handlePushingChange(v === "Yes")}
+                  options={["No","Yes"]} />
+              </div>
+            )}
+
+            {/* Fallback stage picker — only when no dilation entered */}
+            {admDilation === null && (
+              <div>
+                <SLabel className="mb-1">No VE yet — select stage manually</SLabel>
+                <p className="text-[11px] text-gray-400 mb-3">Or tap a dilation circle above to auto-deduce</p>
+                <TileGrid value={stage} onChange={handleStageChange} cols={2}
+                  options={["Latent","Active first stage","Passive second stage","Active second stage"]}
+                  subFn={o => STAGE_SUB[o]} />
+                {err && <p className="text-xs text-red-500 mt-2">{err}</p>}
+              </div>
+            )}
+
+            {/* Rest of VE — only when dilation entered */}
+            {admDilation !== null && (
               <>
                 <div className="h-px bg-gray-100" />
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest -mb-2">Admission findings</p>
-
-                <div>
-                  <div className="flex items-baseline justify-between mb-3">
-                    <SLabel>Dilation</SLabel>
-                    {admDilation !== null
-                      ? <span className="text-xl font-bold text-gray-900">{admDilation} cm</span>
-                      : <span className="text-xs text-gray-400">tap a circle</span>}
-                  </div>
-                  <NumberGrid value={admDilation} onChange={setAdmDil} />
-                </div>
 
                 <div>
                   <SLabel className="mb-2">Membranes</SLabel>
@@ -1067,13 +1130,14 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
                     <SLabel>Contractions / 10 min</SLabel>
                     <span className="text-xl font-bold text-gray-900">{admContracts}</span>
                   </div>
-                  <Stepper value={admContracts} onChange={setAdmContr} min={0} max={10} />
+                  <Stepper value={admContracts} onChange={handleContractionChange} min={0} max={10} />
                 </div>
               </>
             )}
-          </div>
+          </>
         )}
 
+        {/* ── Step 3: Context ─────────────────────────────────────── */}
         {step === 3 && (
           <>
             <div>
@@ -1088,10 +1152,12 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
             </div>
 
             <div>
-              <SLabel className="mb-3">Mode of onset</SLabel>
-              <TileGrid value={mode} onChange={setMode} cols={3}
+              <SLabel className="mb-2">Mode of onset</SLabel>
+              <PillRow value={mode} onChange={setMode}
                 options={["Spontaneous","Induced","PPROM"]}
-                subFn={o => ({ Spontaneous:"Natural onset", Induced:"IOL in progress", PPROM:"Pre-term PROM" }[o])} />
+                labelFn={o => ({ Spontaneous:"Spontaneous", Induced:"Induced", PPROM:"PPROM" }[o])} />
+              {mode === "Induced" && <p className="text-[10px] text-gray-400 mt-1.5">IOL in progress</p>}
+              {mode === "PPROM" && <p className="text-[10px] text-gray-400 mt-1.5">Pre-term pre-labour rupture of membranes</p>}
             </div>
 
             {mode === "Induced" && (
@@ -1101,11 +1167,9 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
                   options={["Dinoprostone","Balloon","Misoprostol","ARM+Synto"]} />
               </div>
             )}
-          </>
-        )}
 
-        {step === 4 && (
-          <>
+            <div className="h-px bg-gray-100" />
+
             <div>
               <SLabel className="mb-3">Risk flags — select all that apply</SLabel>
               <ChipGroup
@@ -1147,7 +1211,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
       <div className="px-5 pt-4 border-t border-gray-100 shrink-0" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.25rem)' }}>
         <button onClick={goNext}
           className="w-full py-4 rounded-2xl text-base font-bold bg-gray-900 text-white active:scale-95 transition-all">
-          {step < 4 ? "Next" : "Add to ward"}
+          {step < 3 ? "Next" : "Add to ward"}
         </button>
       </div>
     </div>
@@ -1369,9 +1433,18 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
     "preterm-steroids": "corticosteroidsConfirmed",
     "preterm-tocolysis":"tocolysisOffered",
   };
+  const OBS_STAMP = {
+    "pulse-never": "lastPulse", "pulse-due": "lastPulse",
+    "bp-never":    "lastBP",    "bp-due":    "lastBP",
+    "temp-never":  "lastTemp",  "temp-due":  "lastTemp",
+    "bgl-never":   "lastBGL",   "bgl-due":   "lastBGL",
+  };
   const ackAlert = id => {
-    const flag = PERSISTENT_FLAGS[id];
-    if (flag) onUpdate({ [flag]: true });
+    if (PERSISTENT_FLAGS[id]) {
+      onUpdate({ [PERSISTENT_FLAGS[id]]: true });
+    } else if (OBS_STAMP[id]) {
+      onUpdate({ observations: { ...bed.observations, [OBS_STAMP[id]]: nowISO() } });
+    }
   };
 
   const status   = bedStatusColor(alerts);
@@ -1465,7 +1538,7 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
             {alerts.length > 0
               ? <div className="space-y-2">{alerts.map(a => (
                   <AlertCard key={a.id} alert={a}
-                    onAcknowledge={PERSISTENT_FLAGS[a.id] ? ackAlert : undefined} />
+                    onAcknowledge={(PERSISTENT_FLAGS[a.id] || OBS_STAMP[a.id]) ? ackAlert : undefined} />
                 ))}</div>
               : <div className="rounded-2xl bg-green-50 border border-green-200 p-4">
                   <p className="text-sm font-bold text-green-700">All clear</p>
@@ -2160,9 +2233,11 @@ export default function WardPage({ shift, onEndShift }) {
   const saveNewBed = bed => {
     setBeds(prev => ({ ...prev, [bed.id]: bed }));
     setView("board");
-    // Immediately prompt for first VE
-    setSheet("ve");
-    setSheetBedId(bed.id);
+    // Auto-open VE only for active first stage where no VE was captured in the wizard
+    if (!bed.ves?.length && bed.labourStage === "Active first stage") {
+      setSheet("ve");
+      setSheetBedId(bed.id);
+    }
   };
 
   if (view === "wizard") {
