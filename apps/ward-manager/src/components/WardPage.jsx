@@ -973,8 +973,10 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
       if (!n) { setErr("Enter a bed number"); return; }
       if (existingNumbers.includes(n)) { setErr("Already in use"); return; }
       if (gestWeeks < 28) { setErr("Gestation below 28+0 is not yet supported"); return; }
-      if (!stage) { setErr("Enter dilation or select a labour stage"); return; }
       setErr(""); setStep(2);
+    } else if (step === 2) {
+      if (!stage) { setErr("Enter dilation or select a stage"); return; }
+      setErr(""); setStep(3);
     } else {
       const id = `bed-${Date.now()}`;
       const stageTime = admTime ? timeToISO(admTime) : nowISO();
@@ -1004,7 +1006,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
     }
   };
 
-  const titles = ["", "Patient", "Context"];
+  const titles = ["", "Patient", "Examination", "Context"];
 
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col">
@@ -1017,12 +1019,13 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
           </svg>
         </button>
         <p className="flex-1 text-base font-bold text-gray-900">{titles[step]}</p>
-        <WizardDots step={step} total={2} />
+        <WizardDots step={step} total={3} />
       </div>
 
       {/* Step content */}
       <div className="flex-1 overflow-y-auto px-5 py-6 space-y-7">
 
+        {/* ── Step 1: Patient ─────────────────────────────────────── */}
         {step === 1 && (
           <>
             <div>
@@ -1048,29 +1051,44 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
                 onChange={({ weeks, days }) => { setGestW(weeks); setGestD(days); setErr(""); }}
               />
             </div>
+          </>
+        )}
 
-            <div className="h-px bg-gray-100" />
-
-            {/* Dilation — always shown; drives stage automatically */}
+        {/* ── Step 2: Examination ─────────────────────────────────── */}
+        {step === 2 && (
+          <>
+            {/* Dilation — the hero question on this screen */}
             <div>
-              <div className="flex items-baseline justify-between mb-3">
-                <SLabel>Dilation on admission</SLabel>
+              <div className="flex items-end justify-between mb-4">
+                <SLabel>Dilation</SLabel>
                 {admDilation !== null
-                  ? <span className="text-xl font-bold text-gray-900">{admDilation} cm</span>
-                  : <span className="text-xs text-gray-400">tap to record VE</span>}
+                  ? <span className="text-3xl font-black text-gray-900 leading-none">{admDilation} <span className="text-lg font-semibold text-gray-400">cm</span></span>
+                  : <span className="text-xs text-gray-400">tap a circle</span>}
               </div>
               <NumberGrid value={admDilation} onChange={handleDilationChange} />
-              {admDilation !== null && (
-                <p className="text-[11px] text-gray-400 mt-2.5">
-                  Stage deduced: <span className="font-semibold text-gray-600">{stage}</span>
-                  {admDilation === 3 && (
-                    <span className="ml-1">{admContracts >= 4 ? "· ≥ 4 ctx/10 min" : "· adjust contractions below to refine"}</span>
-                  )}
-                </p>
-              )}
+
+              {/* Stage chip — appears as soon as dilation is tapped */}
+              {admDilation !== null && (() => {
+                const chipCls = {
+                  "Latent":               "bg-gray-100 text-gray-600",
+                  "Active first stage":   "bg-blue-100 text-blue-700",
+                  "Passive second stage": "bg-violet-100 text-violet-700",
+                  "Active second stage":  "bg-violet-200 text-violet-800",
+                }[stage] ?? "bg-gray-100 text-gray-600";
+                return (
+                  <div className="flex items-center gap-2 mt-3">
+                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold ${chipCls}`}>{stage}</span>
+                    {admDilation === 3 && (
+                      <span className="text-[11px] text-gray-400">
+                        {admContracts >= 4 ? "≥ 4 ctx/10 min" : "adjust contractions below to refine"}
+                      </span>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
-            {/* Pushing? — only when fully dilated */}
+            {/* Pushing? — only at 10 cm */}
             {admDilation === 10 && (
               <div>
                 <SLabel className="mb-3">Actively pushing?</SLabel>
@@ -1080,20 +1098,23 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
               </div>
             )}
 
-            {/* Fallback stage picker — shown when no dilation entered */}
+            {/* Fallback stage picker — only when no dilation entered */}
             {admDilation === null && (
               <div>
-                <SLabel className="mb-1">Labour stage</SLabel>
-                <p className="text-[11px] text-gray-400 mb-3">If no VE yet — or enter dilation above to auto-deduce</p>
+                <SLabel className="mb-1">No VE yet — select stage manually</SLabel>
+                <p className="text-[11px] text-gray-400 mb-3">Or tap a dilation circle above to auto-deduce</p>
                 <TileGrid value={stage} onChange={handleStageChange} cols={2}
                   options={["Latent","Active first stage","Passive second stage","Active second stage"]}
                   subFn={o => STAGE_SUB[o]} />
+                {err && <p className="text-xs text-red-500 mt-2">{err}</p>}
               </div>
             )}
 
-            {/* Other VE findings — shown when dilation is entered */}
+            {/* Rest of VE — only when dilation entered */}
             {admDilation !== null && (
               <>
+                <div className="h-px bg-gray-100" />
+
                 <div>
                   <SLabel className="mb-2">Membranes</SLabel>
                   <PillRow value={admMembranes} onChange={setAdmMemb} options={["Intact","SROM","AROM"]} />
@@ -1116,7 +1137,8 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
           </>
         )}
 
-        {step === 2 && (
+        {/* ── Step 3: Context ─────────────────────────────────────── */}
+        {step === 3 && (
           <>
             <div>
               <SLabel className="mb-2">Analgesia</SLabel>
@@ -1187,7 +1209,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
       <div className="px-5 pt-4 border-t border-gray-100 shrink-0" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.25rem)' }}>
         <button onClick={goNext}
           className="w-full py-4 rounded-2xl text-base font-bold bg-gray-900 text-white active:scale-95 transition-all">
-          {step < 2 ? "Next" : "Add to ward"}
+          {step < 3 ? "Next" : "Add to ward"}
         </button>
       </div>
     </div>
