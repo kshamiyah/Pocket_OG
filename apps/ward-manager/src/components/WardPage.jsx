@@ -903,7 +903,7 @@ function CTGSheet({ bed, onSave }) {
   );
 }
 
-// ─── Admission wizard — 4 steps ───────────────────────────────────────────
+// ─── Admission wizard — 2 steps ───────────────────────────────────────────
 
 function WizardDots({ step, total = 4 }) {
   return (
@@ -927,7 +927,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
   const [indMethod, setIndM]  = useState("Dinoprostone");
   const [analgesia, setAnal]  = useState("None");
   const [flags, setFlags]     = useState([]);
-  const [admTime, setAdmT]    = useState("");
+  const [admTime, setAdmT]    = useState(timeInputNow);
 
   // Admission VE (captured inline in step 2 for non-latent stages)
   const [admDilation, setAdmDil]   = useState(null);
@@ -948,10 +948,6 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
       if (existingNumbers.includes(n)) { setErr("Already in use"); return; }
       if (gestWeeks < 28) { setErr("Gestation below 28+0 is not yet supported"); return; }
       setErr(""); setStep(2);
-    } else if (step === 2) {
-      setStep(3);
-    } else if (step === 3) {
-      setStep(4);
     } else {
       const id = `bed-${Date.now()}`;
       const stageTime = admTime ? timeToISO(admTime) : nowISO();
@@ -981,7 +977,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
     }
   };
 
-  const titles = ["", "Who?", "What stage?", "Setup", "Any concerns?"];
+  const titles = ["", "Patient", "Context"];
 
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col">
@@ -994,7 +990,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
           </svg>
         </button>
         <p className="flex-1 text-base font-bold text-gray-900">{titles[step]}</p>
-        <WizardDots step={step} total={4} />
+        <WizardDots step={step} total={2} />
       </div>
 
       {/* Step content */}
@@ -1025,11 +1021,9 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
                 onChange={({ weeks, days }) => { setGestW(weeks); setGestD(days); setErr(""); }}
               />
             </div>
-          </>
-        )}
 
-        {step === 2 && (
-          <div className="space-y-6">
+            <div className="h-px bg-gray-100" />
+
             <div>
               <SLabel className="mb-3">Labour stage — NICE NG235 §1.1</SLabel>
               <TileGrid value={stage} onChange={handleStageChange} cols={2}
@@ -1071,10 +1065,10 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
                 </div>
               </>
             )}
-          </div>
+          </>
         )}
 
-        {step === 3 && (
+        {step === 2 && (
           <>
             <div>
               <SLabel className="mb-2">Analgesia</SLabel>
@@ -1101,11 +1095,9 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
                   options={["Dinoprostone","Balloon","Misoprostol","ARM+Synto"]} />
               </div>
             )}
-          </>
-        )}
 
-        {step === 4 && (
-          <>
+            <div className="h-px bg-gray-100" />
+
             <div>
               <SLabel className="mb-3">Risk flags — select all that apply</SLabel>
               <ChipGroup
@@ -1147,7 +1139,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
       <div className="px-5 pt-4 border-t border-gray-100 shrink-0" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.25rem)' }}>
         <button onClick={goNext}
           className="w-full py-4 rounded-2xl text-base font-bold bg-gray-900 text-white active:scale-95 transition-all">
-          {step < 4 ? "Next" : "Add to ward"}
+          {step < 2 ? "Next" : "Add to ward"}
         </button>
       </div>
     </div>
