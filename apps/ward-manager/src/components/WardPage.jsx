@@ -929,16 +929,34 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
   const [flags, setFlags]     = useState([]);
   const [admTime, setAdmT]    = useState(timeInputNow);
 
-  // Admission VE (captured inline in step 2 for non-latent stages)
+  // Admission VE — dilation drives stage deduction
   const [admDilation, setAdmDil]   = useState(null);
   const [admMembranes, setAdmMemb] = useState("Intact");
   const [admStation, setAdmStn]    = useState(0);
   const [admContracts, setAdmContr]= useState(3);
+  const [admPushing, setAdmPush]   = useState(false);
+
+  const deduceStage = (d, isPushing) => {
+    if (d === null) return stage; // no VE — keep whatever is set manually
+    if (d <= 3) return "Latent";
+    if (d <= 9) return "Active first stage";
+    return isPushing ? "Active second stage" : "Passive second stage";
+  };
+
+  const handleDilationChange = (d) => {
+    setAdmDil(d);
+    setStage(deduceStage(d, admPushing));
+  };
+
+  const handlePushingChange = (isPushing) => {
+    setAdmPush(isPushing);
+    if (admDilation === 10) setStage(isPushing ? "Active second stage" : "Passive second stage");
+  };
 
   const handleStageChange = (s) => {
     setStage(s);
+    // Manual override from fallback picker — also set dilation hint at 10 for 2nd stage
     if (s === "Active second stage") setAdmDil(10);
-    else if (admDilation === 10 && stage === "Active second stage") setAdmDil(null);
   };
 
   const goNext = () => {
@@ -951,7 +969,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
     } else {
       const id = `bed-${Date.now()}`;
       const stageTime = admTime ? timeToISO(admTime) : nowISO();
-      const admVE = stage !== "Latent" && admDilation !== null ? [{
+      const admVE = admDilation !== null ? [{
         id: `ve-${Date.now()}`,
         time: stageTime,
         dilation: admDilation,
@@ -1024,28 +1042,46 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
 
             <div className="h-px bg-gray-100" />
 
+            {/* Dilation — always shown; drives stage automatically */}
             <div>
-              <SLabel className="mb-3">Labour stage — NICE NG235 §1.1</SLabel>
-              <TileGrid value={stage} onChange={handleStageChange} cols={2}
-                options={["Latent","Active first stage","Passive second stage","Active second stage"]}
-                subFn={o => STAGE_SUB[o]} />
+              <div className="flex items-baseline justify-between mb-3">
+                <SLabel>Dilation on admission</SLabel>
+                {admDilation !== null
+                  ? <span className="text-xl font-bold text-gray-900">{admDilation} cm</span>
+                  : <span className="text-xs text-gray-400">tap to record VE</span>}
+              </div>
+              <NumberGrid value={admDilation} onChange={handleDilationChange} />
+              {admDilation !== null && (
+                <p className="text-[11px] text-gray-400 mt-2.5">
+                  Stage deduced: <span className="font-semibold text-gray-600">{stage}</span>
+                </p>
+              )}
             </div>
 
-            {stage !== "Latent" && (
+            {/* Pushing? — only when fully dilated */}
+            {admDilation === 10 && (
+              <div>
+                <SLabel className="mb-3">Actively pushing?</SLabel>
+                <PillRow value={admPushing ? "Yes" : "No"}
+                  onChange={v => handlePushingChange(v === "Yes")}
+                  options={["No","Yes"]} />
+              </div>
+            )}
+
+            {/* Fallback stage picker — only when no VE entered */}
+            {admDilation === null && (
+              <div>
+                <SLabel className="mb-1">Labour stage</SLabel>
+                <p className="text-[11px] text-gray-400 mb-3">Or enter dilation above — stage will be deduced</p>
+                <TileGrid value={stage} onChange={handleStageChange} cols={2}
+                  options={["Latent","Active first stage","Passive second stage","Active second stage"]}
+                  subFn={o => STAGE_SUB[o]} />
+              </div>
+            )}
+
+            {/* Other VE findings — shown when dilation is entered */}
+            {admDilation !== null && (
               <>
-                <div className="h-px bg-gray-100" />
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest -mb-2">Admission findings</p>
-
-                <div>
-                  <div className="flex items-baseline justify-between mb-3">
-                    <SLabel>Dilation</SLabel>
-                    {admDilation !== null
-                      ? <span className="text-xl font-bold text-gray-900">{admDilation} cm</span>
-                      : <span className="text-xs text-gray-400">tap a circle</span>}
-                  </div>
-                  <NumberGrid value={admDilation} onChange={setAdmDil} />
-                </div>
-
                 <div>
                   <SLabel className="mb-2">Membranes</SLabel>
                   <PillRow value={admMembranes} onChange={setAdmMemb} options={["Intact","SROM","AROM"]} />
