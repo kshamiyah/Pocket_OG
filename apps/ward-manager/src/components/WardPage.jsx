@@ -936,16 +936,24 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
   const [admContracts, setAdmContr]= useState(3);
   const [admPushing, setAdmPush]   = useState(false);
 
-  const deduceStage = (d, isPushing) => {
-    if (d === null) return stage; // no VE — keep whatever is set manually
-    if (d <= 3) return "Latent";
+  const deduceStage = (d, ctx, isPushing) => {
+    if (d === null) return stage;
+    if (d <= 2) return "Latent";
+    // 3 cm: latent unless contractions are regular/established (≥ 4/10 min)
+    if (d === 3) return ctx.contractions >= 4 ? "Active first stage" : "Latent";
     if (d <= 9) return "Active first stage";
     return isPushing ? "Active second stage" : "Passive second stage";
   };
 
   const handleDilationChange = (d) => {
     setAdmDil(d);
-    setStage(deduceStage(d, admPushing));
+    setStage(deduceStage(d, { contractions: admContracts }, admPushing));
+  };
+
+  const handleContractionChange = (c) => {
+    setAdmContr(c);
+    // Re-deduce at the 3 cm boundary when contractions change
+    if (admDilation === 3) setStage(deduceStage(3, { contractions: c }, admPushing));
   };
 
   const handlePushingChange = (isPushing) => {
@@ -1054,6 +1062,9 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
               {admDilation !== null && (
                 <p className="text-[11px] text-gray-400 mt-2.5">
                   Stage deduced: <span className="font-semibold text-gray-600">{stage}</span>
+                  {admDilation === 3 && (
+                    <span className="ml-1">{admContracts >= 4 ? "· ≥ 4 ctx/10 min" : "· adjust contractions below to refine"}</span>
+                  )}
                 </p>
               )}
             </div>
@@ -1097,7 +1108,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
                     <SLabel>Contractions / 10 min</SLabel>
                     <span className="text-xl font-bold text-gray-900">{admContracts}</span>
                   </div>
-                  <Stepper value={admContracts} onChange={setAdmContr} min={0} max={10} />
+                  <Stepper value={admContracts} onChange={handleContractionChange} min={0} max={10} />
                 </div>
               </>
             )}
