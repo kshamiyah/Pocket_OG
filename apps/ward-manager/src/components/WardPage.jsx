@@ -922,7 +922,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
   const [gestWeeks, setGestW] = useState(40);
   const [gestDays,  setGestD] = useState(0);
   const [err, setErr]         = useState("");
-  const [stage, setStage]     = useState("Active first stage");
+  const [stage, setStage]     = useState(null);
   const [mode, setMode]       = useState("Spontaneous");
   const [indMethod, setIndM]  = useState("Dinoprostone");
   const [analgesia, setAnal]  = useState("None");
@@ -937,7 +937,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
   const [admPushing, setAdmPush]   = useState(false);
 
   const deduceStage = (d, ctx, isPushing) => {
-    if (d === null) return stage;
+    if (d === null) return null; // no dilation → stage not yet determined
     if (d <= 2) return "Latent";
     // 3 cm: latent unless contractions are regular/established (≥ 4/10 min)
     if (d === 3) return ctx.contractions >= 4 ? "Active first stage" : "Latent";
@@ -973,6 +973,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
       if (!n) { setErr("Enter a bed number"); return; }
       if (existingNumbers.includes(n)) { setErr("Already in use"); return; }
       if (gestWeeks < 28) { setErr("Gestation below 28+0 is not yet supported"); return; }
+      if (!stage) { setErr("Enter dilation or select a labour stage"); return; }
       setErr(""); setStep(2);
     } else {
       const id = `bed-${Date.now()}`;
@@ -1079,11 +1080,11 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
               </div>
             )}
 
-            {/* Fallback stage picker — only when no VE entered */}
+            {/* Fallback stage picker — shown when no dilation entered */}
             {admDilation === null && (
               <div>
                 <SLabel className="mb-1">Labour stage</SLabel>
-                <p className="text-[11px] text-gray-400 mb-3">Or enter dilation above — stage will be deduced</p>
+                <p className="text-[11px] text-gray-400 mb-3">If no VE yet — or enter dilation above to auto-deduce</p>
                 <TileGrid value={stage} onChange={handleStageChange} cols={2}
                   options={["Latent","Active first stage","Passive second stage","Active second stage"]}
                   subFn={o => STAGE_SUB[o]} />
