@@ -2233,8 +2233,8 @@ export default function WardPage({ shift, onEndShift }) {
   const saveNewBed = bed => {
     setBeds(prev => ({ ...prev, [bed.id]: bed }));
     setView("board");
-    // Only auto-open VE if none was captured in the wizard
-    if (!bed.ves?.length) {
+    // Auto-open VE only for active first stage where no VE was captured in the wizard
+    if (!bed.ves?.length && bed.labourStage === "Active first stage") {
       setSheet("ve");
       setSheetBedId(bed.id);
     }
