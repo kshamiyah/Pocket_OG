@@ -2231,9 +2231,11 @@ export default function WardPage({ shift, onEndShift }) {
   const saveNewBed = bed => {
     setBeds(prev => ({ ...prev, [bed.id]: bed }));
     setView("board");
-    // Immediately prompt for first VE
-    setSheet("ve");
-    setSheetBedId(bed.id);
+    // Only auto-open VE if none was captured in the wizard
+    if (!bed.ves?.length) {
+      setSheet("ve");
+      setSheetBedId(bed.id);
+    }
   };
 
   if (view === "wizard") {
