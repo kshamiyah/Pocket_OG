@@ -1152,10 +1152,12 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
             </div>
 
             <div>
-              <SLabel className="mb-3">Mode of onset</SLabel>
-              <TileGrid value={mode} onChange={setMode} cols={3}
+              <SLabel className="mb-2">Mode of onset</SLabel>
+              <PillRow value={mode} onChange={setMode}
                 options={["Spontaneous","Induced","PPROM"]}
-                subFn={o => ({ Spontaneous:"Natural onset", Induced:"IOL in progress", PPROM:"Pre-term PROM" }[o])} />
+                labelFn={o => ({ Spontaneous:"Spontaneous", Induced:"Induced", PPROM:"PPROM" }[o])} />
+              {mode === "Induced" && <p className="text-[10px] text-gray-400 mt-1.5">IOL in progress</p>}
+              {mode === "PPROM" && <p className="text-[10px] text-gray-400 mt-1.5">Pre-term pre-labour rupture of membranes</p>}
             </div>
 
             {mode === "Induced" && (
