@@ -84,6 +84,8 @@ export function computeAlerts(bed, now = Date.now()) {
   const isGBSPos = flags.includes("GBS+");
   const membranesTime = findMembranesTime(ves);
   const membranesRuptured = lastVE?.membranes === "SROM" || lastVE?.membranes === "AROM";
+  const lastLiquor = lastVE?.liquor ?? null;
+  const hasMeconium = lastLiquor === "Thin meconium" || lastLiquor === "Thick meconium";
 
   const gestWks = parseGestWeeks(bed.gestation);
   const isPreterm = gestWks !== null && gestWks < 37;
@@ -365,6 +367,45 @@ export function computeAlerts(bed, now = Date.now()) {
     });
   }
 
+  // ─── Liquor / meconium (NICE NG235 §1.7) ────────────────────────────────
+  if (lastLiquor === "Thick meconium") {
+    alerts.push({
+      id: "mec-thick",
+      severity: "urgent",
+      title: "Significant meconium — continuous CTG, notify neonatology",
+      body: "Thick/dark green meconium-stained liquor. Continuous CTG is mandatory. Inform neonatology now. Expedite delivery if fetal compromise evident.",
+      citation: "NICE NG235 §1.7.1 [2023]",
+    });
+  } else if (lastLiquor === "Thin meconium") {
+    alerts.push({
+      id: "mec-thin",
+      severity: "warning",
+      title: "Thin meconium — continuous CTG recommended",
+      body: "Light meconium staining noted. Continuous CTG is recommended. Escalate if CTG becomes suspicious or pathological.",
+      citation: "NICE NG235 §1.7.1 [2023]",
+    });
+  }
+
+  if (lastLiquor === "Blood-stained") {
+    alerts.push({
+      id: "liquor-blood",
+      severity: "warning",
+      title: "Blood-stained liquor — assess for abruption / vasa praevia",
+      body: "Blood-stained amniotic fluid may indicate placental abruption or vasa praevia. Review fetal heart rate and escalate to senior if concerned.",
+      citation: "NICE NG235 §1.7.2 [2023]",
+    });
+  }
+
+  if (lastLiquor === "Absent") {
+    alerts.push({
+      id: "liquor-absent",
+      severity: "warning",
+      title: "No liquor draining post-rupture — assess for oligohydramnios",
+      body: "Absent liquor after membrane rupture may indicate oligohydramnios and cord compression risk. Consider CTG and senior review.",
+      citation: "NICE NG235 §1.7.3 [2023]",
+    });
+  }
+
   // ─── Abnormal observation values ─────────────────────────────────────
   const pulse = obs.pulseValue  ? parseFloat(obs.pulseValue)  : null;
   const bpSys = obs.bpSystolic  ? parseFloat(obs.bpSystolic)  : null;
@@ -553,7 +594,8 @@ export function computeAlerts(bed, now = Date.now()) {
     isDiabetic || isHypertensive || isGBSPos || isPreterm ||
     bed.analgesia === "Epidural" ||
     bed.modeOfOnset === "PPROM" ||
-    bed.oxytocinStartTime
+    bed.oxytocinStartTime ||
+    hasMeconium
   );
 
   if (bed.labourStage && bed.labourStage !== "Latent") {
@@ -568,6 +610,7 @@ export function computeAlerts(bed, now = Date.now()) {
         bed.analgesia === "Epidural" && "Epidural",
         bed.oxytocinStartTime && "Oxytocin",
         bed.modeOfOnset === "PPROM" && "PPROM",
+        hasMeconium && "Meconium",
       ].filter(Boolean).join(", ");
       alerts.push({
         id: "ctg-not-documented",

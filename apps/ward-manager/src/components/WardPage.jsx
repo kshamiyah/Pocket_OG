@@ -1,15 +1,22 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { computeAlerts, bedStatusColor, classifyCTGEntry } from "../utils/wardAlerts";
+import { IOL_IND, iolEntryTier, sortIOLQueue } from "../utils/iolPriority";
 
 // ─── Storage ─────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = "pocket_og_ward_beds";
+const STORAGE_KEY     = "pocket_og_ward_beds";
+const IOL_STORAGE_KEY = "pocket_og_iol_queue";
 
 function loadBeds() {
   try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : {}; }
   catch { return {}; }
 }
 function saveBeds(beds) { localStorage.setItem(STORAGE_KEY, JSON.stringify(beds)); }
+function loadIOL() {
+  try { const r = localStorage.getItem(IOL_STORAGE_KEY); return r ? JSON.parse(r) : []; }
+  catch { return []; }
+}
+function saveIOL(q) { localStorage.setItem(IOL_STORAGE_KEY, JSON.stringify(q)); }
 function nowISO() { return new Date().toISOString(); }
 function timeInputNow() {
   const d = new Date();
@@ -40,7 +47,50 @@ const STAGE_SHORT = {
   "Active second stage":  "Active 2nd",
 };
 
+const LIQUOR_LABEL = {
+  "Clear":          "Clear",
+  "Thin meconium":  "Mec: thin",
+  "Thick meconium": "Mec: thick",
+  "Blood-stained":  "Blood-stained",
+  "Absent":         "Absent",
+};
+
+const IOL_REASONS = [
+  "Post-dates",
+  "PROM at term",
+  "Gestational diabetes",
+  "Pre-eclampsia / hypertension",
+  "Suspected FGR",
+  "Reduced fetal movements",
+  "Obstetric cholestasis",
+  "Previous stillbirth",
+  "Maternal request",
+  "Other",
+];
+
+const TASK_QUICK = [
+  "Repeat FBC",
+  "Group & Save",
+  "Clotting screen",
+  "Senior review",
+  "Repeat CTG",
+  "Antibiotics due",
+  "Consent form",
+  "IV access",
+  "Urine dip",
+];
+
 const PAR_SHORT = { "Para 0": "P0", "Para 1": "P1", "Para 2+": "P2+" };
+
+// ─── IOL Wizard constants ─────────────────────────────────────────────────
+
+const IOL_TIER_META = [
+  { label: "Urgent",   cls: { badge: "bg-red-500 text-white",    border: "border-red-200",   bg: "bg-red-50",    text: "text-red-700"   } },
+  { label: "High",     cls: { badge: "bg-orange-500 text-white", border: "border-orange-200",bg: "bg-orange-50", text: "text-orange-700"} },
+  { label: "Moderate", cls: { badge: "bg-amber-400 text-white",  border: "border-amber-200", bg: "bg-amber-50",  text: "text-amber-700" } },
+  { label: "Routine",  cls: { badge: "bg-gray-300 text-gray-700",border: "border-gray-200",  bg: "bg-white",     text: "text-gray-500"  } },
+];
+
 
 function bedSummary(bed) {
   // Background: who is this patient
@@ -413,7 +463,7 @@ function BottomSheet({ open, onClose, title, sub, children }) {
 
 // ─── VE sheet — 2-page pagination ─────────────────────────────────────────
 
-function VESheet({ bed, onSave }) {
+function VESheet({ bed, editVE, onSave }) {
   const lastVE = bed.ves?.[bed.ves.length - 1];
   const prevMembTime = (() => {
     for (let i = (bed.ves?.length ?? 0) - 1; i >= 0; i--)
@@ -422,22 +472,29 @@ function VESheet({ bed, onSave }) {
   })();
 
   const [page, setPage]          = useState(1);
-  const [dilation, setDil]       = useState(lastVE?.dilation ?? null);
-  const [membranes, setMemb]     = useState(lastVE?.membranes ?? "Intact");
-  const [membTime, setMembTime]  = useState(timeInputNow);
-  const [veTime, setVETime]      = useState(timeInputNow);
-  const [station, setStn]        = useState(lastVE?.station ?? 0);
-  const [presentation, setPres]  = useState("Cephalic");
-  const [contractions, setContr] = useState(lastVE?.contractions ?? 3);
+  const [dilation, setDil]       = useState(editVE?.dilation ?? null);
+  const [membranes, setMemb]     = useState(editVE?.membranes ?? lastVE?.membranes ?? "Intact");
+  const [membTime, setMembTime]  = useState(
+    editVE?.membranesTime ? fmtTime(editVE.membranesTime) : timeInputNow()
+  );
+  const [veTime, setVETime]      = useState(
+    editVE?.time ? fmtTime(editVE.time) : timeInputNow()
+  );
+  const [station, setStn]        = useState(editVE?.station ?? lastVE?.station ?? 0);
+  const [presentation, setPres]  = useState(editVE?.presentation ?? "Cephalic");
+  const [contractions, setContr] = useState(editVE?.contractions ?? lastVE?.contractions ?? 3);
+  const [liquor, setLiquor]      = useState(editVE?.liquor ?? lastVE?.liquor ?? null);
 
   const save = () => {
     if (dilation === null) return;
     onSave({
-      id: `ve-${Date.now()}`, time: timeToISO(veTime),
+      id: editVE?.id ?? `ve-${Date.now()}`,
+      time: timeToISO(veTime),
       dilation, station, presentation, membranes,
       membranesTime: membranes !== "Intact"
-        ? (prevMembTime && lastVE?.membranes === membranes ? prevMembTime : timeToISO(membTime))
+        ? (editVE ? timeToISO(membTime) : prevMembTime && lastVE?.membranes === membranes ? prevMembTime : timeToISO(membTime))
         : null,
+      liquor: membranes !== "Intact" ? liquor : null,
       contractions,
     });
   };
@@ -473,6 +530,20 @@ function VESheet({ bed, onSave }) {
                 </div>
               )}
             </div>
+
+            {membranes !== "Intact" && (
+              <div>
+                <SLabel className="mb-2">Liquor</SLabel>
+                <div className="space-y-2">
+                  <PillRow value={liquor} onChange={setLiquor}
+                    options={["Clear","Thin meconium","Thick meconium"]}
+                    labelFn={o => LIQUOR_LABEL[o]} />
+                  <PillRow value={liquor} onChange={setLiquor}
+                    options={["Blood-stained","Absent"]}
+                    labelFn={o => LIQUOR_LABEL[o]} />
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -915,16 +986,17 @@ function WizardDots({ step, total = 4 }) {
   );
 }
 
-function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
+function AdmissionWizard({ existingNumbers, onSave, onCancel, initialValues = null }) {
   const [step, setStep]       = useState(1);
   const [bedNum, setBedNum]   = useState("");
   const [parity, setParity]   = useState("Para 0");
-  const [gestWeeks, setGestW] = useState(40);
-  const [gestDays,  setGestD] = useState(0);
+  const [gestWeeks, setGestW] = useState(initialValues?.gestWeeks ?? 40);
+  const [gestDays,  setGestD] = useState(initialValues?.gestDays  ?? 0);
   const [err, setErr]         = useState("");
   const [stage, setStage]     = useState(null);
-  const [mode, setMode]       = useState("Spontaneous");
+  const [mode, setMode]       = useState(initialValues?.mode ?? "Spontaneous");
   const [indMethod, setIndM]  = useState("Dinoprostone");
+  const [iolReasons, setIolR] = useState(initialValues?.iolReasons ?? []);
   const [analgesia, setAnal]  = useState("None");
   const [flags, setFlags]     = useState([]);
   const [admTime, setAdmT]    = useState(timeInputNow);
@@ -932,6 +1004,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
   // Admission VE — dilation drives stage deduction
   const [admDilation, setAdmDil]   = useState(null);
   const [admMembranes, setAdmMemb] = useState("Intact");
+  const [admLiquor, setAdmLiquor]  = useState(null);
   const [admStation, setAdmStn]    = useState(0);
   const [admContracts, setAdmContr]= useState(3);
   const [admPushing, setAdmPush]   = useState(false);
@@ -986,6 +1059,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
         dilation: admDilation,
         membranes: admMembranes,
         membranesTime: admMembranes !== "Intact" ? stageTime : null,
+        liquor: admMembranes !== "Intact" ? admLiquor : null,
         station: admStation,
         presentation: "Cephalic",
         contractions: admContracts,
@@ -996,6 +1070,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
         parity, gestation: `${gestWeeks}+${gestDays}`,
         modeOfOnset: mode,
         inductionMethod: mode === "Induced" ? indMethod : null,
+        iolReasons: mode === "Induced" ? iolReasons : [],
         analgesia, riskFlags: flags, labourStage: stage,
         activeFirstStageStartTime: stage === "Active first stage" ? stageTime : null,
         passiveStartTime: stage === "Passive second stage" ? stageTime : null,
@@ -1120,6 +1195,20 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
                   <PillRow value={admMembranes} onChange={setAdmMemb} options={["Intact","SROM","AROM"]} />
                 </div>
 
+                {admMembranes !== "Intact" && (
+                  <div>
+                    <SLabel className="mb-2">Liquor</SLabel>
+                    <div className="space-y-2">
+                      <PillRow value={admLiquor} onChange={setAdmLiquor}
+                        options={["Clear","Thin meconium","Thick meconium"]}
+                        labelFn={o => LIQUOR_LABEL[o]} />
+                      <PillRow value={admLiquor} onChange={setAdmLiquor}
+                        options={["Blood-stained","Absent"]}
+                        labelFn={o => LIQUOR_LABEL[o]} />
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <SLabel className="mb-3">Station</SLabel>
                   <StationStrip value={admStation} onChange={setAdmStn} />
@@ -1161,11 +1250,21 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
             </div>
 
             {mode === "Induced" && (
-              <div>
-                <SLabel className="mb-2">Induction method</SLabel>
-                <PillRow value={indMethod} onChange={setIndM}
-                  options={["Dinoprostone","Balloon","Misoprostol","ARM+Synto"]} />
-              </div>
+              <>
+                <div>
+                  <SLabel className="mb-2">Induction method</SLabel>
+                  <div className="space-y-2">
+                    <PillRow value={indMethod} onChange={setIndM}
+                      options={["Dinoprostone","Balloon"]} />
+                    <PillRow value={indMethod} onChange={setIndM}
+                      options={["Misoprostol","ARM+Synto"]} />
+                  </div>
+                </div>
+                <div>
+                  <SLabel className="mb-2">Indication — select all that apply</SLabel>
+                  <ChipGroup options={IOL_REASONS} selected={iolReasons} onChange={setIolR} />
+                </div>
+              </>
             )}
 
             <div className="h-px bg-gray-100" />
@@ -1423,9 +1522,84 @@ function ObsDots({ bed, now }) {
   );
 }
 
-// ─── Bed detail view — 3 inner tabs ──────────────────────────────────────
+// ─── Per-patient task list ────────────────────────────────────────────────
 
-function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOpenOxy, onOpenDelivery, onOpenCTG }) {
+function TasksTab({ bed, onUpdate }) {
+  const tasks   = bed.tasks ?? [];
+  const pending = tasks.filter(t => !t.done);
+  const done    = tasks.filter(t => t.done);
+  const [text, setText] = useState("");
+
+  const addTask = raw => {
+    const label = raw.trim();
+    if (!label) return;
+    const task = { id: `task-${Date.now()}`, text: label, done: false, createdAt: nowISO() };
+    onUpdate({ tasks: [...tasks, task] });
+    setText("");
+  };
+
+  const toggle = id =>
+    onUpdate({ tasks: tasks.map(t => t.id === id ? { ...t, done: !t.done } : t) });
+
+  return (
+    <div className="px-5 pt-4 pb-8 space-y-5">
+      {/* Quick-add chips */}
+      <div>
+        <SLabel className="mb-2">Quick add</SLabel>
+        <div className="flex flex-wrap gap-2">
+          {TASK_QUICK.map(label => (
+            <button key={label} onClick={() => addTask(label)}
+              className="px-3 py-1.5 rounded-full bg-gray-100 text-xs font-semibold text-gray-700 active:scale-95 transition-all">
+              + {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Custom input */}
+      <div className="flex gap-2">
+        <input type="text" value={text} onChange={e => setText(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && addTask(text)}
+          placeholder="Custom task…"
+          className="flex-1 px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-gray-400 bg-white" />
+        <button onClick={() => addTask(text)} disabled={!text.trim()}
+          className="px-4 py-3 rounded-2xl bg-gray-900 text-white text-sm font-bold disabled:opacity-30 active:scale-95 transition-all">
+          Add
+        </button>
+      </div>
+
+      {/* Task list */}
+      {tasks.length === 0 ? (
+        <p className="text-sm text-gray-400 text-center py-8">No tasks — use quick-add or type above</p>
+      ) : (
+        <div className="space-y-2">
+          {pending.map(task => (
+            <div key={task.id} className="flex items-center gap-3 rounded-2xl bg-white border border-gray-100 shadow-sm px-4 py-3">
+              <button onClick={() => toggle(task.id)}
+                className="w-6 h-6 rounded-full border-2 border-gray-300 shrink-0 active:scale-95 transition-all" />
+              <p className="text-sm text-gray-900 flex-1 leading-snug">{task.text}</p>
+            </div>
+          ))}
+          {done.map(task => (
+            <div key={task.id} className="flex items-center gap-3 rounded-2xl bg-gray-50 border border-gray-100 px-4 py-3">
+              <button onClick={() => toggle(task.id)}
+                className="w-6 h-6 rounded-full bg-green-500 border-2 border-green-500 flex items-center justify-center shrink-0 active:scale-95 transition-all">
+                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </button>
+              <p className="text-sm text-gray-400 flex-1 leading-snug line-through">{task.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Bed detail view — inner tabs ─────────────────────────────────────────
+
+function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEditVE, onOpenOxy, onOpenDelivery, onOpenCTG }) {
   const PERSISTENT_FLAGS = {
     "gbs-iap":          "gbsAntibioticsStarted",
     "preterm-neonatal": "neonatalTeamAlerted",
@@ -1510,8 +1684,10 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
               { key: "ves",      label: "VEs" },
               { key: "obs",      label: "Obs" },
               { key: "ctg",      label: "CTG" },
+              { key: "tasks",    label: "Tasks" },
             ].map(tab => {
               const lastCTG = tab.key === "ctg" ? bed.ctgLog?.[bed.ctgLog.length - 1] : null;
+              const pendingTaskCount = tab.key === "tasks" ? (bed.tasks ?? []).filter(t => !t.done).length : 0;
               return (
                 <button key={tab.key} onClick={() => setInnerTab(tab.key)}
                   className={`flex-1 py-3 text-sm font-semibold relative transition-colors ${innerTab === tab.key ? "text-gray-900 border-b-2 border-gray-900" : "text-gray-400"}`}>
@@ -1524,6 +1700,11 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
                   )}
                   {lastCTG?.classification === "suspicious" && (
                     <span className="absolute top-2 right-1 w-2 h-2 rounded-full bg-amber-400" />
+                  )}
+                  {tab.key === "tasks" && pendingTaskCount > 0 && (
+                    <span className="absolute top-1.5 right-1 min-w-[16px] h-4 px-1 rounded-full bg-blue-500 text-white text-[9px] font-black flex items-center justify-center leading-none">
+                      {pendingTaskCount}
+                    </span>
                   )}
                 </button>
               );
@@ -1575,6 +1756,33 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
                 <PillRow value={bed.analgesia} onChange={a => onUpdate({ analgesia: a })} options={["Epidural","Remifentanil PCA"]} />
               </div>
             </div>
+
+            {/* IOL details — only when induced */}
+            {bed.modeOfOnset === "Induced" && (
+              <div>
+                <SLabel className="mb-2">Induction</SLabel>
+                <div className="rounded-2xl border border-gray-100 bg-white p-4 space-y-3">
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1.5">Method</p>
+                    <div className="space-y-2">
+                      <PillRow value={bed.inductionMethod} onChange={v => onUpdate({ inductionMethod: v })}
+                        options={["Dinoprostone","Balloon"]} />
+                      <PillRow value={bed.inductionMethod} onChange={v => onUpdate({ inductionMethod: v })}
+                        options={["Misoprostol","ARM+Synto"]} />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1.5">Indication</p>
+                    <ChipGroup options={IOL_REASONS}
+                      selected={bed.iolReasons ?? []}
+                      onChange={v => onUpdate({ iolReasons: v })} />
+                    {(bed.iolReasons?.length ?? 0) === 0 && (
+                      <p className="text-xs text-gray-400 mt-1.5">None recorded — tap to add</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Delivery status */}
             <div>
@@ -1632,11 +1840,18 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
                     <div key={ve.id} className={`px-4 py-3 ${i > 0 ? "border-t border-gray-50" : ""}`}>
                       <div className="flex items-baseline justify-between">
                         <p className="text-2xl font-bold text-gray-900">{ve.dilation} cm</p>
-                        <p className="text-xs text-gray-400">{fmtTime(ve.time)}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs text-gray-400">{fmtTime(ve.time)}</p>
+                          <button onClick={() => onEditVE(ve)}
+                            className="text-xs font-semibold text-gray-500 px-2 py-0.5 rounded-lg border border-gray-200 bg-white active:bg-gray-50">
+                            Edit
+                          </button>
+                        </div>
                       </div>
                       <p className="text-xs text-gray-500 mt-0.5">
                         Station {ve.station > 0 ? `+${ve.station}` : ve.station} · {ve.membranes}
                         {ve.membranesTime ? ` at ${fmtTime(ve.membranesTime)}` : ""} · {ve.contractions}/10 min
+                        {ve.liquor && ve.liquor !== "Clear" ? ` · ${LIQUOR_LABEL[ve.liquor] ?? ve.liquor}` : ""}
                       </p>
                     </div>
                   ))}
@@ -1723,15 +1938,13 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
             </div>
           </div>
         )}
+
+        {/* Tasks tab */}
+        {innerTab === "tasks" && (
+          <TasksTab bed={bed} onUpdate={onUpdate} />
+        )}
       </div>
 
-      {/* FAB — always shows VE */}
-      <div className="fixed bottom-24 right-5 z-30">
-        <button onClick={onOpenVE}
-          className="w-14 h-14 rounded-full bg-gray-900 text-white shadow-lg text-sm font-bold flex items-center justify-center active:scale-95 transition-all">
-          VE
-        </button>
-      </div>
     </div>
   );
 }
@@ -1920,14 +2133,33 @@ const TASK_LEVELS = [
   { key: "info",    label: "Routine", dotCls: "bg-blue-400",  barCls: "bg-blue-300",  hdrCls: "text-blue-500",  bdgCls: "bg-blue-100 text-blue-600", divCls: "border-blue-100",  cardCls: "border-blue-100 bg-blue-50"  },
 ];
 
-function TasksView({ beds, alertsMap, onSelect }) {
-  const allTasks = Object.entries(alertsMap).flatMap(([bedId, alerts]) => {
+function TasksView({ beds, alertsMap, onSelect, onUpdateBed }) {
+  const bedList = Object.values(beds).sort((a, b) =>
+    a.bedNumber.localeCompare(b.bedNumber, undefined, { numeric: true })
+  );
+
+  const manualPending = bedList.flatMap(bed =>
+    (bed.tasks ?? []).filter(t => !t.done).map(t => ({ task: t, bed }))
+  );
+  const manualDone = bedList.flatMap(bed =>
+    (bed.tasks ?? []).filter(t => t.done).map(t => ({ task: t, bed }))
+  );
+  const allManual = [...manualPending, ...manualDone];
+
+  const toggleTask = (bed, taskId) => {
+    const newTasks = (bed.tasks ?? []).map(t => t.id === taskId ? { ...t, done: !t.done } : t);
+    onUpdateBed(bed.id, { tasks: newTasks });
+  };
+
+  const allAlerts = Object.entries(alertsMap).flatMap(([bedId, alerts]) => {
     const bed = beds[bedId];
     if (!bed || bed.delivery) return [];
     return alerts.map(a => ({ ...a, bed }));
   });
 
-  if (allTasks.length === 0) {
+  const hasAnything = allManual.length > 0 || allAlerts.length > 0;
+
+  if (!hasAnything) {
     return (
       <div className="flex flex-col items-center justify-center py-24 px-8 text-center">
         <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
@@ -1943,8 +2175,47 @@ function TasksView({ beds, alertsMap, onSelect }) {
 
   return (
     <div className="px-5 pb-8 pt-1 space-y-5">
+      {/* Manual tasks */}
+      {allManual.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-2 px-1">
+            <span className="text-[11px] font-black uppercase tracking-widest text-gray-500">Tasks</span>
+            {manualPending.length > 0 && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-blue-500 text-white">{manualPending.length}</span>
+            )}
+          </div>
+          <div className="rounded-2xl border border-gray-100 bg-white overflow-hidden shadow-sm">
+            {allManual.map(({ task, bed }, i) => (
+              <div key={`${bed.id}-${task.id}`}
+                className={`flex items-center gap-3 px-4 py-3 ${i > 0 ? "border-t border-gray-50" : ""}`}>
+                <button onClick={() => toggleTask(bed, task.id)}
+                  className={`w-6 h-6 rounded-full border-2 shrink-0 active:scale-95 transition-all flex items-center justify-center ${
+                    task.done ? "bg-green-500 border-green-500" : "border-gray-300"
+                  }`}>
+                  {task.done && (
+                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </button>
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm leading-snug ${task.done ? "line-through text-gray-400" : "text-gray-900"}`}>
+                    {task.text}
+                  </p>
+                </div>
+                <button onClick={() => onSelect(bed.id)}
+                  className="text-[10px] font-bold bg-gray-100 text-gray-600 rounded-md px-1.5 py-0.5 shrink-0">
+                  Bed {bed.bedNumber}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Clinical alerts */}
       {TASK_LEVELS.map(lv => {
-        const tasks = allTasks.filter(t => t.severity === lv.key);
+        const tasks = allAlerts.filter(t => t.severity === lv.key);
         if (!tasks.length) return null;
         return (
           <div key={lv.key}>
@@ -1982,9 +2253,220 @@ function TasksView({ beds, alertsMap, onSelect }) {
   );
 }
 
-function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, onQuickCTG, onHandover, shift, onEndShift }) {
-  const bedList      = Object.values(beds).sort((a,b) => a.bedNumber.localeCompare(b.bedNumber, undefined, {numeric:true}));
-  const totalUrgent  = Object.values(alertsMap).flat().filter(a => a.severity === "urgent").length;
+// ─── IOL Wizard UI ────────────────────────────────────────────────────────
+
+function IOLAddSheet({ onSave, initialValues = null }) {
+  const [initials, setInit]    = useState(initialValues?.initials    ?? "");
+  const [gestWeeks, setGestW]  = useState(initialValues?.gestWeeks   ?? 40);
+  const [gestDays,  setGestD]  = useState(initialValues?.gestDays    ?? 0);
+  const [indications, setInds] = useState(initialValues?.indications ?? []);
+  const [queueTime, setQTime]  = useState(
+    initialValues?.addedAt ? fmtTime(initialValues.addedAt) : timeInputNow()
+  );
+
+  const isEdit = !!initialValues;
+
+  const toggle = ind =>
+    setInds(prev => prev.includes(ind) ? prev.filter(x => x !== ind) : [...prev, ind]);
+
+  const save = () => {
+    if (!initials.trim() || !indications.length) return;
+    onSave({
+      id:         initialValues?.id ?? `iol-${Date.now()}`,
+      addedAt:    timeToISO(queueTime),
+      initials:   initials.trim().toUpperCase(),
+      gestWeeks, gestDays, indications,
+    });
+  };
+
+  const canSave = initials.trim().length > 0 && indications.length > 0;
+
+  const tierGroups = [0,1,2,3].map(tier => ({
+    tier,
+    meta: IOL_TIER_META[tier],
+    items: IOL_IND.filter(i => i.tier === tier),
+  }));
+
+  const adjWeeks = d => setGestW(w => Math.max(24, Math.min(42, w + d)));
+  const adjDays  = d => {
+    let nd = gestDays + d, nw = gestWeeks;
+    if (nd > 6) { nd = 0; nw = Math.min(42, nw + 1); }
+    if (nd < 0) { nd = 6; nw = Math.max(24, nw - 1); }
+    setGestW(nw); setGestD(nd);
+  };
+  const btnSm = "w-9 h-9 rounded-xl bg-gray-100 text-gray-700 text-xs font-bold flex items-center justify-center active:scale-95 shrink-0";
+
+  return (
+    <>
+      <div className="overflow-y-auto overscroll-contain flex-1 min-h-0">
+        <div className="px-5 pt-3 pb-3 space-y-3">
+
+          {/* Initials */}
+          <div>
+            <SLabel className="mb-1.5">Initials</SLabel>
+            <input
+              type="text" maxLength={4} value={initials}
+              onChange={e => setInit(e.target.value)}
+              placeholder="JB"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xl font-bold text-gray-900 uppercase tracking-widest focus:outline-none focus:border-gray-400 text-center" />
+          </div>
+
+          {/* Time queued — full-width row so iOS time picker never clips */}
+          <div>
+            <SLabel className="mb-1.5">Time queued</SLabel>
+            <input
+              type="time" value={queueTime}
+              onChange={e => setQTime(e.target.value)}
+              className="block w-full border border-gray-200 rounded-xl px-3 py-2 text-base text-gray-900 focus:outline-none focus:border-gray-400" />
+          </div>
+
+          {/* Compact gestation */}
+          <div className="flex items-center gap-2">
+            <SLabel className="shrink-0">Gestation</SLabel>
+            <div className="flex items-center gap-1 ml-auto">
+              <button onClick={() => adjWeeks(-1)} className={btnSm}>−w</button>
+              <span className="text-base font-bold text-gray-900 w-12 text-center tabular-nums">{gestWeeks}+{gestDays}</span>
+              <button onClick={() => adjWeeks(+1)} className={btnSm}>+w</button>
+              <div className="w-px h-5 bg-gray-200 mx-0.5" />
+              <button onClick={() => adjDays(-1)} className={btnSm}>−d</button>
+              <button onClick={() => adjDays(+1)} className={btnSm}>+d</button>
+            </div>
+          </div>
+
+          {/* Indications — 2-column grid per tier */}
+          <div>
+            <SLabel className="mb-2">Indication — select all that apply</SLabel>
+            <div className="space-y-2">
+              {tierGroups.map(({ tier, meta, items }) => (
+                <div key={tier}>
+                  <p className={`text-[10px] font-bold uppercase tracking-wide mb-1 ${meta.cls.text}`}>
+                    {meta.label}
+                  </p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {items.map(ind => {
+                      const on = indications.includes(ind.label);
+                      return (
+                        <button key={ind.label} type="button" onClick={() => toggle(ind.label)}
+                          className={`px-2.5 py-1.5 rounded-xl border text-[11px] font-semibold text-left leading-tight transition-colors active:scale-95 ${
+                            on ? "bg-gray-900 border-gray-900 text-white" : "bg-white border-gray-200 text-gray-600"
+                          }`}>
+                          {ind.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div className="px-5 pt-2.5 border-t border-gray-100 shrink-0"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}>
+        <button onClick={save} disabled={!canSave}
+          className={`w-full py-3 rounded-2xl text-base font-bold transition-all active:scale-95 ${
+            canSave ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-400"
+          }`}>
+          {isEdit ? "Save changes" : "Add to queue"}
+        </button>
+      </div>
+    </>
+  );
+}
+
+function IOLTab({ queue, onAdd, onAdmit, onRemove, onEdit }) {
+  const sorted = sortIOLQueue(queue);
+
+  if (!sorted.length) {
+    return (
+      <div className="px-5 pt-12 text-center">
+        <p className="text-gray-400 text-sm font-medium mb-6">No women queued for IOL</p>
+        <button onClick={onAdd}
+          className="px-6 py-3.5 rounded-2xl bg-gray-900 text-white text-sm font-bold active:scale-95 transition-all">
+          + Add to queue
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-5 space-y-3">
+      <div className="flex justify-end pt-1">
+        <button onClick={onAdd}
+          className="px-4 py-2 rounded-xl bg-gray-900 text-white text-xs font-bold active:scale-95 transition-all">
+          + Add
+        </button>
+      </div>
+
+      {sorted.map((entry, idx) => {
+        const tier = iolEntryTier(entry);
+        const meta = IOL_TIER_META[tier];
+        const waitMs = Date.now() - new Date(entry.addedAt).getTime();
+        const waitStr = fmtAge(waitMs);
+        const indCites = entry.indications.map(l => IOL_IND.find(i => i.label === l)).filter(Boolean);
+        const cite = [...new Set(indCites.map(i => i.cite).filter(Boolean))].join(" · ");
+
+        return (
+          <div key={entry.id} className={`rounded-2xl border ${meta.cls.border} ${meta.cls.bg} overflow-hidden`}>
+            <div className="p-4">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-black text-gray-300 w-6 shrink-0">#{idx + 1}</span>
+                  <span className="text-xl font-bold text-gray-900">{entry.initials}</span>
+                  <span className="text-sm font-semibold text-gray-500">{entry.gestWeeks}+{entry.gestDays ?? 0}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${meta.cls.badge}`}>
+                    {meta.label}
+                  </span>
+                </div>
+                <span className="text-xs text-gray-400 shrink-0 text-right">
+                  <span className="font-semibold text-gray-500">{fmtTime(entry.addedAt)}</span>
+                  {" · "}{waitStr} ago
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {entry.indications.map(ind => (
+                  <span key={ind} className="px-2.5 py-1 rounded-full bg-white border border-gray-200 text-xs font-medium text-gray-700">
+                    {ind}
+                  </span>
+                ))}
+              </div>
+
+              {cite && (
+                <p className="text-[10px] text-gray-400 mb-3">{cite}</p>
+              )}
+
+              <div className="flex gap-2">
+                <button onClick={() => onAdmit(entry)}
+                  className="flex-1 py-2.5 rounded-xl bg-gray-900 text-white text-sm font-bold active:scale-95 transition-all">
+                  Admit to ward →
+                </button>
+                <button onClick={() => onEdit(entry)}
+                  className="px-3 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold active:bg-gray-50">
+                  Edit
+                </button>
+                <button onClick={() => onRemove(entry.id)}
+                  className="px-3 py-2.5 rounded-xl border border-gray-200 text-gray-400 text-sm font-medium active:bg-gray-50">
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      <p className="text-[10px] text-gray-300 text-center pb-4 leading-relaxed">
+        Priority order per NICE NG207 · Not a substitute for clinical judgement
+      </p>
+    </div>
+  );
+}
+
+function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, onQuickCTG, onHandover, onUpdateBed, shift, onEndShift, iolQueue, onIOLAdd, onIOLAdmit, onIOLRemove, onIOLEdit }) {
+  const bedList         = Object.values(beds).sort((a,b) => a.bedNumber.localeCompare(b.bedNumber, undefined, {numeric:true}));
+  const totalUrgent     = Object.values(alertsMap).flat().filter(a => a.severity === "urgent").length;
+  const totalPendingTasks = Object.values(beds).reduce((n, b) => n + (b.tasks ?? []).filter(t => !t.done).length, 0);
   const now          = Date.now();
   const msLeft       = useCountdown(shift?.shiftEnd);
   const nearEnd      = msLeft != null && msLeft > 0 && msLeft <= 30 * 60 * 1000;
@@ -2049,37 +2531,48 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
           </div>
         </div>
 
-        {/* Board / Tasks tab bar */}
-        {bedList.length > 0 && (
-          <div className="px-5 pb-3">
-            <div className="flex bg-gray-100 dark:bg-gray-900 rounded-xl p-1 gap-1">
-              {[
-                { key: "board", label: "Board" },
-                { key: "tasks", label: "Tasks" },
-              ].map(tab => {
-                const isActive = boardTab === tab.key;
-                return (
-                  <button key={tab.key} onClick={() => setBoardTab(tab.key)}
-                    className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                      isActive ? "bg-white shadow-sm text-gray-900" : "text-gray-500"
+        {/* Board / Tasks / IOL tab bar — always visible */}
+        <div className="px-5 pb-3">
+          <div className="flex bg-gray-100 dark:bg-gray-900 rounded-xl p-1 gap-1">
+            {[
+              { key: "board", label: "Board" },
+              { key: "tasks", label: "Tasks" },
+              { key: "iol",   label: "IOL" },
+            ].map(tab => {
+              const isActive = boardTab === tab.key;
+              const iolUrgent = iolQueue.filter(e => iolEntryTier(e) <= 1).length;
+              return (
+                <button key={tab.key} onClick={() => setBoardTab(tab.key)}
+                  className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                    isActive ? "bg-white shadow-sm text-gray-900" : "text-gray-500"
+                  }`}>
+                  {tab.label}
+                  {tab.key === "tasks" && totalPendingTasks > 0 && (
+                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none ${
+                      isActive ? "bg-blue-500 text-white" : "bg-blue-100 text-blue-600"
                     }`}>
-                    {tab.label}
-                    {tab.key === "tasks" && totalUrgent > 0 && (
-                      <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none ${
-                        isActive ? "bg-red-500 text-white" : "bg-red-100 text-red-500"
-                      }`}>
-                        {totalUrgent}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+                      {totalPendingTasks}
+                    </span>
+                  )}
+                  {tab.key === "iol" && iolQueue.length > 0 && (
+                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none ${
+                      iolUrgent > 0
+                        ? (isActive ? "bg-red-500 text-white" : "bg-red-100 text-red-600")
+                        : (isActive ? "bg-gray-500 text-white" : "bg-gray-200 text-gray-600")
+                    }`}>
+                      {iolQueue.length}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
-        )}
+        </div>
 
-        {boardTab === "tasks" ? (
-          <TasksView beds={beds} alertsMap={alertsMap} onSelect={onSelect} />
+        {boardTab === "iol" ? (
+          <IOLTab queue={iolQueue} onAdd={onIOLAdd} onAdmit={onIOLAdmit} onRemove={onIOLRemove} onEdit={onIOLEdit} />
+        ) : boardTab === "tasks" ? (
+          <TasksView beds={beds} alertsMap={alertsMap} onSelect={onSelect} onUpdateBed={onUpdateBed} />
         ) : (
         <>
 
@@ -2099,23 +2592,69 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
 
         <div className="px-5 space-y-3">
           {bedList.map(bed => {
-            const alerts     = alertsMap[bed.id] ?? [];
-            const status     = bedStatusColor(alerts);
-            const sc         = STATUS[status];
-            const lastVE     = bed.ves?.[bed.ves.length - 1];
-            const urgentN    = alerts.filter(a => a.severity === "urgent").length;
-            const msSinceVE  = lastVE ? now - new Date(lastVE.time).getTime() : null;
+            const alerts      = alertsMap[bed.id] ?? [];
+            const status      = bedStatusColor(alerts);
+            const sc          = STATUS[status];
+            const lastVE      = bed.ves?.length ? bed.ves[bed.ves.length - 1] : null;
+            const urgentN     = alerts.filter(a => a.severity === "urgent").length;
             const isDelivered = !!bed.delivery;
+            const currentOxy  = bed.oxytocinLog?.length ? bed.oxytocinLog[bed.oxytocinLog.length - 1] : null;
+            const pendingTasks = (bed.tasks ?? []).filter(t => !t.done).length;
 
             const cardCls = isDelivered
               ? "border-green-200 bg-green-50"
               : sc.card;
 
+            // B — Background
+            const bParts = [];
+            if (bed.parity)    bParts.push(PAR_SHORT[bed.parity] ?? bed.parity);
+            if (bed.gestation) bParts.push(bed.gestation);
+            if (bed.modeOfOnset === "Induced") {
+              bParts.push(bed.iolReasons?.length ? `Induced (${bed.iolReasons[0]})` : "Induced");
+            } else if (bed.modeOfOnset === "PPROM") {
+              bParts.push("PPROM");
+            } else if (bed.modeOfOnset) {
+              bParts.push("Spontaneous");
+            }
+            (bed.riskFlags ?? []).forEach(f => bParts.push(f));
+
+            // S — Situation
+            const sParts = [];
+            if (isDelivered) {
+              sParts.push(`${bed.delivery.mode} at ${fmtTime(bed.delivery.time)}`);
+            } else {
+              if (bed.labourStage) sParts.push(STAGE_SHORT[bed.labourStage] ?? bed.labourStage);
+              if (lastVE) {
+                const ago = fmtAge(now - new Date(lastVE.time).getTime());
+                sParts.push(`${lastVE.dilation}cm ${ago} ago`);
+              } else {
+                sParts.push("No VE");
+              }
+            }
+
+            // A — Assessment
+            const aParts = [];
+            if (isDelivered) {
+              if (bed.delivery.ebl != null) aParts.push(`EBL ${bed.delivery.ebl} mL`);
+            } else {
+              if (lastVE?.membranes) {
+                if (lastVE.membranes !== "Intact") {
+                  aParts.push(`${lastVE.membranes}${lastVE.membranesTime ? ` ${fmtTime(lastVE.membranesTime)}` : ""}`);
+                  if (lastVE.liquor) aParts.push(LIQUOR_LABEL[lastVE.liquor] ?? lastVE.liquor);
+                } else {
+                  aParts.push("Intact");
+                }
+              }
+              if (bed.analgesia && bed.analgesia !== "None") aParts.push(bed.analgesia);
+              if (currentOxy) aParts.push(`Oxy ${currentOxy.dose} mU/min`);
+            }
+
             return (
               <div key={bed.id} className={`rounded-2xl border ${cardCls} overflow-hidden`}>
                 {/* Main tap area → detail */}
                 <button onClick={() => onSelect(bed.id)} className="w-full p-4 text-left">
-                  <div className="flex items-center justify-between gap-2">
+                  {/* Header */}
+                  <div className="flex items-center justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2">
                       <span className="text-xl font-bold text-gray-900">Bed {bed.bedNumber}</span>
                       {isDelivered
@@ -2132,8 +2671,39 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500 mt-1.5 truncate">{bedSummary(bed)}</p>
-                  {!isDelivered && <ObsDots bed={bed} now={now} />}
+
+                  {/* BSAR rows */}
+                  <div className="space-y-1.5">
+                    {bParts.length > 0 && (
+                      <div className="flex gap-2 items-baseline">
+                        <span className="text-[10px] font-bold text-gray-300 w-3 shrink-0">B</span>
+                        <span className="text-sm text-gray-700 leading-snug">{bParts.join(" · ")}</span>
+                      </div>
+                    )}
+                    {sParts.length > 0 && (
+                      <div className="flex gap-2 items-baseline">
+                        <span className="text-[10px] font-bold text-gray-300 w-3 shrink-0">S</span>
+                        <span className="text-sm font-semibold text-gray-900 leading-snug">{sParts.join(" · ")}</span>
+                      </div>
+                    )}
+                    {aParts.length > 0 && (
+                      <div className="flex gap-2 items-baseline">
+                        <span className="text-[10px] font-bold text-gray-300 w-3 shrink-0">A</span>
+                        <span className="text-sm text-gray-600 leading-snug">{aParts.join(" · ")}</span>
+                      </div>
+                    )}
+                    {!isDelivered && (
+                      <div className="flex gap-2 items-center mt-1">
+                        <span className="text-[10px] font-bold text-gray-300 w-3 shrink-0">R</span>
+                        <div className="flex items-center gap-3">
+                          <ObsDots bed={bed} now={now} />
+                          {pendingTasks > 0 && (
+                            <span className="text-[11px] font-semibold text-blue-500">{pendingTasks} task{pendingTasks !== 1 ? "s" : ""}</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </button>
 
                 {/* Quick actions bar */}
@@ -2173,13 +2743,20 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
 
 export default function WardPage({ shift, onEndShift }) {
   const [beds, setBeds]            = useState(loadBeds);
+  const [iolQueue, setIolQueue]    = useState(loadIOL);
+  const [admitIOL, setAdmitIOL]    = useState(null);   // IOL entry being admitted, pre-fills wizard
+  const [iolSheet, setIolSheet]    = useState(false);  // add/edit sheet
+  const [iolSheetKey, setIolSheetKey] = useState(0);  // increments on each open to force fresh mount
+  const [iolEditEntry, setIolEditEntry] = useState(null); // entry being edited, null for new
   const [selectedId, setSelId]     = useState(null);
   const [view, setView]            = useState("board"); // board | detail | wizard
   const [sheet, setSheet]          = useState(null);    // null | "ve" | "oxy"
   const [sheetBedId, setSheetBedId]= useState(null);
+  const [editVE, setEditVE]        = useState(null);    // VE object being edited, or null for new
   const [tick, setTick]            = useState(0);
 
   useEffect(() => { saveBeds(beds); }, [beds]);
+  useEffect(() => { saveIOL(iolQueue); }, [iolQueue]);
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 60000);
     return () => clearInterval(id);
@@ -2197,14 +2774,18 @@ export default function WardPage({ shift, onEndShift }) {
   }, []);
 
   const openSheet = (type, bedId) => { setSheet(type); setSheetBedId(bedId); };
-  const closeSheet = () => { setSheet(null); setSheetBedId(null); };
+  const closeSheet = () => { setSheet(null); setSheetBedId(null); setEditVE(null); };
 
   const sheetBed = sheetBedId ? beds[sheetBedId] : null;
 
   const saveVE = ve => {
     if (!sheetBed) return;
-    const updates = { ves: [...sheetBed.ves, ve] };
-    if (ve.membranes === "AROM" && !sheetBed.armTime) updates.armTime = ve.membranesTime;
+    const isEdit = !!editVE;
+    const newVes = isEdit
+      ? sheetBed.ves.map(v => v.id === ve.id ? ve : v)
+      : [...sheetBed.ves, ve];
+    const updates = { ves: newVes };
+    if (!isEdit && ve.membranes === "AROM" && !sheetBed.armTime) updates.armTime = ve.membranesTime;
     updateBed(sheetBedId, updates);
     closeSheet();
   };
@@ -2232,8 +2813,11 @@ export default function WardPage({ shift, onEndShift }) {
 
   const saveNewBed = bed => {
     setBeds(prev => ({ ...prev, [bed.id]: bed }));
+    if (admitIOL) {
+      setIolQueue(prev => prev.filter(e => e.id !== admitIOL.id));
+      setAdmitIOL(null);
+    }
     setView("board");
-    // Auto-open VE only for active first stage where no VE was captured in the wizard
     if (!bed.ves?.length && bed.labourStage === "Active first stage") {
       setSheet("ve");
       setSheetBedId(bed.id);
@@ -2241,11 +2825,18 @@ export default function WardPage({ shift, onEndShift }) {
   };
 
   if (view === "wizard") {
+    const wizardInitial = admitIOL ? {
+      gestWeeks:  admitIOL.gestWeeks,
+      gestDays:   admitIOL.gestDays ?? 0,
+      mode:       "Induced",
+      iolReasons: admitIOL.indications,
+    } : null;
     return (
       <AdmissionWizard
         existingNumbers={Object.values(beds).map(b => b.bedNumber)}
+        initialValues={wizardInitial}
         onSave={saveNewBed}
-        onCancel={() => setView("board")}
+        onCancel={() => { setAdmitIOL(null); setView("board"); }}
       />
     );
   }
@@ -2264,8 +2855,14 @@ export default function WardPage({ shift, onEndShift }) {
           onQuickVE={id => openSheet("ve", id)}
           onQuickCTG={id => openSheet("ctg", id)}
           onHandover={() => setSheet("handover")}
+          onUpdateBed={updateBed}
           shift={shift}
           onEndShift={onEndShift}
+          iolQueue={iolQueue}
+          onIOLAdd={() => { setIolEditEntry(null); setIolSheetKey(k => k + 1); setIolSheet(true); }}
+          onIOLEdit={entry => { setIolEditEntry(entry); setIolSheetKey(k => k + 1); setIolSheet(true); }}
+          onIOLAdmit={entry => { setAdmitIOL(entry); setView("wizard"); }}
+          onIOLRemove={id => setIolQueue(prev => prev.filter(e => e.id !== id))}
         />
       )}
 
@@ -2278,18 +2875,34 @@ export default function WardPage({ shift, onEndShift }) {
             setBeds(prev => { const n = {...prev}; delete n[selectedId]; return n; });
             setSelId(null); setView("board");
           }}
-          onOpenVE={() => openSheet("ve", selectedId)}
+          onOpenVE={() => { setEditVE(null); openSheet("ve", selectedId); }}
+          onEditVE={ve => { setEditVE(ve); openSheet("ve", selectedId); }}
           onOpenOxy={() => openSheet("oxy", selectedId)}
           onOpenDelivery={() => openSheet("delivery", selectedId)}
           onOpenCTG={() => openSheet("ctg", selectedId)}
         />
       )}
 
+      {/* IOL add / edit sheet */}
+      <BottomSheet open={iolSheet} onClose={() => { setIolSheet(false); setIolEditEntry(null); }}
+        title={iolEditEntry ? "Edit IOL entry" : "Add to IOL queue"}
+        sub="NICE NG207 · Inducing labour">
+        <IOLAddSheet key={iolSheetKey} initialValues={iolEditEntry} onSave={entry => {
+          setIolQueue(prev =>
+            iolEditEntry
+              ? prev.map(e => e.id === entry.id ? entry : e)
+              : [...prev, entry]
+          );
+          setIolEditEntry(null);
+          setIolSheet(false);
+        }} />
+      </BottomSheet>
+
       {/* Global bottom sheets — render above everything */}
       <BottomSheet open={sheet === "ve" && !!sheetBed} onClose={closeSheet}
-        title={`Record VE${sheetBed ? ` — Bed ${sheetBed.bedNumber}` : ""}`}
+        title={`${editVE ? "Edit VE" : "Record VE"}${sheetBed ? ` — Bed ${sheetBed.bedNumber}` : ""}`}
         sub="NICE NG235 §1.4.1 — 4-hourly in active labour">
-        {sheetBed && <VESheet bed={sheetBed} onSave={saveVE} />}
+        {sheetBed && <VESheet bed={sheetBed} editVE={editVE} onSave={saveVE} />}
       </BottomSheet>
 
       <BottomSheet open={sheet === "oxy" && !!sheetBed} onClose={closeSheet}

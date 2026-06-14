@@ -996,6 +996,90 @@ describe("Second stage pushing time — edge cases", () => {
   })
 })
 
+// ─── Liquor / meconium alerts (NICE NG235 §1.7) ──────────────────────────────
+
+describe("Liquor alerts", () => {
+  it("fires mec-thick (urgent) for thick meconium", () => {
+    const bed = activeBed({ ves: [{ time: t(1 * HOUR), dilation: 5, liquor: "Thick meconium" }] })
+    const alerts = computeAlerts(bed, NOW)
+    expect(has(alerts, "mec-thick")).toBe(true)
+    expect(alerts.find(a => a.id === "mec-thick").severity).toBe("urgent")
+  })
+
+  it("fires mec-thin (warning) for thin meconium", () => {
+    const bed = activeBed({ ves: [{ time: t(1 * HOUR), dilation: 5, liquor: "Thin meconium" }] })
+    const alerts = computeAlerts(bed, NOW)
+    expect(has(alerts, "mec-thin")).toBe(true)
+    expect(alerts.find(a => a.id === "mec-thin").severity).toBe("warning")
+  })
+
+  it("does not fire mec-thick when liquor is thin", () => {
+    const bed = activeBed({ ves: [{ time: t(1 * HOUR), dilation: 5, liquor: "Thin meconium" }] })
+    expect(hasNot(computeAlerts(bed, NOW), "mec-thick")).toBe(true)
+  })
+
+  it("does not fire mec-thin when liquor is thick", () => {
+    const bed = activeBed({ ves: [{ time: t(1 * HOUR), dilation: 5, liquor: "Thick meconium" }] })
+    expect(hasNot(computeAlerts(bed, NOW), "mec-thin")).toBe(true)
+  })
+
+  it("fires liquor-blood (warning) for blood-stained", () => {
+    const bed = activeBed({ ves: [{ time: t(1 * HOUR), dilation: 5, liquor: "Blood-stained" }] })
+    const alerts = computeAlerts(bed, NOW)
+    expect(has(alerts, "liquor-blood")).toBe(true)
+    expect(alerts.find(a => a.id === "liquor-blood").severity).toBe("warning")
+  })
+
+  it("fires liquor-absent (warning) for absent liquor", () => {
+    const bed = activeBed({ ves: [{ time: t(1 * HOUR), dilation: 5, liquor: "Absent" }] })
+    const alerts = computeAlerts(bed, NOW)
+    expect(has(alerts, "liquor-absent")).toBe(true)
+    expect(alerts.find(a => a.id === "liquor-absent").severity).toBe("warning")
+  })
+
+  it("fires no liquor alert when liquor is Clear", () => {
+    const bed = activeBed({ ves: [{ time: t(1 * HOUR), dilation: 5, liquor: "Clear" }] })
+    const alerts = computeAlerts(bed, NOW)
+    expect(hasNot(alerts, "mec-thick")).toBe(true)
+    expect(hasNot(alerts, "mec-thin")).toBe(true)
+    expect(hasNot(alerts, "liquor-blood")).toBe(true)
+    expect(hasNot(alerts, "liquor-absent")).toBe(true)
+  })
+
+  it("fires no liquor alert when liquor is null", () => {
+    const bed = activeBed({ ves: [{ time: t(1 * HOUR), dilation: 5, liquor: null }] })
+    const alerts = computeAlerts(bed, NOW)
+    expect(hasNot(alerts, "mec-thick")).toBe(true)
+    expect(hasNot(alerts, "mec-thin")).toBe(true)
+    expect(hasNot(alerts, "liquor-blood")).toBe(true)
+    expect(hasNot(alerts, "liquor-absent")).toBe(true)
+  })
+
+  it("meconium triggers needsContinuousCTG — ctg-not-documented fires", () => {
+    const bed = activeBed({
+      ves: [{ time: t(1 * HOUR), dilation: 5, liquor: "Thin meconium" }],
+      ctgLog: [],
+    })
+    expect(has(computeAlerts(bed, NOW), "ctg-not-documented")).toBe(true)
+  })
+
+  it("thick meconium triggers needsContinuousCTG — ctg-not-documented fires", () => {
+    const bed = activeBed({
+      ves: [{ time: t(1 * HOUR), dilation: 5, liquor: "Thick meconium" }],
+      ctgLog: [],
+    })
+    expect(has(computeAlerts(bed, NOW), "ctg-not-documented")).toBe(true)
+  })
+
+  it("clear liquor does not trigger CTG by itself", () => {
+    const bed = activeBed({
+      ves: [{ time: t(1 * HOUR), dilation: 5, liquor: "Clear" }],
+      ctgLog: [],
+    })
+    expect(hasNot(computeAlerts(bed, NOW), "ctg-not-documented")).toBe(true)
+  })
+})
+
 // ─── Alert severity ordering ──────────────────────────────────────────────────
 
 describe("Alert ordering", () => {
