@@ -1236,8 +1236,12 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
               <>
                 <div>
                   <SLabel className="mb-2">Induction method</SLabel>
-                  <PillRow value={indMethod} onChange={setIndM}
-                    options={["Dinoprostone","Balloon","Misoprostol","ARM+Synto"]} />
+                  <div className="space-y-2">
+                    <PillRow value={indMethod} onChange={setIndM}
+                      options={["Dinoprostone","Balloon"]} />
+                    <PillRow value={indMethod} onChange={setIndM}
+                      options={["Misoprostol","ARM+Synto"]} />
+                  </div>
                 </div>
                 <div>
                   <SLabel className="mb-2">Indication — select all that apply</SLabel>
@@ -1743,8 +1747,12 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEd
                 <div className="rounded-2xl border border-gray-100 bg-white p-4 space-y-3">
                   <div>
                     <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1.5">Method</p>
-                    <PillRow value={bed.inductionMethod} onChange={v => onUpdate({ inductionMethod: v })}
-                      options={["Dinoprostone","Balloon","Misoprostol","ARM+Synto"]} />
+                    <div className="space-y-2">
+                      <PillRow value={bed.inductionMethod} onChange={v => onUpdate({ inductionMethod: v })}
+                        options={["Dinoprostone","Balloon"]} />
+                      <PillRow value={bed.inductionMethod} onChange={v => onUpdate({ inductionMethod: v })}
+                        options={["Misoprostol","ARM+Synto"]} />
+                    </div>
                   </div>
                   <div>
                     <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1.5">Indication</p>
@@ -1920,13 +1928,6 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEd
         )}
       </div>
 
-      {/* FAB — always shows VE */}
-      <div className="fixed bottom-24 right-5 z-30">
-        <button onClick={onOpenVE}
-          className="w-14 h-14 rounded-full bg-gray-900 text-white shadow-lg text-sm font-bold flex items-center justify-center active:scale-95 transition-all">
-          VE
-        </button>
-      </div>
     </div>
   );
 }
