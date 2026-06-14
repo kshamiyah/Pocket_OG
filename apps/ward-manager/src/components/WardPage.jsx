@@ -2388,7 +2388,10 @@ function IOLTab({ queue, onAdd, onAdmit, onRemove }) {
                     {meta.label}
                   </span>
                 </div>
-                <span className="text-xs text-gray-400 shrink-0">Added {waitStr} ago</span>
+                <span className="text-xs text-gray-400 shrink-0 text-right">
+                  <span className="font-semibold text-gray-500">{fmtTime(entry.addedAt)}</span>
+                  {" · "}{waitStr} ago
+                </span>
               </div>
 
               <div className="flex flex-wrap gap-1.5 mb-3">
