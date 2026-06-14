@@ -2255,11 +2255,13 @@ function TasksView({ beds, alertsMap, onSelect, onUpdateBed }) {
 
 // ─── IOL Wizard UI ────────────────────────────────────────────────────────
 
-function IOLAddSheet({ onSave }) {
-  const [initials, setInit]     = useState("");
-  const [gestWeeks, setGestW]   = useState(40);
-  const [gestDays,  setGestD]   = useState(0);
-  const [indications, setInds]  = useState([]);
+function IOLAddSheet({ onSave, initialValues = null }) {
+  const [initials, setInit]    = useState(initialValues?.initials    ?? "");
+  const [gestWeeks, setGestW]  = useState(initialValues?.gestWeeks   ?? 40);
+  const [gestDays,  setGestD]  = useState(initialValues?.gestDays    ?? 0);
+  const [indications, setInds] = useState(initialValues?.indications ?? []);
+
+  const isEdit = !!initialValues;
 
   const toggle = ind =>
     setInds(prev => prev.includes(ind) ? prev.filter(x => x !== ind) : [...prev, ind]);
@@ -2267,11 +2269,10 @@ function IOLAddSheet({ onSave }) {
   const save = () => {
     if (!initials.trim() || !indications.length) return;
     onSave({
-      id: `iol-${Date.now()}`,
-      initials: initials.trim().toUpperCase(),
-      gestWeeks, gestDays,
-      indications,
-      addedAt: nowISO(),
+      id:         initialValues?.id      ?? `iol-${Date.now()}`,
+      addedAt:    initialValues?.addedAt ?? nowISO(),
+      initials:   initials.trim().toUpperCase(),
+      gestWeeks, gestDays, indications,
     });
   };
 
@@ -2337,14 +2338,14 @@ function IOLAddSheet({ onSave }) {
           className={`w-full py-4 rounded-2xl text-base font-bold transition-all active:scale-95 ${
             canSave ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-400"
           }`}>
-          Add to queue
+          {isEdit ? "Save changes" : "Add to queue"}
         </button>
       </div>
     </>
   );
 }
 
-function IOLTab({ queue, onAdd, onAdmit, onRemove }) {
+function IOLTab({ queue, onAdd, onAdmit, onRemove, onEdit }) {
   const sorted = sortIOLQueue(queue);
 
   if (!sorted.length) {
@@ -2411,6 +2412,10 @@ function IOLTab({ queue, onAdd, onAdmit, onRemove }) {
                   className="flex-1 py-2.5 rounded-xl bg-gray-900 text-white text-sm font-bold active:scale-95 transition-all">
                   Admit to ward →
                 </button>
+                <button onClick={() => onEdit(entry)}
+                  className="px-3 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold active:bg-gray-50">
+                  Edit
+                </button>
                 <button onClick={() => onRemove(entry.id)}
                   className="px-3 py-2.5 rounded-xl border border-gray-200 text-gray-400 text-sm font-medium active:bg-gray-50">
                   ✕
@@ -2428,7 +2433,7 @@ function IOLTab({ queue, onAdd, onAdmit, onRemove }) {
   );
 }
 
-function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, onQuickCTG, onHandover, onUpdateBed, shift, onEndShift, iolQueue, onIOLAdd, onIOLAdmit, onIOLRemove }) {
+function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, onQuickCTG, onHandover, onUpdateBed, shift, onEndShift, iolQueue, onIOLAdd, onIOLAdmit, onIOLRemove, onIOLEdit }) {
   const bedList         = Object.values(beds).sort((a,b) => a.bedNumber.localeCompare(b.bedNumber, undefined, {numeric:true}));
   const totalUrgent     = Object.values(alertsMap).flat().filter(a => a.severity === "urgent").length;
   const totalPendingTasks = Object.values(beds).reduce((n, b) => n + (b.tasks ?? []).filter(t => !t.done).length, 0);
@@ -2535,7 +2540,7 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
         </div>
 
         {boardTab === "iol" ? (
-          <IOLTab queue={iolQueue} onAdd={onIOLAdd} onAdmit={onIOLAdmit} onRemove={onIOLRemove} />
+          <IOLTab queue={iolQueue} onAdd={onIOLAdd} onAdmit={onIOLAdmit} onRemove={onIOLRemove} onEdit={onIOLEdit} />
         ) : boardTab === "tasks" ? (
           <TasksView beds={beds} alertsMap={alertsMap} onSelect={onSelect} onUpdateBed={onUpdateBed} />
         ) : (
@@ -2710,8 +2715,9 @@ export default function WardPage({ shift, onEndShift }) {
   const [beds, setBeds]            = useState(loadBeds);
   const [iolQueue, setIolQueue]    = useState(loadIOL);
   const [admitIOL, setAdmitIOL]    = useState(null);   // IOL entry being admitted, pre-fills wizard
-  const [iolSheet, setIolSheet]    = useState(false);  // add-to-queue sheet
+  const [iolSheet, setIolSheet]    = useState(false);  // add/edit sheet
   const [iolSheetKey, setIolSheetKey] = useState(0);  // increments on each open to force fresh mount
+  const [iolEditEntry, setIolEditEntry] = useState(null); // entry being edited, null for new
   const [selectedId, setSelId]     = useState(null);
   const [view, setView]            = useState("board"); // board | detail | wizard
   const [sheet, setSheet]          = useState(null);    // null | "ve" | "oxy"
@@ -2823,7 +2829,8 @@ export default function WardPage({ shift, onEndShift }) {
           shift={shift}
           onEndShift={onEndShift}
           iolQueue={iolQueue}
-          onIOLAdd={() => { setIolSheetKey(k => k + 1); setIolSheet(true); }}
+          onIOLAdd={() => { setIolEditEntry(null); setIolSheetKey(k => k + 1); setIolSheet(true); }}
+          onIOLEdit={entry => { setIolEditEntry(entry); setIolSheetKey(k => k + 1); setIolSheet(true); }}
           onIOLAdmit={entry => { setAdmitIOL(entry); setView("wizard"); }}
           onIOLRemove={id => setIolQueue(prev => prev.filter(e => e.id !== id))}
         />
@@ -2846,11 +2853,17 @@ export default function WardPage({ shift, onEndShift }) {
         />
       )}
 
-      {/* IOL add sheet */}
-      <BottomSheet open={iolSheet} onClose={() => setIolSheet(false)}
-        title="Add to IOL queue" sub="NICE NG207 · Inducing labour">
-        <IOLAddSheet key={iolSheetKey} onSave={entry => {
-          setIolQueue(prev => [...prev, entry]);
+      {/* IOL add / edit sheet */}
+      <BottomSheet open={iolSheet} onClose={() => { setIolSheet(false); setIolEditEntry(null); }}
+        title={iolEditEntry ? "Edit IOL entry" : "Add to IOL queue"}
+        sub="NICE NG207 · Inducing labour">
+        <IOLAddSheet key={iolSheetKey} initialValues={iolEditEntry} onSave={entry => {
+          setIolQueue(prev =>
+            iolEditEntry
+              ? prev.map(e => e.id === entry.id ? entry : e)
+              : [...prev, entry]
+          );
+          setIolEditEntry(null);
           setIolSheet(false);
         }} />
       </BottomSheet>
