@@ -2354,23 +2354,69 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
 
         <div className="px-5 space-y-3">
           {bedList.map(bed => {
-            const alerts     = alertsMap[bed.id] ?? [];
-            const status     = bedStatusColor(alerts);
-            const sc         = STATUS[status];
-            const lastVE     = bed.ves?.[bed.ves.length - 1];
-            const urgentN    = alerts.filter(a => a.severity === "urgent").length;
-            const msSinceVE  = lastVE ? now - new Date(lastVE.time).getTime() : null;
+            const alerts      = alertsMap[bed.id] ?? [];
+            const status      = bedStatusColor(alerts);
+            const sc          = STATUS[status];
+            const lastVE      = bed.ves?.length ? bed.ves[bed.ves.length - 1] : null;
+            const urgentN     = alerts.filter(a => a.severity === "urgent").length;
             const isDelivered = !!bed.delivery;
+            const currentOxy  = bed.oxytocinLog?.length ? bed.oxytocinLog[bed.oxytocinLog.length - 1] : null;
+            const pendingTasks = (bed.tasks ?? []).filter(t => !t.done).length;
 
             const cardCls = isDelivered
               ? "border-green-200 bg-green-50"
               : sc.card;
 
+            // B — Background
+            const bParts = [];
+            if (bed.parity)    bParts.push(PAR_SHORT[bed.parity] ?? bed.parity);
+            if (bed.gestation) bParts.push(bed.gestation);
+            if (bed.modeOfOnset === "Induced") {
+              bParts.push(bed.iolReasons?.length ? `Induced (${bed.iolReasons[0]})` : "Induced");
+            } else if (bed.modeOfOnset === "PPROM") {
+              bParts.push("PPROM");
+            } else if (bed.modeOfOnset) {
+              bParts.push("Spontaneous");
+            }
+            (bed.riskFlags ?? []).forEach(f => bParts.push(f));
+
+            // S — Situation
+            const sParts = [];
+            if (isDelivered) {
+              sParts.push(`${bed.delivery.mode} at ${fmtTime(bed.delivery.time)}`);
+            } else {
+              if (bed.labourStage) sParts.push(STAGE_SHORT[bed.labourStage] ?? bed.labourStage);
+              if (lastVE) {
+                const ago = fmtAge(now - new Date(lastVE.time).getTime());
+                sParts.push(`${lastVE.dilation}cm ${ago} ago`);
+              } else {
+                sParts.push("No VE");
+              }
+            }
+
+            // A — Assessment
+            const aParts = [];
+            if (isDelivered) {
+              if (bed.delivery.ebl != null) aParts.push(`EBL ${bed.delivery.ebl} mL`);
+            } else {
+              if (lastVE?.membranes) {
+                if (lastVE.membranes !== "Intact") {
+                  aParts.push(`${lastVE.membranes}${lastVE.membranesTime ? ` ${fmtTime(lastVE.membranesTime)}` : ""}`);
+                  if (lastVE.liquor) aParts.push(LIQUOR_LABEL[lastVE.liquor] ?? lastVE.liquor);
+                } else {
+                  aParts.push("Intact");
+                }
+              }
+              if (bed.analgesia && bed.analgesia !== "None") aParts.push(bed.analgesia);
+              if (currentOxy) aParts.push(`Oxy ${currentOxy.dose} mU/min`);
+            }
+
             return (
               <div key={bed.id} className={`rounded-2xl border ${cardCls} overflow-hidden`}>
                 {/* Main tap area → detail */}
                 <button onClick={() => onSelect(bed.id)} className="w-full p-4 text-left">
-                  <div className="flex items-center justify-between gap-2">
+                  {/* Header */}
+                  <div className="flex items-center justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2">
                       <span className="text-xl font-bold text-gray-900">Bed {bed.bedNumber}</span>
                       {isDelivered
@@ -2387,8 +2433,39 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500 mt-1.5 truncate">{bedSummary(bed)}</p>
-                  {!isDelivered && <ObsDots bed={bed} now={now} />}
+
+                  {/* BSAR rows */}
+                  <div className="space-y-1.5">
+                    {bParts.length > 0 && (
+                      <div className="flex gap-2 items-baseline">
+                        <span className="text-[10px] font-bold text-gray-300 w-3 shrink-0">B</span>
+                        <span className="text-sm text-gray-700 leading-snug">{bParts.join(" · ")}</span>
+                      </div>
+                    )}
+                    {sParts.length > 0 && (
+                      <div className="flex gap-2 items-baseline">
+                        <span className="text-[10px] font-bold text-gray-300 w-3 shrink-0">S</span>
+                        <span className="text-sm font-semibold text-gray-900 leading-snug">{sParts.join(" · ")}</span>
+                      </div>
+                    )}
+                    {aParts.length > 0 && (
+                      <div className="flex gap-2 items-baseline">
+                        <span className="text-[10px] font-bold text-gray-300 w-3 shrink-0">A</span>
+                        <span className="text-sm text-gray-600 leading-snug">{aParts.join(" · ")}</span>
+                      </div>
+                    )}
+                    {!isDelivered && (
+                      <div className="flex gap-2 items-center mt-1">
+                        <span className="text-[10px] font-bold text-gray-300 w-3 shrink-0">R</span>
+                        <div className="flex items-center gap-3">
+                          <ObsDots bed={bed} now={now} />
+                          {pendingTasks > 0 && (
+                            <span className="text-[11px] font-semibold text-blue-500">{pendingTasks} task{pendingTasks !== 1 ? "s" : ""}</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </button>
 
                 {/* Quick actions bar */}
