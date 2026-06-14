@@ -2301,23 +2301,23 @@ function IOLAddSheet({ onSave, initialValues = null }) {
       <div className="overflow-y-auto overscroll-contain flex-1 min-h-0">
         <div className="px-5 pt-3 pb-3 space-y-3">
 
-          {/* Initials + Time */}
-          <div className="flex gap-3">
-            <div className="w-24 shrink-0">
-              <SLabel className="mb-1.5">Initials</SLabel>
-              <input
-                type="text" maxLength={4} value={initials}
-                onChange={e => setInit(e.target.value)}
-                placeholder="JB"
-                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xl font-bold text-gray-900 uppercase tracking-widest focus:outline-none focus:border-gray-400 text-center" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <SLabel className="mb-1.5">Time queued</SLabel>
-              <input
-                type="time" value={queueTime}
-                onChange={e => setQTime(e.target.value)}
-                className="w-full min-w-0 border border-gray-200 rounded-xl px-3 py-2 text-base text-gray-900 focus:outline-none focus:border-gray-400 text-center" />
-            </div>
+          {/* Initials */}
+          <div>
+            <SLabel className="mb-1.5">Initials</SLabel>
+            <input
+              type="text" maxLength={4} value={initials}
+              onChange={e => setInit(e.target.value)}
+              placeholder="JB"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xl font-bold text-gray-900 uppercase tracking-widest focus:outline-none focus:border-gray-400 text-center" />
+          </div>
+
+          {/* Time queued — full-width row so iOS time picker never clips */}
+          <div>
+            <SLabel className="mb-1.5">Time queued</SLabel>
+            <input
+              type="time" value={queueTime}
+              onChange={e => setQTime(e.target.value)}
+              className="block w-full border border-gray-200 rounded-xl px-3 py-2 text-base text-gray-900 focus:outline-none focus:border-gray-400" />
           </div>
 
           {/* Compact gestation */}
@@ -2375,24 +2375,94 @@ function IOLAddSheet({ onSave, initialValues = null }) {
   );
 }
 
+function IOLReferenceSheet() {
+  const tierGroups = IOL_TIER_META.map((meta, tier) => ({
+    tier, meta,
+    items: IOL_IND.filter(i => i.tier === tier),
+  }));
+
+  const tierDescriptions = [
+    "Deliver within hours — escalate immediately",
+    "Expedite — aim to start induction today",
+    "Plan induction — prioritise within the week",
+    "Schedule in usual order",
+  ];
+
+  return (
+    <div className="px-5 pt-2 pb-6 space-y-4">
+      <p className="text-xs text-gray-400 leading-relaxed">
+        Priority order based on NICE NG207 (Inducing labour). Within each tier,
+        higher gestation is prioritised first, then by longest wait.
+      </p>
+
+      {tierGroups.map(({ tier, meta, items }) => (
+        <div key={tier} className={`rounded-2xl border ${meta.cls.border} ${meta.cls.bg} p-4`}>
+          <div className="flex items-center gap-2 mb-3">
+            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${meta.cls.badge}`}>
+              {meta.label}
+            </span>
+            <span className={`text-xs font-medium ${meta.cls.text}`}>
+              {tierDescriptions[tier]}
+            </span>
+          </div>
+          <div className="space-y-1.5">
+            {items.map(ind => (
+              <div key={ind.label} className="flex items-baseline justify-between gap-2">
+                <span className="text-sm text-gray-800">{ind.label}</span>
+                {ind.cite && (
+                  <span className="text-[10px] text-gray-400 shrink-0">{ind.cite}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <p className="text-[10px] text-gray-300 text-center leading-relaxed pt-1">
+        Not a substitute for clinical judgement
+      </p>
+    </div>
+  );
+}
+
 function IOLTab({ queue, onAdd, onAdmit, onRemove, onEdit }) {
+  const [showRef, setShowRef] = useState(false);
   const sorted = sortIOLQueue(queue);
+
+  const InfoBtn = () => (
+    <button onClick={() => setShowRef(true)}
+      className="w-8 h-8 flex items-center justify-center rounded-xl border border-gray-200 text-gray-400 text-sm font-bold active:bg-gray-50">
+      ⓘ
+    </button>
+  );
 
   if (!sorted.length) {
     return (
-      <div className="px-5 pt-12 text-center">
-        <p className="text-gray-400 text-sm font-medium mb-6">No women queued for IOL</p>
-        <button onClick={onAdd}
-          className="px-6 py-3.5 rounded-2xl bg-gray-900 text-white text-sm font-bold active:scale-95 transition-all">
-          + Add to queue
-        </button>
-      </div>
+      <>
+        <div className="px-5 pt-12 text-center">
+          <p className="text-gray-400 text-sm font-medium mb-6">No women queued for IOL</p>
+          <button onClick={onAdd}
+            className="px-6 py-3.5 rounded-2xl bg-gray-900 text-white text-sm font-bold active:scale-95 transition-all">
+            + Add to queue
+          </button>
+          <button onClick={() => setShowRef(true)}
+            className="block mx-auto mt-4 text-xs text-gray-400 underline underline-offset-2">
+            Priority reference (NICE NG207)
+          </button>
+        </div>
+        <BottomSheet open={showRef} onClose={() => setShowRef(false)}
+          title="IOL Priority Reference" sub="NICE NG207 · Inducing labour">
+          <IOLReferenceSheet />
+        </BottomSheet>
+      </>
     );
   }
 
   return (
+    <>
     <div className="px-5 space-y-3">
-      <div className="flex justify-end pt-1">
+      <div className="flex items-center justify-end gap-2 pt-1">
+        <InfoBtn />
         <button onClick={onAdd}
           className="px-4 py-2 rounded-xl bg-gray-900 text-white text-xs font-bold active:scale-95 transition-all">
           + Add
@@ -2460,6 +2530,12 @@ function IOLTab({ queue, onAdd, onAdmit, onRemove, onEdit }) {
         Priority order per NICE NG207 · Not a substitute for clinical judgement
       </p>
     </div>
+
+    <BottomSheet open={showRef} onClose={() => setShowRef(false)}
+      title="IOL Priority Reference" sub="NICE NG207 · Inducing labour">
+      <IOLReferenceSheet />
+    </BottomSheet>
+    </>
   );
 }
 
