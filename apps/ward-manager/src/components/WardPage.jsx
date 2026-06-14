@@ -2287,49 +2287,67 @@ function IOLAddSheet({ onSave, initialValues = null }) {
     items: IOL_IND.filter(i => i.tier === tier),
   }));
 
+  const adjWeeks = d => setGestW(w => Math.max(24, Math.min(42, w + d)));
+  const adjDays  = d => {
+    let nd = gestDays + d, nw = gestWeeks;
+    if (nd > 6) { nd = 0; nw = Math.min(42, nw + 1); }
+    if (nd < 0) { nd = 6; nw = Math.max(24, nw - 1); }
+    setGestW(nw); setGestD(nd);
+  };
+  const btnSm = "w-9 h-9 rounded-xl bg-gray-100 text-gray-700 text-xs font-bold flex items-center justify-center active:scale-95 shrink-0";
+
   return (
     <>
       <div className="overflow-y-auto overscroll-contain flex-1 min-h-0">
-        <div className="px-5 pt-4 pb-4 space-y-5">
+        <div className="px-5 pt-3 pb-3 space-y-3">
 
+          {/* Initials + Time */}
           <div className="flex gap-3">
             <div className="flex-1">
-              <SLabel className="mb-2">Initials</SLabel>
+              <SLabel className="mb-1.5">Initials</SLabel>
               <input
                 type="text" maxLength={4} value={initials}
                 onChange={e => setInit(e.target.value)}
-                placeholder="e.g. JB"
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-xl font-bold text-gray-900 uppercase tracking-widest focus:outline-none focus:border-gray-400 text-center" />
+                placeholder="JB"
+                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xl font-bold text-gray-900 uppercase tracking-widest focus:outline-none focus:border-gray-400 text-center" />
             </div>
             <div className="flex-1">
-              <SLabel className="mb-2">Time queued</SLabel>
+              <SLabel className="mb-1.5">Time queued</SLabel>
               <input
                 type="time" value={queueTime}
                 onChange={e => setQTime(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base text-gray-900 focus:outline-none focus:border-gray-400 text-center" />
+                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base text-gray-900 focus:outline-none focus:border-gray-400 text-center" />
             </div>
           </div>
 
-          <div>
-            <SLabel className="mb-3">Gestation</SLabel>
-            <GestationInput weeks={gestWeeks} days={gestDays}
-              onChange={({ weeks, days }) => { setGestW(weeks); setGestD(days); }} />
+          {/* Compact gestation */}
+          <div className="flex items-center gap-2">
+            <SLabel className="shrink-0">Gestation</SLabel>
+            <div className="flex items-center gap-1 ml-auto">
+              <button onClick={() => adjWeeks(-1)} className={btnSm}>−w</button>
+              <span className="text-base font-bold text-gray-900 w-12 text-center tabular-nums">{gestWeeks}+{gestDays}</span>
+              <button onClick={() => adjWeeks(+1)} className={btnSm}>+w</button>
+              <div className="w-px h-5 bg-gray-200 mx-0.5" />
+              <button onClick={() => adjDays(-1)} className={btnSm}>−d</button>
+              <button onClick={() => adjDays(+1)} className={btnSm}>+d</button>
+            </div>
           </div>
 
+          {/* Indications — 2-column grid per tier */}
           <div>
-            <SLabel className="mb-3">Indication — select all that apply</SLabel>
-            <div className="space-y-3">
+            <SLabel className="mb-2">Indication — select all that apply</SLabel>
+            <div className="space-y-2">
               {tierGroups.map(({ tier, meta, items }) => (
                 <div key={tier}>
-                  <p className={`text-[10px] font-bold uppercase tracking-wide mb-1.5 ${meta.cls.text}`}>
+                  <p className={`text-[10px] font-bold uppercase tracking-wide mb-1 ${meta.cls.text}`}>
                     {meta.label}
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 gap-1.5">
                     {items.map(ind => {
                       const on = indications.includes(ind.label);
                       return (
                         <button key={ind.label} type="button" onClick={() => toggle(ind.label)}
-                          className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition-colors active:scale-95 ${
+                          className={`px-2.5 py-1.5 rounded-xl border text-[11px] font-semibold text-left leading-tight transition-colors active:scale-95 ${
                             on ? "bg-gray-900 border-gray-900 text-white" : "bg-white border-gray-200 text-gray-600"
                           }`}>
                           {ind.label}
@@ -2344,10 +2362,10 @@ function IOLAddSheet({ onSave, initialValues = null }) {
 
         </div>
       </div>
-      <div className="px-5 pt-3 border-t border-gray-100 shrink-0"
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}>
+      <div className="px-5 pt-2.5 border-t border-gray-100 shrink-0"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}>
         <button onClick={save} disabled={!canSave}
-          className={`w-full py-4 rounded-2xl text-base font-bold transition-all active:scale-95 ${
+          className={`w-full py-3 rounded-2xl text-base font-bold transition-all active:scale-95 ${
             canSave ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-400"
           }`}>
           {isEdit ? "Save changes" : "Add to queue"}
