@@ -48,6 +48,19 @@ const LIQUOR_LABEL = {
   "Absent":         "Absent",
 };
 
+const IOL_REASONS = [
+  "Post-dates",
+  "PROM at term",
+  "Gestational diabetes",
+  "Pre-eclampsia / hypertension",
+  "Suspected FGR",
+  "Reduced fetal movements",
+  "Obstetric cholestasis",
+  "Previous stillbirth",
+  "Maternal request",
+  "Other",
+];
+
 const PAR_SHORT = { "Para 0": "P0", "Para 1": "P1", "Para 2+": "P2+" };
 
 function bedSummary(bed) {
@@ -954,6 +967,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
   const [stage, setStage]     = useState(null);
   const [mode, setMode]       = useState("Spontaneous");
   const [indMethod, setIndM]  = useState("Dinoprostone");
+  const [iolReasons, setIolR] = useState([]);
   const [analgesia, setAnal]  = useState("None");
   const [flags, setFlags]     = useState([]);
   const [admTime, setAdmT]    = useState(timeInputNow);
@@ -1027,6 +1041,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
         parity, gestation: `${gestWeeks}+${gestDays}`,
         modeOfOnset: mode,
         inductionMethod: mode === "Induced" ? indMethod : null,
+        iolReasons: mode === "Induced" ? iolReasons : [],
         analgesia, riskFlags: flags, labourStage: stage,
         activeFirstStageStartTime: stage === "Active first stage" ? stageTime : null,
         passiveStartTime: stage === "Passive second stage" ? stageTime : null,
@@ -1206,11 +1221,17 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
             </div>
 
             {mode === "Induced" && (
-              <div>
-                <SLabel className="mb-2">Induction method</SLabel>
-                <PillRow value={indMethod} onChange={setIndM}
-                  options={["Dinoprostone","Balloon","Misoprostol","ARM+Synto"]} />
-              </div>
+              <>
+                <div>
+                  <SLabel className="mb-2">Induction method</SLabel>
+                  <PillRow value={indMethod} onChange={setIndM}
+                    options={["Dinoprostone","Balloon","Misoprostol","ARM+Synto"]} />
+                </div>
+                <div>
+                  <SLabel className="mb-2">Indication — select all that apply</SLabel>
+                  <ChipGroup options={IOL_REASONS} selected={iolReasons} onChange={setIolR} />
+                </div>
+              </>
             )}
 
             <div className="h-px bg-gray-100" />
@@ -1620,6 +1641,29 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEd
                 <PillRow value={bed.analgesia} onChange={a => onUpdate({ analgesia: a })} options={["Epidural","Remifentanil PCA"]} />
               </div>
             </div>
+
+            {/* IOL details — only when induced */}
+            {bed.modeOfOnset === "Induced" && (
+              <div>
+                <SLabel className="mb-2">Induction</SLabel>
+                <div className="rounded-2xl border border-gray-100 bg-white p-4 space-y-3">
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1.5">Method</p>
+                    <PillRow value={bed.inductionMethod} onChange={v => onUpdate({ inductionMethod: v })}
+                      options={["Dinoprostone","Balloon","Misoprostol","ARM+Synto"]} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1.5">Indication</p>
+                    <ChipGroup options={IOL_REASONS}
+                      selected={bed.iolReasons ?? []}
+                      onChange={v => onUpdate({ iolReasons: v })} />
+                    {(bed.iolReasons?.length ?? 0) === 0 && (
+                      <p className="text-xs text-gray-400 mt-1.5">None recorded — tap to add</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Delivery status */}
             <div>
