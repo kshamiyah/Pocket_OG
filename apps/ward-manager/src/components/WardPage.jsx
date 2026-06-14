@@ -2368,7 +2368,7 @@ function IOLTab({ queue, onAdd, onAdmit, onRemove }) {
         </button>
       </div>
 
-      {sorted.map(entry => {
+      {sorted.map((entry, idx) => {
         const tier = iolEntryTier(entry);
         const meta = IOL_TIER_META[tier];
         const waitMs = Date.now() - new Date(entry.addedAt).getTime();
@@ -2381,6 +2381,7 @@ function IOLTab({ queue, onAdd, onAdmit, onRemove }) {
             <div className="p-4">
               <div className="flex items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2">
+                  <span className="text-lg font-black text-gray-300 w-6 shrink-0">#{idx + 1}</span>
                   <span className="text-xl font-bold text-gray-900">{entry.initials}</span>
                   <span className="text-sm font-semibold text-gray-500">{entry.gestWeeks}+{entry.gestDays ?? 0}</span>
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${meta.cls.badge}`}>
@@ -2707,6 +2708,7 @@ export default function WardPage({ shift, onEndShift }) {
   const [iolQueue, setIolQueue]    = useState(loadIOL);
   const [admitIOL, setAdmitIOL]    = useState(null);   // IOL entry being admitted, pre-fills wizard
   const [iolSheet, setIolSheet]    = useState(false);  // add-to-queue sheet
+  const [iolSheetKey, setIolSheetKey] = useState(0);  // increments on each open to force fresh mount
   const [selectedId, setSelId]     = useState(null);
   const [view, setView]            = useState("board"); // board | detail | wizard
   const [sheet, setSheet]          = useState(null);    // null | "ve" | "oxy"
@@ -2818,7 +2820,7 @@ export default function WardPage({ shift, onEndShift }) {
           shift={shift}
           onEndShift={onEndShift}
           iolQueue={iolQueue}
-          onIOLAdd={() => setIolSheet(true)}
+          onIOLAdd={() => { setIolSheetKey(k => k + 1); setIolSheet(true); }}
           onIOLAdmit={entry => { setAdmitIOL(entry); setView("wizard"); }}
           onIOLRemove={id => setIolQueue(prev => prev.filter(e => e.id !== id))}
         />
@@ -2844,7 +2846,7 @@ export default function WardPage({ shift, onEndShift }) {
       {/* IOL add sheet */}
       <BottomSheet open={iolSheet} onClose={() => setIolSheet(false)}
         title="Add to IOL queue" sub="NICE NG207 · Inducing labour">
-        <IOLAddSheet onSave={entry => {
+        <IOLAddSheet key={iolSheetKey} onSave={entry => {
           setIolQueue(prev => [...prev, entry]);
           setIolSheet(false);
         }} />
