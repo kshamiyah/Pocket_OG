@@ -61,6 +61,18 @@ const IOL_REASONS = [
   "Other",
 ];
 
+const TASK_QUICK = [
+  "Repeat FBC",
+  "Group & Save",
+  "Clotting screen",
+  "Senior review",
+  "Repeat CTG",
+  "Antibiotics due",
+  "Consent form",
+  "IV access",
+  "Urine dip",
+];
+
 const PAR_SHORT = { "Para 0": "P0", "Para 1": "P1", "Para 2+": "P2+" };
 
 function bedSummary(bed) {
@@ -1489,7 +1501,82 @@ function ObsDots({ bed, now }) {
   );
 }
 
-// ─── Bed detail view — 3 inner tabs ──────────────────────────────────────
+// ─── Per-patient task list ────────────────────────────────────────────────
+
+function TasksTab({ bed, onUpdate }) {
+  const tasks   = bed.tasks ?? [];
+  const pending = tasks.filter(t => !t.done);
+  const done    = tasks.filter(t => t.done);
+  const [text, setText] = useState("");
+
+  const addTask = raw => {
+    const label = raw.trim();
+    if (!label) return;
+    const task = { id: `task-${Date.now()}`, text: label, done: false, createdAt: nowISO() };
+    onUpdate({ tasks: [...tasks, task] });
+    setText("");
+  };
+
+  const toggle = id =>
+    onUpdate({ tasks: tasks.map(t => t.id === id ? { ...t, done: !t.done } : t) });
+
+  return (
+    <div className="px-5 pt-4 pb-8 space-y-5">
+      {/* Quick-add chips */}
+      <div>
+        <SLabel className="mb-2">Quick add</SLabel>
+        <div className="flex flex-wrap gap-2">
+          {TASK_QUICK.map(label => (
+            <button key={label} onClick={() => addTask(label)}
+              className="px-3 py-1.5 rounded-full bg-gray-100 text-xs font-semibold text-gray-700 active:scale-95 transition-all">
+              + {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Custom input */}
+      <div className="flex gap-2">
+        <input type="text" value={text} onChange={e => setText(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && addTask(text)}
+          placeholder="Custom task…"
+          className="flex-1 px-4 py-3 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-gray-400 bg-white" />
+        <button onClick={() => addTask(text)} disabled={!text.trim()}
+          className="px-4 py-3 rounded-2xl bg-gray-900 text-white text-sm font-bold disabled:opacity-30 active:scale-95 transition-all">
+          Add
+        </button>
+      </div>
+
+      {/* Task list */}
+      {tasks.length === 0 ? (
+        <p className="text-sm text-gray-400 text-center py-8">No tasks — use quick-add or type above</p>
+      ) : (
+        <div className="space-y-2">
+          {pending.map(task => (
+            <div key={task.id} className="flex items-center gap-3 rounded-2xl bg-white border border-gray-100 shadow-sm px-4 py-3">
+              <button onClick={() => toggle(task.id)}
+                className="w-6 h-6 rounded-full border-2 border-gray-300 shrink-0 active:scale-95 transition-all" />
+              <p className="text-sm text-gray-900 flex-1 leading-snug">{task.text}</p>
+            </div>
+          ))}
+          {done.map(task => (
+            <div key={task.id} className="flex items-center gap-3 rounded-2xl bg-gray-50 border border-gray-100 px-4 py-3">
+              <button onClick={() => toggle(task.id)}
+                className="w-6 h-6 rounded-full bg-green-500 border-2 border-green-500 flex items-center justify-center shrink-0 active:scale-95 transition-all">
+                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </button>
+              <p className="text-sm text-gray-400 flex-1 leading-snug line-through">{task.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Bed detail view — inner tabs ─────────────────────────────────────────
 
 function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEditVE, onOpenOxy, onOpenDelivery, onOpenCTG }) {
   const PERSISTENT_FLAGS = {
@@ -1576,8 +1663,10 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEd
               { key: "ves",      label: "VEs" },
               { key: "obs",      label: "Obs" },
               { key: "ctg",      label: "CTG" },
+              { key: "tasks",    label: "Tasks" },
             ].map(tab => {
               const lastCTG = tab.key === "ctg" ? bed.ctgLog?.[bed.ctgLog.length - 1] : null;
+              const pendingTaskCount = tab.key === "tasks" ? (bed.tasks ?? []).filter(t => !t.done).length : 0;
               return (
                 <button key={tab.key} onClick={() => setInnerTab(tab.key)}
                   className={`flex-1 py-3 text-sm font-semibold relative transition-colors ${innerTab === tab.key ? "text-gray-900 border-b-2 border-gray-900" : "text-gray-400"}`}>
@@ -1590,6 +1679,11 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEd
                   )}
                   {lastCTG?.classification === "suspicious" && (
                     <span className="absolute top-2 right-1 w-2 h-2 rounded-full bg-amber-400" />
+                  )}
+                  {tab.key === "tasks" && pendingTaskCount > 0 && (
+                    <span className="absolute top-1.5 right-1 min-w-[16px] h-4 px-1 rounded-full bg-blue-500 text-white text-[9px] font-black flex items-center justify-center leading-none">
+                      {pendingTaskCount}
+                    </span>
                   )}
                 </button>
               );
@@ -1819,6 +1913,11 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEd
             </div>
           </div>
         )}
+
+        {/* Tasks tab */}
+        {innerTab === "tasks" && (
+          <TasksTab bed={bed} onUpdate={onUpdate} />
+        )}
       </div>
 
       {/* FAB — always shows VE */}
@@ -2016,14 +2115,33 @@ const TASK_LEVELS = [
   { key: "info",    label: "Routine", dotCls: "bg-blue-400",  barCls: "bg-blue-300",  hdrCls: "text-blue-500",  bdgCls: "bg-blue-100 text-blue-600", divCls: "border-blue-100",  cardCls: "border-blue-100 bg-blue-50"  },
 ];
 
-function TasksView({ beds, alertsMap, onSelect }) {
-  const allTasks = Object.entries(alertsMap).flatMap(([bedId, alerts]) => {
+function TasksView({ beds, alertsMap, onSelect, onUpdateBed }) {
+  const bedList = Object.values(beds).sort((a, b) =>
+    a.bedNumber.localeCompare(b.bedNumber, undefined, { numeric: true })
+  );
+
+  const manualPending = bedList.flatMap(bed =>
+    (bed.tasks ?? []).filter(t => !t.done).map(t => ({ task: t, bed }))
+  );
+  const manualDone = bedList.flatMap(bed =>
+    (bed.tasks ?? []).filter(t => t.done).map(t => ({ task: t, bed }))
+  );
+  const allManual = [...manualPending, ...manualDone];
+
+  const toggleTask = (bed, taskId) => {
+    const newTasks = (bed.tasks ?? []).map(t => t.id === taskId ? { ...t, done: !t.done } : t);
+    onUpdateBed(bed.id, { tasks: newTasks });
+  };
+
+  const allAlerts = Object.entries(alertsMap).flatMap(([bedId, alerts]) => {
     const bed = beds[bedId];
     if (!bed || bed.delivery) return [];
     return alerts.map(a => ({ ...a, bed }));
   });
 
-  if (allTasks.length === 0) {
+  const hasAnything = allManual.length > 0 || allAlerts.length > 0;
+
+  if (!hasAnything) {
     return (
       <div className="flex flex-col items-center justify-center py-24 px-8 text-center">
         <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
@@ -2039,8 +2157,47 @@ function TasksView({ beds, alertsMap, onSelect }) {
 
   return (
     <div className="px-5 pb-8 pt-1 space-y-5">
+      {/* Manual tasks */}
+      {allManual.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-2 px-1">
+            <span className="text-[11px] font-black uppercase tracking-widest text-gray-500">Tasks</span>
+            {manualPending.length > 0 && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-blue-500 text-white">{manualPending.length}</span>
+            )}
+          </div>
+          <div className="rounded-2xl border border-gray-100 bg-white overflow-hidden shadow-sm">
+            {allManual.map(({ task, bed }, i) => (
+              <div key={`${bed.id}-${task.id}`}
+                className={`flex items-center gap-3 px-4 py-3 ${i > 0 ? "border-t border-gray-50" : ""}`}>
+                <button onClick={() => toggleTask(bed, task.id)}
+                  className={`w-6 h-6 rounded-full border-2 shrink-0 active:scale-95 transition-all flex items-center justify-center ${
+                    task.done ? "bg-green-500 border-green-500" : "border-gray-300"
+                  }`}>
+                  {task.done && (
+                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </button>
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm leading-snug ${task.done ? "line-through text-gray-400" : "text-gray-900"}`}>
+                    {task.text}
+                  </p>
+                </div>
+                <button onClick={() => onSelect(bed.id)}
+                  className="text-[10px] font-bold bg-gray-100 text-gray-600 rounded-md px-1.5 py-0.5 shrink-0">
+                  Bed {bed.bedNumber}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Clinical alerts */}
       {TASK_LEVELS.map(lv => {
-        const tasks = allTasks.filter(t => t.severity === lv.key);
+        const tasks = allAlerts.filter(t => t.severity === lv.key);
         if (!tasks.length) return null;
         return (
           <div key={lv.key}>
@@ -2078,9 +2235,10 @@ function TasksView({ beds, alertsMap, onSelect }) {
   );
 }
 
-function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, onQuickCTG, onHandover, shift, onEndShift }) {
-  const bedList      = Object.values(beds).sort((a,b) => a.bedNumber.localeCompare(b.bedNumber, undefined, {numeric:true}));
-  const totalUrgent  = Object.values(alertsMap).flat().filter(a => a.severity === "urgent").length;
+function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, onQuickCTG, onHandover, onUpdateBed, shift, onEndShift }) {
+  const bedList         = Object.values(beds).sort((a,b) => a.bedNumber.localeCompare(b.bedNumber, undefined, {numeric:true}));
+  const totalUrgent     = Object.values(alertsMap).flat().filter(a => a.severity === "urgent").length;
+  const totalPendingTasks = Object.values(beds).reduce((n, b) => n + (b.tasks ?? []).filter(t => !t.done).length, 0);
   const now          = Date.now();
   const msLeft       = useCountdown(shift?.shiftEnd);
   const nearEnd      = msLeft != null && msLeft > 0 && msLeft <= 30 * 60 * 1000;
@@ -2160,11 +2318,11 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
                       isActive ? "bg-white shadow-sm text-gray-900" : "text-gray-500"
                     }`}>
                     {tab.label}
-                    {tab.key === "tasks" && totalUrgent > 0 && (
+                    {tab.key === "tasks" && totalPendingTasks > 0 && (
                       <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none ${
-                        isActive ? "bg-red-500 text-white" : "bg-red-100 text-red-500"
+                        isActive ? "bg-blue-500 text-white" : "bg-blue-100 text-blue-600"
                       }`}>
-                        {totalUrgent}
+                        {totalPendingTasks}
                       </span>
                     )}
                   </button>
@@ -2175,7 +2333,7 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
         )}
 
         {boardTab === "tasks" ? (
-          <TasksView beds={beds} alertsMap={alertsMap} onSelect={onSelect} />
+          <TasksView beds={beds} alertsMap={alertsMap} onSelect={onSelect} onUpdateBed={onUpdateBed} />
         ) : (
         <>
 
@@ -2365,6 +2523,7 @@ export default function WardPage({ shift, onEndShift }) {
           onQuickVE={id => openSheet("ve", id)}
           onQuickCTG={id => openSheet("ctg", id)}
           onHandover={() => setSheet("handover")}
+          onUpdateBed={updateBed}
           shift={shift}
           onEndShift={onEndShift}
         />
