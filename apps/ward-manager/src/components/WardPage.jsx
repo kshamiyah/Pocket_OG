@@ -2303,7 +2303,7 @@ function IOLAddSheet({ onSave, initialValues = null }) {
 
           {/* Initials + Time */}
           <div className="flex gap-3">
-            <div className="flex-1">
+            <div className="w-24 shrink-0">
               <SLabel className="mb-1.5">Initials</SLabel>
               <input
                 type="text" maxLength={4} value={initials}
@@ -2311,12 +2311,12 @@ function IOLAddSheet({ onSave, initialValues = null }) {
                 placeholder="JB"
                 className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xl font-bold text-gray-900 uppercase tracking-widest focus:outline-none focus:border-gray-400 text-center" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <SLabel className="mb-1.5">Time queued</SLabel>
               <input
                 type="time" value={queueTime}
                 onChange={e => setQTime(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base text-gray-900 focus:outline-none focus:border-gray-400 text-center" />
+                className="w-full min-w-0 border border-gray-200 rounded-xl px-3 py-2 text-base text-gray-900 focus:outline-none focus:border-gray-400 text-center" />
             </div>
           </div>
 
