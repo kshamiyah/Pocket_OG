@@ -2260,6 +2260,9 @@ function IOLAddSheet({ onSave, initialValues = null }) {
   const [gestWeeks, setGestW]  = useState(initialValues?.gestWeeks   ?? 40);
   const [gestDays,  setGestD]  = useState(initialValues?.gestDays    ?? 0);
   const [indications, setInds] = useState(initialValues?.indications ?? []);
+  const [queueTime, setQTime]  = useState(
+    initialValues?.addedAt ? fmtTime(initialValues.addedAt) : timeInputNow()
+  );
 
   const isEdit = !!initialValues;
 
@@ -2269,8 +2272,8 @@ function IOLAddSheet({ onSave, initialValues = null }) {
   const save = () => {
     if (!initials.trim() || !indications.length) return;
     onSave({
-      id:         initialValues?.id      ?? `iol-${Date.now()}`,
-      addedAt:    initialValues?.addedAt ?? nowISO(),
+      id:         initialValues?.id ?? `iol-${Date.now()}`,
+      addedAt:    timeToISO(queueTime),
       initials:   initials.trim().toUpperCase(),
       gestWeeks, gestDays, indications,
     });
@@ -2289,13 +2292,22 @@ function IOLAddSheet({ onSave, initialValues = null }) {
       <div className="overflow-y-auto overscroll-contain flex-1 min-h-0">
         <div className="px-5 pt-4 pb-4 space-y-5">
 
-          <div>
-            <SLabel className="mb-2">Initials</SLabel>
-            <input
-              type="text" maxLength={4} value={initials}
-              onChange={e => setInit(e.target.value)}
-              placeholder="e.g. JB"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-xl font-bold text-gray-900 uppercase tracking-widest focus:outline-none focus:border-gray-400 text-center" />
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <SLabel className="mb-2">Initials</SLabel>
+              <input
+                type="text" maxLength={4} value={initials}
+                onChange={e => setInit(e.target.value)}
+                placeholder="e.g. JB"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-xl font-bold text-gray-900 uppercase tracking-widest focus:outline-none focus:border-gray-400 text-center" />
+            </div>
+            <div className="flex-1">
+              <SLabel className="mb-2">Time queued</SLabel>
+              <input
+                type="time" value={queueTime}
+                onChange={e => setQTime(e.target.value)}
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-base text-gray-900 focus:outline-none focus:border-gray-400 text-center" />
+            </div>
           </div>
 
           <div>
