@@ -40,6 +40,14 @@ const STAGE_SHORT = {
   "Active second stage":  "Active 2nd",
 };
 
+const LIQUOR_LABEL = {
+  "Clear":          "Clear",
+  "Thin meconium":  "Mec: thin",
+  "Thick meconium": "Mec: thick",
+  "Blood-stained":  "Blood-stained",
+  "Absent":         "Absent",
+};
+
 const PAR_SHORT = { "Para 0": "P0", "Para 1": "P1", "Para 2+": "P2+" };
 
 function bedSummary(bed) {
@@ -429,6 +437,7 @@ function VESheet({ bed, onSave }) {
   const [station, setStn]        = useState(lastVE?.station ?? 0);
   const [presentation, setPres]  = useState("Cephalic");
   const [contractions, setContr] = useState(lastVE?.contractions ?? 3);
+  const [liquor, setLiquor]      = useState(lastVE?.liquor ?? null);
 
   const save = () => {
     if (dilation === null) return;
@@ -438,6 +447,7 @@ function VESheet({ bed, onSave }) {
       membranesTime: membranes !== "Intact"
         ? (prevMembTime && lastVE?.membranes === membranes ? prevMembTime : timeToISO(membTime))
         : null,
+      liquor: membranes !== "Intact" ? liquor : null,
       contractions,
     });
   };
@@ -473,6 +483,20 @@ function VESheet({ bed, onSave }) {
                 </div>
               )}
             </div>
+
+            {membranes !== "Intact" && (
+              <div>
+                <SLabel className="mb-2">Liquor</SLabel>
+                <div className="space-y-2">
+                  <PillRow value={liquor} onChange={setLiquor}
+                    options={["Clear","Thin meconium","Thick meconium"]}
+                    labelFn={o => LIQUOR_LABEL[o]} />
+                  <PillRow value={liquor} onChange={setLiquor}
+                    options={["Blood-stained","Absent"]}
+                    labelFn={o => LIQUOR_LABEL[o]} />
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -932,6 +956,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
   // Admission VE — dilation drives stage deduction
   const [admDilation, setAdmDil]   = useState(null);
   const [admMembranes, setAdmMemb] = useState("Intact");
+  const [admLiquor, setAdmLiquor]  = useState(null);
   const [admStation, setAdmStn]    = useState(0);
   const [admContracts, setAdmContr]= useState(3);
   const [admPushing, setAdmPush]   = useState(false);
@@ -986,6 +1011,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
         dilation: admDilation,
         membranes: admMembranes,
         membranesTime: admMembranes !== "Intact" ? stageTime : null,
+        liquor: admMembranes !== "Intact" ? admLiquor : null,
         station: admStation,
         presentation: "Cephalic",
         contractions: admContracts,
@@ -1119,6 +1145,20 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
                   <SLabel className="mb-2">Membranes</SLabel>
                   <PillRow value={admMembranes} onChange={setAdmMemb} options={["Intact","SROM","AROM"]} />
                 </div>
+
+                {admMembranes !== "Intact" && (
+                  <div>
+                    <SLabel className="mb-2">Liquor</SLabel>
+                    <div className="space-y-2">
+                      <PillRow value={admLiquor} onChange={setAdmLiquor}
+                        options={["Clear","Thin meconium","Thick meconium"]}
+                        labelFn={o => LIQUOR_LABEL[o]} />
+                      <PillRow value={admLiquor} onChange={setAdmLiquor}
+                        options={["Blood-stained","Absent"]}
+                        labelFn={o => LIQUOR_LABEL[o]} />
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <SLabel className="mb-3">Station</SLabel>
@@ -1637,6 +1677,7 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
                       <p className="text-xs text-gray-500 mt-0.5">
                         Station {ve.station > 0 ? `+${ve.station}` : ve.station} · {ve.membranes}
                         {ve.membranesTime ? ` at ${fmtTime(ve.membranesTime)}` : ""} · {ve.contractions}/10 min
+                        {ve.liquor && ve.liquor !== "Clear" ? ` · ${LIQUOR_LABEL[ve.liquor] ?? ve.liquor}` : ""}
                       </p>
                     </div>
                   ))}
