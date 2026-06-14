@@ -3,13 +3,19 @@ import { computeAlerts, bedStatusColor, classifyCTGEntry } from "../utils/wardAl
 
 // ─── Storage ─────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = "pocket_og_ward_beds";
+const STORAGE_KEY     = "pocket_og_ward_beds";
+const IOL_STORAGE_KEY = "pocket_og_iol_queue";
 
 function loadBeds() {
   try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : {}; }
   catch { return {}; }
 }
 function saveBeds(beds) { localStorage.setItem(STORAGE_KEY, JSON.stringify(beds)); }
+function loadIOL() {
+  try { const r = localStorage.getItem(IOL_STORAGE_KEY); return r ? JSON.parse(r) : []; }
+  catch { return []; }
+}
+function saveIOL(q) { localStorage.setItem(IOL_STORAGE_KEY, JSON.stringify(q)); }
 function nowISO() { return new Date().toISOString(); }
 function timeInputNow() {
   const d = new Date();
@@ -74,6 +80,48 @@ const TASK_QUICK = [
 ];
 
 const PAR_SHORT = { "Para 0": "P0", "Para 1": "P1", "Para 2+": "P2+" };
+
+// ─── IOL Wizard constants ─────────────────────────────────────────────────
+
+const IOL_TIER_META = [
+  { label: "Urgent",   cls: { badge: "bg-red-500 text-white",    border: "border-red-200",   bg: "bg-red-50",    text: "text-red-700"   } },
+  { label: "High",     cls: { badge: "bg-orange-500 text-white", border: "border-orange-200",bg: "bg-orange-50", text: "text-orange-700"} },
+  { label: "Moderate", cls: { badge: "bg-amber-400 text-white",  border: "border-amber-200", bg: "bg-amber-50",  text: "text-amber-700" } },
+  { label: "Routine",  cls: { badge: "bg-gray-300 text-gray-700",border: "border-gray-200",  bg: "bg-white",     text: "text-gray-500"  } },
+];
+
+const IOL_IND = [
+  { label: "Severe pre-eclampsia",      tier: 0, cite: "NG207 §1.4" },
+  { label: "PPROM + chorioamnionitis",  tier: 0, cite: "NG207 §1.4" },
+  { label: "FGR — absent/reversed EDF",tier: 0, cite: "NG207 §1.4" },
+  { label: "Pre-eclampsia",            tier: 1, cite: "NG207 §1.4" },
+  { label: "PROM at term >24h",        tier: 1, cite: "NG207 §1.4" },
+  { label: "Post-dates 42+0",          tier: 1, cite: "NG207 §1.3" },
+  { label: "RFM + concerns",           tier: 1, cite: "NG207 §1.4" },
+  { label: "Post-dates 41+",           tier: 2, cite: "NG207 §1.3" },
+  { label: "GDM",                      tier: 2, cite: "NG207 §1.4" },
+  { label: "ICP",                      tier: 2, cite: "NG207 §1.4" },
+  { label: "Previous stillbirth",      tier: 2, cite: "NG207 §1.4" },
+  { label: "SGA / FGR (stable)",       tier: 2, cite: "NG207 §1.4" },
+  { label: "Maternal request",         tier: 3, cite: "NG207 §1.4" },
+  { label: "Social",                   tier: 3, cite: "" },
+];
+
+function iolEntryTier(entry) {
+  if (!entry.indications?.length) return 3;
+  return Math.min(...entry.indications.map(ind => IOL_IND.find(i => i.label === ind)?.tier ?? 3));
+}
+
+function sortIOLQueue(queue) {
+  return [...queue].sort((a, b) => {
+    const ta = iolEntryTier(a), tb = iolEntryTier(b);
+    if (ta !== tb) return ta - tb;
+    const ga = a.gestWeeks * 7 + (a.gestDays ?? 0);
+    const gb = b.gestWeeks * 7 + (b.gestDays ?? 0);
+    if (ga !== gb) return gb - ga;
+    return new Date(a.addedAt) - new Date(b.addedAt);
+  });
+}
 
 function bedSummary(bed) {
   // Background: who is this patient
@@ -969,17 +1017,17 @@ function WizardDots({ step, total = 4 }) {
   );
 }
 
-function AdmissionWizard({ existingNumbers, onSave, onCancel }) {
+function AdmissionWizard({ existingNumbers, onSave, onCancel, initialValues = null }) {
   const [step, setStep]       = useState(1);
   const [bedNum, setBedNum]   = useState("");
   const [parity, setParity]   = useState("Para 0");
-  const [gestWeeks, setGestW] = useState(40);
-  const [gestDays,  setGestD] = useState(0);
+  const [gestWeeks, setGestW] = useState(initialValues?.gestWeeks ?? 40);
+  const [gestDays,  setGestD] = useState(initialValues?.gestDays  ?? 0);
   const [err, setErr]         = useState("");
   const [stage, setStage]     = useState(null);
-  const [mode, setMode]       = useState("Spontaneous");
+  const [mode, setMode]       = useState(initialValues?.mode ?? "Spontaneous");
   const [indMethod, setIndM]  = useState("Dinoprostone");
-  const [iolReasons, setIolR] = useState([]);
+  const [iolReasons, setIolR] = useState(initialValues?.iolReasons ?? []);
   const [analgesia, setAnal]  = useState("None");
   const [flags, setFlags]     = useState([]);
   const [admTime, setAdmT]    = useState(timeInputNow);
@@ -2236,7 +2284,178 @@ function TasksView({ beds, alertsMap, onSelect, onUpdateBed }) {
   );
 }
 
-function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, onQuickCTG, onHandover, onUpdateBed, shift, onEndShift }) {
+// ─── IOL Wizard UI ────────────────────────────────────────────────────────
+
+function IOLAddSheet({ onSave }) {
+  const [initials, setInit]     = useState("");
+  const [gestWeeks, setGestW]   = useState(40);
+  const [gestDays,  setGestD]   = useState(0);
+  const [indications, setInds]  = useState([]);
+
+  const toggle = ind =>
+    setInds(prev => prev.includes(ind) ? prev.filter(x => x !== ind) : [...prev, ind]);
+
+  const save = () => {
+    if (!initials.trim() || !indications.length) return;
+    onSave({
+      id: `iol-${Date.now()}`,
+      initials: initials.trim().toUpperCase(),
+      gestWeeks, gestDays,
+      indications,
+      addedAt: nowISO(),
+    });
+  };
+
+  const canSave = initials.trim().length > 0 && indications.length > 0;
+
+  const tierGroups = [0,1,2,3].map(tier => ({
+    tier,
+    meta: IOL_TIER_META[tier],
+    items: IOL_IND.filter(i => i.tier === tier),
+  }));
+
+  return (
+    <>
+      <div className="overflow-y-auto overscroll-contain flex-1 min-h-0">
+        <div className="px-5 pt-4 pb-4 space-y-5">
+
+          <div>
+            <SLabel className="mb-2">Initials</SLabel>
+            <input
+              type="text" maxLength={4} value={initials}
+              onChange={e => setInit(e.target.value)}
+              placeholder="e.g. JB"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-xl font-bold text-gray-900 uppercase tracking-widest focus:outline-none focus:border-gray-400 text-center" />
+          </div>
+
+          <div>
+            <SLabel className="mb-3">Gestation</SLabel>
+            <GestationInput weeks={gestWeeks} days={gestDays}
+              onChange={({ weeks, days }) => { setGestW(weeks); setGestD(days); }} />
+          </div>
+
+          <div>
+            <SLabel className="mb-3">Indication — select all that apply</SLabel>
+            <div className="space-y-3">
+              {tierGroups.map(({ tier, meta, items }) => (
+                <div key={tier}>
+                  <p className={`text-[10px] font-bold uppercase tracking-wide mb-1.5 ${meta.cls.text}`}>
+                    {meta.label}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {items.map(ind => {
+                      const on = indications.includes(ind.label);
+                      return (
+                        <button key={ind.label} type="button" onClick={() => toggle(ind.label)}
+                          className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition-colors active:scale-95 ${
+                            on ? "bg-gray-900 border-gray-900 text-white" : "bg-white border-gray-200 text-gray-600"
+                          }`}>
+                          {ind.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div className="px-5 pt-3 border-t border-gray-100 shrink-0"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}>
+        <button onClick={save} disabled={!canSave}
+          className={`w-full py-4 rounded-2xl text-base font-bold transition-all active:scale-95 ${
+            canSave ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-400"
+          }`}>
+          Add to queue
+        </button>
+      </div>
+    </>
+  );
+}
+
+function IOLTab({ queue, onAdd, onAdmit, onRemove }) {
+  const sorted = sortIOLQueue(queue);
+
+  if (!sorted.length) {
+    return (
+      <div className="px-5 pt-12 text-center">
+        <p className="text-gray-400 text-sm font-medium mb-6">No women queued for IOL</p>
+        <button onClick={onAdd}
+          className="px-6 py-3.5 rounded-2xl bg-gray-900 text-white text-sm font-bold active:scale-95 transition-all">
+          + Add to queue
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-5 space-y-3">
+      <div className="flex justify-end pt-1">
+        <button onClick={onAdd}
+          className="px-4 py-2 rounded-xl bg-gray-900 text-white text-xs font-bold active:scale-95 transition-all">
+          + Add
+        </button>
+      </div>
+
+      {sorted.map(entry => {
+        const tier = iolEntryTier(entry);
+        const meta = IOL_TIER_META[tier];
+        const waitMs = Date.now() - new Date(entry.addedAt).getTime();
+        const waitStr = fmtAge(waitMs);
+        const indCites = entry.indications.map(l => IOL_IND.find(i => i.label === l)).filter(Boolean);
+        const cite = [...new Set(indCites.map(i => i.cite).filter(Boolean))].join(" · ");
+
+        return (
+          <div key={entry.id} className={`rounded-2xl border ${meta.cls.border} ${meta.cls.bg} overflow-hidden`}>
+            <div className="p-4">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-bold text-gray-900">{entry.initials}</span>
+                  <span className="text-sm font-semibold text-gray-500">{entry.gestWeeks}+{entry.gestDays ?? 0}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${meta.cls.badge}`}>
+                    {meta.label}
+                  </span>
+                </div>
+                <span className="text-xs text-gray-400 shrink-0">Added {waitStr} ago</span>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {entry.indications.map(ind => (
+                  <span key={ind} className="px-2.5 py-1 rounded-full bg-white border border-gray-200 text-xs font-medium text-gray-700">
+                    {ind}
+                  </span>
+                ))}
+              </div>
+
+              {cite && (
+                <p className="text-[10px] text-gray-400 mb-3">{cite}</p>
+              )}
+
+              <div className="flex gap-2">
+                <button onClick={() => onAdmit(entry)}
+                  className="flex-1 py-2.5 rounded-xl bg-gray-900 text-white text-sm font-bold active:scale-95 transition-all">
+                  Admit to ward →
+                </button>
+                <button onClick={() => onRemove(entry.id)}
+                  className="px-3 py-2.5 rounded-xl border border-gray-200 text-gray-400 text-sm font-medium active:bg-gray-50">
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      <p className="text-[10px] text-gray-300 text-center pb-4 leading-relaxed">
+        Priority order per NICE NG207 · Not a substitute for clinical judgement
+      </p>
+    </div>
+  );
+}
+
+function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, onQuickCTG, onHandover, onUpdateBed, shift, onEndShift, iolQueue, onIOLAdd, onIOLAdmit, onIOLRemove }) {
   const bedList         = Object.values(beds).sort((a,b) => a.bedNumber.localeCompare(b.bedNumber, undefined, {numeric:true}));
   const totalUrgent     = Object.values(alertsMap).flat().filter(a => a.severity === "urgent").length;
   const totalPendingTasks = Object.values(beds).reduce((n, b) => n + (b.tasks ?? []).filter(t => !t.done).length, 0);
@@ -2304,36 +2523,47 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
           </div>
         </div>
 
-        {/* Board / Tasks tab bar */}
-        {bedList.length > 0 && (
-          <div className="px-5 pb-3">
-            <div className="flex bg-gray-100 dark:bg-gray-900 rounded-xl p-1 gap-1">
-              {[
-                { key: "board", label: "Board" },
-                { key: "tasks", label: "Tasks" },
-              ].map(tab => {
-                const isActive = boardTab === tab.key;
-                return (
-                  <button key={tab.key} onClick={() => setBoardTab(tab.key)}
-                    className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                      isActive ? "bg-white shadow-sm text-gray-900" : "text-gray-500"
+        {/* Board / Tasks / IOL tab bar — always visible */}
+        <div className="px-5 pb-3">
+          <div className="flex bg-gray-100 dark:bg-gray-900 rounded-xl p-1 gap-1">
+            {[
+              { key: "board", label: "Board" },
+              { key: "tasks", label: "Tasks" },
+              { key: "iol",   label: "IOL" },
+            ].map(tab => {
+              const isActive = boardTab === tab.key;
+              const iolUrgent = iolQueue.filter(e => iolEntryTier(e) <= 1).length;
+              return (
+                <button key={tab.key} onClick={() => setBoardTab(tab.key)}
+                  className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                    isActive ? "bg-white shadow-sm text-gray-900" : "text-gray-500"
+                  }`}>
+                  {tab.label}
+                  {tab.key === "tasks" && totalPendingTasks > 0 && (
+                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none ${
+                      isActive ? "bg-blue-500 text-white" : "bg-blue-100 text-blue-600"
                     }`}>
-                    {tab.label}
-                    {tab.key === "tasks" && totalPendingTasks > 0 && (
-                      <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none ${
-                        isActive ? "bg-blue-500 text-white" : "bg-blue-100 text-blue-600"
-                      }`}>
-                        {totalPendingTasks}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+                      {totalPendingTasks}
+                    </span>
+                  )}
+                  {tab.key === "iol" && iolQueue.length > 0 && (
+                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none ${
+                      iolUrgent > 0
+                        ? (isActive ? "bg-red-500 text-white" : "bg-red-100 text-red-600")
+                        : (isActive ? "bg-gray-500 text-white" : "bg-gray-200 text-gray-600")
+                    }`}>
+                      {iolQueue.length}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
-        )}
+        </div>
 
-        {boardTab === "tasks" ? (
+        {boardTab === "iol" ? (
+          <IOLTab queue={iolQueue} onAdd={onIOLAdd} onAdmit={onIOLAdmit} onRemove={onIOLRemove} />
+        ) : boardTab === "tasks" ? (
           <TasksView beds={beds} alertsMap={alertsMap} onSelect={onSelect} onUpdateBed={onUpdateBed} />
         ) : (
         <>
@@ -2505,6 +2735,9 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
 
 export default function WardPage({ shift, onEndShift }) {
   const [beds, setBeds]            = useState(loadBeds);
+  const [iolQueue, setIolQueue]    = useState(loadIOL);
+  const [admitIOL, setAdmitIOL]    = useState(null);   // IOL entry being admitted, pre-fills wizard
+  const [iolSheet, setIolSheet]    = useState(false);  // add-to-queue sheet
   const [selectedId, setSelId]     = useState(null);
   const [view, setView]            = useState("board"); // board | detail | wizard
   const [sheet, setSheet]          = useState(null);    // null | "ve" | "oxy"
@@ -2513,6 +2746,7 @@ export default function WardPage({ shift, onEndShift }) {
   const [tick, setTick]            = useState(0);
 
   useEffect(() => { saveBeds(beds); }, [beds]);
+  useEffect(() => { saveIOL(iolQueue); }, [iolQueue]);
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 60000);
     return () => clearInterval(id);
@@ -2569,8 +2803,11 @@ export default function WardPage({ shift, onEndShift }) {
 
   const saveNewBed = bed => {
     setBeds(prev => ({ ...prev, [bed.id]: bed }));
+    if (admitIOL) {
+      setIolQueue(prev => prev.filter(e => e.id !== admitIOL.id));
+      setAdmitIOL(null);
+    }
     setView("board");
-    // Auto-open VE only for active first stage where no VE was captured in the wizard
     if (!bed.ves?.length && bed.labourStage === "Active first stage") {
       setSheet("ve");
       setSheetBedId(bed.id);
@@ -2578,11 +2815,18 @@ export default function WardPage({ shift, onEndShift }) {
   };
 
   if (view === "wizard") {
+    const wizardInitial = admitIOL ? {
+      gestWeeks:  admitIOL.gestWeeks,
+      gestDays:   admitIOL.gestDays ?? 0,
+      mode:       "Induced",
+      iolReasons: admitIOL.indications,
+    } : null;
     return (
       <AdmissionWizard
         existingNumbers={Object.values(beds).map(b => b.bedNumber)}
+        initialValues={wizardInitial}
         onSave={saveNewBed}
-        onCancel={() => setView("board")}
+        onCancel={() => { setAdmitIOL(null); setView("board"); }}
       />
     );
   }
@@ -2604,6 +2848,10 @@ export default function WardPage({ shift, onEndShift }) {
           onUpdateBed={updateBed}
           shift={shift}
           onEndShift={onEndShift}
+          iolQueue={iolQueue}
+          onIOLAdd={() => setIolSheet(true)}
+          onIOLAdmit={entry => { setAdmitIOL(entry); setView("wizard"); }}
+          onIOLRemove={id => setIolQueue(prev => prev.filter(e => e.id !== id))}
         />
       )}
 
@@ -2623,6 +2871,15 @@ export default function WardPage({ shift, onEndShift }) {
           onOpenCTG={() => openSheet("ctg", selectedId)}
         />
       )}
+
+      {/* IOL add sheet */}
+      <BottomSheet open={iolSheet} onClose={() => setIolSheet(false)}
+        title="Add to IOL queue" sub="NICE NG207 · Inducing labour">
+        <IOLAddSheet onSave={entry => {
+          setIolQueue(prev => [...prev, entry]);
+          setIolSheet(false);
+        }} />
+      </BottomSheet>
 
       {/* Global bottom sheets — render above everything */}
       <BottomSheet open={sheet === "ve" && !!sheetBed} onClose={closeSheet}
