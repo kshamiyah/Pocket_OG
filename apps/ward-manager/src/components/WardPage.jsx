@@ -421,7 +421,7 @@ function BottomSheet({ open, onClose, title, sub, children }) {
 
 // ─── VE sheet — 2-page pagination ─────────────────────────────────────────
 
-function VESheet({ bed, onSave }) {
+function VESheet({ bed, editVE, onSave }) {
   const lastVE = bed.ves?.[bed.ves.length - 1];
   const prevMembTime = (() => {
     for (let i = (bed.ves?.length ?? 0) - 1; i >= 0; i--)
@@ -430,22 +430,27 @@ function VESheet({ bed, onSave }) {
   })();
 
   const [page, setPage]          = useState(1);
-  const [dilation, setDil]       = useState(lastVE?.dilation ?? null);
-  const [membranes, setMemb]     = useState(lastVE?.membranes ?? "Intact");
-  const [membTime, setMembTime]  = useState(timeInputNow);
-  const [veTime, setVETime]      = useState(timeInputNow);
-  const [station, setStn]        = useState(lastVE?.station ?? 0);
-  const [presentation, setPres]  = useState("Cephalic");
-  const [contractions, setContr] = useState(lastVE?.contractions ?? 3);
-  const [liquor, setLiquor]      = useState(lastVE?.liquor ?? null);
+  const [dilation, setDil]       = useState(editVE?.dilation ?? null);
+  const [membranes, setMemb]     = useState(editVE?.membranes ?? lastVE?.membranes ?? "Intact");
+  const [membTime, setMembTime]  = useState(
+    editVE?.membranesTime ? fmtTime(editVE.membranesTime) : timeInputNow()
+  );
+  const [veTime, setVETime]      = useState(
+    editVE?.time ? fmtTime(editVE.time) : timeInputNow()
+  );
+  const [station, setStn]        = useState(editVE?.station ?? lastVE?.station ?? 0);
+  const [presentation, setPres]  = useState(editVE?.presentation ?? "Cephalic");
+  const [contractions, setContr] = useState(editVE?.contractions ?? lastVE?.contractions ?? 3);
+  const [liquor, setLiquor]      = useState(editVE?.liquor ?? lastVE?.liquor ?? null);
 
   const save = () => {
     if (dilation === null) return;
     onSave({
-      id: `ve-${Date.now()}`, time: timeToISO(veTime),
+      id: editVE?.id ?? `ve-${Date.now()}`,
+      time: timeToISO(veTime),
       dilation, station, presentation, membranes,
       membranesTime: membranes !== "Intact"
-        ? (prevMembTime && lastVE?.membranes === membranes ? prevMembTime : timeToISO(membTime))
+        ? (editVE ? timeToISO(membTime) : prevMembTime && lastVE?.membranes === membranes ? prevMembTime : timeToISO(membTime))
         : null,
       liquor: membranes !== "Intact" ? liquor : null,
       contractions,
@@ -1465,7 +1470,7 @@ function ObsDots({ bed, now }) {
 
 // ─── Bed detail view — 3 inner tabs ──────────────────────────────────────
 
-function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOpenOxy, onOpenDelivery, onOpenCTG }) {
+function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEditVE, onOpenOxy, onOpenDelivery, onOpenCTG }) {
   const PERSISTENT_FLAGS = {
     "gbs-iap":          "gbsAntibioticsStarted",
     "preterm-neonatal": "neonatalTeamAlerted",
@@ -1672,7 +1677,13 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onOp
                     <div key={ve.id} className={`px-4 py-3 ${i > 0 ? "border-t border-gray-50" : ""}`}>
                       <div className="flex items-baseline justify-between">
                         <p className="text-2xl font-bold text-gray-900">{ve.dilation} cm</p>
-                        <p className="text-xs text-gray-400">{fmtTime(ve.time)}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs text-gray-400">{fmtTime(ve.time)}</p>
+                          <button onClick={() => onEditVE(ve)}
+                            className="text-xs font-semibold text-gray-500 px-2 py-0.5 rounded-lg border border-gray-200 bg-white active:bg-gray-50">
+                            Edit
+                          </button>
+                        </div>
                       </div>
                       <p className="text-xs text-gray-500 mt-0.5">
                         Station {ve.station > 0 ? `+${ve.station}` : ve.station} · {ve.membranes}
@@ -2218,6 +2229,7 @@ export default function WardPage({ shift, onEndShift }) {
   const [view, setView]            = useState("board"); // board | detail | wizard
   const [sheet, setSheet]          = useState(null);    // null | "ve" | "oxy"
   const [sheetBedId, setSheetBedId]= useState(null);
+  const [editVE, setEditVE]        = useState(null);    // VE object being edited, or null for new
   const [tick, setTick]            = useState(0);
 
   useEffect(() => { saveBeds(beds); }, [beds]);
@@ -2238,14 +2250,18 @@ export default function WardPage({ shift, onEndShift }) {
   }, []);
 
   const openSheet = (type, bedId) => { setSheet(type); setSheetBedId(bedId); };
-  const closeSheet = () => { setSheet(null); setSheetBedId(null); };
+  const closeSheet = () => { setSheet(null); setSheetBedId(null); setEditVE(null); };
 
   const sheetBed = sheetBedId ? beds[sheetBedId] : null;
 
   const saveVE = ve => {
     if (!sheetBed) return;
-    const updates = { ves: [...sheetBed.ves, ve] };
-    if (ve.membranes === "AROM" && !sheetBed.armTime) updates.armTime = ve.membranesTime;
+    const isEdit = !!editVE;
+    const newVes = isEdit
+      ? sheetBed.ves.map(v => v.id === ve.id ? ve : v)
+      : [...sheetBed.ves, ve];
+    const updates = { ves: newVes };
+    if (!isEdit && ve.membranes === "AROM" && !sheetBed.armTime) updates.armTime = ve.membranesTime;
     updateBed(sheetBedId, updates);
     closeSheet();
   };
@@ -2319,7 +2335,8 @@ export default function WardPage({ shift, onEndShift }) {
             setBeds(prev => { const n = {...prev}; delete n[selectedId]; return n; });
             setSelId(null); setView("board");
           }}
-          onOpenVE={() => openSheet("ve", selectedId)}
+          onOpenVE={() => { setEditVE(null); openSheet("ve", selectedId); }}
+          onEditVE={ve => { setEditVE(ve); openSheet("ve", selectedId); }}
           onOpenOxy={() => openSheet("oxy", selectedId)}
           onOpenDelivery={() => openSheet("delivery", selectedId)}
           onOpenCTG={() => openSheet("ctg", selectedId)}
@@ -2328,9 +2345,9 @@ export default function WardPage({ shift, onEndShift }) {
 
       {/* Global bottom sheets — render above everything */}
       <BottomSheet open={sheet === "ve" && !!sheetBed} onClose={closeSheet}
-        title={`Record VE${sheetBed ? ` — Bed ${sheetBed.bedNumber}` : ""}`}
+        title={`${editVE ? "Edit VE" : "Record VE"}${sheetBed ? ` — Bed ${sheetBed.bedNumber}` : ""}`}
         sub="NICE NG235 §1.4.1 — 4-hourly in active labour">
-        {sheetBed && <VESheet bed={sheetBed} onSave={saveVE} />}
+        {sheetBed && <VESheet bed={sheetBed} editVE={editVE} onSave={saveVE} />}
       </BottomSheet>
 
       <BottomSheet open={sheet === "oxy" && !!sheetBed} onClose={closeSheet}
