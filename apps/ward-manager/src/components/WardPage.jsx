@@ -1159,14 +1159,14 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel, initialValues = nu
               {/* Stage chip — appears as soon as dilation is tapped */}
               {admDilation !== null && (() => {
                 const chipCls = {
-                  "Latent":               "bg-gray-100 text-gray-600",
-                  "Active first stage":   "bg-blue-100 text-blue-700",
-                  "Passive second stage": "bg-violet-100 text-violet-700",
-                  "Active second stage":  "bg-violet-200 text-violet-800",
-                }[stage] ?? "bg-gray-100 text-gray-600";
+                  "Latent":               "bg-gray-600 text-white",
+                  "Active first stage":   "bg-blue-600 text-white",
+                  "Passive second stage": "bg-violet-600 text-white",
+                  "Active second stage":  "bg-violet-800 text-white",
+                }[stage] ?? "bg-gray-600 text-white";
                 return (
                   <div className="flex items-center gap-2 mt-3">
-                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold ${chipCls}`}>{stage}</span>
+                    <span className={`inline-flex px-3.5 py-1.5 rounded-full text-sm font-bold ${chipCls}`}>{stage}</span>
                     {admDilation === 3 && (
                       <span className="text-[11px] text-gray-400">
                         {admContracts >= 4 ? "≥ 4 ctx/10 min" : "adjust contractions below to refine"}
@@ -1373,22 +1373,24 @@ function AlertCard({ alert, onAcknowledge }) {
   }
 
   return (
-    <div className={`rounded-2xl border ${s.border} ${s.bg} p-4`}>
-      <div className="flex items-start gap-3">
-        <div className={`w-1.5 h-1.5 rounded-full ${s.bar} mt-1.5 shrink-0`} />
-        <div className="flex-1">
-          <p className={`text-sm font-bold ${s.text} leading-snug`}>{alert.title}</p>
-          <p className="text-xs text-gray-600 mt-1 leading-relaxed">{alert.body}</p>
-          <p className={`text-[10px] font-bold uppercase tracking-wide mt-2 ${s.cite}`}>{alert.citation}</p>
+    <div className={`rounded-2xl border ${s.border} ${s.bg} overflow-hidden`}>
+      <div className="flex items-stretch">
+        <div className={`w-1 shrink-0 ${s.bar}`} />
+        <div className="flex-1 flex items-start gap-3 p-4">
+          <div className="flex-1">
+            <p className={`text-base font-bold ${s.text} leading-snug`}>{alert.title}</p>
+            <p className="text-xs text-gray-600 mt-1 leading-relaxed">{alert.body}</p>
+            <p className={`text-[10px] font-bold uppercase tracking-wide mt-2 ${s.cite}`}>{alert.citation}</p>
+          </div>
+          {onAcknowledge && (
+            <button onClick={handleDone}
+              className={`w-8 h-8 rounded-full border-2 ${s.border} flex items-center justify-center shrink-0 mt-0.5 active:scale-95 transition-all`}>
+              <svg className={`w-3.5 h-3.5 ${s.text}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </button>
+          )}
         </div>
-        {onAcknowledge && (
-          <button onClick={handleDone}
-            className={`w-8 h-8 rounded-full border-2 ${s.border} flex items-center justify-center shrink-0 mt-0.5 active:scale-95 transition-all`}>
-            <svg className={`w-3.5 h-3.5 ${s.text}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </button>
-        )}
       </div>
     </div>
   );
@@ -1468,7 +1470,7 @@ function ObsRow({ bed, onUpdate }) {
           return (
             <button key={item.key}
               onClick={() => markDone(item)}
-              className={`py-3.5 rounded-2xl border flex flex-col items-center gap-0.5 active:scale-95 transition-all ${
+              className={`py-4 rounded-2xl border flex flex-col items-center gap-1 active:scale-95 transition-all ${
                 st==="ok"   ? "bg-green-50 border-green-200" :
                 st==="warn" ? "bg-amber-50 border-amber-200" :
                 st==="over" ? "bg-red-50   border-red-200"   :
@@ -1477,10 +1479,10 @@ function ObsRow({ bed, onUpdate }) {
               <p className={`text-xs font-bold ${
                 st==="ok" ? "text-green-700" : st==="warn" ? "text-amber-700" : st==="over" ? "text-red-700" : "text-gray-500"
               }`}>{item.label}</p>
-              <p className={`text-[11px] font-medium ${
-                st==="ok" ? "text-green-500" : st==="warn" ? "text-amber-500" : st==="over" ? "text-red-500" : "text-gray-400"
+              <p className={`${displayVal ? "text-sm font-semibold" : "text-[11px] font-medium"} ${
+                st==="ok" ? "text-green-600" : st==="warn" ? "text-amber-600" : st==="over" ? "text-red-600" : "text-gray-400"
               }`}>
-                {displayVal ?? (lastISO ? fmtTime(lastISO) : "tap to record")}
+                {displayVal ?? (lastISO ? fmtTime(lastISO) : "—")}
               </p>
             </button>
           );
@@ -1752,16 +1754,27 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEd
         {innerTab === "overview" && (
           <div className="px-5 pt-4 space-y-5 pb-24">
             {/* Alerts */}
-            {alerts.length > 0
-              ? <div className="space-y-2">{alerts.map(a => (
-                  <AlertCard key={a.id} alert={a}
-                    onAcknowledge={(PERSISTENT_FLAGS[a.id] || OBS_STAMP[a.id]) ? ackAlert : undefined} />
-                ))}</div>
-              : <div className="rounded-2xl bg-green-50 border border-green-200 p-4">
-                  <p className="text-sm font-bold text-green-700">All clear</p>
-                  <p className="text-xs text-green-600 mt-0.5">No active alerts.</p>
+            {alerts.length > 0 ? (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-gray-500">Alerts</span>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                    alerts.some(a => a.severity === "urgent") ? "bg-red-500 text-white" : "bg-amber-400 text-white"
+                  }`}>{alerts.length}</span>
                 </div>
-            }
+                <div className="space-y-2">
+                  {alerts.map(a => (
+                    <AlertCard key={a.id} alert={a}
+                      onAcknowledge={(PERSISTENT_FLAGS[a.id] || OBS_STAMP[a.id]) ? ackAlert : undefined} />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-2xl bg-green-50 border border-green-200 p-4">
+                <p className="text-sm font-bold text-green-700">All clear</p>
+                <p className="text-xs text-green-600 mt-0.5">No active alerts.</p>
+              </div>
+            )}
 
             {/* Stage — hidden post-delivery (P4-22) */}
             {!bed.delivery && (
@@ -1949,7 +1962,7 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEd
                             </button>
                           </div>
                         </div>
-                        <p className="text-[11px] text-gray-500 leading-snug">{ctgEntryLabel(entry)}</p>
+                        <p className="text-xs text-gray-500 leading-relaxed">{ctgEntryLabel(entry)}</p>
                       </div>
                     );
                   })}
@@ -2769,18 +2782,10 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
             if (rf.length > 2) bParts.push(`+${rf.length - 2} more`);
 
             // S — Situation
-            const sParts = [];
-            if (isDelivered) {
-              sParts.push(`${bed.delivery.mode} at ${fmtTime(bed.delivery.time)}`);
-            } else {
-              if (bed.labourStage) sParts.push(STAGE_SHORT[bed.labourStage] ?? bed.labourStage);
-              if (lastVE) {
-                const ago = fmtAge(now - new Date(lastVE.time).getTime());
-                sParts.push(`${lastVE.dilation}cm ${ago} ago`);
-              } else {
-                sParts.push("No VE");
-              }
-            }
+            const veAgeMin   = lastVE ? (now - new Date(lastVE.time).getTime()) / 60000 : null;
+            const veAgoStr   = veAgeMin != null ? fmtAge(veAgeMin * 60000) : null;
+            const veAgeCls   = veAgeMin == null ? "" : veAgeMin > 240 ? "text-red-500 font-bold" : veAgeMin > 180 ? "text-amber-500 font-semibold" : "text-gray-400";
+            const delivSLine = isDelivered ? `${bed.delivery.mode} at ${fmtTime(bed.delivery.time)}` : null;
 
             // A — Assessment
             const aParts = [];
@@ -2830,10 +2835,27 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
                         <span className="text-sm text-gray-700 leading-snug">{bParts.join(" · ")}</span>
                       </div>
                     )}
-                    {sParts.length > 0 && (
+                    {/* S row — dilation displayed large for instant scannability */}
+                    {isDelivered ? (
                       <div className="flex gap-2 items-baseline">
                         <span className="text-[10px] font-bold text-gray-300 w-3 shrink-0">S</span>
-                        <span className="text-sm font-semibold text-gray-900 leading-snug">{sParts.join(" · ")}</span>
+                        <span className="text-sm font-semibold text-gray-900 leading-snug">{delivSLine}</span>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2 items-center">
+                        <span className="text-[10px] font-bold text-gray-300 w-3 shrink-0">S</span>
+                        <span className="text-xs text-gray-500 leading-none">{STAGE_SHORT[bed.labourStage] ?? bed.labourStage ?? "—"}</span>
+                        {lastVE ? (
+                          <>
+                            <span className="text-gray-300 leading-none text-xs">·</span>
+                            <span className="text-lg font-black text-gray-900 leading-none tabular-nums">
+                              {lastVE.dilation}<span className="text-xs font-normal text-gray-400"> cm</span>
+                            </span>
+                            <span className={`text-xs leading-none ${veAgeCls}`}>{veAgoStr} ago</span>
+                          </>
+                        ) : (
+                          <span className="text-sm font-semibold text-gray-400">No VE</span>
+                        )}
                       </div>
                     )}
                     {aParts.length > 0 && (
