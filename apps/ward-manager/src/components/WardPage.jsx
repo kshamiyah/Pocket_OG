@@ -26,6 +26,8 @@ function timeToISO(str) {
   const d = new Date();
   const [h, m] = str.split(":").map(Number);
   d.setHours(h, m, 0, 0);
+  // If the result is more than 1 hour in the future, the time refers to yesterday
+  if (d.getTime() > Date.now() + 60 * 60 * 1000) d.setDate(d.getDate() - 1);
   return d.toISOString();
 }
 function fmtTime(iso) {
@@ -107,7 +109,7 @@ function bedSummary(bed) {
     if (d.ebl != null) sit.push(`EBL ${d.ebl} mL`);
   } else {
     if (bed.labourStage) sit.push(STAGE_SHORT[bed.labourStage] ?? bed.labourStage);
-    const lastVE = bed.ves?.[bed.ves.length - 1];
+    const lastVE = bed.ves?.length ? [...bed.ves].sort((a,b) => new Date(a.time)-new Date(b.time)).at(-1) : null;
     if (lastVE) {
       const ago = fmtAge(Date.now() - new Date(lastVE.time).getTime());
       sit.push(`${lastVE.dilation}cm ${ago} ago`);
@@ -464,7 +466,7 @@ function BottomSheet({ open, onClose, title, sub, children }) {
 // ─── VE sheet — 2-page pagination ─────────────────────────────────────────
 
 function VESheet({ bed, editVE, onSave }) {
-  const lastVE = bed.ves?.[bed.ves.length - 1];
+  const lastVE = bed.ves?.length ? [...bed.ves].sort((a,b) => new Date(a.time)-new Date(b.time)).at(-1) : null;
   const prevMembTime = (() => {
     for (let i = (bed.ves?.length ?? 0) - 1; i >= 0; i--)
       if (bed.ves[i].membranesTime) return bed.ves[i].membranesTime;
@@ -2017,7 +2019,7 @@ function generateHandover(beds, alertsMap, shift) {
         if (ptFlags.length) lines.push(ptFlags.join(" · "));
         if (d.notes) lines.push(`Notes: ${d.notes}`);
       } else {
-        const lastVE = bed.ves?.[bed.ves.length - 1];
+        const lastVE = bed.ves?.length ? [...bed.ves].sort((a,b) => new Date(a.time)-new Date(b.time)).at(-1) : null;
         if (lastVE) {
           const ago = fmtAge(Date.now() - new Date(lastVE.time).getTime());
           const stn = lastVE.station > 0 ? `+${lastVE.station}` : `${lastVE.station}`;
@@ -2671,7 +2673,7 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
             const alerts      = alertsMap[bed.id] ?? [];
             const status      = bedStatusColor(alerts);
             const sc          = STATUS[status];
-            const lastVE      = bed.ves?.length ? bed.ves[bed.ves.length - 1] : null;
+            const lastVE      = bed.ves?.length ? [...bed.ves].sort((a,b) => new Date(a.time)-new Date(b.time)).at(-1) : null;
             const urgentN     = alerts.filter(a => a.severity === "urgent").length;
             const isDelivered = !!bed.delivery;
             const currentOxy  = bed.oxytocinLog?.length ? bed.oxytocinLog[bed.oxytocinLog.length - 1] : null;

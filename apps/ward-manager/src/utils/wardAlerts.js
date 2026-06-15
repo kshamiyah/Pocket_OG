@@ -69,7 +69,7 @@ export function classifyCTGEntry(entry, prevBaselineHR = null) {
 export function computeAlerts(bed, now = Date.now()) {
   const alerts = [];
 
-  const ves = bed.ves ?? [];
+  const ves = [...(bed.ves ?? [])].sort((a, b) => new Date(a.time) - new Date(b.time));
   const lastVE = ves.length > 0 ? ves[ves.length - 1] : null;
   const prevVE = ves.length > 1 ? ves[ves.length - 2] : null;
   const oxyLog = bed.oxytocinLog ?? [];
@@ -223,7 +223,7 @@ export function computeAlerts(bed, now = Date.now()) {
   // ─── Slow progress ───────────────────────────────────────────────────
   if (bed.labourStage === "Active first stage" && lastVE && prevVE) {
     const diffHours = (new Date(lastVE.time) - new Date(prevVE.time)) / HOUR;
-    if (diffHours >= 2) {
+    if (diffHours >= 2 && lastVE.dilation >= prevVE.dilation) {
       const rate = (lastVE.dilation - prevVE.dilation) / diffHours;
       if (rate < 0.5) {
         alerts.push({
