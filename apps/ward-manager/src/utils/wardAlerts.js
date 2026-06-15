@@ -30,15 +30,18 @@ function parseGestWeeks(str) {
 }
 
 // ─── CTG feature classification (NICE NG229 §1.4.16–1.4.31) ────────────────
+// Scores only baseline HR, variability, and decelerations per NG229 §1.4.
+// Tachysystole (≥5 ctx/10 min) is handled separately as a standalone alert.
 export function classifyCTGEntry(entry, prevBaselineHR = null) {
   const features = [];
 
   // Baseline HR
   const hr   = entry.baselineHR ?? 140;
   const rise = prevBaselineHR != null ? hr - prevBaselineHR : 0;
-  if (hr < 100 || hr > 160)       features.push("red");
+  if (hr < 100 || hr > 160)        features.push("red");
+  // ≥20 bpm rise is a local clinical threshold; NICE NG229 §1.4 scores absolute range only
   else if (hr < 110 || rise >= 20) features.push("amber");
-  else                             features.push("white");
+  else                              features.push("white");
 
   // Variability
   const v    = entry.variability ?? "5-25";
@@ -56,9 +59,6 @@ export function classifyCTGEntry(entry, prevBaselineHR = null) {
   else if (d === "late" || d === "prolonged") features.push("red");
   else features.push("white");
 
-  // Contractions (≥5/10 min = non-reassuring tachysystole)
-  if ((entry.contractionsPerTen ?? 0) >= 5) features.push("amber");
-
   const reds   = features.filter(f => f === "red").length;
   const ambers = features.filter(f => f === "amber").length;
   if (reds >= 1 || ambers >= 2) return "pathological";
@@ -67,6 +67,9 @@ export function classifyCTGEntry(entry, prevBaselineHR = null) {
 }
 
 export function computeAlerts(bed, now = Date.now()) {
+  // P1-1: Delivered patients generate no intrapartum alerts
+  if (bed.delivery) return [];
+
   const alerts = [];
 
   const ves = [...(bed.ves ?? [])].sort((a, b) => new Date(a.time) - new Date(b.time));
@@ -75,6 +78,9 @@ export function computeAlerts(bed, now = Date.now()) {
   const oxyLog = bed.oxytocinLog ?? [];
   const currentOx = oxyLog.length > 0 ? oxyLog[oxyLog.length - 1] : null;
   const obs = bed.observations ?? {};
+  // ctgLog defined here so tachysystole check can use the most recent source
+  const ctgLog = bed.ctgLog ?? [];
+  const lastCTG = ctgLog.length > 0 ? ctgLog[ctgLog.length - 1] : null;
 
   const hasRegionalAnalgesia = bed.analgesia === "Epidural" || bed.analgesia === "Remifentanil PCA";
   const isNullip = bed.parity === "Para 0";
@@ -82,6 +88,7 @@ export function computeAlerts(bed, now = Date.now()) {
   const isDiabetic = flags.some(f => f.startsWith("Diabetic"));
   const isHypertensive = flags.includes("Hypertensive");
   const isGBSPos = flags.includes("GBS+");
+  const isGBSPending = flags.includes("GBS pending");
   const membranesTime = findMembranesTime(ves);
   const membranesRuptured = lastVE?.membranes === "SROM" || lastVE?.membranes === "AROM";
   const lastLiquor = lastVE?.liquor ?? null;
@@ -90,6 +97,9 @@ export function computeAlerts(bed, now = Date.now()) {
   const gestWks = parseGestWeeks(bed.gestation);
   const isPreterm = gestWks !== null && gestWks < 37;
   const gest = bed.gestation ?? "";
+
+  // P1-2: Alerts not supported below 28 weeks — clinical logic is different
+  if (gestWks !== null && gestWks < 28) return [];
 
   // ─── Preterm — neonatal team (< 34 weeks) ───────────────────────────
   if (isPreterm && gestWks < 34 && !bed.neonatalTeamAlerted) {
@@ -160,17 +170,31 @@ export function computeAlerts(bed, now = Date.now()) {
   }
 
   // ─── ARM reassessment at 2h (NICE NG235 §1.5.3–1.5.4) ──────────────────
+  // Checks both VE absence AND inadequate contractions post-ARM
   if (bed.armTime && bed.labourStage === "Active first stage") {
     const ms = now - new Date(bed.armTime).getTime();
-    const veAfterARM = ves.filter(ve => new Date(ve.time) > new Date(bed.armTime));
-    if (ms >= 2 * HOUR && veAfterARM.length === 0) {
-      alerts.push({
-        id: "arm-reassess",
-        severity: "warning",
-        title: `Reassess 2h after ARM (${formatAge(ms)} ago)`,
-        body: "No VE recorded since ARM. If contractions still inadequate at 2h post-ARM, offer oxytocin augmentation.",
-        citation: "NICE NG235 §1.5.3–1.5.4 [2023]",
-      });
+    const vesAfterARM = ves.filter(ve => new Date(ve.time) > new Date(bed.armTime));
+    if (ms >= 2 * HOUR) {
+      if (vesAfterARM.length === 0) {
+        alerts.push({
+          id: "arm-reassess",
+          severity: "warning",
+          title: `Reassess 2h after ARM (${formatAge(ms)} ago)`,
+          body: "No VE recorded since ARM. If contractions still inadequate at 2h post-ARM, offer oxytocin augmentation.",
+          citation: "NICE NG235 §1.5.3–1.5.4 [2023]",
+        });
+      } else {
+        const lastPostARM = vesAfterARM[vesAfterARM.length - 1];
+        if (typeof lastPostARM.contractions === "number" && lastPostARM.contractions < 3) {
+          alerts.push({
+            id: "arm-cx-inadequate",
+            severity: "warning",
+            title: `ARM ${formatAge(ms)} ago — contractions still inadequate (${lastPostARM.contractions}/10 min)`,
+            body: `Post-ARM VE shows < 3 contractions/10 min. Consider offering oxytocin augmentation to establish effective labour.`,
+            citation: "NICE NG235 §1.5.3–1.5.4 [2023]",
+          });
+        }
+      }
     }
   }
 
@@ -221,6 +245,7 @@ export function computeAlerts(bed, now = Date.now()) {
   }
 
   // ─── Slow progress ───────────────────────────────────────────────────
+  // Check 1: consecutive VEs ≥2h apart
   if (bed.labourStage === "Active first stage" && lastVE && prevVE) {
     const diffHours = (new Date(lastVE.time) - new Date(prevVE.time)) / HOUR;
     if (diffHours >= 2 && lastVE.dilation >= prevVE.dilation) {
@@ -236,14 +261,44 @@ export function computeAlerts(bed, now = Date.now()) {
       }
     }
   }
+  // Check 2: overall progress from first active-stage VE (catches multi-VE slow drift)
+  if (bed.labourStage === "Active first stage" && bed.activeFirstStageStartTime && lastVE && !alerts.find(a => a.id === "slow-progress")) {
+    const firstActiveVE = ves.find(ve => new Date(ve.time) >= new Date(bed.activeFirstStageStartTime));
+    if (firstActiveVE && firstActiveVE !== lastVE) {
+      const totalHours = (new Date(lastVE.time) - new Date(firstActiveVE.time)) / HOUR;
+      if (totalHours >= 2 && lastVE.dilation >= firstActiveVE.dilation) {
+        const overallRate = (lastVE.dilation - firstActiveVE.dilation) / totalHours;
+        if (overallRate < 0.5) {
+          alerts.push({
+            id: "slow-progress",
+            severity: "urgent",
+            title: "Slow labour progress",
+            body: `Overall progress ${overallRate === 0 ? "0 cm" : `${overallRate.toFixed(1)} cm/hr`} over ${totalHours.toFixed(1)}h in active stage — below the 0.5 cm/hr threshold. Review membranes, augmentation, and CPD.`,
+            citation: "NICE NG235 §1.5.1–1.5.4 [2023]",
+          });
+        }
+      }
+    }
+  }
 
   // ─── Hyperstimulation ────────────────────────────────────────────────
-  if (lastVE && typeof lastVE.contractions === "number" && lastVE.contractions > 5) {
+  // P1-5: Use most recent contraction count from either VE or CTG
+  const latestCxSource = (() => {
+    const veHasCx  = lastVE  && typeof lastVE.contractions       === "number";
+    const ctgHasCx = lastCTG && typeof lastCTG.contractionsPerTen === "number";
+    if (!veHasCx && !ctgHasCx) return null;
+    if (veHasCx && !ctgHasCx)  return { count: lastVE.contractions, from: "VE" };
+    if (!veHasCx && ctgHasCx)  return { count: lastCTG.contractionsPerTen, from: "CTG" };
+    return new Date(lastVE.time) >= new Date(lastCTG.time)
+      ? { count: lastVE.contractions, from: "VE" }
+      : { count: lastCTG.contractionsPerTen, from: "CTG" };
+  })();
+  if (latestCxSource && latestCxSource.count > 5) {
     alerts.push({
       id: "hyperstim",
       severity: "urgent",
       title: "Uterine hyperstimulation",
-      body: `${lastVE.contractions} contractions/10 min recorded. Stop or reduce oxytocin. Consider terbutaline 250 mcg SC if hyperstimulation persists.`,
+      body: `${latestCxSource.count} contractions/10 min recorded (${latestCxSource.from}). Stop or reduce oxytocin. Consider terbutaline 250 mcg SC if hyperstimulation persists.`,
       citation: "NICE NG235 §1.5.7 [2023]",
     });
   }
@@ -334,7 +389,7 @@ export function computeAlerts(bed, now = Date.now()) {
         id: "prom-24h",
         severity: "urgent",
         title: "PROM > 24 hours — offer induction",
-        body: "Prelabour rupture of membranes for > 24h without established labour. Offer induction of labour. If GBS+, offer immediate induction with IV benzylpenicillin.",
+        body: `Prelabour rupture of membranes for > 24h without established labour. Offer induction of labour.${isGBSPos ? " GBS+ — offer immediate induction with IV benzylpenicillin." : isGBSPending ? " GBS result pending — check and commence antibiotics if positive." : ""}`,
         citation: "NICE NG235 §1.2.11 [2023]",
       });
     } else if (ms >= 18 * HOUR) {
@@ -342,7 +397,7 @@ export function computeAlerts(bed, now = Date.now()) {
         id: "prom-18h",
         severity: "urgent",
         title: `Membranes ruptured > 18 hours (${formatAge(ms)})`,
-        body: "Increased GBS risk. Review GBS status. Offer IV benzylpenicillin 3g stat then 1.5g every 4h until delivery if GBS+ or risk factors present.",
+        body: `Increased GBS risk. ${isGBSPending ? "GBS result pending — obtain result urgently and " : "Review GBS status. "}Offer IV benzylpenicillin 3g stat then 1.5g every 4h until delivery if GBS+ or risk factors present.`,
         citation: "NICE NG235 §1.2.9 [2023] · GL787",
       });
     } else if (ms >= 16 * HOUR) {
@@ -350,7 +405,7 @@ export function computeAlerts(bed, now = Date.now()) {
         id: "prom-16h",
         severity: "warning",
         title: `Membranes ruptured ${formatAge(ms)} — approaching 18h`,
-        body: "Review GBS status. Prepare for intrapartum antibiotic prophylaxis if GBS+ or risk factors.",
+        body: `Review GBS status${isGBSPending ? " (result pending — check now)" : ""}. Prepare for intrapartum antibiotic prophylaxis if GBS+ or risk factors.`,
         citation: "NICE NG235 §1.2.9 [2023] · GL787",
       });
     }
@@ -363,6 +418,17 @@ export function computeAlerts(bed, now = Date.now()) {
       severity: "urgent",
       title: "GBS+ — IV antibiotic prophylaxis required",
       body: "Offer IV benzylpenicillin 3g stat, then 1.5g every 4 hours until delivery. If penicillin-allergic: clindamycin 900 mg IV 8-hourly.",
+      citation: "GL787 · NICE NG235 §1.2.12 [2023]",
+    });
+  }
+
+  // ─── GBS pending — remind to check result after rupture ─────────────
+  if (isGBSPending && membranesRuptured && !isGBSPos && !alerts.find(a => a.id.startsWith("prom-"))) {
+    alerts.push({
+      id: "gbs-pending-rupture",
+      severity: "warning",
+      title: "GBS result pending — membranes ruptured",
+      body: "Obtain GBS result urgently. If positive, commence IV benzylpenicillin 3g stat then 1.5g every 4h until delivery.",
       citation: "GL787 · NICE NG235 §1.2.12 [2023]",
     });
   }
@@ -586,12 +652,9 @@ export function computeAlerts(bed, now = Date.now()) {
   }
 
   // ─── CTG monitoring (NICE NG229, Dec 2022) ───────────────────────────────
-  const ctgLog = bed.ctgLog ?? [];
-  const lastCTG = ctgLog.length > 0 ? ctgLog[ctgLog.length - 1] : null;
-
   const needsContinuousCTG = !!(
     flags.some(f => f === "VBAC" || f === "Previous LSCS") ||
-    isDiabetic || isHypertensive || isGBSPos || isPreterm ||
+    isDiabetic || isHypertensive || isGBSPos || isGBSPending || isPreterm ||
     bed.analgesia === "Epidural" ||
     bed.modeOfOnset === "PPROM" ||
     bed.oxytocinStartTime ||
@@ -607,6 +670,7 @@ export function computeAlerts(bed, now = Date.now()) {
         isHypertensive && "Hypertension",
         isPreterm && `Preterm (${gest})`,
         isGBSPos && "GBS+",
+        isGBSPending && "GBS pending",
         bed.analgesia === "Epidural" && "Epidural",
         bed.oxytocinStartTime && "Oxytocin",
         bed.modeOfOnset === "PPROM" && "PPROM",

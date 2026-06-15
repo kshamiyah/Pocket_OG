@@ -744,18 +744,20 @@ function DeliverySheet({ bed, onSave }) {
 
 // ─── CTG sheet ───────────────────────────────────────────────────────────
 
-function CTGSheet({ bed, onSave }) {
-  const prevEntry = (bed.ctgLog ?? []).slice(-1)[0] ?? null;
-  const prevHR    = prevEntry?.baselineHR ?? null;
+function CTGSheet({ bed, editCTG = null, onSave }) {
+  const prevEntry = editCTG
+    ? (bed.ctgLog ?? []).filter(e => e.id !== editCTG.id).slice(-1)[0] ?? null
+    : (bed.ctgLog ?? []).slice(-1)[0] ?? null;
+  const prevHR = prevEntry?.baselineHR ?? null;
 
-  const [ctgTime, setCTGTime]     = useState(timeInputNow);
-  const [hr, setHR]               = useState(prevHR ?? 140);
-  const [variability, setVar]     = useState("5-25");
-  const [varMin, setVarMin]       = useState(0);
-  const [decels, setDecels]       = useState("none");
-  const [decelMin, setDecelMin]   = useState(0);
-  const [accelerations, setAccel] = useState(true);
-  const [ctxPer10, setCtx]        = useState(3);
+  const [ctgTime, setCTGTime]     = useState(editCTG ? fmtTime(editCTG.time) : timeInputNow());
+  const [hr, setHR]               = useState(editCTG?.baselineHR ?? prevHR ?? 140);
+  const [variability, setVar]     = useState(editCTG?.variability ?? "5-25");
+  const [varMin, setVarMin]       = useState(editCTG?.variabilityMinutes ?? 0);
+  const [decels, setDecels]       = useState(editCTG?.decelerations ?? "none");
+  const [decelMin, setDecelMin]   = useState(editCTG?.decelerationMinutes ?? 0);
+  const [accelerations, setAccel] = useState(editCTG?.accelerations ?? true);
+  const [ctxPer10, setCtx]        = useState(editCTG?.contractionsPerTen ?? 3);
 
   const classification = useMemo(() =>
     classifyCTGEntry(
@@ -775,7 +777,7 @@ function CTGSheet({ bed, onSave }) {
                 : hr < 110 ? "AMBER — 100–109 bpm" : "White — normal 110–160 bpm";
 
   const save = () => onSave({
-    id: `ctg-${Date.now()}`,
+    id: editCTG?.id ?? `ctg-${Date.now()}`,
     time: timeToISO(ctgTime),
     baselineHR: hr, variability, variabilityMinutes: varMin,
     decelerations: decels, decelerationMinutes: decelMin,
@@ -1002,6 +1004,14 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel, initialValues = nu
   const [analgesia, setAnal]  = useState("None");
   const [flags, setFlags]     = useState([]);
   const [admTime, setAdmT]    = useState(timeInputNow);
+  const [showAdmDetails, setShowAdmDetails] = useState(false);
+
+  // P4-21: warn on accidental browser/tab close mid-wizard
+  useEffect(() => {
+    const handler = e => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, []);
 
   // Admission VE — dilation drives stage deduction
   const [admDilation, setAdmDil]   = useState(null);
@@ -1068,7 +1078,7 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel, initialValues = nu
       }] : [];
       onSave({
         id, bedNumber: bedNum.trim(),
-        admissionTime: admTime ? timeToISO(admTime) : null,
+        admissionTime: admTime ? timeToISO(admTime) : nowISO(),
         parity, gestation: `${gestWeeks}+${gestDays}`,
         modeOfOnset: mode,
         inductionMethod: mode === "Induced" ? indMethod : null,
@@ -1089,7 +1099,9 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel, initialValues = nu
     <div className="fixed inset-0 z-50 bg-white flex flex-col">
       {/* Top bar */}
       <div className="px-5 pb-4 flex items-center gap-3 border-b border-gray-100 shrink-0" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}>
-        <button onClick={step === 1 ? onCancel : () => setStep(s => s - 1)}
+        <button onClick={step === 1
+            ? () => { if (!bedNum || window.confirm("Discard this admission?")) onCancel(); }
+            : () => setStep(s => s - 1)}
           className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 shrink-0">
           <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -1211,18 +1223,32 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel, initialValues = nu
                   </div>
                 )}
 
-                <div>
-                  <SLabel className="mb-3">Station</SLabel>
-                  <StationStrip value={admStation} onChange={setAdmStn} />
-                </div>
+                {/* P2-12: Station & contractions behind optional disclosure to reduce load */}
+                <button onClick={() => setShowAdmDetails(v => !v)}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 active:text-gray-600 transition-colors">
+                  <svg className={`w-3.5 h-3.5 transition-transform ${showAdmDetails ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                  {showAdmDetails ? "Hide" : "Station & contractions"}{" "}
+                  {!showAdmDetails && <span className="text-gray-300">· optional</span>}
+                </button>
 
-                <div>
-                  <div className="flex items-baseline justify-between mb-3">
-                    <SLabel>Contractions / 10 min</SLabel>
-                    <span className="text-xl font-bold text-gray-900">{admContracts}</span>
-                  </div>
-                  <Stepper value={admContracts} onChange={handleContractionChange} min={0} max={10} />
-                </div>
+                {showAdmDetails && (
+                  <>
+                    <div>
+                      <SLabel className="mb-3">Station</SLabel>
+                      <StationStrip value={admStation} onChange={setAdmStn} />
+                    </div>
+
+                    <div>
+                      <div className="flex items-baseline justify-between mb-3">
+                        <SLabel>Contractions / 10 min</SLabel>
+                        <span className="text-xl font-bold text-gray-900">{admContracts}</span>
+                      </div>
+                      <Stepper value={admContracts} onChange={handleContractionChange} min={0} max={10} />
+                    </div>
+                  </>
+                )}
               </>
             )}
           </>
@@ -1274,11 +1300,14 @@ function AdmissionWizard({ existingNumbers, onSave, onCancel, initialValues = nu
             <div>
               <SLabel className="mb-3">Risk flags — select all that apply</SLabel>
               <ChipGroup
-                options={["GBS+","Diabetic-T1","Diabetic-T2","Diabetic-GDM","VBAC","Previous LSCS","Hypertensive"]}
+                options={["GBS+","GBS pending","Diabetic-T1","Diabetic-T2","Diabetic-GDM","VBAC","Previous LSCS","Hypertensive"]}
                 selected={flags} onChange={setFlags} />
               <div className="mt-3 space-y-1">
                 {flags.includes("GBS+") && (
                   <p className="text-[11px] text-amber-600 font-semibold">GBS+ → IV benzylpenicillin required intrapartum · GL787 + NG235 §1.2.12</p>
+                )}
+                {flags.includes("GBS pending") && (
+                  <p className="text-[11px] text-amber-600 font-semibold">GBS pending → obtain result urgently; commence antibiotics if positive · GL787</p>
                 )}
                 {flags.some(f=>f.startsWith("Diabetic")) && (
                   <p className="text-[11px] text-amber-600 font-semibold">Diabetic → hourly BGL, target 4–7 mmol/L · GL983</p>
@@ -1451,7 +1480,7 @@ function ObsRow({ bed, onUpdate }) {
               <p className={`text-[11px] font-medium ${
                 st==="ok" ? "text-green-500" : st==="warn" ? "text-amber-500" : st==="over" ? "text-red-500" : "text-gray-400"
               }`}>
-                {displayVal ?? (lastISO ? fmtTime(lastISO) : "tap to clear")}
+                {displayVal ?? (lastISO ? fmtTime(lastISO) : "tap to record")}
               </p>
             </button>
           );
@@ -1515,7 +1544,7 @@ function ObsDots({ bed, now }) {
         const letter  = item.label[0];
         return (
           <div key={item.key} className="flex items-center gap-0.5">
-            <div className={`w-2 h-2 rounded-full ${dotCls}`} />
+            <div className={`w-2.5 h-2.5 rounded-full ${dotCls}`} />
             <span className="text-[10px] text-gray-400 font-semibold">{letter}</span>
           </div>
         );
@@ -1601,7 +1630,7 @@ function TasksTab({ bed, onUpdate }) {
 
 // ─── Bed detail view — inner tabs ─────────────────────────────────────────
 
-function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEditVE, onOpenOxy, onOpenDelivery, onOpenCTG }) {
+function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEditVE, onOpenOxy, onOpenDelivery, onOpenCTG, onEditCTG, onDeleteCTG }) {
   const PERSISTENT_FLAGS = {
     "gbs-iap":          "gbsAntibioticsStarted",
     "preterm-neonatal": "neonatalTeamAlerted",
@@ -1626,15 +1655,20 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEd
   const status   = bedStatusColor(alerts);
   const sc       = STATUS[status];
   const currentOx= bed.oxytocinLog?.[bed.oxytocinLog.length - 1];
-  const [now, setNow]       = useState(Date.now());
-  const [urineVal, setUrineVal] = useState(String(bed.observations?.urineOutput ?? ""));
-  const [innerTab, setInnerTab] = useState("overview"); // overview | ves | obs
+  const [now, setNow]             = useState(Date.now());
+  const [urineVal, setUrineVal]   = useState(String(bed.observations?.urineOutput ?? ""));
+  const [innerTab, setInnerTab]   = useState("overview"); // overview | ves | obs
+  const [confirmDischarge, setConfirmDischarge] = useState(false);
 
   useEffect(() => { const id = setInterval(() => setNow(Date.now()), 30000); return () => clearInterval(id); }, []);
 
   const urgentCount = alerts.filter(a => a.severity === "urgent").length;
 
   const setStage = s => {
+    const order = ["Latent", "Active first stage", "Passive second stage", "Active second stage"];
+    const curIdx = order.indexOf(bed.labourStage);
+    const newIdx = order.indexOf(s);
+    if (curIdx > newIdx && !window.confirm(`Change stage back to "${s}"?\n\nExisting timers are kept — only the stage label changes.`)) return;
     const u = { labourStage: s };
     if (s === "Active first stage"   && !bed.activeFirstStageStartTime) u.activeFirstStageStartTime = nowISO();
     if (s === "Passive second stage" && !bed.passiveStartTime)          u.passiveStartTime          = nowISO();
@@ -1729,26 +1763,28 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEd
                 </div>
             }
 
-            {/* Stage */}
-            <div>
-              <SLabel className="mb-2">Labour stage — NICE NG235 §1.1</SLabel>
-              <div className="grid grid-cols-2 gap-2">
-                {STAGES.map(s => {
-                  const active = bed.labourStage === s;
-                  const sub =
-                    s === "Active second stage"  && bed.pushingStartTime  ? `Pushing: ${fmtAge(now - new Date(bed.pushingStartTime).getTime())}` :
-                    s === "Passive second stage" && bed.passiveStartTime  ? `Passive: ${fmtAge(now - new Date(bed.passiveStartTime).getTime())}` :
-                    STAGE_SUB[s];
-                  return (
-                    <button key={s} onClick={() => setStage(s)}
-                      className={`py-3.5 px-3 rounded-2xl border text-left transition-colors active:scale-95 ${active ? "bg-gray-900 border-gray-900" : "bg-white border-gray-200"}`}>
-                      <p className={`text-xs font-bold leading-snug ${active ? "text-white" : "text-gray-800"}`}>{s}</p>
-                      <p className={`text-[10px] mt-0.5 leading-tight ${active ? "text-gray-400" : "text-gray-400"}`}>{sub}</p>
-                    </button>
-                  );
-                })}
+            {/* Stage — hidden post-delivery (P4-22) */}
+            {!bed.delivery && (
+              <div>
+                <SLabel className="mb-2">Labour stage — NICE NG235 §1.1</SLabel>
+                <div className="grid grid-cols-2 gap-2">
+                  {STAGES.map(s => {
+                    const active = bed.labourStage === s;
+                    const sub =
+                      s === "Active second stage"  && bed.pushingStartTime  ? `Pushing: ${fmtAge(now - new Date(bed.pushingStartTime).getTime())}` :
+                      s === "Passive second stage" && bed.passiveStartTime  ? `Passive: ${fmtAge(now - new Date(bed.passiveStartTime).getTime())}` :
+                      STAGE_SUB[s];
+                    return (
+                      <button key={s} onClick={() => setStage(s)}
+                        className={`py-3.5 px-3 rounded-2xl border text-left transition-colors active:scale-95 ${active ? "bg-gray-900 border-gray-900" : "bg-white border-gray-200"}`}>
+                        <p className={`text-xs font-bold leading-snug ${active ? "text-white" : "text-gray-800"}`}>{s}</p>
+                        <p className={`text-[10px] mt-0.5 leading-tight ${active ? "text-gray-400" : "text-gray-400"}`}>{sub}</p>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Analgesia */}
             <div>
@@ -1813,12 +1849,28 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEd
               )}
             </div>
 
-            {/* Discharge */}
+            {/* Discharge — 2-step confirm to prevent accidental deletion */}
             <div className="space-y-2 pt-2">
-              <button onClick={() => { if (window.confirm(`Discharge Bed ${bed.bedNumber}?`)) onDelete(); }}
-                className="w-full border border-red-200 text-red-500 font-medium py-3 rounded-2xl text-sm active:bg-red-50">
-                Discharge / Remove bed
-              </button>
+              {!confirmDischarge ? (
+                <button onClick={() => setConfirmDischarge(true)}
+                  className="w-full border border-red-200 text-red-500 font-medium py-3 rounded-2xl text-sm active:bg-red-50">
+                  Discharge / Remove bed
+                </button>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs text-center text-red-500 font-semibold">This will permanently remove Bed {bed.bedNumber}. Are you sure?</p>
+                  <div className="flex gap-2">
+                    <button onClick={onDelete}
+                      className="flex-1 py-3 rounded-2xl bg-red-500 text-white text-sm font-bold active:bg-red-600">
+                      Yes, discharge
+                    </button>
+                    <button onClick={() => setConfirmDischarge(false)}
+                      className="flex-1 py-3 rounded-2xl border border-gray-200 text-gray-600 text-sm font-medium active:bg-gray-50">
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
               <p className="text-[10px] text-gray-300 text-center leading-relaxed pb-2">
                 NICE NG235 (Sept 2023) · GL983 · GL787 · Not a substitute for clinical judgement
               </p>
@@ -1883,9 +1935,19 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEd
                       <div key={entry.id} className={`px-4 py-3 ${i > 0 ? "border-t border-gray-50" : ""}`}>
                         <div className="flex items-center justify-between mb-1">
                           <p className="text-sm font-bold text-gray-900">{fmtTime(entry.time)}</p>
-                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${cs.border} ${cs.bg} ${cs.text} capitalize`}>
-                            {entry.classification}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${cs.border} ${cs.bg} ${cs.text} capitalize`}>
+                              {entry.classification}
+                            </span>
+                            <button onClick={() => onEditCTG(entry)}
+                              className="text-xs font-semibold text-gray-500 px-2 py-0.5 rounded-lg border border-gray-200 bg-white active:bg-gray-50">
+                              Edit
+                            </button>
+                            <button onClick={() => { if (window.confirm("Delete this CTG entry?")) onDeleteCTG(entry.id); }}
+                              className="text-xs text-gray-400 px-2 py-0.5 rounded-lg border border-gray-200 bg-white active:bg-gray-50">
+                              ✕
+                            </button>
+                          </div>
                         </div>
                         <p className="text-[11px] text-gray-500 leading-snug">{ctgEntryLabel(entry)}</p>
                       </div>
@@ -1901,6 +1963,11 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEd
         {/* Obs tab */}
         {innerTab === "obs" && (
           <div className="px-5 pt-4 pb-8 space-y-5">
+            <p className="text-[11px] text-gray-400 leading-relaxed">
+              Pulse hourly · BP {(bed.riskFlags ?? []).includes("Hypertensive") ? "hourly (hypertensive)" : "4-hourly"} · Temp 4-hourly
+              {(bed.riskFlags ?? []).some(f => f.startsWith("Diabetic")) ? " · BGL hourly" : ""}
+              {" · "}Tap each to record time; use + buttons to enter values.
+            </p>
             <ObsRow bed={bed} onUpdate={obs => onUpdate({ observations: { ...bed.observations, ...obs } })} />
 
             {/* Urine output */}
@@ -2448,8 +2515,8 @@ function IOLTab({ queue, onAdd, onAdmit, onRemove, onEdit }) {
             + Add to queue
           </button>
           <button onClick={() => setShowRef(true)}
-            className="block mx-auto mt-4 text-xs text-gray-400 underline underline-offset-2">
-            Priority reference (NICE NG207)
+            className="block mx-auto mt-5 text-[11px] text-gray-300 underline underline-offset-2">
+            View priority reference (NICE NG207)
           </button>
         </div>
         <BottomSheet open={showRef} onClose={() => setShowRef(false)}
@@ -2474,6 +2541,7 @@ function IOLTab({ queue, onAdd, onAdmit, onRemove, onEdit }) {
       {sorted.map((entry, idx) => {
         const tier = iolEntryTier(entry);
         const meta = IOL_TIER_META[tier];
+        const tierActions = ["Deliver within hours — escalate immediately", "Expedite — aim to start today", "Plan — prioritise within the week", "Schedule in usual order"];
         const waitMs = Date.now() - new Date(entry.addedAt).getTime();
         const waitStr = fmtAge(waitMs);
         const indCites = entry.indications.map(l => IOL_IND.find(i => i.label === l)).filter(Boolean);
@@ -2496,6 +2564,8 @@ function IOLTab({ queue, onAdd, onAdmit, onRemove, onEdit }) {
                   {" · "}{waitStr} ago
                 </span>
               </div>
+
+              <p className={`text-xs font-medium mb-2 ${meta.cls.text}`}>{tierActions[tier]}</p>
 
               <div className="flex flex-wrap gap-1.5 mb-3">
                 {entry.indications.map(ind => (
@@ -2694,7 +2764,9 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
             } else if (bed.modeOfOnset) {
               bParts.push("Spontaneous");
             }
-            (bed.riskFlags ?? []).forEach(f => bParts.push(f));
+            const rf = bed.riskFlags ?? [];
+            rf.slice(0, 2).forEach(f => bParts.push(f));
+            if (rf.length > 2) bParts.push(`+${rf.length - 2} more`);
 
             // S — Situation
             const sParts = [];
@@ -2828,9 +2900,10 @@ export default function WardPage({ shift, onEndShift }) {
   const [iolEditEntry, setIolEditEntry] = useState(null); // entry being edited, null for new
   const [selectedId, setSelId]     = useState(null);
   const [view, setView]            = useState("board"); // board | detail | wizard
-  const [sheet, setSheet]          = useState(null);    // null | "ve" | "oxy"
+  const [sheet, setSheet]          = useState(null);    // null | "ve" | "oxy" | "ctg" ...
   const [sheetBedId, setSheetBedId]= useState(null);
   const [editVE, setEditVE]        = useState(null);    // VE object being edited, or null for new
+  const [editCTG, setEditCTG]      = useState(null);    // CTG object being edited, or null for new
   const [tick, setTick]            = useState(0);
 
   useEffect(() => { saveBeds(beds); }, [beds]);
@@ -2852,13 +2925,15 @@ export default function WardPage({ shift, onEndShift }) {
   }, []);
 
   const openSheet = (type, bedId) => { setSheet(type); setSheetBedId(bedId); };
-  const closeSheet = () => { setSheet(null); setSheetBedId(null); setEditVE(null); };
+  const closeSheet = () => { setSheet(null); setSheetBedId(null); setEditVE(null); setEditCTG(null); };
 
   const sheetBed = sheetBedId ? beds[sheetBedId] : null;
 
   const saveVE = ve => {
     if (!sheetBed) return;
     const isEdit = !!editVE;
+    // P1-4: prevent duplicate VEs at the exact same timestamp
+    if (!isEdit && sheetBed.ves.some(v => v.time === ve.time)) return;
     const newVes = isEdit
       ? sheetBed.ves.map(v => v.id === ve.id ? ve : v)
       : [...sheetBed.ves, ve];
@@ -2885,7 +2960,11 @@ export default function WardPage({ shift, onEndShift }) {
   const saveCTG = entry => {
     if (!sheetBed) return;
     const ctgLog = sheetBed.ctgLog ?? [];
-    updateBed(sheetBedId, { ctgLog: [...ctgLog, entry] });
+    const isEdit = !!editCTG;
+    const newLog = isEdit
+      ? ctgLog.map(e => e.id === entry.id ? entry : e)
+      : [...ctgLog, entry];
+    updateBed(sheetBedId, { ctgLog: newLog });
     closeSheet();
   };
 
@@ -2957,7 +3036,9 @@ export default function WardPage({ shift, onEndShift }) {
           onEditVE={ve => { setEditVE(ve); openSheet("ve", selectedId); }}
           onOpenOxy={() => openSheet("oxy", selectedId)}
           onOpenDelivery={() => openSheet("delivery", selectedId)}
-          onOpenCTG={() => openSheet("ctg", selectedId)}
+          onOpenCTG={() => { setEditCTG(null); openSheet("ctg", selectedId); }}
+          onEditCTG={ctg => { setEditCTG(ctg); openSheet("ctg", selectedId); }}
+          onDeleteCTG={ctgId => updateBed(selectedId, { ctgLog: (selectedBed.ctgLog ?? []).filter(e => e.id !== ctgId) })}
         />
       )}
 
@@ -2995,9 +3076,9 @@ export default function WardPage({ shift, onEndShift }) {
       </BottomSheet>
 
       <BottomSheet open={sheet === "ctg" && !!sheetBed} onClose={closeSheet}
-        title={`CTG Review — Bed ${sheetBed?.bedNumber ?? ""}`}
+        title={`${editCTG ? "Edit CTG Review" : "Log CTG Review"} — Bed ${sheetBed?.bedNumber ?? ""}`}
         sub="NICE NG229 — Fetal Monitoring in Labour [Dec 2022]">
-        {sheetBed && <CTGSheet bed={sheetBed} onSave={saveCTG} />}
+        {sheetBed && <CTGSheet bed={sheetBed} editCTG={editCTG} onSave={saveCTG} />}
       </BottomSheet>
 
       <BottomSheet open={sheet === "handover"} onClose={closeSheet}

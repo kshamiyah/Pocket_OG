@@ -730,20 +730,23 @@ describe("classifyCTGEntry — decelerations", () => {
   it("prolonged deceleration — RED → pathological", () => expect(entry("prolonged", 0)).toBe("pathological"))
 })
 
-describe("classifyCTGEntry — contractions", () => {
+// Contractions (tachysystole) are no longer part of CTG feature scoring per NICE NG229 §1.4
+// — they trigger a separate hyperstimulation alert instead.
+describe("classifyCTGEntry — contractions do NOT influence classification", () => {
   const entry = (contractionsPerTen) =>
     classifyCTGEntry({ baselineHR: 140, variability: "5-25", variabilityMinutes: 0,
                        decelerations: "none", decelerationMinutes: 0,
                        accelerations: true, contractionsPerTen })
 
-  it("4 contractions/10 min — normal", () => expect(entry(4)).toBe("normal"))
-  it("5 contractions/10 min — AMBER → suspicious", () => expect(entry(5)).toBe("suspicious"))
-  it("6 contractions/10 min with reduced-var too — pathological (2 ambers)", () =>
+  it("4 contractions/10 min — normal (unchanged)", () => expect(entry(4)).toBe("normal"))
+  it("5 contractions/10 min — still normal (not amber; handled by hyperstim alert)", () => expect(entry(5)).toBe("normal"))
+  it("6 contractions/10 min alone — still normal", () => expect(entry(6)).toBe("normal"))
+  it("6 contractions + reduced variability → suspicious (amber from variability, not ctx)", () =>
     expect(classifyCTGEntry({
       baselineHR: 140, variability: "<5", variabilityMinutes: 35,
       decelerations: "none", decelerationMinutes: 0,
       accelerations: true, contractionsPerTen: 6,
-    })).toBe("pathological"))
+    })).toBe("suspicious"))
 })
 
 describe("classifyCTGEntry — overall formula", () => {
