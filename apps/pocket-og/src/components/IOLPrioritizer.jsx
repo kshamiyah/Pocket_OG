@@ -97,26 +97,78 @@ function explainRank(p) {
   return gs ? `${gs} · ${waitTxt}` : waitTxt;
 }
 
+function briefNote(p) {
+  const w = WINDOWS[p.ind.key];
+  if (w?.type === "asap") return `${p.label} (inpatient — immediate)`;
+  if (w?.type === "individual") {
+    const g = p.gestDays ? ` ${fmtGest(p.gestDays)},` : "";
+    return `${p.label} (${g} consultant-directed${p.daysWaiting > 0 ? `, ${p.daysWaiting}d waiting` : ""})`;
+  }
+  if (!p.gestDays) return `${p.label}${p.daysWaiting > 0 ? ` (${p.daysWaiting}d waiting)` : ""}`;
+  const w2 = w;
+  const overEnd = w2.end != null ? p.gestDays - w2.end : null;
+  const fromStart = p.gestDays - w2.start;
+  if (overEnd > 0) return `${p.label} (${fmtGest(p.gestDays)}, ${overEnd}d past target)`;
+  if (fromStart >= 0) return `${p.label} (${fmtGest(p.gestDays)}, in window)`;
+  return `${p.label} (${fmtGest(p.gestDays)}, ${-fromStart}d before window)`;
+}
+
+function tiebreakNote(patients) {
+  if (patients.length < 2) return briefNote(patients[0]);
+  const badge = tierBadgeLabel(patients[0].ind.key, patients[0].ind.priority);
+  const w = WINDOWS[patients[0].ind.key];
+
+  if (w?.type === "individual") {
+    const ns = patients.map(p => `${p.label} (${p.daysWaiting}d)`).join(" → ");
+    return `${ns} — same sub-tier (${badge}), ordered by wait time`;
+  }
+
+  if (patients.length === 2) {
+    const [a, b] = patients;
+    if (a.gestDays && b.gestDays) {
+      const oeA = w.end != null ? a.gestDays - w.end : null;
+      const oeB = w.end != null ? b.gestDays - w.end : null;
+      if (oeA > 0 && (!oeB || oeB <= 0)) {
+        return `${a.label} before ${b.label} — both ${badge}, ${fmtGest(a.gestDays)} is ${oeA}d past target vs ${fmtGest(b.gestDays)} still in window`;
+      }
+      if (oeA > 0 && oeB > 0 && oeA !== oeB) {
+        return `${a.label} before ${b.label} — both ${badge}, ${fmtGest(a.gestDays)} (${oeA}d past) vs ${fmtGest(b.gestDays)} (${oeB}d past)`;
+      }
+      const fsA = a.gestDays - w.start;
+      const fsB = b.gestDays - w.start;
+      if (fsA !== fsB) {
+        return `${a.label} before ${b.label} — both ${badge}, ${fmtGest(a.gestDays)} further into window than ${fmtGest(b.gestDays)}`;
+      }
+    }
+    return `${a.label} before ${b.label} — both ${badge}, ${a.daysWaiting}d vs ${b.daysWaiting}d waiting`;
+  }
+
+  const descs = patients.map(p => {
+    if (!p.gestDays) return `${p.label} (${p.daysWaiting}d)`;
+    const oe = w.end != null ? p.gestDays - w.end : null;
+    if (oe > 0) return `${p.label} ${fmtGest(p.gestDays)} (${oe}d OD)`;
+    return `${p.label} ${fmtGest(p.gestDays)}`;
+  });
+  return `${badge}: ${descs.join(" → ")} — ranked by gestation urgency`;
+}
+
 function generateNarrative(sorted) {
   if (sorted.length === 0) return "";
-  const ordinals = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"];
-  return sorted.map((p, i) => {
-    const pos = ordinals[i] || `#${i + 1}`;
-    const badge = tierBadgeLabel(p.ind.key, p.ind.priority);
-    const w = WINDOWS[p.ind.key];
-    const waitTxt = p.daysWaiting > 0 ? `, ${p.daysWaiting}d on the IOL list` : "";
 
-    if (w?.type === "asap") {
-      return `Patient ${p.label} is ${pos} (${badge}): ${p.ind.label} — inpatient, immediate delivery indicated${waitTxt}`;
+  const groups = [];
+  for (const p of sorted) {
+    const tier = SUBTIER[p.ind.key] ?? String(p.ind.priority);
+    const last = groups[groups.length - 1];
+    if (last && last.tier === tier) {
+      last.patients.push(p);
+    } else {
+      groups.push({ tier, patients: [p] });
     }
-    if (w?.type === "individual") {
-      const g = p.gestDays ? ` at ${fmtGest(p.gestDays)}` : "";
-      return `Patient ${p.label} is ${pos} (${badge}): ${p.ind.label}${g} — consultant-directed timing${waitTxt}`;
-    }
-    const gs = gestStatus(p);
-    if (gs) return `Patient ${p.label} is ${pos} (${badge}): ${p.ind.label} — ${gs}${waitTxt}`;
-    return `Patient ${p.label} is ${pos} (${badge}): ${p.ind.label} — target ${p.ind.gestation}${waitTxt}`;
-  }).join(". ") + ".";
+  }
+
+  return groups.map(({ patients }) =>
+    patients.length === 1 ? briefNote(patients[0]) : tiebreakNote(patients)
+  ).join(". ") + ".";
 }
 
 function tierBadgeLabel(key, priority) {
