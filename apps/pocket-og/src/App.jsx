@@ -5,6 +5,7 @@ import { GUIDELINES } from "@pocket-og/guidelines";
 import WikiCard from "./components/WikiCard";
 import NoResults from "./components/NoResults";
 import FlowchartPlayer from "./components/FlowchartPlayer";
+import IOLPrioritizer from "./components/IOLPrioritizer";
 import FeedbackButton from "./components/FeedbackButton";
 import ConsentPage from "./components/ConsentPage";
 import CalculatorPage from "./components/CalculatorPage";
@@ -90,6 +91,7 @@ export default function App() {
   const [filter, setFilter] = useState("ALL");
   const [expanded, setExpanded] = useState({});
   const [activeFlowchartId, setActiveFlowchartId] = useState(null);
+  const [showIOLPrioritizer, setShowIOLPrioritizer] = useState(false);
   const [activeTab, setActiveTab] = useState("search");
   const [guidelinePickerOpen, setGuidelinePickerOpen] = useState(false);
   const [glSourceFilter, setGlSourceFilter] = useState("ALL");
@@ -147,6 +149,9 @@ export default function App() {
 
       {/* Feedback button — always visible */}
       <FeedbackButton query={query} filter={filter} />
+
+      {/* IOL Prioritizer overlay */}
+      {showIOLPrioritizer && <IOLPrioritizer onClose={() => setShowIOLPrioritizer(false)} />}
 
       {/* Flowchart overlay */}
       {activeFlowchartId && FLOWCHARTS[activeFlowchartId] && (
@@ -357,6 +362,25 @@ export default function App() {
             <div className="px-5 pt-16 pb-4">
               <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Flowcharts</h2>
               <p className="text-sm text-gray-400 mt-1">Interactive clinical decision pathways</p>
+            </div>
+
+            {/* IOL Priority List tool */}
+            <div className="px-5 pb-5">
+              <button
+                onClick={() => setShowIOLPrioritizer(true)}
+                className="flex items-center gap-3 w-full px-4 py-4 rounded-2xl bg-white border border-teal-100 shadow-sm hover:bg-teal-50 active:bg-teal-100 transition-colors text-left"
+              >
+                <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center shrink-0">
+                  <span className="text-white text-sm font-bold">↑↓</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900">IOL Priority List</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Rank patients by clinical urgency · GL861</p>
+                </div>
+                <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             </div>
 
             <div className="px-5 pb-4 flex gap-2">
