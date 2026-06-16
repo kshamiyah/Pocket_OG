@@ -54,6 +54,16 @@ const WINDOWS = {
   "post-dates":{ start: 40 * 7 + 7, end: null       },
 };
 
+// NICE NG207: post-dates stillbirth risk escalates sharply at 42+0 (3/1000) and 43+0 (7/1000).
+// Escalate priority accordingly rather than leaving all post-dates as Routine.
+function getEffectiveTier(p) {
+  if (p.ind.key === "post-dates" && p.gestDays !== null) {
+    if (p.gestDays >= 43 * 7) return { priority: 1, subtier: "1c", escalated: "≥43+0" };
+    if (p.gestDays >= 42 * 7) return { priority: 2, subtier: "2b", escalated: "≥42+0" };
+  }
+  return { priority: p.ind.priority, subtier: SUBTIER[p.ind.key] ?? null, escalated: null };
+}
+
 function fmtGest(days) {
   return `${Math.floor(days / 7)}+${days % 7}`;
 }
@@ -68,6 +78,7 @@ function gestUrgencyScore(key, gestDays) {
 function isOverdue(key, gestDays) {
   const w = WINDOWS[key];
   if (!w || !gestDays || w.type === "asap" || w.type === "individual") return false;
+  if (key === "post-dates" && gestDays >= 42 * 7) return true;
   return w.end !== null && gestDays > w.end;
 }
 
@@ -83,7 +94,14 @@ function gestStatus(p) {
   return `${fmtGest(p.gestDays)}, window opens in ${-fromStart}d (${p.ind.gestation})`;
 }
 
+function tierBadgeLabel(subtier, priority) {
+  if (!subtier) return priority === "Routine" ? "Routine" : `P${priority}`;
+  if (subtier === "R") return "Routine";
+  return `P${subtier}`;
+}
+
 function explainRank(p) {
+  const tier = getEffectiveTier(p);
   const w = WINDOWS[p.ind.key];
   const waitTxt = p.daysWaiting > 0 ? `${p.daysWaiting}d on list` : "added today";
   if (w?.type === "asap") return "Inpatient — immediate delivery indicated";
@@ -92,12 +110,17 @@ function explainRank(p) {
       ? `${fmtGest(p.gestDays)} — consultant-directed · ${waitTxt}`
       : `Consultant-directed · ${waitTxt}`;
   }
+  if (tier.escalated) {
+    const dPast = p.gestDays - w.start;
+    return `${fmtGest(p.gestDays)}, ${dPast}d post-dates — escalated to ${tierBadgeLabel(tier.subtier, tier.priority)} per NICE NG207 · ${waitTxt}`;
+  }
   if (!w || p.gestDays === null) return `Target ${p.ind.gestation} · ${waitTxt}`;
   const gs = gestStatus(p);
   return gs ? `${gs} · ${waitTxt}` : waitTxt;
 }
 
 function briefNote(p) {
+  const tier = getEffectiveTier(p);
   const w = WINDOWS[p.ind.key];
   if (w?.type === "asap") return `${p.label} (inpatient — immediate)`;
   if (w?.type === "individual") {
@@ -105,9 +128,9 @@ function briefNote(p) {
     return `${p.label} (${g} consultant-directed${p.daysWaiting > 0 ? `, ${p.daysWaiting}d waiting` : ""})`;
   }
   if (!p.gestDays) return `${p.label}${p.daysWaiting > 0 ? ` (${p.daysWaiting}d waiting)` : ""}`;
-  const w2 = w;
-  const overEnd = w2.end != null ? p.gestDays - w2.end : null;
-  const fromStart = p.gestDays - w2.start;
+  const overEnd = w.end != null ? p.gestDays - w.end : null;
+  const fromStart = p.gestDays - w.start;
+  if (tier.escalated) return `${p.label} (${fmtGest(p.gestDays)}, ${fromStart}d post-dates — escalated to ${tierBadgeLabel(tier.subtier, tier.priority)})`;
   if (overEnd > 0) return `${p.label} (${fmtGest(p.gestDays)}, ${overEnd}d past target)`;
   if (fromStart > 0 && w.end === null) return `${p.label} (${fmtGest(p.gestDays)}, ${fromStart}d past target)`;
   if (fromStart >= 0) return `${p.label} (${fmtGest(p.gestDays)}, in window)`;
@@ -116,7 +139,8 @@ function briefNote(p) {
 
 function tiebreakNote(patients) {
   if (patients.length < 2) return briefNote(patients[0]);
-  const badge = tierBadgeLabel(patients[0].ind.key, patients[0].ind.priority);
+  const { subtier, priority } = getEffectiveTier(patients[0]);
+  const badge = tierBadgeLabel(subtier, priority);
   const w = WINDOWS[patients[0].ind.key];
 
   if (w?.type === "individual") {
@@ -156,27 +180,23 @@ function tiebreakNote(patients) {
 function generateNarrative(sorted) {
   if (sorted.length === 0) return [];
 
+  // Group consecutive patients only if same effective tier AND same indication
+  // (avoids mixing windows when building tiebreak explanations)
   const groups = [];
   for (const p of sorted) {
-    const tier = SUBTIER[p.ind.key] ?? String(p.ind.priority);
+    const { subtier, priority } = getEffectiveTier(p);
+    const groupKey = (subtier ?? String(priority)) + "|" + p.ind.key;
     const last = groups[groups.length - 1];
-    if (last && last.tier === tier) {
+    if (last && last.groupKey === groupKey) {
       last.patients.push(p);
     } else {
-      groups.push({ tier, patients: [p] });
+      groups.push({ groupKey, patients: [p] });
     }
   }
 
   return groups.map(({ patients }) =>
     patients.length === 1 ? briefNote(patients[0]) : tiebreakNote(patients)
   );
-}
-
-function tierBadgeLabel(key, priority) {
-  const t = SUBTIER[key];
-  if (!t) return priority === "Routine" ? "Routine" : `P${priority}`;
-  if (t === "R") return "Routine";
-  return `P${t}`;
 }
 
 const PRIORITY_BADGE_COLORS = {
@@ -240,9 +260,11 @@ export default function IOLPrioritizer({ onClose }) {
   const cancelForm = () => { resetForm(); setShowForm(false); };
 
   const sorted = [...patients].sort((a, b) => {
-    const p = (PRIORITY_ORDER[a.ind.priority] ?? 3) - (PRIORITY_ORDER[b.ind.priority] ?? 3);
+    const ta = getEffectiveTier(a);
+    const tb = getEffectiveTier(b);
+    const p = (PRIORITY_ORDER[ta.priority] ?? 3) - (PRIORITY_ORDER[tb.priority] ?? 3);
     if (p) return p;
-    const s = (SUBTIER_ORDER[SUBTIER[a.ind.key]] ?? 9) - (SUBTIER_ORDER[SUBTIER[b.ind.key]] ?? 9);
+    const s = (SUBTIER_ORDER[ta.subtier] ?? 9) - (SUBTIER_ORDER[tb.subtier] ?? 9);
     if (s) return s;
     const g = gestUrgencyScore(a.ind.key, a.gestDays) - gestUrgencyScore(b.ind.key, b.gestDays);
     if (g) return g;
@@ -263,7 +285,7 @@ export default function IOLPrioritizer({ onClose }) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-gray-900 leading-tight">IOL Priority List</p>
-          <p className="text-xs text-gray-400">GL861 · Ranked by urgency, gestation &amp; wait</p>
+          <p className="text-xs text-gray-400">GL861 · NICE NG207 · Ranked by urgency, gestation &amp; wait</p>
         </div>
         <button
           onClick={onClose}
@@ -306,8 +328,9 @@ export default function IOLPrioritizer({ onClose }) {
           )}
           {sorted.map((p, i) => {
             const overdue = isOverdue(p.ind.key, p.gestDays);
-            const badgeColor = PRIORITY_BADGE_COLORS[p.ind.priority];
-            const badgeLabel = tierBadgeLabel(p.ind.key, p.ind.priority);
+            const tier = getEffectiveTier(p);
+            const badgeColor = PRIORITY_BADGE_COLORS[tier.priority];
+            const badgeLabel = tierBadgeLabel(tier.subtier, tier.priority);
             const explanation = explainRank(p);
             return (
               <div key={p.id} className="px-4 py-3 rounded-2xl border border-gray-100 bg-gray-50">
@@ -318,6 +341,9 @@ export default function IOLPrioritizer({ onClose }) {
                       <span className={`px-2 py-0.5 rounded-full text-xs font-bold shrink-0 ${badgeColor}`}>{badgeLabel}</span>
                       {overdue && (
                         <span className="px-1.5 py-0.5 rounded-full text-xs font-semibold bg-red-500 text-white shrink-0">Overdue</span>
+                      )}
+                      {tier.escalated && (
+                        <span className="px-1.5 py-0.5 rounded-full text-xs font-semibold bg-orange-500 text-white shrink-0">Escalated</span>
                       )}
                       <p className="text-sm font-semibold text-gray-800">Patient {p.label}</p>
                     </div>
