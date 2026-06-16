@@ -93,7 +93,7 @@ export default function IOLPrioritizer({ onClose }) {
       </div>
 
       {/* Add patient form — sticky bottom */}
-      <div className="shrink-0 border-t border-gray-100 px-4 py-3 bg-white">
+      <div className="shrink-0 border-t border-gray-100 px-4 py-3 bg-white" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
         <div className="max-w-lg mx-auto space-y-2">
           <input
             type="text"
@@ -101,13 +101,13 @@ export default function IOLPrioritizer({ onClose }) {
             value={label}
             onChange={e => setLabel(e.target.value)}
             onKeyDown={e => e.key === "Enter" && addPatient()}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400"
           />
           <div className="flex gap-2">
             <select
               value={indication}
               onChange={e => setIndication(e.target.value)}
-              className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400 appearance-none"
+              className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-base text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400 appearance-none"
             >
               <option value="">Select indication…</option>
               <optgroup label="Priority 1">
