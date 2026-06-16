@@ -46,6 +46,7 @@ export default function IOLPrioritizer({ onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+      {/* Header */}
       <div className="shrink-0 border-b border-gray-100 px-4 py-3 flex items-center gap-3">
         <div className="w-7 h-7 rounded-xl bg-teal-600 flex items-center justify-center shrink-0">
           <span className="text-white text-xs font-bold">↑↓</span>
@@ -54,9 +55,13 @@ export default function IOLPrioritizer({ onClose }) {
           <p className="text-sm font-semibold text-gray-900 leading-tight">IOL Priority List</p>
           <p className="text-xs text-gray-400">GL861 · Ranked by clinical urgency</p>
         </div>
-        <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors text-lg leading-none shrink-0">×</button>
+        <button
+          onClick={onClose}
+          className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors text-lg leading-none shrink-0"
+        >×</button>
       </div>
 
+      {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-4 py-4">
         <div className="max-w-lg mx-auto space-y-2">
           {sorted.length === 0 && (
@@ -77,13 +82,17 @@ export default function IOLPrioritizer({ onClose }) {
                   <p className="text-xs text-gray-500 leading-snug">{p.ind.label}</p>
                   <p className="text-xs text-gray-400">{p.ind.gestation}</p>
                 </div>
-                <button onClick={() => setPatients(prev => prev.filter(x => x.id !== p.id))} className="text-gray-300 hover:text-red-400 text-lg leading-none shrink-0 transition-colors">×</button>
+                <button
+                  onClick={() => setPatients(prev => prev.filter(x => x.id !== p.id))}
+                  className="text-gray-300 hover:text-red-400 text-lg leading-none shrink-0 transition-colors"
+                >×</button>
               </div>
             );
           })}
         </div>
       </div>
 
+      {/* Add patient form — sticky bottom */}
       <div className="shrink-0 border-t border-gray-100 px-4 py-3 bg-white">
         <div className="max-w-lg mx-auto space-y-2">
           <input
@@ -95,15 +104,44 @@ export default function IOLPrioritizer({ onClose }) {
             className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400"
           />
           <div className="flex gap-2">
-            <select value={indication} onChange={e => setIndication(e.target.value)} className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400 appearance-none">
+            <select
+              value={indication}
+              onChange={e => setIndication(e.target.value)}
+              className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400 appearance-none"
+            >
               <option value="">Select indication…</option>
-              <optgroup label="Priority 1">{IOL_INDICATIONS.filter(i => i.priority === 1).map(i => <option key={i.key} value={i.key}>{i.label}</option>)}</optgroup>
-              <optgroup label="Priority 2">{IOL_INDICATIONS.filter(i => i.priority === 2).map(i => <option key={i.key} value={i.key}>{i.label}</option>)}</optgroup>
-              <optgroup label="Routine">{IOL_INDICATIONS.filter(i => i.priority === "Routine").map(i => <option key={i.key} value={i.key}>{i.label}</option>)}</optgroup>
+              <optgroup label="Priority 1">
+                {IOL_INDICATIONS.filter(i => i.priority === 1).map(i => (
+                  <option key={i.key} value={i.key}>{i.label}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Priority 2">
+                {IOL_INDICATIONS.filter(i => i.priority === 2).map(i => (
+                  <option key={i.key} value={i.key}>{i.label}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Routine">
+                {IOL_INDICATIONS.filter(i => i.priority === "Routine").map(i => (
+                  <option key={i.key} value={i.key}>{i.label}</option>
+                ))}
+              </optgroup>
             </select>
-            <button onClick={addPatient} disabled={!indication} className="shrink-0 bg-teal-600 hover:bg-teal-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors">Add</button>
+            <button
+              onClick={addPatient}
+              disabled={!indication}
+              className="shrink-0 bg-teal-600 hover:bg-teal-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors"
+            >
+              Add
+            </button>
           </div>
-          {patients.length > 0 && <button onClick={() => setPatients([])} className="w-full text-xs text-gray-400 hover:text-gray-600 py-1 transition-colors">Clear all</button>}
+          {patients.length > 0 && (
+            <button
+              onClick={() => setPatients([])}
+              className="w-full text-xs text-gray-400 hover:text-gray-600 py-1 transition-colors"
+            >
+              Clear all
+            </button>
+          )}
         </div>
       </div>
     </div>

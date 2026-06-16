@@ -2,14 +2,22 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import { SEARCH_INDEX, search } from "./search/engine";
 import WikiCard from "./components/WikiCard";
 import NoResults from "./components/NoResults";
+import FlowchartPlayer from "./components/FlowchartPlayer";
+import IOLPrioritizer from "./components/IOLPrioritizer";
+import { FLOWCHARTS, FLOWCHART_GROUPS } from "./data/flowcharts";
 
 const FILTER_OPTIONS = [
   { value: "ALL",         label: "All guidelines",                     pill: "All",         codes: null,               active: "bg-gray-900 text-white" },
-  { value: "GL952",       label: "Pre-Eclampsia / PIH / PET",          pill: "PET / PIH",   codes: ["GL952"],          active: "bg-blue-100 text-blue-700" },
+  { value: "GL952",       label: "Pre-Eclampsia / PIH / PET",          pill: "PET / HIH",   codes: ["GL952"],          active: "bg-blue-100 text-blue-700" },
   { value: "GL787",       label: "Obstetric Infections & Antibiotics", pill: "Antibiotics", codes: ["GL787"],          active: "bg-emerald-100 text-emerald-700" },
   { value: "MISCARRIAGE", label: "Miscarriage",                        pill: "Miscarriage", codes: ["CG565", "CG621"], active: "bg-violet-100 text-violet-700" },
   { value: "CG623",       label: "Ectopic Pregnancy",                  pill: "Ectopic",     codes: ["CG623"],          active: "bg-orange-100 text-orange-700" },
   { value: "GL895",       label: "PPRoM",                              pill: "PPRoM",       codes: ["GL895"],          active: "bg-sky-100 text-sky-700" },
+  { value: "GL783",       label: "Iron Deficiency Anaemia",            pill: "Anaemia",     codes: ["GL783"],          active: "bg-amber-100 text-amber-700" },
+  { value: "GL880",       label: "ICP",                                pill: "ICP",         codes: ["GL880"],          active: "bg-yellow-100 text-yellow-700" },
+  { value: "GL891",       label: "VTE",                                pill: "VTE",         codes: ["GL891"],          active: "bg-indigo-100 text-indigo-700" },
+  { value: "GL983",       label: "Diabetes in Pregnancy",              pill: "Diabetes",    codes: ["GL983"],          active: "bg-pink-100 text-pink-700" },
+  { value: "GL861",       label: "Induction of Labour",                pill: "IOL",         codes: ["GL861"],          active: "bg-teal-100 text-teal-700" },
 ];
 
 const SUGGESTIONS = [
@@ -23,21 +31,29 @@ const SUGGESTIONS = [
   "gentamicin weight",
 ];
 
+const GROUP_COLORS = {
+  teal:   { section: "text-teal-700", card: "border-teal-100 hover:border-teal-300 hover:bg-teal-50", dot: "bg-teal-500", badge: "bg-teal-50 text-teal-700" },
+  indigo: { section: "text-indigo-700", card: "border-indigo-100 hover:border-indigo-300 hover:bg-indigo-50", dot: "bg-indigo-500", badge: "bg-indigo-50 text-indigo-700" },
+  pink:   { section: "text-pink-700", card: "border-pink-100 hover:border-pink-300 hover:bg-pink-50", dot: "bg-pink-500", badge: "bg-pink-50 text-pink-700" },
+  yellow: { section: "text-yellow-700", card: "border-yellow-100 hover:border-yellow-300 hover:bg-yellow-50", dot: "bg-yellow-500", badge: "bg-yellow-50 text-yellow-700" },
+};
+
 export default function App() {
-  const [inputValue, setInputValue] = useState(""); // what the user is typing
-  const [query, setQuery] = useState("");            // what actually drives search (set on Enter)
+  const [tab, setTab] = useState("search");
+  const [inputValue, setInputValue] = useState("");
+  const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("ALL");
   const [expanded, setExpanded] = useState({});
+  const [activeFlowchart, setActiveFlowchart] = useState(null);
+  const [showIOLPrioritizer, setShowIOLPrioritizer] = useState(false);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
   const hasQuery = query.trim().length > 0;
 
-  // Focus idle input on mount
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
   }, []);
 
-  // When transitioning to results view, transfer focus to results input
   useEffect(() => {
     if (hasQuery && resultsInputRef.current) {
       resultsInputRef.current.focus();
@@ -54,6 +70,15 @@ export default function App() {
     setQuery("");
     setFilter("ALL");
     setExpanded({});
+  };
+
+  const switchTab = (t) => {
+    setTab(t);
+    if (t === "search") {
+      // keep search state
+    } else {
+      // switching to flowcharts — don't clear search
+    }
   };
 
   const activeOption = FILTER_OPTIONS.find(o => o.value === filter);
@@ -76,145 +101,264 @@ export default function App() {
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
       `}</style>
 
-      {/* Hero / idle state */}
-      {!hasQuery && (
-        <div className="flex flex-col items-center justify-center min-h-screen px-4 pb-24">
-          <div className="w-full max-w-xl">
-            {/* Logo */}
-            <div className="flex flex-col items-center text-center mb-8">
-              <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center mb-3 shadow-sm">
-                <span className="text-white text-base font-semibold">Rx</span>
-              </div>
-              <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Pocket O&G</h1>
-              <p className="text-sm text-gray-400 mt-1">RBH guidelines — wherever you go, whenever you need them</p>
-            </div>
+      {/* Flowchart overlay */}
+      {activeFlowchart && (
+        <FlowchartPlayer
+          flowchart={activeFlowchart}
+          onClose={() => setActiveFlowchart(null)}
+        />
+      )}
 
-            {/* Search bar + button */}
-            <div className="flex gap-2 mb-4">
-              <div className="relative flex-1">
-                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-                </svg>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  placeholder="Ask a clinical question…"
-                  value={inputValue}
-                  onChange={e => setInputValue(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && submitSearch()}
-                  className="w-full border border-gray-200 rounded-2xl pl-11 pr-4 py-4 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 shadow-sm transition-all"
-                />
+      {/* IOL Prioritizer overlay */}
+      {showIOLPrioritizer && (
+        <IOLPrioritizer onClose={() => setShowIOLPrioritizer(false)} />
+      )}
+
+      {/* ── SEARCH TAB ── */}
+      {tab === "search" && (
+        <>
+          {/* Hero / idle state */}
+          {!hasQuery && (
+            <div className="flex flex-col items-center justify-center min-h-screen px-4 pb-24">
+              <div className="w-full max-w-xl">
+                {/* Logo */}
+                <div className="flex flex-col items-center text-center mb-8">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center mb-3 shadow-sm">
+                    <span className="text-white text-base font-semibold">Rx</span>
+                  </div>
+                  <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Pocket O&G</h1>
+                  <p className="text-sm text-gray-400 mt-1">RBH guidelines — wherever you go, whenever you need them</p>
+                </div>
+
+                {/* Search bar + button */}
+                <div className="flex gap-2 mb-4">
+                  <div className="relative flex-1">
+                    <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                    </svg>
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      placeholder="Ask a clinical question…"
+                      value={inputValue}
+                      onChange={e => setInputValue(e.target.value)}
+                      onKeyDown={e => e.key === "Enter" && submitSearch()}
+                      className="w-full border border-gray-200 rounded-2xl pl-11 pr-4 py-4 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 shadow-sm transition-all"
+                    />
+                  </div>
+                  <button
+                    onClick={() => submitSearch()}
+                    className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-5 rounded-2xl shadow-sm transition-colors"
+                  >
+                    Search
+                  </button>
+                </div>
+
+                {/* Guideline dropdown */}
+                <div className="relative mb-4">
+                  <select
+                    value={filter}
+                    onChange={e => setFilter(e.target.value)}
+                    className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 shadow-sm appearance-none transition-all"
+                  >
+                    {FILTER_OPTIONS.map(o => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                  <svg className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+
+                {/* Suggestion chips */}
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {SUGGESTIONS.map(s => (
+                    <button
+                      key={s}
+                      onClick={() => { setInputValue(s); submitSearch(s); }}
+                      className="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-xs text-gray-600 transition-colors"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
               </div>
+            </div>
+          )}
+
+          {/* Results state */}
+          {hasQuery && (
+            <>
+              {/* Sticky compact header */}
+              <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-gray-100">
+                <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
+                    <span className="text-white text-xs font-semibold">Rx</span>
+                  </div>
+                  <div className="relative flex-1">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                    </svg>
+                    <input
+                      ref={resultsInputRef}
+                      type="text"
+                      value={inputValue}
+                      onChange={e => setInputValue(e.target.value)}
+                      onKeyDown={e => e.key === "Enter" && submitSearch()}
+                      className="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-8 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                    />
+                    <button
+                      onClick={clearSearch}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg leading-none"
+                    >×</button>
+                  </div>
+                  {/* Filter pills */}
+                  <div className="flex gap-1 shrink-0 overflow-x-auto">
+                    {FILTER_OPTIONS.map(f => (
+                      <button
+                        key={f.value}
+                        onClick={() => { setFilter(f.value); setExpanded({}); submitSearch(); }}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+                          filter === f.value ? f.active : "text-gray-400 hover:text-gray-600"
+                        }`}
+                      >
+                        {f.pill}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Results */}
+              <div className="max-w-2xl mx-auto px-4 py-5 pb-24">
+                {!showNoResults && (
+                  <p className="text-xs text-gray-400 mb-4">
+                    {primary.length} result{primary.length !== 1 ? "s" : ""} for "{query}"
+                    {filter !== "ALL" && <span className="text-gray-300"> · {activeOption?.label}</span>}
+                  </p>
+                )}
+
+                {showNoResults
+                  ? <NoResults query={query} fallbacks={fallback} expanded={expanded} onToggle={toggle} />
+                  : (
+                    <div className="space-y-3">
+                      {primary.map(page => (
+                        <WikiCard key={page.id} page={page} query={query} isExpanded={!!expanded[page.id]} onToggle={() => toggle(page.id)} />
+                      ))}
+                    </div>
+                  )
+                }
+
+                <div className="mt-10 text-center">
+                  <p className="text-xs text-gray-300">Content derived verbatim from RBH trust guidelines · Not a substitute for clinical judgement · Always escalate when uncertain</p>
+                  <p className="text-xs text-gray-300 mt-1">Built by Khalid Shamiyah</p>
+                </div>
+              </div>
+            </>
+          )}
+        </>
+      )}
+
+      {/* ── FLOWCHARTS TAB ── */}
+      {tab === "flowcharts" && (
+        <>
+          {/* Header */}
+          <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-gray-100">
+            <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
+              <div className="w-7 h-7 rounded-xl bg-teal-600 flex items-center justify-center shrink-0">
+                <span className="text-white text-xs font-semibold">Rx</span>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900 leading-tight">Flowcharts</p>
+                <p className="text-xs text-gray-400">Step-by-step clinical pathways</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="max-w-2xl mx-auto px-4 py-5 pb-24">
+            {/* IOL Priority List — special card */}
+            <div className="mb-6">
+              <p className="text-xs font-semibold text-teal-700 uppercase tracking-wider mb-2">GL861 · Induction of Labour</p>
               <button
-                onClick={() => submitSearch()}
-                className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-5 rounded-2xl shadow-sm transition-colors"
+                onClick={() => setShowIOLPrioritizer(true)}
+                className="w-full text-left px-4 py-4 rounded-2xl border-2 border-teal-200 bg-teal-50 hover:border-teal-400 hover:bg-teal-100 transition-all group"
               >
-                Search
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-teal-600 flex items-center justify-center shrink-0">
+                    <span className="text-white text-sm font-bold">↑↓</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <p className="text-sm font-semibold text-teal-900 leading-tight">IOL Priority List</p>
+                      <span className="px-1.5 py-0.5 rounded-full bg-teal-600 text-white text-xs font-semibold">Tool</span>
+                    </div>
+                    <p className="text-xs text-teal-600">Add patients by indication — auto-sorted by clinical urgency (P1 / P2 / Routine)</p>
+                  </div>
+                  <span className="text-teal-400 text-xl shrink-0">›</span>
+                </div>
               </button>
             </div>
 
-            {/* Guideline dropdown */}
-            <div className="relative mb-4">
-              <select
-                value={filter}
-                onChange={e => setFilter(e.target.value)}
-                className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 shadow-sm appearance-none transition-all"
-              >
-                {FILTER_OPTIONS.map(o => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-              <svg className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-
-            {/* Suggestion chips */}
-            <div className="flex flex-wrap gap-2 justify-center">
-              {SUGGESTIONS.map(s => (
-                <button
-                  key={s}
-                  onClick={() => { setInputValue(s); submitSearch(s); }}
-                  className="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-xs text-gray-600 transition-colors"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Results state */}
-      {hasQuery && (
-        <>
-          {/* Sticky compact header */}
-          <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-gray-100">
-            <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-              <div className="w-7 h-7 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
-                <span className="text-white text-xs font-semibold">Rx</span>
-              </div>
-              <div className="relative flex-1">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-                </svg>
-                <input
-                  ref={resultsInputRef}
-                  type="text"
-                  value={inputValue}
-                  onChange={e => setInputValue(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && submitSearch()}
-                  className="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-8 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
-                />
-                <button
-                  onClick={clearSearch}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg leading-none"
-                >×</button>
-              </div>
-              {/* Filter pills */}
-              <div className="flex gap-1 shrink-0 overflow-x-auto">
-                {FILTER_OPTIONS.map(f => (
-                  <button
-                    key={f.value}
-                    onClick={() => { setFilter(f.value); setExpanded({}); submitSearch(); }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
-                      filter === f.value ? f.active : "text-gray-400 hover:text-gray-600"
-                    }`}
-                  >
-                    {f.pill}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Results */}
-          <div className="max-w-2xl mx-auto px-4 py-5">
-            {!showNoResults && (
-              <p className="text-xs text-gray-400 mb-4">
-                {primary.length} result{primary.length !== 1 ? "s" : ""} for "{query}"
-                {filter !== "ALL" && <span className="text-gray-300"> · {activeOption?.label}</span>}
-              </p>
-            )}
-
-            {showNoResults
-              ? <NoResults query={query} fallbacks={fallback} expanded={expanded} onToggle={toggle} />
-              : (
-                <div className="space-y-3">
-                  {primary.map(page => (
-                    <WikiCard key={page.id} page={page} query={query} isExpanded={!!expanded[page.id]} onToggle={() => toggle(page.id)} />
-                  ))}
+            {/* Flowchart groups */}
+            {FLOWCHART_GROUPS.map(group => {
+              const gc = GROUP_COLORS[group.color] ?? GROUP_COLORS.teal;
+              return (
+                <div key={group.gl} className="mb-6">
+                  <p className={`text-xs font-semibold uppercase tracking-wider mb-2 ${gc.section}`}>
+                    {group.gl} · {group.label}
+                  </p>
+                  <div className="space-y-2">
+                    {group.entries.map(entry => (
+                      <button
+                        key={entry.id}
+                        onClick={() => setActiveFlowchart(FLOWCHARTS[entry.id])}
+                        className={`w-full text-left px-4 py-3.5 rounded-2xl border transition-all flex items-center gap-3 ${gc.card}`}
+                      >
+                        <div className={`w-2 h-2 rounded-full shrink-0 ${gc.dot}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-800 leading-tight">{entry.title}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">{entry.subtitle}</p>
+                        </div>
+                        <span className="text-gray-300 text-xl shrink-0">›</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              )
-            }
+              );
+            })}
 
-            <div className="mt-10 text-center">
+            <div className="mt-6 text-center">
               <p className="text-xs text-gray-300">Content derived verbatim from RBH trust guidelines · Not a substitute for clinical judgement · Always escalate when uncertain</p>
-              <p className="text-xs text-gray-300 mt-1">Built by Khalid Shamiyah</p>
             </div>
           </div>
         </>
       )}
+
+      {/* ── BOTTOM TAB BAR ── */}
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-100 flex">
+        <button
+          onClick={() => switchTab("search")}
+          className={`flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-colors ${
+            tab === "search" ? "text-blue-600" : "text-gray-400 hover:text-gray-600"
+          }`}
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+          </svg>
+          <span className="text-xs font-medium">Search</span>
+        </button>
+        <button
+          onClick={() => switchTab("flowcharts")}
+          className={`flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-colors ${
+            tab === "flowcharts" ? "text-teal-600" : "text-gray-400 hover:text-gray-600"
+          }`}
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7" />
+          </svg>
+          <span className="text-xs font-medium">Flowcharts</span>
+        </button>
+      </div>
     </div>
   );
 }

@@ -4,6 +4,7 @@ export const GL983_DKA_FLOWCHART = {
   subtitle: "GL983 · Diabetic Ketoacidosis in Pregnancy",
   startId: "suspect",
   nodes: {
+
     "suspect": {
       type: "alert",
       title: "Suspect DKA — Medical Emergency",
@@ -16,6 +17,7 @@ export const GL983_DKA_FLOWCHART = {
       ],
       next: "diagnose",
     },
+
     "diagnose": {
       type: "decision",
       title: "DKA diagnostic criteria met?",
@@ -25,6 +27,7 @@ export const GL983_DKA_FLOWCHART = {
         { label: "No — criteria not met", sublabel: "Not DKA — treat underlying cause, monitor", next: "not-dka" },
       ],
     },
+
     "not-dka": {
       type: "end",
       title: "Not DKA — Treat Cause & Monitor",
@@ -35,6 +38,7 @@ export const GL983_DKA_FLOWCHART = {
         "Low threshold to re-evaluate — DKA can evolve",
       ],
     },
+
     "escalate": {
       type: "action",
       title: "Escalate & Investigate",
@@ -48,17 +52,22 @@ export const GL983_DKA_FLOWCHART = {
       ],
       next: "fluids",
     },
+
     "fluids": {
       type: "action",
       title: "IV Fluid Replacement (0.9% NaCl)",
       text: "Replace ~5 litres over the schedule below. Give a 500 mL bolus first if SBP < 90 mmHg.",
       items: [
-        "1 litre over 1 hour", "1 litre over 2 hours", "1 litre over 2 hours",
-        "1 litre over 4 hours", "1 litre over 6–8 hours",
+        "1 litre over 1 hour",
+        "1 litre over 2 hours",
+        "1 litre over 2 hours",
+        "1 litre over 4 hours",
+        "1 litre over 6–8 hours",
         "Add potassium from the second bag onwards per level below",
       ],
       next: "potassium",
     },
+
     "potassium": {
       type: "decision",
       title: "Serum potassium level?",
@@ -69,6 +78,7 @@ export const GL983_DKA_FLOWCHART = {
         { label: "> 5.5 mmol/L", sublabel: "No potassium this bag", next: "frii" },
       ],
     },
+
     "frii": {
       type: "action",
       title: "Fixed Rate Insulin Infusion (FRII)",
@@ -81,6 +91,7 @@ export const GL983_DKA_FLOWCHART = {
       ],
       next: "resolution",
     },
+
     "resolution": {
       type: "decision",
       title: "DKA resolved?",
@@ -90,6 +101,7 @@ export const GL983_DKA_FLOWCHART = {
         { label: "No — not yet resolved", sublabel: "Continue FRII and monitoring", next: "continue" },
       ],
     },
+
     "continue": {
       type: "action",
       title: "Continue Treatment & Monitoring",
@@ -102,6 +114,7 @@ export const GL983_DKA_FLOWCHART = {
       ],
       next: "resolution",
     },
+
     "resolved": {
       type: "end",
       title: "Resolved — Convert Insulin",
@@ -112,5 +125,6 @@ export const GL983_DKA_FLOWCHART = {
         "Keep diabetes/endocrine team involved for ongoing management",
       ],
     },
+
   },
 };

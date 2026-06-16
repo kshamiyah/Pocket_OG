@@ -4,6 +4,7 @@ export const GL880_DELIVERY_FLOWCHART = {
   subtitle: "GL880 · Intrahepatic Cholestasis of Pregnancy",
   startId: "present",
   nodes: {
+
     "present": {
       type: "action",
       title: "Itch Without Rash",
@@ -15,6 +16,7 @@ export const GL880_DELIVERY_FLOWCHART = {
       ],
       next: "diagnose",
     },
+
     "diagnose": {
       type: "decision",
       title: "Bile acids > 19 µmol/L?",
@@ -24,6 +26,7 @@ export const GL880_DELIVERY_FLOWCHART = {
         { label: "No — normal BA", sublabel: "If itch persists, repeat BA + LFTs at 1–2 week intervals", next: "not-icp" },
       ],
     },
+
     "not-icp": {
       type: "end",
       title: "ICP Not Confirmed",
@@ -34,6 +37,7 @@ export const GL880_DELIVERY_FLOWCHART = {
         "Consider other benign causes of itching",
       ],
     },
+
     "stratify": {
       type: "decision",
       title: "Peak bile acid level?",
@@ -44,6 +48,7 @@ export const GL880_DELIVERY_FLOWCHART = {
         { label: "≥ 100 µmol/L (severe)", sublabel: "Refer Miss Brooks' ANC", next: "severe" },
       ],
     },
+
     "mild": {
       type: "end",
       title: "Mild ICP (BA 19–39)",
@@ -54,6 +59,7 @@ export const GL880_DELIVERY_FLOWCHART = {
         "Symptomatic itch relief: aqueous cream ± menthol, chlorphenamine, loratadine/cetirizine",
       ],
     },
+
     "moderate": {
       type: "end",
       title: "Moderate ICP (BA 40–99)",
@@ -65,6 +71,7 @@ export const GL880_DELIVERY_FLOWCHART = {
         "Co-morbidities (pre-eclampsia, diabetes, multiple pregnancy) with BA > 40 may justify earlier delivery",
       ],
     },
+
     "severe": {
       type: "alert",
       title: "Severe ICP (BA ≥ 100) — Highest Stillbirth Risk",
@@ -76,5 +83,6 @@ export const GL880_DELIVERY_FLOWCHART = {
         "UDCA may be considered (senior prescription); Vitamin K (Menadiol 10 mg daily) if clotting abnormal",
       ],
     },
+
   },
 };
