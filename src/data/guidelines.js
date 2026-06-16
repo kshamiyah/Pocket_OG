@@ -5,6 +5,11 @@ export const GUIDELINES = {
   CG621: { code: "CG621", label: "Medical Management of Miscarriage", version: "V6", date: "May 2024", color: "rose" },
   CG623: { code: "CG623", label: "Ectopic Pregnancy — Medical Management", version: "V5", date: "June 2025", color: "orange" },
   GL895: { code: "GL895", label: "PPRoM", version: "V7", date: "November 2023", color: "sky" },
+  GL783: { code: "GL783", label: "Iron Deficiency Anaemia", version: "V5", date: "January 2025", color: "amber" },
+  GL880: { code: "GL880", label: "Intrahepatic Cholestasis of Pregnancy", version: "V5", date: "April 2025", color: "yellow" },
+  GL891: { code: "GL891", label: "VTE in Pregnancy & Postnatal", version: "V8", date: "February 2026", color: "indigo" },
+  GL983: { code: "GL983", label: "Diabetes in Pregnancy", version: "V4", date: "March 2026", color: "pink" },
+  GL861: { code: "GL861", label: "Induction of Labour", version: "V6.10", date: "May 2026", color: "teal" },
 };
 
 export const GL_COLORS = {
@@ -14,4 +19,9 @@ export const GL_COLORS = {
   CG621: { badge: "bg-rose-900/50 text-rose-300 border-rose-600/40", dot: "bg-rose-400" },
   CG623: { badge: "bg-orange-900/50 text-orange-300 border-orange-600/40", dot: "bg-orange-400" },
   GL895: { badge: "bg-sky-900/50 text-sky-300 border-sky-600/40", dot: "bg-sky-400" },
+  GL783: { badge: "bg-amber-900/50 text-amber-300 border-amber-600/40", dot: "bg-amber-400" },
+  GL880: { badge: "bg-yellow-900/50 text-yellow-300 border-yellow-600/40", dot: "bg-yellow-400" },
+  GL891: { badge: "bg-indigo-900/50 text-indigo-300 border-indigo-600/40", dot: "bg-indigo-400" },
+  GL983: { badge: "bg-pink-900/50 text-pink-300 border-pink-600/40", dot: "bg-pink-400" },
+  GL861: { badge: "bg-teal-900/50 text-teal-300 border-teal-600/40", dot: "bg-teal-400" },
 };
