@@ -71,35 +71,52 @@ function isOverdue(key, gestDays) {
   return w.end !== null && gestDays > w.end;
 }
 
+function gestStatus(p) {
+  const w = WINDOWS[p.ind.key];
+  if (!w || w.type === "asap" || w.type === "individual") return null;
+  if (p.gestDays === null) return null;
+  const overEnd = w.end !== null ? p.gestDays - w.end : null;
+  const fromStart = p.gestDays - w.start;
+  if (overEnd !== null && overEnd > 0) return `${fmtGest(p.gestDays)}, ${overEnd}d past target window (${p.ind.gestation})`;
+  if (fromStart > 0 && w.end === null)  return `${fmtGest(p.gestDays)}, ${fromStart}d past target (${p.ind.gestation})`;
+  if (fromStart >= 0)                   return `${fmtGest(p.gestDays)}, in window (${p.ind.gestation})`;
+  return `${fmtGest(p.gestDays)}, window opens in ${-fromStart}d (${p.ind.gestation})`;
+}
+
 function explainRank(p) {
   const w = WINDOWS[p.ind.key];
   const waitTxt = p.daysWaiting > 0 ? `${p.daysWaiting}d on list` : "added today";
-
   if (w?.type === "asap") return "Inpatient — immediate delivery indicated";
-
   if (w?.type === "individual") {
     return p.gestDays !== null
       ? `${fmtGest(p.gestDays)} — consultant-directed · ${waitTxt}`
       : `Consultant-directed · ${waitTxt}`;
   }
+  if (!w || p.gestDays === null) return `Target ${p.ind.gestation} · ${waitTxt}`;
+  const gs = gestStatus(p);
+  return gs ? `${gs} · ${waitTxt}` : waitTxt;
+}
 
-  if (!w) return waitTxt;
+function generateNarrative(sorted) {
+  if (sorted.length === 0) return "";
+  const ordinals = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"];
+  return sorted.map((p, i) => {
+    const pos = ordinals[i] || `#${i + 1}`;
+    const badge = tierBadgeLabel(p.ind.key, p.ind.priority);
+    const w = WINDOWS[p.ind.key];
+    const waitTxt = p.daysWaiting > 0 ? `, ${p.daysWaiting}d on the IOL list` : "";
 
-  if (p.gestDays === null) return `Target ${p.ind.gestation} · ${waitTxt}`;
-
-  const gestStr = fmtGest(p.gestDays);
-  const overEnd = w.end !== null ? p.gestDays - w.end : null;
-  const fromStart = p.gestDays - w.start;
-
-  if (overEnd !== null && overEnd > 0) {
-    return `${gestStr} — ${overEnd}d past target window (${p.ind.gestation}) · ${waitTxt}`;
-  } else if (fromStart > 0 && w.end === null) {
-    return `${gestStr} — ${fromStart}d past target (${p.ind.gestation}) · ${waitTxt}`;
-  } else if (fromStart >= 0) {
-    return `${gestStr} — in window (${p.ind.gestation}) · ${waitTxt}`;
-  } else {
-    return `${gestStr} — window opens in ${-fromStart}d (${p.ind.gestation}) · ${waitTxt}`;
-  }
+    if (w?.type === "asap") {
+      return `Patient ${p.label} is ${pos} (${badge}): ${p.ind.label} — inpatient, immediate delivery indicated${waitTxt}`;
+    }
+    if (w?.type === "individual") {
+      const g = p.gestDays ? ` at ${fmtGest(p.gestDays)}` : "";
+      return `Patient ${p.label} is ${pos} (${badge}): ${p.ind.label}${g} — consultant-directed timing${waitTxt}`;
+    }
+    const gs = gestStatus(p);
+    if (gs) return `Patient ${p.label} is ${pos} (${badge}): ${p.ind.label} — ${gs}${waitTxt}`;
+    return `Patient ${p.label} is ${pos} (${badge}): ${p.ind.label} — target ${p.ind.gestation}${waitTxt}`;
+  }).join(". ") + ".";
 }
 
 function tierBadgeLabel(key, priority) {
@@ -123,6 +140,7 @@ const uid = () => ++_uid;
 export default function IOLPrioritizer({ onClose }) {
   const [patients, setPatients] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [showNarrative, setShowNarrative] = useState(true);
   const [label, setLabel] = useState("");
   const [gestWeeks, setGestWeeks] = useState("");
   const [gestExtraDays, setGestExtraDays] = useState("");
@@ -178,6 +196,8 @@ export default function IOLPrioritizer({ onClose }) {
     return b.daysWaiting - a.daysWaiting;
   });
 
+  const narrative = generateNarrative(sorted);
+
   return (
     <div
       className="fixed left-0 right-0 z-50 bg-white flex flex-col overflow-hidden"
@@ -197,6 +217,22 @@ export default function IOLPrioritizer({ onClose }) {
           className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors text-lg leading-none shrink-0"
         >×</button>
       </div>
+
+      {/* Ranking narrative strip */}
+      {sorted.length > 0 && (
+        <div className="shrink-0 border-b border-teal-100 bg-teal-50">
+          <button
+            onClick={() => setShowNarrative(v => !v)}
+            className="w-full flex items-center justify-between px-4 py-2.5 text-left"
+          >
+            <span className="text-xs font-semibold text-teal-700">Ranking justification</span>
+            <span className="text-xs text-teal-500 shrink-0 ml-2">{showNarrative ? "▲ hide" : "▼ show"}</span>
+          </button>
+          {showNarrative && (
+            <p className="px-4 pb-3 text-xs text-teal-900 leading-relaxed">{narrative}</p>
+          )}
+        </div>
+      )}
 
       {/* Patient list */}
       <div className="flex-1 overflow-y-auto px-4 py-4">
@@ -274,48 +310,50 @@ export default function IOLPrioritizer({ onClose }) {
                 className={INPUT_CLS}
               />
 
-              <div className="flex gap-2">
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-400 mb-1 pl-1">Weeks</p>
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    placeholder="38"
-                    min="20"
-                    max="43"
-                    value={gestWeeks}
-                    onChange={e => setGestWeeks(e.target.value)}
-                    onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
-                    className={INPUT_CLS}
-                  />
+              <div>
+                <p className="text-xs text-gray-400 mb-1 pl-1">Gestation</p>
+                <div className="flex gap-2">
+                  <div className="flex-1 min-w-0">
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      placeholder="Weeks (e.g. 38)"
+                      min="20"
+                      max="43"
+                      value={gestWeeks}
+                      onChange={e => setGestWeeks(e.target.value)}
+                      onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
+                      className={INPUT_CLS}
+                    />
+                  </div>
+                  <div className="w-24">
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      placeholder="+Days"
+                      min="0"
+                      max="6"
+                      value={gestExtraDays}
+                      onChange={e => setGestExtraDays(e.target.value)}
+                      onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
+                      className={INPUT_CLS}
+                    />
+                  </div>
                 </div>
-                <div className="w-20">
-                  <p className="text-xs text-gray-400 mb-1 pl-1">+Days</p>
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    placeholder="0"
-                    min="0"
-                    max="6"
-                    value={gestExtraDays}
-                    onChange={e => setGestExtraDays(e.target.value)}
-                    onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
-                    className={INPUT_CLS}
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-400 mb-1 pl-1">Days on list</p>
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    placeholder="0"
-                    min="0"
-                    value={daysWaiting}
-                    onChange={e => setDaysWaiting(e.target.value)}
-                    onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
-                    className={INPUT_CLS}
-                  />
-                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-gray-400 mb-1 pl-1">Days on IOL list</p>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  placeholder="0"
+                  min="0"
+                  value={daysWaiting}
+                  onChange={e => setDaysWaiting(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
+                  className={INPUT_CLS}
+                />
               </div>
 
               <select
