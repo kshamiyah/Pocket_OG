@@ -45,7 +45,7 @@ export default function IOLPrioritizer({ onClose }) {
   const sorted = [...patients].sort((a, b) => (PRIORITY_ORDER[a.ind.priority] ?? 3) - (PRIORITY_ORDER[b.ind.priority] ?? 3));
 
   return (
-    <div className="fixed inset-x-0 top-0 z-50 bg-white flex flex-col" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif", height: '100dvh' }}>
+    <div className="fixed inset-0 z-50 bg-white flex flex-col overflow-hidden" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
       {/* Header */}
       <div className="shrink-0 border-b border-gray-100 px-4 py-3 flex items-center gap-3">
         <div className="w-7 h-7 rounded-xl bg-teal-600 flex items-center justify-center shrink-0">
@@ -93,7 +93,7 @@ export default function IOLPrioritizer({ onClose }) {
       </div>
 
       {/* Add patient form — sticky bottom */}
-      <div className="shrink-0 border-t border-gray-100 px-4 py-3 bg-white" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+      <div className="shrink-0 border-t border-gray-100 px-4 pt-2 pb-2 bg-white" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
         <div className="max-w-lg mx-auto space-y-2">
           <input
             type="text"
