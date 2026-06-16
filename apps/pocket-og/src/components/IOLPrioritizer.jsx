@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const IOL_INDICATIONS = [
   { key: "pet",        label: "Pre-eclampsia / PET (inpatient)",             priority: 1,         gestation: "ASAP ≥37 wks" },
@@ -32,6 +32,20 @@ export default function IOLPrioritizer({ onClose }) {
   const [patients, setPatients] = useState([]);
   const [label, setLabel] = useState("");
   const [indication, setIndication] = useState("");
+  const [vpTop, setVpTop] = useState(0);
+  const [vpHeight, setVpHeight] = useState(() =>
+    (typeof window !== "undefined" && window.visualViewport?.height) || window.innerHeight
+  );
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => { setVpTop(vv.offsetTop); setVpHeight(vv.height); };
+    update();
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => { vv.removeEventListener("resize", update); vv.removeEventListener("scroll", update); };
+  }, []);
 
   const addPatient = () => {
     if (!indication) return;
@@ -45,7 +59,7 @@ export default function IOLPrioritizer({ onClose }) {
   const sorted = [...patients].sort((a, b) => (PRIORITY_ORDER[a.ind.priority] ?? 3) - (PRIORITY_ORDER[b.ind.priority] ?? 3));
 
   return (
-    <div className="fixed inset-0 z-50 bg-white flex flex-col overflow-hidden" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
+    <div className="fixed left-0 right-0 z-50 bg-white flex flex-col overflow-hidden" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif", top: vpTop, height: vpHeight }}>
       {/* Header */}
       <div className="shrink-0 border-b border-gray-100 px-4 py-3 flex items-center gap-3">
         <div className="w-7 h-7 rounded-xl bg-teal-600 flex items-center justify-center shrink-0">
