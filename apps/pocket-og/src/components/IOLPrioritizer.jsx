@@ -17,16 +17,15 @@ const IOL_INDICATIONS = [
   { key: "post-dates", label: "Post-dates",                                  priority: "Routine", gestation: "40+7" },
 ];
 
-// Sub-tiers: within P1 by acuity, within P2 by earliest gestation window start
 const SUBTIER = {
-  "pet": "1a", "aph": "1a",           // inpatient / ASAP
-  "iugr": "1b",                        // consultant-directed individual timing
-  "dm-t1t2": "1c", "anticoag": "1c",  // scheduled window
-  "icp": "2a", "gdm-macro": "2a",     // from 37 wks
-  "age-45": "2b", "rfm": "2b",        // from 38 wks
-  "pcr": "2c",                         // from 39 wks
-  "age-40-44": "2d", "htn-op": "2d",  // from 40 wks
-  "gdm-low": "2e",                     // from 40+3
+  "pet": "1a", "aph": "1a",
+  "iugr": "1b",
+  "dm-t1t2": "1c", "anticoag": "1c",
+  "icp": "2a", "gdm-macro": "2a",
+  "age-45": "2b", "rfm": "2b",
+  "pcr": "2c",
+  "age-40-44": "2d", "htn-op": "2d",
+  "gdm-low": "2e",
   "post-dates": "R",
 };
 
@@ -38,7 +37,6 @@ const SUBTIER_ORDER = {
 
 const PRIORITY_ORDER = { 1: 0, 2: 1, Routine: 2 };
 
-// Gestation windows in total days (weeks × 7 + days)
 const WINDOWS = {
   "pet":       { type: "asap" },
   "aph":       { type: "asap" },
@@ -56,25 +54,15 @@ const WINDOWS = {
   "post-dates":{ start: 40 * 7 + 7, end: null       },
 };
 
-function parseGest(str) {
-  if (!str) return null;
-  const m = str.trim().match(/^(\d{1,2})\+([0-6])$/);
-  if (m) return parseInt(m[1]) * 7 + parseInt(m[2]);
-  const w = str.trim().match(/^(\d{1,2})$/);
-  if (w) return parseInt(w[1]) * 7;
-  return null;
-}
-
 function fmtGest(days) {
   return `${Math.floor(days / 7)}+${days % 7}`;
 }
 
-// Lower return value = more urgent (sorts earlier)
 function gestUrgencyScore(key, gestDays) {
   const w = WINDOWS[key];
   if (!w || w.type === "asap") return -Infinity;
   if (w.type === "individual" || gestDays === null) return 0;
-  return -(gestDays - w.start); // further past start → more negative → sorts first
+  return -(gestDays - w.start);
 }
 
 function isOverdue(key, gestDays) {
@@ -97,10 +85,9 @@ function explainRank(p) {
 
   if (!w) return waitTxt;
 
-  const gestStr = p.gestDays !== null ? fmtGest(p.gestDays) : null;
+  if (p.gestDays === null) return `Target ${p.ind.gestation} · ${waitTxt}`;
 
-  if (!gestStr) return `Target ${p.ind.gestation} · ${waitTxt}`;
-
+  const gestStr = fmtGest(p.gestDays);
   const overEnd = w.end !== null ? p.gestDays - w.end : null;
   const fromStart = p.gestDays - w.start;
 
@@ -128,14 +115,18 @@ const PRIORITY_BADGE_COLORS = {
   Routine: "bg-green-100 text-green-700",
 };
 
+const INPUT_CLS = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base text-gray-800 placeholder-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400";
+
 let _uid = 0;
 const uid = () => ++_uid;
 
 export default function IOLPrioritizer({ onClose }) {
   const [patients, setPatients] = useState([]);
+  const [showForm, setShowForm] = useState(false);
   const [label, setLabel] = useState("");
-  const [gestInput, setGestInput] = useState("");
-  const [daysInput, setDaysInput] = useState("");
+  const [gestWeeks, setGestWeeks] = useState("");
+  const [gestExtraDays, setGestExtraDays] = useState("");
+  const [daysWaiting, setDaysWaiting] = useState("");
   const [indication, setIndication] = useState("");
   const [vpTop, setVpTop] = useState(0);
   const [vpHeight, setVpHeight] = useState(() =>
@@ -152,6 +143,14 @@ export default function IOLPrioritizer({ onClose }) {
     return () => { vv.removeEventListener("resize", update); vv.removeEventListener("scroll", update); };
   }, []);
 
+  const gestDaysTotal = gestWeeks !== ""
+    ? parseInt(gestWeeks) * 7 + (gestExtraDays !== "" ? Math.min(6, parseInt(gestExtraDays) || 0) : 0)
+    : null;
+
+  const resetForm = () => {
+    setLabel(""); setGestWeeks(""); setGestExtraDays(""); setDaysWaiting(""); setIndication("");
+  };
+
   const addPatient = () => {
     if (!indication) return;
     const ind = IOL_INDICATIONS.find(i => i.key === indication);
@@ -160,11 +159,14 @@ export default function IOLPrioritizer({ onClose }) {
       id: uid(),
       label: label.trim() || String(prev.length + 1),
       ind,
-      gestDays: parseGest(gestInput),
-      daysWaiting: Math.max(0, parseInt(daysInput) || 0),
+      gestDays: gestDaysTotal,
+      daysWaiting: Math.max(0, parseInt(daysWaiting) || 0),
     }]);
-    setLabel(""); setGestInput(""); setDaysInput(""); setIndication("");
+    resetForm();
+    setShowForm(false);
   };
+
+  const cancelForm = () => { resetForm(); setShowForm(false); };
 
   const sorted = [...patients].sort((a, b) => {
     const p = (PRIORITY_ORDER[a.ind.priority] ?? 3) - (PRIORITY_ORDER[b.ind.priority] ?? 3);
@@ -203,7 +205,7 @@ export default function IOLPrioritizer({ onClose }) {
             <div className="text-center py-12 text-gray-400">
               <p className="text-3xl mb-3">📋</p>
               <p className="text-sm font-medium text-gray-500">No patients added yet</p>
-              <p className="text-xs text-gray-400 mt-1">Add patients below — ranked by sub-tier, gestation &amp; wait time</p>
+              <p className="text-xs text-gray-400 mt-1">Tap + Add patient below to get started</p>
             </div>
           )}
           {sorted.map((p, i) => {
@@ -234,76 +236,121 @@ export default function IOLPrioritizer({ onClose }) {
               </div>
             );
           })}
-        </div>
-      </div>
-
-      {/* Add patient form */}
-      <div className="shrink-0 border-t border-gray-100 px-4 pt-2 pb-2 bg-white" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
-        <div className="max-w-lg mx-auto space-y-2">
-          <input
-            type="text"
-            placeholder="Patient label (optional)"
-            value={label}
-            onChange={e => setLabel(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400"
-          />
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Gestation e.g. 38+4"
-              value={gestInput}
-              onChange={e => setGestInput(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
-              className="flex-1 min-w-0 border border-gray-200 rounded-xl px-3 py-2.5 text-base text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400"
-            />
-            <input
-              type="number"
-              placeholder="Days waiting"
-              min="0"
-              value={daysInput}
-              onChange={e => setDaysInput(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
-              className="w-32 border border-gray-200 rounded-xl px-3 py-2.5 text-base text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400"
-            />
-          </div>
-          <select
-            value={indication}
-            onChange={e => setIndication(e.target.value)}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400"
-          >
-            <option value="">Select indication…</option>
-            <optgroup label="Priority 1">
-              {IOL_INDICATIONS.filter(i => i.priority === 1).map(i => (
-                <option key={i.key} value={i.key}>{i.label}</option>
-              ))}
-            </optgroup>
-            <optgroup label="Priority 2">
-              {IOL_INDICATIONS.filter(i => i.priority === 2).map(i => (
-                <option key={i.key} value={i.key}>{i.label}</option>
-              ))}
-            </optgroup>
-            <optgroup label="Routine">
-              {IOL_INDICATIONS.filter(i => i.priority === "Routine").map(i => (
-                <option key={i.key} value={i.key}>{i.label}</option>
-              ))}
-            </optgroup>
-          </select>
-          <button
-            onClick={addPatient}
-            disabled={!indication}
-            className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold text-sm py-2.5 rounded-xl transition-colors"
-          >
-            Add
-          </button>
           {patients.length > 0 && (
             <button
               onClick={() => setPatients([])}
-              className="w-full text-xs text-gray-400 hover:text-gray-600 py-1 transition-colors"
+              className="w-full text-xs text-gray-400 hover:text-gray-600 py-2 transition-colors"
             >
               Clear all
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Bottom — collapsed or expanded */}
+      <div className="shrink-0 border-t border-gray-100 bg-white px-4 pt-3" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+        <div className="max-w-lg mx-auto">
+
+          {!showForm ? (
+            <button
+              onClick={() => setShowForm(true)}
+              className="w-full bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold text-sm py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+            >
+              <span className="text-base leading-none">+</span> Add patient
+            </button>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-gray-700">New patient</p>
+                <button onClick={cancelForm} className="text-sm text-gray-400 hover:text-gray-600 transition-colors">Cancel</button>
+              </div>
+
+              <input
+                type="text"
+                placeholder="Patient label (optional)"
+                value={label}
+                onChange={e => setLabel(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
+                className={INPUT_CLS}
+              />
+
+              <div className="flex gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-400 mb-1 pl-1">Weeks</p>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="38"
+                    min="20"
+                    max="43"
+                    value={gestWeeks}
+                    onChange={e => setGestWeeks(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
+                    className={INPUT_CLS}
+                  />
+                </div>
+                <div className="w-20">
+                  <p className="text-xs text-gray-400 mb-1 pl-1">+Days</p>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="0"
+                    min="0"
+                    max="6"
+                    value={gestExtraDays}
+                    onChange={e => setGestExtraDays(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
+                    className={INPUT_CLS}
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-400 mb-1 pl-1">Days on list</p>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="0"
+                    min="0"
+                    value={daysWaiting}
+                    onChange={e => setDaysWaiting(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
+                    className={INPUT_CLS}
+                  />
+                </div>
+              </div>
+
+              <select
+                value={indication}
+                onChange={e => setIndication(e.target.value)}
+                className={INPUT_CLS + " text-gray-700"}
+              >
+                <option value="">Select indication…</option>
+                <optgroup label="Priority 1">
+                  {IOL_INDICATIONS.filter(i => i.priority === 1).map(i => (
+                    <option key={i.key} value={i.key}>{i.label}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Priority 2">
+                  {IOL_INDICATIONS.filter(i => i.priority === 2).map(i => (
+                    <option key={i.key} value={i.key}>{i.label}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Routine">
+                  {IOL_INDICATIONS.filter(i => i.priority === "Routine").map(i => (
+                    <option key={i.key} value={i.key}>{i.label}</option>
+                  ))}
+                </optgroup>
+              </select>
+
+              <button
+                onClick={addPatient}
+                disabled={!indication}
+                className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold text-sm py-3 rounded-xl transition-colors"
+              >
+                Add
+              </button>
+            </div>
+          )}
+
         </div>
       </div>
     </div>
