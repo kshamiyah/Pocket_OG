@@ -153,7 +153,7 @@ function tiebreakNote(patients) {
 }
 
 function generateNarrative(sorted) {
-  if (sorted.length === 0) return "";
+  if (sorted.length === 0) return [];
 
   const groups = [];
   for (const p of sorted) {
@@ -168,7 +168,7 @@ function generateNarrative(sorted) {
 
   return groups.map(({ patients }) =>
     patients.length === 1 ? briefNote(patients[0]) : tiebreakNote(patients)
-  ).join(". ") + ".";
+  );
 }
 
 function tierBadgeLabel(key, priority) {
@@ -281,7 +281,14 @@ export default function IOLPrioritizer({ onClose }) {
             <span className="text-xs text-teal-500 shrink-0 ml-2">{showNarrative ? "▲ hide" : "▼ show"}</span>
           </button>
           {showNarrative && (
-            <p className="px-4 pb-3 text-xs text-teal-900 leading-relaxed">{narrative}</p>
+            <ul className="px-4 pb-3 space-y-1">
+              {narrative.map((line, i) => (
+                <li key={i} className="text-xs text-teal-900 leading-relaxed flex gap-1.5">
+                  <span className="text-teal-400 shrink-0 mt-0.5">·</span>
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       )}
