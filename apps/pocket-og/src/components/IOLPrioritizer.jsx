@@ -109,6 +109,7 @@ function briefNote(p) {
   const overEnd = w2.end != null ? p.gestDays - w2.end : null;
   const fromStart = p.gestDays - w2.start;
   if (overEnd > 0) return `${p.label} (${fmtGest(p.gestDays)}, ${overEnd}d past target)`;
+  if (fromStart > 0 && w.end === null) return `${p.label} (${fmtGest(p.gestDays)}, ${fromStart}d past target)`;
   if (fromStart >= 0) return `${p.label} (${fmtGest(p.gestDays)}, in window)`;
   return `${p.label} (${fmtGest(p.gestDays)}, ${-fromStart}d before window)`;
 }
