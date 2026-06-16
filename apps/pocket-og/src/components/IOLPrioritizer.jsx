@@ -106,6 +106,8 @@ function explainRank(p) {
 
   if (overEnd !== null && overEnd > 0) {
     return `${gestStr} — ${overEnd}d past target window (${p.ind.gestation}) · ${waitTxt}`;
+  } else if (fromStart > 0 && w.end === null) {
+    return `${gestStr} — ${fromStart}d past target (${p.ind.gestation}) · ${waitTxt}`;
   } else if (fromStart >= 0) {
     return `${gestStr} — in window (${p.ind.gestation}) · ${waitTxt}`;
   } else {
