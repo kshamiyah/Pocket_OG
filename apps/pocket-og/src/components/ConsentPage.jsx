@@ -118,7 +118,7 @@ function FreqPill({ freqKey }) {
 
 function SourceTag({ source }) {
   return (
-    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wide">{source}</span>
+    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">{source}</span>
   );
 }
 
@@ -147,7 +147,7 @@ function ProcedureList({ onSelect }) {
                   <p className="text-xs text-gray-400 mt-0.5">{proc.subtypes}</p>
                 </div>
                 <div className="flex flex-col items-end gap-1.5 shrink-0">
-                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wide text-right leading-tight max-w-[110px]">{proc.source}</span>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide text-right leading-tight max-w-[100px]">{proc.source}</span>
                   <svg className="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
@@ -341,7 +341,7 @@ function _RiskRow_UNUSED({ risk, instrument, showIfConditions, activeFactors }) 
       {expanded && risk.plain && (
         <div className="px-4 pb-3 ml-5">
           <p className="text-sm text-gray-600 leading-relaxed">{risk.plain}</p>
-          <p className="text-[9px] text-gray-300 mt-1.5 uppercase tracking-wide font-bold">{risk.source}</p>
+          <p className="text-[10px] text-gray-300 mt-1.5 uppercase tracking-wide font-bold">{risk.source}</p>
         </div>
       )}
     </div>
@@ -358,7 +358,7 @@ function RiskSection({ title, risks, instrument, activeFactors }) {
 
   return (
     <div className="mb-4">
-      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">{title}</p>
+      <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2 px-1">{title}</p>
       <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
         {risks.map(r => (
           <RiskRow key={r.id} risk={r} instrument={instrument} activeFactors={activeFactors} />
@@ -378,7 +378,7 @@ function AlternativesSection({ alternatives }) {
 
   return (
     <div className="mb-4">
-      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Alternatives discussed</p>
+      <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2 px-1">Alternatives discussed</p>
       <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm divide-y divide-gray-50">
         {alternatives.map(alt => {
           const active = checked.has(alt.id);
@@ -424,7 +424,7 @@ function DocChecklist() {
 
   return (
     <div className="mb-6">
-      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Documentation checklist</p>
+      <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2 px-1">Documentation checklist</p>
       <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm divide-y divide-gray-50">
         {items.map(item => {
           const active = checked.has(item.id);
@@ -456,7 +456,7 @@ function FAQSection({ faqs }) {
   const [openId, setOpenId] = useState(null);
   return (
     <div className="mb-4">
-      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Common patient questions</p>
+      <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2 px-1">Common patient questions</p>
       <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm divide-y divide-gray-50">
         {faqs.map((item, i) => {
           const open = openId === i;
@@ -488,13 +488,13 @@ function FAQSection({ faqs }) {
 function FreqKey() {
   return (
     <div className="rounded-xl bg-gray-50 border border-gray-100 p-3.5 mb-4">
-      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">RCOG frequency scale</p>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">RCOG frequency scale</p>
+      <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
         {Object.entries(FREQ).map(([key, f]) => (
           <div key={key} className="flex items-center gap-1.5">
             <span className={`w-2 h-2 rounded-full shrink-0 ${f.dot}`} />
             <span className={`text-[10px] font-semibold ${f.text}`}>{f.label}</span>
-            <span className="text-[9px] text-gray-300 ml-auto">
+            <span className="text-[10px] text-gray-300 ml-auto">
               {key === "VERY_COMMON" && "1/1–10"}
               {key === "COMMON"      && "1/10–100"}
               {key === "UNCOMMON"    && "1/100–1k"}
@@ -728,7 +728,7 @@ function FreqRiskRow({ risk }) {
             <p className="text-[10px] text-gray-300 font-medium mt-0.5">{risk.source}</p>
           )}
         </div>
-        <div className="shrink-0 text-right max-w-[120px]">
+        <div className="shrink-0 text-right max-w-[100px]">
           {risk.note && <p className="text-[10px] text-orange-500 font-semibold leading-snug mb-0.5">{risk.note}</p>}
           {risk._rate
             ? <p className={`text-[12px] font-bold tabular-nums leading-snug ${color}`}>{risk._rate}</p>
@@ -752,7 +752,7 @@ function ComparisonRiskRow({ risk }) {
       <button onClick={() => setExpanded(e => !e)} className="w-full flex items-start gap-3 py-3.5 px-4 text-left">
         <span className="w-2 h-2 rounded-full shrink-0 mt-1.5 bg-gray-200" />
         <p className="flex-1 min-w-0 text-[14px] text-gray-900 font-medium leading-snug pr-2">{risk.name}</p>
-        <div className="shrink-0 text-right max-w-[130px] space-y-0.5">
+        <div className="shrink-0 text-right max-w-[110px] space-y-0.5">
           <p className={`text-[11px] font-bold tabular-nums leading-snug ${risk.cs_higher ? "text-rose-500" : "text-teal-500"}`}>
             CS {risk.cs.replace("About ", "").replace(" on average", "")}
           </p>

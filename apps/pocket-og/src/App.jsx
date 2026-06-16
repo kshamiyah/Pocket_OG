@@ -164,7 +164,7 @@ export default function App() {
 
                 {/* Hero */}
                 <div className="text-center mb-10">
-                  <h1 className="text-[50px] font-[800] tracking-[0.04em] text-black">Pocket O&G</h1>
+                  <h1 className="text-[36px] sm:text-[50px] font-[800] tracking-[0.04em] text-black">Pocket O&G</h1>
                   <p className="mt-3 text-base leading-relaxed text-gray-400">
                     RBH maternity guidelines.<br />Whenever and wherever you need them.
                   </p>
@@ -183,7 +183,7 @@ export default function App() {
                     value={inputValue}
                     onChange={e => setInputValue(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && submitSearch()}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-14 py-4 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-10 pr-12 py-3.5 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
                   />
                   <button
                     onClick={() => submitSearch()}
