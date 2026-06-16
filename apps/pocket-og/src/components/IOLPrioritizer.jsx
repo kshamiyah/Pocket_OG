@@ -117,37 +117,35 @@ export default function IOLPrioritizer({ onClose }) {
             onKeyDown={e => { if (e.key === "Enter") { addPatient(); e.target.blur(); } }}
             className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400"
           />
-          <div className="flex gap-2">
-            <select
-              value={indication}
-              onChange={e => setIndication(e.target.value)}
-              className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-base text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400 appearance-none"
-            >
-              <option value="">Select indication…</option>
-              <optgroup label="Priority 1">
-                {IOL_INDICATIONS.filter(i => i.priority === 1).map(i => (
-                  <option key={i.key} value={i.key}>{i.label}</option>
-                ))}
-              </optgroup>
-              <optgroup label="Priority 2">
-                {IOL_INDICATIONS.filter(i => i.priority === 2).map(i => (
-                  <option key={i.key} value={i.key}>{i.label}</option>
-                ))}
-              </optgroup>
-              <optgroup label="Routine">
-                {IOL_INDICATIONS.filter(i => i.priority === "Routine").map(i => (
-                  <option key={i.key} value={i.key}>{i.label}</option>
-                ))}
-              </optgroup>
-            </select>
-            <button
-              onClick={addPatient}
-              disabled={!indication}
-              className="shrink-0 bg-teal-600 hover:bg-teal-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors"
-            >
-              Add
-            </button>
-          </div>
+          <select
+            value={indication}
+            onChange={e => setIndication(e.target.value)}
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400"
+          >
+            <option value="">Select indication…</option>
+            <optgroup label="Priority 1">
+              {IOL_INDICATIONS.filter(i => i.priority === 1).map(i => (
+                <option key={i.key} value={i.key}>{i.label}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Priority 2">
+              {IOL_INDICATIONS.filter(i => i.priority === 2).map(i => (
+                <option key={i.key} value={i.key}>{i.label}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Routine">
+              {IOL_INDICATIONS.filter(i => i.priority === "Routine").map(i => (
+                <option key={i.key} value={i.key}>{i.label}</option>
+              ))}
+            </optgroup>
+          </select>
+          <button
+            onClick={addPatient}
+            disabled={!indication}
+            className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold text-sm py-2.5 rounded-xl transition-colors"
+          >
+            Add
+          </button>
           {patients.length > 0 && (
             <button
               onClick={() => setPatients([])}
