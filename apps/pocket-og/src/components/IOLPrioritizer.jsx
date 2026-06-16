@@ -45,7 +45,7 @@ export default function IOLPrioritizer({ onClose }) {
   const sorted = [...patients].sort((a, b) => (PRIORITY_ORDER[a.ind.priority] ?? 3) - (PRIORITY_ORDER[b.ind.priority] ?? 3));
 
   return (
-    <div className="fixed inset-0 z-50 bg-white flex flex-col" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
+    <div className="fixed inset-x-0 top-0 z-50 bg-white flex flex-col" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif", height: '100dvh' }}>
       {/* Header */}
       <div className="shrink-0 border-b border-gray-100 px-4 py-3 flex items-center gap-3">
         <div className="w-7 h-7 rounded-xl bg-teal-600 flex items-center justify-center shrink-0">
@@ -100,7 +100,7 @@ export default function IOLPrioritizer({ onClose }) {
             placeholder="Patient label (e.g. 1, Pt 3)"
             value={label}
             onChange={e => setLabel(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && addPatient()}
+            onKeyDown={e => { if (e.key === "Enter") { addPatient(); e.target.blur(); } }}
             className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400"
           />
           <div className="flex gap-2">
