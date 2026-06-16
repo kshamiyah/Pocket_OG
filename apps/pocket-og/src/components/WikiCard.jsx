@@ -45,7 +45,7 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
         {/* Tap target */}
         <button
           onClick={onToggle}
-          className="w-full text-left px-5 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors flex items-center gap-3"
+          className="w-full text-left px-3 sm:px-5 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors flex items-center gap-3"
         >
           <div className="flex-1 min-w-0">
             <p className={`text-xs font-semibold mb-1 ${CONDITION_COLOR[page.gl] ?? "text-gray-400"}`}>
@@ -82,7 +82,7 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
             href={`/guidelines/${gl.code}.pdf`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-5 py-2 border-t border-gray-50 text-xs text-gray-400 hover:text-gray-600 transition-colors w-full"
+            className="flex items-center gap-1.5 px-3 sm:px-5 py-2.5 border-t border-gray-50 text-xs text-gray-400 hover:text-gray-600 transition-colors w-full"
           >
             <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -93,7 +93,7 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
 
         {/* Expanded content */}
         {isExpanded && (
-          <div className="px-5 pb-5 border-t border-gray-100 pt-4">
+          <div className="px-3 sm:px-5 pb-5 border-t border-gray-100 pt-4 overflow-x-hidden">
             {page.flowchartId && onOpenFlowchart && (
               <button
                 onClick={() => onOpenFlowchart(page.flowchartId)}

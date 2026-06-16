@@ -21,7 +21,7 @@ export default function ContentBlock({ block, highlightTerms = [] }) {
       <p className="text-sm text-amber-800 leading-snug">{hi(block.value)}</p>
     </div>
   );
-  if (block.type === "subheading") return <h4 className="text-xs font-semibold uppercase tracking-widest text-blue-500 mt-5 mb-2">{hi(block.value)}</h4>;
+  if (block.type === "subheading") return <h4 className="text-xs font-semibold uppercase tracking-wide text-blue-500 mt-5 mb-2">{hi(block.value)}</h4>;
   if (block.type === "list") return (
     <ul className="mb-4 space-y-1.5">
       {block.items.map((item, i) => (
@@ -32,8 +32,8 @@ export default function ContentBlock({ block, highlightTerms = [] }) {
     </ul>
   );
   if (block.type === "table") return (
-    <div className="overflow-x-auto mb-4 rounded-xl border border-gray-100">
-      <table className="w-full text-sm border-collapse">
+    <div className="overflow-x-auto mb-4 rounded-xl border border-gray-100 -mx-1">
+      <table className="w-full min-w-[320px] text-sm border-collapse">
         <thead>
           <tr className="bg-gray-50">
             {block.headers.map((h, i) => (
