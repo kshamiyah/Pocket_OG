@@ -426,27 +426,26 @@ export default function App() {
         <div className="min-h-screen pb-24">
           <div className="max-w-lg mx-auto">
 
-            <div className="px-5 pt-16 pb-3">
-              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Flowcharts</h2>
-              <p className="text-sm text-gray-400 mt-1">Interactive clinical decision pathways</p>
+            <div className="px-5 pt-14 pb-1">
+              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Flowcharts</h2>
+              <p className="text-xs text-gray-400 mt-0.5">Interactive clinical decision pathways</p>
             </div>
 
-            <div className="px-5 pb-3 flex gap-2">
-              {["ALL", "RBH", "RCOG", "NICE"].map(src => (
-                <button
-                  key={src}
-                  onClick={() => setFcSourceFilter(src)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                    fcSourceFilter === src ? "bg-black text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                  }`}
-                >
-                  {src}
-                </button>
-              ))}
-            </div>
-
-            {/* Search bar */}
-            <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md px-5 pb-3 border-b border-gray-100">
+            {/* Sticky: source filter + search */}
+            <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-3 pb-3">
+              <div className="flex gap-1.5 mb-2.5">
+                {["ALL", "RBH", "RCOG", "NICE"].map(src => (
+                  <button
+                    key={src}
+                    onClick={() => setFcSourceFilter(src)}
+                    className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-colors ${
+                      fcSourceFilter === src ? "bg-black text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                    }`}
+                  >
+                    {src}
+                  </button>
+                ))}
+              </div>
               <div className="relative">
                 <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
@@ -478,7 +477,7 @@ export default function App() {
                 <div key={letter}>
                   <div
                     ref={el => { fcSectionRefs.current[letter] = el; }}
-                    style={{ scrollMarginTop: "56px" }}
+                    style={{ scrollMarginTop: "108px" }}
                     className="px-5 pt-4 pb-1 flex items-center gap-2"
                   >
                     <span className="text-[10px] font-bold text-gray-300 tracking-widest">{letter}</span>
@@ -554,26 +553,26 @@ export default function App() {
       {activeTab === "guidelines" && (
         <div className="min-h-screen pb-24">
           <div className="max-w-lg mx-auto">
-            <div className="px-5 pt-16 pb-3">
-              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Guidelines</h2>
-              <p className="text-sm text-gray-400 mt-1">All RBH Maternity guidelines</p>
-            </div>
-            <div className="px-5 pb-3 flex gap-2">
-              {["ALL", "RBH", "RCOG", "NICE"].map(src => (
-                <button
-                  key={src}
-                  onClick={() => setGlSourceFilter(src)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                    glSourceFilter === src ? "bg-black text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                  }`}
-                >
-                  {src}
-                </button>
-              ))}
+            <div className="px-5 pt-14 pb-1">
+              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Guidelines</h2>
+              <p className="text-xs text-gray-400 mt-0.5">All RBH Maternity guidelines</p>
             </div>
 
-            {/* Sticky search bar */}
-            <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md px-5 pb-3 border-b border-gray-100">
+            {/* Sticky: source filter + search */}
+            <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-3 pb-3">
+              <div className="flex gap-1.5 mb-2.5">
+                {["ALL", "RBH", "RCOG", "NICE"].map(src => (
+                  <button
+                    key={src}
+                    onClick={() => setGlSourceFilter(src)}
+                    className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-colors ${
+                      glSourceFilter === src ? "bg-black text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                    }`}
+                  >
+                    {src}
+                  </button>
+                ))}
+              </div>
               <div className="relative">
                 <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
@@ -607,7 +606,7 @@ export default function App() {
                     <div key={letter}>
                       <div
                         ref={el => { glSectionRefs.current[letter] = el; }}
-                        style={{ scrollMarginTop: "56px" }}
+                        style={{ scrollMarginTop: "108px" }}
                         className="px-4 py-1.5 bg-gray-50 border-b border-gray-100"
                       >
                         <span className="text-[10px] font-bold text-gray-400 tracking-widest">{letter}</span>
