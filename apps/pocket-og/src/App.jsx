@@ -432,7 +432,7 @@ export default function App() {
             </div>
 
             {/* Sticky: source filter + search */}
-            <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-3 pb-3">
+            <div className="sticky top-0 z-20 bg-white border-b border-gray-100 pl-4 pr-8 pt-3 pb-3">
               <div className="flex gap-1.5 mb-2.5">
                 {["ALL", "RBH", "RCOG", "NICE"].map(src => (
                   <button
@@ -559,7 +559,7 @@ export default function App() {
             </div>
 
             {/* Sticky: source filter + search */}
-            <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-3 pb-3">
+            <div className="sticky top-0 z-20 bg-white border-b border-gray-100 pl-4 pr-8 pt-3 pb-3">
               <div className="flex gap-1.5 mb-2.5">
                 {["ALL", "RBH", "RCOG", "NICE"].map(src => (
                   <button

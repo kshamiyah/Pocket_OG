@@ -157,7 +157,7 @@ function ProcedureList({ onSelect }) {
         </div>
 
         {/* Sticky search bar */}
-        <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-3 pb-3">
+        <div className="sticky top-0 z-20 bg-white border-b border-gray-100 pl-4 pr-8 pt-3 pb-3">
           <div className="relative">
             <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
