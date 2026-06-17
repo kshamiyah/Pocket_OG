@@ -170,7 +170,7 @@ export default function App() {
           flowchart={FLOWCHARTS[activeFlowchartId]}
           theme={FC_GL_COLOR[FLOWCHART_LINKS.find(fc => fc.id === activeFlowchartId)?.gl]}
           onClose={() => setActiveFlowchartId(null)}
-          pdfUrl={(() => { const gl = FLOWCHART_LINKS.find(fc => fc.id === activeFlowchartId)?.gl; return gl && GUIDELINES[gl]?.pdf ? `/guidelines/${gl}.pdf` : null; })()}
+          pdfUrl={(() => { const gl = FLOWCHART_LINKS.find(fc => fc.id === activeFlowchartId)?.gl; const g = gl && GUIDELINES[gl]; return g?.pdf ? (g.pdfPath || `/guidelines/${gl}.pdf`) : null; })()}
         />
       )}
 
@@ -485,7 +485,7 @@ export default function App() {
                         </div>
                         {gl.pdf && (
                           <a
-                            href={`/guidelines/${gl.code}.pdf`}
+                            href={gl.pdfPath || `/guidelines/${gl.code}.pdf`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors text-xs font-medium text-gray-600 shrink-0"

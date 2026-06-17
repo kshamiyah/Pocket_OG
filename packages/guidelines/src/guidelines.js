@@ -14,8 +14,8 @@ export const GUIDELINES = {
   QS22: { code: "QS22", label: "Antenatal Care", version: "QS22", date: "February 2023", color: "lime", pdf: true, source: "NICE" },
   GTG57: { code: "GTG57", label: "Reduced Fetal Movements", version: "GTG57", date: "February 2026", color: "red", pdf: true, source: "RCOG" },
   GTG63: { code: "GTG63", label: "Antepartum Haemorrhage", version: "GTG63", date: "November 2011", color: "purple", pdf: true, source: "RCOG" },
-  NG88: { code: "NG88", label: "Heavy Menstrual Bleeding", version: "NG88", date: "September 2023", color: "fuchsia", pdf: false, source: "NICE" },
-  GTG67: { code: "GTG67", label: "Management of Endometrial Hyperplasia", version: "GTG67", date: "February 2016", color: "green", pdf: false, source: "RCOG" },
+  NG88: { code: "NG88", label: "Heavy Menstrual Bleeding", version: "NG88", date: "September 2023", color: "fuchsia", pdf: true, pdfPath: "/guidelines/heavy-menstrual-bleeding-assessment-and-management-pdf-1837701412549.pdf", source: "NICE" },
+  GTG67: { code: "GTG67", label: "Management of Endometrial Hyperplasia", version: "GTG67", date: "February 2016", color: "green", pdf: true, pdfPath: "/guidelines/gtg_67_endometrial_hyperplasia.pdf", source: "RCOG" },
 };
 
 export const GL_COLORS = {
