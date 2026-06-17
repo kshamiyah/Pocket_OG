@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useMemo, useRef } from "react";
+import AlphabetSidebar from "./AlphabetSidebar";
 import {
   CONSENT_PROCEDURES,
   FREQ,
@@ -125,36 +126,99 @@ function SourceTag({ source }) {
 // ─── Step 0: procedure list ───────────────────────────────────────────────────
 
 function ProcedureList({ onSelect }) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const sectionRefs = useRef({});
+
+  const filtered = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    return [...CONSENT_PROCEDURES]
+      .filter(p => !q || p.title.toLowerCase().includes(q) || p.subtypes?.toLowerCase().includes(q))
+      .sort((a, b) => a.title.localeCompare(b.title));
+  }, [searchQuery]);
+
+  const groupedByLetter = useMemo(() => {
+    const groups = {};
+    filtered.forEach(p => {
+      const letter = p.title[0].toUpperCase();
+      if (!groups[letter]) groups[letter] = [];
+      groups[letter].push(p);
+    });
+    return groups;
+  }, [filtered]);
+
+  const activeLetters = useMemo(() => new Set(Object.keys(groupedByLetter)), [groupedByLetter]);
+
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <div className="px-5 pt-16 pb-6">
+        <div className="px-5 pt-16 pb-4">
           <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Consent</h2>
           <p className="text-sm text-gray-400 mt-1">Procedure risks — verbatim from RCOG & NICE</p>
         </div>
 
-        <div className="px-5">
-          <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm divide-y divide-gray-100">
-            {[...CONSENT_PROCEDURES].sort((a, b) => a.title.localeCompare(b.title)).map(proc => (
+        {/* Sticky search bar */}
+        <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md px-5 pb-3 border-b border-gray-100">
+          <div className="relative">
+            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Filter procedures…"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-9 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+            />
+            {searchQuery && (
               <button
-                key={proc.id}
-                onClick={() => onSelect(proc.id)}
-                className="flex items-center gap-3 w-full px-4 py-4 min-h-[80px] hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center rounded-full bg-gray-300 hover:bg-gray-400 transition-colors"
               >
-                <div className={`w-1 h-10 rounded-full shrink-0 ${proc.color.accent}`} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 leading-snug">{proc.title}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{proc.subtypes}</p>
-                </div>
-                <div className="flex flex-col items-end gap-1.5 shrink-0">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide text-right leading-tight max-w-[100px]">{proc.source}</span>
-                  <svg className="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
+                <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
               </button>
-            ))}
+            )}
           </div>
+        </div>
+
+        <div className="px-5 pt-3">
+          {filtered.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-10">No procedures match &ldquo;{searchQuery}&rdquo;</p>
+          ) : (
+            <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+              {Object.entries(groupedByLetter).sort().map(([letter, items]) => (
+                <div key={letter}>
+                  <div
+                    ref={el => { sectionRefs.current[letter] = el; }}
+                    style={{ scrollMarginTop: "56px" }}
+                    className="px-4 py-1.5 bg-gray-50 border-b border-gray-100"
+                  >
+                    <span className="text-[10px] font-bold text-gray-400 tracking-widest">{letter}</span>
+                  </div>
+                  {items.map((proc, i) => (
+                    <button
+                      key={proc.id}
+                      onClick={() => onSelect(proc.id)}
+                      className={`flex items-center gap-3 w-full px-4 py-4 min-h-[80px] hover:bg-gray-50 active:bg-gray-100 transition-colors text-left ${i > 0 ? "border-t border-gray-50" : ""}`}
+                    >
+                      <div className={`w-1 h-10 rounded-full shrink-0 ${proc.color.accent}`} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 leading-snug">{proc.title}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{proc.subtypes}</p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1.5 shrink-0">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide text-right leading-tight max-w-[100px]">{proc.source}</span>
+                        <svg className="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
 
           <p className="text-[10px] text-gray-300 text-center mt-6 px-4 leading-relaxed">
             Montgomery (2015) standard — all risks a reasonable patient would want to know.<br />
@@ -162,6 +226,13 @@ function ProcedureList({ onSelect }) {
           </p>
         </div>
       </div>
+
+      <AlphabetSidebar
+        activeLetters={activeLetters}
+        onSelect={letter => {
+          sectionRefs.current[letter]?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }}
+      />
     </div>
   );
 }
