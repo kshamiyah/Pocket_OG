@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useMemo, useRef } from "react";
+import AlphabetSidebar from "./AlphabetSidebar";
 import {
   CALCULATOR_SCENARIOS,
   interpretPUL,
@@ -22,58 +23,128 @@ import {
 // ─── Step 0: scenario picker ──────────────────────────────────────────
 
 function ScenarioList({ onSelect }) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const sectionRefs = useRef({});
+
+  const filtered = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    return [...CALCULATOR_SCENARIOS]
+      .filter(s => !q || s.title.toLowerCase().includes(q) || s.subtitle?.toLowerCase().includes(q))
+      .sort((a, b) => a.title.localeCompare(b.title));
+  }, [searchQuery]);
+
+  const groupedByLetter = useMemo(() => {
+    const groups = {};
+    filtered.forEach(s => {
+      const letter = s.title[0].toUpperCase();
+      if (!groups[letter]) groups[letter] = [];
+      groups[letter].push(s);
+    });
+    return groups;
+  }, [filtered]);
+
+  const activeLetters = useMemo(() => new Set(Object.keys(groupedByLetter)), [groupedByLetter]);
+
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <div className="px-5 pt-16 pb-6">
+        <div className="px-5 pt-16 pb-4">
           <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Calculator</h2>
           <p className="text-sm text-gray-400 mt-1">Decision-support calculators — verbatim from NICE & RCOG</p>
         </div>
 
-        <div className="px-5">
-          <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm divide-y divide-gray-100">
-            {[...CALCULATOR_SCENARIOS].sort((a, b) => a.title.localeCompare(b.title)).map(s => (
+        {/* Sticky search bar */}
+        <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md px-5 pb-3 border-b border-gray-100">
+          <div className="relative">
+            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Filter calculators…"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-9 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+            />
+            {searchQuery && (
               <button
-                key={s.id}
-                onClick={() => onSelect(s.id)}
-                className="flex items-start gap-3 w-full px-4 py-3 h-[120px] hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center rounded-full bg-gray-300 hover:bg-gray-400 transition-colors"
               >
-                <div className={`w-1 h-12 rounded-full shrink-0 ${s.color.accent}`} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 leading-snug">{s.title}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{s.subtitle}</p>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mt-1.5">{s.source}</p>
-                  {s.pdfs?.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-2" onClick={e => e.stopPropagation()}>
-                      {s.pdfs.map(pdf => (
-                        <a
-                          key={pdf.label}
-                          href={pdf.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 hover:bg-gray-200 text-[10px] font-semibold text-gray-500 transition-colors"
-                        >
-                          <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                          </svg>
-                          {pdf.label}
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <svg className="w-4 h-4 text-gray-300 shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </button>
-            ))}
+            )}
           </div>
+        </div>
+
+        <div className="px-5 pt-3">
+          {filtered.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-10">No calculators match &ldquo;{searchQuery}&rdquo;</p>
+          ) : (
+            <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+              {Object.entries(groupedByLetter).sort().map(([letter, items]) => (
+                <div key={letter}>
+                  <div
+                    ref={el => { sectionRefs.current[letter] = el; }}
+                    style={{ scrollMarginTop: "56px" }}
+                    className="px-4 py-1.5 bg-gray-50 border-b border-gray-100"
+                  >
+                    <span className="text-[10px] font-bold text-gray-400 tracking-widest">{letter}</span>
+                  </div>
+                  {items.map(s => (
+                    <button
+                      key={s.id}
+                      onClick={() => onSelect(s.id)}
+                      className="flex items-start gap-3 w-full px-4 py-3 h-[120px] hover:bg-gray-50 active:bg-gray-100 transition-colors text-left border-t border-gray-50"
+                    >
+                      <div className={`w-1 h-12 rounded-full shrink-0 ${s.color.accent}`} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 leading-snug">{s.title}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{s.subtitle}</p>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mt-1.5">{s.source}</p>
+                        {s.pdfs?.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mt-2" onClick={e => e.stopPropagation()}>
+                            {s.pdfs.map(pdf => (
+                              <a
+                                key={pdf.label}
+                                href={pdf.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 hover:bg-gray-200 text-[10px] font-semibold text-gray-500 transition-colors"
+                              >
+                                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                {pdf.label}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <svg className="w-4 h-4 text-gray-300 shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
 
           <p className="text-[10px] text-gray-300 text-center mt-6 px-4 leading-relaxed">
             All thresholds and interpretation text are taken verbatim from NICE NG126 (last updated August 2023) and RCOG/AEPU Green-top Guideline No. 21 (November 2016). This tool supports — not replaces — clinical judgement.
           </p>
         </div>
       </div>
+
+      <AlphabetSidebar
+        activeLetters={activeLetters}
+        onSelect={letter => {
+          sectionRefs.current[letter]?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }}
+      />
     </div>
   );
 }

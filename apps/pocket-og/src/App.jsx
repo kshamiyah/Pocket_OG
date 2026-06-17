@@ -9,6 +9,7 @@ import IOLPrioritizer from "./components/IOLPrioritizer";
 import FeedbackButton from "./components/FeedbackButton";
 import ConsentPage from "./components/ConsentPage";
 import CalculatorPage from "./components/CalculatorPage";
+import AlphabetSidebar from "./components/AlphabetSidebar";
 
 const FILTER_OPTIONS = [
   { value: "ALL",        label: "All guidelines",      pill: "All",           filterFn: null,                                                    active: "bg-gray-900 text-white" },
@@ -113,9 +114,56 @@ export default function App() {
   const [guidelinePickerOpen, setGuidelinePickerOpen] = useState(false);
   const [glSourceFilter, setGlSourceFilter] = useState("ALL");
   const [fcSourceFilter, setFcSourceFilter] = useState("ALL");
+  const [glSearchQuery, setGlSearchQuery] = useState("");
+  const [fcSearchQuery, setFcSearchQuery] = useState("");
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
+  const glSectionRefs = useRef({});
+  const fcSectionRefs = useRef({});
   const hasQuery = query.trim().length > 0;
+
+  const filteredGuidelines = useMemo(() => {
+    const q = glSearchQuery.toLowerCase().trim();
+    return Object.values(GUIDELINES)
+      .filter(gl => glSourceFilter === "ALL" || gl.source === glSourceFilter)
+      .filter(gl => !q || gl.label.toLowerCase().includes(q) || gl.code.toLowerCase().includes(q))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [glSourceFilter, glSearchQuery]);
+
+  const glGroupedByLetter = useMemo(() => {
+    const groups = {};
+    filteredGuidelines.forEach(gl => {
+      const letter = gl.label[0].toUpperCase();
+      if (!groups[letter]) groups[letter] = [];
+      groups[letter].push(gl);
+    });
+    return groups;
+  }, [filteredGuidelines]);
+
+  const glActiveLetters = useMemo(() => new Set(Object.keys(glGroupedByLetter)), [glGroupedByLetter]);
+
+  const filteredFlowchartGroups = useMemo(() => {
+    const q = fcSearchQuery.toLowerCase().trim();
+    return FLOWCHART_GROUPS.filter(group => {
+      if (fcSourceFilter !== "ALL" && GUIDELINES[group.gl]?.source !== fcSourceFilter) return false;
+      if (!q) return true;
+      if (group.label.toLowerCase().includes(q) || group.gl.toLowerCase().includes(q)) return true;
+      return FLOWCHART_LINKS.filter(fc => fc.gl === group.gl)
+        .some(fc => FLOWCHARTS[fc.id]?.title?.toLowerCase().includes(q));
+    });
+  }, [fcSearchQuery, fcSourceFilter]);
+
+  const fcGroupedByLetter = useMemo(() => {
+    const groups = {};
+    filteredFlowchartGroups.forEach(group => {
+      const letter = group.label[0].toUpperCase();
+      if (!groups[letter]) groups[letter] = [];
+      groups[letter].push(group);
+    });
+    return groups;
+  }, [filteredFlowchartGroups]);
+
+  const fcActiveLetters = useMemo(() => new Set(Object.keys(fcGroupedByLetter)), [fcGroupedByLetter]);
 
   // Focus idle input on mount
   useEffect(() => {
@@ -376,12 +424,12 @@ export default function App() {
         <div className="min-h-screen pb-24">
           <div className="max-w-lg mx-auto">
 
-            <div className="px-5 pt-16 pb-4">
+            <div className="px-5 pt-16 pb-3">
               <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Flowcharts</h2>
               <p className="text-sm text-gray-400 mt-1">Interactive clinical decision pathways</p>
             </div>
 
-            <div className="px-5 pb-4 flex gap-2">
+            <div className="px-5 pb-3 flex gap-2">
               {["ALL", "RBH", "RCOG", "NICE"].map(src => (
                 <button
                   key={src}
@@ -395,53 +443,102 @@ export default function App() {
               ))}
             </div>
 
-            {FLOWCHART_GROUPS.filter(group => fcSourceFilter === "ALL" || GUIDELINES[group.gl]?.source === fcSourceFilter).map(group => {
-              const groupLinks = FLOWCHART_LINKS.filter(fc => fc.gl === group.gl);
-              if (!groupLinks.length) return null;
-              const col = FC_GL_COLOR[group.gl];
-              return (
-                <div key={group.gl} className="mb-8 px-5">
-                  <div className="flex items-baseline gap-2 mb-2">
-                    <span className={`text-xs font-bold tracking-wide ${col.icon}`}>{group.gl}</span>
-                    <span className="text-xs text-gray-400">{group.label}</span>
+            {/* Search bar */}
+            <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md px-5 pb-3 border-b border-gray-100">
+              <div className="relative">
+                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Filter flowcharts…"
+                  value={fcSearchQuery}
+                  onChange={e => setFcSearchQuery(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-9 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                />
+                {fcSearchQuery && (
+                  <button
+                    onClick={() => setFcSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center rounded-full bg-gray-300 hover:bg-gray-400 transition-colors"
+                  >
+                    <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {filteredFlowchartGroups.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-10">No flowcharts match &ldquo;{fcSearchQuery}&rdquo;</p>
+            ) : (
+              Object.entries(fcGroupedByLetter).sort().map(([letter, groups]) => (
+                <div key={letter}>
+                  <div
+                    ref={el => { fcSectionRefs.current[letter] = el; }}
+                    style={{ scrollMarginTop: "56px" }}
+                    className="px-5 pt-4 pb-1 flex items-center gap-2"
+                  >
+                    <span className="text-[10px] font-bold text-gray-300 tracking-widest">{letter}</span>
+                    <div className="flex-1 h-px bg-gray-100" />
                   </div>
-                  <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
-                    {groupLinks.map((fc, i) => {
-                      const chart = FLOWCHARTS[fc.id];
-                      return (
-                        <button
-                          key={fc.id}
-                          onClick={() => setActiveFlowchartId(fc.id)}
-                          className={`flex items-center gap-3 w-full px-4 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left ${
-                            i > 0 ? "border-t border-gray-50" : ""
-                          }`}
-                        >
-                          <div className={`w-1 h-8 rounded-full shrink-0 ${col.accent}`} />
-                          <p className="flex-1 text-sm font-medium text-gray-900">{chart.title}</p>
-                          <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                          </svg>
-                        </button>
-                      );
-                    })}
-                    {group.gl === "GL861" && (
-                      <button
-                        onClick={() => setShowIOLPrioritizer(true)}
-                        className="flex items-center gap-3 w-full px-4 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left border-t border-gray-50"
-                      >
-                        <div className={`w-1 h-8 rounded-full shrink-0 ${col.accent}`} />
-                        <p className="flex-1 text-sm font-medium text-gray-900">IOL Priority List</p>
-                        <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
+                  {groups.map(group => {
+                    const groupLinks = FLOWCHART_LINKS.filter(fc => fc.gl === group.gl);
+                    if (!groupLinks.length) return null;
+                    const col = FC_GL_COLOR[group.gl];
+                    return (
+                      <div key={group.gl} className="mb-4 px-5">
+                        <div className="flex items-baseline gap-2 mb-2">
+                          <span className={`text-xs font-bold tracking-wide ${col.icon}`}>{group.gl}</span>
+                          <span className="text-xs text-gray-400">{group.label}</span>
+                        </div>
+                        <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+                          {groupLinks.map((fc, i) => {
+                            const chart = FLOWCHARTS[fc.id];
+                            return (
+                              <button
+                                key={fc.id}
+                                onClick={() => setActiveFlowchartId(fc.id)}
+                                className={`flex items-center gap-3 w-full px-4 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left ${
+                                  i > 0 ? "border-t border-gray-50" : ""
+                                }`}
+                              >
+                                <div className={`w-1 h-8 rounded-full shrink-0 ${col.accent}`} />
+                                <p className="flex-1 text-sm font-medium text-gray-900">{chart.title}</p>
+                                <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                              </button>
+                            );
+                          })}
+                          {group.gl === "GL861" && (
+                            <button
+                              onClick={() => setShowIOLPrioritizer(true)}
+                              className="flex items-center gap-3 w-full px-4 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left border-t border-gray-50"
+                            >
+                              <div className={`w-1 h-8 rounded-full shrink-0 ${col.accent}`} />
+                              <p className="flex-1 text-sm font-medium text-gray-900">IOL Priority List</p>
+                              <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
+              ))
+            )}
 
           </div>
+
+          <AlphabetSidebar
+            activeLetters={fcActiveLetters}
+            onSelect={letter => {
+              fcSectionRefs.current[letter]?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+          />
         </div>
       )}
 
@@ -455,11 +552,11 @@ export default function App() {
       {activeTab === "guidelines" && (
         <div className="min-h-screen pb-24">
           <div className="max-w-lg mx-auto">
-            <div className="px-5 pt-16 pb-4">
+            <div className="px-5 pt-16 pb-3">
               <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Guidelines</h2>
               <p className="text-sm text-gray-400 mt-1">All RBH Maternity guidelines</p>
             </div>
-            <div className="px-5 pb-4 flex gap-2">
+            <div className="px-5 pb-3 flex gap-2">
               {["ALL", "RBH", "RCOG", "NICE"].map(src => (
                 <button
                   key={src}
@@ -472,42 +569,88 @@ export default function App() {
                 </button>
               ))}
             </div>
-            <div className="px-5">
-              <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
-                {Object.values(GUIDELINES)
-                  .filter(gl => glSourceFilter === "ALL" || gl.source === glSourceFilter)
-                  .sort((a, b) => a.label.localeCompare(b.label))
-                  .map((gl, i) => {
-                    const col = FC_GL_COLOR[gl.code] ?? { accent: "bg-gray-300", icon: "text-gray-400" };
-                    return (
-                      <div
-                        key={gl.code}
-                        className={`flex items-center gap-3 px-4 py-4 min-h-[80px] ${i > 0 ? "border-t border-gray-50" : ""}`}
-                      >
-                        <div className={`w-1 h-10 rounded-full shrink-0 ${col.accent}`} />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gray-900 leading-snug">{gl.label}</p>
-                          <p className="text-xs text-gray-400 mt-0.5">{gl.code} · {gl.version} · {gl.date}</p>
-                        </div>
-                        {gl.pdf && (
-                          <a
-                            href={gl.pdfPath || `/guidelines/${gl.code}.pdf`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors text-xs font-medium text-gray-600 shrink-0"
-                          >
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                            PDF
-                          </a>
-                        )}
-                      </div>
-                    );
-                  })}
+
+            {/* Sticky search bar */}
+            <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md px-5 pb-3 border-b border-gray-100">
+              <div className="relative">
+                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Filter guidelines…"
+                  value={glSearchQuery}
+                  onChange={e => setGlSearchQuery(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-9 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                />
+                {glSearchQuery && (
+                  <button
+                    onClick={() => setGlSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center rounded-full bg-gray-300 hover:bg-gray-400 transition-colors"
+                  >
+                    <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                )}
               </div>
             </div>
+
+            <div className="px-5 pt-3">
+              {filteredGuidelines.length === 0 ? (
+                <p className="text-sm text-gray-400 text-center py-10">No guidelines match &ldquo;{glSearchQuery}&rdquo;</p>
+              ) : (
+                <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+                  {Object.entries(glGroupedByLetter).sort().map(([letter, items]) => (
+                    <div key={letter}>
+                      <div
+                        ref={el => { glSectionRefs.current[letter] = el; }}
+                        style={{ scrollMarginTop: "56px" }}
+                        className="px-4 py-1.5 bg-gray-50 border-b border-gray-100"
+                      >
+                        <span className="text-[10px] font-bold text-gray-400 tracking-widest">{letter}</span>
+                      </div>
+                      {items.map((gl, i) => {
+                        const col = FC_GL_COLOR[gl.code] ?? { accent: "bg-gray-300", icon: "text-gray-400" };
+                        return (
+                          <div
+                            key={gl.code}
+                            className={`flex items-center gap-3 px-4 py-4 min-h-[80px] ${i > 0 ? "border-t border-gray-50" : ""}`}
+                          >
+                            <div className={`w-1 h-10 rounded-full shrink-0 ${col.accent}`} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-gray-900 leading-snug">{gl.label}</p>
+                              <p className="text-xs text-gray-400 mt-0.5">{gl.code} · {gl.version} · {gl.date}</p>
+                            </div>
+                            {gl.pdf && (
+                              <a
+                                href={gl.pdfPath || `/guidelines/${gl.code}.pdf`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors text-xs font-medium text-gray-600 shrink-0"
+                              >
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                                PDF
+                              </a>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+
+          <AlphabetSidebar
+            activeLetters={glActiveLetters}
+            onSelect={letter => {
+              glSectionRefs.current[letter]?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+          />
         </div>
       )}
 
