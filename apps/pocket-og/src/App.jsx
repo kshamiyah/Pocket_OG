@@ -53,6 +53,13 @@ const FLOWCHART_LINKS = [
   { id: "GTG63_TRIAGE",        gl: "GTG63" },
   { id: "GTG63_DELIVERY",      gl: "GTG63" },
   { id: "GTG63_ANTID",         gl: "GTG63" },
+  { id: "NG88_ASSESSMENT",     gl: "NG88" },
+  { id: "NG88_TREATMENT",      gl: "NG88" },
+  { id: "NG88_SURGICAL",       gl: "NG88" },
+  { id: "NG88_FIBROID",        gl: "NG88" },
+  { id: "NG88_SECONDARY",      gl: "NG88" },
+  { id: "GTG67_MANAGEMENT",    gl: "GTG67" },
+  { id: "GTG67_AEH",           gl: "GTG67" },
 ];
 
 const FC_GL_COLOR = {
@@ -68,6 +75,8 @@ const FC_GL_COLOR = {
   QS22:  { badge: "bg-lime-50 text-lime-700 border-lime-100",       icon: "text-lime-500",   accent: "bg-lime-400",   solid: "bg-lime-500",   solidHover: "hover:bg-lime-600" },
   GTG57: { badge: "bg-red-50 text-red-700 border-red-100",          icon: "text-red-500",    accent: "bg-red-500",    solid: "bg-red-500",    solidHover: "hover:bg-red-600" },
   GTG63: { badge: "bg-purple-50 text-purple-700 border-purple-100", icon: "text-purple-500", accent: "bg-purple-500", solid: "bg-purple-600", solidHover: "hover:bg-purple-700" },
+  NG88:  { badge: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100", icon: "text-fuchsia-500", accent: "bg-fuchsia-400", solid: "bg-fuchsia-600", solidHover: "hover:bg-fuchsia-700" },
+  GTG67: { badge: "bg-green-50 text-green-700 border-green-100",       icon: "text-green-500",   accent: "bg-green-400",   solid: "bg-green-600",   solidHover: "hover:bg-green-700" },
 };
 
 const FLOWCHART_GROUPS = [
@@ -83,6 +92,8 @@ const FLOWCHART_GROUPS = [
   { gl: "QS22",  label: "Antenatal Care" },
   { gl: "GTG57", label: "Reduced Fetal Movements" },
   { gl: "GTG63", label: "Antepartum Haemorrhage" },
+  { gl: "NG88",  label: "Heavy Menstrual Bleeding" },
+  { gl: "GTG67", label: "Endometrial Hyperplasia" },
 ];
 
 export default function App() {
