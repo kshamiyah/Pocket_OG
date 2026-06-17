@@ -6,6 +6,7 @@ import {
   QS46_SECTIONS, QS22_SECTIONS,
   GTG57_SECTIONS, GTG63_SECTIONS,
   NG88_SECTIONS,
+  GTG67_SECTIONS,
 } from "@pocket-og/guidelines";
 
 function escapeRe(s) {
@@ -45,6 +46,7 @@ const _WIKI = [
   ...GL783_SECTIONS, ...GL880_SECTIONS, ...GL891_SECTIONS, ...GL983_SECTIONS,
   ...QS46_SECTIONS, ...QS22_SECTIONS, ...GTG57_SECTIONS, ...GTG63_SECTIONS,
   ...NG88_SECTIONS,
+  ...GTG67_SECTIONS,
 ];
 
 export const SEARCH_INDEX = _WIKI.map(page => ({
