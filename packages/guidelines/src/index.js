@@ -18,3 +18,4 @@ export { QS46_SECTIONS } from "./QS46.js";
 
 export { GTG57_SECTIONS } from "./GTG57.js";
 export { GTG63_SECTIONS } from "./GTG63.js";
+export { NG88_SECTIONS } from "./NG88.js";
