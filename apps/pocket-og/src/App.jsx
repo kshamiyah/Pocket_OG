@@ -58,8 +58,12 @@ const FLOWCHART_LINKS = [
   { id: "NG88_SURGICAL",       gl: "NG88" },
   { id: "NG88_FIBROID",        gl: "NG88" },
   { id: "NG88_SECONDARY",      gl: "NG88" },
-  { id: "GTG67_MANAGEMENT",    gl: "GTG67" },
-  { id: "GTG67_AEH",           gl: "GTG67" },
+  { id: "GTG67_MANAGEMENT",      gl: "GTG67" },
+  { id: "GTG67_AEH",             gl: "GTG67" },
+  { id: "NHSCSP20_SCREENING",    gl: "NHSCSP20" },
+  { id: "NHSCSP20_COLPOSCOPY",   gl: "NHSCSP20" },
+  { id: "NHSCSP20_TOC",          gl: "NHSCSP20" },
+  { id: "NHSCSP20_PREGNANCY",    gl: "NHSCSP20" },
 ];
 
 const FC_GL_COLOR = {
@@ -76,7 +80,8 @@ const FC_GL_COLOR = {
   GTG57: { badge: "bg-red-50 text-red-700 border-red-100",          icon: "text-red-500",    accent: "bg-red-500",    solid: "bg-red-500",    solidHover: "hover:bg-red-600" },
   GTG63: { badge: "bg-purple-50 text-purple-700 border-purple-100", icon: "text-purple-500", accent: "bg-purple-500", solid: "bg-purple-600", solidHover: "hover:bg-purple-700" },
   NG88:  { badge: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100", icon: "text-fuchsia-500", accent: "bg-fuchsia-400", solid: "bg-fuchsia-600", solidHover: "hover:bg-fuchsia-700" },
-  GTG67: { badge: "bg-green-50 text-green-700 border-green-100",       icon: "text-green-500",   accent: "bg-green-400",   solid: "bg-green-600",   solidHover: "hover:bg-green-700" },
+  GTG67:    { badge: "bg-green-50 text-green-700 border-green-100",     icon: "text-green-500",   accent: "bg-green-400",   solid: "bg-green-600",   solidHover: "hover:bg-green-700" },
+  NHSCSP20: { badge: "bg-slate-50 text-slate-700 border-slate-100",     icon: "text-slate-500",   accent: "bg-slate-400",   solid: "bg-slate-600",   solidHover: "hover:bg-slate-700" },
 };
 
 const FLOWCHART_GROUPS = [
@@ -93,7 +98,8 @@ const FLOWCHART_GROUPS = [
   { gl: "GTG57", label: "Reduced Fetal Movements" },
   { gl: "GTG63", label: "Antepartum Haemorrhage" },
   { gl: "NG88",  label: "Heavy Menstrual Bleeding" },
-  { gl: "GTG67", label: "Endometrial Hyperplasia" },
+  { gl: "GTG67",    label: "Endometrial Hyperplasia" },
+  { gl: "NHSCSP20", label: "Cervical Screening & Colposcopy" },
 ];
 
 export default function App() {
