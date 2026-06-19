@@ -10,6 +10,9 @@ import FeedbackButton from "./components/FeedbackButton";
 import ConsentPage from "./components/ConsentPage";
 import CalculatorPage from "./components/CalculatorPage";
 import AlphabetSidebar from "./components/AlphabetSidebar";
+import GuidelineReader from "./components/GuidelineReader";
+
+const READER_AVAILABLE = new Set(["GL861"]);
 
 const FILTER_OPTIONS = [
   { value: "ALL",        label: "All guidelines",      pill: "All",           filterFn: null,                                                    active: "bg-gray-900 text-white" },
@@ -116,6 +119,7 @@ export default function App() {
   const [fcSourceFilter, setFcSourceFilter] = useState("ALL");
   const [glSearchQuery, setGlSearchQuery] = useState("");
   const [fcSearchQuery, setFcSearchQuery] = useState("");
+  const [activeGuidelineGl, setActiveGuidelineGl] = useState(null);
   const [activeCalcScenario, setActiveCalcScenario] = useState(null);
   const [calcNavKey, setCalcNavKey] = useState(0);
   const [activeConsentProcedure, setActiveConsentProcedure] = useState(null);
@@ -241,6 +245,15 @@ export default function App() {
 
       {/* IOL Prioritizer overlay */}
       {showIOLPrioritizer && <IOLPrioritizer onClose={() => setShowIOLPrioritizer(false)} />}
+
+      {/* Guideline reader overlay */}
+      {activeGuidelineGl && (
+        <GuidelineReader
+          gl={activeGuidelineGl}
+          onClose={() => setActiveGuidelineGl(null)}
+          onNavigate={handleNavigate}
+        />
+      )}
 
       {/* Flowchart overlay */}
       {activeFlowchartId && FLOWCHARTS[activeFlowchartId] && (
@@ -648,30 +661,41 @@ export default function App() {
                       </div>
                       {items.map((gl, i) => {
                         const col = FC_GL_COLOR[gl.code] ?? { accent: "bg-gray-300", icon: "text-gray-400" };
+                        const canRead = READER_AVAILABLE.has(gl.code);
+                        const El = canRead ? "button" : "div";
                         return (
-                          <div
+                          <El
                             key={gl.code}
-                            className={`flex items-center gap-3 px-4 py-4 min-h-[80px] ${i > 0 ? "border-t border-gray-50" : ""}`}
+                            onClick={canRead ? () => setActiveGuidelineGl(gl.code) : undefined}
+                            className={`flex items-center gap-3 px-4 py-4 min-h-[80px] w-full text-left ${canRead ? "hover:bg-gray-50 active:bg-gray-100 transition-colors" : ""} ${i > 0 ? "border-t border-gray-50" : ""}`}
                           >
                             <div className={`w-1 h-10 rounded-full shrink-0 ${col.accent}`} />
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-semibold text-gray-900 leading-snug">{gl.label}</p>
                               <p className="text-xs text-gray-400 mt-0.5">{gl.code} · {gl.version} · {gl.date}</p>
                             </div>
-                            {gl.pdf && (
-                              <a
-                                href={gl.pdfPath || `/guidelines/${gl.code}.pdf`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors text-xs font-medium text-gray-600 shrink-0"
-                              >
-                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            <div className="flex items-center gap-2 shrink-0">
+                              {gl.pdf && (
+                                <a
+                                  href={gl.pdfPath || `/guidelines/${gl.code}.pdf`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={e => e.stopPropagation()}
+                                  className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors text-xs font-medium text-gray-600"
+                                >
+                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                  </svg>
+                                  PDF
+                                </a>
+                              )}
+                              {canRead && (
+                                <svg className="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                                 </svg>
-                                PDF
-                              </a>
-                            )}
-                          </div>
+                              )}
+                            </div>
+                          </El>
                         );
                       })}
                     </div>
