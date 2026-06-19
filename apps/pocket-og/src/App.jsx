@@ -147,6 +147,8 @@ export default function App() {
       setActiveTab("consent");
     } else if (type === "iol-prioritizer") {
       setShowIOLPrioritizer(true);
+    } else if (type === "reader") {
+      setActiveGuidelineGl(id);
     }
   };
   const hasQuery = query.trim().length > 0;

@@ -197,3 +197,16 @@ export const FLOWCHART_NODE_CONNECTIONS = {
   },
 
 };
+
+// Keywords that become inline tappable links in the guideline reader.
+// Case-insensitive matching; only the first occurrence per section is linked.
+export const GUIDELINE_KEYWORD_LINKS = {
+  GL861: [
+    { phrase: "pre-eclampsia",         type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "diabetes",              type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
+    { phrase: "GDM",                   type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
+    { phrase: "obstetric cholestasis", type: "reader", id: "GL880", gl: "GL880", label: "Intrahepatic Cholestasis of Pregnancy" },
+    { phrase: "anticoagulation",       type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+    { phrase: "VTE",                   type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+  ],
+};

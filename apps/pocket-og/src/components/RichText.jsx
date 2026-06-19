@@ -1,23 +1,34 @@
 // Inline colors by gl / calc id — hex values avoid Tailwind purge issues
 const INLINE_COLORS = {
+  // flowchart links
   CG623:                  "#f97316", // orange-500
   GL891:                  "#6366f1", // indigo-500
   GL861:                  "#14b8a6", // teal-500
+  // calculator links
   MTX_SURVEILLANCE:       "#8b5cf6", // violet-500
   ECTOPIC_DECISION:       "#f43f5e", // rose-500
   EXPECTANT_SURVEILLANCE: "#14b8a6", // teal-500
   VTE_RISK:               "#6366f1", // indigo-500
+  // reader (guideline) link targets
+  GL952:  "#3b82f6", // blue-500
+  GL983:  "#ec4899", // pink-500
+  GL880:  "#ca8a04", // yellow-600
+  GL787:  "#10b981", // emerald-500
+  GL895:  "#0ea5e9", // sky-500
+  GL783:  "#f59e0b", // amber-500
 };
 
 function linkColor(link) {
   if (link.type === "flowchart") return INLINE_COLORS[link.gl] ?? "#6b7280";
   if (link.type === "calculator") return INLINE_COLORS[link.id] ?? "#6b7280";
+  if (link.type === "reader") return INLINE_COLORS[link.gl] ?? "#6b7280";
   return "#6b7280";
 }
 
-// Splits `text` by matched phrase, returning [{content, link|null}]
+// Case-insensitive phrase matching; preserves original casing in output
 function buildSegments(text, links) {
-  const active = links.filter(l => l.phrase && text.includes(l.phrase));
+  const lowerText = text.toLowerCase();
+  const active = links.filter(l => l.phrase && lowerText.includes(l.phrase.toLowerCase()));
   if (!active.length) return [{ content: text, link: null }];
 
   const segments = [];
@@ -26,9 +37,10 @@ function buildSegments(text, links) {
   while (remaining.length > 0) {
     let earliest = null;
     let earliestIdx = Infinity;
+    const lowerRemaining = remaining.toLowerCase();
 
     for (const l of active) {
-      const idx = remaining.indexOf(l.phrase);
+      const idx = lowerRemaining.indexOf(l.phrase.toLowerCase());
       if (idx !== -1 && idx < earliestIdx) {
         earliest = l;
         earliestIdx = idx;
@@ -40,7 +52,7 @@ function buildSegments(text, links) {
       break;
     }
     if (earliestIdx > 0) segments.push({ content: remaining.slice(0, earliestIdx), link: null });
-    segments.push({ content: earliest.phrase, link: earliest });
+    segments.push({ content: remaining.slice(earliestIdx, earliestIdx + earliest.phrase.length), link: earliest });
     remaining = remaining.slice(earliestIdx + earliest.phrase.length);
   }
 

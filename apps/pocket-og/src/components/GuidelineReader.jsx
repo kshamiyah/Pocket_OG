@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import {
   GUIDELINES,
   GL861_SECTIONS, GL952_SECTIONS, GL891_SECTIONS, GL983_SECTIONS,
@@ -9,6 +9,7 @@ import {
   NG88_SECTIONS, NHSCSP20_SECTIONS,
 } from "@pocket-og/guidelines";
 import { FLOWCHARTS } from "../data/flowcharts";
+import { GUIDELINE_KEYWORD_LINKS } from "../data/connections";
 import ContentBlock from "./ContentBlock";
 import SeeAlso from "./SeeAlso";
 
@@ -63,6 +64,27 @@ function shortTitle(title) {
   return title.replace(/^.+? — /, "");
 }
 
+function blockText(block) {
+  if (!block) return "";
+  if (block.type === "text" || block.type === "alert" || block.type === "subheading") return block.value ?? "";
+  if (block.type === "list") return (block.items ?? []).join(" ");
+  if (block.type === "table") return [...(block.headers ?? []), ...(block.rows ?? []).flat()].join(" ");
+  return "";
+}
+
+// Returns an array of per-block link arrays for a section, respecting first-mention-only.
+function computeSectionBlockLinks(section, allLinks) {
+  const seenIds = new Set();
+  return (section.content ?? []).map(block => {
+    const available = allLinks.filter(l => !seenIds.has(l.id));
+    const text = blockText(block).toLowerCase();
+    for (const l of available) {
+      if (text.includes(l.phrase.toLowerCase())) seenIds.add(l.id);
+    }
+    return available;
+  });
+}
+
 export default function GuidelineReader({ gl, onClose, onNavigate }) {
   const sections = SECTIONS_MAP[gl] ?? [];
   const guideline = GUIDELINES[gl];
@@ -70,6 +92,15 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
   const scrollRef = useRef(null);
   const sectionRefs = useRef({});
   const [showContents, setShowContents] = useState(false);
+
+  const keywordLinks = GUIDELINE_KEYWORD_LINKS[gl] ?? [];
+  const blockLinksMap = useMemo(() => {
+    const map = {};
+    for (const section of sections) {
+      map[section.id] = computeSectionBlockLinks(section, keywordLinks);
+    }
+    return map;
+  }, [sections, keywordLinks]);
 
   const jumpTo = (id) => {
     setShowContents(false);
@@ -127,7 +158,12 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
               {/* Section content */}
               <div className="px-4 pt-5 pb-10">
                 {section.content.map((block, j) => (
-                  <ContentBlock key={j} block={block} />
+                  <ContentBlock
+                    key={j}
+                    block={block}
+                    inlineLinks={blockLinksMap[section.id]?.[j] ?? []}
+                    onNavigate={onNavigate}
+                  />
                 ))}
 
                 {section.flowchartId && FLOWCHARTS[section.flowchartId] && onNavigate && (

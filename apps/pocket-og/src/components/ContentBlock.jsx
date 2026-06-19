@@ -1,3 +1,5 @@
+import RichText from "./RichText";
+
 export function highlightText(text, terms) {
   if (!terms || !terms.length || !text) return text;
   const escaped = terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
@@ -11,10 +13,11 @@ export function highlightText(text, terms) {
   );
 }
 
-export default function ContentBlock({ block, highlightTerms = [] }) {
+export default function ContentBlock({ block, highlightTerms = [], inlineLinks = [], onNavigate }) {
   const hi = t => highlightText(t, highlightTerms);
+  const rt = t => <RichText text={t} links={inlineLinks} onNavigate={onNavigate} />;
 
-  if (block.type === "text") return <p className="text-sm text-gray-700 leading-relaxed mb-3">{hi(block.value)}</p>;
+  if (block.type === "text") return <p className="text-sm text-gray-700 leading-relaxed mb-3">{rt(block.value)}</p>;
   if (block.type === "alert") return (
     <div className="flex gap-2.5 bg-amber-50 border border-amber-200 rounded-xl p-3.5 mb-4">
       <span className="text-amber-500 shrink-0 text-sm">⚠</span>
@@ -26,7 +29,7 @@ export default function ContentBlock({ block, highlightTerms = [] }) {
     <ul className="mb-4 space-y-1.5">
       {block.items.map((item, i) => (
         <li key={i} className="flex gap-2 text-sm text-gray-700 leading-snug">
-          <span className="text-blue-400 shrink-0 mt-0.5">›</span><span>{hi(item)}</span>
+          <span className="text-blue-400 shrink-0 mt-0.5">›</span><span>{rt(item)}</span>
         </li>
       ))}
     </ul>
