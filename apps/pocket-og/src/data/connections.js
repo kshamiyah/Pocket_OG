@@ -200,6 +200,8 @@ export const FLOWCHART_NODE_CONNECTIONS = {
 
 // Keywords that become inline tappable links in the guideline reader.
 // Case-insensitive matching; only the first occurrence per section is linked.
+// Only phrases that appear in text / list blocks are listed (subheadings and
+// table cells render as plain text and do not receive RichText treatment).
 export const GUIDELINE_KEYWORD_LINKS = {
   GL861: [
     { phrase: "pre-eclampsia",         type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
@@ -208,5 +210,56 @@ export const GUIDELINE_KEYWORD_LINKS = {
     { phrase: "obstetric cholestasis", type: "reader", id: "GL880", gl: "GL880", label: "Intrahepatic Cholestasis of Pregnancy" },
     { phrase: "anticoagulation",       type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
     { phrase: "VTE",                   type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+  ],
+
+  GL952: [
+    { phrase: "VTE",                   type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+  ],
+
+  GL891: [
+    { phrase: "pre-eclampsia",         type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+  ],
+
+  GL983: [
+    { phrase: "pre-eclampsia",         type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+  ],
+
+  GL880: [
+    { phrase: "pre-eclampsia",         type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "diabetes",              type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
+  ],
+
+  GL895: [
+    { phrase: "GBS",                   type: "reader", id: "GL787", gl: "GL787", label: "Obstetric Antibiotics" },
+  ],
+
+  CG565: [
+    { phrase: "ectopic",               type: "reader", id: "CG623", gl: "CG623", label: "Ectopic Pregnancy" },
+  ],
+
+  CG623: [
+    { phrase: "anaemia",               type: "reader", id: "GL783", gl: "GL783", label: "Iron Deficiency Anaemia" },
+  ],
+
+  QS22: [
+    { phrase: "VTE",                   type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+    { phrase: "pre-eclampsia",         type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "GDM",                   type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
+    { phrase: "anaemia",               type: "reader", id: "GL783", gl: "GL783", label: "Iron Deficiency Anaemia" },
+  ],
+
+  GTG57: [
+    { phrase: "IOL",                   type: "reader", id: "GL861", gl: "GL861", label: "Induction of Labour" },
+    { phrase: "pre-eclampsia",         type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "diabetes",              type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
+  ],
+
+  GTG63: [
+    { phrase: "IOL",                   type: "reader", id: "GL861", gl: "GL861", label: "Induction of Labour" },
+    { phrase: "VTE",                   type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+  ],
+
+  NG88: [
+    { phrase: "anaemia",               type: "reader", id: "GL783", gl: "GL783", label: "Iron Deficiency Anaemia" },
   ],
 };
