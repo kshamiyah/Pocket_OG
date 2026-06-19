@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { GUIDELINES, GL861_SECTIONS } from "@pocket-og/guidelines";
 import { FLOWCHARTS } from "../data/flowcharts";
 import ContentBlock from "./ContentBlock";
@@ -19,6 +19,15 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
   const guideline = GUIDELINES[gl];
   const theme = GL_THEME[gl] ?? DEFAULT_THEME;
   const scrollRef = useRef(null);
+  const sectionRefs = useRef({});
+  const [showContents, setShowContents] = useState(false);
+
+  const jumpTo = (id) => {
+    setShowContents(false);
+    setTimeout(() => {
+      sectionRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
+  };
 
   return (
     <div className="fixed inset-0 z-40 bg-white flex flex-col">
@@ -38,6 +47,14 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
             <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${theme.badge}`}>{gl}</span>
             <p className="text-sm font-bold text-gray-900 mt-0.5 leading-snug">{guideline?.label}</p>
           </div>
+          <button
+            onClick={() => setShowContents(true)}
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors shrink-0"
+          >
+            <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h10" />
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -46,9 +63,9 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
         <div className="max-w-lg mx-auto pb-32">
 
           {sections.map((section) => (
-            <div key={section.id}>
+            <div key={section.id} ref={el => { sectionRefs.current[section.id] = el; }}>
 
-              {/* Sticky section header — sticks below the main header as you scroll */}
+              {/* Sticky section header */}
               <div className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm px-4 py-2.5">
                 <p className={`text-[9px] font-bold uppercase tracking-widest mb-0.5 ${theme.conditionColor}`}>
                   {section.condition}
@@ -104,6 +121,53 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
 
         </div>
       </div>
+
+      {/* Contents sheet */}
+      {showContents && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-50 bg-black/30"
+            onClick={() => setShowContents(false)}
+          />
+          {/* Sheet */}
+          <div className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-3xl shadow-2xl max-w-lg mx-auto">
+            <div className="px-5 pt-5 pb-2 flex items-center justify-between">
+              <p className="text-base font-bold text-gray-900">Contents</p>
+              <button
+                onClick={() => setShowContents(false)}
+                className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+              >
+                <svg className="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="overflow-y-auto max-h-[60vh] pb-8">
+              {sections.map((section, i) => (
+                <button
+                  key={section.id}
+                  onClick={() => jumpTo(section.id)}
+                  className={`w-full flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left ${
+                    i > 0 ? "border-t border-gray-50" : ""
+                  }`}
+                >
+                  <span className={`text-xs font-bold w-5 shrink-0 ${theme.conditionColor}`}>{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-[10px] font-semibold uppercase tracking-wide ${theme.conditionColor}`}>{section.condition}</p>
+                    <p className="text-sm font-medium text-gray-900 leading-snug mt-0.5">
+                      {section.title.replace(/^IOL — |^Term PLRoM — /, "")}
+                    </p>
+                  </div>
+                  <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
     </div>
   );
