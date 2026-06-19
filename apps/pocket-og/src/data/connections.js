@@ -31,6 +31,8 @@ export const CALCULATOR_CONNECTIONS = {
 // whatsNext: rendered on end nodes as a "What's next" block.
 // inlineLinks: { phrase, type, id, gl } — phrases in node.text that become tappable.
 export const FLOWCHART_NODE_CONNECTIONS = {
+
+  // ── Ectopic pregnancy (CG623) ────────────────────────────────────────
   CG623_MTX: {
     "end-monitoring": {
       whatsNext: [
@@ -51,6 +53,8 @@ export const FLOWCHART_NODE_CONNECTIONS = {
       ],
     },
   },
+
+  // ── VTE (GL891) ──────────────────────────────────────────────────────
   GL891_ANTENATAL: {
     "dosing": {
       whatsNext: [
@@ -80,4 +84,116 @@ export const FLOWCHART_NODE_CONNECTIONS = {
       ],
     },
   },
+
+  // ── IOL (GL861) ──────────────────────────────────────────────────────
+  GL861_TIMING: {
+    "end": {
+      whatsNext: [
+        { type: "iol-prioritizer", id: null, gl: "GL861", label: "IOL priority list", sublabel: "Add this patient to the induction queue" },
+      ],
+    },
+  },
+  GL861_IOL: {
+    "end-unsuccessful": {
+      whatsNext: [
+        { type: "iol-prioritizer", id: null, gl: "GL861", label: "IOL priority list", sublabel: "Review and requeue for induction" },
+      ],
+    },
+  },
+
+  // ── Miscarriage (CG565 + CG621) ─────────────────────────────────────
+  CG565_TRIAGE: {
+    "end-smm": {
+      whatsNext: [
+        { type: "consent", id: "SURG_MISC", gl: null, label: "Consent — surgical miscarriage", sublabel: "EVA / MVA — risks & patient information" },
+      ],
+    },
+    "end-medical-incomplete": {
+      whatsNext: [
+        { type: "consent", id: "MED_MISC", gl: null, label: "Consent — medical miscarriage", sublabel: "Misoprostol — risks & patient information" },
+      ],
+    },
+    "end-medical-missed": {
+      whatsNext: [
+        { type: "consent", id: "MED_MISC", gl: null, label: "Consent — medical miscarriage", sublabel: "Mifepristone + Misoprostol" },
+        { type: "flowchart", id: "CG621_OUTPATIENT", gl: "CG621", label: "Medical management — outpatient", sublabel: "CG621 — step through the pathway" },
+      ],
+    },
+  },
+  CG621_OUTPATIENT: {
+    "end-surgical": {
+      whatsNext: [
+        { type: "consent", id: "SURG_MISC", gl: null, label: "Consent — surgical miscarriage", sublabel: "EVA / MVA — risks & patient information" },
+      ],
+    },
+  },
+  CG621_INPATIENT: {
+    "end-surgical-inpatient": {
+      whatsNext: [
+        { type: "consent", id: "SURG_MISC", gl: null, label: "Consent — surgical miscarriage", sublabel: "EVA / MVA — risks & patient information" },
+      ],
+    },
+  },
+
+  // ── Pre-eclampsia / Hypertension (GL952) ────────────────────────────
+  GL952_TRIAGE: {
+    "chronic-htn": {
+      whatsNext: [
+        { type: "flowchart", id: "GL952_ACUTE", gl: "GL952", label: "Acute BP management", sublabel: "GL952 — manage an acute BP episode" },
+      ],
+    },
+    "gest-htn": {
+      whatsNext: [
+        { type: "flowchart", id: "GL952_ACUTE", gl: "GL952", label: "Acute BP management", sublabel: "GL952 — manage an acute BP episode" },
+      ],
+    },
+    "mild-pet": {
+      whatsNext: [
+        { type: "flowchart", id: "GL952_ACUTE", gl: "GL952", label: "Acute BP management", sublabel: "GL952 — manage an acute BP episode" },
+      ],
+    },
+    "severe-pet": {
+      whatsNext: [
+        { type: "flowchart", id: "GL952_ACUTE", gl: "GL952", label: "Acute BP management", sublabel: "GL952 — manage an acute BP episode" },
+        { type: "flowchart", id: "GL952_SEVERE_LW", gl: "GL952", label: "Severe PET — labour ward", sublabel: "GL952 — MgSO4 & escalation pathway" },
+      ],
+    },
+  },
+  GL952_ACUTE: {
+    "end-monitor": {
+      whatsNext: [
+        { type: "flowchart", id: "GL952_TRIAGE", gl: "GL952", label: "Hypertension classification", sublabel: "GL952 — re-classify if BP recurs" },
+      ],
+    },
+    "end-controlled": {
+      whatsNext: [
+        { type: "flowchart", id: "GL952_SEVERE_LW", gl: "GL952", label: "Severe PET — labour ward", sublabel: "GL952 — if escalation is needed" },
+        { type: "flowchart", id: "GL952_POSTNATAL", gl: "GL952", label: "Postnatal BP management", sublabel: "GL952 — after delivery" },
+      ],
+    },
+    "end-lw-monitor": {
+      whatsNext: [
+        { type: "flowchart", id: "GL952_SEVERE_LW", gl: "GL952", label: "Severe PET — labour ward", sublabel: "GL952 — MgSO4 & escalation pathway" },
+        { type: "flowchart", id: "GL952_POSTNATAL", gl: "GL952", label: "Postnatal BP management", sublabel: "GL952 — after delivery" },
+      ],
+    },
+  },
+  GL952_SEVERE_LW: {
+    "end-controlled-lw": {
+      whatsNext: [
+        { type: "flowchart", id: "GL952_POSTNATAL", gl: "GL952", label: "Postnatal BP management", sublabel: "GL952 — after delivery" },
+      ],
+    },
+    "end-no-mgso4": {
+      whatsNext: [
+        { type: "flowchart", id: "GL952_POSTNATAL", gl: "GL952", label: "Postnatal BP management", sublabel: "GL952 — after delivery" },
+      ],
+    },
+    "end-mgso4": {
+      whatsNext: [
+        { type: "flowchart", id: "GL952_POSTNATAL", gl: "GL952", label: "Postnatal BP management", sublabel: "GL952 — after delivery" },
+      ],
+    },
+  },
+
 };
