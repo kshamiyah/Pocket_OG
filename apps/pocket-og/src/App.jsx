@@ -138,6 +138,8 @@ export default function App() {
       setActiveConsentProcedure(id);
       setConsentNavKey(k => k + 1);
       setActiveTab("consent");
+    } else if (type === "iol-prioritizer") {
+      setShowIOLPrioritizer(true);
     }
   };
   const hasQuery = query.trim().length > 0;
