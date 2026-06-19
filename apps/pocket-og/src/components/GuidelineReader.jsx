@@ -1,18 +1,67 @@
 import { useRef, useState } from "react";
-import { GUIDELINES, GL861_SECTIONS } from "@pocket-og/guidelines";
+import {
+  GUIDELINES,
+  GL861_SECTIONS, GL952_SECTIONS, GL891_SECTIONS, GL983_SECTIONS,
+  GL880_SECTIONS, GL787_SECTIONS, GL783_SECTIONS, GL895_SECTIONS,
+  CG565_SECTIONS, CG621_SECTIONS, CG623_SECTIONS,
+  QS46_SECTIONS, QS22_SECTIONS,
+  GTG57_SECTIONS, GTG63_SECTIONS, GTG67_SECTIONS,
+  NG88_SECTIONS, NHSCSP20_SECTIONS,
+} from "@pocket-og/guidelines";
 import { FLOWCHARTS } from "../data/flowcharts";
 import ContentBlock from "./ContentBlock";
 import SeeAlso from "./SeeAlso";
 
 const SECTIONS_MAP = {
   GL861: GL861_SECTIONS,
+  GL952: GL952_SECTIONS,
+  GL891: GL891_SECTIONS,
+  GL983: GL983_SECTIONS,
+  GL880: GL880_SECTIONS,
+  GL787: GL787_SECTIONS,
+  GL783: GL783_SECTIONS,
+  GL895: GL895_SECTIONS,
+  CG565: CG565_SECTIONS,
+  CG621: CG621_SECTIONS,
+  CG623: CG623_SECTIONS,
+  QS46:  QS46_SECTIONS,
+  QS22:  QS22_SECTIONS,
+  GTG57: GTG57_SECTIONS,
+  GTG63: GTG63_SECTIONS,
+  GTG67: GTG67_SECTIONS,
+  NG88:  NG88_SECTIONS,
+  NHSCSP20: NHSCSP20_SECTIONS,
 };
 
+// Colours match the existing GL colour system in App.jsx / WikiCard
 const GL_THEME = {
-  GL861: { badge: "bg-teal-50 text-teal-700", conditionColor: "text-teal-500" },
+  GL861:    { badge: "bg-teal-50 text-teal-700",      conditionColor: "text-teal-500"     },
+  GL952:    { badge: "bg-blue-50 text-blue-700",      conditionColor: "text-blue-500"     },
+  GL891:    { badge: "bg-indigo-50 text-indigo-700",  conditionColor: "text-indigo-500"   },
+  GL983:    { badge: "bg-pink-50 text-pink-700",      conditionColor: "text-pink-500"     },
+  GL880:    { badge: "bg-yellow-50 text-yellow-700",  conditionColor: "text-yellow-600"   },
+  GL787:    { badge: "bg-emerald-50 text-emerald-700",conditionColor: "text-emerald-500"  },
+  GL783:    { badge: "bg-amber-50 text-amber-700",    conditionColor: "text-amber-500"    },
+  GL895:    { badge: "bg-sky-50 text-sky-700",        conditionColor: "text-sky-500"      },
+  CG565:    { badge: "bg-violet-50 text-violet-700",  conditionColor: "text-violet-500"   },
+  CG621:    { badge: "bg-rose-50 text-rose-700",      conditionColor: "text-rose-500"     },
+  CG623:    { badge: "bg-orange-50 text-orange-700",  conditionColor: "text-orange-500"   },
+  QS46:     { badge: "bg-cyan-50 text-cyan-700",      conditionColor: "text-cyan-500"     },
+  QS22:     { badge: "bg-lime-50 text-lime-700",      conditionColor: "text-lime-600"     },
+  GTG57:    { badge: "bg-red-50 text-red-700",        conditionColor: "text-red-500"      },
+  GTG63:    { badge: "bg-purple-50 text-purple-700",  conditionColor: "text-purple-500"   },
+  GTG67:    { badge: "bg-green-50 text-green-700",    conditionColor: "text-green-500"    },
+  NG88:     { badge: "bg-fuchsia-50 text-fuchsia-700",conditionColor: "text-fuchsia-500"  },
+  NHSCSP20: { badge: "bg-slate-50 text-slate-700",    conditionColor: "text-slate-500"    },
 };
 
 const DEFAULT_THEME = { badge: "bg-gray-100 text-gray-600", conditionColor: "text-gray-400" };
+
+// Strip common abbreviation prefixes from titles (e.g. "IOL — ", "IDA — ", "VTE — ")
+// so they're not redundant alongside the condition label shown above
+function shortTitle(title) {
+  return title.replace(/^.+? — /, "");
+}
 
 export default function GuidelineReader({ gl, onClose, onNavigate }) {
   const sections = SECTIONS_MAP[gl] ?? [];
@@ -71,7 +120,7 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
                   {section.condition}
                 </p>
                 <h2 className="text-sm font-bold text-gray-900 leading-snug">
-                  {section.title.replace(/^IOL — |^Term PLRoM — /, "")}
+                  {shortTitle(section.title)}
                 </h2>
               </div>
 
@@ -125,12 +174,7 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
       {/* Contents sheet */}
       {showContents && (
         <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-50 bg-black/30"
-            onClick={() => setShowContents(false)}
-          />
-          {/* Sheet */}
+          <div className="fixed inset-0 z-50 bg-black/30" onClick={() => setShowContents(false)} />
           <div className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-3xl shadow-2xl max-w-lg mx-auto">
             <div className="px-5 pt-5 pb-2 flex items-center justify-between">
               <p className="text-base font-bold text-gray-900">Contents</p>
@@ -155,9 +199,7 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
                   <span className={`text-xs font-bold w-5 shrink-0 ${theme.conditionColor}`}>{i + 1}</span>
                   <div className="flex-1 min-w-0">
                     <p className={`text-[10px] font-semibold uppercase tracking-wide ${theme.conditionColor}`}>{section.condition}</p>
-                    <p className="text-sm font-medium text-gray-900 leading-snug mt-0.5">
-                      {section.title.replace(/^IOL — |^Term PLRoM — /, "")}
-                    </p>
+                    <p className="text-sm font-medium text-gray-900 leading-snug mt-0.5">{shortTitle(section.title)}</p>
                   </div>
                   <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />

@@ -12,7 +12,11 @@ import CalculatorPage from "./components/CalculatorPage";
 import AlphabetSidebar from "./components/AlphabetSidebar";
 import GuidelineReader from "./components/GuidelineReader";
 
-const READER_AVAILABLE = new Set(["GL861"]);
+const READER_AVAILABLE = new Set([
+  "GL861", "GL952", "GL891", "GL983", "GL880", "GL787", "GL783", "GL895",
+  "CG565", "CG621", "CG623", "QS46", "QS22", "GTG57", "GTG63", "GTG67",
+  "NG88", "NHSCSP20",
+]);
 
 const FILTER_OPTIONS = [
   { value: "ALL",        label: "All guidelines",      pill: "All",           filterFn: null,                                                    active: "bg-gray-900 text-white" },
