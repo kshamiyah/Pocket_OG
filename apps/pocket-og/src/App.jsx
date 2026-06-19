@@ -282,7 +282,7 @@ export default function App() {
                 <div className="text-center mb-10">
                   <h1 className="text-[36px] sm:text-[50px] font-[800] tracking-[0.04em] text-black">Pocket O&G</h1>
                   <p className="mt-3 text-base leading-relaxed text-gray-400">
-                    RBH maternity guidelines.<br />Whenever and wherever you need them.
+                    Local and national guidelines.<br />Whenever and wherever you need them.
                   </p>
                   <p className="mt-2 text-sm font-medium text-gray-300">Built by Khalid Shamiyah</p>
                 </div>
@@ -607,7 +607,7 @@ export default function App() {
           <div className="max-w-lg mx-auto">
             <div className="px-5 pt-14 pb-1">
               <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Guidelines</h2>
-              <p className="text-xs text-gray-400 mt-0.5">All RBH Maternity guidelines</p>
+              <p className="text-xs text-gray-400 mt-0.5">National and local guidelines</p>
             </div>
 
             {/* Sticky: source filter + search */}
@@ -734,17 +734,6 @@ export default function App() {
             <span className="text-[10px] font-medium">Search</span>
           </button>
           <button
-            onClick={() => setActiveTab("flowcharts")}
-            className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
-              activeTab === "flowcharts" ? "text-black" : "text-gray-400"
-            }`}
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l8.5 5v10L12 22 3.5 17V7L12 2z" />
-            </svg>
-            <span className="text-[10px] font-medium">Charts</span>
-          </button>
-          <button
             onClick={() => setActiveTab("guidelines")}
             className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
               activeTab === "guidelines" ? "text-black" : "text-gray-400"
@@ -754,6 +743,17 @@ export default function App() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <span className="text-[10px] font-medium">Guides</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("flowcharts")}
+            className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
+              activeTab === "flowcharts" ? "text-black" : "text-gray-400"
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l8.5 5v10L12 22 3.5 17V7L12 2z" />
+            </svg>
+            <span className="text-[10px] font-medium">Charts</span>
           </button>
           <button
             onClick={() => setActiveTab("consent")}
