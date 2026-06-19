@@ -1110,9 +1110,13 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
 
 // ─── main export ──────────────────────────────────────────────────────────────
 
-export default function ConsentPage() {
-  const [step, setStep]           = useState(0);  // 0=list, 1=context, 2=factors, 3=summary
-  const [procedureId, setProcId]  = useState(null);
+export default function ConsentPage({ initialProcedure }) {
+  const [step, setStep]           = useState(() => {
+    if (!initialProcedure) return 0;
+    const hasContext = (PROCEDURE_CONFIG[initialProcedure]?.contextOptions?.length ?? 0) > 0;
+    return hasContext ? 1 : 2;
+  });
+  const [procedureId, setProcId]  = useState(initialProcedure ?? null);
   const [context, setContext]     = useState(null);
   const [factors, setFactors]     = useState(new Set());
 

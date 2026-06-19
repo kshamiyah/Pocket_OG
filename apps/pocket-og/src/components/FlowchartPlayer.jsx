@@ -1,4 +1,7 @@
 import { useState } from "react";
+import SeeAlso from "./SeeAlso";
+import RichText from "./RichText";
+import { FLOWCHART_NODE_CONNECTIONS } from "../data/connections";
 
 const NODE_STYLES = {
   action:  { badge: "bg-blue-100 text-blue-700",   icon: "→", bar: "bg-blue-500" },
@@ -23,13 +26,14 @@ function getSublabelItems(sublabel) {
     .filter(Boolean);
 }
 
-export default function FlowchartPlayer({ flowchart, theme, onClose, pdfUrl }) {
+export default function FlowchartPlayer({ flowchart, theme, onClose, pdfUrl, onNavigate }) {
   const [currentId, setCurrentId] = useState(flowchart.startId);
   const [history, setHistory] = useState([]); // [{ nodeId, label }]
 
   const node = flowchart.nodes[currentId];
   const styles = END_STYLE_OVERRIDES[currentId] ?? NODE_STYLES[node.type] ?? NODE_STYLES.action;
   const accentTheme = theme ?? { solid: "bg-[#0E4286]", solidHover: "hover:bg-[#0B3872]" };
+  const nodeConnections = FLOWCHART_NODE_CONNECTIONS[flowchart.id]?.[currentId] ?? {};
 
   const choose = (option) => {
     setHistory(prev => [...prev, { nodeId: currentId, label: option.label }]);
@@ -131,7 +135,9 @@ export default function FlowchartPlayer({ flowchart, theme, onClose, pdfUrl }) {
 
           {/* Main text */}
           {node.text && (
-            <p className="text-sm text-gray-700 leading-relaxed mb-3 whitespace-pre-line">{node.text}</p>
+            <p className="text-sm text-gray-700 leading-relaxed mb-3 whitespace-pre-line">
+              <RichText text={node.text} links={nodeConnections.inlineLinks ?? []} onNavigate={onNavigate} />
+            </p>
           )}
 
           {/* Items list */}
@@ -140,7 +146,9 @@ export default function FlowchartPlayer({ flowchart, theme, onClose, pdfUrl }) {
               {node.items.map((item, i) => (
                 <li key={i} className="flex gap-2 text-sm text-gray-700 leading-snug">
                   <span className="text-teal-400 shrink-0 mt-0.5">›</span>
-                  <span>{item}</span>
+                  <span>
+                    <RichText text={item} links={nodeConnections.inlineLinks ?? []} onNavigate={onNavigate} />
+                  </span>
                 </li>
               ))}
             </ul>
@@ -191,22 +199,33 @@ export default function FlowchartPlayer({ flowchart, theme, onClose, pdfUrl }) {
             </button>
           )}
 
-          {/* End node — restart / close */}
+          {/* End node — "What's next" + restart / close */}
           {isEnd && (
-            <div className="mt-5 flex gap-2">
-              <button
-                onClick={restart}
-                className="flex-1 py-3.5 rounded-2xl text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-              >
-                ↺ Start over
-              </button>
-              <button
-                onClick={onClose}
-                className={`flex-1 py-3.5 rounded-2xl text-sm font-semibold ${accentTheme.solid} ${accentTheme.solidHover} text-white transition-colors`}
-              >
-                Close
-              </button>
-            </div>
+            <>
+              {nodeConnections.whatsNext?.length > 0 && (
+                <div className="mt-5">
+                  <SeeAlso
+                    links={nodeConnections.whatsNext}
+                    label="What's next"
+                    onNavigate={onNavigate}
+                  />
+                </div>
+              )}
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={restart}
+                  className="flex-1 py-3.5 rounded-2xl text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  ↺ Start over
+                </button>
+                <button
+                  onClick={onClose}
+                  className={`flex-1 py-3.5 rounded-2xl text-sm font-semibold ${accentTheme.solid} ${accentTheme.solidHover} text-white transition-colors`}
+                >
+                  Close
+                </button>
+              </div>
+            </>
           )}
 
           {/* Disclaimer */}

@@ -1,4 +1,6 @@
 import { useState, useMemo, useRef } from "react";
+import SeeAlso from "./SeeAlso";
+import { CALCULATOR_CONNECTIONS } from "../data/connections";
 import AlphabetSidebar from "./AlphabetSidebar";
 import {
   CALCULATOR_SCENARIOS,
@@ -265,7 +267,7 @@ function ResultCard({ result }) {
 
 // ─── Scenario 1: PUL ──────────────────────────────────────────────────
 
-function PulCalculator({ onBack, pdfs }) {
+function PulCalculator({ onBack, pdfs, onNavigate }) {
   const [haemodynamicInstability, setHaemodynamicInstability] = useState(null);
   const [worseningPain, setWorseningPain] = useState(null);
   const [heavyBleeding, setHeavyBleeding] = useState(null);
@@ -394,6 +396,10 @@ function PulCalculator({ onBack, pdfs }) {
               </button>
             </>
           )}
+
+          <div className="mt-6">
+            <SeeAlso links={CALCULATOR_CONNECTIONS.PUL} onNavigate={onNavigate} />
+          </div>
         </div>
       </div>
     </div>
@@ -402,7 +408,7 @@ function PulCalculator({ onBack, pdfs }) {
 
 // ─── Scenario 2: Ectopic decision ─────────────────────────────────────
 
-function EctopicDecisionCalculator({ onBack, pdfs }) {
+function EctopicDecisionCalculator({ onBack, pdfs, onNavigate }) {
   const [hcg, setHcg] = useState("");
   const [massSize, setMassSize] = useState("");
   const [significantPain, setSignificantPain] = useState(null);
@@ -505,6 +511,10 @@ function EctopicDecisionCalculator({ onBack, pdfs }) {
               </button>
             </>
           )}
+
+          <div className="mt-6">
+            <SeeAlso links={CALCULATOR_CONNECTIONS.ECTOPIC_DECISION} onNavigate={onNavigate} />
+          </div>
         </div>
       </div>
     </div>
@@ -513,7 +523,7 @@ function EctopicDecisionCalculator({ onBack, pdfs }) {
 
 // ─── Scenario 3: Expectant surveillance ───────────────────────────────
 
-function ExpectantSurveillanceCalculator({ onBack, pdfs }) {
+function ExpectantSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
   const [haemodynamicInstability, setHaemodynamicInstability] = useState(null);
   const [worseningPain, setWorseningPain] = useState(null);
   const [heavyBleeding, setHeavyBleeding] = useState(null);
@@ -586,6 +596,10 @@ function ExpectantSurveillanceCalculator({ onBack, pdfs }) {
           <button onClick={reset} className="w-full mt-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-3 rounded-2xl transition-colors text-sm">
             Reset
           </button>
+
+          <div className="mt-6">
+            <SeeAlso links={CALCULATOR_CONNECTIONS.EXPECTANT_SURVEILLANCE} onNavigate={onNavigate} />
+          </div>
         </div>
       </div>
     </div>
@@ -594,7 +608,7 @@ function ExpectantSurveillanceCalculator({ onBack, pdfs }) {
 
 // ─── Scenario 4: Post-MTX surveillance ────────────────────────────────
 
-function MtxSurveillanceCalculator({ onBack, pdfs }) {
+function MtxSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
   const [haemodynamicInstability, setHaemodynamicInstability] = useState(null);
   const [worseningPain, setWorseningPain] = useState(null);
   const [heavyBleeding, setHeavyBleeding] = useState(null);
@@ -669,6 +683,10 @@ function MtxSurveillanceCalculator({ onBack, pdfs }) {
           <button onClick={reset} className="w-full mt-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-3 rounded-2xl transition-colors text-sm">
             Reset
           </button>
+
+          <div className="mt-6">
+            <SeeAlso links={CALCULATOR_CONNECTIONS.MTX_SURVEILLANCE} onNavigate={onNavigate} />
+          </div>
         </div>
       </div>
     </div>
@@ -677,7 +695,7 @@ function MtxSurveillanceCalculator({ onBack, pdfs }) {
 
 // ─── Scenario 5: VTE risk score (GTG37a) ──────────────────────────────
 
-function VteRiskCalculator({ onBack, pdfs }) {
+function VteRiskCalculator({ onBack, pdfs, onNavigate }) {
   const [phase, setPhase] = useState(null); // "antenatal" | "postnatal"
   const [ticked, setTicked] = useState(new Set());
   const [weight, setWeight] = useState("");
@@ -890,6 +908,10 @@ function VteRiskCalculator({ onBack, pdfs }) {
               </button>
             </>
           )}
+
+          <div className="mt-6">
+            <SeeAlso links={CALCULATOR_CONNECTIONS.VTE_RISK} onNavigate={onNavigate} />
+          </div>
         </div>
       </div>
     </div>
@@ -898,19 +920,19 @@ function VteRiskCalculator({ onBack, pdfs }) {
 
 // ─── Entry point ──────────────────────────────────────────────────────
 
-export default function CalculatorPage() {
-  const [scenarioId, setScenarioId] = useState(null);
+export default function CalculatorPage({ initialScenario, onNavigate }) {
+  const [scenarioId, setScenarioId] = useState(initialScenario ?? null);
 
   if (!scenarioId) return <ScenarioList onSelect={setScenarioId} />;
 
   const back = () => setScenarioId(null);
   const pdfs = CALCULATOR_SCENARIOS.find(s => s.id === scenarioId)?.pdfs ?? [];
 
-  if (scenarioId === "PUL") return <PulCalculator onBack={back} pdfs={pdfs} />;
-  if (scenarioId === "ECTOPIC_DECISION") return <EctopicDecisionCalculator onBack={back} pdfs={pdfs} />;
-  if (scenarioId === "EXPECTANT_SURVEILLANCE") return <ExpectantSurveillanceCalculator onBack={back} pdfs={pdfs} />;
-  if (scenarioId === "MTX_SURVEILLANCE") return <MtxSurveillanceCalculator onBack={back} pdfs={pdfs} />;
-  if (scenarioId === "VTE_RISK") return <VteRiskCalculator onBack={back} pdfs={pdfs} />;
+  if (scenarioId === "PUL") return <PulCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
+  if (scenarioId === "ECTOPIC_DECISION") return <EctopicDecisionCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
+  if (scenarioId === "EXPECTANT_SURVEILLANCE") return <ExpectantSurveillanceCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
+  if (scenarioId === "MTX_SURVEILLANCE") return <MtxSurveillanceCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
+  if (scenarioId === "VTE_RISK") return <VteRiskCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
 
   return <ScenarioList onSelect={setScenarioId} />;
 }

@@ -116,10 +116,30 @@ export default function App() {
   const [fcSourceFilter, setFcSourceFilter] = useState("ALL");
   const [glSearchQuery, setGlSearchQuery] = useState("");
   const [fcSearchQuery, setFcSearchQuery] = useState("");
+  const [activeCalcScenario, setActiveCalcScenario] = useState(null);
+  const [calcNavKey, setCalcNavKey] = useState(0);
+  const [activeConsentProcedure, setActiveConsentProcedure] = useState(null);
+  const [consentNavKey, setConsentNavKey] = useState(0);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
   const glSectionRefs = useRef({});
   const fcSectionRefs = useRef({});
+
+  const handleNavigate = ({ type, id }) => {
+    if (type === "calculator") {
+      setActiveFlowchartId(null);
+      setActiveCalcScenario(id);
+      setCalcNavKey(k => k + 1);
+      setActiveTab("calculator");
+    } else if (type === "flowchart") {
+      setActiveFlowchartId(id);
+    } else if (type === "consent") {
+      setActiveFlowchartId(null);
+      setActiveConsentProcedure(id);
+      setConsentNavKey(k => k + 1);
+      setActiveTab("consent");
+    }
+  };
   const hasQuery = query.trim().length > 0;
 
   const filteredGuidelines = useMemo(() => {
@@ -227,6 +247,7 @@ export default function App() {
           theme={FC_GL_COLOR[FLOWCHART_LINKS.find(fc => fc.id === activeFlowchartId)?.gl]}
           onClose={() => setActiveFlowchartId(null)}
           pdfUrl={(() => { const gl = FLOWCHART_LINKS.find(fc => fc.id === activeFlowchartId)?.gl; const g = gl && GUIDELINES[gl]; return g?.pdf ? (g.pdfPath || `/guidelines/${gl}.pdf`) : null; })()}
+          onNavigate={handleNavigate}
         />
       )}
 
@@ -544,10 +565,22 @@ export default function App() {
       )}
 
       {/* Consent tab */}
-      {activeTab === "consent" && <ConsentPage />}
+      {activeTab === "consent" && (
+        <ConsentPage
+          key={consentNavKey}
+          initialProcedure={activeConsentProcedure}
+          onNavigate={handleNavigate}
+        />
+      )}
 
       {/* Calculator tab */}
-      {activeTab === "calculator" && <CalculatorPage />}
+      {activeTab === "calculator" && (
+        <CalculatorPage
+          key={calcNavKey}
+          initialScenario={activeCalcScenario}
+          onNavigate={handleNavigate}
+        />
+      )}
 
       {/* Guidelines tab */}
       {activeTab === "guidelines" && (
