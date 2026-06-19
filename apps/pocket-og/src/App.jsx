@@ -118,7 +118,6 @@ export default function App() {
   const [activeFlowchartId, setActiveFlowchartId] = useState(null);
   const [showIOLPrioritizer, setShowIOLPrioritizer] = useState(false);
   const [activeTab, setActiveTab] = useState("search");
-  const [guidelinePickerOpen, setGuidelinePickerOpen] = useState(false);
   const [glSourceFilter, setGlSourceFilter] = useState("ALL");
   const [fcSourceFilter, setFcSourceFilter] = useState("ALL");
   const [glSearchQuery, setGlSearchQuery] = useState("");
@@ -311,74 +310,6 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* Browse guidelines */}
-                <div className="relative">
-                  {guidelinePickerOpen && (
-                    <button
-                      type="button"
-                      aria-label="Close guideline picker"
-                      onClick={() => setGuidelinePickerOpen(false)}
-                      className="fixed inset-0 z-30 cursor-default bg-transparent"
-                    />
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setGuidelinePickerOpen(open => !open)}
-                    className="relative z-40 w-full rounded-xl border border-gray-200 bg-white/92 px-3.5 py-2.5 text-left shadow-sm backdrop-blur-xl transition-all hover:bg-white"
-                  >
-                    <span className="flex items-center gap-2.5">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500">
-                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h10" />
-                        </svg>
-                      </span>
-                      <span className="flex min-w-0 flex-1 flex-col justify-center">
-                        <span className="block text-[13px] font-semibold text-gray-900 leading-tight">Browse guidelines</span>
-                        <span className="mt-0.5 block text-[11px] leading-tight text-gray-400">
-                          {filter === "ALL" ? "All guideline groups" : activeOption?.pill}
-                        </span>
-                      </span>
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-                        <svg className={`h-3 w-3 transition-transform ${guidelinePickerOpen ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                      </span>
-                    </span>
-                  </button>
-
-                  {guidelinePickerOpen && (
-                    <div className="absolute inset-x-0 top-[calc(100%+0.4rem)] z-40 rounded-[20px] border border-gray-200/80 bg-white/97 p-1 shadow-[0_12px_28px_rgba(15,23,42,0.10)] backdrop-blur-2xl">
-                      <div className="max-h-44 space-y-1 overflow-y-auto overscroll-contain pr-0.5 pb-0.5 no-scrollbar touch-pan-y">
-                        {FILTER_OPTIONS.filter(o => !o.resultsOnly).map(o => (
-                          <button
-                            key={o.value}
-                            type="button"
-                            onClick={() => {
-                              setFilter(o.value);
-                              setGuidelinePickerOpen(false);
-                            }}
-                            className={`flex w-full items-center gap-2 rounded-2xl px-2.5 py-1.5 text-left transition-all ${
-                              filter === o.value
-                                ? "bg-gray-200 text-gray-900"
-                                : "bg-gray-50/90 text-gray-700 hover:bg-gray-100"
-                            }`}
-                          >
-                            <span className={`h-1.5 w-1.5 rounded-full ${filter === o.value ? "bg-gray-500" : "bg-gray-300"}`} />
-                            <span className="min-w-0 flex-1">
-                              <span className="block text-[13px] font-medium leading-tight">{o.pill}</span>
-                              <span className={`block text-[10px] mt-0.5 leading-tight ${filter === o.value ? "text-gray-500" : "text-gray-400"}`}>
-                                {o.label}
-                              </span>
-                            </span>
-                            <span className={`text-[10px] ${filter === o.value ? "text-gray-500" : "text-gray-300"}`}>
-                              {filter === o.value ? "✓" : "›"}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
 
               </div>
             </div>
