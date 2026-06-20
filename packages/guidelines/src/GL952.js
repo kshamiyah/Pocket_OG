@@ -15,7 +15,7 @@ export const GL952_SECTIONS = [
   },
   {
     id: "pet-postnatal-inpatient", gl: "GL952", condition: "Pre-Eclampsia", setting: "Postnatal — Inpatient",
-    flowchartId: "GL952_POSTNATAL",
+    flowchartId: "GL952_POSTNATAL_WARD",
     title: "Postnatal Inpatient Management",
     tags: ["postnatal","post natal","after birth","postpartum","ward","iffley","inpatient","discharge","blood pressure","bp","medication","bloods","blood tests","pet screen","stay","how long","length of stay","discharge criteria","methyldopa","labetalol","nifedipine"],
     content: [

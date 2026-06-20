@@ -655,3 +655,299 @@ export const GL952_POSTNATAL_FLOWCHART = {
 
   },
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const GL952_POSTNATAL_WARD_FLOWCHART = {
+  id: "GL952_POSTNATAL_WARD",
+  title: "Postnatal Ward — BP Management",
+  subtitle: "GL952 · Acute BP Decision Tool",
+  startId: "bp-reading",
+  nodes: {
+
+    "bp-reading": {
+      type: "decision",
+      title: "Current BP reading",
+      text: "Assess the blood pressure and choose the appropriate band.",
+      options: [
+        { label: "≥160/110 mmHg", sublabel: "Severe hypertension", next: "severe" },
+        { label: "150–159 / 100–109 mmHg", sublabel: "Moderate hypertension", next: "moderate-symptoms" },
+        { label: "130–149 / 80–99 mmHg", sublabel: "Mild / within target range", next: "maintain" },
+        { label: "<130/80 mmHg", sublabel: "Below target", next: "low-bp" },
+      ],
+    },
+
+    // ── SEVERE ────────────────────────────────────────────────────────────────
+
+    "severe": {
+      type: "alert",
+      title: "Severe Hypertension — Act Now",
+      text: "BP ≥160/110 requires treatment within 30–60 minutes. Call registrar immediately.",
+      items: [
+        "Call obstetric registrar NOW",
+        "Oral nifedipine 10 mg stat (repeat once at 30 min if still ≥160/110)",
+        "OR IV labetalol 50 mg over 5 minutes if IV access in situ",
+        "Continuous BP monitoring — recheck every 15 minutes",
+        "Pulse oximetry; ensure IV access",
+        "Do NOT leave patient unattended",
+      ],
+      next: "severe-recheck",
+    },
+
+    "severe-recheck": {
+      type: "decision",
+      title: "BP after treatment?",
+      text: "Recheck BP 30 minutes after first-line treatment.",
+      options: [
+        { label: "Controlled — <150/100", sublabel: "Treatment effective", next: "severe-controlled" },
+        { label: "Still ≥160/110", sublabel: "Not responding", next: "severe-escalate" },
+      ],
+    },
+
+    "severe-controlled": {
+      type: "end",
+      title: "Severe HTN — Now Controlled",
+      text: "Continue close monitoring and review ongoing regimen.",
+      items: [
+        "BP monitoring every 30 minutes for 2 hours, then hourly",
+        "Review ongoing antihypertensive regimen with registrar",
+        "Consider Enalapril 5 mg OD as maintenance agent (first choice postnatal)",
+        "Check U+Es at 1 week if starting enalapril",
+        "Document all treatment changes on EPR",
+      ],
+    },
+
+    "severe-escalate": {
+      type: "alert",
+      title: "Uncontrolled Severe Hypertension — Escalate",
+      text: "BP not responding to first-line treatment. Call consultant.",
+      items: [
+        "Call consultant obstetrician and anaesthetist",
+        "Anaesthetic review — consider HDU/ITU",
+        "IV hydralazine 5–10 mg slow bolus over 10–20 minutes",
+        "OR repeat IV labetalol 50–100 mg; max cumulative 200 mg",
+        "Check bloods urgently: FBC, U+E, LFTs, clotting",
+        "Consider eclampsia protocol if neurological symptoms develop",
+      ],
+      next: "severe-escalate-end",
+    },
+
+    "severe-escalate-end": {
+      type: "end",
+      title: "Senior Review Ongoing",
+      text: "Continue treatment under consultant supervision. HDU criteria likely met.",
+      items: [
+        "HDU admission if BP remains uncontrolled or symptoms present",
+        "Continuous monitoring until BP stable for ≥1 hour",
+        "MgSO4 if eclampsia risk: severe headache, visual changes, clonus",
+      ],
+    },
+
+    // ── MODERATE ──────────────────────────────────────────────────────────────
+
+    "moderate-symptoms": {
+      type: "decision",
+      title: "Any symptoms?",
+      text: "Ask about: headache, visual disturbance (floaters / flashing lights), epigastric or RUQ pain.",
+      options: [
+        { label: "Yes — symptoms present", sublabel: "Call registrar first", next: "symptoms-present" },
+        { label: "No symptoms", sublabel: "Adjust medication", next: "medication-check" },
+      ],
+    },
+
+    "symptoms-present": {
+      type: "alert",
+      title: "Symptoms Present — Call Registrar",
+      text: "Do not adjust medication without registrar review. Symptoms may indicate PET deterioration.",
+      items: [
+        "Call obstetric registrar before any medication change",
+        "Send bloods: FBC, U+E, LFTs, uric acid",
+        "Urine output — catheterise if not already done",
+        "CTG if any fetal concern",
+        "Do not leave patient alone",
+      ],
+      next: "symptoms-end",
+    },
+
+    "symptoms-end": {
+      type: "end",
+      title: "Await Registrar Review",
+      text: "Management will be directed by the registrar following assessment.",
+      items: [
+        "Continue BP monitoring every 15 minutes",
+        "Repeat observations: RR, O2 sats, conscious level",
+        "If BP escalates to ≥160/110 before registrar arrives: give oral nifedipine 10 mg",
+      ],
+    },
+
+    // ── MEDICATION CHECK ──────────────────────────────────────────────────────
+
+    "medication-check": {
+      type: "decision",
+      title: "Current antihypertensive?",
+      text: "What is the patient currently taking?",
+      options: [
+        { label: "Methyldopa", sublabel: "Must switch postnatally", next: "switch-methyldopa" },
+        { label: "Labetalol", sublabel: "Titrate up or switch", next: "titrate-labetalol" },
+        { label: "Nifedipine MR", sublabel: "Titrate up or add agent", next: "titrate-nifedipine" },
+        { label: "None / other", sublabel: "Start enalapril first line", next: "start-treatment" },
+      ],
+    },
+
+    "switch-methyldopa": {
+      type: "action",
+      title: "Switch from Methyldopa",
+      text: "Methyldopa must be stopped within 2 days of delivery — associated with postnatal depression.",
+      items: [
+        "STOP methyldopa",
+        "First choice: Enalapril 5 mg OD — preferred postnatal agent (GL952)",
+        "Black African/Caribbean ethnicity: use Nifedipine MR 10 mg BD or Amlodipine instead",
+        "Enalapril is safe for breastfeeding; check U+Es at 1 week",
+        "Recheck BP in 4 hours after switching",
+        "Document switch on EPR and TTO",
+      ],
+      next: "recheck-4h",
+    },
+
+    "start-treatment": {
+      type: "action",
+      title: "Start Antihypertensive",
+      text: "No current treatment — initiate first-line postnatal agent.",
+      items: [
+        "First choice postnatally: Enalapril 5 mg OD",
+        "Black African/Caribbean ethnicity: Nifedipine MR 10 mg BD or Amlodipine",
+        "Labetalol 100 mg BD: alternative if enalapril not appropriate",
+        "Enalapril and labetalol both safe for breastfeeding",
+        "Check U+Es at 1 week after starting enalapril",
+        "Recheck BP in 4 hours",
+      ],
+      next: "recheck-4h",
+    },
+
+    "titrate-labetalol": {
+      type: "action",
+      title: "Titrate Labetalol",
+      text: "Increase dose in stepwise fashion. Consider switching to or adding enalapril postnatally.",
+      items: [
+        "Titration: 100 mg BD → 200 mg BD → 200 mg TDS → 400 mg TDS (max 800 mg/day)",
+        "Postnatally: consider switching to Enalapril 5 mg OD (first choice per GL952)",
+        "Avoid labetalol in: asthma, heart failure, bradycardia",
+        "Recheck BP in 4 hours after dose change",
+        "If already on max dose (800 mg/day): call registrar — add second agent",
+      ],
+      next: "max-check-labetalol",
+    },
+
+    "titrate-nifedipine": {
+      type: "action",
+      title: "Titrate Nifedipine MR",
+      text: "Increase dose stepwise. Consider adding enalapril as second agent if needed.",
+      items: [
+        "Titration: 10 mg BD → 20 mg BD → 30 mg BD → 40 mg BD (max 80 mg/day)",
+        "Safe for breastfeeding",
+        "Consider adding Enalapril 5 mg OD if dose escalation alone insufficient",
+        "Recheck BP in 4 hours after dose change",
+        "If already on max dose (80 mg/day): call registrar",
+      ],
+      next: "max-check-nifedipine",
+    },
+
+    "max-check-labetalol": {
+      type: "decision",
+      title: "Already on maximum labetalol dose?",
+      text: "800 mg/day is the maximum dose of labetalol.",
+      options: [
+        { label: "No — dose increased", sublabel: "Recheck in 4 hours", next: "recheck-4h" },
+        { label: "Yes — on maximum", sublabel: "Add second agent", next: "add-agent" },
+      ],
+    },
+
+    "max-check-nifedipine": {
+      type: "decision",
+      title: "Already on maximum nifedipine dose?",
+      text: "80 mg/day is the maximum dose of nifedipine MR.",
+      options: [
+        { label: "No — dose increased", sublabel: "Recheck in 4 hours", next: "recheck-4h" },
+        { label: "Yes — on maximum", sublabel: "Add second agent", next: "add-agent" },
+      ],
+    },
+
+    "add-agent": {
+      type: "end",
+      title: "Maximum Dose — Call Registrar",
+      text: "Single agent at maximum dose is insufficient. Registrar review needed to add second agent.",
+      items: [
+        "Call obstetric registrar",
+        "Add Enalapril 5 mg OD to existing regimen (if not already on it)",
+        "Or add Labetalol / Nifedipine MR as appropriate",
+        "Check U+Es at 1 week if adding enalapril",
+        "Document combination regimen on EPR and TTO",
+      ],
+    },
+
+    "recheck-4h": {
+      type: "end",
+      title: "Recheck BP in 4 Hours",
+      text: "Document medication change and continue routine monitoring.",
+      items: [
+        "Continue 4-hourly BP monitoring",
+        "If next reading ≥160/110: restart from top of pathway",
+        "If next reading still 150–159/100–109: call registrar — further escalation needed",
+        "Document all changes on EPR",
+        "Ensure medication changes reflected on drug chart and TTO",
+      ],
+    },
+
+    // ── MAINTAIN ──────────────────────────────────────────────────────────────
+
+    "maintain": {
+      type: "end",
+      title: "Maintain Current Treatment",
+      text: "BP within acceptable range. Continue current antihypertensive and monitoring.",
+      items: [
+        "Continue current antihypertensive unchanged",
+        "4-hourly BP monitoring",
+        "Recheck at next routine observation",
+        "If BP trends upward on consecutive readings — reassess",
+      ],
+    },
+
+    // ── LOW BP ────────────────────────────────────────────────────────────────
+
+    "low-bp": {
+      type: "decision",
+      title: "On antihypertensive treatment?",
+      text: "BP <130/80 — assess whether treatment reduction is needed.",
+      options: [
+        { label: "Yes — on treatment", sublabel: "Consider dose reduction", next: "reduce-dose" },
+        { label: "No treatment", sublabel: "Monitor only", next: "low-no-treatment" },
+      ],
+    },
+
+    "reduce-dose": {
+      type: "end",
+      title: "Consider Reducing Dose",
+      text: "BP <130/80 sustained for >24 hours on treatment — step down.",
+      items: [
+        "Reduce antihypertensive dose by one step",
+        "Do not stop abruptly — step down gradually",
+        "Recheck BP in 4 hours after reducing",
+        "Inform registrar of dose reduction",
+        "Document on EPR and update TTO before discharge",
+      ],
+    },
+
+    "low-no-treatment": {
+      type: "end",
+      title: "Low BP — No Treatment",
+      text: "BP <130/80 with no antihypertensives. No action required.",
+      items: [
+        "Reassure patient",
+        "Continue 4-hourly BP monitoring",
+        "Ensure adequate hydration",
+        "If symptomatic (dizzy, faint): lie flat, call midwife",
+      ],
+    },
+
+  },
+};
