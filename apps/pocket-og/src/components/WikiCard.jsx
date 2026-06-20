@@ -79,7 +79,7 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
         {/* PDF source link */}
         {gl?.pdf && (
           <a
-            href={`/guidelines/${gl.code}.pdf`}
+            href={gl.pdfUrl || gl.pdfPath || `/guidelines/${gl.code}.pdf`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 px-3 sm:px-5 py-2.5 border-t border-gray-50 text-xs text-gray-400 hover:text-gray-600 transition-colors w-full"

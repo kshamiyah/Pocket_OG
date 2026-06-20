@@ -204,7 +204,7 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
           <div className="mx-4 pt-6 pb-6 border-t border-gray-100 text-center space-y-3">
             {guideline?.pdf && (
               <a
-                href={guideline.pdfPath || `/guidelines/${gl}.pdf`}
+                href={guideline.pdfUrl || guideline.pdfPath || `/guidelines/${gl}.pdf`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors text-xs font-medium text-gray-600"

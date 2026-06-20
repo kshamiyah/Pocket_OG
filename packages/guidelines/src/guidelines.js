@@ -17,12 +17,12 @@ export const GUIDELINES = {
   NG88: { code: "NG88", label: "Heavy Menstrual Bleeding", version: "NG88", date: "September 2023", color: "fuchsia", pdf: true, pdfPath: "/guidelines/heavy-menstrual-bleeding-assessment-and-management-pdf-1837701412549.pdf", source: "NICE" },
   GTG67:    { code: "GTG67",    label: "Management of Endometrial Hyperplasia", version: "GTG67",    date: "February 2016", color: "green", pdf: true, pdfPath: "/guidelines/gtg_67_endometrial_hyperplasia.pdf", source: "RCOG" },
   NHSCSP20: { code: "NHSCSP20", label: "Cervical Screening & Colposcopy",        version: "NHSCSP20", date: "2020 (updated 2025)", color: "slate", pdf: false, source: "NHSCSP" },
-  GTG52: { code: "GTG52", label: "Postpartum Haemorrhage",               version: "GTG52",    date: "December 2016", color: "red",    pdf: true, source: "RCOG" },
-  GTG69: { code: "GTG69", label: "Nausea & Vomiting of Pregnancy",       version: "GTG69",    date: "June 2016",     color: "orange", pdf: true, source: "RCOG" },
-  NG25:  { code: "NG25",  label: "Preterm Labour & Birth",               version: "NG25",     date: "November 2015 (updated 2022)", color: "sky",    pdf: true, source: "NICE" },
-  GTG31: { code: "GTG31", label: "Small for Gestational Age Fetus (SGA)", version: "GTG31",   date: "February 2013", color: "green",  pdf: true, source: "RCOG" },
-  GTG17: { code: "GTG17", label: "Recurrent Miscarriage",                version: "GTG17",    date: "April 2011",    color: "violet", pdf: true, source: "RCOG" },
-  CG192: { code: "CG192", label: "Perinatal Mental Health",              version: "NG192",    date: "December 2014 (updated 2020)", color: "purple", pdf: true, source: "NICE" },
+  GTG52: { code: "GTG52", label: "Postpartum Haemorrhage",                version: "GTG52", date: "December 2016",                color: "red",    pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/postpartum-haemorrhage-prevention-and-management-green-top-guideline-no-52/" },
+  GTG69: { code: "GTG69", label: "Nausea & Vomiting of Pregnancy",        version: "GTG69", date: "June 2016",                     color: "orange", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/the-management-of-nausea-and-vomiting-of-pregnancy-and-hyperemesis-gravidarum-green-top-guideline-no-69/" },
+  NG25:  { code: "NG25",  label: "Preterm Labour & Birth",                version: "NG25",  date: "November 2015 (updated 2022)", color: "sky",    pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng25" },
+  GTG31: { code: "GTG31", label: "Small for Gestational Age Fetus (SGA)", version: "GTG31", date: "February 2013",                color: "green",  pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/small-for-gestational-age-fetus-investigation-and-management-2nd-edition-green-top-guideline-no-31/" },
+  GTG17: { code: "GTG17", label: "Recurrent Miscarriage",                 version: "GTG17", date: "April 2011",                   color: "violet", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/the-investigation-and-treatment-of-couples-with-recurrent-first-trimester-and-second-trimester-miscarriage-green-top-guideline-no-17/" },
+  CG192: { code: "CG192", label: "Perinatal Mental Health",               version: "NG192", date: "December 2014 (updated 2020)", color: "purple", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng192" },
 };
 
 export const GL_COLORS = {
