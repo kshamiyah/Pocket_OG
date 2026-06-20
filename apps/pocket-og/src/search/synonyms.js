@@ -47,6 +47,12 @@ export const SYNONYMS = {
   // PET / hypertension
   "pe":  ["pre-eclampsia","preeclampsia","eclampsia","pet","hypertension in pregnancy"],
   "pet": ["pre-eclampsia","preeclampsia","hypertension in pregnancy","eclampsia"],
+  "pih": ["pregnancy induced hypertension","pregnancy-induced hypertension","gestational hypertension","hypertension in pregnancy","pre-eclampsia"],
+  "pregnancy induced hypertension": ["pih","gestational hypertension","hypertension in pregnancy","pre-eclampsia","ng133"],
+  "gestational hypertension": ["pih","pregnancy induced hypertension","hypertension in pregnancy","pre-eclampsia","ng133"],
+  "chronic hypertension pregnancy": ["pre-existing hypertension","ace inhibitor","arb","labetalol","nifedipine","ng133"],
+  "hypertension in pregnancy": ["pih","gestational hypertension","pre-eclampsia","pet","ng133","labetalol","antihypertensive"],
+  "aspirin pregnancy": ["aspirin","pre-eclampsia prevention","pih","gestational hypertension","ng133","75mg","150mg"],
   // BP / medication
   "bp meds": ["antihypertensive","labetalol","nifedipine","medication"],
   "blood pressure tablets": ["antihypertensive","labetalol","nifedipine"],
