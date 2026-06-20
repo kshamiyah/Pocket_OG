@@ -9,6 +9,7 @@ import {
   NG88_SECTIONS, NHSCSP20_SECTIONS,
   GTG52_SECTIONS, GTG69_SECTIONS, NG25_SECTIONS,
   GTG31_SECTIONS, GTG17_SECTIONS, CG192_SECTIONS,
+  NG133_SECTIONS,
 } from "@pocket-og/guidelines";
 import { FLOWCHARTS } from "../data/flowcharts";
 import { GUIDELINE_KEYWORD_LINKS } from "../data/connections";
@@ -40,6 +41,7 @@ const SECTIONS_MAP = {
   GTG31: GTG31_SECTIONS,
   GTG17: GTG17_SECTIONS,
   CG192: CG192_SECTIONS,
+  NG133: NG133_SECTIONS,
 };
 
 // Colours match the existing GL colour system in App.jsx / WikiCard
@@ -68,6 +70,7 @@ const GL_THEME = {
   GTG31: { badge: "bg-green-50 text-green-700",     conditionColor: "text-green-500"    },
   GTG17: { badge: "bg-violet-50 text-violet-700",   conditionColor: "text-violet-500"   },
   CG192: { badge: "bg-purple-50 text-purple-700",   conditionColor: "text-purple-500"   },
+  NG133: { badge: "bg-cyan-50 text-cyan-700",       conditionColor: "text-cyan-600"     },
 };
 
 const DEFAULT_THEME = { badge: "bg-gray-100 text-gray-600", conditionColor: "text-gray-400" };

@@ -278,6 +278,9 @@ export const GUIDELINE_KEYWORD_LINKS = {
 
   GL952: [
     { phrase: "VTE",                   type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+    { phrase: "aspirin",               type: "reader", id: "NG133", gl: "NG133", label: "Hypertension in Pregnancy (NICE NG133)" },
+    { phrase: "gestational hypertension", type: "reader", id: "NG133", gl: "NG133", label: "Hypertension in Pregnancy (NICE NG133)" },
+    { phrase: "chronic hypertension",  type: "reader", id: "NG133", gl: "NG133", label: "Hypertension in Pregnancy (NICE NG133)" },
   ],
 
   GL891: [
@@ -379,5 +382,14 @@ export const GUIDELINE_KEYWORD_LINKS = {
     { phrase: "VTE",           type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
     { phrase: "pre-eclampsia", type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
     { phrase: "diabetes",      type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
+  ],
+
+  NG133: [
+    { phrase: "VTE",                      type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+    { phrase: "diabetes",                 type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
+    { phrase: "fetal growth restriction", type: "reader", id: "GTG31", gl: "GTG31", label: "SGA & Fetal Growth Restriction" },
+    { phrase: "antiphospholipid",         type: "reader", id: "GTG17", gl: "GTG17", label: "Recurrent Miscarriage" },
+    { phrase: "small for gestational age",type: "reader", id: "GTG31", gl: "GTG31", label: "SGA & Fetal Growth Restriction" },
+    { phrase: "postpartum haemorrhage",   type: "reader", id: "GTG52", gl: "GTG52", label: "Postpartum Haemorrhage" },
   ],
 };

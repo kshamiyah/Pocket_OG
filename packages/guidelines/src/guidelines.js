@@ -23,6 +23,7 @@ export const GUIDELINES = {
   GTG31: { code: "GTG31", label: "Small for Gestational Age Fetus (SGA)", version: "GTG31", date: "February 2013",                color: "green",  pdf: true, source: "RCOG", pdfUrl: "https://obgyn.onlinelibrary.wiley.com/doi/epdf/10.1111/1471-0528.17814" },
   GTG17: { code: "GTG17", label: "Recurrent Miscarriage",                 version: "GTG17", date: "April 2011",                   color: "violet", pdf: true, source: "RCOG", pdfUrl: "https://obgyn.onlinelibrary.wiley.com/doi/epdf/10.1111/1471-0528.17515" },
   CG192: { code: "CG192", label: "Perinatal Mental Health",               version: "NG192", date: "December 2014 (updated 2020)", color: "purple", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/cg192/resources/antenatal-and-postnatal-mental-health-clinical-management-and-service-guidance-pdf-35109869806789" },
+  NG133: { code: "NG133", label: "Hypertension in Pregnancy",             version: "NG133", date: "June 2019 (updated 2023)",     color: "cyan",   pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng133/resources/hypertension-in-pregnancy-diagnosis-and-management-pdf-66141782348997" },
 };
 
 export const GL_COLORS = {
@@ -50,4 +51,5 @@ export const GL_COLORS = {
   GTG31: { badge: "bg-green-900/50 text-green-300 border-green-600/40",   dot: "bg-green-400" },
   GTG17: { badge: "bg-violet-900/50 text-violet-300 border-violet-600/40", dot: "bg-violet-400" },
   CG192: { badge: "bg-purple-900/50 text-purple-300 border-purple-600/40", dot: "bg-purple-400" },
+  NG133: { badge: "bg-cyan-900/50 text-cyan-300 border-cyan-600/40",       dot: "bg-cyan-400" },
 };

@@ -24,6 +24,7 @@ const INLINE_COLORS = {
   CG192:  "#a855f7", // purple-500
   CG565:  "#8b5cf6", // violet-500
   CG623:  "#f97316", // orange-500 (also flowchart — consistent)
+  NG133:  "#06b6d4", // cyan-500
 };
 
 function linkColor(link) {

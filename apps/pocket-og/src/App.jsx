@@ -17,6 +17,7 @@ const READER_AVAILABLE = new Set([
   "CG565", "CG621", "CG623", "QS46", "QS22", "GTG57", "GTG63", "GTG67",
   "NG88", "NHSCSP20",
   "GTG52", "GTG69", "NG25", "GTG31", "GTG17", "CG192",
+  "NG133",
 ]);
 
 const FILTER_OPTIONS = [
@@ -99,6 +100,7 @@ const FC_GL_COLOR = {
   GTG31: { badge: "bg-green-50 text-green-700 border-green-100",     icon: "text-green-500",   accent: "bg-green-400",   solid: "bg-green-600",   solidHover: "hover:bg-green-700" },
   GTG17: { badge: "bg-violet-50 text-violet-700 border-violet-100",  icon: "text-violet-400",  accent: "bg-violet-400",  solid: "bg-violet-600",  solidHover: "hover:bg-violet-700" },
   CG192: { badge: "bg-purple-50 text-purple-700 border-purple-100",  icon: "text-purple-500",  accent: "bg-purple-500",  solid: "bg-purple-600",  solidHover: "hover:bg-purple-700" },
+  NG133: { badge: "bg-cyan-50 text-cyan-700 border-cyan-100",        icon: "text-cyan-500",    accent: "bg-cyan-500",    solid: "bg-cyan-600",    solidHover: "hover:bg-cyan-700" },
 };
 
 const FLOWCHART_GROUPS = [
