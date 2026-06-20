@@ -16,6 +16,14 @@ const INLINE_COLORS = {
   GL787:  "#10b981", // emerald-500
   GL895:  "#0ea5e9", // sky-500
   GL783:  "#f59e0b", // amber-500
+  GTG52:  "#ef4444", // red-500
+  GTG69:  "#f97316", // orange-500
+  NG25:   "#0ea5e9", // sky-500
+  GTG31:  "#22c55e", // green-500
+  GTG17:  "#8b5cf6", // violet-500
+  CG192:  "#a855f7", // purple-500
+  CG565:  "#8b5cf6", // violet-500
+  CG623:  "#f97316", // orange-500 (also flowchart — consistent)
 };
 
 function linkColor(link) {

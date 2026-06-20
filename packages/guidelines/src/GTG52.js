@@ -1,0 +1,177 @@
+export const GTG52_SECTIONS = [
+  {
+    id: "gtg52-overview", gl: "GTG52", condition: "Postpartum Haemorrhage", setting: "Overview & The 4 Ts",
+    title: "PPH — Definition, Classification & Causes",
+    tags: ["pph","postpartum haemorrhage","blood loss","atony","4 Ts","tone","trauma","tissue","thrombin","primary pph","500ml","1000ml","major pph","minor pph","massive pph","2500ml"],
+    content: [
+      { type: "subheading", value: "Definition & Classification" },
+      { type: "list", items: [
+        "Primary PPH: blood loss ≥500 ml from genital tract within 24 hours of birth",
+        "Minor PPH: 500–1000 ml — initial measures often sufficient",
+        "Major PPH: >1000 ml — requires escalation",
+        "Moderate major PPH: 1001–2000 ml",
+        "Severe major PPH: >2000 ml — activate massive haemorrhage protocol",
+        "Secondary PPH: abnormal bleeding 24 hours to 12 weeks postpartum",
+      ]},
+      { type: "subheading", value: "The 4 Ts — Causes" },
+      { type: "table", headers: ["Cause", "Frequency", "Examples"], rows: [
+        ["Tone (uterine atony)", "~80%", "Polyhydramnios, multiple pregnancy, macrosomia, prolonged labour, uterine fibroids, chorioamnionitis"],
+        ["Tissue (retained products)", "~10%", "Retained placenta, retained products of conception, morbid placental adhesion"],
+        ["Trauma (genital tract injury)", "~5%", "Perineal, vaginal, cervical, uterine lacerations; uterine rupture, uterine inversion"],
+        ["Thrombin (coagulopathy)", "~1–5%", "Antepartum DIC (abruption, IVF), inherited coagulation disorders, therapeutic anticoagulation"],
+      ]},
+      { type: "subheading", value: "Risk Factors for Atonic PPH" },
+      { type: "list", items: [
+        "Previous PPH or placenta praevia",
+        "Multiple pregnancy or polyhydramnios (overdistension)",
+        "Macrosomia (EFW >4 kg)",
+        "Grand multiparity (≥5 deliveries)",
+        "Prolonged labour (especially third stage >30 min)",
+        "Chorioamnionitis or pyrexia in labour",
+        "Uterine fibroids",
+        "General anaesthesia, oxytocin augmentation",
+        "Placenta praevia or accreta suspected",
+      ]},
+      { type: "alert", value: "Women at increased risk of PPH should deliver in a consultant-led unit with immediate access to blood products and theatre." },
+    ]
+  },
+  {
+    id: "gtg52-prevention", gl: "GTG52", condition: "Postpartum Haemorrhage", setting: "Prevention (AMTSL)",
+    title: "PPH — Active Management of the Third Stage",
+    tags: ["amtsl","active management","third stage","oxytocin","syntometrine","ergometrine","uterotonics","misoprostol","cord traction","controlled cord traction","uterine massage","cord clamping"],
+    content: [
+      { type: "subheading", value: "Active Management of Third Stage Labour (AMTSL)" },
+      { type: "text", value: "AMTSL reduces the risk of PPH by approximately 60% and is recommended for all women. It consists of uterotonic administration, controlled cord traction, and uterine massage only if indicated." },
+      { type: "subheading", value: "Uterotonics — First Choice" },
+      { type: "list", items: [
+        "Oxytocin 10 IU IM: preferred for all vaginal and caesarean births — give at delivery of anterior shoulder",
+        "IV route: 5 IU IV slowly (1–2 min) if IV access already established — avoid rapid bolus (hypotension)",
+        "Following caesarean birth: oxytocin infusion 40 IU in 500 ml Hartmann's over 4 hours",
+      ]},
+      { type: "subheading", value: "Uterotonics — Additional / High-Risk" },
+      { type: "list", items: [
+        "Carbetocin 100 mcg IV (slow bolus): licensed alternative to oxytocin + ergometrine for CS, longer duration of action",
+        "Syntometrine (oxytocin 5 IU + ergometrine 500 mcg) IM: for vaginal birth in women at increased risk — avoid if hypertension, cardiac disease",
+        "Misoprostol 400–600 mcg sublingual: if oxytocin unavailable or ineffective",
+      ]},
+      { type: "subheading", value: "Cord Traction and Placental Delivery" },
+      { type: "list", items: [
+        "Controlled cord traction (Brandt-Andrews): apply gentle traction with uterine counter-traction once uterus contracted",
+        "Do NOT apply cord traction without uterine contraction — risk of cord avulsion or uterine inversion",
+        "If placenta not delivered within 30 minutes: consider manual removal of placenta under anaesthesia",
+      ]},
+      { type: "alert", value: "Routine uterine massage after placental delivery is NOT recommended in low-risk women — no additional reduction in PPH risk and causes discomfort." },
+    ]
+  },
+  {
+    id: "gtg52-minor", gl: "GTG52", condition: "Postpartum Haemorrhage", setting: "Minor PPH Management",
+    title: "PPH — Minor (500–1000 ml)",
+    tags: ["minor pph","500ml","1000ml","iv access","oxytocin","bimanual compression","catheter","urine output","ergometrine","initial management"],
+    content: [
+      { type: "subheading", value: "Immediate Actions" },
+      { type: "list", items: [
+        "Call for help — inform midwife in charge and obstetrician",
+        "Rub up a uterine contraction — bimanual uterine massage",
+        "Establish IV access: 16G cannula × 1 (minimum)",
+        "Send bloods: FBC, coagulation screen, U&E, LFT, group & screen",
+        "IV fluid resuscitation with crystalloid (Hartmann's/0.9% saline)",
+        "Catheterise — monitor urine output hourly (target >30 ml/hr)",
+        "Keep patient warm, treat pain adequately",
+      ]},
+      { type: "subheading", value: "Uterotonics (Minor PPH)" },
+      { type: "list", items: [
+        "Oxytocin 5 IU IV slowly — if not already given for third-stage",
+        "Oxytocin infusion: 40 IU in 500 ml Hartmann's at 125 ml/hr",
+        "Ergometrine 500 mcg IM or IV slowly — if oxytocin alone insufficient (avoid if hypertension or cardiac disease)",
+        "Misoprostol 800 mcg PR/SL if parenteral agents unavailable",
+      ]},
+      { type: "subheading", value: "Address the Cause" },
+      { type: "list", items: [
+        "Tone: bimanual uterine compression, fundal massage",
+        "Tissue: check placenta is complete — if in doubt, explore uterine cavity",
+        "Trauma: inspect cervix and vagina with good exposure and lighting",
+        "Thrombin: check coagulation results, correct if abnormal",
+      ]},
+      { type: "alert", value: "If blood loss approaches 1000 ml or the woman is haemodynamically compromised — escalate immediately to major PPH protocol." },
+    ]
+  },
+  {
+    id: "gtg52-major", gl: "GTG52", condition: "Postpartum Haemorrhage", setting: "Major PPH Management",
+    title: "PPH — Major (>1000 ml)",
+    tags: ["major pph","1000ml","2000ml","resuscitation","carboprost","tranexamic acid","txa","blood transfusion","crossmatch","mbu","massive haemorrhage protocol","mhp","ffp","platelets","cryoprecipitate","fibrinogen"],
+    content: [
+      { type: "alert", value: "Major PPH (>1000 ml) — activate the major haemorrhage response immediately. Do not delay treatment awaiting laboratory results." },
+      { type: "subheading", value: "Call for Help" },
+      { type: "list", items: [
+        "Call senior midwife, senior obstetrician, anaesthetist",
+        "Alert theatre team if surgical intervention may be needed",
+        "Activate local major PPH protocol",
+        "Consider early obstetric consultant involvement",
+      ]},
+      { type: "subheading", value: "IV Access & Resuscitation" },
+      { type: "list", items: [
+        "2 × large bore IV cannulae (14G or 16G)",
+        "Crossmatch 4 units red cells urgently",
+        "Rapid crystalloid infusion (Hartmann's up to 1.5–2 L) pending blood products",
+        "O-negative blood if immediate life-threatening haemorrhage before crossmatch available",
+        "Target Hb >80 g/L, Plt >75 × 10⁹/L, fibrinogen >2 g/L",
+      ]},
+      { type: "subheading", value: "Pharmacological Management" },
+      { type: "list", items: [
+        "Oxytocin infusion: 40 IU in 500 ml Hartmann's — continue",
+        "Ergometrine 500 mcg IV slowly (if not contraindicated)",
+        "Carboprost (Hemabate) 0.25 mg IM every 15 minutes — max 8 doses (contraindicated in asthma)",
+        "Misoprostol 800 mcg PR/SL",
+        "Tranexamic acid 1 g IV over 10 minutes — give as soon as possible (within 3 hours of birth)",
+      ]},
+      { type: "subheading", value: "Blood Products" },
+      { type: "list", items: [
+        "Red cells: transfuse to maintain Hb >80 g/L",
+        "FFP 4 units: if fibrinogen <1.5 g/L or coagulopathy developing; ratio 1:1 with red cells if massive",
+        "Cryoprecipitate 2 pools: if fibrinogen <2 g/L — first choice for fibrinogen replacement",
+        "Platelets: transfuse if Plt <75 × 10⁹/L (or <100 if ongoing bleeding)",
+        "Consider recombinant Factor VIIa in life-threatening haemorrhage not responding to standard measures",
+      ]},
+    ]
+  },
+  {
+    id: "gtg52-massive", gl: "GTG52", condition: "Postpartum Haemorrhage", setting: "Massive PPH / MHP",
+    title: "PPH — Massive (>2500 ml) & Surgical Options",
+    tags: ["massive pph","2500ml","mhp","massive haemorrhage protocol","balloon tamponade","b-lynch","hayman","devascularisation","uterine artery embolisation","interventional radiology","hysterectomy","cell salvage","recombinant factor viia"],
+    content: [
+      { type: "alert", value: "Massive PPH (>2500 ml or any life-threatening haemorrhage) — activate hospital Massive Haemorrhage Protocol (MHP). Contact haematologist and blood bank immediately." },
+      { type: "subheading", value: "Activate MHP" },
+      { type: "list", items: [
+        "Call consultant obstetrician, anaesthetist, and haematologist",
+        "MHP pack: 6 units red cells + 4 units FFP ± platelets ± cryoprecipitate",
+        "Cell salvage: use if available (requires haematologist authorisation if Rhesus negative)",
+        "Point-of-care coagulation testing (ROTEM/TEG) to guide product replacement",
+        "Keep patient warm — hypothermia worsens coagulopathy",
+        "Correct acidosis and ionised hypocalcaemia (10 ml 10% calcium gluconate per 4 units red cells)",
+      ]},
+      { type: "subheading", value: "Intrauterine Balloon Tamponade" },
+      { type: "list", items: [
+        "Bakri balloon or SOS Bakri: insert into uterine cavity and inflate with 300–500 ml saline",
+        "Used when atony persists despite uterotonics",
+        "'Tamponade test': if bleeding stops with balloon inflated, conservative management may suffice",
+        "May allow time to transfer to theatre or interventional radiology",
+      ]},
+      { type: "subheading", value: "Surgical Options (in order of invasiveness)" },
+      { type: "list", items: [
+        "B-Lynch suture (brace suture): compresses uterine body — effective for atony at caesarean",
+        "Hayman suture: simpler brace suture technique",
+        "Systematic pelvic devascularisation: bilateral uterine artery ligation ± ovarian artery ligation",
+        "Uterine artery embolisation (UAE): interventional radiology — uterine conservation; suitable if haemodynamically stable",
+        "Peripartum hysterectomy: life-saving last resort — obstetric consultant + gynaecological oncologist if available",
+      ]},
+      { type: "subheading", value: "Post-Event Care" },
+      { type: "list", items: [
+        "HDU or ITU admission after massive PPH",
+        "VTE assessment and LMWH once haemostasis achieved (high VTE risk post-major PPH)",
+        "Debrief: patient and partner, with written summary",
+        "Postnatal debrief with consultant before discharge",
+        "MBRRACE notification if maternal death or near-miss",
+      ]},
+    ]
+  },
+];

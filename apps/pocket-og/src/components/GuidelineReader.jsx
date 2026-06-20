@@ -7,6 +7,8 @@ import {
   QS46_SECTIONS, QS22_SECTIONS,
   GTG57_SECTIONS, GTG63_SECTIONS, GTG67_SECTIONS,
   NG88_SECTIONS, NHSCSP20_SECTIONS,
+  GTG52_SECTIONS, GTG69_SECTIONS, NG25_SECTIONS,
+  GTG31_SECTIONS, GTG17_SECTIONS, CG192_SECTIONS,
 } from "@pocket-og/guidelines";
 import { FLOWCHARTS } from "../data/flowcharts";
 import { GUIDELINE_KEYWORD_LINKS } from "../data/connections";
@@ -32,6 +34,12 @@ const SECTIONS_MAP = {
   GTG67: GTG67_SECTIONS,
   NG88:  NG88_SECTIONS,
   NHSCSP20: NHSCSP20_SECTIONS,
+  GTG52: GTG52_SECTIONS,
+  GTG69: GTG69_SECTIONS,
+  NG25:  NG25_SECTIONS,
+  GTG31: GTG31_SECTIONS,
+  GTG17: GTG17_SECTIONS,
+  CG192: CG192_SECTIONS,
 };
 
 // Colours match the existing GL colour system in App.jsx / WikiCard
@@ -54,6 +62,12 @@ const GL_THEME = {
   GTG67:    { badge: "bg-green-50 text-green-700",    conditionColor: "text-green-500"    },
   NG88:     { badge: "bg-fuchsia-50 text-fuchsia-700",conditionColor: "text-fuchsia-500"  },
   NHSCSP20: { badge: "bg-slate-50 text-slate-700",    conditionColor: "text-slate-500"    },
+  GTG52: { badge: "bg-red-50 text-red-700",         conditionColor: "text-red-500"      },
+  GTG69: { badge: "bg-orange-50 text-orange-700",   conditionColor: "text-orange-500"   },
+  NG25:  { badge: "bg-sky-50 text-sky-700",         conditionColor: "text-sky-500"      },
+  GTG31: { badge: "bg-green-50 text-green-700",     conditionColor: "text-green-500"    },
+  GTG17: { badge: "bg-violet-50 text-violet-700",   conditionColor: "text-violet-500"   },
+  CG192: { badge: "bg-purple-50 text-purple-700",   conditionColor: "text-purple-500"   },
 };
 
 const DEFAULT_THEME = { badge: "bg-gray-100 text-gray-600", conditionColor: "text-gray-400" };

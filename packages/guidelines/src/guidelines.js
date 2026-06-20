@@ -17,6 +17,12 @@ export const GUIDELINES = {
   NG88: { code: "NG88", label: "Heavy Menstrual Bleeding", version: "NG88", date: "September 2023", color: "fuchsia", pdf: true, pdfPath: "/guidelines/heavy-menstrual-bleeding-assessment-and-management-pdf-1837701412549.pdf", source: "NICE" },
   GTG67:    { code: "GTG67",    label: "Management of Endometrial Hyperplasia", version: "GTG67",    date: "February 2016", color: "green", pdf: true, pdfPath: "/guidelines/gtg_67_endometrial_hyperplasia.pdf", source: "RCOG" },
   NHSCSP20: { code: "NHSCSP20", label: "Cervical Screening & Colposcopy",        version: "NHSCSP20", date: "2020 (updated 2025)", color: "slate", pdf: false, source: "NHSCSP" },
+  GTG52: { code: "GTG52", label: "Postpartum Haemorrhage",               version: "GTG52",    date: "December 2016", color: "red",    pdf: true, source: "RCOG" },
+  GTG69: { code: "GTG69", label: "Nausea & Vomiting of Pregnancy",       version: "GTG69",    date: "June 2016",     color: "orange", pdf: true, source: "RCOG" },
+  NG25:  { code: "NG25",  label: "Preterm Labour & Birth",               version: "NG25",     date: "November 2015 (updated 2022)", color: "sky",    pdf: true, source: "NICE" },
+  GTG31: { code: "GTG31", label: "Small for Gestational Age Fetus (SGA)", version: "GTG31",   date: "February 2013", color: "green",  pdf: true, source: "RCOG" },
+  GTG17: { code: "GTG17", label: "Recurrent Miscarriage",                version: "GTG17",    date: "April 2011",    color: "violet", pdf: true, source: "RCOG" },
+  CG192: { code: "CG192", label: "Perinatal Mental Health",              version: "NG192",    date: "December 2014 (updated 2020)", color: "purple", pdf: true, source: "NICE" },
 };
 
 export const GL_COLORS = {
@@ -38,4 +44,10 @@ export const GL_COLORS = {
   NG88: { badge: "bg-fuchsia-900/50 text-fuchsia-300 border-fuchsia-600/40", dot: "bg-fuchsia-400" },
   GTG67:    { badge: "bg-green-900/50 text-green-300 border-green-600/40",   dot: "bg-green-400" },
   NHSCSP20: { badge: "bg-slate-900/50 text-slate-300 border-slate-600/40",   dot: "bg-slate-400" },
+  GTG52: { badge: "bg-red-900/50 text-red-300 border-red-600/40",         dot: "bg-red-400" },
+  GTG69: { badge: "bg-orange-900/50 text-orange-300 border-orange-600/40", dot: "bg-orange-400" },
+  NG25:  { badge: "bg-sky-900/50 text-sky-300 border-sky-600/40",         dot: "bg-sky-400" },
+  GTG31: { badge: "bg-green-900/50 text-green-300 border-green-600/40",   dot: "bg-green-400" },
+  GTG17: { badge: "bg-violet-900/50 text-violet-300 border-violet-600/40", dot: "bg-violet-400" },
+  CG192: { badge: "bg-purple-900/50 text-purple-300 border-purple-600/40", dot: "bg-purple-400" },
 };

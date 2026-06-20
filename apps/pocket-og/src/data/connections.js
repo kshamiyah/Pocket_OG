@@ -262,4 +262,40 @@ export const GUIDELINE_KEYWORD_LINKS = {
   NG88: [
     { phrase: "anaemia",               type: "reader", id: "GL783", gl: "GL783", label: "Iron Deficiency Anaemia" },
   ],
+
+  GTG52: [
+    { phrase: "pre-eclampsia",    type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "VTE",              type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+    { phrase: "chorioamnionitis", type: "reader", id: "GL895", gl: "GL895", label: "PPRoM" },
+  ],
+
+  GTG69: [
+    { phrase: "VTE",      type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+    { phrase: "diabetes", type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
+  ],
+
+  NG25: [
+    { phrase: "pre-eclampsia",    type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "chorioamnionitis", type: "reader", id: "GL895", gl: "GL895", label: "PPRoM" },
+    { phrase: "diabetes",         type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
+  ],
+
+  GTG31: [
+    { phrase: "pre-eclampsia", type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "VTE",           type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+    { phrase: "anaemia",       type: "reader", id: "GL783", gl: "GL783", label: "Iron Deficiency Anaemia" },
+    { phrase: "diabetes",      type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
+  ],
+
+  GTG17: [
+    { phrase: "VTE",         type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+    { phrase: "ectopic",     type: "reader", id: "CG623", gl: "CG623", label: "Ectopic Pregnancy" },
+    { phrase: "miscarriage", type: "reader", id: "CG565", gl: "CG565", label: "First Trimester Miscarriage" },
+  ],
+
+  CG192: [
+    { phrase: "VTE",           type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+    { phrase: "pre-eclampsia", type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "diabetes",      type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
+  ],
 };
