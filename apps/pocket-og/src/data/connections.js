@@ -210,6 +210,7 @@ export const GUIDELINE_KEYWORD_LINKS = {
     { phrase: "obstetric cholestasis", type: "reader", id: "GL880", gl: "GL880", label: "Intrahepatic Cholestasis of Pregnancy" },
     { phrase: "anticoagulation",       type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
     { phrase: "VTE",                   type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+    { phrase: "Fetal growth restriction", type: "reader", id: "GTG31", gl: "GTG31", label: "SGA & Fetal Growth Restriction" },
   ],
 
   GL952: [
@@ -217,20 +218,27 @@ export const GUIDELINE_KEYWORD_LINKS = {
   ],
 
   GL891: [
-    { phrase: "pre-eclampsia",         type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "pre-eclampsia", type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "hyperemesis",   type: "reader", id: "GTG69", gl: "GTG69", label: "Nausea & Vomiting of Pregnancy" },
+    { phrase: "PPH",           type: "reader", id: "GTG52", gl: "GTG52", label: "Postpartum Haemorrhage" },
   ],
 
   GL983: [
-    { phrase: "pre-eclampsia",         type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "pre-eclampsia",       type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "hyperemesis gravidarum", type: "reader", id: "GTG69", gl: "GTG69", label: "Nausea & Vomiting of Pregnancy" },
   ],
 
   GL880: [
-    { phrase: "pre-eclampsia",         type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
-    { phrase: "diabetes",              type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
+    { phrase: "pre-eclampsia",       type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "diabetes",            type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
+    { phrase: "preterm birth",       type: "reader", id: "NG25",  gl: "NG25",  label: "Preterm Labour & Birth" },
+    { phrase: "postpartum haemorrhage", type: "reader", id: "GTG52", gl: "GTG52", label: "Postpartum Haemorrhage" },
   ],
 
   GL895: [
-    { phrase: "GBS",                   type: "reader", id: "GL787", gl: "GL787", label: "Obstetric Antibiotics" },
+    { phrase: "GBS",     type: "reader", id: "GL787", gl: "GL787", label: "Obstetric Antibiotics" },
+    { phrase: "preterm", type: "reader", id: "NG25",  gl: "NG25",  label: "Preterm Labour & Birth" },
+    { phrase: "PPH",     type: "reader", id: "GTG52", gl: "GTG52", label: "Postpartum Haemorrhage" },
   ],
 
   CG565: [
@@ -242,25 +250,36 @@ export const GUIDELINE_KEYWORD_LINKS = {
   ],
 
   QS22: [
-    { phrase: "VTE",                   type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
-    { phrase: "pre-eclampsia",         type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
-    { phrase: "GDM",                   type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
-    { phrase: "anaemia",               type: "reader", id: "GL783", gl: "GL783", label: "Iron Deficiency Anaemia" },
+    { phrase: "VTE",                  type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+    { phrase: "pre-eclampsia",        type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "GDM",                  type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
+    { phrase: "anaemia",              type: "reader", id: "GL783", gl: "GL783", label: "Iron Deficiency Anaemia" },
+    { phrase: "Fetal growth restriction", type: "reader", id: "GTG31", gl: "GTG31", label: "SGA & Fetal Growth Restriction" },
+    { phrase: "mental health",        type: "reader", id: "CG192", gl: "CG192", label: "Perinatal Mental Health" },
+    { phrase: "preterm",              type: "reader", id: "NG25",  gl: "NG25",  label: "Preterm Labour & Birth" },
   ],
 
   GTG57: [
-    { phrase: "IOL",                   type: "reader", id: "GL861", gl: "GL861", label: "Induction of Labour" },
-    { phrase: "pre-eclampsia",         type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
-    { phrase: "diabetes",              type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
+    { phrase: "IOL",           type: "reader", id: "GL861", gl: "GL861", label: "Induction of Labour" },
+    { phrase: "pre-eclampsia", type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "diabetes",      type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
+    { phrase: "SGA",           type: "reader", id: "GTG31", gl: "GTG31", label: "SGA & Fetal Growth Restriction" },
   ],
 
   GTG63: [
-    { phrase: "IOL",                   type: "reader", id: "GL861", gl: "GL861", label: "Induction of Labour" },
-    { phrase: "VTE",                   type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+    { phrase: "IOL",                  type: "reader", id: "GL861", gl: "GL861", label: "Induction of Labour" },
+    { phrase: "VTE",                  type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+    { phrase: "PPH",                  type: "reader", id: "GTG52", gl: "GTG52", label: "Postpartum Haemorrhage" },
+    { phrase: "preterm",              type: "reader", id: "NG25",  gl: "NG25",  label: "Preterm Labour & Birth" },
+    { phrase: "Fetal growth restriction", type: "reader", id: "GTG31", gl: "GTG31", label: "SGA & Fetal Growth Restriction" },
   ],
 
   NG88: [
     { phrase: "anaemia",               type: "reader", id: "GL783", gl: "GL783", label: "Iron Deficiency Anaemia" },
+  ],
+
+  NHSCSP20: [
+    { phrase: "preterm birth", type: "reader", id: "NG25", gl: "NG25", label: "Preterm Labour & Birth" },
   ],
 
   GTG52: [
