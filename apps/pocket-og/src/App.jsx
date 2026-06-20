@@ -16,6 +16,7 @@ const READER_AVAILABLE = new Set([
   "GL861", "GL952", "GL891", "GL983", "GL880", "GL787", "GL783", "GL895",
   "CG565", "CG621", "CG623", "QS46", "QS22", "GTG57", "GTG63", "GTG67",
   "NG88", "NHSCSP20",
+  "GTG52", "GTG69", "NG25", "GTG31", "GTG17", "CG192",
 ]);
 
 const FILTER_OPTIONS = [
@@ -90,6 +91,12 @@ const FC_GL_COLOR = {
   NG88:  { badge: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100", icon: "text-fuchsia-500", accent: "bg-fuchsia-400", solid: "bg-fuchsia-600", solidHover: "hover:bg-fuchsia-700" },
   GTG67:    { badge: "bg-green-50 text-green-700 border-green-100",     icon: "text-green-500",   accent: "bg-green-400",   solid: "bg-green-600",   solidHover: "hover:bg-green-700" },
   NHSCSP20: { badge: "bg-slate-50 text-slate-700 border-slate-100",     icon: "text-slate-500",   accent: "bg-slate-400",   solid: "bg-slate-600",   solidHover: "hover:bg-slate-700" },
+  GTG52: { badge: "bg-red-50 text-red-700 border-red-100",           icon: "text-red-500",     accent: "bg-red-400",     solid: "bg-red-600",     solidHover: "hover:bg-red-700" },
+  GTG69: { badge: "bg-orange-50 text-orange-700 border-orange-100",  icon: "text-orange-400",  accent: "bg-orange-400",  solid: "bg-orange-500",  solidHover: "hover:bg-orange-600" },
+  NG25:  { badge: "bg-sky-50 text-sky-700 border-sky-100",           icon: "text-sky-400",     accent: "bg-sky-400",     solid: "bg-sky-600",     solidHover: "hover:bg-sky-700" },
+  GTG31: { badge: "bg-green-50 text-green-700 border-green-100",     icon: "text-green-500",   accent: "bg-green-400",   solid: "bg-green-600",   solidHover: "hover:bg-green-700" },
+  GTG17: { badge: "bg-violet-50 text-violet-700 border-violet-100",  icon: "text-violet-400",  accent: "bg-violet-400",  solid: "bg-violet-600",  solidHover: "hover:bg-violet-700" },
+  CG192: { badge: "bg-purple-50 text-purple-700 border-purple-100",  icon: "text-purple-500",  accent: "bg-purple-500",  solid: "bg-purple-600",  solidHover: "hover:bg-purple-700" },
 };
 
 const FLOWCHART_GROUPS = [
@@ -614,7 +621,7 @@ export default function App() {
                             <div className="flex items-center gap-2 shrink-0">
                               {gl.pdf && (
                                 <a
-                                  href={gl.pdfPath || `/guidelines/${gl.code}.pdf`}
+                                  href={gl.pdfUrl || gl.pdfPath || `/guidelines/${gl.code}.pdf`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   onClick={e => e.stopPropagation()}
