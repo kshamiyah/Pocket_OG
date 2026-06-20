@@ -69,6 +69,17 @@ export const CALCULATOR_SCENARIOS = [
       { label: "RCOG GTG37a", url: "/guidelines/gtg-37a.pdf" },
     ],
   },
+  {
+    id: "PUQE",
+    title: "PUQE Score",
+    subtitle: "Severity of nausea & vomiting in pregnancy",
+    source: "RCOG GTG69 · Pregnancy-Unique Quantification of Emesis",
+    color: { accent: "bg-orange-500", text: "text-orange-700", bg: "bg-orange-50", border: "border-orange-200" },
+    description: "3-question validated tool to classify NVP severity and guide management setting.",
+    pdfs: [
+      { label: "RCOG GTG69", url: "https://obgyn.onlinelibrary.wiley.com/doi/epdf/10.1111/1471-0528.17739" },
+    ],
+  },
 ];
 
 // ──────────────────────────────────────────────────────────────────────

@@ -25,12 +25,75 @@ export const CALCULATOR_CONNECTIONS = {
     { type: "flowchart", id: "GL891_ANTENATAL", gl: "GL891", label: "Antenatal VTE pathway", sublabel: "GL891 — risk assessment & prophylaxis" },
     { type: "flowchart", id: "GL891_POSTNATAL", gl: "GL891", label: "Postnatal VTE pathway", sublabel: "GL891 — risk assessment & prophylaxis" },
   ],
+  PUQE: [
+    { type: "reader", id: "GTG69", gl: "GTG69", label: "GTG69 — NVP & HG guideline", sublabel: "Full guideline text" },
+  ],
 };
 
 // Per-flowchart, per-node connections.
 // whatsNext: rendered on end nodes as a "What's next" block.
 // inlineLinks: { phrase, type, id, gl } — phrases in node.text that become tappable.
 export const FLOWCHART_NODE_CONNECTIONS = {
+
+  // ── PPH (GTG52) ─────────────────────────────────────────────────────
+  GTG52_PPH: {
+    "normal": {
+      whatsNext: [
+        { type: "reader", id: "GTG52", gl: "GTG52", label: "GTG52 — PPH guideline", sublabel: "Full guideline text" },
+      ],
+    },
+    "minor_resolved": {
+      whatsNext: [
+        { type: "reader", id: "GTG52", gl: "GTG52", label: "GTG52 — PPH guideline", sublabel: "Full guideline text" },
+      ],
+    },
+    "major_resolved": {
+      whatsNext: [
+        { type: "reader", id: "GTG52", gl: "GTG52", label: "GTG52 — PPH guideline", sublabel: "Full guideline text" },
+      ],
+    },
+    "end_massive": {
+      whatsNext: [
+        { type: "reader", id: "GTG52", gl: "GTG52", label: "GTG52 — PPH guideline", sublabel: "Full guideline text" },
+      ],
+    },
+  },
+
+  // ── SGA / FGR (GTG31) ───────────────────────────────────────────────
+  GTG31_SURVEILLANCE: {
+    "minor_normal": {
+      whatsNext: [
+        { type: "reader", id: "GTG31", gl: "GTG31", label: "GTG31 — SGA guideline", sublabel: "Full guideline text" },
+      ],
+    },
+    "major_normal": {
+      whatsNext: [
+        { type: "reader", id: "GTG31", gl: "GTG31", label: "GTG31 — SGA guideline", sublabel: "Full guideline text" },
+      ],
+    },
+    "deliver_34": {
+      whatsNext: [
+        { type: "reader", id: "GTG31", gl: "GTG31", label: "GTG31 — SGA guideline", sublabel: "Full guideline text" },
+        { type: "reader", id: "NG25",  gl: "NG25",  label: "NG25 — Preterm Labour & Birth", sublabel: "Corticosteroids, MgSO₄, tocolysis" },
+      ],
+    },
+    "deliver_32": {
+      whatsNext: [
+        { type: "reader", id: "GTG31", gl: "GTG31", label: "GTG31 — SGA guideline", sublabel: "Full guideline text" },
+        { type: "reader", id: "NG25",  gl: "NG25",  label: "NG25 — Preterm Labour & Birth", sublabel: "Corticosteroids, MgSO₄, tocolysis" },
+      ],
+    },
+    "deliver_now": {
+      whatsNext: [
+        { type: "reader", id: "NG25",  gl: "NG25",  label: "NG25 — Preterm Labour & Birth", sublabel: "Corticosteroids, MgSO₄" },
+      ],
+    },
+    "emergency": {
+      whatsNext: [
+        { type: "reader", id: "NG25",  gl: "NG25",  label: "NG25 — Preterm Labour & Birth", sublabel: "Corticosteroids, MgSO₄" },
+      ],
+    },
+  },
 
   // ── Ectopic pregnancy (CG623) ────────────────────────────────────────
   CG623_MTX: {
@@ -283,14 +346,14 @@ export const GUIDELINE_KEYWORD_LINKS = {
   ],
 
   GTG52: [
-    { phrase: "pre-eclampsia",    type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
-    { phrase: "VTE",              type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
-    { phrase: "chorioamnionitis", type: "reader", id: "GL895", gl: "GL895", label: "PPRoM" },
+    { phrase: "pre-eclampsia",    type: "reader",    id: "GL952",    gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "VTE",              type: "reader",    id: "GL891",    gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+    { phrase: "chorioamnionitis", type: "reader",    id: "GL895",    gl: "GL895", label: "PPRoM" },
   ],
 
   GTG69: [
-    { phrase: "VTE",      type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
-    { phrase: "diabetes", type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
+    { phrase: "VTE",      type: "reader",     id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
+    { phrase: "diabetes", type: "reader",     id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
   ],
 
   NG25: [

@@ -73,6 +73,8 @@ const FLOWCHART_LINKS = [
   { id: "NHSCSP20_COLPOSCOPY",   gl: "NHSCSP20" },
   { id: "NHSCSP20_TOC",          gl: "NHSCSP20" },
   { id: "NHSCSP20_PREGNANCY",    gl: "NHSCSP20" },
+  { id: "GTG52_PPH",             gl: "GTG52" },
+  { id: "GTG31_SURVEILLANCE",    gl: "GTG31" },
 ];
 
 const FC_GL_COLOR = {
@@ -115,6 +117,8 @@ const FLOWCHART_GROUPS = [
   { gl: "NG88",  label: "Heavy Menstrual Bleeding" },
   { gl: "GTG67",    label: "Endometrial Hyperplasia" },
   { gl: "NHSCSP20", label: "Cervical Screening & Colposcopy" },
+  { gl: "GTG52",    label: "Postpartum Haemorrhage" },
+  { gl: "GTG31",    label: "Small for Gestational Age / FGR" },
 ];
 
 export default function App() {

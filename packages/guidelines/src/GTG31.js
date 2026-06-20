@@ -30,7 +30,7 @@ export const GTG31_SECTIONS = [
     ]
   },
   {
-    id: "gtg31-surveillance", gl: "GTG31", condition: "SGA & Fetal Growth Restriction", setting: "Surveillance Protocol",
+    id: "gtg31-surveillance", gl: "GTG31", condition: "SGA & Fetal Growth Restriction", setting: "Surveillance Protocol", flowchartId: "GTG31_SURVEILLANCE",
     title: "SGA/FGR — Doppler Surveillance Categories",
     tags: ["doppler","umbilical artery","mca","middle cerebral artery","ductus venosus","dv","absent end diastolic flow","aedf","reversed end diastolic flow","redf","biophysical profile","bpp","liquor","amniotic fluid","surveillance","serial growth scan"],
     content: [
@@ -59,7 +59,7 @@ export const GTG31_SECTIONS = [
     ]
   },
   {
-    id: "gtg31-delivery", gl: "GTG31", condition: "SGA & Fetal Growth Restriction", setting: "Delivery Timing",
+    id: "gtg31-delivery", gl: "GTG31", condition: "SGA & Fetal Growth Restriction", setting: "Delivery Timing", flowchartId: "GTG31_SURVEILLANCE",
     title: "SGA/FGR — Timing and Mode of Delivery",
     tags: ["delivery","timing","37 weeks","32 weeks","34 weeks","corticosteroids","magnesium sulphate","induction","caesarean section","mode","iol","cs","neonatal","nicu","icu","admission"],
     content: [

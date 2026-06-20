@@ -64,7 +64,7 @@ export const GTG52_SECTIONS = [
     ]
   },
   {
-    id: "gtg52-minor", gl: "GTG52", condition: "Postpartum Haemorrhage", setting: "Minor PPH Management",
+    id: "gtg52-minor", gl: "GTG52", condition: "Postpartum Haemorrhage", setting: "Minor PPH Management", flowchartId: "GTG52_PPH",
     title: "PPH — Minor (500–1000 ml)",
     tags: ["minor pph","500ml","1000ml","iv access","oxytocin","bimanual compression","catheter","urine output","ergometrine","initial management"],
     content: [
@@ -96,7 +96,7 @@ export const GTG52_SECTIONS = [
     ]
   },
   {
-    id: "gtg52-major", gl: "GTG52", condition: "Postpartum Haemorrhage", setting: "Major PPH Management",
+    id: "gtg52-major", gl: "GTG52", condition: "Postpartum Haemorrhage", setting: "Major PPH Management", flowchartId: "GTG52_PPH",
     title: "PPH — Major (>1000 ml)",
     tags: ["major pph","1000ml","2000ml","resuscitation","carboprost","tranexamic acid","txa","blood transfusion","crossmatch","mbu","massive haemorrhage protocol","mhp","ffp","platelets","cryoprecipitate","fibrinogen"],
     content: [

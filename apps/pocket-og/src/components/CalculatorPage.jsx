@@ -918,6 +918,117 @@ function VteRiskCalculator({ onBack, pdfs, onNavigate }) {
   );
 }
 
+// ─── Scenario: PUQE Score ─────────────────────────────────────────────
+
+const PUQE_QUESTIONS = [
+  {
+    key: "nausea",
+    label: "In the last 24 hours, for how long have you felt nauseated or sick to your stomach?",
+    options: [
+      { value: 1, label: "≤ 1 hour" },
+      { value: 2, label: "1–3 hours" },
+      { value: 3, label: "3–6 hours" },
+      { value: 4, label: "6–9 hours" },
+      { value: 5, label: "> 9 hours" },
+    ],
+  },
+  {
+    key: "vomiting",
+    label: "In the last 24 hours, how many times have you vomited?",
+    options: [
+      { value: 1, label: "Not at all" },
+      { value: 2, label: "1–2 times" },
+      { value: 3, label: "3–4 times" },
+      { value: 4, label: "5–6 times" },
+      { value: 5, label: "> 6 times" },
+    ],
+  },
+  {
+    key: "retching",
+    label: "In the last 24 hours, how many times have you had retching without bringing anything up?",
+    options: [
+      { value: 1, label: "Not at all" },
+      { value: 2, label: "1–2 times" },
+      { value: 3, label: "3–4 times" },
+      { value: 4, label: "5–6 times" },
+      { value: 5, label: "> 6 times" },
+    ],
+  },
+];
+
+function puqeResult(score) {
+  if (score <= 6)  return { title: "Mild NVP", summary: `Score ${score} / 15`, detail: "Self-care and lifestyle measures are appropriate. Small frequent meals, ginger, pyridoxine (vitamin B6) 10–25 mg TDS. Review if symptoms worsen.", actions: ["Avoid triggers (fatty / spicy food, strong smells)", "Ginger (capsules, biscuits, tea) — modest evidence", "Pyridoxine (vitamin B6) 10–25 mg TDS", "Rest; acupressure wristband if preferred"], citation: "RCOG GTG69", color: "text-green-700", bg: "bg-green-50", border: "border-green-200" };
+  if (score <= 12) return { title: "Moderate NVP", summary: `Score ${score} / 15`, detail: "Day care or ambulatory review recommended. Consider first-line antiemetics. Admit if unable to tolerate oral fluids or antiemetics.", actions: ["First-line: cyclizine 50 mg PO/IV/IM TDS, promethazine 12.5–25 mg QDS, or prochlorperazine 5–10 mg TDS", "Ensure adequate hydration — consider oral rehydration sachets", "Review weight; check urine ketones", "Admit if: ketones 2+, weight loss > 5%, unable to keep fluids down"], citation: "RCOG GTG69", color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200" };
+  return { title: "Severe NVP / Hyperemesis Gravidarum", summary: `Score ${score} / 15`, detail: "Inpatient admission strongly recommended. Give Pabrinex (IV thiamine) BEFORE any glucose-containing fluids. Assess for Wernicke's encephalopathy.", actions: ["ADMIT — IV fluids (Hartmann's first choice), antiemetics IV", "Pabrinex (thiamine) 2 pairs IV in 100 ml NaCl over 30 min — BEFORE dextrose", "Second-line antiemetics: ondansetron 4–8 mg IV/PO, metoclopramide 10 mg IV TDS (max 5 days)", "Consider ondansetron, refractory cases: hydrocortisone 100 mg IV BD", "VTE risk assessment — prescribe LMWH if admitted", "Monitor electrolytes (K+, Na+, phosphate) every 24 hours"], citation: "RCOG GTG69", color: "text-red-700", bg: "bg-red-50", border: "border-red-200" };
+}
+
+function PuqeCalculator({ onBack, pdfs }) {
+  const [answers, setAnswers] = useState({});
+
+  const allAnswered = PUQE_QUESTIONS.every(q => answers[q.key] !== undefined);
+  const score = allAnswered ? PUQE_QUESTIONS.reduce((sum, q) => sum + answers[q.key], 0) : null;
+  const result = score !== null ? puqeResult(score) : null;
+
+  return (
+    <div className="flex flex-col h-full bg-gray-50">
+      <StepHeader title="PUQE Score" subtitle="GTG69 · Nausea & Vomiting of Pregnancy" onBack={onBack} pdfs={pdfs} />
+      <div className="flex-1 overflow-y-auto pb-10">
+        <div className="px-4 space-y-6 pt-4">
+
+          {PUQE_QUESTIONS.map(q => (
+            <div key={q.key}>
+              <p className="text-sm font-semibold text-gray-700 leading-snug mb-3">{q.label}</p>
+              <div className="grid grid-cols-1 gap-2">
+                {q.options.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setAnswers(a => ({ ...a, [q.key]: opt.value }))}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm text-left transition-colors ${
+                      answers[q.key] === opt.value
+                        ? "bg-gray-900 border-gray-900 text-white"
+                        : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    <span className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 text-xs font-bold ${
+                      answers[q.key] === opt.value ? "border-white text-white" : "border-gray-300 text-gray-400"
+                    }`}>{opt.value}</span>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {result && (
+            <div className={`rounded-2xl border ${result.border} ${result.bg} p-5`}>
+              <p className={`text-base font-bold ${result.color}`}>{result.title}</p>
+              <p className="text-xs text-gray-500 font-medium mt-0.5">{result.summary}</p>
+              <p className="text-sm text-gray-700 leading-relaxed mt-3">{result.detail}</p>
+              <ul className="mt-3 space-y-1.5">
+                {result.actions.map((a, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-gray-700 leading-relaxed">
+                    <span className="text-gray-400 mt-1 shrink-0">›</span>
+                    <span>{a}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mt-4">{result.citation}</p>
+            </div>
+          )}
+
+          {!allAnswered && (
+            <p className="text-xs text-gray-400 text-center pb-4">Answer all 3 questions to see your score</p>
+          )}
+
+          <p className="text-[10px] text-gray-300 text-center leading-relaxed pb-4">
+            PUQE is a screening tool — clinical assessment (weight, ketones, electrolytes) always takes precedence. A low PUQE with significant weight loss or electrolyte disturbance still warrants admission.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Entry point ──────────────────────────────────────────────────────
 
 export default function CalculatorPage({ initialScenario, onNavigate }) {
@@ -933,6 +1044,7 @@ export default function CalculatorPage({ initialScenario, onNavigate }) {
   if (scenarioId === "EXPECTANT_SURVEILLANCE") return <ExpectantSurveillanceCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
   if (scenarioId === "MTX_SURVEILLANCE") return <MtxSurveillanceCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
   if (scenarioId === "VTE_RISK") return <VteRiskCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
+  if (scenarioId === "PUQE") return <PuqeCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
 
   return <ScenarioList onSelect={setScenarioId} />;
 }
