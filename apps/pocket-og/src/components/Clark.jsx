@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CLARK_PROTOCOLS, CLARK_CATEGORIES } from "../data/clark";
 
 // ─── Step type badge ──────────────────────────────────────────────────────────
@@ -516,11 +516,23 @@ function ClarkHome({ onSelect, onClose }) {
 
 export default function Clark({ onClose }) {
   const [activeProtocol, setActiveProtocol] = useState(null);
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setRevealed(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col"
-      style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}
+      style={{
+        fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif",
+        clipPath: revealed
+          ? "circle(150% at calc(100% - 48px) calc(100% - 108px))"
+          : "circle(28px at calc(100% - 48px) calc(100% - 108px))",
+        transition: "clip-path 0.55s cubic-bezier(0.22, 1, 0.36, 1)",
+      }}
     >
       {activeProtocol ? (
         <div className="flex flex-col h-full bg-zinc-700">
