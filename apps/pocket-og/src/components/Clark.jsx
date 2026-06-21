@@ -35,10 +35,6 @@ const SEVERITY_CLS = {
 // ─── Checklist node ───────────────────────────────────────────────────────────
 
 function ChecklistNode({ node, stepNum, onContinue }) {
-  const [checked, setChecked] = useState({});
-  const toggle = (i) => setChecked(prev => ({ ...prev, [i]: !prev[i] }));
-  const checkedCount = Object.values(checked).filter(Boolean).length;
-
   return (
     <div className="px-4 py-5 max-w-lg mx-auto">
       <StepBadge type="checklist" stepNum={stepNum} />
@@ -52,29 +48,11 @@ function ChecklistNode({ node, stepNum, onContinue }) {
         </div>
       )}
 
-      <ul className="space-y-2 mb-6">
+      <ul className="space-y-2.5 mb-6">
         {node.items.map((item, i) => (
-          <li
-            key={i}
-            onClick={() => toggle(i)}
-            className={`flex gap-3 items-start px-4 py-3 rounded-2xl border cursor-pointer select-none transition-all ${
-              checked[i]
-                ? "bg-emerald-50 border-emerald-200"
-                : "bg-white border-gray-100 hover:border-gray-200 active:bg-gray-50"
-            }`}
-          >
-            <div className={`mt-0.5 w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center transition-all ${
-              checked[i] ? "bg-emerald-500 border-emerald-500" : "border-gray-300"
-            }`}>
-              {checked[i] && (
-                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              )}
-            </div>
-            <span className={`text-sm leading-snug ${checked[i] ? "text-gray-400 line-through" : "text-gray-800"}`}>
-              {item}
-            </span>
+          <li key={i} className="flex gap-2.5 text-sm text-gray-700 leading-snug">
+            <span className="text-emerald-400 shrink-0 mt-0.5">›</span>
+            <span>{item}</span>
           </li>
         ))}
       </ul>
@@ -83,13 +61,8 @@ function ChecklistNode({ node, stepNum, onContinue }) {
         onClick={onContinue}
         className="w-full py-3.5 rounded-2xl text-sm font-semibold bg-gray-900 hover:bg-black text-white transition-colors"
       >
-        {checkedCount > 0
-          ? `Continue (${checkedCount}/${node.items.length} checked) →`
-          : "Continue →"}
+        Continue →
       </button>
-      {checkedCount < node.items.length && (
-        <p className="text-xs text-gray-400 text-center mt-2">You can continue without checking all items</p>
-      )}
     </div>
   );
 }
@@ -476,8 +449,8 @@ function ClarkHome({ onSelect, onClose }) {
           </button>
         </div>
 
-        <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
-          <p className="text-xs text-gray-400 leading-relaxed">
+        <div className="bg-white/5 border border-white/8 rounded-2xl px-4 py-3">
+          <p className="text-xs text-slate-400 leading-relaxed">
             Choose a presenting complaint. CLARK walks you through history, examination, investigations, scoring, and management — all in one place.
           </p>
         </div>
@@ -487,7 +460,7 @@ function ClarkHome({ onSelect, onClose }) {
       <div className="flex-1 overflow-y-auto px-5 pb-10">
         {CLARK_CATEGORIES.map(category => (
           <div key={category.id} className="mb-7">
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">
               {category.label}
             </p>
             <div className="space-y-2">
@@ -496,14 +469,14 @@ function ClarkHome({ onSelect, onClose }) {
                   <button
                     key={proto.id}
                     onClick={() => onSelect(CLARK_PROTOCOLS[proto.id])}
-                    className="w-full text-left bg-white rounded-2xl px-4 py-4 flex items-center gap-3 hover:bg-gray-50 active:bg-gray-100 transition-colors shadow-sm"
+                    className="w-full text-left bg-white/95 rounded-2xl px-4 py-3.5 flex items-center gap-3 hover:bg-white active:bg-gray-50 transition-colors"
                   >
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-900 leading-snug">{proto.label}</p>
                       <p className="text-xs text-gray-400 mt-0.5">{proto.subtitle}</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full whitespace-nowrap">
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full whitespace-nowrap">
                         {proto.guideline}
                       </span>
                       <svg className="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -514,13 +487,13 @@ function ClarkHome({ onSelect, onClose }) {
                 ) : (
                   <div
                     key={proto.id}
-                    className="w-full text-left bg-white/5 border border-white/8 rounded-2xl px-4 py-3.5 flex items-center gap-3 opacity-50 cursor-default"
+                    className="w-full text-left bg-white/5 border border-white/8 rounded-2xl px-4 py-3 flex items-center gap-3 opacity-40 cursor-default"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-300 leading-snug">{proto.label}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{proto.subtitle}</p>
+                      <p className="text-sm font-medium text-slate-300 leading-snug">{proto.label}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{proto.subtitle}</p>
                     </div>
-                    <span className="text-[10px] font-semibold text-gray-500 bg-white/10 px-2 py-0.5 rounded-full shrink-0">
+                    <span className="text-[10px] font-semibold text-slate-500 bg-white/8 px-2 py-0.5 rounded-full shrink-0">
                       Soon
                     </span>
                   </div>
@@ -530,7 +503,7 @@ function ClarkHome({ onSelect, onClose }) {
           </div>
         ))}
 
-        <p className="text-xs text-gray-600 text-center leading-relaxed pb-2">
+        <p className="text-xs text-slate-600 text-center leading-relaxed pb-2">
           CLARK is a clinical aid — not a substitute for clinical judgement.<br />
           Always escalate when uncertain.
         </p>
@@ -554,7 +527,7 @@ export default function Clark({ onClose }) {
           <ClarkSession protocol={activeProtocol} onExit={() => setActiveProtocol(null)} />
         </div>
       ) : (
-        <div className="flex flex-col h-full bg-gray-950">
+        <div className="flex flex-col h-full bg-slate-900">
           <ClarkHome onSelect={setActiveProtocol} onClose={onClose} />
         </div>
       )}
