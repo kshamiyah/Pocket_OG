@@ -31,6 +31,7 @@ export const PPROM_PROTOCOL = {
         "Do not leave the patient — get help to come to you",
       ],
       next: "history",
+      source: { gl: "NG25", sectionId: "ng25-transfer", label: "Transfer & Delivery" },
     },
 
     // ─── Gestation ────────────────────────────────────────────────────────────
@@ -60,6 +61,8 @@ export const PPROM_PROTOCOL = {
         "Document full counselling conversation",
       ],
       next: "history",
+      // VERIFY: pulmonary hypoplasia, limb deformities, and serial USS specifics are PPROM-specific (RCOG GTG73) and not directly covered in NG25; periviable counselling framework covered in NG25
+      source: { gl: "NG25", sectionId: "ng25-transfer", label: "Transfer & Delivery" },
     },
 
     // ─── History & examination ─────────────────────────────────────────────────
@@ -78,6 +81,8 @@ export const PPROM_PROTOCOL = {
         "Risk factors for chorioamnionitis: previous PPROM, recent VE, cervical instrumentation",
       ],
       next: "examination",
+      // VERIFY: PPROM-specific history items (cerclage removal, chorioamnionitis risk factors) are not individually enumerated in NG25; risk factor framework covered in NG25 overview
+      source: { gl: "NG25", sectionId: "ng25-overview", label: "Overview & Definitions" },
     },
 
     "examination": {
@@ -92,6 +97,7 @@ export const PPROM_PROTOCOL = {
         "Do NOT perform digital vaginal examination — increases infection risk",
       ],
       next: "speculum_q",
+      source: { gl: "NG25", sectionId: "ng25-diagnosis", label: "Diagnosis" },
     },
 
     // ─── Confirm diagnosis ────────────────────────────────────────────────────
@@ -118,6 +124,8 @@ export const PPROM_PROTOCOL = {
         "If chorioamnionitis suspected: IV antibiotics and expedite delivery regardless of gestation",
       ],
       next: "pprom_confirmed",
+      // VERIFY: meconium escalation pathway and chorioamnionitis expedite-delivery rule are not explicitly stated in NG25; NG25 tocolysis section confirms chorioamnionitis is a contraindication to tocolysis and implies delivery
+      source: { gl: "NG25", sectionId: "ng25-transfer", label: "Transfer & Delivery" },
     },
 
     "swab_q": {
@@ -147,6 +155,7 @@ export const PPROM_PROTOCOL = {
         },
       ],
       next: "documentation",
+      source: { gl: "NG25", sectionId: "ng25-diagnosis", label: "Diagnosis" },
     },
 
     "srom_unlikely": {
@@ -164,6 +173,7 @@ export const PPROM_PROTOCOL = {
         },
       ],
       next: "documentation",
+      source: { gl: "NG25", sectionId: "ng25-diagnosis", label: "Diagnosis" },
     },
 
     "pprom_confirmed": {
@@ -178,6 +188,8 @@ export const PPROM_PROTOCOL = {
         "USS — confirm presentation, placental site, amniotic fluid volume (AFI or deepest pool), EFW",
       ],
       next: "infection_q",
+      // VERIFY: specific infection thresholds (WCC >17, CRP >10) and PPROM investigation panel are not individually listed in NG25; general assessment framework covered in NG25 overview
+      source: { gl: "NG25", sectionId: "ng25-overview", label: "Overview & Definitions" },
     },
 
     // ─── Infection screen ──────────────────────────────────────────────────────
@@ -205,6 +217,8 @@ export const PPROM_PROTOCOL = {
         "IV antibiotics per local trust protocol (do not delay for cultures)",
       ],
       next: "documentation",
+      // VERIFY: chorioamnionitis diagnostic criteria (specific temperature/HR/fetal HR thresholds) are not enumerated in NG25; NG25 tocolysis section identifies chorioamnionitis as a contraindication; expedite-delivery rule is PPROM/GTG73 guidance
+      source: { gl: "NG25", sectionId: "ng25-transfer", label: "Transfer & Delivery" },
     },
 
     // ─── Management by gestation ───────────────────────────────────────────────
@@ -246,6 +260,8 @@ export const PPROM_PROTOCOL = {
         },
       ],
       next: "escalation",
+      // VERIFY: erythromycin 250 mg QDS × 10 days is PPROM-specific antibiotic guidance (ORACLE I trial / RCOG GTG73) and is not covered in NG25; MgSO4 up to 34 weeks extends slightly beyond NG25's primary threshold of <30 weeks (NG25 says "consider up to 33+6")
+      source: { gl: "NG25", sectionId: "ng25-steroids", label: "Corticosteroids" },
     },
 
     "late_preterm_mgmt": {
@@ -272,6 +288,8 @@ export const PPROM_PROTOCOL = {
         },
       ],
       next: "escalation",
+      // VERIFY: corticosteroids up to 35+6 weeks in PPROM context and IOL timing for late-preterm PPROM are covered in NG25 steroids section (offer up to 35+6 weeks) and transfer section; antibiotic use at 34–36+6 is PPROM-specific guidance not individually addressed in NG25
+      source: { gl: "NG25", sectionId: "ng25-steroids", label: "Corticosteroids" },
     },
 
     "term_mgmt_q": {
@@ -299,6 +317,8 @@ export const PPROM_PROTOCOL = {
         },
       ],
       next: "documentation",
+      // VERIFY: GBS-positive SROM management (immediate IOL, benzylpenicillin) is PPROM/GBS-specific guidance (RCOG GTG36b) and not individually covered in NG25; delivery decision framework is covered in NG25 transfer section
+      source: { gl: "NG25", sectionId: "ng25-transfer", label: "Transfer & Delivery" },
     },
 
     "gbs_negative": {
@@ -324,6 +344,8 @@ export const PPROM_PROTOCOL = {
         },
       ],
       next: "documentation",
+      // VERIFY: IOL within 24 hours for term SROM and expectant monitoring specifics are PPROM-specific guidance (NICE CG55 / RCOG GTG73) not individually addressed in NG25; delivery decision and intrapartum CTG covered in NG25 transfer section
+      source: { gl: "NG25", sectionId: "ng25-transfer", label: "Transfer & Delivery" },
     },
 
     // ─── Escalation ───────────────────────────────────────────────────────────
@@ -342,6 +364,7 @@ export const PPROM_PROTOCOL = {
         "Patient distressed or requesting delivery — senior shared decision-making required",
       ],
       next: "documentation",
+      source: { gl: "NG25", sectionId: "ng25-transfer", label: "Transfer & Delivery" },
     },
 
     // ─── Documentation ────────────────────────────────────────────────────────
@@ -364,6 +387,7 @@ export const PPROM_PROTOCOL = {
         "Consent discussion documented — risks of expectant management explained",
         "Safety-netting: patient advised of signs of infection and when to call urgently",
       ],
+      source: { gl: "NG25", sectionId: "ng25-overview", label: "Overview & Definitions" },
     },
 
   },
