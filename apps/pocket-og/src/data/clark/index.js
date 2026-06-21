@@ -3,6 +3,7 @@ import { RFM_PROTOCOL } from "./rfm";
 import { ITCHING_PROTOCOL } from "./itching";
 import { PVB_PROTOCOL } from "./pvb";
 import { SWOLLEN_LEGS_PROTOCOL } from "./swollen_legs";
+import { PPROM_PROTOCOL } from "./pprom";
 
 export const CLARK_PROTOCOLS = {
   hyperemesis: HYPEREMESIS_PROTOCOL,
@@ -10,6 +11,7 @@ export const CLARK_PROTOCOLS = {
   itching: ITCHING_PROTOCOL,
   pvb: PVB_PROTOCOL,
   swollen_legs: SWOLLEN_LEGS_PROTOCOL,
+  pprom: PPROM_PROTOCOL,
 };
 
 export const CLARK_CATEGORIES = [
@@ -50,6 +52,13 @@ export const CLARK_CATEGORIES = [
         label: "Swollen Legs",
         subtitle: "DVT screen & VTE risk",
         guideline: "RBH GL891",
+        available: true,
+      },
+      {
+        id: "pprom",
+        label: "?PPROM / ?SROM",
+        subtitle: "Prelabour rupture of membranes",
+        guideline: "RCOG GTG73",
         available: true,
       },
       {
