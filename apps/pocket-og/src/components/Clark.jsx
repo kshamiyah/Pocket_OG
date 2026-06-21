@@ -33,7 +33,23 @@ const SEVERITY_CLS = {
   red:   "bg-red-100 text-red-700 border-red-200",
 };
 
-// ─── Question node ────────────────────────────────────────────────────────────
+// ─── Source citation badge ────────────────────────────────────────────────────
+
+function SourceBadge({ source }) {
+  if (!source) return null;
+  return (
+    <div className="flex items-center gap-1.5 pt-3 mt-2 border-t border-zinc-600/60">
+      <svg className="w-3 h-3 text-zinc-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <span className="text-[10px] text-zinc-500 leading-none">
+        <span className="font-bold text-zinc-400">{source.gl}</span>
+        {source.label && <span className="text-zinc-600"> — {source.label}</span>}
+      </span>
+    </div>
+  );
+}
+
 
 function QuestionNode({ node, stepNum, onAnswer }) {
   return (
@@ -74,7 +90,7 @@ function ChecklistNode({ node, stepNum, onContinue }) {
         </div>
       )}
 
-      <ul className="space-y-2.5 mb-6">
+      <ul className="space-y-2.5 mb-4">
         {node.items.map((item, i) => (
           <li key={i} className="flex gap-2.5 text-sm text-zinc-200 leading-snug">
             <span className="text-emerald-400 shrink-0 mt-0.5">›</span>
@@ -83,9 +99,11 @@ function ChecklistNode({ node, stepNum, onContinue }) {
         ))}
       </ul>
 
+      <SourceBadge source={node.source} />
+
       <button
         onClick={onContinue}
-        className="w-full py-3.5 rounded-2xl text-sm font-semibold bg-white hover:bg-zinc-100 text-zinc-900 transition-colors"
+        className="w-full mt-4 py-3.5 rounded-2xl text-sm font-semibold bg-white hover:bg-zinc-100 text-zinc-900 transition-colors"
       >
         Continue →
       </button>
@@ -184,7 +202,7 @@ function TreatmentNode({ node, stepNum, onContinue }) {
       )}
       <h2 className="text-xl font-bold text-zinc-100 mt-1 mb-4">{node.title}</h2>
 
-      <div className="space-y-4 mb-6">
+      <div className="space-y-4 mb-4">
         {(node.sections ?? []).map((section, si) => (
           <div key={si} className="rounded-2xl border border-zinc-600 overflow-hidden">
             <div className="px-4 py-2.5 bg-zinc-600 border-b border-zinc-500">
@@ -224,9 +242,11 @@ function TreatmentNode({ node, stepNum, onContinue }) {
         ))}
       </div>
 
+      <SourceBadge source={node.source} />
+
       <button
         onClick={onContinue}
-        className="w-full py-3.5 rounded-2xl text-sm font-semibold bg-white hover:bg-zinc-100 text-zinc-900 transition-colors"
+        className="w-full mt-4 py-3.5 rounded-2xl text-sm font-semibold bg-white hover:bg-zinc-100 text-zinc-900 transition-colors"
       >
         Continue →
       </button>
@@ -254,7 +274,7 @@ function EscalationNode({ node, stepNum, onContinue }) {
         </div>
       )}
 
-      <ul className="space-y-2 mb-6">
+      <ul className="space-y-2 mb-4">
         {(node.items ?? []).map((item, i) => (
           <li key={i} className="flex gap-2.5 px-4 py-3 bg-amber-900/20 border border-amber-700/40 rounded-2xl">
             <span className="text-amber-400 shrink-0 mt-0.5 text-sm">›</span>
@@ -263,10 +283,12 @@ function EscalationNode({ node, stepNum, onContinue }) {
         ))}
       </ul>
 
+      <SourceBadge source={node.source} />
+
       {onContinue && (
         <button
           onClick={onContinue}
-          className="w-full py-3.5 rounded-2xl text-sm font-semibold bg-white hover:bg-zinc-100 text-zinc-900 transition-colors"
+          className="w-full mt-4 py-3.5 rounded-2xl text-sm font-semibold bg-white hover:bg-zinc-100 text-zinc-900 transition-colors"
         >
           Continue →
         </button>
@@ -286,7 +308,7 @@ function EndNode({ node, onRestart, onClose }) {
       <h2 className="text-xl font-bold text-zinc-100 mt-3 mb-1">{node.title}</h2>
       {node.subtitle && <p className="text-sm text-zinc-400 mb-4 leading-snug">{node.subtitle}</p>}
 
-      <ul className="space-y-2 mb-6">
+      <ul className="space-y-2 mb-4">
         {(node.items ?? []).map((item, i) => (
           <li key={i} className="flex gap-3 items-start">
             <span className="w-5 h-5 rounded-full bg-zinc-600 flex items-center justify-center shrink-0 mt-0.5">
@@ -297,7 +319,9 @@ function EndNode({ node, onRestart, onClose }) {
         ))}
       </ul>
 
-      <div className="flex gap-2">
+      <SourceBadge source={node.source} />
+
+      <div className="flex gap-2 mt-4">
         <button
           onClick={onRestart}
           className="flex-1 py-3.5 rounded-2xl text-sm font-semibold border border-zinc-500 text-zinc-300 hover:bg-zinc-600 transition-colors"
