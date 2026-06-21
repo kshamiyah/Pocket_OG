@@ -15,9 +15,9 @@ export const HMB_PROTOCOL = {
       question: "Any red flag features?",
       subtitle: "Screen before proceeding — some presentations need a different pathway",
       options: [
-        { label: "Postmenopausal bleeding",          sublabel: "Any bleeding >12 months after last period",     next: "pmb_referral"   },
-        { label: "Persistent IMB or postcoital bleeding", sublabel: "At any age — investigate before treating", next: "imb_path"        },
-        { label: "HMB only — no red flags",                                                                     next: "history"        },
+        { label: "Postmenopausal bleeding",               sublabel: "Any bleeding >12 months after last period",     next: "pmb_referral"   },
+        { label: "Persistent IMB or postcoital bleeding", sublabel: "At any age — investigate before treating",      next: "imb_path"        },
+        { label: "HMB only — no red flags",                                                                          next: "history"        },
       ],
     },
 
@@ -55,17 +55,17 @@ export const HMB_PROTOCOL = {
       question: "Is there significant ongoing or heavy bleeding right now?",
       subtitle: "Bridging medical treatment can be started immediately while investigations are pending",
       options: [
-        { label: "Yes — bleeding is active, heavy, or distressing",        next: "imb_interim_tx" },
-        { label: "No — mild, episodic, or currently settled",              next: "cervix_exam_q"  },
+        { label: "Yes — bleeding is active, heavy, or distressing",   next: "imb_interim_tx" },
+        { label: "No — mild, episodic, or currently settled",         next: "cervix_exam_q"  },
       ],
     },
 
     "imb_interim_tx": {
       type: "treatment",
-      title: "Interim medical treatment — active IMB",
+      title: "Active IMB — Bridging Options to Consider",
       sections: [
         {
-          title: "Norethisterone — arrest or reduce ongoing bleeding",
+          title: "Consider norethisterone — to arrest heavy ongoing bleeding",
           drugs: [
             {
               drug: "Norethisterone",
@@ -75,7 +75,7 @@ export const HMB_PROTOCOL = {
           ],
         },
         {
-          title: "Tranexamic acid — if heavy loss component",
+          title: "Consider adding tranexamic acid — if heavy loss component",
           drugs: [
             {
               drug: "Tranexamic acid",
@@ -103,10 +103,10 @@ export const HMB_PROTOCOL = {
       question: "What does the cervix look like on speculum?",
       subtitle: "Any contact bleeding, ulceration, or irregular surface requires urgent referral",
       options: [
-        { label: "Suspicious — contact bleeding, ulceration, or irregular surface", sublabel: "Urgent 2WW referral needed",                             next: "cervix_2ww"          },
+        { label: "Suspicious — contact bleeding, ulceration, or irregular surface", sublabel: "Urgent 2WW referral needed",                               next: "cervix_2ww"          },
         { label: "Ectropion visible",                                                sublabel: "Columnar epithelium on ectocervix — common, usually benign", next: "ectropion_symptom_q" },
-        { label: "Cervical polyp",                                                  sublabel: "Pedunculated, soft, often bleeds on contact",               next: "cervical_polyp_path" },
-        { label: "Normal cervix — no abnormality found",                            sublabel: "Assess endometrium next",                                    next: "imb_uss_q"           },
+        { label: "Cervical polyp",                                                   sublabel: "Pedunculated, soft, often bleeds on contact",               next: "cervical_polyp_path" },
+        { label: "Normal cervix — no abnormality found",                             sublabel: "Assess endometrium next",                                    next: "imb_uss_q"           },
       ],
     },
 
@@ -130,29 +130,29 @@ export const HMB_PROTOCOL = {
       question: "Is the ectropion causing symptoms?",
       subtitle: "Ectropion is common and often asymptomatic — only treat if it is the likely cause of the PCB or discharge",
       options: [
-        { label: "Yes — causing PCB, discharge, or discomfort", next: "ectropion_treatment" },
-        { label: "No — incidental finding, patient asymptomatic", next: "imb_uss_q" },
+        { label: "Yes — causing PCB, discharge, or discomfort",   next: "ectropion_treatment" },
+        { label: "No — incidental finding, patient asymptomatic", next: "imb_uss_q"           },
       ],
     },
 
     "ectropion_treatment": {
       type: "treatment",
-      title: "Symptomatic cervical ectropion",
+      title: "Symptomatic Ectropion — Management Prompts",
       sections: [
         {
-          title: "Management options",
+          title: "Options to consider",
           items: [
-            "Reassurance first: explain ectropion is benign — normal columnar tissue on the outside of the cervix",
-            "Refer to colposcopy for treatment (cryotherapy or silver nitrate) — if ectropion is the likely cause of symptoms",
+            "Reassure first: explain ectropion is benign — normal columnar tissue on the outside of the cervix",
+            "Consider referral to colposcopy for treatment (cryotherapy or silver nitrate) — if ectropion is the likely cause of symptoms",
             "Refer to colposcopy if: diagnosis uncertain or smear abnormal",
           ],
         },
         {
-          title: "After treatment",
+          title: "After referral / treatment",
           items: [
-            "Vaginal discharge and spotting for 2–4 weeks post-treatment — counsel in advance",
-            "Review at 6–8 weeks — most resolve or improve significantly",
-            "PCB persists after treatment: USS endometrium to exclude upper tract pathology",
+            "Counsel patient: vaginal discharge and spotting for 2–4 weeks post-treatment",
+            "Plan review at 6–8 weeks — most resolve or improve significantly",
+            "PCB persists after treatment: arrange USS endometrium to exclude upper tract pathology",
           ],
         },
       ],
@@ -162,10 +162,10 @@ export const HMB_PROTOCOL = {
 
     "cervical_polyp_path": {
       type: "treatment",
-      title: "Cervical polyp",
+      title: "Cervical Polyp — Management Prompts",
       sections: [
         {
-          title: "Management",
+          title: "Management options",
           items: [
             "Small pedunculated polyps: can be avulsed in primary care — twist at base, apply silver nitrate to stump",
             "Send all removed tissue for histology — most are benign but rare malignancy reported",
@@ -173,11 +173,11 @@ export const HMB_PROTOCOL = {
           ],
         },
         {
-          title: "Follow-up",
+          title: "Follow-up prompts",
           items: [
             "Review histology — confirm benign and reassure patient when result available",
-            "PCB persists after polypectomy: USS endometrium to exclude intrauterine pathology",
-            "Recurrence is common — advise patient to report any further PCB",
+            "PCB persists after polypectomy: arrange USS endometrium to exclude intrauterine pathology",
+            "Advise patient that recurrence is common — report any further PCB",
           ],
         },
       ],
@@ -237,12 +237,12 @@ export const HMB_PROTOCOL = {
 
     "imb_reassure": {
       type: "treatment",
-      title: "Likely benign — reassure and safety-net",
+      title: "Likely Benign — Reassurance Prompts",
       sections: [
         {
           title: "Management",
           items: [
-            "STI result: review and treat if positive — follow local sexual health guidelines for Chlamydia treatment",
+            "STI result: review and treat if positive — follow local sexual health guidelines",
             "Reassure: most IMB/PCB in low-risk women <45 with normal investigations is benign",
             "Advise return if: symptoms persist beyond 2 further cycles, worsen, or new symptoms develop",
             "Consider LNG-IUS or CHC if concurrent HMB or contraception desired",
@@ -280,9 +280,9 @@ export const HMB_PROTOCOL = {
         "Future fertility wishes — critical for treatment planning",
         "Contraception requirements",
         "Previous treatments tried and response",
-        "Medications: anticoagulants (significantly worsen HMB), tamoxifen (endometrial cancer risk factor), hormonal contraception",
+        "Medications: anticoagulants (significantly worsen HMB), tamoxifen (endometrial cancer risk), hormonal contraception",
         "Medical history: thyroid disease, diabetes, obesity, liver disease, hypertension",
-        "Bleeding history: HMB since menarche, family/personal history of abnormal bleeding after dental/surgical procedures → coagulation screen including VWF antigen, VWF activity (Ristocetin cofactor), FVIII",
+        "Bleeding history: HMB since menarche, family/personal history of abnormal bleeding → send coagulation screen including VWF antigen, VWF activity (Ristocetin cofactor), FVIII",
       ],
       source: { gl: "NG88", sectionId: "ng88-assessment", label: "Assessment in Primary Care" },
       next: "examination",
@@ -309,8 +309,8 @@ export const HMB_PROTOCOL = {
       question: "Is structural pathology suspected?",
       subtitle: "Palpable uterus, bulk symptoms (pressure, urinary frequency), or prior abnormal USS",
       options: [
-        { label: "Yes — or USS already abnormal",        next: "get_uss"  },
-        { label: "No — no structural cause suspected",   next: "lng_q"    },
+        { label: "Yes — or USS already abnormal",       next: "get_uss"  },
+        { label: "No — no structural cause suspected",  next: "lng_q"    },
       ],
     },
 
@@ -331,42 +331,42 @@ export const HMB_PROTOCOL = {
       type: "question",
       question: "What does the USS show?",
       options: [
-        { label: "Endometrial polyp or submucosal fibroid",                                                   next: "polyp_path"        },
-        { label: "Fibroids ≥ 3 cm / multiple / distorting cavity",                                            next: "fertility_q"       },
-        { label: "Thickened or irregular endometrium",    sublabel: "Warrants histological assessment",        next: "biopsy_path"       },
-        { label: "Adenomyosis features",                  sublabel: "Heterogeneous myometrium, myometrial cysts, junctional zone thickening", next: "adenomyosis_path" },
-        { label: "Normal — no significant findings",      sublabel: "Manage as no structural pathology",       next: "lng_q"             },
+        { label: "Endometrial polyp or submucosal fibroid",                                                    next: "polyp_path"        },
+        { label: "Fibroids ≥ 3 cm / multiple / distorting cavity",                                             next: "fertility_q"       },
+        { label: "Thickened or irregular endometrium",     sublabel: "Warrants histological assessment",        next: "biopsy_path"       },
+        { label: "Adenomyosis features",                   sublabel: "Heterogeneous myometrium, myometrial cysts, junctional zone thickening", next: "adenomyosis_path" },
+        { label: "Normal — no significant findings",       sublabel: "Manage as no structural pathology",       next: "lng_q"             },
       ],
     },
 
     "adenomyosis_path": {
       type: "treatment",
-      title: "Adenomyosis — medical management first",
+      title: "Adenomyosis — Management Prompts",
       sections: [
         {
-          title: "Diagnosis",
+          title: "Confirm the diagnosis first",
           items: [
             "USS strongly suggestive — MRI pelvis is more accurate (junctional zone >12 mm or >40% of total myometrial thickness is diagnostic)",
-            "Endometrial biopsy does NOT diagnose adenomyosis — definitive diagnosis requires full myometrial histology (i.e. hysterectomy specimen)",
-            "Do not refer for Pipelle biopsy — this will not confirm or exclude adenomyosis",
+            "Endometrial biopsy does NOT diagnose adenomyosis — definitive diagnosis requires full myometrial histology (hysterectomy specimen)",
+            "Do not refer for Pipelle biopsy — will not confirm or exclude adenomyosis",
           ],
         },
         {
-          title: "First-line medical management",
+          title: "Medical options to consider first",
           items: [
-            "LNG-IUS (Mirena): first-line — reduces HMB and dysmenorrhoea; effective even in enlarged uteri; can slow progression",
-            "Combined hormonal contraception (back-to-back): induces amenorrhoea; reduces dysmenorrhoea",
-            "GnRH analogue (goserelin): temporary — symptoms recur after stopping; use as bridge to surgery",
-            "Relugolix (Ryeqo): oral GnRH antagonist with add-back HRT; sustained relief without surgical menopause",
+            "Consider LNG-IUS (Mirena) first-line — reduces HMB and dysmenorrhoea; effective even in enlarged uteri",
+            "Consider combined hormonal contraception back-to-back — induces amenorrhoea, reduces dysmenorrhoea",
+            "Consider GnRH analogue (goserelin) if bridging to surgery — symptoms recur after stopping",
+            "Consider relugolix (Ryeqo) — oral GnRH antagonist with add-back HRT; sustained relief",
           ],
         },
         {
           title: "When to refer to gynaecology",
           items: [
             "Symptoms not controlled by pharmacological options",
-            "MRI to confirm extent before considering surgery",
-            "Hysterectomy: definitive — appropriate for family-complete women with failed medical management",
-            "Adenomyomectomy (focal adenomyosis): technically challenging; specialist centres only; for fertility preservation",
+            "Consider MRI to confirm extent before surgical planning",
+            "Hysterectomy: definitive option for family-complete women with failed medical management",
+            "Adenomyomectomy (focal adenomyosis): specialist centres only; fertility preservation",
           ],
         },
       ],
@@ -378,13 +378,13 @@ export const HMB_PROTOCOL = {
 
     "polyp_path": {
       type: "treatment",
-      title: "Polyp or submucosal fibroid — refer for hysteroscopy",
+      title: "Polyp / Submucosal Fibroid — Referral Prompts",
       sections: [
         {
-          title: "Outpatient hysteroscopy",
+          title: "Outpatient hysteroscopy — the next step",
           items: [
             "Gold standard for intrauterine pathology — outpatient preferred (no-touch technique ± LA)",
-            "NSAID 30–60 minutes before procedure",
+            "Consider NSAID 30–60 minutes before procedure",
             "Polypectomy at time of diagnostic hysteroscopy if polyp identified",
             "Send all tissue for histology",
             "Submucosal fibroid: characterise FIGO type (0–2) and plan myomectomy",
@@ -393,17 +393,17 @@ export const HMB_PROTOCOL = {
         {
           title: "After polypectomy",
           items: [
-            "Review at 6–8 weeks — most women have significant improvement",
-            "Symptoms recur: repeat hysteroscopy, LNG-IUS, or ablation",
+            "Plan review at 6–8 weeks — most women have significant improvement",
+            "Symptoms recur: consider repeat hysteroscopy, LNG-IUS, or ablation",
           ],
         },
         {
           title: "Hysteroscopic myomectomy (submucosal fibroid)",
           items: [
-            "GnRH analogue × 3 months pre-op if anaemic or fibroid large",
+            "Consider GnRH analogue × 3 months pre-op if anaemic or fibroid large",
             "Type 0: usually complete resection in one procedure",
             "Type 1–2: may require staged procedures",
-            "If fertility desired: allow 3–6 months before conception after myomectomy",
+            "Allow 3–6 months before conception after myomectomy if fertility desired",
           ],
         },
       ],
@@ -418,22 +418,22 @@ export const HMB_PROTOCOL = {
       question: "Does she want to preserve fertility?",
       subtitle: "This determines which surgical options are appropriate",
       options: [
-        { label: "Yes — future pregnancy desired",  next: "fibroid_fertility_path" },
-        { label: "No — family complete",            next: "fibroid_symptom_q"      },
+        { label: "Yes — future pregnancy desired", next: "fibroid_fertility_path" },
+        { label: "No — family complete",           next: "fibroid_symptom_q"      },
       ],
     },
 
     "fibroid_fertility_path": {
       type: "treatment",
-      title: "Fibroids — fertility-preserving surgical options",
+      title: "Fibroids with Fertility Wish — Options to Discuss",
       sections: [
         {
-          title: "Surgical options",
+          title: "Surgical options to discuss",
           items: [
             "Hysteroscopic myomectomy — submucosal fibroids FIGO type 0–2",
             "Laparoscopic myomectomy — intramural fibroids (ideally ≤3 fibroids, ≤10 cm); skilled surgeon required",
             "Open myomectomy — large, multiple, or complex fibroid configurations",
-            "GnRH analogue × 3 months pre-op if large or anaemic — reduces size and blood loss",
+            "Consider GnRH analogue × 3 months pre-op if large or anaemic — reduces size and blood loss",
             "Allow 3–6 months before conception after myomectomy",
           ],
         },
@@ -447,9 +447,9 @@ export const HMB_PROTOCOL = {
         {
           title: "Medical bridging while awaiting surgery",
           items: [
-            "Tranexamic acid 1 g QDS during heavy days",
-            "Relugolix (Ryeqo) — oral GnRH antagonist with HRT add-back; sustained symptom relief",
-            "GnRH analogue (goserelin / leuprorelin) — temporary shrinkage pre-operatively",
+            "Consider tranexamic acid 1 g QDS during heavy days for symptom relief",
+            "Consider relugolix (Ryeqo) — oral GnRH antagonist with HRT add-back; sustained symptom relief",
+            "Consider GnRH analogue (goserelin / leuprorelin) — temporary shrinkage pre-operatively",
           ],
         },
       ],
@@ -462,27 +462,27 @@ export const HMB_PROTOCOL = {
       question: "What is the primary symptom?",
       subtitle: "Family complete — determines which interventions to prioritise",
       options: [
-        { label: "HMB only",                                            next: "fibroid_surgical_q" },
-        { label: "Bulk symptoms — pressure, urinary frequency, pain",   next: "fibroid_bulk_path"  },
-        { label: "Both HMB and bulk symptoms",                          next: "fibroid_bulk_path"  },
+        { label: "HMB only",                                           next: "fibroid_surgical_q" },
+        { label: "Bulk symptoms — pressure, urinary frequency, pain",  next: "fibroid_bulk_path"  },
+        { label: "Both HMB and bulk symptoms",                         next: "fibroid_bulk_path"  },
       ],
     },
 
     "fibroid_bulk_path": {
       type: "treatment",
-      title: "Bulk symptoms — options",
+      title: "Bulk Symptoms — Options to Consider",
       sections: [
         {
           title: "Medical bridging (temporary relief only)",
           items: [
-            "Relugolix (Ryeqo) — oral GnRH antagonist with HRT add-back; sustained symptom relief",
-            "GnRH analogue (goserelin) — temporary fibroid shrinkage; symptoms recur after stopping",
+            "Consider relugolix (Ryeqo) — oral GnRH antagonist with HRT add-back; sustained symptom relief",
+            "Consider GnRH analogue (goserelin) — temporary fibroid shrinkage; symptoms recur after stopping",
           ],
         },
         {
-          title: "Definitive — choose surgical approach",
+          title: "Definitive options to discuss",
           items: [
-            "UAE: addresses both HMB and bulk symptoms; MRI required first",
+            "UAE: addresses both HMB and bulk symptoms; ensure MRI before proceeding",
             "Myomectomy: removes fibroids, preserves uterus; fibroid recurrence ~30% at 5 years",
             "Hysterectomy: definitively addresses both HMB and bulk symptoms",
           ],
@@ -497,25 +497,25 @@ export const HMB_PROTOCOL = {
       question: "Which surgical approach does she prefer?",
       subtitle: "Shared decision — discuss pros, cons, and recovery for each",
       options: [
-        { label: "UAE",           sublabel: "Non-surgical · uterus preserved · MRI required first",     next: "uae_path"          },
-        { label: "Myomectomy",    sublabel: "Surgical · remove fibroids · keep uterus",                 next: "myomectomy_path"   },
-        { label: "Hysterectomy",  sublabel: "Definitive · no further HMB · discuss route",             next: "hysterectomy_path" },
+        { label: "UAE",          sublabel: "Non-surgical · uterus preserved · MRI required first",  next: "uae_path"          },
+        { label: "Myomectomy",   sublabel: "Surgical · remove fibroids · keep uterus",              next: "myomectomy_path"   },
+        { label: "Hysterectomy", sublabel: "Definitive · no further HMB · discuss route",           next: "hysterectomy_path" },
       ],
     },
 
     "uae_path": {
       type: "treatment",
-      title: "Uterine Artery Embolisation (UAE)",
+      title: "UAE — What to Prepare & Discuss",
       sections: [
         {
-          title: "Pre-procedure",
+          title: "Before proceeding",
           items: [
-            "MRI pelvis required first — maps fibroid vascularity and anatomy",
+            "Ensure MRI pelvis first — maps fibroid vascularity and anatomy",
             "NOT recommended for women who wish to preserve fertility — risk of premature ovarian failure and obstetric complications",
           ],
         },
         {
-          title: "Procedure and outcomes",
+          title: "Discuss with the patient — procedure & outcomes",
           items: [
             "Interventional radiology — no surgical incision",
             "Fibroid volume reduction 40–70%; symptom improvement 85–90% at 1 year",
@@ -531,23 +531,23 @@ export const HMB_PROTOCOL = {
 
     "myomectomy_path": {
       type: "treatment",
-      title: "Laparoscopic or Open Myomectomy",
+      title: "Myomectomy — Points to Discuss",
       sections: [
         {
-          title: "Route selection",
+          title: "Route — what to consider",
           items: [
             "Laparoscopic: preferred if ≤3 fibroids and ≤10 cm; experienced laparoscopic surgeon required",
             "Open (abdominal): for large, multiple, or complex fibroid configurations",
-            "GnRH analogue × 3 months pre-op if large or anaemic — reduces size and blood loss",
-            "Intraoperative cell salvage for large cases",
+            "Consider GnRH analogue × 3 months pre-op if large or anaemic — reduces size and blood loss",
+            "Consider cell salvage for large cases",
           ],
         },
         {
-          title: "Outcomes",
+          title: "Outcomes to discuss",
           items: [
             "Fibroid recurrence ~30% at 5–10 years",
             "Re-operation required in ~10–15% within 5 years",
-            "Correct anaemia to Hb ≥100 g/L pre-operatively",
+            "Ensure Hb ≥100 g/L before surgery",
           ],
         },
       ],
@@ -557,7 +557,7 @@ export const HMB_PROTOCOL = {
 
     "hysterectomy_path": {
       type: "treatment",
-      title: "Hysterectomy",
+      title: "Hysterectomy — Route & Preparation Prompts",
       sections: [
         {
           title: "Route — discuss with patient",
@@ -568,18 +568,18 @@ export const HMB_PROTOCOL = {
           ],
         },
         {
-          title: "Pre-operative",
+          title: "Pre-operative checklist",
           items: [
-            "Correct anaemia: target Hb ≥100 g/L before surgery",
-            "GnRH analogue × 3 months if fibroids very large — reduces uterine size",
+            "Ensure Hb ≥100 g/L before surgery — treat iron deficiency first",
+            "Consider GnRH analogue × 3 months if fibroids very large — reduces uterine size",
             "Discuss ovarian conservation — avoids surgical menopause but retains ovarian cancer risk",
           ],
         },
         {
-          title: "Post-operative",
+          title: "Post-operative prompts",
           items: [
             "VTE prophylaxis per unit protocol",
-            "Pathology review of uterus post-operatively",
+            "Review pathology of uterus post-operatively",
             "If oophorectomy performed: oestrogen-only HRT — no progestogen needed post-hysterectomy",
           ],
         },
@@ -609,27 +609,27 @@ export const HMB_PROTOCOL = {
       type: "question",
       question: "What did the biopsy show?",
       options: [
-        { label: "Normal / inactive / proliferative",                sublabel: "Treat HMB",                    next: "lng_q"             },
-        { label: "Hyperplasia without atypia",                                                                next: "hyperplasia_path"  },
-        { label: "Atypical hyperplasia (AEH/EIN) or carcinoma",      sublabel: "Urgent oncology referral",     next: "aeh_urgent"        },
+        { label: "Normal / inactive / proliferative",               sublabel: "Treat HMB",                  next: "lng_q"             },
+        { label: "Hyperplasia without atypia",                                                               next: "hyperplasia_path"  },
+        { label: "Atypical hyperplasia (AEH/EIN) or carcinoma",     sublabel: "Urgent oncology referral",   next: "aeh_urgent"        },
       ],
     },
 
     "hyperplasia_path": {
       type: "treatment",
-      title: "Endometrial hyperplasia without atypia",
+      title: "Hyperplasia Without Atypia — Management Prompts",
       sections: [
         {
-          title: "First-line treatment",
+          title: "Consider these first-line options",
           items: [
-            "LNG-IUS — regression rate >90% at 6 months; continue until two consecutive negative biopsies (per NG88)",
-            "If LNG-IUS declined: oral progestogen (norethisterone 10–15 mg daily or medroxyprogesterone acetate 10–20 mg daily)",
-            "6-monthly endometrial biopsy until two consecutive negative biopsies",
-            "Address underlying risk factors: weight reduction, diabetes control",
+            "Consider LNG-IUS first — regression rate >90% at 6 months; continue until two consecutive negative biopsies (per NG88)",
+            "If LNG-IUS declined: consider oral progestogen (norethisterone 10–15 mg daily or medroxyprogesterone acetate 10–20 mg daily)",
+            "Plan 6-monthly endometrial biopsy until two consecutive negative biopsies",
+            "Address underlying risk factors: discuss weight reduction, diabetes control",
           ],
         },
         {
-          title: "Refer to gynaecology if",
+          title: "When to refer to gynaecology",
           items: [
             "Persistent hyperplasia after 12 months of treatment",
             "Patient preference for hysterectomy",
@@ -663,30 +663,30 @@ export const HMB_PROTOCOL = {
       question: "Is LNG-IUS (Mirena) acceptable and suitable?",
       subtitle: "Most effective pharmacological option — reduces HMB by 71–95%. First-line unless contraindicated or declined.",
       options: [
-        { label: "Yes — patient accepts, no contraindications",                                                         next: "lng_offer"       },
+        { label: "Yes — patient accepts, no contraindications",                                                          next: "lng_offer"       },
         { label: "No — declined or contraindicated",  sublabel: "Current breast cancer, distorted cavity, active PID",  next: "contraception_q" },
       ],
     },
 
     "lng_offer": {
       type: "treatment",
-      title: "LNG-IUS (Mirena 52 mg) — First-Line",
+      title: "LNG-IUS — Counselling & Insertion Prompts",
       sections: [
         {
-          title: "Insertion & counselling",
+          title: "Cover at counselling before insertion",
           items: [
-            "Insert at any time in the menstrual cycle",
-            "Irregular spotting very common in first 3–6 months — counsel before insertion so she is not surprised",
+            "Can be inserted at any point in the menstrual cycle",
+            "Irregular spotting is very common in the first 3–6 months — counsel before insertion so she is not surprised",
             "Approximately 20–50% of users become amenorrhoeic within 12 months",
             "Contraception: >99.8% efficacy; fertility returns rapidly after removal",
           ],
         },
         {
-          title: "Follow-up",
+          title: "Follow-up plan",
           items: [
-            "Review at 3–6 months — irregular bleeding usually settles",
+            "Plan review at 3–6 months — irregular bleeding usually settles",
             "Treat iron deficiency anaemia concurrently",
-            "Licensed for up to 5 years; re-insert at 5 years if still indicated",
+            "Licensed for up to 5 years; plan re-insertion at 5 years if still indicated",
           ],
         },
       ],
@@ -698,20 +698,20 @@ export const HMB_PROTOCOL = {
       type: "question",
       question: "LNG-IUS response at 3–6 months?",
       options: [
-        { label: "Good — HMB improved, spotting reducing or settled",            next: "lng_continue"            },
-        { label: "Inadequate — HMB persists, or IUS expelled / not tolerated",  next: "refer_treatment_failure" },
+        { label: "Good — HMB improved, spotting reducing or settled",           next: "lng_continue"            },
+        { label: "Inadequate — HMB persists, or IUS expelled / not tolerated", next: "refer_treatment_failure" },
       ],
     },
 
     "lng_continue": {
       type: "treatment",
-      title: "Continue LNG-IUS — annual review",
+      title: "LNG-IUS Working Well — Follow-up Prompts",
       sections: [
         {
           title: "Ongoing management",
           items: [
-            "Annual review — recheck FBC if anaemia was present",
-            "LNG-IUS effective for up to 5 years — re-insert at 5 years if still indicated",
+            "Plan annual review — recheck FBC if anaemia was present",
+            "LNG-IUS effective for up to 5 years — plan re-insertion at 5 years if still indicated",
             "Advise patient to return if symptoms change, IMB/PCB develops, or new symptoms arise",
             "Offer endometrial biopsy if ≥45 years and new risk factors for endometrial cancer develop",
           ],
@@ -725,20 +725,20 @@ export const HMB_PROTOCOL = {
       type: "question",
       question: "Does she want contraception?",
       options: [
-        { label: "Yes — contraception desired",           next: "hormonal_tx"     },
-        { label: "No — no contraception needed",          next: "non_hormonal_tx" },
+        { label: "Yes — contraception desired",  next: "hormonal_tx"     },
+        { label: "No — no contraception needed", next: "non_hormonal_tx" },
       ],
     },
 
     "hormonal_tx": {
       type: "treatment",
-      title: "Hormonal options — with contraceptive benefit",
+      title: "Hormonal Options — Consider These",
       sections: [
         {
           title: "Combined hormonal contraception (CHC)",
           items: [
             "Combined pill — reduces blood loss by ~40–50%",
-            "Use back-to-back to reduce cycle frequency and number of bleeds per year",
+            "Consider back-to-back to reduce cycle frequency and number of bleeds per year",
             "Patch or vaginal ring — similar efficacy to combined pill",
             "Check UKMEC categories before prescribing",
           ],
@@ -762,18 +762,18 @@ export const HMB_PROTOCOL = {
 
     "non_hormonal_tx": {
       type: "treatment",
-      title: "Non-hormonal options",
+      title: "Non-hormonal Options — Consider These",
       sections: [
         {
-          title: "First-line",
+          title: "Options to offer",
           drugs: [
-            { drug: "Tranexamic acid",  dose: "1 g (2 × 500 mg) up to QDS",   note: "During heavy bleeding only — max 4 days per cycle. Reduces loss ~50%. Avoid if history of VTE." },
-            { drug: "Mefenamic acid",   dose: "500 mg TDS during bleeding",    note: "Reduces loss ~20–30%; also helps dysmenorrhoea. Avoid in renal disease or peptic ulcer disease." },
-            { drug: "Ibuprofen",        dose: "400–600 mg TDS during bleeding", note: "Alternative NSAID — similar efficacy to mefenamic acid." },
+            { drug: "Tranexamic acid", dose: "1 g (2 × 500 mg) up to QDS",    note: "During heavy bleeding only — max 4 days per cycle. Reduces loss ~50%. Avoid if history of VTE." },
+            { drug: "Mefenamic acid",  dose: "500 mg TDS during bleeding",     note: "Reduces loss ~20–30%; also helps dysmenorrhoea. Avoid in renal disease or peptic ulcer disease." },
+            { drug: "Ibuprofen",       dose: "400–600 mg TDS during bleeding", note: "Alternative NSAID — similar efficacy to mefenamic acid." },
           ],
         },
         {
-          title: "Combination",
+          title: "Combined approach",
           items: [
             "Tranexamic acid + NSAID can be used together — additive effect on blood loss",
           ],
@@ -787,19 +787,19 @@ export const HMB_PROTOCOL = {
       type: "question",
       question: "Response to treatment at 3–6 months?",
       options: [
-        { label: "Satisfactory — symptoms adequately controlled",               next: "continue_tx"             },
-        { label: "Inadequate — persists after ≥2 pharmacological options",     next: "refer_treatment_failure" },
+        { label: "Satisfactory — symptoms adequately controlled",              next: "continue_tx"             },
+        { label: "Inadequate — persists after ≥2 pharmacological options",    next: "refer_treatment_failure" },
       ],
     },
 
     "continue_tx": {
       type: "treatment",
-      title: "Continue effective treatment — annual review",
+      title: "Treatment Responding — Follow-up Prompts",
       sections: [
         {
-          title: "Ongoing",
+          title: "Ongoing management",
           items: [
-            "Annual review or sooner if symptoms change",
+            "Plan annual review — or sooner if symptoms change",
             "Reassess if: new IMB/PCB develops, approaching perimenopause, treatment no longer effective",
             "Offer endometrial biopsy if ≥45 years and risk factors for endometrial cancer develop",
           ],
