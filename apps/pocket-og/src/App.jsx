@@ -241,6 +241,17 @@ export default function App() {
       {/* Feedback button — always visible */}
       <FeedbackButton query={query} filter={filter} />
 
+      {/* CLARK floating launcher */}
+      <button
+        onClick={() => setShowClark(true)}
+        aria-label="Open CLARK clinical co-pilot"
+        className="fixed bottom-20 right-5 z-30 w-14 h-14 rounded-full bg-zinc-700 hover:bg-zinc-600 flex items-center justify-center shadow-lg transition-all active:scale-95"
+      >
+        <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M22 12h-4l-3 9L9 3l-3 9H2" />
+        </svg>
+      </button>
+
       {/* CLARK overlay */}
       {showClark && <Clark onClose={() => setShowClark(false)} />}
 
@@ -326,29 +337,6 @@ export default function App() {
                   ))}
                 </div>
 
-                {/* CLARK launcher */}
-                <div className="mt-5 pt-4 border-t border-gray-100">
-                  <button
-                    onClick={() => setShowClark(true)}
-                    className="w-full group bg-gray-900 hover:bg-gray-800 text-white rounded-2xl px-4 py-3 flex items-center gap-3 transition-all active:scale-[0.98]"
-                  >
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0">
-                      <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                      </svg>
-                    </div>
-                    <div className="flex-1 text-left">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-bold text-white">CLARK</p>
-                        <span className="text-[9px] font-bold text-emerald-400 tracking-widest uppercase">New</span>
-                      </div>
-                      <p className="text-xs text-gray-500">Clinical co-pilot · See patients step by step</p>
-                    </div>
-                    <svg className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-                </div>
 
               </div>
             </div>

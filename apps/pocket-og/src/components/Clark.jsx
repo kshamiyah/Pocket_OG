@@ -38,19 +38,19 @@ function ChecklistNode({ node, stepNum, onContinue }) {
   return (
     <div className="px-4 py-5 max-w-lg mx-auto">
       <StepBadge type="checklist" stepNum={stepNum} />
-      <h2 className="text-xl font-bold text-gray-900 mt-3 mb-1">{node.title}</h2>
-      {node.subtitle && <p className="text-sm text-gray-500 mb-4 leading-snug">{node.subtitle}</p>}
+      <h2 className="text-xl font-bold text-zinc-100 mt-3 mb-1">{node.title}</h2>
+      {node.subtitle && <p className="text-sm text-zinc-400 mb-4 leading-snug">{node.subtitle}</p>}
 
       {node.alert && (
-        <div className="mb-4 bg-red-50 border border-red-200 rounded-2xl px-4 py-3 flex gap-2.5">
-          <span className="text-red-500 shrink-0 mt-0.5">⚠</span>
-          <p className="text-sm text-red-700 font-medium leading-snug">{node.alert}</p>
+        <div className="mb-4 bg-red-900/20 border border-red-700/40 rounded-2xl px-4 py-3 flex gap-2.5">
+          <span className="text-red-400 shrink-0 mt-0.5">⚠</span>
+          <p className="text-sm text-red-300 font-medium leading-snug">{node.alert}</p>
         </div>
       )}
 
       <ul className="space-y-2.5 mb-6">
         {node.items.map((item, i) => (
-          <li key={i} className="flex gap-2.5 text-sm text-gray-700 leading-snug">
+          <li key={i} className="flex gap-2.5 text-sm text-zinc-200 leading-snug">
             <span className="text-emerald-400 shrink-0 mt-0.5">›</span>
             <span>{item}</span>
           </li>
@@ -59,7 +59,7 @@ function ChecklistNode({ node, stepNum, onContinue }) {
 
       <button
         onClick={onContinue}
-        className="w-full py-3.5 rounded-2xl text-sm font-semibold bg-gray-900 hover:bg-black text-white transition-colors"
+        className="w-full py-3.5 rounded-2xl text-sm font-semibold bg-white hover:bg-zinc-100 text-zinc-900 transition-colors"
       >
         Continue →
       </button>
@@ -87,14 +87,14 @@ function CalculatorNode({ node, stepNum, scores, setScores, onContinue }) {
   return (
     <div className="px-4 py-5 max-w-lg mx-auto">
       <StepBadge type="calculator" stepNum={stepNum} />
-      <h2 className="text-xl font-bold text-gray-900 mt-3 mb-1">{node.title}</h2>
-      {node.subtitle && <p className="text-sm text-gray-500 mb-1 leading-snug">{node.subtitle}</p>}
-      {node.description && <p className="text-xs text-gray-400 mb-5 leading-snug">{node.description}</p>}
+      <h2 className="text-xl font-bold text-zinc-100 mt-3 mb-1">{node.title}</h2>
+      {node.subtitle && <p className="text-sm text-zinc-400 mb-1 leading-snug">{node.subtitle}</p>}
+      {node.description && <p className="text-xs text-zinc-500 mb-5 leading-snug">{node.description}</p>}
 
       <div className="space-y-6 mb-6">
         {fields.map(field => (
           <div key={field.id}>
-            <p className="text-sm font-semibold text-gray-800 mb-2.5 leading-snug">{field.question}</p>
+            <p className="text-sm font-semibold text-zinc-200 mb-2.5 leading-snug">{field.question}</p>
             <div className="space-y-1.5">
               {field.options.map(opt => (
                 <button
@@ -102,8 +102,8 @@ function CalculatorNode({ node, stepNum, scores, setScores, onContinue }) {
                   onClick={() => setScores(prev => ({ ...prev, [field.id]: opt.score }))}
                   className={`w-full px-4 py-2.5 rounded-xl text-sm text-left transition-all border ${
                     scores[field.id] === opt.score
-                      ? "bg-gray-900 border-gray-900 text-white font-medium"
-                      : "bg-white border-gray-100 hover:border-gray-300 hover:bg-gray-50 text-gray-700"
+                      ? "bg-white border-white text-zinc-900 font-medium"
+                      : "bg-zinc-600 border-zinc-500 hover:border-zinc-400 hover:bg-zinc-500 text-zinc-200"
                   }`}
                 >
                   {opt.label}
@@ -115,11 +115,11 @@ function CalculatorNode({ node, stepNum, scores, setScores, onContinue }) {
       </div>
 
       {/* Running score */}
-      <div className="flex items-center justify-between border border-gray-100 rounded-2xl px-4 py-3 mb-3">
-        <span className="text-sm text-gray-500">PUQE Total</span>
-        <span className="text-2xl font-bold text-gray-900">
+      <div className="flex items-center justify-between border border-zinc-600 rounded-2xl px-4 py-3 mb-3">
+        <span className="text-sm text-zinc-400">PUQE Total</span>
+        <span className="text-2xl font-bold text-zinc-100">
           {allAnswered ? total : "—"}
-          <span className="text-sm font-normal text-gray-400 ml-1">/ 15</span>
+          <span className="text-sm font-normal text-zinc-500 ml-1">/ 15</span>
         </span>
       </div>
 
@@ -135,7 +135,7 @@ function CalculatorNode({ node, stepNum, scores, setScores, onContinue }) {
       <button
         onClick={() => result && onContinue(result.next, result.label)}
         disabled={!allAnswered}
-        className="w-full py-3.5 rounded-2xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-gray-900 hover:bg-black text-white"
+        className="w-full py-3.5 rounded-2xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-white hover:bg-zinc-100 text-zinc-900"
       >
         {allAnswered
           ? `See ${result?.label ?? "management"} →`
@@ -156,40 +156,40 @@ function TreatmentNode({ node, stepNum, onContinue }) {
           {node.badge.label}
         </span>
       )}
-      <h2 className="text-xl font-bold text-gray-900 mt-1 mb-4">{node.title}</h2>
+      <h2 className="text-xl font-bold text-zinc-100 mt-1 mb-4">{node.title}</h2>
 
       <div className="space-y-4 mb-6">
         {(node.sections ?? []).map((section, si) => (
-          <div key={si} className="rounded-2xl border border-gray-100 overflow-hidden">
-            <div className="px-4 py-2.5 bg-gray-50 border-b border-gray-100">
-              <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">{section.title}</p>
-              {section.note && <p className="text-xs text-gray-400 mt-0.5">{section.note}</p>}
+          <div key={si} className="rounded-2xl border border-zinc-600 overflow-hidden">
+            <div className="px-4 py-2.5 bg-zinc-600 border-b border-zinc-500">
+              <p className="text-xs font-bold text-zinc-200 uppercase tracking-wide">{section.title}</p>
+              {section.note && <p className="text-xs text-zinc-400 mt-0.5">{section.note}</p>}
             </div>
             {section.alert && (
-              <div className="px-4 py-2.5 bg-red-50 border-b border-red-100 flex gap-2">
-                <span className="text-red-500 text-xs shrink-0 mt-0.5">⚠</span>
-                <p className="text-xs text-red-700 font-medium leading-snug">{section.alert}</p>
+              <div className="px-4 py-2.5 bg-red-900/20 border-b border-red-700/40 flex gap-2">
+                <span className="text-red-400 text-xs shrink-0 mt-0.5">⚠</span>
+                <p className="text-xs text-red-300 font-medium leading-snug">{section.alert}</p>
               </div>
             )}
             {section.items && (
-              <ul className="divide-y divide-gray-50">
+              <ul className="divide-y divide-zinc-600">
                 {section.items.map((item, ii) => (
                   <li key={ii} className="flex gap-2.5 px-4 py-2.5">
                     <span className="text-emerald-400 shrink-0 mt-0.5">›</span>
-                    <span className="text-sm text-gray-700 leading-snug">{item}</span>
+                    <span className="text-sm text-zinc-200 leading-snug">{item}</span>
                   </li>
                 ))}
               </ul>
             )}
             {section.drugs && (
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-zinc-600">
                 {section.drugs.map((drug, di) => (
                   <div key={di} className="px-4 py-3">
                     <div className="flex flex-wrap gap-2 items-baseline">
-                      <span className="text-sm font-semibold text-gray-900">{drug.drug}</span>
-                      <span className="text-sm text-gray-600">{drug.dose}</span>
+                      <span className="text-sm font-semibold text-zinc-100">{drug.drug}</span>
+                      <span className="text-sm text-zinc-300">{drug.dose}</span>
                     </div>
-                    {drug.note && <p className="text-xs text-gray-400 mt-0.5 leading-snug">{drug.note}</p>}
+                    {drug.note && <p className="text-xs text-zinc-400 mt-0.5 leading-snug">{drug.note}</p>}
                   </div>
                 ))}
               </div>
@@ -200,7 +200,7 @@ function TreatmentNode({ node, stepNum, onContinue }) {
 
       <button
         onClick={onContinue}
-        className="w-full py-3.5 rounded-2xl text-sm font-semibold bg-gray-900 hover:bg-black text-white transition-colors"
+        className="w-full py-3.5 rounded-2xl text-sm font-semibold bg-white hover:bg-zinc-100 text-zinc-900 transition-colors"
       >
         Continue →
       </button>
@@ -219,20 +219,20 @@ function EscalationNode({ node, stepNum, onContinue }) {
           {node.badge.label}
         </span>
       )}
-      <h2 className="text-xl font-bold text-gray-900 mt-1 mb-1">{node.title}</h2>
-      {node.subtitle && <p className="text-sm text-gray-500 mb-3 leading-snug">{node.subtitle}</p>}
+      <h2 className="text-xl font-bold text-zinc-100 mt-1 mb-1">{node.title}</h2>
+      {node.subtitle && <p className="text-sm text-zinc-400 mb-3 leading-snug">{node.subtitle}</p>}
 
       {node.alert && (
-        <div className="mb-4 bg-red-50 border border-red-200 rounded-2xl px-4 py-3">
-          <p className="text-sm font-bold text-red-700">⚠ {node.alert}</p>
+        <div className="mb-4 bg-red-900/20 border border-red-700/40 rounded-2xl px-4 py-3">
+          <p className="text-sm font-bold text-red-300">⚠ {node.alert}</p>
         </div>
       )}
 
       <ul className="space-y-2 mb-6">
         {(node.items ?? []).map((item, i) => (
-          <li key={i} className="flex gap-2.5 px-4 py-3 bg-amber-50 border border-amber-100 rounded-2xl">
-            <span className="text-amber-500 shrink-0 mt-0.5 text-sm">›</span>
-            <span className="text-sm text-gray-800 leading-snug">{item}</span>
+          <li key={i} className="flex gap-2.5 px-4 py-3 bg-amber-900/20 border border-amber-700/40 rounded-2xl">
+            <span className="text-amber-400 shrink-0 mt-0.5 text-sm">›</span>
+            <span className="text-sm text-amber-200 leading-snug">{item}</span>
           </li>
         ))}
       </ul>
@@ -240,7 +240,7 @@ function EscalationNode({ node, stepNum, onContinue }) {
       {onContinue && (
         <button
           onClick={onContinue}
-          className="w-full py-3.5 rounded-2xl text-sm font-semibold bg-gray-900 hover:bg-black text-white transition-colors"
+          className="w-full py-3.5 rounded-2xl text-sm font-semibold bg-white hover:bg-zinc-100 text-zinc-900 transition-colors"
         >
           Continue →
         </button>
@@ -257,16 +257,16 @@ function EndNode({ node, onRestart, onClose }) {
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
         ✓ Complete
       </span>
-      <h2 className="text-xl font-bold text-gray-900 mt-3 mb-1">{node.title}</h2>
-      {node.subtitle && <p className="text-sm text-gray-500 mb-4 leading-snug">{node.subtitle}</p>}
+      <h2 className="text-xl font-bold text-zinc-100 mt-3 mb-1">{node.title}</h2>
+      {node.subtitle && <p className="text-sm text-zinc-400 mb-4 leading-snug">{node.subtitle}</p>}
 
       <ul className="space-y-2 mb-6">
         {(node.items ?? []).map((item, i) => (
           <li key={i} className="flex gap-3 items-start">
-            <span className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center shrink-0 mt-0.5">
-              <span className="text-[10px] font-bold text-gray-500">{i + 1}</span>
+            <span className="w-5 h-5 rounded-full bg-zinc-600 flex items-center justify-center shrink-0 mt-0.5">
+              <span className="text-[10px] font-bold text-zinc-300">{i + 1}</span>
             </span>
-            <span className="text-sm text-gray-700 leading-snug">{item}</span>
+            <span className="text-sm text-zinc-200 leading-snug">{item}</span>
           </li>
         ))}
       </ul>
@@ -274,13 +274,13 @@ function EndNode({ node, onRestart, onClose }) {
       <div className="flex gap-2">
         <button
           onClick={onRestart}
-          className="flex-1 py-3.5 rounded-2xl text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+          className="flex-1 py-3.5 rounded-2xl text-sm font-semibold border border-zinc-500 text-zinc-300 hover:bg-zinc-600 transition-colors"
         >
           ↺ New patient
         </button>
         <button
           onClick={onClose}
-          className="flex-1 py-3.5 rounded-2xl text-sm font-semibold bg-gray-900 hover:bg-black text-white transition-colors"
+          className="flex-1 py-3.5 rounded-2xl text-sm font-semibold bg-white hover:bg-zinc-100 text-zinc-900 transition-colors"
         >
           Done
         </button>
@@ -350,19 +350,19 @@ function ClarkSession({ protocol, onExit }) {
 
       {/* Path trail */}
       {history.length > 0 && (
-        <div className="shrink-0 px-4 py-2 border-b border-gray-50 overflow-x-auto">
+        <div className="shrink-0 px-4 py-2 border-b border-zinc-600 overflow-x-auto">
           <div className="flex gap-1.5 items-center min-w-max">
             {history.map((h, i) => (
               <span key={i} className="flex items-center gap-1.5">
                 {h.label && (
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-xs text-emerald-600 whitespace-nowrap">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-900/30 text-xs text-emerald-400 whitespace-nowrap">
                     {h.label}
                   </span>
                 )}
-                <span className="text-gray-300 text-xs">›</span>
+                <span className="text-zinc-500 text-xs">›</span>
               </span>
             ))}
-            <span className="px-2 py-0.5 rounded-full bg-gray-100 text-xs text-gray-500 font-medium whitespace-nowrap">
+            <span className="px-2 py-0.5 rounded-full bg-zinc-600 text-xs text-zinc-300 font-medium whitespace-nowrap">
               Step {stepNum}
             </span>
           </div>
@@ -523,7 +523,7 @@ export default function Clark({ onClose }) {
       style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}
     >
       {activeProtocol ? (
-        <div className="flex flex-col h-full bg-zinc-50">
+        <div className="flex flex-col h-full bg-zinc-700">
           <ClarkSession protocol={activeProtocol} onExit={() => setActiveProtocol(null)} />
         </div>
       ) : (
