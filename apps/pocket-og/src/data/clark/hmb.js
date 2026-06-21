@@ -37,14 +37,174 @@ export const HMB_PROTOCOL = {
 
     "imb_path": {
       type: "checklist",
-      title: "Persistent IMB / postcoital bleeding — investigate first",
+      title: "IMB / PCB — initial assessment",
       alert: "Do not treat HMB empirically if IMB or PCB is the primary concern — investigate first.",
       items: [
-        "Speculum examination — assess cervix: contact bleeding, polyps, suspicious appearance",
-        "Ensure cervical smear is up to date; colposcopy if smear abnormal or cervix suspicious",
-        "Pelvic USS — assess uterine cavity and endometrium",
-        "Consider hysteroscopy + endometrial biopsy if USS abnormal or IMB persists",
-        "Refer to gynaecology if no obvious cause found or USS abnormal",
+        "STI screen: NAAT for Chlamydia trachomatis and Neisseria gonorrhoeae — essential if <25 or new/multiple partners",
+        "Cervical smear: check history — arrange if overdue before proceeding to treatment",
+        "FBC: Hb if significant blood loss suspected",
+        "Proceed to speculum examination — findings will determine next steps",
+      ],
+      next: "cervix_exam_q",
+    },
+
+    "cervix_exam_q": {
+      type: "question",
+      question: "What does the cervix look like on speculum?",
+      subtitle: "Any contact bleeding, ulceration, or irregular surface requires urgent referral",
+      options: [
+        { label: "Suspicious — contact bleeding, ulceration, or irregular surface", sublabel: "Urgent 2WW referral needed",                             next: "cervix_2ww"          },
+        { label: "Ectropion visible",                                                sublabel: "Columnar epithelium on ectocervix — common, usually benign", next: "ectropion_symptom_q" },
+        { label: "Cervical polyp",                                                  sublabel: "Pedunculated, soft, often bleeds on contact",               next: "cervical_polyp_path" },
+        { label: "Normal cervix — no abnormality found",                            sublabel: "Assess endometrium next",                                    next: "imb_uss_q"           },
+      ],
+    },
+
+    "cervix_2ww": {
+      type: "escalation",
+      title: "Suspicious cervix — urgent 2WW referral",
+      alert: "Any cervix with contact bleeding, ulceration, irregular surface, or suspicious appearance must be referred urgently. Do not treat in primary care.",
+      items: [
+        "Refer under 2-week wait — gynaecology urgent suspected cervical cancer pathway",
+        "Colposcopy referral if smear shows any grade of CIN — do not wait for further symptoms",
+        "Do not biopsy in primary care — refer to colposcopy/gynaecology",
+        "Cervical smear if overdue — but do not delay 2WW referral for the result",
+        "Reassure patient: referral is precautionary — most cervical biopsies are benign",
+      ],
+      next: "documentation",
+    },
+
+    "ectropion_symptom_q": {
+      type: "question",
+      question: "Is the ectropion causing symptoms?",
+      subtitle: "Ectropion is common and often asymptomatic — only treat if it is the likely cause of the PCB or discharge",
+      options: [
+        { label: "Yes — causing PCB, discharge, or discomfort", next: "ectropion_treatment" },
+        { label: "No — incidental finding, patient asymptomatic", next: "imb_uss_q" },
+      ],
+    },
+
+    "ectropion_treatment": {
+      type: "treatment",
+      title: "Symptomatic cervical ectropion",
+      sections: [
+        {
+          title: "Management options",
+          items: [
+            "Reassurance first: explain ectropion is benign — normal columnar tissue on the outside of the cervix",
+            "Cryotherapy: first-line office treatment — single freeze, effective in ~80%",
+            "Silver nitrate application: for small symptomatic ectropion at colposcopy",
+            "Refer to colposcopy if: cryotherapy not available, diagnosis uncertain, or smear abnormal",
+          ],
+        },
+        {
+          title: "After treatment",
+          items: [
+            "Vaginal discharge and spotting for 2–4 weeks post-cryotherapy — counsel in advance",
+            "Review at 6–8 weeks — most resolve or improve significantly",
+            "PCB persists after treatment: USS endometrium to exclude upper tract pathology",
+          ],
+        },
+      ],
+      next: "imb_uss_q",
+    },
+
+    "cervical_polyp_path": {
+      type: "treatment",
+      title: "Cervical polyp",
+      sections: [
+        {
+          title: "Management",
+          items: [
+            "Small pedunculated polyps: can be avulsed in primary care — twist at base, apply silver nitrate to stump",
+            "Send all removed tissue for histology — most are benign but rare malignancy reported",
+            "Large or sessile polyps: refer to colposcopy / outpatient hysteroscopy — do not avulse in primary care",
+          ],
+        },
+        {
+          title: "Follow-up",
+          items: [
+            "Review histology — confirm benign and reassure patient when result available",
+            "PCB persists after polypectomy: USS endometrium to exclude intrauterine pathology",
+            "Recurrence is common — advise patient to report any further PCB",
+          ],
+        },
+      ],
+      next: "imb_uss_q",
+    },
+
+    "imb_uss_q": {
+      type: "question",
+      question: "What does pelvic USS show?",
+      subtitle: "Transvaginal USS preferred — endometrial thickness and intrauterine cavity",
+      options: [
+        { label: "Thickened or irregular endometrium",       sublabel: ">11 mm premenopausal mid-cycle, or any thickness warranting investigation", next: "imb_biopsy"           },
+        { label: "Intrauterine polyp or submucosal fibroid",                                                                                        next: "polyp_path"           },
+        { label: "Normal endometrium and cavity",                                                                                                    next: "imb_no_abnormality_q" },
+        { label: "USS not yet performed / pending",                                                                                                  next: "imb_arrange_uss"      },
+      ],
+    },
+
+    "imb_arrange_uss": {
+      type: "checklist",
+      title: "Arrange USS — pending result",
+      items: [
+        "Transvaginal USS — request urgently if age ≥45 or risk factors present",
+        "Ensure STI result is reviewed and acted on when available",
+        "Safety-net: advise patient to return urgently if bleeding becomes heavy or new symptoms develop",
+        "Return to this protocol when USS result is back to decide next step",
+      ],
+      next: "documentation",
+    },
+
+    "imb_biopsy": {
+      type: "checklist",
+      title: "Endometrial biopsy — perform or arrange",
+      items: [
+        "Pipelle biopsy: outpatient, <60 seconds — first-line for endometrial sampling",
+        "NSAID 30–60 min before (e.g. ibuprofen 400 mg) reduces cramping",
+        "If USS suggests focal polyp: hysteroscopy preferred — Pipelle misses focal lesions in ~60%",
+        "Indications met: thickened USS endometrium, age ≥45, or persistent unexplained IMB/PCB",
+      ],
+      next: "biopsy_result_q",
+    },
+
+    "imb_no_abnormality_q": {
+      type: "question",
+      question: "Patient age and symptom status?",
+      subtitle: "Normal cervix, normal USS — decide next step based on age, risk, and persistence",
+      options: [
+        { label: "≥ 45 years or significant risk factors", sublabel: "BMI >30, PCOS, diabetes, family history of endometrial cancer", next: "imb_biopsy"  },
+        { label: "< 45 years, low risk, symptoms settled",                                                                             next: "imb_reassure" },
+        { label: "< 45 years, low risk, but symptoms persist",                                                                         next: "imb_refer"    },
+      ],
+    },
+
+    "imb_reassure": {
+      type: "treatment",
+      title: "Likely benign — reassure and safety-net",
+      sections: [
+        {
+          title: "Management",
+          items: [
+            "STI result: review and treat if positive (Chlamydia: doxycycline 100 mg BD × 7 days)",
+            "Reassure: most IMB/PCB in low-risk women <45 with normal investigations is benign",
+            "Advise return if: symptoms persist beyond 2 further cycles, worsen, or new symptoms develop",
+            "Consider LNG-IUS or CHC if concurrent HMB or contraception desired",
+          ],
+        },
+      ],
+      next: "documentation",
+    },
+
+    "imb_refer": {
+      type: "escalation",
+      title: "Refer to gynaecology — persistent unexplained IMB/PCB",
+      items: [
+        "Persistent symptoms despite normal cervix, normal USS, and negative STI screen — refer secondary care",
+        "Include in referral: age, smear history, STI result, USS report, treatments tried",
+        "Hysteroscopy ± directed biopsy will be the likely next step in secondary care",
+        "Safety-net: advise patient to attend urgently if bleeding becomes heavy or new symptoms develop",
       ],
       next: "documentation",
     },
