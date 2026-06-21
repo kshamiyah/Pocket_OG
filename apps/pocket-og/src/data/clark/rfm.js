@@ -44,13 +44,14 @@ export const RFM_PROTOCOL = {
     "pre24_reassure": {
       type: "treatment",
       title: "Reassure — normal variation before 24 weeks",
+      source: { gl: "GTG57", sectionId: "gtg57-gestation-management", label: "Management by Gestation (<28 Weeks)" },
       sections: [
         {
           title: "Advice to give the patient",
           items: [
             "Fetal heart confirmed — this is reassuring",
             "Significant variation in perceived movement is normal before 24 weeks",
-            "Women feel movements from 16–24 weeks — earlier with multiparous women",
+            "Most women perceive movement from 18–20 weeks; multiparous women may feel movement from 16 weeks; primiparous women may not perceive movement until after 20 weeks",
             "Advise: attend immediately if no movement felt at all by 24 weeks",
             "Advise: return with any further concerns — do not dismiss RFM",
           ],
@@ -71,6 +72,7 @@ export const RFM_PROTOCOL = {
       type: "escalation",
       title: "No movement ever felt — arrange USS",
       alert: "No perceived movement at all before 24 weeks requires further investigation",
+      source: { gl: "GTG57", sectionId: "gtg57-gestation-management", label: "Management by Gestation (<28 Weeks)" },
       items: [
         "Arrange anomaly USS if not already performed",
         "Consider referral to fetal medicine specialist",
@@ -105,13 +107,14 @@ export const RFM_PROTOCOL = {
     "mid_reassure": {
       type: "treatment",
       title: "24–28 weeks — low risk, fetal heart confirmed",
+      source: { gl: "GTG57", sectionId: "gtg57-gestation-management", label: "Management by Gestation (<28 Weeks)" },
       sections: [
         {
           title: "Reassure the patient",
           items: [
             "Fetal heart confirmed — reassuring",
             "Explain normal pattern of movement at this gestation",
-            "CTG can be offered from 26+0 weeks if there is any clinical concern",
+            "CTG can be offered from 26+0 weeks if there is clinical indication",
             "No further investigation required today if low risk",
           ],
         },
@@ -120,7 +123,7 @@ export const RFM_PROTOCOL = {
           items: [
             "Report any further reduction or change in movement pattern immediately",
             "Attend maternity unit if concerned — do not wait",
-            "RFM is presenting symptom in ~50% of IUFDs — always take seriously",
+            "RFM is presenting symptom in approximately 50% of IUFDs — always take seriously",
           ],
         },
       ],
@@ -131,11 +134,11 @@ export const RFM_PROTOCOL = {
       type: "checklist",
       title: "Risk factors present — investigate",
       subtitle: "24+0 to 27+6 weeks with risk factors",
+      source: { gl: "GTG57", sectionId: "gtg57-gestation-management", label: "Management by Gestation (<28 Weeks)" },
       items: [
-        "CTG — can be offered from 26+0 weeks if clinical concern",
+        "CTG — can be offered from 26+0 weeks if clinically indicated",
         "USS — EFW and abdominal circumference to screen for SGA (<10th centile)",
-        "Liquor volume — oligohydramnios = adverse outcome risk",
-        "Uterine artery Doppler — if available at your unit",
+        "Liquor volume — oligohydramnios is associated with adverse outcome",
         "If SGA or abnormal Doppler found → manage per RCOG GTG31 with senior input",
       ],
       next: "documentation",
@@ -157,12 +160,13 @@ export const RFM_PROTOCOL = {
       type: "checklist",
       title: "Take a focused history",
       subtitle: "Cover these areas before CTG",
-      alert: "RFM is the presenting symptom in ~50% of IUFDs — always take seriously regardless of perceived cause",
+      alert: "RFM is the presenting symptom in approximately 50% of IUFDs — always take seriously regardless of perceived cause",
+      source: { gl: "GTG57", sectionId: "gtg57-clinical-assessment", label: "Clinical Assessment" },
       items: [
         "Duration and character of RFM — reduced, absent, or changed pattern",
         "Any preceding period of excessive or vigorous movements",
-        "Anterior placenta — reduces perception but does not remove risk",
-        "Medications crossing the placenta: opioids, benzodiazepines; alcohol use",
+        "Anterior placenta — may decrease perception but should NOT cause a sudden change in movement after 28 weeks",
+        "Medications crossing the placenta: opioids, benzodiazepines, methadone; alcohol use",
         "Risk factors for FGR/stillbirth: smoking, hypertension, diabetes, obesity",
         "Prior SGA, stillbirth, or recurrent RFM (≥2 episodes within 21 days = higher risk)",
       ],
@@ -172,13 +176,14 @@ export const RFM_PROTOCOL = {
     "late_exam": {
       type: "checklist",
       title: "Examine the patient",
+      source: { gl: "GTG57", sectionId: "gtg57-clinical-assessment", label: "Clinical Assessment" },
       items: [
         "BP, HR, temperature",
         "Symphysis-fundal height (SFH) — plot on customised growth chart",
         "Urinalysis — protein, glucose",
         "Perform computerised CTG — minimum 20 minutes",
         "Computerised interpretation preferred — reduces inter-observer variation",
-        "A healthy fetus shows FHR accelerations with >92% of gross body movements",
+        "A healthy fetus shows FHR accelerations with 92–97% of gross body movements",
         "If no acceleration for >80 minutes — fetal compromise is likely",
       ],
       next: "ctg_q",
@@ -207,15 +212,16 @@ export const RFM_PROTOCOL = {
       type: "treatment",
       title: "Normal CTG — Reassure and discharge",
       badge: { label: "Normal CTG · No risk factors", color: "green" },
+      source: { gl: "GTG57", sectionId: "gtg57-after-normal-investigations", label: "After Normal Investigations — Surveillance & Intervention" },
       sections: [
         {
           title: "Advice to give the patient",
           items: [
             "All findings today are normal — reassure",
-            "Do NOT recommend formal kick charts — no evidence of benefit (Grade A)",
-            "Fetal movements do not decrease towards term — this is a common myth",
+            "Do NOT recommend formal kick charts — no evidence of benefit [Grade A]",
+            "Fetal movements do not decrease towards term — this is a common misconception",
             "Report any further reduction in movements or change in pattern immediately",
-            "If ≥39 weeks and all investigations normal: IOL can be offered — not associated with increased CS rate",
+            "If ≥39 weeks and all investigations normal: IOL can be offered — not associated with increased caesarean rate [Grade A]",
           ],
         },
       ],
@@ -226,11 +232,12 @@ export const RFM_PROTOCOL = {
       type: "checklist",
       title: "Request USS",
       subtitle: "Normal CTG — but USS is indicated",
+      source: { gl: "GTG57", sectionId: "gtg57-clinical-assessment", label: "Clinical Assessment" },
       items: [
         "EFW and abdominal circumference — SGA <10th centile",
-        "Amniotic fluid volume — deepest vertical pocket (oligohydramnios = adverse outcome risk)",
+        "Amniotic fluid volume — deepest vertical pocket (oligohydramnios is associated with adverse outcome)",
         "Umbilical artery Doppler — pulsatility index; absent or reversed end-diastolic flow = severe FGR",
-        "Cerebroplacental ratio (CPR) — consider if ≥37 weeks; CPR <1.1 may guide IOL decision",
+        "Consider cerebroplacental ratio (CPR) — especially if ≥37 weeks",
         "Fetal morphology — if anomaly scan not previously performed",
         "Do not delay USS — perform at earliest available opportunity",
       ],
@@ -249,13 +256,14 @@ export const RFM_PROTOCOL = {
     "uss_normal": {
       type: "treatment",
       title: "Normal USS — reassure",
+      source: { gl: "GTG57", sectionId: "gtg57-after-normal-investigations", label: "After Normal Investigations — Surveillance & Intervention" },
       sections: [
         {
           title: "Management",
           items: [
             "Reassure — all investigations normal",
-            "No indication for IOL before 39 weeks on RFM alone with normal investigations",
-            "If ≥39 weeks: IOL can be offered in partnership with the woman",
+            "No indication for expediting birth before 39 weeks on RFM alone with normal investigations [Grade A]",
+            "If ≥39 weeks: IOL can be offered in partnership with the woman [Grade A]",
             "Advise: report any further RFM or movement change immediately",
           ],
         },
@@ -267,10 +275,11 @@ export const RFM_PROTOCOL = {
       type: "escalation",
       title: "Abnormal USS — senior review needed",
       alert: "Do not manage SGA, oligohydramnios, or abnormal Doppler alone",
+      source: { gl: "GTG57", sectionId: "gtg57-after-normal-investigations", label: "After Normal Investigations — Surveillance & Intervention" },
       items: [
         "Manage per RCOG GTG31 (SGA / Growth Restricted Fetus)",
         "Involve senior obstetrician (ST6+ or consultant)",
-        "Absent or reversed end-diastolic flow on UAD = urgent senior review",
+        "Absent or reversed end-diastolic flow on umbilical artery Doppler = urgent senior review",
         "Frequency of surveillance and timing of birth determined by USS findings and gestation",
       ],
       next: "documentation",
@@ -279,12 +288,13 @@ export const RFM_PROTOCOL = {
     "senior_review": {
       type: "escalation",
       title: "Suspicious or pathological CTG — call senior now",
-      alert: "Abnormal CTG in context of RFM increases risk of adverse outcome 7-fold. Do not manage alone.",
+      alert: "Abnormal CTG in context of RFM increases risk of adverse outcome (aOR 7.1). Do not manage alone.",
+      source: { gl: "GTG57", sectionId: "gtg57-clinical-assessment", label: "Clinical Assessment" },
       items: [
         "Involve senior obstetrician (ST6+ or consultant) immediately",
         "Consider acute fetal compromise — expedite birth if appropriate",
         "If lesser degree of concern: further CTG monitoring with plan for frequent reassessment",
-        "Add USS (EFW, liquor, UAD) if immediate birth not indicated",
+        "Add USS (EFW, liquor, umbilical artery Doppler) if immediate birth not indicated",
         "If acute compromise → proceed to birth per unit protocol",
       ],
       next: "documentation",
@@ -296,6 +306,7 @@ export const RFM_PROTOCOL = {
       type: "escalation",
       title: "Fetal heart not detected — act now",
       alert: "Do not leave the woman alone. Arrange immediate USS to confirm fetal viability.",
+      source: { gl: "GTG57", sectionId: "gtg57-clinical-assessment", label: "Clinical Assessment" },
       items: [
         "Arrange immediate USS — do not delay",
         "Do not reassure the patient until USS confirms viability",
@@ -311,10 +322,11 @@ export const RFM_PROTOCOL = {
     "escalation_check": {
       type: "escalation",
       title: "Also escalate if any of these apply",
+      source: { gl: "GTG57", sectionId: "gtg57-recurrent-rfm", label: "Recurrent RFM" },
       items: [
-        "Recurrent RFM — 2 or more episodes within 21 days (stillbirth risk 1.4%, FGR risk 44%)",
+        "Recurrent RFM — 2 or more episodes within 21 days (stillbirth risk 1.4%, FGR risk 44.2%)",
         "SGA, oligohydramnios, or absent / reversed umbilical artery end-diastolic flow",
-        "Woman requesting delivery despite normal investigations — senior shared decision-making",
+        "Woman requesting delivery despite normal investigations — individualised senior decision",
         "Any clinical deterioration or instinct that something is wrong",
       ],
       next: "documentation",
@@ -326,13 +338,14 @@ export const RFM_PROTOCOL = {
       type: "end",
       title: "Document on EPR",
       subtitle: "Before you leave the patient",
+      source: { gl: "GTG57", sectionId: "gtg57-clinical-assessment", label: "Clinical Assessment" },
       items: [
         "Gestation at presentation",
         "Nature of RFM — reduced, absent, or changed pattern",
         "Risk factors identified",
         "SFH plotted on growth chart",
         "FH confirmed on Doppler — time and result",
-        "CTG performed — result and interpretation (if ≥28 weeks)",
+        "CTG performed — result and interpretation (if ≥26 weeks)",
         "USS performed or referred — findings (if indicated)",
         "Management plan and clinical rationale",
         "Safety-netting advice given — patient knows to return with any further concerns",
