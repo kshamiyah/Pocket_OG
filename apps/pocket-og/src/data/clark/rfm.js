@@ -114,6 +114,7 @@ export const RFM_PROTOCOL = {
           items: [
             "Fetal heart confirmed — reassuring",
             "Explain normal pattern of movement at this gestation",
+            "CTG is NOT recommended before 26+0 weeks — insufficient evidence [GTG57]",
             "CTG can be offered from 26+0 weeks if there is clinical indication",
             "No further investigation required today if low risk",
           ],
@@ -165,7 +166,7 @@ export const RFM_PROTOCOL = {
       items: [
         "Duration and character of RFM — reduced, absent, or changed pattern",
         "Any preceding period of excessive or vigorous movements",
-        "Anterior placenta — may decrease perception but should NOT cause a sudden change in movement after 28 weeks",
+        "Anterior placenta — may decrease perception before 28 weeks but should NOT cause a sudden change in movement after 28 weeks",
         "Medications crossing the placenta: opioids, benzodiazepines, methadone; alcohol use",
         "Risk factors for FGR/stillbirth: smoking, hypertension, diabetes, obesity",
         "Prior SGA, stillbirth, or recurrent RFM (≥2 episodes within 21 days = higher risk)",
@@ -221,7 +222,6 @@ export const RFM_PROTOCOL = {
             "Do NOT recommend formal kick charts — no evidence of benefit [Grade A]",
             "Fetal movements do not decrease towards term — this is a common misconception",
             "Report any further reduction in movements or change in pattern immediately",
-            "If ≥39 weeks and all investigations normal: IOL can be offered — not associated with increased caesarean rate [Grade A]",
           ],
         },
       ],
@@ -324,7 +324,7 @@ export const RFM_PROTOCOL = {
       title: "Also escalate if any of these apply",
       source: { gl: "GTG57", sectionId: "gtg57-recurrent-rfm", label: "Recurrent RFM" },
       items: [
-        "Recurrent RFM — 2 or more episodes within 21 days (stillbirth risk 1.4%, FGR risk 44.2%)",
+        "Recurrent RFM — 2 or more episodes within 21 days after 26+0 weeks (stillbirth risk 1.4%, FGR risk 44.2%)",
         "SGA, oligohydramnios, or absent / reversed umbilical artery end-diastolic flow",
         "Woman requesting delivery despite normal investigations — individualised senior decision",
         "Any clinical deterioration or instinct that something is wrong",

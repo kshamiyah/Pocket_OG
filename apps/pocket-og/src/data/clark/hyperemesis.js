@@ -143,7 +143,7 @@ export const HYPEREMESIS_PROTOCOL = {
       ],
       scoring: [
         { min: 3,  max: 6,  label: "Mild NVP",    color: "green", next: "mild_management"     },
-        { min: 7,  max: 12, label: "Moderate HG",  color: "amber", next: "moderate_management" },
+        { min: 7,  max: 12, label: "Moderate NVP", color: "amber", next: "moderate_management" },
         { min: 13, max: 15, label: "Severe HG",    color: "red",   next: "severe_management"   },
       ],
       source: { gl: "GTG69", sectionId: "gtg69-overview", label: "NVP & HG — Overview and PUQE Scoring" },
@@ -178,6 +178,7 @@ export const HYPEREMESIS_PROTOCOL = {
         {
           title: "Second-line — if first-line inadequate",
           drugs: [
+            { drug: "Domperidone",      dose: "10 mg PO TDS",                              note: "Dopamine antagonist; use shortest effective duration"                                                      },
             { drug: "Metoclopramide",   dose: "10 mg PO/IV/IM TDS",                       note: "Max 5 days continuous — risk of tardive dyskinesia with prolonged use" },
             { drug: "Ondansetron",      dose: "4–8 mg PO/IV BD–TDS",                      note: "Effective; 2022 evidence shows no significant teratogenicity at therapeutic doses; counsel and document" },
           ],
@@ -254,7 +255,7 @@ export const HYPEREMESIS_PROTOCOL = {
         "VTE risk assessment: LMWH on admission + TED stockings when mobile",
       ],
       next: "improving_q",
-      source: { gl: "GTG69", sectionId: "gtg69-complications", label: "Complications" },
+      source: { gl: "GTG69", sectionId: "gtg69-fluids", label: "IV Fluid Management & Thiamine" },
     },
 
     // ─── Response to treatment ─────────────────────────────────────────────────

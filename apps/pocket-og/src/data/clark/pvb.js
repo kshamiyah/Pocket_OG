@@ -76,7 +76,7 @@ export const PVB_PROTOCOL = {
       title: "Major APH — immediate actions",
       alert: "Digital VE only AFTER USS excludes placenta praevia — NEVER perform blind",
       items: [
-        "2× 14G or 16G IV access",
+        "2× 14G IV access",
         "FBC, coagulation screen, crossmatch 4 units, U&E, LFTs",
         "Assess fetal wellbeing — apply CTG once mother is stable",
         "Call registrar now — do not manage major APH alone",
@@ -301,7 +301,7 @@ export const PVB_PROTOCOL = {
         "Admission or discharge decision and management plan",
         "Safety-netting advice given to patient",
       ],
-      source: { gl: "GTG63", sectionId: "gtg63-antid", label: "Anti-D Immunoglobulin in RhD-Negative Women with APH" },
+      source: { gl: "GTG63", sectionId: "gtg63-assessment", label: "Clinical Assessment of APH" },
     },
 
   },

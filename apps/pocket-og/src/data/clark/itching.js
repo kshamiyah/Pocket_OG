@@ -130,8 +130,8 @@ export const ITCHING_PROTOCOL = {
           title: "Symptomatic relief",
           drugs: [
             { drug: "Aqueous cream + menthol 1%",      dose: "Apply to affected areas PRN",  note: "First-line topical emollient"       },
-            { drug: "Chlorphenamine",                   dose: "4 mg TDS oral",                note: "Sedative antihistamine — useful at night" },
-            { drug: "Loratadine / Cetirizine",         dose: "10 mg OD oral",                note: "Non-sedating antihistamine"         },
+            { drug: "Chlorphenamine",                   dose: "4 mg TDS oral (per BNF)",      note: "Sedative antihistamine — useful at night; dose not specified in GL880" },
+            { drug: "Loratadine / Cetirizine",         dose: "10 mg OD oral (per BNF)",      note: "Non-sedating antihistamine; dose not specified in GL880" },
           ],
         },
       ],
@@ -171,8 +171,8 @@ export const ITCHING_PROTOCOL = {
           title: "Symptomatic relief",
           drugs: [
             { drug: "Aqueous cream + menthol 1%",  dose: "Apply PRN",         note: "First-line topical emollient"       },
-            { drug: "Chlorphenamine",               dose: "4 mg TDS oral",     note: "Sedative antihistamine — useful at night" },
-            { drug: "Loratadine / Cetirizine",     dose: "10 mg OD oral",     note: "Non-sedating antihistamine"         },
+            { drug: "Chlorphenamine",               dose: "4 mg TDS oral (per BNF)",  note: "Sedative antihistamine — useful at night; dose not specified in GL880" },
+            { drug: "Loratadine / Cetirizine",     dose: "10 mg OD oral (per BNF)", note: "Non-sedating antihistamine; dose not specified in GL880" },
           ],
         },
       ],
@@ -183,7 +183,7 @@ export const ITCHING_PROTOCOL = {
       type: "treatment",
       title: "Mild ICP — Outpatient Management",
       badge: { label: "BA 19–39 µmol/L", color: "amber" },
-      source: { gl: "GL880", sectionId: "icp-delivery", label: "ICP — Timing of Delivery & Labour Monitoring" },
+      source: { gl: "GL880", sectionId: "icp-diagnosis", label: "ICP — Diagnosis & Monitoring" },
       sections: [
         {
           title: "Monitoring",
@@ -204,19 +204,19 @@ export const ITCHING_PROTOCOL = {
           title: "Symptomatic relief",
           drugs: [
             { drug: "Aqueous cream + menthol 1%",  dose: "Apply PRN",         note: "First-line topical emollient"       },
-            { drug: "Chlorphenamine",               dose: "4 mg TDS oral",     note: "Sedative antihistamine — useful at night" },
-            { drug: "Loratadine / Cetirizine",     dose: "10 mg OD oral",     note: "Non-sedating antihistamine"         },
+            { drug: "Chlorphenamine",               dose: "4 mg TDS oral (per BNF)",  note: "Sedative antihistamine — useful at night; dose not specified in GL880" },
+            { drug: "Loratadine / Cetirizine",     dose: "10 mg OD oral (per BNF)", note: "Non-sedating antihistamine; dose not specified in GL880" },
           ],
         },
       ],
-      next: "documentation",
+      next: "postnatal_icp",
     },
 
     "moderate_icp": {
       type: "treatment",
       title: "Moderate ICP — Refer to Consultant ANC",
       badge: { label: "BA 40–99 µmol/L", color: "amber" },
-      source: { gl: "GL880", sectionId: "icp-delivery", label: "ICP — Timing of Delivery & Labour Monitoring" },
+      source: { gl: "GL880", sectionId: "icp-diagnosis", label: "ICP — Diagnosis & Monitoring" },
       sections: [
         {
           title: "Monitoring",
@@ -241,13 +241,13 @@ export const ITCHING_PROTOCOL = {
           ],
         },
       ],
-      next: "documentation",
+      next: "postnatal_icp",
     },
 
     "severe_icp": {
       type: "escalation",
       title: "Severe ICP — Escalate to Consultant",
-      alert: "Stillbirth risk is significantly increased when BA > 100 µmol/L (risk ~3.5%). Do not manage this alone.",
+      alert: "Stillbirth risk is significantly increased when BA > 100 µmol/L (risk 3.5%). Do not manage this alone.",
       source: { gl: "GL880", sectionId: "icp-delivery", label: "ICP — Timing of Delivery & Labour Monitoring" },
       items: [
         "Refer urgently to consultant obstetrician — refer specifically to Miss Brooks' ANC; do not discharge",
@@ -257,6 +257,39 @@ export const ITCHING_PROTOCOL = {
         "Vitamin K (Menadiol 10 mg daily) if clotting is abnormal",
         "UDCA (12 mg/kg/day) — may be considered; must only be prescribed after consultation with a senior clinician (middle grade or above)",
         "Discuss risk of stillbirth with patient and document the conversation",
+      ],
+      next: "postnatal_icp",
+    },
+
+    // ─── Postnatal follow-up ──────────────────────────────────────────────────
+
+    "postnatal_icp": {
+      type: "treatment",
+      title: "ICP — Postnatal Follow-up",
+      source: { gl: "GL880", sectionId: "icp-postnatal", label: "ICP — Postnatal Follow-up & Recurrence" },
+      sections: [
+        {
+          title: "Postnatal blood tests",
+          items: [
+            "Repeat bile acids and LFTs at 4–6 weeks postnatally — should normalise after delivery",
+            "If bile acids or LFTs fail to normalise by 6 weeks: investigate for chronic liver disease; refer to hepatology",
+          ],
+        },
+        {
+          title: "Recurrence counselling",
+          items: [
+            "Risk of recurrence in subsequent pregnancies: 45–70% — counsel before next pregnancy",
+            "Should be seen by a consultant in early pregnancy if planning another pregnancy",
+            "Combined oral contraceptive pill may cause cholestasis in women with ICP — consider alternative contraception",
+          ],
+        },
+        {
+          title: "Contraception",
+          items: [
+            "COC: avoid in women with ICP history — may precipitate cholestasis",
+            "Progestogen-only methods are acceptable alternatives",
+          ],
+        },
       ],
       next: "documentation",
     },

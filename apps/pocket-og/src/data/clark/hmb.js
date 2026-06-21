@@ -24,7 +24,7 @@ export const HMB_PROTOCOL = {
     "pmb_referral": {
       type: "escalation",
       title: "Postmenopausal bleeding — 2WW referral",
-      alert: "Any unexplained vaginal bleeding after menopause requires urgent suspected cancer referral. Do not treat empirically.",
+      alert: "Any unexplained vaginal bleeding after menopause — typically applied to women ≥55 years (age used as proxy for menopause per NG88) — requires urgent suspected cancer referral. Do not treat empirically.",
       items: [
         "Refer under 2-week wait — gynaecology urgent suspected cancer pathway",
         "Do not delay referral to trial treatment first",
@@ -181,7 +181,7 @@ export const HMB_PROTOCOL = {
           ],
         },
       ],
-      source: { gl: "NG88", sectionId: "ng88-polyps", label: "HMB with Endometrial Polyps" },
+      source: { gl: "NG88", sectionId: "ng88-referral", label: "When to Refer & Red Flags" },
       next: "imb_uss_q",
     },
 
@@ -216,7 +216,7 @@ export const HMB_PROTOCOL = {
       alert: "NICE NG88: blind Pipelle biopsy is NOT recommended. Refer for hysteroscopy + directed biopsy in secondary care.",
       items: [
         "Refer to gynaecology — outpatient hysteroscopy with directed (hysteroscopic) biopsy",
-        "Indications: thickened USS endometrium, age ≥45, risk factors (BMI >30, PCOS, diabetes), or persistent unexplained IMB/PCB",
+        "Indications per NG88: persistent IMB/PCB, obesity + infrequent heavy bleeding, PCOS, or any clinical feature raising concern — age ≥45 alone is NOT a standalone indication without other features",
         "Hysteroscopy visualises cavity directly and takes targeted biopsy in the same procedure",
         "Include in referral: age, smear history, USS report, STI result, bleeding pattern",
       ],
@@ -249,7 +249,7 @@ export const HMB_PROTOCOL = {
           ],
         },
       ],
-      source: { gl: "NG88", sectionId: "ng88-referral", label: "When to Refer & Red Flags" },
+      source: { gl: "NG88", sectionId: "ng88-assessment", label: "Assessment in Primary Care" },
       next: "documentation",
     },
 
@@ -346,7 +346,7 @@ export const HMB_PROTOCOL = {
         {
           title: "Diagnosis",
           items: [
-            "USS strongly suggestive — MRI pelvis is more accurate (junctional zone >12 mm is diagnostic)",
+            "USS strongly suggestive — MRI pelvis is more accurate (junctional zone >12 mm or >40% of total myometrial thickness is diagnostic)",
             "Endometrial biopsy does NOT diagnose adenomyosis — definitive diagnosis requires full myometrial histology (i.e. hysterectomy specimen)",
             "Do not refer for Pipelle biopsy — this will not confirm or exclude adenomyosis",
           ],
@@ -622,7 +622,7 @@ export const HMB_PROTOCOL = {
         {
           title: "First-line treatment",
           items: [
-            "LNG-IUS — regression rate >90% at 6 months; maintain for ≥12 months post-regression",
+            "LNG-IUS — regression rate >90% at 6 months; continue until two consecutive negative biopsies (per NG88)",
             "If LNG-IUS declined: oral progestogen (norethisterone 10–15 mg daily or medroxyprogesterone acetate 10–20 mg daily)",
             "6-monthly endometrial biopsy until two consecutive negative biopsies",
             "Address underlying risk factors: weight reduction, diabetes control",
@@ -744,10 +744,15 @@ export const HMB_PROTOCOL = {
           ],
         },
         {
-          title: "Progestogen-only options",
+          title: "Progestogen-only options (with contraceptive benefit)",
           items: [
-            "Norethisterone 5 mg TDS day 5–26 — reduces loss ~80%; not contraceptive at this dose/regimen",
             "Injectable progestogen (Depo-Provera) or implant — often induce amenorrhoea; variable bleeding pattern initially",
+          ],
+        },
+        {
+          title: "Non-contraceptive progestogen (HMB only — no contraceptive effect)",
+          items: [
+            "Norethisterone 5 mg TDS day 5–26 — reduces loss ~80%; NOT a contraceptive at this dose/regimen — advise barrier contraception concurrently if required",
           ],
         },
       ],
@@ -837,7 +842,7 @@ export const HMB_PROTOCOL = {
         "Counselling given — e.g. irregular spotting with LNG-IUS",
         "Follow-up plan and review date",
       ],
-      source: { gl: "NG88", sectionId: "ng88-overview", label: "Overview, Definition & Impact" },
+      source: { gl: "NG88", sectionId: "ng88-assessment", label: "Assessment in Primary Care" },
     },
 
   },

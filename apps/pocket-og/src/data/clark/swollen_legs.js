@@ -308,7 +308,7 @@ export const SWOLLEN_LEGS_PROTOCOL = {
         "Haematology or senior review if required",
         "Safety-netting: worsening swelling, SOB, chest pain → attend ED immediately",
       ],
-      source: { gl: "GL891", sectionId: "vte-postnatal", label: "VTE — Postnatal Risk Scoring & Prophylaxis Duration" },
+      source: { gl: "GL891", sectionId: "vte-risk-assessment", label: "VTE Risk Assessment & Antenatal Prophylaxis" },
     },
 
   },
