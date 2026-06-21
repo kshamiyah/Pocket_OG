@@ -45,6 +45,53 @@ export const HMB_PROTOCOL = {
         "FBC: Hb if significant blood loss suspected",
         "Proceed to speculum examination — findings will determine next steps",
       ],
+      next: "imb_bleeding_active_q",
+    },
+
+    "imb_bleeding_active_q": {
+      type: "question",
+      question: "Is there significant ongoing or heavy bleeding right now?",
+      subtitle: "Bridging medical treatment can be started immediately while investigations are pending",
+      options: [
+        { label: "Yes — bleeding is active, heavy, or distressing",        next: "imb_interim_tx" },
+        { label: "No — mild, episodic, or currently settled",              next: "cervix_exam_q"  },
+      ],
+    },
+
+    "imb_interim_tx": {
+      type: "treatment",
+      title: "Interim medical treatment — active IMB",
+      sections: [
+        {
+          title: "Norethisterone — arrest or reduce ongoing bleeding",
+          drugs: [
+            {
+              drug: "Norethisterone",
+              dose: "5 mg TDS orally",
+              note: "Continue until bleeding stops, then for a further 7 days. Withdrawal bleed expected 2–4 days after stopping. Avoid if personal/family history of VTE or migraine with aura.",
+            },
+          ],
+        },
+        {
+          title: "Tranexamic acid — if heavy loss component",
+          drugs: [
+            {
+              drug: "Tranexamic acid",
+              dose: "1 g (2 × 500 mg) up to QDS",
+              note: "During heavy bleeding days only — max 4 days per episode. Reduces blood loss ~50%. Avoid if history of VTE.",
+            },
+          ],
+        },
+        {
+          title: "Key points",
+          items: [
+            "These are bridging treatments only — do not delay investigation",
+            "Both can be used together — additive effect on blood loss",
+            "Treat iron deficiency anaemia concurrently if Hb is low",
+            "Proceed to speculum examination regardless of treatment response",
+          ],
+        },
+      ],
       next: "cervix_exam_q",
     },
 
