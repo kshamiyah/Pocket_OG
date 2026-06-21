@@ -531,7 +531,7 @@ export default function Clark({ onClose }) {
         clipPath: revealed
           ? "circle(150% at calc(100% - 48px) calc(100% - 108px))"
           : "circle(28px at calc(100% - 48px) calc(100% - 108px))",
-        transition: "clip-path 0.55s cubic-bezier(0.22, 1, 0.36, 1)",
+        transition: "clip-path 0.75s cubic-bezier(0.22, 1, 0.36, 1)",
       }}
     >
       {activeProtocol ? (
