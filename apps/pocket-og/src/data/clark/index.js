@@ -4,6 +4,7 @@ import { ITCHING_PROTOCOL } from "./itching";
 import { PVB_PROTOCOL } from "./pvb";
 import { SWOLLEN_LEGS_PROTOCOL } from "./swollen_legs";
 import { PPROM_PROTOCOL } from "./pprom";
+import { HMB_PROTOCOL } from "./hmb";
 
 export const CLARK_PROTOCOLS = {
   hyperemesis: HYPEREMESIS_PROTOCOL,
@@ -12,6 +13,7 @@ export const CLARK_PROTOCOLS = {
   pvb: PVB_PROTOCOL,
   swollen_legs: SWOLLEN_LEGS_PROTOCOL,
   pprom: PPROM_PROTOCOL,
+  hmb: HMB_PROTOCOL,
 };
 
 export const CLARK_CATEGORIES = [
@@ -130,11 +132,11 @@ export const CLARK_CATEGORIES = [
         available: false,
       },
       {
-        id: "heavy_menstrual_bleeding",
+        id: "hmb",
         label: "Heavy Menstrual Bleeding",
         subtitle: "Assessment & medical management",
         guideline: "NICE NG88",
-        available: false,
+        available: true,
       },
     ],
   },
