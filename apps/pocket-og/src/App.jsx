@@ -12,6 +12,7 @@ import ConsentPage from "./components/ConsentPage";
 import CalculatorPage from "./components/CalculatorPage";
 import AlphabetSidebar from "./components/AlphabetSidebar";
 import GuidelineReader from "./components/GuidelineReader";
+import Clark from "./components/Clark";
 
 const READER_AVAILABLE = new Set([
   "GL861", "GL952", "GL891", "GL983", "GL880", "GL787", "GL783", "GL895",
@@ -117,6 +118,7 @@ export default function App() {
   const [calcNavKey, setCalcNavKey] = useState(0);
   const [activeConsentProcedure, setActiveConsentProcedure] = useState(null);
   const [consentNavKey, setConsentNavKey] = useState(0);
+  const [showClark, setShowClark] = useState(false);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
   const glSectionRefs = useRef({});
@@ -239,6 +241,9 @@ export default function App() {
       {/* Feedback button — always visible */}
       <FeedbackButton query={query} filter={filter} />
 
+      {/* CLARK overlay */}
+      {showClark && <Clark onClose={() => setShowClark(false)} />}
+
       {/* IOL Prioritizer overlay */}
       {showIOLPrioritizer && <IOLPrioritizer onClose={() => setShowIOLPrioritizer(false)} />}
 
@@ -266,7 +271,6 @@ export default function App() {
           />
         );
       })()}
-      )}
 
       {/* Search tab — home / results */}
       {activeTab === "search" && (
@@ -320,6 +324,28 @@ export default function App() {
                       {s}
                     </button>
                   ))}
+                </div>
+
+                {/* CLARK launcher */}
+                <div className="mt-6 pt-5 border-t border-gray-100">
+                  <button
+                    onClick={() => setShowClark(true)}
+                    className="w-full group relative bg-gray-950 hover:bg-black text-white rounded-3xl px-5 py-4 flex items-center gap-4 transition-all active:scale-[0.98] shadow-xl shadow-black/10"
+                  >
+                    <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="text-[10px] font-bold text-emerald-400 tracking-widest uppercase mb-0.5">New</p>
+                      <p className="text-base font-black text-white tracking-tight">CLARK</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Clinical co-pilot · See patients step by step</p>
+                    </div>
+                    <svg className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
                 </div>
 
               </div>
