@@ -436,7 +436,7 @@ function ClarkHome({ onSelect, onClose }) {
               Clinical co-pilot
             </p>
             <h1 className="text-5xl font-black text-white tracking-tight leading-none">CLARK</h1>
-            <p className="text-sm text-gray-400 mt-2">Sees patients with you · Step by step</p>
+            <p className="text-sm text-zinc-400 mt-2">Sees patients with you · Step by step</p>
           </div>
           <button
             onClick={onClose}
@@ -449,8 +449,8 @@ function ClarkHome({ onSelect, onClose }) {
           </button>
         </div>
 
-        <div className="bg-white/5 border border-white/8 rounded-2xl px-4 py-3">
-          <p className="text-xs text-slate-400 leading-relaxed">
+        <div className="bg-zinc-700/50 border border-zinc-700 rounded-2xl px-4 py-3">
+          <p className="text-xs text-zinc-400 leading-relaxed">
             Choose a presenting complaint. CLARK walks you through history, examination, investigations, scoring, and management — all in one place.
           </p>
         </div>
@@ -460,7 +460,7 @@ function ClarkHome({ onSelect, onClose }) {
       <div className="flex-1 overflow-y-auto px-5 pb-10">
         {CLARK_CATEGORIES.map(category => (
           <div key={category.id} className="mb-7">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">
               {category.label}
             </p>
             <div className="space-y-2">
@@ -487,13 +487,13 @@ function ClarkHome({ onSelect, onClose }) {
                 ) : (
                   <div
                     key={proto.id}
-                    className="w-full text-left bg-white/5 border border-white/8 rounded-2xl px-4 py-3 flex items-center gap-3 opacity-40 cursor-default"
+                    className="w-full text-left bg-zinc-700/40 border border-zinc-700 rounded-2xl px-4 py-3 flex items-center gap-3 cursor-default"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-300 leading-snug">{proto.label}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{proto.subtitle}</p>
+                      <p className="text-sm font-medium text-zinc-400 leading-snug">{proto.label}</p>
+                      <p className="text-xs text-zinc-600 mt-0.5">{proto.subtitle}</p>
                     </div>
-                    <span className="text-[10px] font-semibold text-slate-500 bg-white/8 px-2 py-0.5 rounded-full shrink-0">
+                    <span className="text-[10px] font-semibold text-zinc-500 bg-zinc-700 px-2 py-0.5 rounded-full shrink-0">
                       Soon
                     </span>
                   </div>
@@ -503,7 +503,7 @@ function ClarkHome({ onSelect, onClose }) {
           </div>
         ))}
 
-        <p className="text-xs text-slate-600 text-center leading-relaxed pb-2">
+        <p className="text-xs text-zinc-600 text-center leading-relaxed pb-2">
           CLARK is a clinical aid — not a substitute for clinical judgement.<br />
           Always escalate when uncertain.
         </p>
@@ -527,7 +527,7 @@ export default function Clark({ onClose }) {
           <ClarkSession protocol={activeProtocol} onExit={() => setActiveProtocol(null)} />
         </div>
       ) : (
-        <div className="flex flex-col h-full bg-slate-900">
+        <div className="flex flex-col h-full bg-zinc-800">
           <ClarkHome onSelect={setActiveProtocol} onClose={onClose} />
         </div>
       )}
