@@ -1,44 +1,18 @@
 import { GUIDELINES } from "@pocket-og/guidelines";
 import ContentBlock, { highlightText } from "./ContentBlock";
-
-const ACCENT = {
-  GL952: "bg-blue-500",
-  GL787: "bg-emerald-500",
-  CG565: "bg-violet-500",
-  CG621: "bg-rose-500",
-  CG623: "bg-orange-500",
-  GL895: "bg-sky-500",
-  GL861: "bg-teal-500",
-  GL783: "bg-amber-500",
-  GL880: "bg-yellow-500",
-  GL891: "bg-indigo-500",
-  GL983: "bg-pink-500",
-};
-
-const CONDITION_COLOR = {
-  GL952: "text-blue-500",
-  GL787: "text-emerald-500",
-  CG565: "text-violet-500",
-  CG621: "text-rose-500",
-  CG623: "text-orange-500",
-  GL895: "text-sky-500",
-  GL861: "text-teal-500",
-  GL783: "text-amber-500",
-  GL880: "text-yellow-500",
-  GL891: "text-indigo-500",
-  GL983: "text-pink-500",
-};
+import { glColors } from "../data/glColors";
 
 export default function WikiCard({ page, isExpanded, onToggle, isFallback, query = "", onOpenFlowchart }) {
   const gl = GUIDELINES[page.gl];
   const highlightTerms = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
+  const col = glColors(page.gl);
 
   return (
     <div className={`rounded-3xl overflow-hidden bg-white flex transition-shadow ${
       isFallback ? "opacity-70 shadow-sm" : "shadow-sm hover:shadow-md"
     }`}>
       {/* Colored left accent bar */}
-      <div className={`w-1 shrink-0 ${ACCENT[page.gl] ?? "bg-gray-300"}`} />
+      <div className={`w-1 shrink-0 ${col.accent}`} />
 
       {/* Card body */}
       <div className="flex-1 min-w-0">
@@ -48,7 +22,7 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
           className="w-full text-left px-3 sm:px-5 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors flex items-center gap-3"
         >
           <div className="flex-1 min-w-0">
-            <p className={`text-xs font-semibold mb-1 ${CONDITION_COLOR[page.gl] ?? "text-gray-400"}`}>
+            <p className={`text-xs font-semibold mb-1 ${col.conditionColor}`}>
               {page.condition}
             </p>
             <h3 className="text-gray-900 font-semibold text-base leading-snug">
@@ -58,7 +32,7 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
               <span className="px-2 py-0.5 rounded-full text-xs text-gray-400 bg-gray-100">{page.setting}</span>
               {gl && <span className="px-2 py-0.5 rounded-full text-xs text-gray-400 bg-gray-100">{gl.version} · {gl.date}</span>}
               {isFallback && (
-                <span className="px-2 py-0.5 rounded-full text-xs text-gray-400 bg-gray-100">closest match</span>
+                <span className="px-2 py-0.5 rounded-full text-xs text-amber-600 bg-amber-50 border border-amber-100">closest match</span>
               )}
               {page.flowchartId && (
                 <span className="px-2 py-0.5 rounded-full text-xs text-teal-600 bg-teal-50 border border-teal-100">
@@ -113,7 +87,7 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
               <ContentBlock key={i} block={block} highlightTerms={highlightTerms} />
             ))}
             <div className="mt-5 pt-3 border-t border-gray-100">
-              <p className="text-xs text-gray-400">{gl.code} {gl.version} · {gl.label} · RBH · {gl.date}</p>
+              <p className="text-xs text-gray-400">{gl.code} {gl.version} · {gl.label} · {gl.source} · {gl.date}</p>
             </div>
           </div>
         )}

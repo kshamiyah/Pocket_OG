@@ -13,6 +13,7 @@ import {
 } from "@pocket-og/guidelines";
 import { FLOWCHARTS } from "../data/flowcharts";
 import { GUIDELINE_KEYWORD_LINKS } from "../data/connections";
+import { glColors } from "../data/glColors";
 import ContentBlock from "./ContentBlock";
 import SeeAlso from "./SeeAlso";
 
@@ -44,36 +45,6 @@ const SECTIONS_MAP = {
   NG133: NG133_SECTIONS,
 };
 
-// Colours match the existing GL colour system in App.jsx / WikiCard
-const GL_THEME = {
-  GL861:    { badge: "bg-teal-50 text-teal-700",      conditionColor: "text-teal-500"     },
-  GL952:    { badge: "bg-blue-50 text-blue-700",      conditionColor: "text-blue-500"     },
-  GL891:    { badge: "bg-indigo-50 text-indigo-700",  conditionColor: "text-indigo-500"   },
-  GL983:    { badge: "bg-pink-50 text-pink-700",      conditionColor: "text-pink-500"     },
-  GL880:    { badge: "bg-yellow-50 text-yellow-700",  conditionColor: "text-yellow-600"   },
-  GL787:    { badge: "bg-emerald-50 text-emerald-700",conditionColor: "text-emerald-500"  },
-  GL783:    { badge: "bg-amber-50 text-amber-700",    conditionColor: "text-amber-500"    },
-  GL895:    { badge: "bg-sky-50 text-sky-700",        conditionColor: "text-sky-500"      },
-  CG565:    { badge: "bg-violet-50 text-violet-700",  conditionColor: "text-violet-500"   },
-  CG621:    { badge: "bg-rose-50 text-rose-700",      conditionColor: "text-rose-500"     },
-  CG623:    { badge: "bg-orange-50 text-orange-700",  conditionColor: "text-orange-500"   },
-  QS46:     { badge: "bg-cyan-50 text-cyan-700",      conditionColor: "text-cyan-500"     },
-  QS22:     { badge: "bg-lime-50 text-lime-700",      conditionColor: "text-lime-600"     },
-  GTG57:    { badge: "bg-red-50 text-red-700",        conditionColor: "text-red-500"      },
-  GTG63:    { badge: "bg-purple-50 text-purple-700",  conditionColor: "text-purple-500"   },
-  GTG67:    { badge: "bg-green-50 text-green-700",    conditionColor: "text-green-500"    },
-  NG88:     { badge: "bg-fuchsia-50 text-fuchsia-700",conditionColor: "text-fuchsia-500"  },
-  NHSCSP20: { badge: "bg-slate-50 text-slate-700",    conditionColor: "text-slate-500"    },
-  GTG52: { badge: "bg-red-50 text-red-700",         conditionColor: "text-red-500"      },
-  GTG69: { badge: "bg-orange-50 text-orange-700",   conditionColor: "text-orange-500"   },
-  NG25:  { badge: "bg-sky-50 text-sky-700",         conditionColor: "text-sky-500"      },
-  GTG31: { badge: "bg-green-50 text-green-700",     conditionColor: "text-green-500"    },
-  GTG17: { badge: "bg-violet-50 text-violet-700",   conditionColor: "text-violet-500"   },
-  CG192: { badge: "bg-purple-50 text-purple-700",   conditionColor: "text-purple-500"   },
-  NG133: { badge: "bg-cyan-50 text-cyan-700",       conditionColor: "text-cyan-600"     },
-};
-
-const DEFAULT_THEME = { badge: "bg-gray-100 text-gray-600", conditionColor: "text-gray-400" };
 
 // Strip common abbreviation prefixes from titles (e.g. "IOL — ", "IDA — ", "VTE — ")
 // so they're not redundant alongside the condition label shown above
@@ -105,7 +76,7 @@ function computeSectionBlockLinks(section, allLinks) {
 export default function GuidelineReader({ gl, onClose, onNavigate }) {
   const sections = SECTIONS_MAP[gl] ?? [];
   const guideline = GUIDELINES[gl];
-  const theme = GL_THEME[gl] ?? DEFAULT_THEME;
+  const theme = glColors(gl);
   const scrollRef = useRef(null);
   const sectionRefs = useRef({});
   const [showContents, setShowContents] = useState(false);

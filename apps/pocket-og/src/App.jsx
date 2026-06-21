@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import { SEARCH_INDEX, search } from "./search/engine";
 import { FLOWCHARTS } from "./data/flowcharts";
 import { GUIDELINES } from "@pocket-og/guidelines";
+import { glColors } from "./data/glColors";
 import WikiCard from "./components/WikiCard";
 import NoResults from "./components/NoResults";
 import FlowchartPlayer from "./components/FlowchartPlayer";
@@ -78,31 +79,6 @@ const FLOWCHART_LINKS = [
   { id: "GTG52_PPH",             gl: "GTG52" },
   { id: "GTG31_SURVEILLANCE",    gl: "GTG31" },
 ];
-
-const FC_GL_COLOR = {
-  GL861: { badge: "bg-teal-50 text-teal-700 border-teal-100",       icon: "text-teal-400",   accent: "bg-teal-400",   solid: "bg-teal-600",   solidHover: "hover:bg-teal-700" },
-  GL952: { badge: "bg-blue-50 text-blue-700 border-blue-100",       icon: "text-blue-400",   accent: "bg-blue-400",   solid: "bg-blue-600",   solidHover: "hover:bg-blue-700" },
-  CG565: { badge: "bg-violet-50 text-violet-700 border-violet-100", icon: "text-violet-400", accent: "bg-violet-400", solid: "bg-violet-600", solidHover: "hover:bg-violet-700" },
-  CG621: { badge: "bg-rose-50 text-rose-700 border-rose-100",       icon: "text-rose-400",   accent: "bg-rose-400",   solid: "bg-rose-600",   solidHover: "hover:bg-rose-700" },
-  CG623: { badge: "bg-orange-50 text-orange-700 border-orange-100", icon: "text-orange-400", accent: "bg-orange-400", solid: "bg-orange-500", solidHover: "hover:bg-orange-600" },
-  GL891: { badge: "bg-indigo-50 text-indigo-700 border-indigo-100", icon: "text-indigo-400", accent: "bg-indigo-400", solid: "bg-indigo-500", solidHover: "hover:bg-indigo-600" },
-  GL983: { badge: "bg-pink-50 text-pink-700 border-pink-100",       icon: "text-pink-400",   accent: "bg-pink-400",   solid: "bg-pink-500",   solidHover: "hover:bg-pink-600" },
-  GL880: { badge: "bg-yellow-50 text-yellow-700 border-yellow-100", icon: "text-yellow-500", accent: "bg-yellow-400", solid: "bg-yellow-500", solidHover: "hover:bg-yellow-600" },
-  QS46:  { badge: "bg-cyan-50 text-cyan-700 border-cyan-100",       icon: "text-cyan-400",   accent: "bg-cyan-400",   solid: "bg-cyan-500",   solidHover: "hover:bg-cyan-600" },
-  QS22:  { badge: "bg-lime-50 text-lime-700 border-lime-100",       icon: "text-lime-500",   accent: "bg-lime-400",   solid: "bg-lime-500",   solidHover: "hover:bg-lime-600" },
-  GTG57: { badge: "bg-red-50 text-red-700 border-red-100",          icon: "text-red-500",    accent: "bg-red-500",    solid: "bg-red-500",    solidHover: "hover:bg-red-600" },
-  GTG63: { badge: "bg-purple-50 text-purple-700 border-purple-100", icon: "text-purple-500", accent: "bg-purple-500", solid: "bg-purple-600", solidHover: "hover:bg-purple-700" },
-  NG88:  { badge: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100", icon: "text-fuchsia-500", accent: "bg-fuchsia-400", solid: "bg-fuchsia-600", solidHover: "hover:bg-fuchsia-700" },
-  GTG67:    { badge: "bg-green-50 text-green-700 border-green-100",     icon: "text-green-500",   accent: "bg-green-400",   solid: "bg-green-600",   solidHover: "hover:bg-green-700" },
-  NHSCSP20: { badge: "bg-slate-50 text-slate-700 border-slate-100",     icon: "text-slate-500",   accent: "bg-slate-400",   solid: "bg-slate-600",   solidHover: "hover:bg-slate-700" },
-  GTG52: { badge: "bg-red-50 text-red-700 border-red-100",           icon: "text-red-500",     accent: "bg-red-400",     solid: "bg-red-600",     solidHover: "hover:bg-red-700" },
-  GTG69: { badge: "bg-orange-50 text-orange-700 border-orange-100",  icon: "text-orange-400",  accent: "bg-orange-400",  solid: "bg-orange-500",  solidHover: "hover:bg-orange-600" },
-  NG25:  { badge: "bg-sky-50 text-sky-700 border-sky-100",           icon: "text-sky-400",     accent: "bg-sky-400",     solid: "bg-sky-600",     solidHover: "hover:bg-sky-700" },
-  GTG31: { badge: "bg-green-50 text-green-700 border-green-100",     icon: "text-green-500",   accent: "bg-green-400",   solid: "bg-green-600",   solidHover: "hover:bg-green-700" },
-  GTG17: { badge: "bg-violet-50 text-violet-700 border-violet-100",  icon: "text-violet-400",  accent: "bg-violet-400",  solid: "bg-violet-600",  solidHover: "hover:bg-violet-700" },
-  CG192: { badge: "bg-purple-50 text-purple-700 border-purple-100",  icon: "text-purple-500",  accent: "bg-purple-500",  solid: "bg-purple-600",  solidHover: "hover:bg-purple-700" },
-  NG133: { badge: "bg-cyan-50 text-cyan-700 border-cyan-100",        icon: "text-cyan-500",    accent: "bg-cyan-500",    solid: "bg-cyan-600",    solidHover: "hover:bg-cyan-700" },
-};
 
 const FLOWCHART_GROUPS = [
   { gl: "GL952", label: "Pre-Eclampsia / Hypertension" },
@@ -257,6 +233,7 @@ export default function App() {
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        :focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; border-radius: 4px; }
       `}</style>
 
       {/* Feedback button — always visible */}
@@ -275,14 +252,20 @@ export default function App() {
       )}
 
       {/* Flowchart overlay */}
-      {activeFlowchartId && FLOWCHARTS[activeFlowchartId] && (
-        <FlowchartPlayer
-          flowchart={FLOWCHARTS[activeFlowchartId]}
-          theme={FC_GL_COLOR[FLOWCHART_LINKS.find(fc => fc.id === activeFlowchartId)?.gl]}
-          onClose={() => setActiveFlowchartId(null)}
-          pdfUrl={(() => { const gl = FLOWCHART_LINKS.find(fc => fc.id === activeFlowchartId)?.gl; const g = gl && GUIDELINES[gl]; return g?.pdf ? (g.pdfUrl || g.pdfPath || `/guidelines/${gl}.pdf`) : null; })()}
-          onNavigate={handleNavigate}
-        />
+      {activeFlowchartId && FLOWCHARTS[activeFlowchartId] && (() => {
+        const fcGl = FLOWCHART_LINKS.find(fc => fc.id === activeFlowchartId)?.gl;
+        const g = fcGl && GUIDELINES[fcGl];
+        return (
+          <FlowchartPlayer
+            flowchart={FLOWCHARTS[activeFlowchartId]}
+            gl={fcGl}
+            theme={glColors(fcGl)}
+            onClose={() => setActiveFlowchartId(null)}
+            pdfUrl={g?.pdf ? (g.pdfUrl || g.pdfPath || `/guidelines/${fcGl}.pdf`) : null}
+            onNavigate={handleNavigate}
+          />
+        );
+      })()}
       )}
 
       {/* Search tab — home / results */}
@@ -489,7 +472,7 @@ export default function App() {
                   {groups.map(group => {
                     const groupLinks = FLOWCHART_LINKS.filter(fc => fc.gl === group.gl);
                     if (!groupLinks.length) return null;
-                    const col = FC_GL_COLOR[group.gl];
+                    const col = glColors(group.gl);
                     return (
                       <div key={group.gl} className="mb-4 px-5">
                         <div className="flex items-baseline gap-2 mb-2">
@@ -629,7 +612,7 @@ export default function App() {
                         <span className="text-[10px] font-bold text-gray-400 tracking-widest">{letter}</span>
                       </div>
                       {items.map((gl, i) => {
-                        const col = FC_GL_COLOR[gl.code] ?? { accent: "bg-gray-300", icon: "text-gray-400" };
+                        const col = glColors(gl.code);
                         const canRead = READER_AVAILABLE.has(gl.code);
                         const El = canRead ? "button" : gl.pdf ? "a" : "div";
                         const elProps = canRead

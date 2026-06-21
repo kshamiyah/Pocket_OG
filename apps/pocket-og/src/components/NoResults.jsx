@@ -13,6 +13,16 @@ export default function NoResults({ query, fallbacks, expanded, onToggle, onOpen
       </div>
       {fallbacks.length > 0 && (
         <>
+          {/* Prominent fuzzy-match warning */}
+          <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-4">
+            <span className="text-amber-500 text-sm shrink-0 mt-0.5">⚠</span>
+            <div>
+              <p className="text-sm font-semibold text-amber-800">These are close matches — not exact results</p>
+              <p className="text-xs text-amber-600 mt-0.5 leading-snug">
+                Content below is the nearest match to "{query}". If you need specific guidance, confirm with your registrar or check the source guideline directly.
+              </p>
+            </div>
+          </div>
           <p className="text-xs text-gray-400 uppercase tracking-widest mb-3">Closest matches</p>
           <div className="space-y-3">
             {fallbacks.map(page => (
