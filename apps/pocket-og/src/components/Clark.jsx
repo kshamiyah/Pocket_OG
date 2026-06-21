@@ -4,12 +4,12 @@ import { CLARK_PROTOCOLS, CLARK_CATEGORIES } from "../data/clark";
 // ─── Step type badge ──────────────────────────────────────────────────────────
 
 const TYPE_META = {
-  question:   { icon: "?", label: "Question",   cls: "bg-teal-100 text-teal-700"      },
-  checklist:  { icon: "→", label: "Checklist",  cls: "bg-blue-100 text-blue-700"      },
-  calculator: { icon: "∑", label: "Score",       cls: "bg-violet-100 text-violet-700" },
-  treatment:  { icon: "Rx",label: "Treatment",   cls: "bg-emerald-100 text-emerald-700" },
-  escalation: { icon: "⚠", label: "Escalation", cls: "bg-amber-100 text-amber-700"   },
-  end:        { icon: "✓", label: "Complete",    cls: "bg-gray-100 text-gray-600"     },
+  question:   { icon: "?", label: "Question",   cls: "bg-teal-100 text-teal-700"       },
+  checklist:  { icon: "→", label: "Checklist",  cls: "bg-blue-100 text-blue-700"       },
+  calculator: { icon: "∑", label: "Score",       cls: "bg-violet-100 text-violet-700"  },
+  treatment:  { icon: "•", label: "Consider",    cls: "bg-emerald-100 text-emerald-700" },
+  escalation: { icon: "⚠", label: "Escalation", cls: "bg-amber-100 text-amber-700"    },
+  end:        { icon: "✓", label: "Complete",    cls: "bg-gray-100 text-gray-600"      },
 };
 
 function StepBadge({ type, stepNum }) {
@@ -35,17 +35,38 @@ const SEVERITY_CLS = {
 
 // ─── Source citation badge ────────────────────────────────────────────────────
 
-function SourceBadge({ source }) {
+function SourceBadge({ source, onOpenGuideline }) {
   if (!source) return null;
-  return (
-    <div className="flex items-center gap-1.5 pt-3 mt-2 border-t border-zinc-600/60">
+  const clickable = !!onOpenGuideline;
+  const inner = (
+    <>
       <svg className="w-3 h-3 text-zinc-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
-      <span className="text-[10px] text-zinc-500 leading-none">
-        <span className="font-bold text-zinc-400">{source.gl}</span>
+      <span className="text-[10px] leading-none">
+        <span className={`font-bold ${clickable ? "text-emerald-400" : "text-zinc-400"}`}>{source.gl}</span>
         {source.label && <span className="text-zinc-600"> — {source.label}</span>}
       </span>
+      {clickable && (
+        <svg className="w-2.5 h-2.5 text-emerald-500 shrink-0 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        </svg>
+      )}
+    </>
+  );
+  if (clickable) {
+    return (
+      <button
+        onClick={() => onOpenGuideline(source.gl)}
+        className="flex items-center gap-1.5 pt-3 mt-2 border-t border-zinc-600/60 w-full text-left hover:border-emerald-600/40 transition-colors active:opacity-70"
+      >
+        {inner}
+      </button>
+    );
+  }
+  return (
+    <div className="flex items-center gap-1.5 pt-3 mt-2 border-t border-zinc-600/60">
+      {inner}
     </div>
   );
 }
@@ -76,7 +97,7 @@ function QuestionNode({ node, stepNum, onAnswer }) {
 
 // ─── Checklist node ───────────────────────────────────────────────────────────
 
-function ChecklistNode({ node, stepNum, onContinue }) {
+function ChecklistNode({ node, stepNum, onContinue, onOpenGuideline }) {
   return (
     <div className="px-4 py-5 max-w-lg mx-auto">
       <StepBadge type="checklist" stepNum={stepNum} />
@@ -99,7 +120,7 @@ function ChecklistNode({ node, stepNum, onContinue }) {
         ))}
       </ul>
 
-      <SourceBadge source={node.source} />
+      <SourceBadge source={node.source} onOpenGuideline={onOpenGuideline} />
 
       <button
         onClick={onContinue}
@@ -119,7 +140,7 @@ const RESULT_CLS = {
   red:   { bg: "bg-red-50",   border: "border-red-200",   text: "text-red-700"   },
 };
 
-function CalculatorNode({ node, stepNum, scores, setScores, onContinue }) {
+function CalculatorNode({ node, stepNum, scores, setScores, onContinue, onOpenGuideline }) {
   const fields = node.fields ?? [];
   const total = fields.reduce((sum, f) => sum + (scores[f.id] ?? 0), 0);
   const allAnswered = fields.every(f => scores[f.id] !== undefined);
@@ -176,10 +197,12 @@ function CalculatorNode({ node, stepNum, scores, setScores, onContinue }) {
         </div>
       )}
 
+      <SourceBadge source={node.source} onOpenGuideline={onOpenGuideline} />
+
       <button
         onClick={() => result && onContinue(result.next, result.label)}
         disabled={!allAnswered}
-        className="w-full py-3.5 rounded-2xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-white hover:bg-zinc-100 text-zinc-900"
+        className="w-full mt-4 py-3.5 rounded-2xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-white hover:bg-zinc-100 text-zinc-900"
       >
         {allAnswered
           ? `See ${result?.label ?? "management"} →`
@@ -191,7 +214,7 @@ function CalculatorNode({ node, stepNum, scores, setScores, onContinue }) {
 
 // ─── Treatment node ───────────────────────────────────────────────────────────
 
-function TreatmentNode({ node, stepNum, onContinue }) {
+function TreatmentNode({ node, stepNum, onContinue, onOpenGuideline }) {
   return (
     <div className="px-4 py-5 max-w-lg mx-auto">
       <StepBadge type="treatment" stepNum={stepNum} />
@@ -242,7 +265,7 @@ function TreatmentNode({ node, stepNum, onContinue }) {
         ))}
       </div>
 
-      <SourceBadge source={node.source} />
+      <SourceBadge source={node.source} onOpenGuideline={onOpenGuideline} />
 
       <button
         onClick={onContinue}
@@ -256,7 +279,7 @@ function TreatmentNode({ node, stepNum, onContinue }) {
 
 // ─── Escalation node ──────────────────────────────────────────────────────────
 
-function EscalationNode({ node, stepNum, onContinue }) {
+function EscalationNode({ node, stepNum, onContinue, onOpenGuideline }) {
   return (
     <div className="px-4 py-5 max-w-lg mx-auto">
       <StepBadge type="escalation" stepNum={stepNum} />
@@ -283,7 +306,7 @@ function EscalationNode({ node, stepNum, onContinue }) {
         ))}
       </ul>
 
-      <SourceBadge source={node.source} />
+      <SourceBadge source={node.source} onOpenGuideline={onOpenGuideline} />
 
       {onContinue && (
         <button
@@ -299,7 +322,7 @@ function EscalationNode({ node, stepNum, onContinue }) {
 
 // ─── End node ─────────────────────────────────────────────────────────────────
 
-function EndNode({ node, onRestart, onClose }) {
+function EndNode({ node, onRestart, onClose, onOpenGuideline }) {
   return (
     <div className="px-4 py-5 max-w-lg mx-auto">
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
@@ -319,7 +342,7 @@ function EndNode({ node, onRestart, onClose }) {
         ))}
       </ul>
 
-      <SourceBadge source={node.source} />
+      <SourceBadge source={node.source} onOpenGuideline={onOpenGuideline} />
 
       <div className="flex gap-2 mt-4">
         <button
@@ -341,7 +364,7 @@ function EndNode({ node, onRestart, onClose }) {
 
 // ─── Protocol session runner ──────────────────────────────────────────────────
 
-function ClarkSession({ protocol, onExit }) {
+function ClarkSession({ protocol, onExit, onOpenGuideline }) {
   const [currentId, setCurrentId] = useState(protocol.startId);
   const [history, setHistory] = useState([]);
   const [scores, setScores] = useState({});
@@ -429,7 +452,7 @@ function ClarkSession({ protocol, onExit }) {
           />
         )}
         {node.type === "checklist" && (
-          <ChecklistNode node={node} stepNum={stepNum} onContinue={() => advance(node.next)} />
+          <ChecklistNode node={node} stepNum={stepNum} onContinue={() => advance(node.next)} onOpenGuideline={onOpenGuideline} />
         )}
         {node.type === "calculator" && (
           <CalculatorNode
@@ -438,20 +461,22 @@ function ClarkSession({ protocol, onExit }) {
             scores={scores}
             setScores={setScores}
             onContinue={(nextId, label) => advance(nextId, label)}
+            onOpenGuideline={onOpenGuideline}
           />
         )}
         {node.type === "treatment" && (
-          <TreatmentNode node={node} stepNum={stepNum} onContinue={() => advance(node.next)} />
+          <TreatmentNode node={node} stepNum={stepNum} onContinue={() => advance(node.next)} onOpenGuideline={onOpenGuideline} />
         )}
         {node.type === "escalation" && (
           <EscalationNode
             node={node}
             stepNum={stepNum}
             onContinue={node.next ? () => advance(node.next) : null}
+            onOpenGuideline={onOpenGuideline}
           />
         )}
         {node.type === "end" && (
-          <EndNode node={node} onRestart={restart} onClose={onExit} />
+          <EndNode node={node} onRestart={restart} onClose={onExit} onOpenGuideline={onOpenGuideline} />
         )}
       </div>
 
@@ -571,7 +596,7 @@ function ClarkHome({ onSelect, onClose }) {
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 
-export default function Clark({ onClose }) {
+export default function Clark({ onClose, onOpenGuideline }) {
   const [activeProtocol, setActiveProtocol] = useState(null);
   const [revealed, setRevealed] = useState(false);
 
@@ -593,7 +618,7 @@ export default function Clark({ onClose }) {
     >
       {activeProtocol ? (
         <div className="flex flex-col h-full bg-zinc-700">
-          <ClarkSession protocol={activeProtocol} onExit={() => setActiveProtocol(null)} />
+          <ClarkSession protocol={activeProtocol} onExit={() => setActiveProtocol(null)} onOpenGuideline={onOpenGuideline} />
         </div>
       ) : (
         <div className="flex flex-col h-full bg-zinc-700">

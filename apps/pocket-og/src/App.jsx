@@ -20,6 +20,7 @@ const READER_AVAILABLE = new Set([
   "NG88", "NHSCSP20",
   "GTG52", "GTG69", "NG25", "GTG31", "GTG17", "CG192",
   "NG133",
+  "GTG73",
 ]);
 
 const FILTER_OPTIONS = [
@@ -119,6 +120,7 @@ export default function App() {
   const [activeConsentProcedure, setActiveConsentProcedure] = useState(null);
   const [consentNavKey, setConsentNavKey] = useState(0);
   const [showClark, setShowClark] = useState(false);
+  const [guidelineFromClark, setGuidelineFromClark] = useState(false);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
   const glSectionRefs = useRef({});
@@ -253,7 +255,17 @@ export default function App() {
       </button>
 
       {/* CLARK overlay */}
-      {showClark && <Clark onClose={() => setShowClark(false)} />}
+      {showClark && (
+        <Clark
+          onClose={() => setShowClark(false)}
+          onOpenGuideline={(gl) => {
+            if (READER_AVAILABLE.has(gl)) {
+              setActiveGuidelineGl(gl);
+              setGuidelineFromClark(true);
+            }
+          }}
+        />
+      )}
 
       {/* IOL Prioritizer overlay */}
       {showIOLPrioritizer && <IOLPrioritizer onClose={() => setShowIOLPrioritizer(false)} />}
@@ -262,8 +274,9 @@ export default function App() {
       {activeGuidelineGl && (
         <GuidelineReader
           gl={activeGuidelineGl}
-          onClose={() => setActiveGuidelineGl(null)}
+          onClose={() => { setActiveGuidelineGl(null); setGuidelineFromClark(false); }}
           onNavigate={handleNavigate}
+          zClassName={guidelineFromClark ? "z-[60]" : "z-40"}
         />
       )}
 

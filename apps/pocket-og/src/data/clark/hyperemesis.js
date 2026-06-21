@@ -153,40 +153,44 @@ export const HYPEREMESIS_PROTOCOL = {
 
     "mild_management": {
       type: "treatment",
-      title: "Mild NVP — Outpatient Management",
+      title: "Mild NVP — Management Prompts",
       badge: { label: "PUQE 3–6 · Mild", color: "green" },
       sections: [
         {
-          title: "Lifestyle advice",
+          title: "Non-pharmacological — try these first",
           items: [
-            "Small, frequent meals — avoid large meals, fatty or spicy foods",
-            "Rest and avoid triggers",
-            "Ginger — tea, biscuits, capsules (modest evidence of benefit)",
-            "Pyridoxine (vitamin B6) 10–25 mg TDS — safe and modestly effective",
-            "Acupressure wristbands (P6 point) — low-quality evidence but harmless",
+            "Small, frequent meals — avoid fatty or spicy foods",
+            "Rest and reduce triggers where possible",
+            "Ginger — tea, biscuits, capsules (modest evidence)",
+            "Pyridoxine (vitamin B6) — safe; modestly effective",
+            "Acupressure wristbands (P6 point) — low evidence, harmless",
           ],
         },
         {
-          title: "First-line antiemetics",
-          note: "All are safe at standard doses in pregnancy",
+          title: "Consider antiemetics if lifestyle measures insufficient",
+          note: "All safe at standard doses in pregnancy",
           drugs: [
-            { drug: "Cyclizine",        dose: "50 mg PO/IV/IM TDS",                      note: "First line — antihistamine; safe and well tolerated"        },
-            { drug: "Promethazine",     dose: "12.5–25 mg PO/IV/IM QDS",                 note: "Good evidence; sedating — useful at night"                  },
-            { drug: "Prochlorperazine", dose: "5–10 mg PO TDS, or 3 mg buccal (Buccastem)", note: "Phenothiazine; buccal useful if actively vomiting"       },
+            { drug: "Cyclizine",        dose: "50 mg PO TDS",                            note: "First line — antihistamine"                                },
+            { drug: "Promethazine",     dose: "12.5–25 mg PO QDS",                       note: "Sedating — useful at night"                                },
+            { drug: "Prochlorperazine", dose: "5–10 mg PO TDS, or 3 mg buccal",          note: "Buccal (Buccastem) useful if actively vomiting"            },
           ],
         },
         {
-          title: "Second-line — if first-line inadequate",
+          title: "Consider second-line if first-line not enough",
           drugs: [
-            { drug: "Domperidone",      dose: "10 mg PO TDS",                              note: "Dopamine antagonist; use shortest effective duration"                                                      },
-            { drug: "Metoclopramide",   dose: "10 mg PO/IV/IM TDS",                       note: "Max 5 days continuous — risk of tardive dyskinesia with prolonged use" },
-            { drug: "Ondansetron",      dose: "4–8 mg PO/IV BD–TDS",                      note: "Effective; 2022 evidence shows no significant teratogenicity at therapeutic doses; counsel and document" },
+            { drug: "Domperidone",    dose: "10 mg PO TDS",       note: "Shortest effective duration"                                               },
+            { drug: "Metoclopramide", dose: "10 mg PO TDS",       note: "Max 5 days continuous — tardive dyskinesia risk"                           },
+            { drug: "Ondansetron",    dose: "4–8 mg PO BD–TDS",   note: "Counsel on 2022 safety data — no significant teratogenicity; document"   },
           ],
         },
         {
-          title: "Thiamine — prescribe in all women with prolonged vomiting",
+          title: "Don't forget thiamine",
+          items: [
+            "Offer oral thiamine to all women with prolonged vomiting",
+            "Even for outpatients — Wernicke's risk increases with duration",
+          ],
           drugs: [
-            { drug: "Thiamine (oral)", dose: "25–50 mg TDS", note: "Outpatient supplementation to prevent Wernicke's encephalopathy in women at risk" },
+            { drug: "Thiamine (oral)", dose: "25–50 mg TDS", note: "Prevents Wernicke's in at-risk women" },
           ],
         },
       ],
@@ -200,37 +204,37 @@ export const HYPEREMESIS_PROTOCOL = {
       badge: { label: "PUQE 7–12 · Moderate", color: "amber" },
       sections: [
         {
-          title: "IV Fluids",
-          alert: "NEVER administer dextrose before thiamine (Pabrinex) — precipitates Wernicke's encephalopathy",
-          items: [
-            "Give Pabrinex IV first, before any IV fluids",
-            "Hartmann's solution (lactated Ringer's): first choice — physiological, corrects metabolic alkalosis",
-            "0.9% NaCl + 20–40 mmol KCl per litre if significant hypokalaemia (K⁺ <3.5 mmol/L)",
-            "Rate: 1 L over 4 hours initially, then reassess",
-            "Monitor U&E every 24 hours while on IV fluids",
-            "Correct Na⁺ <130 mmol/L cautiously — seek specialist advice; risk of central pontine myelinolysis with rapid correction",
-          ],
-        },
-        {
-          title: "Thiamine — give before IV fluids",
+          title: "Thiamine FIRST — before any IV fluids",
+          alert: "Do NOT give IV dextrose before thiamine — precipitates Wernicke's encephalopathy",
           drugs: [
-            { drug: "Pabrinex (IV thiamine)", dose: "2 pairs (component I + II) in 100 ml NaCl over 30 min — repeat if admission >48 hours or if Wernicke's suspected", note: "Give before any glucose-containing fluids" },
+            { drug: "Pabrinex IV", dose: "2 pairs in 100 ml NaCl over 30 min", note: "Repeat if admission >48 hours or Wernicke's suspected — give before any glucose-containing fluids" },
           ],
         },
         {
-          title: "IV / IM Antiemetics",
-          drugs: [
-            { drug: "Cyclizine",        dose: "50 mg IV or IM TDS",        note: "First line"                                               },
-            { drug: "Promethazine",     dose: "12.5–25 mg IV or IM QDS",   note: "Sedating — useful at night"                               },
-            { drug: "Metoclopramide",   dose: "10 mg IV or IM TDS",        note: "Max 5 days — tardive dyskinesia risk with prolonged use"   },
-            { drug: "Ondansetron",      dose: "4–8 mg IV BD–TDS",          note: "Administer slowly — fast bolus risks QTc prolongation"     },
-          ],
-        },
-        {
-          title: "VTE Prophylaxis",
+          title: "IV fluid guidance",
           items: [
-            "All hospitalised women with HG have increased VTE risk (dehydration + immobility)",
-            "Prescribe LMWH (enoxaparin) as per VTE risk assessment — start on admission",
+            "Hartmann's solution — first choice; physiological, corrects metabolic alkalosis",
+            "0.9% NaCl + 20–40 mmol KCl/L — if K⁺ <3.5 mmol/L",
+            "1 L over 4 hours initially — then reassess",
+            "Monitor U&E every 24 hours on IV fluids",
+            "Na⁺ <130 mmol/L — correct cautiously; risk of central pontine myelinolysis",
+          ],
+        },
+        {
+          title: "Consider IV/IM antiemetics",
+          drugs: [
+            { drug: "Cyclizine",      dose: "50 mg IV or IM TDS",       note: "First line"                                           },
+            { drug: "Promethazine",   dose: "12.5–25 mg IV or IM QDS",  note: "Sedating — useful at night"                          },
+            { drug: "Metoclopramide", dose: "10 mg IV or IM TDS",       note: "Max 5 days — tardive dyskinesia risk"                 },
+            { drug: "Ondansetron",    dose: "4–8 mg IV BD–TDS",         note: "Give slowly — fast IV bolus risks QTc prolongation"  },
+          ],
+        },
+        {
+          title: "Assess VTE risk — all admitted women",
+          items: [
+            "Dehydration + immobility = increased VTE risk",
+            "Complete VTE risk assessment on admission",
+            "LMWH if indicated — start on admission",
             "TED stockings when mobile",
           ],
         },
