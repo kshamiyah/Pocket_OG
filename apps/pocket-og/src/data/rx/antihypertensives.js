@@ -4,6 +4,7 @@ export const ANTIHYPERTENSIVES = [
     name: "Amlodipine",
     class: "Calcium channel blocker",
     color: "purple",
+    iconColor: "#FF2D55",
     bnfUrl: "https://bnf.nice.org.uk/drugs/amlodipine/",
     routes: [
       {
@@ -31,6 +32,7 @@ export const ANTIHYPERTENSIVES = [
     name: "Hydralazine",
     class: "Direct vasodilator",
     color: "orange",
+    iconColor: "#30B0C7",
     bnfUrl: "https://bnf.nice.org.uk/drugs/hydralazine-hydrochloride/",
     routes: [
       {
@@ -60,6 +62,7 @@ export const ANTIHYPERTENSIVES = [
     name: "Labetalol",
     class: "Alpha + beta blocker",
     color: "blue",
+    iconColor: "#007AFF",
     bnfUrl: "https://bnf.nice.org.uk/drugs/labetalol/",
     routes: [
       {
@@ -106,6 +109,7 @@ export const ANTIHYPERTENSIVES = [
     name: "Magnesium sulphate",
     class: "Anticonvulsant / neuroprotectant",
     color: "teal",
+    iconColor: "#34C759",
     bnfUrl: "https://bnf.nice.org.uk/drugs/magnesium-sulfate/",
     routes: [
       {
@@ -153,6 +157,7 @@ export const ANTIHYPERTENSIVES = [
     name: "Methyldopa",
     class: "Central alpha-2 agonist",
     color: "amber",
+    iconColor: "#FF9500",
     bnfUrl: "https://bnf.nice.org.uk/drugs/methyldopa/",
     routes: [
       {
@@ -182,6 +187,7 @@ export const ANTIHYPERTENSIVES = [
     name: "Nifedipine",
     class: "Calcium channel blocker",
     color: "purple",
+    iconColor: "#AF52DE",
     bnfUrl: "https://bnf.nice.org.uk/drugs/nifedipine/",
     routes: [
       {
