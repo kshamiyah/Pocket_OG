@@ -206,12 +206,13 @@ export const HMB_PROTOCOL = {
 
     "imb_biopsy": {
       type: "checklist",
-      title: "Endometrial biopsy — perform or arrange",
+      title: "Refer for outpatient hysteroscopy + directed biopsy",
+      alert: "NICE NG88: blind Pipelle biopsy is NOT recommended. Refer for hysteroscopy + directed biopsy in secondary care.",
       items: [
-        "Pipelle biopsy: outpatient, <60 seconds — first-line for endometrial sampling",
-        "NSAID 30–60 min before (e.g. ibuprofen 400 mg) reduces cramping",
-        "If USS suggests focal polyp: hysteroscopy preferred — Pipelle misses focal lesions in ~60%",
-        "Indications met: thickened USS endometrium, age ≥45, or persistent unexplained IMB/PCB",
+        "Refer to gynaecology — outpatient hysteroscopy with directed (hysteroscopic) biopsy",
+        "Indications: thickened USS endometrium, age ≥45, risk factors (BMI >30, PCOS, diabetes), or persistent unexplained IMB/PCB",
+        "Hysteroscopy visualises cavity directly and takes targeted biopsy in the same procedure",
+        "Include in referral: age, smear history, USS report, STI result, bleeding pattern",
       ],
       next: "biopsy_result_q",
     },
@@ -262,13 +263,17 @@ export const HMB_PROTOCOL = {
       type: "checklist",
       title: "Take a focused history",
       items: [
-        "Cycle: length, duration, volume of loss, clots, flooding",
+        "Pregnancy test: exclude pregnancy before any treatment — always",
+        "Cycle: length, duration, volume (flooding, clots, changing protection hourly), duration of HMB",
+        "Onset: lifelong HMB since menarche suggests coagulopathy; perimenopausal onset raises endometrial pathology risk",
         "Associated symptoms: dysmenorrhoea, IMB, PCB, pelvic pressure, urinary frequency",
-        "Quality-of-life impact — work, social, daily activities",
+        "Quality-of-life impact — work, social activities, relationships",
         "Future fertility wishes — critical for treatment planning",
         "Contraception requirements",
         "Previous treatments tried and response",
-        "Bleeding disorders: HMB since menarche, family or personal bleeding history → check VWF, FVIII",
+        "Medications: anticoagulants (significantly worsen HMB), tamoxifen (endometrial cancer risk factor), hormonal contraception",
+        "Medical history: thyroid disease, diabetes, obesity, liver disease, hypertension",
+        "Bleeding history: HMB since menarche, family/personal history of abnormal bleeding after dental/surgical procedures → coagulation screen including VWF antigen, VWF activity (Ristocetin cofactor), FVIII",
       ],
       next: "examination",
     },
@@ -314,11 +319,46 @@ export const HMB_PROTOCOL = {
       type: "question",
       question: "What does the USS show?",
       options: [
-        { label: "Endometrial polyp or submucosal fibroid",              next: "polyp_path"       },
-        { label: "Fibroids ≥ 3 cm / multiple / distorting cavity",       next: "fertility_q"      },
-        { label: "Thickened / abnormal endometrium or adenomyosis",      next: "biopsy_path"      },
-        { label: "Normal — no significant findings",   sublabel: "Manage as no structural pathology",  next: "lng_q" },
+        { label: "Endometrial polyp or submucosal fibroid",                                                   next: "polyp_path"        },
+        { label: "Fibroids ≥ 3 cm / multiple / distorting cavity",                                            next: "fertility_q"       },
+        { label: "Thickened or irregular endometrium",    sublabel: "Warrants histological assessment",        next: "biopsy_path"       },
+        { label: "Adenomyosis features",                  sublabel: "Heterogeneous myometrium, myometrial cysts, junctional zone thickening", next: "adenomyosis_path" },
+        { label: "Normal — no significant findings",      sublabel: "Manage as no structural pathology",       next: "lng_q"             },
       ],
+    },
+
+    "adenomyosis_path": {
+      type: "treatment",
+      title: "Adenomyosis — medical management first",
+      sections: [
+        {
+          title: "Diagnosis",
+          items: [
+            "USS strongly suggestive — MRI pelvis is more accurate (junctional zone >12 mm is diagnostic)",
+            "Endometrial biopsy does NOT diagnose adenomyosis — definitive diagnosis requires full myometrial histology (i.e. hysterectomy specimen)",
+            "Do not refer for Pipelle biopsy — this will not confirm or exclude adenomyosis",
+          ],
+        },
+        {
+          title: "First-line medical management",
+          items: [
+            "LNG-IUS (Mirena): first-line — reduces HMB and dysmenorrhoea; effective even in enlarged uteri; can slow progression",
+            "Combined hormonal contraception (back-to-back): induces amenorrhoea; reduces dysmenorrhoea",
+            "GnRH analogue (goserelin): temporary — symptoms recur after stopping; use as bridge to surgery",
+            "Relugolix (Ryeqo): oral GnRH antagonist with add-back HRT; sustained relief without surgical menopause",
+          ],
+        },
+        {
+          title: "When to refer to gynaecology",
+          items: [
+            "Symptoms not controlled by ≥2 pharmacological options",
+            "MRI to confirm extent before considering surgery",
+            "Hysterectomy: definitive — appropriate for family-complete women with failed medical management",
+            "Adenomyomectomy (focal adenomyosis): technically challenging; specialist centres only; for fertility preservation",
+          ],
+        },
+      ],
+      next: "documentation",
     },
 
     // ─── Polyp / submucosal fibroid path ──────────────────────────────────────
@@ -535,12 +575,14 @@ export const HMB_PROTOCOL = {
 
     "biopsy_path": {
       type: "checklist",
-      title: "Endometrial biopsy indicated",
+      title: "Refer for outpatient hysteroscopy + directed biopsy",
+      alert: "NICE NG88: do NOT perform blind Pipelle biopsy alone — it is not recommended. Endometrial biopsy must be performed at time of hysteroscopy (directed biopsy). Refer to secondary care.",
       items: [
-        "Indications: endometrial thickening on USS, treatment failure in women ≥45, risk factors (BMI >30, PCOS, diabetes, tamoxifen, Lynch syndrome)",
-        "Pipelle biopsy: outpatient procedure, <60 seconds, NSAID 30–60 minutes before",
-        "False-negative rate for focal lesions ~60% — hysteroscopy required if polyp also suspected",
-        "Adenomyosis features on USS: trial LNG-IUS or refer to gynaecology",
+        "Refer to gynaecology — outpatient hysteroscopy with directed (hysteroscopic) biopsy",
+        "Indications: endometrial thickening on USS, treatment failure in women ≥45, or risk factors (BMI >30, PCOS, diabetes, tamoxifen, Lynch syndrome)",
+        "Hysteroscopy is gold standard — visualises cavity directly and takes targeted biopsy; Pipelle alone misses focal pathology in ~60%",
+        "Adenomyosis features on USS (heterogeneous myometrium, myometrial cysts): do not biopsy — diagnose by imaging; trial LNG-IUS or refer separately",
+        "Correct anaemia and arrange FBC before referral appointment",
       ],
       next: "biopsy_result_q",
     },
