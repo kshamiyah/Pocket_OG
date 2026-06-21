@@ -1,7 +1,15 @@
 import { HYPEREMESIS_PROTOCOL } from "./hyperemesis";
+import { RFM_PROTOCOL } from "./rfm";
+import { ITCHING_PROTOCOL } from "./itching";
+import { PVB_PROTOCOL } from "./pvb";
+import { SWOLLEN_LEGS_PROTOCOL } from "./swollen_legs";
 
 export const CLARK_PROTOCOLS = {
   hyperemesis: HYPEREMESIS_PROTOCOL,
+  rfm: RFM_PROTOCOL,
+  itching: ITCHING_PROTOCOL,
+  pvb: PVB_PROTOCOL,
+  swollen_legs: SWOLLEN_LEGS_PROTOCOL,
 };
 
 export const CLARK_CATEGORIES = [
@@ -14,6 +22,34 @@ export const CLARK_CATEGORIES = [
         label: "Hyperemesis Gravidarum",
         subtitle: "Nausea & vomiting in pregnancy",
         guideline: "RCOG GTG69",
+        available: true,
+      },
+      {
+        id: "rfm",
+        label: "Reduced Fetal Movements",
+        subtitle: "RFM — assessment & management",
+        guideline: "RCOG GTG57",
+        available: true,
+      },
+      {
+        id: "itching",
+        label: "Itching in Pregnancy",
+        subtitle: "Obstetric cholestasis screen",
+        guideline: "RBH GL880",
+        available: true,
+      },
+      {
+        id: "pvb",
+        label: "PV Bleeding in Pregnancy",
+        subtitle: "Antepartum haemorrhage",
+        guideline: "RCOG GTG63",
+        available: true,
+      },
+      {
+        id: "swollen_legs",
+        label: "Swollen Legs",
+        subtitle: "DVT screen & VTE risk",
+        guideline: "RBH GL891",
         available: true,
       },
       {
