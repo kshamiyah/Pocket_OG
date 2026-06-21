@@ -364,7 +364,7 @@ function EndNode({ node, onRestart, onClose, onOpenGuideline }) {
 
 // ─── Protocol session runner ──────────────────────────────────────────────────
 
-function ClarkSession({ protocol, onExit, onOpenGuideline }) {
+function ClarkSession({ protocol, onExit, onClose, onOpenGuideline }) {
   const [currentId, setCurrentId] = useState(protocol.startId);
   const [history, setHistory] = useState([]);
   const [scores, setScores] = useState({});
@@ -413,11 +413,13 @@ function ClarkSession({ protocol, onExit, onOpenGuideline }) {
           <p className="text-sm font-semibold text-white leading-tight truncate">{protocol.title}</p>
         </div>
         <button
-          onClick={restart}
-          aria-label="Restart session from beginning"
-          className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors shrink-0 px-1"
+          onClick={onClose}
+          aria-label="Close CLARK"
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors shrink-0"
         >
-          ↺
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
       </div>
 
@@ -618,7 +620,7 @@ export default function Clark({ onClose, onOpenGuideline }) {
     >
       {activeProtocol ? (
         <div className="flex flex-col h-full bg-zinc-700">
-          <ClarkSession protocol={activeProtocol} onExit={() => setActiveProtocol(null)} onOpenGuideline={onOpenGuideline} />
+          <ClarkSession protocol={activeProtocol} onExit={() => setActiveProtocol(null)} onClose={onClose} onOpenGuideline={onOpenGuideline} />
         </div>
       ) : (
         <div className="flex flex-col h-full bg-zinc-700">
