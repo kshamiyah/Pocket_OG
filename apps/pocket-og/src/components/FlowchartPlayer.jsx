@@ -87,6 +87,7 @@ export default function FlowchartPlayer({ flowchart, theme, onClose, pdfUrl, onN
         )}
         <button
           onClick={onClose}
+          aria-label="Close flowchart"
           className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors text-lg leading-none shrink-0"
         >×</button>
       </div>
@@ -229,8 +230,8 @@ export default function FlowchartPlayer({ flowchart, theme, onClose, pdfUrl, onN
           )}
 
           {/* Disclaimer */}
-          <p className="text-xs text-gray-300 mt-8 text-center leading-relaxed">
-            GL861 V6.10 · May 2026 · Always escalate when uncertain
+          <p className="text-xs text-gray-400 mt-8 text-center leading-relaxed">
+            {flowchart.subtitle} · Always escalate when uncertain
           </p>
         </div>
       </div>
@@ -240,12 +241,14 @@ export default function FlowchartPlayer({ flowchart, theme, onClose, pdfUrl, onN
         <button
           onClick={goBack}
           disabled={history.length === 0}
+          aria-label="Go back one step"
           className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           <span>←</span> Back
         </button>
         <button
           onClick={restart}
+          aria-label="Restart flowchart from beginning"
           className="text-sm text-gray-400 hover:text-gray-700 transition-colors"
         >
           ↺ Restart

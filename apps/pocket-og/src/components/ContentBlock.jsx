@@ -35,7 +35,8 @@ export default function ContentBlock({ block, highlightTerms = [], inlineLinks =
     </ul>
   );
   if (block.type === "table") return (
-    <div className="overflow-x-auto mb-4 rounded-xl border border-gray-100 -mx-1">
+    <div className="relative overflow-x-auto mb-4 rounded-xl border border-gray-100 -mx-1">
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-white to-transparent z-10 rounded-r-xl" aria-hidden="true" />
       <table className="w-full min-w-[320px] text-sm border-collapse">
         <thead>
           <tr className="bg-gray-50">

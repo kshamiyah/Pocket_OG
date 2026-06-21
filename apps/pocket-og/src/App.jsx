@@ -280,7 +280,7 @@ export default function App() {
           flowchart={FLOWCHARTS[activeFlowchartId]}
           theme={FC_GL_COLOR[FLOWCHART_LINKS.find(fc => fc.id === activeFlowchartId)?.gl]}
           onClose={() => setActiveFlowchartId(null)}
-          pdfUrl={(() => { const gl = FLOWCHART_LINKS.find(fc => fc.id === activeFlowchartId)?.gl; const g = gl && GUIDELINES[gl]; return g?.pdf ? (g.pdfPath || `/guidelines/${gl}.pdf`) : null; })()}
+          pdfUrl={(() => { const gl = FLOWCHART_LINKS.find(fc => fc.id === activeFlowchartId)?.gl; const g = gl && GUIDELINES[gl]; return g?.pdf ? (g.pdfUrl || g.pdfPath || `/guidelines/${gl}.pdf`) : null; })()}
           onNavigate={handleNavigate}
         />
       )}
@@ -299,7 +299,7 @@ export default function App() {
                   <p className="mt-3 text-base leading-relaxed text-gray-400">
                     Local and national guidelines.<br />Whenever and wherever you need them.
                   </p>
-                  <p className="mt-2 text-sm font-medium text-gray-300">Built by Khalid Shamiyah</p>
+                  <p className="mt-2 text-sm font-medium text-gray-400">Built by Khalid Shamiyah</p>
                 </div>
 
                 {/* Search */}
@@ -326,6 +326,18 @@ export default function App() {
                   </button>
                 </div>
 
+                {/* Suggestion chips */}
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {SUGGESTIONS.map(s => (
+                    <button
+                      key={s}
+                      onClick={() => { setInputValue(s); submitSearch(s); }}
+                      className="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-xs text-gray-600 transition-colors"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
 
               </div>
             </div>
@@ -352,9 +364,10 @@ export default function App() {
                 />
                 <button
                   onClick={clearSearch}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-gray-300 hover:bg-gray-400 transition-colors"
+                  aria-label="Clear search"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
                 >
-                  <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-3 h-3 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
                 </button>
@@ -366,6 +379,7 @@ export default function App() {
                 <button
                   key={f.value}
                   onClick={() => { setFilter(f.value); setExpanded({}); }}
+                  aria-pressed={filter === f.value}
                   className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
                     filter === f.value ? f.active : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                   }`}
@@ -399,8 +413,8 @@ export default function App() {
             }
 
             <div className="mt-10 text-center">
-              <p className="text-xs text-gray-300">Content derived verbatim from RBH trust guidelines · Not a substitute for clinical judgement · Always escalate when uncertain</p>
-              <p className="text-xs text-gray-300 mt-1">Built by Khalid Shamiyah</p>
+              <p className="text-xs text-gray-400">Content derived verbatim from RBH trust guidelines · Not a substitute for clinical judgement · Always escalate when uncertain</p>
+              <p className="text-xs text-gray-400 mt-1">Built by Khalid Shamiyah</p>
             </div>
           </div>
         </>
@@ -419,12 +433,13 @@ export default function App() {
             </div>
 
             {/* Sticky: source filter + search */}
-            <div className="sticky top-0 z-20 bg-white border-b border-gray-100 pl-4 pr-8 pt-3 pb-3">
+            <div className="sticky top-0 z-20 bg-white border-b border-gray-100 pl-4 pr-12 pt-3 pb-3">
               <div className="flex gap-1.5 mb-2.5">
                 {["ALL", "RBH", "RCOG", "NICE"].map(src => (
                   <button
                     key={src}
                     onClick={() => setFcSourceFilter(src)}
+                    aria-pressed={fcSourceFilter === src}
                     className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-colors ${
                       fcSourceFilter === src ? "bg-black text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                     }`}
@@ -447,9 +462,10 @@ export default function App() {
                 {fcSearchQuery && (
                   <button
                     onClick={() => setFcSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center rounded-full bg-gray-300 hover:bg-gray-400 transition-colors"
+                    aria-label="Clear filter"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
                   >
-                    <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-2.5 h-2.5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
                   </button>
@@ -558,12 +574,13 @@ export default function App() {
             </div>
 
             {/* Sticky: source filter + search */}
-            <div className="sticky top-0 z-20 bg-white border-b border-gray-100 pl-4 pr-8 pt-3 pb-3">
+            <div className="sticky top-0 z-20 bg-white border-b border-gray-100 pl-4 pr-12 pt-3 pb-3">
               <div className="flex gap-1.5 mb-2.5">
                 {["ALL", "RBH", "RCOG", "NICE"].map(src => (
                   <button
                     key={src}
                     onClick={() => setGlSourceFilter(src)}
+                    aria-pressed={glSourceFilter === src}
                     className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-colors ${
                       glSourceFilter === src ? "bg-black text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                     }`}
@@ -586,9 +603,10 @@ export default function App() {
                 {glSearchQuery && (
                   <button
                     onClick={() => setGlSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center rounded-full bg-gray-300 hover:bg-gray-400 transition-colors"
+                    aria-label="Clear filter"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
                   >
-                    <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-2.5 h-2.5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
                   </button>
@@ -613,12 +631,17 @@ export default function App() {
                       {items.map((gl, i) => {
                         const col = FC_GL_COLOR[gl.code] ?? { accent: "bg-gray-300", icon: "text-gray-400" };
                         const canRead = READER_AVAILABLE.has(gl.code);
-                        const El = canRead ? "button" : "div";
+                        const El = canRead ? "button" : gl.pdf ? "a" : "div";
+                        const elProps = canRead
+                          ? { onClick: () => setActiveGuidelineGl(gl.code) }
+                          : gl.pdf
+                          ? { href: gl.pdfUrl || gl.pdfPath || `/guidelines/${gl.code}.pdf`, target: "_blank", rel: "noopener noreferrer" }
+                          : {};
                         return (
                           <El
                             key={gl.code}
-                            onClick={canRead ? () => setActiveGuidelineGl(gl.code) : undefined}
-                            className={`flex items-center gap-3 px-4 py-4 min-h-[80px] w-full text-left ${canRead ? "hover:bg-gray-50 active:bg-gray-100 transition-colors" : ""} ${i > 0 ? "border-t border-gray-50" : ""}`}
+                            {...elProps}
+                            className={`flex items-center gap-3 px-4 py-4 min-h-[80px] w-full text-left ${canRead || gl.pdf ? "hover:bg-gray-50 active:bg-gray-100 transition-colors" : ""} ${i > 0 ? "border-t border-gray-50" : ""}`}
                           >
                             <div className={`w-1 h-10 rounded-full shrink-0 ${col.accent}`} />
                             <div className="flex-1 min-w-0">
@@ -669,61 +692,27 @@ export default function App() {
       <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-gray-100"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="flex max-w-lg mx-auto">
-          <button
-            onClick={() => setActiveTab("search")}
-            className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
-              activeTab === "search" ? "text-black" : "text-gray-400"
-            }`}
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-            </svg>
-            <span className="text-[10px] font-medium">Search</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("guidelines")}
-            className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
-              activeTab === "guidelines" ? "text-black" : "text-gray-400"
-            }`}
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span className="text-[10px] font-medium">Guides</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("flowcharts")}
-            className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
-              activeTab === "flowcharts" ? "text-black" : "text-gray-400"
-            }`}
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l8.5 5v10L12 22 3.5 17V7L12 2z" />
-            </svg>
-            <span className="text-[10px] font-medium">Charts</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("consent")}
-            className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
-              activeTab === "consent" ? "text-black" : "text-gray-400"
-            }`}
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-            </svg>
-            <span className="text-[10px] font-medium">Consent</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("calculator")}
-            className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
-              activeTab === "calculator" ? "text-black" : "text-gray-400"
-            }`}
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m-6 5h6m-6 5h6M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" />
-            </svg>
-            <span className="text-[10px] font-medium">Calc</span>
-          </button>
+          {[
+            { id: "search",     label: "Search",  icon: <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" /> },
+            { id: "guidelines", label: "Guides",  icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> },
+            { id: "flowcharts", label: "Flow",    icon: <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l8.5 5v10L12 22 3.5 17V7L12 2z" /> },
+            { id: "consent",    label: "Consent", icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /> },
+            { id: "calculator", label: "Calc",    icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m-6 5h6m-6 5h6M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" /> },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              aria-pressed={activeTab === tab.id}
+              className={`flex-1 flex flex-col items-center gap-0.5 py-3 transition-colors ${
+                activeTab === tab.id ? "text-black" : "text-gray-400"
+              }`}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                {tab.icon}
+              </svg>
+              <span className={`text-xs ${activeTab === tab.id ? "font-semibold" : "font-medium"}`}>{tab.label}</span>
+            </button>
+          ))}
         </div>
       </div>
 

@@ -134,6 +134,7 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
         <div className="max-w-lg mx-auto px-4 pt-12 pb-4 flex items-center gap-3">
           <button
             onClick={onClose}
+            aria-label="Close guideline reader"
             className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors shrink-0"
           >
             <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -146,6 +147,7 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
           </div>
           <button
             onClick={() => setShowContents(true)}
+            aria-label="Show table of contents"
             className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors shrink-0"
           >
             <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -164,7 +166,7 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
 
               {/* Sticky section header */}
               <div className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm px-4 py-2.5">
-                <p className={`text-[9px] font-bold uppercase tracking-widest mb-0.5 ${theme.conditionColor}`}>
+                <p className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${theme.conditionColor}`}>
                   {section.condition}
                 </p>
                 <h2 className="text-sm font-bold text-gray-900 leading-snug">
@@ -218,7 +220,7 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
                 View source PDF
               </a>
             )}
-            <p className="text-xs text-gray-300">{gl} {guideline?.version} · {guideline?.date}</p>
+            <p className="text-xs text-gray-400">{gl} {guideline?.version} · {guideline?.date}</p>
           </div>
 
         </div>
@@ -233,7 +235,8 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
               <p className="text-base font-bold text-gray-900">Contents</p>
               <button
                 onClick={() => setShowContents(false)}
-                className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                aria-label="Close table of contents"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
               >
                 <svg className="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
