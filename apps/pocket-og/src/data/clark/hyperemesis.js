@@ -32,6 +32,7 @@ export const HYPEREMESIS_PROTOCOL = {
         "Call registrar now — do not complete assessment alone",
       ],
       next: "history",
+      source: { gl: "GTG69", sectionId: "gtg69-complications", label: "Complications" },
     },
 
     // ─── History & exam ────────────────────────────────────────────────────────
@@ -52,6 +53,7 @@ export const HYPEREMESIS_PROTOCOL = {
         "Medications already tried at home",
       ],
       next: "examination",
+      source: { gl: "GTG69", sectionId: "gtg69-assessment", label: "Assessment & Admission Criteria" },
     },
 
     "examination": {
@@ -66,6 +68,7 @@ export const HYPEREMESIS_PROTOCOL = {
         "Neurological: nystagmus, confusion, ataxia — signs of Wernicke's",
       ],
       next: "investigations",
+      source: { gl: "GTG69", sectionId: "gtg69-assessment", label: "Assessment & Admission Criteria" },
     },
 
     "investigations": {
@@ -73,14 +76,16 @@ export const HYPEREMESIS_PROTOCOL = {
       title: "Investigations",
       alert: "Do NOT give IV dextrose — precipitates Wernicke's encephalopathy in thiamine-deficient patients",
       items: [
-        "Urine dip — ketones, protein, nitrites, leucocytes",
-        "MSU if any urinary symptoms",
-        "FBC, U&E — Na, K, Cl, Creatinine",
-        "LFTs — ALT raised in ~50% of HG cases",
-        "TFTs — biochemical hyperthyroidism in ~60% (transient, resolves spontaneously)",
+        "Urine dip — ketones (2+ or more suggests significant dehydration), protein, nitrites, leucocytes",
+        "MSU (urine MC&S) — to exclude UTI as a cause",
+        "FBC — raised haematocrit suggests haemoconcentration",
+        "U&E — hypokalaemia and hyponatraemia are common in HG",
+        "LFTs — transaminase elevation in up to 50% of HG (usually mild and transient)",
+        "TFTs — gestational transient thyrotoxicosis in up to 60% of HG; usually resolves spontaneously",
         "USS — confirm viability, exclude molar pregnancy or multiple gestation if not done",
       ],
       next: "fluids_q",
+      source: { gl: "GTG69", sectionId: "gtg69-assessment", label: "Assessment & Admission Criteria" },
     },
 
     // ─── Key branch: can she keep fluids down? ─────────────────────────────────
@@ -106,33 +111,33 @@ export const HYPEREMESIS_PROTOCOL = {
           id: "nausea",
           question: "How long have you felt nauseated or sick to your stomach?",
           options: [
-            { label: "Not at all",  score: 1 },
-            { label: "≤1 hour",     score: 2 },
-            { label: "2–3 hours",   score: 3 },
-            { label: "4–6 hours",   score: 4 },
-            { label: ">6 hours",    score: 5 },
+            { label: "≤1 hour",     score: 1 },
+            { label: "1–3 hours",   score: 2 },
+            { label: "3–6 hours",   score: 3 },
+            { label: "6–9 hours",   score: 4 },
+            { label: ">9 hours",    score: 5 },
           ],
         },
         {
           id: "vomiting",
           question: "How many times have you vomited or thrown up?",
           options: [
-            { label: "Not at all",  score: 1 },
+            { label: "None",        score: 1 },
             { label: "1–2 times",   score: 2 },
             { label: "3–4 times",   score: 3 },
             { label: "5–6 times",   score: 4 },
-            { label: "7 or more",   score: 5 },
+            { label: ">6 times",    score: 5 },
           ],
         },
         {
           id: "retching",
           question: "How many times have you had retching or dry heaves?",
           options: [
-            { label: "Not at all",  score: 1 },
+            { label: "None",        score: 1 },
             { label: "1–2 times",   score: 2 },
             { label: "3–4 times",   score: 3 },
             { label: "5–6 times",   score: 4 },
-            { label: "7 or more",   score: 5 },
+            { label: ">6 times",    score: 5 },
           ],
         },
       ],
@@ -141,6 +146,7 @@ export const HYPEREMESIS_PROTOCOL = {
         { min: 7,  max: 12, label: "Moderate HG",  color: "amber", next: "moderate_management" },
         { min: 13, max: 15, label: "Severe HG",    color: "red",   next: "severe_management"   },
       ],
+      source: { gl: "GTG69", sectionId: "gtg69-overview", label: "NVP & HG — Overview and PUQE Scoring" },
     },
 
     // ─── Management nodes ──────────────────────────────────────────────────────
@@ -153,36 +159,38 @@ export const HYPEREMESIS_PROTOCOL = {
         {
           title: "Lifestyle advice",
           items: [
-            "Small, frequent, bland meals — avoid trigger smells and rich food",
-            "Rest and avoid excessive heat",
-            "Ginger — tea, biscuits, capsules (evidence-supported)",
-            "Acupressure wristbands (P6 point) — low risk, limited evidence",
+            "Small, frequent meals — avoid large meals, fatty or spicy foods",
+            "Rest and avoid triggers",
+            "Ginger — tea, biscuits, capsules (modest evidence of benefit)",
+            "Pyridoxine (vitamin B6) 10–25 mg TDS — safe and modestly effective",
+            "Acupressure wristbands (P6 point) — low-quality evidence but harmless",
           ],
         },
         {
           title: "First-line antiemetics",
           note: "All are safe at standard doses in pregnancy",
           drugs: [
-            { drug: "Cyclizine",        dose: "50 mg TDS oral",                      note: "First line — antihistamine"                                             },
-            { drug: "Prochlorperazine", dose: "5 mg TDS oral or 3 mg buccal BD",     note: "Buccal useful if actively vomiting"                                     },
-            { drug: "Promethazine",     dose: "25 mg nocte or TDS oral",              note: "Sedating — advise patient before prescribing"                           },
+            { drug: "Cyclizine",        dose: "50 mg PO/IV/IM TDS",                      note: "First line — antihistamine; safe and well tolerated"        },
+            { drug: "Promethazine",     dose: "12.5–25 mg PO/IV/IM QDS",                 note: "Good evidence; sedating — useful at night"                  },
+            { drug: "Prochlorperazine", dose: "5–10 mg PO TDS, or 3 mg buccal (Buccastem)", note: "Phenothiazine; buccal useful if actively vomiting"       },
           ],
         },
         {
-          title: "If first-line inadequate — add",
+          title: "Second-line — if first-line inadequate",
           drugs: [
-            { drug: "Ondansetron",             dose: "4 mg BD–TDS oral",                         note: "Discuss risk/benefit; small teratogenic signal; preferred after 10 weeks" },
-            { drug: "Pyridoxine + Doxylamine", dose: "Xonvea 10/10 mg — 2 tabs nocte, titrate",  note: "Licensed in UK 2020 for NVP"                                             },
+            { drug: "Metoclopramide",   dose: "10 mg PO/IV/IM TDS",                       note: "Max 5 days continuous — risk of tardive dyskinesia with prolonged use" },
+            { drug: "Ondansetron",      dose: "4–8 mg PO/IV BD–TDS",                      note: "Effective; 2022 evidence shows no significant teratogenicity at therapeutic doses; counsel and document" },
           ],
         },
         {
-          title: "Always prescribe",
+          title: "Thiamine — prescribe in all women with prolonged vomiting",
           drugs: [
-            { drug: "Thiamine", dose: "25–50 mg TDS oral", note: "Mandatory in HG — prevents Wernicke's encephalopathy" },
+            { drug: "Thiamine (oral)", dose: "25–50 mg TDS", note: "Outpatient supplementation to prevent Wernicke's encephalopathy in women at risk" },
           ],
         },
       ],
       next: "improving_q",
+      source: { gl: "GTG69", sectionId: "gtg69-antiemetics", label: "Antiemetic Management" },
     },
 
     "moderate_management": {
@@ -192,36 +200,42 @@ export const HYPEREMESIS_PROTOCOL = {
       sections: [
         {
           title: "IV Fluids",
-          alert: "Use 0.9% NaCl + KCl — NEVER dextrose (precipitates Wernicke's)",
+          alert: "NEVER administer dextrose before thiamine (Pabrinex) — precipitates Wernicke's encephalopathy",
           items: [
-            "0.9% NaCl + 20 mmol KCl at 125 ml/hr — adjust to urine output",
-            "Target urine output > 0.5 ml/kg/hr",
-            "Correct K⁺ urgently if < 3.0 mmol/L",
+            "Give Pabrinex IV first, before any IV fluids",
+            "Hartmann's solution (lactated Ringer's): first choice — physiological, corrects metabolic alkalosis",
+            "0.9% NaCl + 20–40 mmol KCl per litre if significant hypokalaemia (K⁺ <3.5 mmol/L)",
+            "Rate: 1 L over 4 hours initially, then reassess",
+            "Monitor U&E every 24 hours while on IV fluids",
+            "Correct Na⁺ <130 mmol/L cautiously — seek specialist advice; risk of central pontine myelinolysis with rapid correction",
+          ],
+        },
+        {
+          title: "Thiamine — give before IV fluids",
+          drugs: [
+            { drug: "Pabrinex (IV thiamine)", dose: "2 pairs (component I + II) in 100 ml NaCl over 30 min — repeat if admission >48 hours or if Wernicke's suspected", note: "Give before any glucose-containing fluids" },
           ],
         },
         {
           title: "IV / IM Antiemetics",
           drugs: [
-            { drug: "Ondansetron",      dose: "4 mg IV over 15 min TDS",  note: "Slow IV — fast bolus risks QTc prolongation"         },
-            { drug: "Cyclizine",        dose: "50 mg IV or IM TDS",        note: ""                                                    },
-            { drug: "Metoclopramide",   dose: "10 mg IV or IM TDS",        note: "Max 5 days — extrapyramidal side effect risk"        },
-          ],
-        },
-        {
-          title: "Thiamine — Essential",
-          drugs: [
-            { drug: "Thiamine (Pabrinex)", dose: "100 mg IV TDS for ≥3 days if not eating", note: "Do not omit — Wernicke's risk is serious and preventable" },
+            { drug: "Cyclizine",        dose: "50 mg IV or IM TDS",        note: "First line"                                               },
+            { drug: "Promethazine",     dose: "12.5–25 mg IV or IM QDS",   note: "Sedating — useful at night"                               },
+            { drug: "Metoclopramide",   dose: "10 mg IV or IM TDS",        note: "Max 5 days — tardive dyskinesia risk with prolonged use"   },
+            { drug: "Ondansetron",      dose: "4–8 mg IV BD–TDS",          note: "Administer slowly — fast bolus risks QTc prolongation"     },
           ],
         },
         {
           title: "VTE Prophylaxis",
           items: [
-            "Anti-embolism stockings (TEDS) on admission",
-            "Assess RCOG VTE risk score — start LMWH if score ≥3",
+            "All hospitalised women with HG have increased VTE risk (dehydration + immobility)",
+            "Prescribe LMWH (enoxaparin) as per VTE risk assessment — start on admission",
+            "TED stockings when mobile",
           ],
         },
       ],
       next: "improving_q",
+      source: { gl: "GTG69", sectionId: "gtg69-fluids", label: "IV Fluid Management & Thiamine" },
     },
 
     "severe_management": {
@@ -231,15 +245,16 @@ export const HYPEREMESIS_PROTOCOL = {
       alert: "Call the registrar. Do not manage severe HG alone.",
       items: [
         "Admit — IV access, strict fluid balance chart, daily weights",
-        "IV fluids: 0.9% NaCl + KCl — correct electrolytes urgently",
-        "Pabrinex (IV thiamine) immediately — 1 pair TDS for minimum 3 days",
-        "IV ondansetron 4 mg (slow, over 15 min) TDS",
-        "Consider nasogastric or nasoenteral feeding if nothing tolerated orally",
+        "Give Pabrinex 2 pairs IV (in 100 ml NaCl over 30 min) before any IV fluids",
+        "IV fluids: Hartmann's solution first choice; 0.9% NaCl + KCl if significant hypokalaemia — correct electrolytes urgently",
+        "IV antiemetics: cyclizine 50 mg TDS, or ondansetron 4–8 mg (administer slowly) BD–TDS",
+        "If Wernicke's suspected (confusion, ataxia, ophthalmoplegia/nystagmus): Pabrinex 2 pairs IV TDS × 3 days, then OD until oral intake established + MRI brain",
+        "Enteral nutrition (NG feed) if weight loss >10% of pre-pregnancy weight or inadequate intake despite antiemetics",
         "Dietitian referral",
-        "VTE risk assessment + LMWH + TEDS",
-        "If Wernicke's suspected (nystagmus, confusion, ataxia): Pabrinex 2 pairs IV TDS + MRI brain",
+        "VTE risk assessment: LMWH on admission + TED stockings when mobile",
       ],
       next: "improving_q",
+      source: { gl: "GTG69", sectionId: "gtg69-complications", label: "Complications" },
     },
 
     // ─── Response to treatment ─────────────────────────────────────────────────
@@ -260,12 +275,14 @@ export const HYPEREMESIS_PROTOCOL = {
       alert: "No improvement after 24 hours of IV treatment requires senior review",
       items: [
         "Call the registrar — reassess and modify management plan",
-        "Recheck U&E, urinary ketones — persist 3+ after 24h = senior urgency",
-        "Consider nasogastric or nasoenteral feeding",
+        "Recheck U&E and urinary ketones — ketonuria 2+ or more persisting after 24 h warrants urgent senior review",
+        "Consider enteral nutrition (NG feed) if weight loss >10% or inadequate intake despite antiemetics",
         "Request dietitian review",
-        "Discuss with patient if requesting termination of pregnancy due to HG — senior counselling required",
+        "Explore psychological impact — up to 50% of women with HG report significant depression or anxiety",
+        "Termination of pregnancy for HG is not uncommon — explore and support all options; refer to perinatal mental health team if required",
       ],
       next: "escalation_criteria",
+      source: { gl: "GTG69", sectionId: "gtg69-complications", label: "Complications" },
     },
 
     "escalation_criteria": {
@@ -273,16 +290,18 @@ export const HYPEREMESIS_PROTOCOL = {
       title: "Call the registrar if…",
       subtitle: "Any of the following warrant senior review",
       items: [
-        "Suspected Wernicke's encephalopathy — any neurological symptoms",
-        "Na⁺ < 130 mmol/L or K⁺ < 3.0 mmol/L",
-        "ALT > 3× upper limit of normal",
+        "Suspected Wernicke's encephalopathy — confusion, ataxia, or ophthalmoplegia (classic triad present in <20% of cases)",
+        "Na⁺ <130 mmol/L or K⁺ <3.0 mmol/L",
+        "ALT elevation (transaminase raised in up to 50% of HG — escalate if marked or rising)",
         "No improvement after 24 hours of IV treatment",
-        "Urinary ketones remain 3+ after 24 hours",
-        "Weight loss > 10% of pre-pregnancy weight",
-        "Suspected concurrent sepsis — fever, tachycardia, RR > 20",
+        "Ketonuria 2+ or more persisting after 24 hours",
+        "Weight loss >5% of pre-pregnancy body weight (admission criterion); enteral nutrition if >10%",
+        "Inability to keep down oral fluids or antiemetics",
+        "Suspected concurrent sepsis — fever, tachycardia",
         "Patient requesting termination due to HG — senior counselling required",
       ],
       next: "documentation",
+      source: { gl: "GTG69", sectionId: "gtg69-assessment", label: "Assessment & Admission Criteria" },
     },
 
     "documentation": {
@@ -292,15 +311,16 @@ export const HYPEREMESIS_PROTOCOL = {
       items: [
         "PUQE score — record the number, not just mild/moderate/severe",
         "Current weight vs booking weight — document % loss",
-        "Urinary ketones (1+, 2+, 3+)",
-        "Fluid balance plan and target urine output (> 0.5 ml/kg/hr)",
+        "Urinary ketones (2+ or more = significant)",
+        "IV fluid choice, rate, and volume given",
+        "Thiamine (Pabrinex) given — dose, route, timing",
         "Antiemetics prescribed — drug, dose, route",
-        "Thiamine prescribed — dose, route, planned duration",
-        "VTE risk assessment completed",
+        "VTE risk assessment completed — LMWH and TED stockings documented",
         "Informed patient of medication safety profile in pregnancy",
         "Review plan — time and by whom",
         "Safety-netting: criteria to return communicated to patient",
       ],
+      source: { gl: "GTG69", sectionId: "gtg69-assessment", label: "Assessment & Admission Criteria" },
     },
 
   },
