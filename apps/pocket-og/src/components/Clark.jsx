@@ -4,7 +4,8 @@ import { CLARK_PROTOCOLS, CLARK_CATEGORIES } from "../data/clark";
 // ─── Step type badge ──────────────────────────────────────────────────────────
 
 const TYPE_META = {
-  checklist:  { icon: "→", label: "Checklist",  cls: "bg-blue-100 text-blue-700"     },
+  question:   { icon: "?", label: "Question",   cls: "bg-teal-100 text-teal-700"      },
+  checklist:  { icon: "→", label: "Checklist",  cls: "bg-blue-100 text-blue-700"      },
   calculator: { icon: "∑", label: "Score",       cls: "bg-violet-100 text-violet-700" },
   treatment:  { icon: "Rx",label: "Treatment",   cls: "bg-emerald-100 text-emerald-700" },
   escalation: { icon: "⚠", label: "Escalation", cls: "bg-amber-100 text-amber-700"   },
@@ -31,6 +32,31 @@ const SEVERITY_CLS = {
   amber: "bg-amber-100 text-amber-700 border-amber-200",
   red:   "bg-red-100 text-red-700 border-red-200",
 };
+
+// ─── Question node ────────────────────────────────────────────────────────────
+
+function QuestionNode({ node, stepNum, onAnswer }) {
+  return (
+    <div className="px-4 py-5 max-w-lg mx-auto">
+      <StepBadge type="question" stepNum={stepNum} />
+      <h2 className="text-2xl font-bold text-white mt-3 mb-1 leading-tight">{node.question}</h2>
+      {node.subtitle && <p className="text-sm text-zinc-400 mb-6 leading-snug">{node.subtitle}</p>}
+      {!node.subtitle && <div className="mb-6" />}
+      <div className="space-y-2.5">
+        {node.options.map((opt, i) => (
+          <button
+            key={i}
+            onClick={() => onAnswer(opt.next, opt.label)}
+            className="w-full text-left px-4 py-4 rounded-2xl bg-zinc-600/60 hover:bg-zinc-500/80 border border-zinc-500 hover:border-zinc-400 active:scale-[0.98] transition-all"
+          >
+            <span className="text-sm font-semibold text-white block leading-snug">{opt.label}</span>
+            {opt.sublabel && <span className="text-xs text-zinc-400 mt-0.5 block">{opt.sublabel}</span>}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 // ─── Checklist node ───────────────────────────────────────────────────────────
 
@@ -371,6 +397,13 @@ function ClarkSession({ protocol, onExit }) {
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto">
+        {node.type === "question" && (
+          <QuestionNode
+            node={node}
+            stepNum={stepNum}
+            onAnswer={(nextId, label) => advance(nextId, label)}
+          />
+        )}
         {node.type === "checklist" && (
           <ChecklistNode node={node} stepNum={stepNum} onContinue={() => advance(node.next)} />
         )}
