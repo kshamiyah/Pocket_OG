@@ -324,11 +324,11 @@ function ClarkSession({ protocol, onExit }) {
     <div className="flex flex-col h-full">
 
       {/* Header */}
-      <div className="shrink-0 border-b border-gray-100 px-4 py-3 flex items-center gap-3">
+      <div className="shrink-0 bg-zinc-700 border-b border-zinc-600 px-4 py-3 flex items-center gap-3">
         <button
           onClick={goBack}
           aria-label={history.length === 0 ? "Exit session" : "Go back one step"}
-          className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 transition-colors shrink-0"
+          className="flex items-center gap-1 text-sm text-zinc-300 hover:text-white transition-colors shrink-0"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -336,13 +336,13 @@ function ClarkSession({ protocol, onExit }) {
           {history.length === 0 ? "Exit" : "Back"}
         </button>
         <div className="flex-1 text-center min-w-0">
-          <p className="text-[10px] font-black text-emerald-600 tracking-[0.2em] uppercase">CLARK</p>
-          <p className="text-sm font-semibold text-gray-900 leading-tight truncate">{protocol.title}</p>
+          <p className="text-[10px] font-black text-emerald-400 tracking-[0.2em] uppercase">CLARK</p>
+          <p className="text-sm font-semibold text-white leading-tight truncate">{protocol.title}</p>
         </div>
         <button
           onClick={restart}
           aria-label="Restart session from beginning"
-          className="text-sm text-gray-400 hover:text-gray-700 transition-colors shrink-0 px-1"
+          className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors shrink-0 px-1"
         >
           ↺
         </button>
@@ -400,19 +400,19 @@ function ClarkSession({ protocol, onExit }) {
 
       {/* Bottom nav */}
       {!isEnd && (
-        <div className="shrink-0 border-t border-gray-100 px-4 py-3 flex justify-between items-center">
+        <div className="shrink-0 bg-zinc-700 border-t border-zinc-600 px-4 py-3 flex justify-between items-center">
           <button
             onClick={goBack}
             disabled={history.length === 0}
             aria-label="Go back one step"
-            className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-1.5 text-sm text-zinc-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             ← Back
           </button>
           <button
             onClick={restart}
             aria-label="Restart from beginning"
-            className="text-sm text-gray-400 hover:text-gray-700 transition-colors"
+            className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
           >
             ↺ Restart
           </button>
@@ -449,7 +449,7 @@ function ClarkHome({ onSelect, onClose }) {
           </button>
         </div>
 
-        <div className="bg-zinc-700/50 border border-zinc-700 rounded-2xl px-4 py-3">
+        <div className="bg-zinc-600/50 border border-zinc-600 rounded-2xl px-4 py-3">
           <p className="text-xs text-zinc-400 leading-relaxed">
             Choose a presenting complaint. CLARK walks you through history, examination, investigations, scoring, and management — all in one place.
           </p>
@@ -487,13 +487,13 @@ function ClarkHome({ onSelect, onClose }) {
                 ) : (
                   <div
                     key={proto.id}
-                    className="w-full text-left bg-zinc-700/40 border border-zinc-700 rounded-2xl px-4 py-3 flex items-center gap-3 cursor-default"
+                    className="w-full text-left bg-zinc-600/40 border border-zinc-600 rounded-2xl px-4 py-3 flex items-center gap-3 cursor-default"
                   >
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-zinc-400 leading-snug">{proto.label}</p>
-                      <p className="text-xs text-zinc-600 mt-0.5">{proto.subtitle}</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">{proto.subtitle}</p>
                     </div>
-                    <span className="text-[10px] font-semibold text-zinc-500 bg-zinc-700 px-2 py-0.5 rounded-full shrink-0">
+                    <span className="text-[10px] font-semibold text-zinc-500 bg-zinc-600 px-2 py-0.5 rounded-full shrink-0">
                       Soon
                     </span>
                   </div>
@@ -523,11 +523,11 @@ export default function Clark({ onClose }) {
       style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}
     >
       {activeProtocol ? (
-        <div className="flex flex-col h-full bg-white">
+        <div className="flex flex-col h-full bg-zinc-50">
           <ClarkSession protocol={activeProtocol} onExit={() => setActiveProtocol(null)} />
         </div>
       ) : (
-        <div className="flex flex-col h-full bg-zinc-800">
+        <div className="flex flex-col h-full bg-zinc-700">
           <ClarkHome onSelect={setActiveProtocol} onClose={onClose} />
         </div>
       )}
