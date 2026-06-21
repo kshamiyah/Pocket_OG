@@ -5,16 +5,63 @@ export const ITCHING_PROTOCOL = {
   category: "antenatal",
   guideline: "RBH GL880",
   color: "amber",
-  startId: "history",
+  startId: "rash_q",
   nodes: {
+
+    // ─── Opening question ──────────────────────────────────────────────────────
+
+    "rash_q": {
+      type: "question",
+      question: "Is there a rash?",
+      subtitle: "ICP typically causes no primary rash — scratch marks only",
+      options: [
+        { label: "No rash — scratch marks only, or no skin changes",  next: "distribution_q" },
+        { label: "Yes — there is a visible rash",                     next: "rash_present"   },
+      ],
+    },
+
+    "rash_present": {
+      type: "treatment",
+      title: "Rash present — consider alternative diagnoses",
+      sections: [
+        {
+          title: "Common causes of rash with itch in pregnancy",
+          items: [
+            "PUPPP / polymorphic eruption of pregnancy — urticarial plaques, starts in striae, periumbilical sparing",
+            "Eczema or contact dermatitis — history of atopy, localised",
+            "Scabies — burrows between fingers, web spaces, nocturnal itch",
+            "Pemphigoid gestationis — rare; blisters on abdomen and limbs, positive DIF",
+          ],
+        },
+        {
+          title: "Still check for ICP",
+          items: [
+            "ICP and a rash can co-exist — send bile acids and LFTs regardless",
+            "Continue to the history and investigations if any doubt",
+          ],
+        },
+      ],
+      next: "distribution_q",
+    },
+
+    // ─── History ──────────────────────────────────────────────────────────────
+
+    "distribution_q": {
+      type: "question",
+      question: "Where is the itch worst?",
+      subtitle: "Distribution helps identify ICP",
+      options: [
+        { label: "Palms and soles — or worse at night",    sublabel: "Classic ICP pattern",          next: "history"  },
+        { label: "Generalised — no clear pattern",         sublabel: "Could still be ICP",            next: "history"  },
+        { label: "Localised — belly, legs, or one area",   sublabel: "Less typical of ICP",           next: "history"  },
+      ],
+    },
 
     "history": {
       type: "checklist",
       title: "Take a focused history",
-      subtitle: "Establish character and pattern of itch",
       items: [
-        "Onset, duration, and distribution — palms and soles, generalised, nocturnal worsening",
-        "Presence or absence of rash (ICP typically has no primary rash)",
+        "Onset, duration — palms and soles, generalised, nocturnal worsening",
         "Dark urine or pale stools — biliary obstruction features",
         "Previous ICP in this or prior pregnancies — recurrence rate 45–70%",
         "Family history of ICP or liver disease",
@@ -39,41 +86,65 @@ export const ITCHING_PROTOCOL = {
     "investigations": {
       type: "checklist",
       title: "Investigations",
-      subtitle: "Results guide management and delivery planning",
       items: [
         "Non-fasting bile acids (BA) — key diagnostic test for ICP",
         "LFTs — ALT, AST, ALP, bilirubin, GGT",
         "Clotting screen if BA ≥100 µmol/L or LFTs significantly deranged",
-        "No additional growth scans needed — ICP is not associated with IUGR; scans do not predict stillbirth",
-        "Note: 3 in 4 cases of itching in pregnancy are benign — await results before diagnosing ICP",
+        "Note: results may take hours — arrange review once back",
+        "3 in 4 cases of itching in pregnancy are benign — await results before diagnosing ICP",
       ],
-      next: "bile_acids",
+      next: "results_q",
     },
 
-    "bile_acids": {
-      type: "calculator",
-      title: "Bile Acid Level",
-      subtitle: "Non-fasting bile acids — select result range",
-      description: "Select the range that matches the patient's bile acid result to determine severity and management",
-      fields: [
+    // ─── Key branch: bile acid result ─────────────────────────────────────────
+
+    "results_q": {
+      type: "question",
+      question: "Are the bile acid results available?",
+      options: [
+        { label: "Yes — results are back",        next: "ba_level_q"  },
+        { label: "Not yet — still pending",        next: "pending"     },
+      ],
+    },
+
+    "pending": {
+      type: "treatment",
+      title: "Results pending — interim management",
+      sections: [
         {
-          id: "ba_level",
-          question: "Non-fasting bile acid level?",
-          options: [
-            { label: "<19 µmol/L — normal", score: 1 },
-            { label: "19–39 µmol/L — mild ICP", score: 2 },
-            { label: "40–99 µmol/L — moderate ICP", score: 3 },
-            { label: "≥100 µmol/L — severe ICP", score: 4 },
+          title: "While awaiting results",
+          items: [
+            "Do not diagnose or exclude ICP until bile acids are available",
+            "Symptomatic relief only — topical and antihistamine",
+            "Advise patient to return when results are available or sooner if symptoms worsen",
+            "Advise: return immediately if dark urine, jaundice, or significantly worse itch",
+          ],
+        },
+        {
+          title: "Symptomatic relief",
+          drugs: [
+            { drug: "Aqueous cream + menthol 1%",      dose: "Apply to affected areas PRN",  note: "First-line topical"             },
+            { drug: "Chlorphenamine",                   dose: "4 mg TDS oral",                note: "Antihistamine — safe in pregnancy" },
+            { drug: "Loratadine / Cetirizine",         dose: "10 mg OD oral",                note: "Non-sedating alternative"       },
           ],
         },
       ],
-      scoring: [
-        { min: 1, max: 1, label: "Normal bile acids", color: "green",  next: "not_icp"      },
-        { min: 2, max: 2, label: "Mild ICP",          color: "amber",  next: "mild_icp"     },
-        { min: 3, max: 3, label: "Moderate ICP",      color: "orange", next: "moderate_icp" },
-        { min: 4, max: 4, label: "Severe ICP",        color: "red",    next: "severe_icp"   },
+      next: "documentation",
+    },
+
+    "ba_level_q": {
+      type: "question",
+      question: "What is the bile acid level?",
+      subtitle: "Non-fasting bile acids",
+      options: [
+        { label: "< 19 µmol/L",   sublabel: "Normal",        next: "not_icp"      },
+        { label: "19–39 µmol/L",  sublabel: "Mild ICP",      next: "mild_icp"     },
+        { label: "40–99 µmol/L",  sublabel: "Moderate ICP",  next: "moderate_icp" },
+        { label: "≥ 100 µmol/L",  sublabel: "Severe ICP",    next: "severe_icp"   },
       ],
     },
+
+    // ─── Management by severity ────────────────────────────────────────────────
 
     "not_icp": {
       type: "treatment",
@@ -84,26 +155,17 @@ export const ITCHING_PROTOCOL = {
           title: "Management",
           items: [
             "ICP not confirmed at this stage",
-            "If borderline or mildly elevated — recheck bile acids 1 week later; may normalise",
-            "Ongoing itch with persistently normal BA/LFTs: repeat both at 1–2 week intervals",
+            "If borderline — recheck bile acids 1 week later; may normalise",
+            "Persistent itch with normal BA/LFTs: repeat both at 1–2 week intervals",
             "Advise patient to return if itch worsens, dark urine, or jaundice develops",
           ],
         },
         {
           title: "Symptomatic relief",
           drugs: [
-            { drug: "Aqueous cream + menthol 1%", dose: "Apply to affected areas PRN", note: "First-line topical" },
-            { drug: "Chlorphenamine", dose: "4 mg TDS oral", note: "Antihistamine — safe in pregnancy" },
-            { drug: "Loratadine / Cetirizine", dose: "10 mg OD oral", note: "Non-sedating alternative" },
-          ],
-        },
-        {
-          title: "Consider alternative diagnoses",
-          items: [
-            "PUPPP / polymorphic eruption of pregnancy",
-            "Eczema or contact dermatitis",
-            "Scabies",
-            "Pemphigoid gestationis — rare; blisters on abdomen and limbs",
+            { drug: "Aqueous cream + menthol 1%",  dose: "Apply PRN",         note: "First-line topical"             },
+            { drug: "Chlorphenamine",               dose: "4 mg TDS oral",     note: "Safe in pregnancy"              },
+            { drug: "Loratadine / Cetirizine",     dose: "10 mg OD oral",     note: "Non-sedating alternative"       },
           ],
         },
       ],
@@ -121,7 +183,7 @@ export const ITCHING_PROTOCOL = {
             "Weekly bile acids and LFTs from 38 weeks",
             "BP and urinalysis at every review",
             "No additional growth scans required",
-            "Intermittent auscultation acceptable in labour — homebirth and birth centre not contraindicated",
+            "Intermittent auscultation acceptable in labour",
           ],
         },
         {
@@ -133,9 +195,9 @@ export const ITCHING_PROTOCOL = {
         {
           title: "Symptomatic relief",
           drugs: [
-            { drug: "Aqueous cream + menthol 1%", dose: "Apply PRN", note: "First-line topical" },
-            { drug: "Chlorphenamine", dose: "4 mg TDS oral", note: "" },
-            { drug: "Loratadine / Cetirizine", dose: "10 mg OD oral", note: "Non-sedating" },
+            { drug: "Aqueous cream + menthol 1%",  dose: "Apply PRN",         note: "First-line topical" },
+            { drug: "Chlorphenamine",               dose: "4 mg TDS oral",     note: ""                   },
+            { drug: "Loratadine / Cetirizine",     dose: "10 mg OD oral",     note: "Non-sedating"       },
           ],
         },
       ],
@@ -145,7 +207,7 @@ export const ITCHING_PROTOCOL = {
     "moderate_icp": {
       type: "treatment",
       title: "Moderate ICP — Refer to Consultant ANC",
-      badge: { label: "BA 40–99 µmol/L", color: "orange" },
+      badge: { label: "BA 40–99 µmol/L", color: "amber" },
       sections: [
         {
           title: "Monitoring",
@@ -153,7 +215,7 @@ export const ITCHING_PROTOCOL = {
             "Weekly bile acids and LFTs from 35 weeks — levels may rise above 100 µmol/L",
             "Refer to consultant obstetric antenatal clinic",
             "BP and urinalysis at every review — PET risk is 12.2% in ICP",
-            "Continuous EFM (CEFM) recommended in labour — higher likelihood of meconium",
+            "Continuous EFM (CEFM) recommended in labour",
           ],
         },
         {
@@ -166,7 +228,7 @@ export const ITCHING_PROTOCOL = {
         {
           title: "Consider (senior prescription only)",
           drugs: [
-            { drug: "UDCA (ursodeoxycholic acid)", dose: "12 mg/kg/day in divided doses", note: "Consider from 34–36 weeks; not routine — senior prescription required" },
+            { drug: "UDCA (ursodeoxycholic acid)", dose: "12 mg/kg/day in divided doses", note: "Not routine — senior prescription required" },
           ],
         },
       ],
@@ -176,18 +238,20 @@ export const ITCHING_PROTOCOL = {
     "severe_icp": {
       type: "escalation",
       title: "Severe ICP — Escalate to Consultant",
-      alert: "Stillbirth risk is significantly increased only above 100 µmol/L (~3.5%). Do not manage this alone.",
+      alert: "Stillbirth risk significantly increased above 100 µmol/L (~3.5%). Do not manage this alone.",
       items: [
-        "Refer urgently to consultant obstetrician",
+        "Refer urgently to consultant obstetrician — do not discharge",
         "Planned birth at 35–36 weeks — if already past this gestation, arrange IOL imminently",
         "Continuous EFM (CEFM) must be offered in labour",
         "Advise patient: baby is more likely to need neonatal care at this gestation",
         "Clotting screen — Vitamin K (Menadiol 10 mg daily) if clotting abnormal",
         "UDCA — may be considered; senior prescription only",
-        "Discuss risk of stillbirth with patient and document conversation",
+        "Discuss risk of stillbirth with patient and document the conversation",
       ],
       next: "documentation",
     },
+
+    // ─── Documentation ────────────────────────────────────────────────────────
 
     "documentation": {
       type: "end",
