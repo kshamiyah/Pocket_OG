@@ -12,6 +12,7 @@ import ConsentPage from "./components/ConsentPage";
 import CalculatorPage from "./components/CalculatorPage";
 import AlphabetSidebar from "./components/AlphabetSidebar";
 import GuidelineReader from "./components/GuidelineReader";
+import RxPage from "./components/RxPage";
 
 const READER_AVAILABLE = new Set([
   "GL861", "GL952", "GL891", "GL983", "GL880", "GL787", "GL783", "GL895",
@@ -266,7 +267,6 @@ export default function App() {
           />
         );
       })()}
-      )}
 
       {/* Search tab — home / results */}
       {activeTab === "search" && (
@@ -547,6 +547,9 @@ export default function App() {
         />
       )}
 
+      {/* Rx tab */}
+      {activeTab === "rx" && <RxPage />}
+
       {/* Guidelines tab */}
       {activeTab === "guidelines" && (
         <div className="min-h-screen pb-24">
@@ -681,6 +684,7 @@ export default function App() {
             { id: "flowcharts", label: "Flow",    icon: <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l8.5 5v10L12 22 3.5 17V7L12 2z" /> },
             { id: "consent",    label: "Consent", icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /> },
             { id: "calculator", label: "Calc",    icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m-6 5h6m-6 5h6M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" /> },
+            { id: "rx",         label: "Rx",      icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" /> },
           ].map(tab => (
             <button
               key={tab.id}
