@@ -1,6 +1,14 @@
 import { useState, useRef, useMemo } from "react";
 import { ANTIHYPERTENSIVES } from "../data/rx/antihypertensives";
+import { UTEROTONICS } from "../data/rx/uterotonics";
+import { ANTIEMETICS } from "../data/rx/antiemetics";
 import AlphabetSidebar from "./AlphabetSidebar";
+
+const CATEGORIES = [
+  { id: "antihypertensives", label: "Antihypertensives", drugs: ANTIHYPERTENSIVES },
+  { id: "uterotonics",       label: "Uterotonics",       drugs: UTEROTONICS },
+  { id: "antiemetics",       label: "Antiemetics",       drugs: ANTIEMETICS },
+];
 
 const ACCENT = {
   blue:   "bg-blue-500",
@@ -10,6 +18,20 @@ const ACCENT = {
   teal:   "bg-cyan-500",
   pink:   "bg-pink-500",
   green:  "bg-green-500",
+  indigo: "bg-indigo-500",
+  red:    "bg-red-500",
+  rose:   "bg-rose-500",
+  violet: "bg-violet-500",
+};
+
+const ROUTE_LABEL = { oral: "Oral", iv: "IV", im: "IM", sl: "SL", vag: "Vaginal", rectal: "Rectal" };
+const ROUTE_COLOR = {
+  oral:   "text-emerald-600",
+  iv:     "text-amber-600",
+  im:     "text-orange-500",
+  sl:     "text-blue-600",
+  vag:    "text-purple-600",
+  rectal: "text-gray-500",
 };
 
 // ── Detail overlay ────────────────────────────────────────────────────────────
@@ -39,10 +61,10 @@ function DataRow({ label, value, valueClass = "text-gray-900", border = true }) 
   );
 }
 
-function BulletRow({ color, symbol, text, border = true }) {
+function BulletRow({ colorClass, symbol, text, border = true }) {
   return (
     <div className={`flex items-start gap-3 px-4 py-3 ${border ? "border-b border-gray-50" : ""}`}>
-      <span className={`text-xs font-bold mt-0.5 shrink-0 ${color}`}>{symbol}</span>
+      <span className={`text-xs font-bold mt-0.5 shrink-0 ${colorClass}`}>{symbol}</span>
       <span className="text-sm text-gray-700 leading-snug flex-1">{text}</span>
     </div>
   );
@@ -50,7 +72,6 @@ function BulletRow({ color, symbol, text, border = true }) {
 
 function DrugDetailView({ drug, onClose }) {
   const accent = ACCENT[drug.color] ?? "bg-gray-400";
-
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col">
       {/* Header */}
@@ -91,41 +112,37 @@ function DrugDetailView({ drug, onClose }) {
           </div>
         ))}
 
-        {/* Contraindications */}
         {drug.contraindications?.length > 0 && (
           <>
             <SectionLabel>Contraindications</SectionLabel>
             <DetailCard>
               {drug.contraindications.map((c, i) => (
-                <BulletRow key={i} color="text-red-400" symbol="✕" text={c} border={i < drug.contraindications.length - 1} />
+                <BulletRow key={i} colorClass="text-red-400" symbol="✕" text={c} border={i < drug.contraindications.length - 1} />
               ))}
             </DetailCard>
           </>
         )}
 
-        {/* Cautions */}
         {drug.cautions?.length > 0 && (
           <>
             <SectionLabel>Cautions</SectionLabel>
             <DetailCard>
               {drug.cautions.map((c, i) => (
-                <BulletRow key={i} color="text-amber-500" symbol="!" text={c} border={i < drug.cautions.length - 1} />
+                <BulletRow key={i} colorClass="text-amber-500" symbol="!" text={c} border={i < drug.cautions.length - 1} />
               ))}
             </DetailCard>
           </>
         )}
 
-        {/* Pregnancy safety */}
         {drug.pregnancySafety && (
           <>
             <SectionLabel>Pregnancy Safety</SectionLabel>
             <DetailCard>
-              <BulletRow color="text-emerald-500" symbol="✓" text={drug.pregnancySafety} border={false} />
+              <BulletRow colorClass="text-emerald-500" symbol="✓" text={drug.pregnancySafety} border={false} />
             </DetailCard>
           </>
         )}
 
-        {/* References */}
         {drug.sources?.length > 0 && (
           <>
             <SectionLabel>References</SectionLabel>
@@ -163,19 +180,29 @@ function DrugDetailView({ drug, onClose }) {
 
 export default function RxPage() {
   const [selectedDrug, setSelectedDrug] = useState(null);
+  const [activeCategoryId, setActiveCategoryId] = useState("antihypertensives");
   const [routeFilter, setRouteFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const sectionRefs = useRef({});
 
+  const activeCategory = CATEGORIES.find(c => c.id === activeCategoryId);
+
+  const switchCategory = (id) => {
+    setActiveCategoryId(id);
+    setRouteFilter("All");
+    setSearchQuery("");
+    sectionRefs.current = {};
+  };
+
   const filtered = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
-    return ANTIHYPERTENSIVES.filter(drug => {
+    return activeCategory.drugs.filter(drug => {
       if (q && !drug.name.toLowerCase().includes(q) && !drug.class.toLowerCase().includes(q)) return false;
       if (routeFilter === "Oral") return drug.routes.some(r => r.type === "oral");
-      if (routeFilter === "IV") return drug.routes.some(r => r.type === "iv");
+      if (routeFilter === "IV/IM") return drug.routes.some(r => r.type !== "oral");
       return true;
     });
-  }, [routeFilter, searchQuery]);
+  }, [activeCategory, routeFilter, searchQuery]);
 
   const groupedByLetter = useMemo(() => {
     const groups = {};
@@ -198,17 +225,33 @@ export default function RxPage() {
       <div className="min-h-screen bg-white pb-28">
         <div className="max-w-lg mx-auto">
 
-          {/* Header — matches other tabs */}
+          {/* Header */}
           <div className="px-5 pt-14 pb-1">
             <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Drug Reference</h2>
             <p className="text-xs text-gray-400 mt-0.5">Quick dose lookup — obstetric use</p>
           </div>
 
-          {/* Sticky filter bar — matches other tabs */}
+          {/* Category chips */}
+          <div className="flex gap-2 overflow-x-auto px-4 pt-3 pb-1 no-scrollbar">
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => switchCategory(cat.id)}
+                aria-pressed={activeCategoryId === cat.id}
+                className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                  activeCategoryId === cat.id ? "bg-black text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Sticky filter bar */}
           <div className="sticky top-0 z-20 bg-white border-b border-gray-100 pl-4 pr-12 pt-3 pb-3">
             {/* Route pills */}
             <div className="flex gap-1.5 mb-2.5">
-              {["All", "Oral", "IV"].map(f => (
+              {["All", "Oral", "IV/IM"].map(f => (
                 <button
                   key={f}
                   onClick={() => setRouteFilter(f)}
@@ -228,7 +271,7 @@ export default function RxPage() {
               </svg>
               <input
                 type="text"
-                placeholder="Search drugs…"
+                placeholder={`Search ${activeCategory.label.toLowerCase()}…`}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-9 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
@@ -254,7 +297,7 @@ export default function RxPage() {
             ) : (
               Object.entries(groupedByLetter).sort().map(([letter, drugs]) => (
                 <div key={letter}>
-                  {/* Letter divider — matches Flowcharts tab */}
+                  {/* Letter divider */}
                   <div
                     ref={el => { sectionRefs.current[letter] = el; }}
                     style={{ scrollMarginTop: "108px" }}
@@ -264,12 +307,11 @@ export default function RxPage() {
                     <div className="flex-1 h-px bg-gray-100" />
                   </div>
 
-                  {/* Drug card group — matches Guidelines tab */}
+                  {/* Drug card */}
                   <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
                     {drugs.map((drug, i) => {
                       const accent = ACCENT[drug.color] ?? "bg-gray-400";
-                      const hasOral = drug.routes.some(r => r.type === "oral");
-                      const hasIV = drug.routes.some(r => r.type === "iv");
+                      const routeTypes = [...new Set(drug.routes.map(r => r.type))];
                       return (
                         <button
                           key={drug.id}
@@ -281,8 +323,11 @@ export default function RxPage() {
                             <p className="text-sm font-semibold text-gray-900 leading-snug">{drug.name}</p>
                             <p className="text-xs text-gray-400 mt-0.5">{drug.class}</p>
                             <div className="flex gap-2 mt-1">
-                              {hasOral && <span className="text-[10px] font-semibold text-emerald-600">Oral</span>}
-                              {hasIV && <span className="text-[10px] font-semibold text-amber-600">IV</span>}
+                              {routeTypes.map(rt => (
+                                <span key={rt} className={`text-[10px] font-semibold ${ROUTE_COLOR[rt] ?? "text-gray-500"}`}>
+                                  {ROUTE_LABEL[rt] ?? rt.toUpperCase()}
+                                </span>
+                              ))}
                             </div>
                           </div>
                           <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
