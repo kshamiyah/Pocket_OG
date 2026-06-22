@@ -20,6 +20,7 @@ const READER_AVAILABLE = new Set([
   "NG88", "NHSCSP20",
   "GTG52", "GTG69", "NG25", "GTG31", "GTG17", "CG192",
   "NG133",
+  "BASHH_PID",
 ]);
 
 const FILTER_OPTIONS = [
@@ -79,6 +80,8 @@ const FLOWCHART_LINKS = [
   { id: "NHSCSP20_PREGNANCY",    gl: "NHSCSP20" },
   { id: "GTG52_PPH",             gl: "GTG52" },
   { id: "GTG31_SURVEILLANCE",    gl: "GTG31" },
+  { id: "BASHH_PID_TRIAGE",      gl: "BASHH_PID" },
+  { id: "BASHH_PID_ANTIBIOTICS", gl: "BASHH_PID" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -99,6 +102,7 @@ const FLOWCHART_GROUPS = [
   { gl: "NHSCSP20", label: "Cervical Screening & Colposcopy" },
   { gl: "GTG52",    label: "Postpartum Haemorrhage" },
   { gl: "GTG31",    label: "Small for Gestational Age / FGR" },
+  { gl: "BASHH_PID", label: "Pelvic Inflammatory Disease" },
 ];
 
 export default function App() {
