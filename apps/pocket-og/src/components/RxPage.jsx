@@ -2,39 +2,56 @@ import { useState, useRef, useMemo } from "react";
 import { ANTIHYPERTENSIVES } from "../data/rx/antihypertensives";
 import { UTEROTONICS } from "../data/rx/uterotonics";
 import { ANTIEMETICS } from "../data/rx/antiemetics";
+import { ANTIBIOTICS } from "../data/rx/antibiotics";
+import { TOCOLYTICS } from "../data/rx/tocolytics";
+import { ANTICOAGULANTS } from "../data/rx/anticoagulants";
+import { ANALGESIA } from "../data/rx/analgesia";
 import AlphabetSidebar from "./AlphabetSidebar";
 
 const ALL_DRUGS = [
   ...ANTIHYPERTENSIVES.map(d => ({ ...d, category: "Antihypertensive" })),
   ...UTEROTONICS.map(d =>       ({ ...d, category: "Uterotonic" })),
   ...ANTIEMETICS.map(d =>       ({ ...d, category: "Antiemetic" })),
+  ...ANTIBIOTICS.map(d =>       ({ ...d, category: "Antibiotic" })),
+  ...TOCOLYTICS.map(d =>        ({ ...d, category: "Tocolytic" })),
+  ...ANTICOAGULANTS.map(d =>    ({ ...d, category: "Anticoagulant" })),
+  ...ANALGESIA.map(d =>         ({ ...d, category: "Analgesia" })),
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 const ACCENT = {
-  blue:   "bg-blue-500",
-  purple: "bg-purple-500",
-  amber:  "bg-amber-400",
-  orange: "bg-orange-400",
-  teal:   "bg-cyan-500",
-  pink:   "bg-pink-500",
-  green:  "bg-green-500",
-  indigo: "bg-indigo-500",
-  red:    "bg-red-500",
-  rose:   "bg-rose-500",
-  violet: "bg-violet-500",
+  blue:    "bg-blue-500",
+  purple:  "bg-purple-500",
+  amber:   "bg-amber-400",
+  orange:  "bg-orange-400",
+  teal:    "bg-cyan-500",
+  pink:    "bg-pink-500",
+  green:   "bg-green-500",
+  indigo:  "bg-indigo-500",
+  red:     "bg-red-500",
+  rose:    "bg-rose-500",
+  violet:  "bg-violet-500",
+  lime:    "bg-lime-500",
+  sky:     "bg-sky-500",
+  fuchsia: "bg-fuchsia-500",
+  yellow:  "bg-yellow-400",
 };
 
 const CATEGORY_COLOR = {
   "Antihypertensive": "text-blue-400",
   "Uterotonic":       "text-rose-400",
   "Antiemetic":       "text-emerald-500",
+  "Antibiotic":       "text-lime-600",
+  "Tocolytic":        "text-sky-500",
+  "Anticoagulant":    "text-fuchsia-500",
+  "Analgesia":        "text-yellow-600",
 };
 
-const ROUTE_LABEL = { oral: "Oral", iv: "IV", im: "IM", sl: "SL", vag: "Vaginal", rectal: "Rectal" };
+const ROUTE_LABEL = { oral: "Oral", iv: "IV", im: "IM", sc: "SC", sl: "SL", vag: "Vaginal", rectal: "Rectal" };
 const ROUTE_COLOR = {
   oral:   "text-emerald-600",
   iv:     "text-amber-600",
   im:     "text-orange-500",
+  sc:     "text-indigo-500",
   sl:     "text-blue-600",
   vag:    "text-purple-600",
   rectal: "text-gray-500",
