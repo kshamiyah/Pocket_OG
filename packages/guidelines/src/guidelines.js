@@ -24,6 +24,7 @@ export const GUIDELINES = {
   GTG17: { code: "GTG17", label: "Recurrent Miscarriage",                 version: "GTG17", date: "April 2011",                   color: "violet", pdf: true, source: "RCOG", pdfUrl: "https://obgyn.onlinelibrary.wiley.com/doi/epdf/10.1111/1471-0528.17515" },
   CG192: { code: "CG192", label: "Perinatal Mental Health",               version: "NG192", date: "December 2014 (updated 2020)", color: "purple", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/cg192/resources/antenatal-and-postnatal-mental-health-clinical-management-and-service-guidance-pdf-35109869806789" },
   NG133: { code: "NG133", label: "Hypertension in Pregnancy",             version: "NG133", date: "June 2019 (updated 2023)",     color: "cyan",   pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng133/resources/hypertension-in-pregnancy-diagnosis-and-management-pdf-66141782348997" },
+  BASHH_PID: { code: "BASHH_PID", label: "Pelvic Inflammatory Disease", version: "2019", date: "2018 (updated 2019)", color: "fuchsia", pdf: true, source: "BASHH", pdfUrl: "https://www.bashh.org/resources/6/pid_2019/" },
 };
 
 export const GL_COLORS = {
@@ -52,4 +53,5 @@ export const GL_COLORS = {
   GTG17: { badge: "bg-violet-900/50 text-violet-300 border-violet-600/40", dot: "bg-violet-400" },
   CG192: { badge: "bg-purple-900/50 text-purple-300 border-purple-600/40", dot: "bg-purple-400" },
   NG133: { badge: "bg-cyan-900/50 text-cyan-300 border-cyan-600/40",       dot: "bg-cyan-400" },
+  BASHH_PID: { badge: "bg-fuchsia-900/50 text-fuchsia-300 border-fuchsia-600/40", dot: "bg-fuchsia-400" },
 };
