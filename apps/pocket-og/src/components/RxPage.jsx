@@ -4,11 +4,11 @@ import { UTEROTONICS } from "../data/rx/uterotonics";
 import { ANTIEMETICS } from "../data/rx/antiemetics";
 import AlphabetSidebar from "./AlphabetSidebar";
 
-const CATEGORIES = [
-  { id: "antihypertensives", label: "Antihypertensives", drugs: ANTIHYPERTENSIVES },
-  { id: "uterotonics",       label: "Uterotonics",       drugs: UTEROTONICS },
-  { id: "antiemetics",       label: "Antiemetics",       drugs: ANTIEMETICS },
-];
+const ALL_DRUGS = [
+  ...ANTIHYPERTENSIVES.map(d => ({ ...d, category: "Antihypertensive" })),
+  ...UTEROTONICS.map(d =>       ({ ...d, category: "Uterotonic" })),
+  ...ANTIEMETICS.map(d =>       ({ ...d, category: "Antiemetic" })),
+].sort((a, b) => a.name.localeCompare(b.name));
 
 const ACCENT = {
   blue:   "bg-blue-500",
@@ -22,6 +22,12 @@ const ACCENT = {
   red:    "bg-red-500",
   rose:   "bg-rose-500",
   violet: "bg-violet-500",
+};
+
+const CATEGORY_COLOR = {
+  "Antihypertensive": "text-blue-400",
+  "Uterotonic":       "text-rose-400",
+  "Antiemetic":       "text-emerald-500",
 };
 
 const ROUTE_LABEL = { oral: "Oral", iv: "IV", im: "IM", sl: "SL", vag: "Vaginal", rectal: "Rectal" };
@@ -74,7 +80,6 @@ function DrugDetailView({ drug, onClose }) {
   const accent = ACCENT[drug.color] ?? "bg-gray-400";
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col">
-      {/* Header */}
       <div className="flex-none px-4 pt-3 pb-3 flex items-center justify-between border-b border-gray-100 bg-white">
         <div className="flex items-center gap-3 min-w-0">
           <div className={`w-2 h-9 rounded-full shrink-0 ${accent}`} />
@@ -94,10 +99,7 @@ function DrugDetailView({ drug, onClose }) {
         </button>
       </div>
 
-      {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto pb-28 bg-gray-50">
-
-        {/* Routes */}
         {drug.routes.map((r, ri) => (
           <div key={ri}>
             <SectionLabel>{r.label}</SectionLabel>
@@ -180,29 +182,18 @@ function DrugDetailView({ drug, onClose }) {
 
 export default function RxPage() {
   const [selectedDrug, setSelectedDrug] = useState(null);
-  const [activeCategoryId, setActiveCategoryId] = useState("antihypertensives");
-  const [routeFilter, setRouteFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const sectionRefs = useRef({});
 
-  const activeCategory = CATEGORIES.find(c => c.id === activeCategoryId);
-
-  const switchCategory = (id) => {
-    setActiveCategoryId(id);
-    setRouteFilter("All");
-    setSearchQuery("");
-    sectionRefs.current = {};
-  };
-
   const filtered = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
-    return activeCategory.drugs.filter(drug => {
-      if (q && !drug.name.toLowerCase().includes(q) && !drug.class.toLowerCase().includes(q)) return false;
-      if (routeFilter === "Oral") return drug.routes.some(r => r.type === "oral");
-      if (routeFilter === "IV/IM") return drug.routes.some(r => r.type !== "oral");
-      return true;
-    });
-  }, [activeCategory, routeFilter, searchQuery]);
+    if (!q) return ALL_DRUGS;
+    return ALL_DRUGS.filter(d =>
+      d.name.toLowerCase().includes(q) ||
+      d.class.toLowerCase().includes(q) ||
+      d.category.toLowerCase().includes(q)
+    );
+  }, [searchQuery]);
 
   const groupedByLetter = useMemo(() => {
     const groups = {};
@@ -228,50 +219,18 @@ export default function RxPage() {
           {/* Header */}
           <div className="px-5 pt-14 pb-1">
             <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Drug Reference</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Quick dose lookup — obstetric use</p>
+            <p className="text-xs text-gray-400 mt-0.5">{ALL_DRUGS.length} drugs — quick dose lookup</p>
           </div>
 
-          {/* Category chips */}
-          <div className="flex gap-2 overflow-x-auto px-4 pt-3 pb-1 no-scrollbar">
-            {CATEGORIES.map(cat => (
-              <button
-                key={cat.id}
-                onClick={() => switchCategory(cat.id)}
-                aria-pressed={activeCategoryId === cat.id}
-                className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                  activeCategoryId === cat.id ? "bg-black text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Sticky filter bar */}
+          {/* Sticky search bar */}
           <div className="sticky top-0 z-20 bg-white border-b border-gray-100 pl-4 pr-12 pt-3 pb-3">
-            {/* Route pills */}
-            <div className="flex gap-1.5 mb-2.5">
-              {["All", "Oral", "IV/IM"].map(f => (
-                <button
-                  key={f}
-                  onClick={() => setRouteFilter(f)}
-                  aria-pressed={routeFilter === f}
-                  className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-colors ${
-                    routeFilter === f ? "bg-black text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                  }`}
-                >
-                  {f}
-                </button>
-              ))}
-            </div>
-            {/* Search */}
             <div className="relative">
               <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
               </svg>
               <input
                 type="text"
-                placeholder={`Search ${activeCategory.label.toLowerCase()}…`}
+                placeholder="Search drugs…"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-9 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
@@ -297,17 +256,15 @@ export default function RxPage() {
             ) : (
               Object.entries(groupedByLetter).sort().map(([letter, drugs]) => (
                 <div key={letter}>
-                  {/* Letter divider */}
                   <div
                     ref={el => { sectionRefs.current[letter] = el; }}
-                    style={{ scrollMarginTop: "108px" }}
+                    style={{ scrollMarginTop: "60px" }}
                     className="pt-4 pb-1 flex items-center gap-2"
                   >
                     <span className="text-[10px] font-bold text-gray-300 tracking-widest">{letter}</span>
                     <div className="flex-1 h-px bg-gray-100" />
                   </div>
 
-                  {/* Drug card */}
                   <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
                     {drugs.map((drug, i) => {
                       const accent = ACCENT[drug.color] ?? "bg-gray-400";
@@ -322,7 +279,13 @@ export default function RxPage() {
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-gray-900 leading-snug">{drug.name}</p>
                             <p className="text-xs text-gray-400 mt-0.5">{drug.class}</p>
-                            <div className="flex gap-2 mt-1">
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className={`text-[10px] font-semibold ${CATEGORY_COLOR[drug.category] ?? "text-gray-400"}`}>
+                                {drug.category}
+                              </span>
+                              {routeTypes.length > 0 && (
+                                <span className="text-gray-200 text-[10px]">·</span>
+                              )}
                               {routeTypes.map(rt => (
                                 <span key={rt} className={`text-[10px] font-semibold ${ROUTE_COLOR[rt] ?? "text-gray-500"}`}>
                                   {ROUTE_LABEL[rt] ?? rt.toUpperCase()}
