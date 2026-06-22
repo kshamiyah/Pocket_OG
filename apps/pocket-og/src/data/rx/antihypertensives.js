@@ -3,7 +3,7 @@ export const ANTIHYPERTENSIVES = [
     id: "amlodipine",
     name: "Amlodipine",
     class: "Calcium channel blocker",
-    color: "purple",
+    color: "pink",
     iconColor: "#FF2D55",
     bnfUrl: "https://bnf.nice.org.uk/drugs/amlodipine/",
     routes: [
