@@ -10,6 +10,7 @@ import {
   GTG52_SECTIONS, GTG69_SECTIONS, NG25_SECTIONS,
   GTG31_SECTIONS, GTG17_SECTIONS, CG192_SECTIONS,
   NG133_SECTIONS,
+  BASHH_PID_SECTIONS,
 } from "@pocket-og/guidelines";
 import { FLOWCHARTS } from "../data/flowcharts";
 import { GUIDELINE_KEYWORD_LINKS } from "../data/connections";
@@ -43,6 +44,7 @@ const SECTIONS_MAP = {
   GTG17: GTG17_SECTIONS,
   CG192: CG192_SECTIONS,
   NG133: NG133_SECTIONS,
+  BASHH_PID: BASHH_PID_SECTIONS,
 };
 
 
