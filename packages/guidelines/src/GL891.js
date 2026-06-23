@@ -1,7 +1,6 @@
 export const GL891_SECTIONS = [
   {
     id: "vte-risk-assessment", gl: "GL891", condition: "VTE in Pregnancy & Postnatal", setting: "Risk Assessment",
-    flowchartId: "GL891_ANTENATAL",
     title: "VTE — Risk Assessment & Antenatal Prophylaxis Indications",
     tags: ["vte","thromboembolism","dvt","pe","pulmonary embolism","deep vein thrombosis","risk assessment","lmwh","enoxaparin","prophylaxis","antenatal","booking","admission","booking appointment","thrombophilia","antithrombin","protein c","protein s","antiphospholipid","aps","previous vte","high risk","intermediate risk","ohss","cancer","sle","sickle cell","nephrotic","ivdu","cumulative risk factors","4 risk factors","3 risk factors","28 weeks","first trimester","fayyaz","gajree","haemobs","bridging","gp"],
     content: [
@@ -113,7 +112,6 @@ export const GL891_SECTIONS = [
   },
   {
     id: "vte-postnatal", gl: "GL891", condition: "VTE in Pregnancy & Postnatal", setting: "Postnatal Prophylaxis",
-    flowchartId: "GL891_POSTNATAL",
     title: "VTE — Postnatal Risk Scoring & Prophylaxis Duration",
     tags: ["vte","postnatal","thromboprophylaxis","6 weeks","10 days","intermediate risk","high risk","caesarean section","bmi 40","readmission","surgical procedure","cancer","heart failure","sle","ibd","sickle cell","diabetes nephropathy","ivdu","cumulative risk factors","2 or more","enoxaparin postnatal","flowtrons","epr","4 to 6 hours","secondary care prescription","mbrrace"],
     content: [
