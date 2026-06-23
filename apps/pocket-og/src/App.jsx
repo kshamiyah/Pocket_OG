@@ -14,6 +14,7 @@ import AlphabetSidebar from "./components/AlphabetSidebar";
 import GuidelineReader from "./components/GuidelineReader";
 import RxPage from "./components/RxPage";
 import DisclaimerModal from "./components/DisclaimerModal";
+import InstallBanner from "./components/InstallBanner";
 
 const READER_AVAILABLE = new Set([
   "GL861", "GL952", "GL891", "GL983", "GL880", "GL787", "GL783", "GL895",
@@ -328,6 +329,8 @@ export default function App() {
                     </button>
                   ))}
                 </div>
+
+                <InstallBanner />
 
               </div>
             </div>
