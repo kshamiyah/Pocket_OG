@@ -2,8 +2,8 @@ export const CONTRACEPTION = [
   // ── Combined hormonal ─────────────────────────────────────────────────────
   {
     id: "cocp",
-    name: "COCP (Combined Pill)",
-    class: "Combined oral contraceptive — ethinylestradiol + progestogen",
+    name: "Ethinylestradiol / Progestogen",
+    class: "Combined oral contraceptive (COCP)",
     color: "pink",
     routes: [
       {
@@ -53,8 +53,8 @@ export const CONTRACEPTION = [
   },
   {
     id: "contraceptive_patch",
-    name: "Contraceptive Patch",
-    class: "Combined hormonal — transdermal (Evra®)",
+    name: "Ethinylestradiol / Norelgestromin",
+    class: "Combined hormonal contraceptive — transdermal patch (Evra®)",
     color: "pink",
     routes: [
       {
@@ -84,8 +84,8 @@ export const CONTRACEPTION = [
   },
   {
     id: "vaginal_ring",
-    name: "Vaginal Ring",
-    class: "Combined hormonal — vaginal (NuvaRing®)",
+    name: "Ethinylestradiol / Etonogestrel",
+    class: "Combined hormonal contraceptive — vaginal ring (NuvaRing®)",
     color: "pink",
     routes: [
       {
@@ -116,8 +116,8 @@ export const CONTRACEPTION = [
   // ── Progestogen-only pills ────────────────────────────────────────────────
   {
     id: "desogestrel_pop",
-    name: "Desogestrel POP",
-    class: "Progestogen-only pill — desogestrel (Cerazette®, Cerelle®)",
+    name: "Desogestrel",
+    class: "Progestogen-only pill (Cerazette®, Cerelle®)",
     color: "pink",
     routes: [
       {
@@ -208,8 +208,8 @@ export const CONTRACEPTION = [
   // ── Long-acting reversible contraception (LARC) ───────────────────────────
   {
     id: "nexplanon",
-    name: "Etonogestrel Implant",
-    class: "Progestogen-only implant (Nexplanon®)",
+    name: "Etonogestrel",
+    class: "Progestogen-only subdermal implant (Nexplanon®)",
     color: "pink",
     routes: [
       {
@@ -290,7 +290,7 @@ export const CONTRACEPTION = [
   },
   {
     id: "lng_ius",
-    name: "LNG-IUS",
+    name: "Levonorgestrel IUS",
     class: "Levonorgestrel intrauterine system (Mirena®, Kyleena®, Jaydess®)",
     color: "pink",
     routes: [
@@ -384,7 +384,7 @@ export const CONTRACEPTION = [
   // ── Emergency contraception ───────────────────────────────────────────────
   {
     id: "levonorgestrel_ec",
-    name: "Levonorgestrel EC",
+    name: "Levonorgestrel",
     class: "Emergency contraception — progestogen (Levonelle® One Step, 1500)",
     color: "pink",
     routes: [
@@ -416,7 +416,7 @@ export const CONTRACEPTION = [
   },
   {
     id: "ulipristal_ec",
-    name: "Ulipristal Acetate EC",
+    name: "Ulipristal Acetate",
     class: "Emergency contraception — selective progesterone receptor modulator (EllaOne®)",
     color: "pink",
     routes: [

@@ -206,20 +206,28 @@ function DrugDetailView({ drug, onClose }) {
 
 // ── List view ─────────────────────────────────────────────────────────────────
 
+const CATEGORIES = [
+  "Analgesia", "Antibiotic", "Anticoagulant", "Antiemetic",
+  "Antihypertensive", "Contraception", "Endometriosis", "Tocolytic", "Uterotonic",
+];
+
 export default function RxPage() {
   const [selectedDrug, setSelectedDrug] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState(null);
   const sectionRefs = useRef({});
 
   const filtered = useMemo(() => {
+    let result = ALL_DRUGS;
+    if (activeCategory) result = result.filter(d => d.category === activeCategory);
     const q = searchQuery.toLowerCase().trim();
-    if (!q) return ALL_DRUGS;
-    return ALL_DRUGS.filter(d =>
+    if (q) result = result.filter(d =>
       d.name.toLowerCase().includes(q) ||
       d.class.toLowerCase().includes(q) ||
       d.category.toLowerCase().includes(q)
     );
-  }, [searchQuery]);
+    return result;
+  }, [searchQuery, activeCategory]);
 
   const groupedByLetter = useMemo(() => {
     const groups = {};
@@ -245,11 +253,14 @@ export default function RxPage() {
           {/* Header */}
           <div className="px-5 pt-14 pb-1">
             <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Drug Reference</h2>
-            <p className="text-xs text-gray-400 mt-0.5">{ALL_DRUGS.length} drugs — quick dose lookup</p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {activeCategory ? `${filtered.length} of ${ALL_DRUGS.length} drugs` : `${ALL_DRUGS.length} drugs`} — quick dose lookup
+            </p>
           </div>
 
-          {/* Sticky search bar */}
-          <div className="sticky top-0 z-20 bg-white border-b border-gray-100 pl-4 pr-12 pt-3 pb-3">
+          {/* Sticky search + filter */}
+          <div className="sticky top-0 z-20 bg-white border-b border-gray-100">
+            <div className="pl-4 pr-12 pt-3 pb-3">
             <div className="relative">
               <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
@@ -272,6 +283,32 @@ export default function RxPage() {
                   </svg>
                 </button>
               )}
+            </div>
+            </div>
+
+            {/* Category chips */}
+            <div className="flex gap-2 overflow-x-auto px-4 pb-3 scrollbar-none">
+              <button
+                onClick={() => setActiveCategory(null)}
+                className={`shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+                  activeCategory === null ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                }`}
+              >
+                All
+              </button>
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
+                  className={`shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+                    activeCategory === cat
+                      ? "bg-gray-900 text-white"
+                      : `bg-gray-100 hover:bg-gray-200 ${CATEGORY_COLOR[cat] ?? "text-gray-500"}`
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
           </div>
 
