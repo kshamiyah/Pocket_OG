@@ -111,6 +111,21 @@ describe("Latent phase reassessment", () => {
   it("fires warning at exactly 4h", () => {
     expect(has(computeAlerts(latentBed(4), NOW), "latent-reassess")).toBe(true)
   })
+
+  it("uses inductionStartTime for induced latent patients", () => {
+    const bed = {
+      ...latentBed(1),
+      modeOfOnset: "Induced",
+      inductionStartTime: t(5 * HOUR),
+      admissionTime: t(1 * HOUR),
+    }
+    expect(has(computeAlerts(bed, NOW), "latent-reassess")).toBe(true)
+  })
+
+  it("falls back to admissionTime when induced but no IOL start recorded", () => {
+    const bed = { ...latentBed(4), modeOfOnset: "Induced", inductionStartTime: null }
+    expect(has(computeAlerts(bed, NOW), "latent-reassess")).toBe(true)
+  })
 })
 
 // ─── Slow progress (NICE NG235 §1.5.1–1.5.4) ─────────────────────────────────

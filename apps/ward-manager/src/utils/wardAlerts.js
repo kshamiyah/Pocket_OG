@@ -231,16 +231,24 @@ export function computeAlerts(bed, now = Date.now()) {
   }
 
   // ─── Latent phase reassessment ───────────────────────────────────────
-  if (bed.labourStage === "Latent" && bed.admissionTime) {
-    const ms = now - new Date(bed.admissionTime).getTime();
-    if (ms >= 4 * HOUR) {
-      alerts.push({
-        id: "latent-reassess",
-        severity: "warning",
-        title: "Latent phase — reassess now",
-        body: `${formatAge(ms)} since admission. Offer reassessment to confirm or exclude active labour.`,
-        citation: "NICE NG235 §1.3.3 [2023]",
-      });
+  if (bed.labourStage === "Latent") {
+    const anchorTime = bed.modeOfOnset === "Induced" && bed.inductionStartTime
+      ? bed.inductionStartTime
+      : bed.admissionTime;
+    if (anchorTime) {
+      const ms = now - new Date(anchorTime).getTime();
+      const sinceLabel = bed.modeOfOnset === "Induced" && bed.inductionStartTime
+        ? "since IOL started"
+        : "since admission";
+      if (ms >= 4 * HOUR) {
+        alerts.push({
+          id: "latent-reassess",
+          severity: "warning",
+          title: "Latent phase — reassess now",
+          body: `${formatAge(ms)} ${sinceLabel}. Offer reassessment to confirm or exclude active labour.`,
+          citation: "NICE NG235 §1.3.3 [2023]",
+        });
+      }
     }
   }
 
