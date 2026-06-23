@@ -13,6 +13,7 @@ import CalculatorPage from "./components/CalculatorPage";
 import AlphabetSidebar from "./components/AlphabetSidebar";
 import GuidelineReader from "./components/GuidelineReader";
 import RxPage from "./components/RxPage";
+import DisclaimerModal from "./components/DisclaimerModal";
 
 const READER_AVAILABLE = new Set([
   "GL861", "GL952", "GL891", "GL983", "GL880", "GL787", "GL783", "GL895",
@@ -231,6 +232,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
+      <DisclaimerModal />
       <style>{`
         * { box-sizing: border-box; }
         html, body { -ms-overflow-style: none; scrollbar-width: none; }
@@ -401,7 +403,7 @@ export default function App() {
             }
 
             <div className="mt-10 text-center">
-              <p className="text-xs text-gray-400">Content derived verbatim from RBH trust guidelines · Not a substitute for clinical judgement · Always escalate when uncertain</p>
+              <p className="text-xs text-gray-400">Content summarised from national and local guidelines · For decision support only · Clinical judgement always applies</p>
               <p className="text-xs text-gray-400 mt-1">Built by Khalid Shamiyah</p>
             </div>
           </div>

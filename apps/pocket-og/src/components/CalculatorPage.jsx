@@ -136,7 +136,7 @@ function ScenarioList({ onSelect }) {
           )}
 
           <p className="text-[10px] text-gray-300 text-center mt-6 px-4 leading-relaxed">
-            All thresholds and interpretation text are taken verbatim from NICE NG126 (last updated August 2023) and RCOG/AEPU Green-top Guideline No. 21 (November 2016). This tool supports — not replaces — clinical judgement.
+            Calculator outputs are decision aids only. Clinical responsibility remains with the treating clinician. Thresholds are derived from national guidelines — verify against your local protocols and current published guidance before applying in practice.
           </p>
         </div>
       </div>

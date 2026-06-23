@@ -196,6 +196,7 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
               </a>
             )}
             <p className="text-xs text-gray-400">{gl} {guideline?.version} · {guideline?.date}</p>
+            <p className="text-xs text-gray-400 mt-1">Content summarised from source guidelines — verify against current published versions and local protocols. For decision support only.</p>
           </div>
 
         </div>

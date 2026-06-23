@@ -369,7 +369,7 @@ export default function RxPage() {
           </div>
 
           <p className="text-[10px] text-gray-400 text-center px-5 pt-6 pb-2 leading-relaxed">
-            For guidance only. Verify against current BNF and local protocols.
+            Doses are for guidance only and may not reflect local formulary or patient-specific factors. Always verify against the current BNF, SmPC, and your institution's prescribing protocols. For use by qualified healthcare professionals only.
           </p>
         </div>
 
