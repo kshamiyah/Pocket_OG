@@ -21,6 +21,7 @@ const READER_AVAILABLE = new Set([
   "GTG52", "GTG69", "NG25", "GTG31", "GTG17", "CG192",
   "NG133",
   "BASHH_PID",
+  "NG73",
 ]);
 
 const FILTER_OPTIONS = [
@@ -82,6 +83,8 @@ const FLOWCHART_LINKS = [
   { id: "GTG31_SURVEILLANCE",    gl: "GTG31" },
   { id: "BASHH_PID_TRIAGE",      gl: "BASHH_PID" },
   { id: "BASHH_PID_ANTIBIOTICS", gl: "BASHH_PID" },
+  { id: "NG73_DIAGNOSIS",        gl: "NG73" },
+  { id: "NG73_TREATMENT",        gl: "NG73" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -103,6 +106,7 @@ const FLOWCHART_GROUPS = [
   { gl: "GTG52",    label: "Postpartum Haemorrhage" },
   { gl: "GTG31",    label: "Small for Gestational Age / FGR" },
   { gl: "BASHH_PID", label: "Pelvic Inflammatory Disease" },
+  { gl: "NG73",      label: "Endometriosis" },
 ];
 
 export default function App() {

@@ -6,16 +6,20 @@ import { ANTIBIOTICS } from "../data/rx/antibiotics";
 import { TOCOLYTICS } from "../data/rx/tocolytics";
 import { ANTICOAGULANTS } from "../data/rx/anticoagulants";
 import { ANALGESIA } from "../data/rx/analgesia";
+import { ENDOMETRIOSIS_DRUGS } from "../data/rx/endometriosis";
+import { CONTRACEPTION } from "../data/rx/contraception";
 import AlphabetSidebar from "./AlphabetSidebar";
 
 const ALL_DRUGS = [
-  ...ANTIHYPERTENSIVES.map(d => ({ ...d, category: "Antihypertensive" })),
-  ...UTEROTONICS.map(d =>       ({ ...d, category: "Uterotonic" })),
-  ...ANTIEMETICS.map(d =>       ({ ...d, category: "Antiemetic" })),
-  ...ANTIBIOTICS.map(d =>       ({ ...d, category: "Antibiotic" })),
-  ...TOCOLYTICS.map(d =>        ({ ...d, category: "Tocolytic" })),
-  ...ANTICOAGULANTS.map(d =>    ({ ...d, category: "Anticoagulant" })),
-  ...ANALGESIA.map(d =>         ({ ...d, category: "Analgesia" })),
+  ...ANTIHYPERTENSIVES.map(d =>    ({ ...d, category: "Antihypertensive" })),
+  ...UTEROTONICS.map(d =>          ({ ...d, category: "Uterotonic" })),
+  ...ANTIEMETICS.map(d =>          ({ ...d, category: "Antiemetic" })),
+  ...ANTIBIOTICS.map(d =>          ({ ...d, category: "Antibiotic" })),
+  ...TOCOLYTICS.map(d =>           ({ ...d, category: "Tocolytic" })),
+  ...ANTICOAGULANTS.map(d =>       ({ ...d, category: "Anticoagulant" })),
+  ...ANALGESIA.map(d =>            ({ ...d, category: "Analgesia" })),
+  ...ENDOMETRIOSIS_DRUGS.map(d =>  ({ ...d, category: "Endometriosis" })),
+  ...CONTRACEPTION.map(d =>        ({ ...d, category: "Contraception" })),
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 const ACCENT = {
@@ -44,17 +48,22 @@ const CATEGORY_COLOR = {
   "Tocolytic":        "text-sky-500",
   "Anticoagulant":    "text-fuchsia-500",
   "Analgesia":        "text-yellow-600",
+  "Endometriosis":    "text-purple-500",
+  "Contraception":    "text-pink-500",
 };
 
-const ROUTE_LABEL = { oral: "Oral", iv: "IV", im: "IM", sc: "SC", sl: "SL", vag: "Vaginal", rectal: "Rectal" };
+const ROUTE_LABEL = { oral: "Oral", iv: "IV", im: "IM", sc: "SC", sl: "SL", vag: "Vaginal", rectal: "Rectal", patch: "Patch", implant: "Implant", iud: "IUD/IUS" };
 const ROUTE_COLOR = {
-  oral:   "text-emerald-600",
-  iv:     "text-amber-600",
-  im:     "text-orange-500",
-  sc:     "text-indigo-500",
-  sl:     "text-blue-600",
-  vag:    "text-purple-600",
-  rectal: "text-gray-500",
+  oral:    "text-emerald-600",
+  iv:      "text-amber-600",
+  im:      "text-orange-500",
+  sc:      "text-indigo-500",
+  sl:      "text-blue-600",
+  vag:     "text-purple-600",
+  rectal:  "text-gray-500",
+  patch:   "text-violet-500",
+  implant: "text-teal-600",
+  iud:     "text-cyan-600",
 };
 
 // ── Detail overlay ────────────────────────────────────────────────────────────

@@ -30,3 +30,4 @@ export { GTG17_SECTIONS } from "./GTG17.js";
 export { CG192_SECTIONS } from "./CG192.js";
 export { NG133_SECTIONS } from "./NG133.js";
 export { BASHH_PID_SECTIONS } from "./BASHH_PID.js";
+export { NG73_SECTIONS } from "./NG73.js";

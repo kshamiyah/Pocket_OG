@@ -25,6 +25,7 @@ export const GUIDELINES = {
   CG192: { code: "CG192", label: "Perinatal Mental Health",               version: "NG192", date: "December 2014 (updated 2020)", color: "purple", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/cg192/resources/antenatal-and-postnatal-mental-health-clinical-management-and-service-guidance-pdf-35109869806789" },
   NG133: { code: "NG133", label: "Hypertension in Pregnancy",             version: "NG133", date: "June 2019 (updated 2023)",     color: "cyan",   pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng133/resources/hypertension-in-pregnancy-diagnosis-and-management-pdf-66141782348997" },
   BASHH_PID: { code: "BASHH_PID", label: "Pelvic Inflammatory Disease", version: "2019", date: "2018 (updated 2019)", color: "fuchsia", pdf: true, source: "BASHH", pdfUrl: "https://www.bashh.org/resources/6/pid_2019/" },
+  NG73: { code: "NG73", label: "Endometriosis", version: "NG73", date: "September 2017 (updated 2024)", color: "purple", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng73/resources/endometriosis-diagnosis-and-management-pdf-1837632548293" },
 };
 
 export const GL_COLORS = {
@@ -54,4 +55,5 @@ export const GL_COLORS = {
   CG192: { badge: "bg-purple-900/50 text-purple-300 border-purple-600/40", dot: "bg-purple-400" },
   NG133: { badge: "bg-cyan-900/50 text-cyan-300 border-cyan-600/40",       dot: "bg-cyan-400" },
   BASHH_PID: { badge: "bg-fuchsia-900/50 text-fuchsia-300 border-fuchsia-600/40", dot: "bg-fuchsia-400" },
+  NG73: { badge: "bg-purple-900/50 text-purple-300 border-purple-600/40", dot: "bg-purple-400" },
 };

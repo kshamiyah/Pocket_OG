@@ -1,0 +1,445 @@
+export const CONTRACEPTION = [
+  // ── Combined hormonal ─────────────────────────────────────────────────────
+  {
+    id: "cocp",
+    name: "COCP (Combined Pill)",
+    class: "Combined oral contraceptive — ethinylestradiol + progestogen",
+    color: "pink",
+    routes: [
+      {
+        type: "oral",
+        shortLabel: "Oral — contraception",
+        label: "Oral — contraception (standard 21-day regimen)",
+        dose: "1 tablet daily (e.g. Microgynon 30: EE 30 mcg + levonorgestrel 150 mcg)",
+        frequency: "21 days on, 7 days off (pill-free interval); or every day (ED preparation)",
+        maxDose: "1 tablet per day",
+        notes: "99.7% effective with perfect use. Start day 1–5 of cycle for immediate protection; day 1 start gives immediate protection, day 2–5 requires 7 days additional contraception. Monophasic preparations preferred (consistent dose). Switching preparations: continue without a break. If vomiting/diarrhoea within 3–4 hours of pill: treat as missed pill.",
+      },
+      {
+        type: "oral",
+        shortLabel: "Oral — continuous / tailored",
+        label: "Oral — continuous or tricycling regimen",
+        dose: "1 tablet daily continuously (no pill-free interval)",
+        frequency: "Continuously — skip pill-free week; or tricycle (3 packs then 4-day break)",
+        maxDose: "1 tablet per day",
+        notes: "Continuous COCP: suppresses periods; first-line for endometriosis-related dysmenorrhoea and cyclical pain. Tricycling: take 3 packs back-to-back then 4-day break — reduces frequency of withdrawal bleeds. Particularly useful for endometriosis, dysmenorrhoea, HMB, and women who prefer fewer periods.",
+      },
+    ],
+    contraindications: [
+      "Migraine with aura",
+      "Personal history of VTE or thrombophilia",
+      "Cardiovascular disease, stroke, or TIA",
+      "BP ≥160/100 mmHg uncontrolled",
+      "Active liver disease or hepatic adenoma",
+      "Breast cancer (current or within 5 years)",
+      "Smoking ≥35 years of age (≥15 cigarettes/day — UKMEC 4)",
+      "BMI ≥35 (relative — UKMEC 3)",
+      "Diabetes with complications (retinopathy, nephropathy)",
+      "Breastfeeding <6 weeks postpartum",
+    ],
+    cautions: [
+      "Increases VTE risk 3–4× (absolute risk still low in healthy women)",
+      "Drospirenone and desogestrel-containing pills carry higher VTE risk than levonorgestrel",
+      "Annual BP check recommended",
+      "Drug interactions: rifampicin, carbamazepine, phenytoin reduce efficacy significantly",
+      "Antibiotics: no additional precautions required with non-enzyme-inducing antibiotics",
+      "Missed pill rules: if >24 hr late — take missed pill ASAP, use condoms for 7 days",
+    ],
+    pregnancySafety: "Stop as soon as pregnancy confirmed. No evidence of harm to fetus if inadvertently taken in early pregnancy.",
+    sources: [
+      { label: "BNF — Combined hormonal contraceptives", href: "https://bnf.nice.org.uk/treatment-summaries/contraceptives-hormonal/" },
+      { label: "FSRH Guideline — CHC", href: "https://www.fsrh.org/documents/ceu-clinical-guidance-combined-hormonal-contraception/" },
+    ],
+  },
+  {
+    id: "contraceptive_patch",
+    name: "Contraceptive Patch",
+    class: "Combined hormonal — transdermal (Evra®)",
+    color: "pink",
+    routes: [
+      {
+        type: "patch",
+        shortLabel: "Patch — weekly",
+        label: "Transdermal — weekly contraceptive patch",
+        dose: "1 patch releasing EE 20 mcg/day + norelgestromin 150 mcg/day",
+        frequency: "Apply new patch weekly for 3 weeks, then 1 patch-free week",
+        maxDose: "1 patch at a time",
+        notes: "Apply to clean, dry, non-irritated skin on buttock, abdomen, upper arm, or upper torso (not breasts). Rotate site each week. Adhesion: check daily — if patch partially detached <24 hr, reapply or replace. If detached >24 hr: treat as missed contraception. Same efficacy, contraindications, and drug interactions as COCP. Slightly higher EE exposure than standard 30 mcg COCP — use with caution in VTE risk factors.",
+      },
+    ],
+    contraindications: [
+      "Same as COCP — see COCP entry",
+      "Skin conditions affecting patch adhesion sites",
+    ],
+    cautions: [
+      "Higher oestrogen exposure than some COCPs — additional VTE consideration",
+      "Weight >90 kg: reduced efficacy — consider alternative method",
+      "Same drug interactions as COCP (enzyme inducers significantly reduce efficacy)",
+    ],
+    pregnancySafety: "Stop as soon as pregnancy confirmed. No known fetal harm.",
+    sources: [
+      { label: "BNF — Contraceptive patch", href: "https://bnf.nice.org.uk/drugs/ethinylestradiol-with-norelgestromin/" },
+      { label: "FSRH Guideline — CHC", href: "https://www.fsrh.org/documents/ceu-clinical-guidance-combined-hormonal-contraception/" },
+    ],
+  },
+  {
+    id: "vaginal_ring",
+    name: "Vaginal Ring",
+    class: "Combined hormonal — vaginal (NuvaRing®)",
+    color: "pink",
+    routes: [
+      {
+        type: "vag",
+        shortLabel: "Vaginal — monthly ring",
+        label: "Vaginal — combined hormonal ring",
+        dose: "Releases EE 15 mcg/day + etonogestrel 120 mcg/day",
+        frequency: "Insert for 3 weeks, remove for 1 week (ring-free interval); or continuous use",
+        maxDose: "1 ring at a time",
+        notes: "Self-inserted vaginally. Lowest EE dose of all combined hormonal methods. Flexible ring — not felt by most women or partners. Continuous use (no ring-free week): similar to continuous COCP for endometriosis/dysmenorrhoea management. If ring expels: rinse in cold water and reinsert within 3 hours. Same contraindications as COCP. Useful in women who want lower oestrogen exposure or prefer non-oral route.",
+      },
+    ],
+    contraindications: [
+      "Same as COCP — see COCP entry",
+      "Conditions affecting vaginal use (prolapse, inability to insert)",
+    ],
+    cautions: [
+      "Same drug interactions as COCP",
+      "Vaginal infections may increase expulsion risk",
+      "Enzyme inducers significantly reduce efficacy",
+    ],
+    pregnancySafety: "Stop as soon as pregnancy confirmed.",
+    sources: [
+      { label: "BNF — Etonogestrel with ethinylestradiol", href: "https://bnf.nice.org.uk/drugs/etonogestrel-with-ethinylestradiol/" },
+    ],
+  },
+
+  // ── Progestogen-only pills ────────────────────────────────────────────────
+  {
+    id: "desogestrel_pop",
+    name: "Desogestrel POP",
+    class: "Progestogen-only pill — desogestrel (Cerazette®, Cerelle®)",
+    color: "pink",
+    routes: [
+      {
+        type: "oral",
+        shortLabel: "Oral — POP",
+        label: "Oral — progestogen-only pill",
+        dose: "75 mcg desogestrel",
+        frequency: "Once daily continuously — no pill-free interval",
+        maxDose: "75 mcg/day",
+        notes: "Preferred POP in UK — 12-hour window (more forgiving than traditional POP's 3-hour window). Anovulatory in ~97% of cycles — mechanism differs from traditional POP. Take at same time each day. Missed pill: if >12 hours late, take ASAP and use condoms for 2 days. Suitable when oestrogen contraindicated (VTE, migraine with aura, breastfeeding, hypertension). Also effective off-label for endometriosis pain and dysmenorrhoea.",
+      },
+    ],
+    contraindications: [
+      "Breast cancer (current or within 5 years)",
+      "Severe hepatic impairment",
+      "Unexplained vaginal bleeding",
+    ],
+    cautions: [
+      "Irregular bleeding very common — may improve after 3 months; counsel before starting",
+      "Drug interactions: enzyme inducers (rifampicin, carbamazepine) significantly reduce efficacy",
+      "Functional ovarian cysts may develop — usually resolve spontaneously",
+      "Safe to use from 3 weeks postpartum if breastfeeding",
+    ],
+    pregnancySafety: "Safe — no proven harm if taken inadvertently in early pregnancy. Suitable for use while breastfeeding.",
+    sources: [
+      { label: "BNF — Desogestrel", href: "https://bnf.nice.org.uk/drugs/desogestrel/" },
+      { label: "FSRH Guideline — POP", href: "https://www.fsrh.org/documents/ceu-clinical-guidance-progestogen-only-pills/" },
+    ],
+  },
+  {
+    id: "norethisterone_pop",
+    name: "Norethisterone POP",
+    class: "Progestogen-only pill — norethisterone (Micronor®, Noriday®)",
+    color: "pink",
+    routes: [
+      {
+        type: "oral",
+        shortLabel: "Oral — traditional POP",
+        label: "Oral — traditional norethisterone POP",
+        dose: "350 mcg norethisterone",
+        frequency: "Once daily continuously — strict 3-hour window",
+        maxDose: "350 mcg/day",
+        notes: "Traditional POP — works primarily by thickening cervical mucus (not reliably anovulatory). STRICT 3-hour window — if pill >3 hours late, use condoms for 2 days. Generally less preferred than desogestrel POP due to narrow window. Does not reliably suppress ovulation — less effective for endometriosis/period suppression than desogestrel POP.",
+      },
+    ],
+    contraindications: [
+      "Breast cancer (current or within 5 years)",
+      "Severe hepatic impairment",
+    ],
+    cautions: [
+      "Strict 3-hour window — patient education essential",
+      "Enzyme inducers (rifampicin, carbamazepine) significantly reduce efficacy",
+      "Irregular bleeding common",
+    ],
+    pregnancySafety: "Safe — no proven harm in early pregnancy. Suitable while breastfeeding.",
+    sources: [
+      { label: "BNF — Norethisterone (contraception)", href: "https://bnf.nice.org.uk/drugs/norethisterone/" },
+    ],
+  },
+
+  // ── Long-acting reversible contraception (LARC) ───────────────────────────
+  {
+    id: "nexplanon",
+    name: "Etonogestrel Implant",
+    class: "Progestogen-only implant (Nexplanon®)",
+    color: "pink",
+    routes: [
+      {
+        type: "implant",
+        shortLabel: "Subdermal implant — 3 years",
+        label: "Subdermal implant — contraception (± endometriosis / dysmenorrhoea)",
+        dose: "68 mg etonogestrel releasing ~60–70 mcg/day initially",
+        frequency: "Single insertion; licensed 3 years; replace at 3 years",
+        maxDose: "1 implant at a time; replace at 3 years",
+        notes: "Inserted subdermally in non-dominant upper arm by trained clinician. Most effective contraceptive available (>99.9%). Anovulatory mechanism. Insert days 1–5 of cycle for immediate protection; any other time — 7 days additional contraception needed. Also used off-label for endometriosis and dysmenorrhoea pain suppression — often amenorrhoeic. Removal: any time; fertility returns rapidly. IMPORTANT: palpate and confirm location before relying on for contraception.",
+      },
+    ],
+    contraindications: [
+      "Breast cancer (current or within 5 years)",
+      "Active thromboembolic disease (relative)",
+      "Severe hepatic impairment",
+    ],
+    cautions: [
+      "Irregular, unpredictable bleeding — most common reason for removal; counsel thoroughly before insertion",
+      "Enzyme inducers (rifampicin, carbamazepine, some antiretrovirals): significantly reduce efficacy — consider alternative or additional contraception",
+      "Weight >70 kg: no dose adjustment required; efficacy maintained",
+      "Insertion and removal by trained clinician only",
+      "Check for radiopacity on X-ray if location uncertain",
+    ],
+    pregnancySafety: "Highly effective contraceptive — remove immediately if pregnancy confirmed. No evidence of harm to fetus from inadvertent exposure.",
+    sources: [
+      { label: "BNF — Etonogestrel implant", href: "https://bnf.nice.org.uk/drugs/etonogestrel/" },
+      { label: "FSRH Guideline — Implants", href: "https://www.fsrh.org/documents/ceu-clinical-guidance-implants/" },
+    ],
+  },
+  {
+    id: "depo_provera",
+    name: "Medroxyprogesterone Injection",
+    class: "Progestogen depot injection (Depo-Provera®)",
+    color: "pink",
+    routes: [
+      {
+        type: "im",
+        shortLabel: "IM — every 12 weeks",
+        label: "IM — depot contraception (± endometriosis / HMB)",
+        dose: "150 mg medroxyprogesterone acetate",
+        frequency: "Every 12 weeks (within 5 days of due date for continued protection)",
+        maxDose: "150 mg per injection; do not shorten injection interval",
+        notes: "Highly effective (>99% with perfect use). Give within first 5 days of cycle for immediate protection; any other time — 7 days additional contraception. Also effective for endometriosis pain and HMB — amenorrhoea occurs in ~50% by 1 year. IMPORTANT: advise that return of fertility may be delayed 6–12 months (occasionally longer) after stopping — discuss before starting in women planning pregnancy soon. Bone density: DEXA not routinely recommended unless additional risk factors; loss generally reversible after stopping.",
+      },
+    ],
+    contraindications: [
+      "Breast cancer (current or within 5 years)",
+      "Unexplained vaginal bleeding",
+      "Severe hepatic disease",
+    ],
+    cautions: [
+      "Delayed return of fertility — up to 12 months or more after last injection; ALWAYS counsel before starting",
+      "Irregular or prolonged bleeding in first months — may improve; amenorrhoea in ~50% at 1 year",
+      "Bone density: small reversible reduction with use; caution in adolescents and women with additional osteoporosis risk",
+      "Cannot be reversed once given — unlike other LARC methods",
+      "Suitable 6 weeks postpartum if breastfeeding",
+    ],
+    pregnancySafety: "Not to be given in pregnancy. No significant harm to fetus from inadvertent early exposure documented.",
+    sources: [
+      { label: "BNF — Medroxyprogesterone (injection)", href: "https://bnf.nice.org.uk/drugs/medroxyprogesterone-acetate/" },
+      { label: "FSRH Guideline — Injectable contraception", href: "https://www.fsrh.org/documents/ceu-clinical-guidance-injectable-contraception/" },
+    ],
+  },
+  {
+    id: "lng_ius_52",
+    name: "LNG-IUS 52 mg (Mirena®)",
+    class: "Levonorgestrel intrauterine system — 52 mg",
+    color: "pink",
+    routes: [
+      {
+        type: "iud",
+        shortLabel: "IUS — up to 8 years",
+        label: "Intrauterine — contraception / HMB / endometriosis",
+        dose: "52 mg LNG; releases ~20 mcg/day initially falling to ~10 mcg/day at 5 years",
+        frequency: "Single insertion; licensed 8 years contraception; 5 years for HMB; 4 years as HRT progestogen",
+        maxDose: "1 device at a time",
+        notes: "Most effective IUS — >99.9% effective. Licensed for: contraception (8 years), treatment of HMB (5 years), progestogen component of HRT (4 years), and endometriosis-associated dysmenorrhoea. Insert at any time in cycle if reasonably certain not pregnant — immediate protection if day 1–7; otherwise 7 days additional contraception. Insertion may be uncomfortable — offer analgesia (ibuprofen, local anaesthetic). Amenorrhoea in ~20% at 1 year, lighter periods in most. Fit during caesarean section or immediately postpartum if appropriate.",
+      },
+    ],
+    contraindications: [
+      "Current pelvic infection or STI",
+      "Uterine cavity distortion (fibroids, abnormality)",
+      "Unexplained vaginal bleeding",
+      "Breast cancer (current or within 5 years)",
+      "Gestational trophoblastic disease with elevated βhCG",
+    ],
+    cautions: [
+      "Irregular spotting very common in first 3–6 months — counsel before insertion",
+      "Expulsion risk: 5 per 100 women over 5 years — teach self-check for threads",
+      "Perforation risk: ~1–2 per 1000 insertions",
+      "Ectopic pregnancy risk if IUS fails — must exclude ectopic if pregnant with IUS",
+      "Functional ovarian cysts: may occur, usually resolve spontaneously",
+    ],
+    pregnancySafety: "Remove if pregnancy confirmed — risk of septic abortion if left in situ. If strings not visible on USS and IUS cannot be removed, discuss risks with specialist.",
+    sources: [
+      { label: "BNF — Levonorgestrel (IUS)", href: "https://bnf.nice.org.uk/drugs/levonorgestrel/" },
+      { label: "FSRH Guideline — IUS", href: "https://www.fsrh.org/documents/ceu-clinical-guidance-intrauterine-contraception/" },
+    ],
+  },
+  {
+    id: "lng_ius_195",
+    name: "LNG-IUS 19.5 mg (Kyleena®)",
+    class: "Levonorgestrel intrauterine system — 19.5 mg",
+    color: "pink",
+    routes: [
+      {
+        type: "iud",
+        shortLabel: "IUS — 5 years",
+        label: "Intrauterine — contraception (5 years)",
+        dose: "19.5 mg LNG; releases ~17.5 mcg/day initially",
+        frequency: "Single insertion; licensed 5 years for contraception only",
+        maxDose: "1 device at a time",
+        notes: "Smaller device than Mirena — may be preferred in nulliparous women or those with a smaller uterus. Licensed for contraception only (not HMB or HRT). Less effect on periods than Mirena — fewer women become amenorrhoeic (~12% at 5 years vs ~20% with Mirena). Irregular bleeding in first months. >99% effective. Insert day 1–7 for immediate protection; otherwise 7 days additional contraception.",
+      },
+    ],
+    contraindications: [
+      "Same as Mirena LNG-IUS 52mg",
+    ],
+    cautions: [
+      "Same as Mirena LNG-IUS 52mg",
+      "Less amenorrhoea than Mirena — if amenorrhoea is desired, Mirena may be preferable",
+    ],
+    pregnancySafety: "Remove if pregnancy confirmed.",
+    sources: [
+      { label: "BNF — Levonorgestrel (IUS)", href: "https://bnf.nice.org.uk/drugs/levonorgestrel/" },
+    ],
+  },
+  {
+    id: "lng_ius_135",
+    name: "LNG-IUS 13.5 mg (Jaydess®)",
+    class: "Levonorgestrel intrauterine system — 13.5 mg",
+    color: "pink",
+    routes: [
+      {
+        type: "iud",
+        shortLabel: "IUS — 3 years",
+        label: "Intrauterine — contraception (3 years)",
+        dose: "13.5 mg LNG; releases ~14 mcg/day initially",
+        frequency: "Single insertion; licensed 3 years for contraception only",
+        maxDose: "1 device at a time",
+        notes: "Smallest LNG-IUS — designed for women who prefer or require a smaller device (nulliparous, narrow cervix). Licensed for contraception only — not HMB or HRT add-on. Lowest LNG dose of IUS range — least effect on menstrual pattern. Irregular spotting common. Same efficacy and insertion considerations as other IUS devices. Not recommended off-label for endometriosis — insufficient LNG release for endometrial suppression.",
+      },
+    ],
+    contraindications: [
+      "Same as Mirena LNG-IUS 52mg",
+    ],
+    cautions: [
+      "Lowest progestogen dose — not appropriate for HMB or endometriosis management",
+      "Same as Mirena LNG-IUS 52mg for insertion and expulsion risk",
+    ],
+    pregnancySafety: "Remove if pregnancy confirmed.",
+    sources: [
+      { label: "BNF — Levonorgestrel (IUS)", href: "https://bnf.nice.org.uk/drugs/levonorgestrel/" },
+    ],
+  },
+  {
+    id: "copper_iud",
+    name: "Copper IUD",
+    class: "Non-hormonal intrauterine device (T-Safe® 380A, TT 380 Slimline, others)",
+    color: "pink",
+    routes: [
+      {
+        type: "iud",
+        shortLabel: "IUD — up to 10 years",
+        label: "Intrauterine — non-hormonal contraception / emergency contraception",
+        dose: "Copper IUD (≥380 mm² copper surface area recommended)",
+        frequency: "Single insertion; licensed 5–10+ years depending on device; if inserted ≥40 years can remain until menopause",
+        maxDose: "1 device at a time",
+        notes: "Highly effective non-hormonal contraception (>99%). Copper is spermicidal and prevents implantation. No hormonal side effects — suitable when hormones contraindicated. May worsen menstrual bleeding and dysmenorrhoea — caution in women with HMB or endometriosis (Mirena preferred in these). EMERGENCY USE: most effective form of emergency contraception — insert within 5 days of unprotected sex (or within 5 days of earliest likely ovulation). Copper IUDs inserted at ≥40 years can remain in situ until 1 year after last period (postmenopause).",
+      },
+    ],
+    contraindications: [
+      "Current pelvic infection or STI",
+      "Unexplained vaginal bleeding",
+      "Uterine cavity distortion",
+      "Wilson's disease or copper allergy",
+      "Gestational trophoblastic disease with elevated βhCG",
+    ],
+    cautions: [
+      "Heavier periods and more painful dysmenorrhoea — common; may improve after 3–6 months",
+      "NOT suitable as first choice in women with HMB or endometriosis (consider LNG-IUS instead)",
+      "Expulsion risk: 5 per 100 over 5 years — teach self-check for threads",
+      "Perforation risk ~1–2 per 1000 insertions",
+      "Ectopic pregnancy: must exclude if pregnancy occurs with IUD in situ",
+    ],
+    pregnancySafety: "Remove if pregnancy confirmed — risk of septic abortion. MOST EFFECTIVE emergency contraceptive when inserted within 5 days.",
+    sources: [
+      { label: "BNF — Copper IUD", href: "https://bnf.nice.org.uk/treatment-summaries/contraceptives-non-hormonal/" },
+      { label: "FSRH Guideline — Intrauterine Contraception", href: "https://www.fsrh.org/documents/ceu-clinical-guidance-intrauterine-contraception/" },
+    ],
+  },
+
+  // ── Emergency contraception ───────────────────────────────────────────────
+  {
+    id: "levonorgestrel_ec",
+    name: "Levonorgestrel EC",
+    class: "Emergency contraception — progestogen (Levonelle® One Step, 1500)",
+    color: "pink",
+    routes: [
+      {
+        type: "oral",
+        shortLabel: "Oral — emergency contraception",
+        label: "Oral — emergency contraception (within 72 hours)",
+        dose: "1.5 mg levonorgestrel",
+        frequency: "Single dose — take as soon as possible after unprotected sex",
+        maxDose: "1.5 mg single dose (within 72 hours)",
+        notes: "Most effective when taken as soon as possible. Efficacy: ~95% within 24 hr; ~85% 25–48 hr; ~58% 49–72 hr. Licensed up to 72 hours; FSRH recommends can be offered up to 96 hours (reduced efficacy). LESS effective than EllaOne between 72–120 hours. Weight >70 kg or BMI >26: reduced efficacy — consider double dose (3 mg) or copper IUD instead. Mechanism: primarily delays/inhibits ovulation — does NOT terminate an established pregnancy. If taking enzyme inducers (rifampicin, carbamazepine): double dose (3 mg). Vomiting within 3 hours: repeat dose.",
+      },
+    ],
+    contraindications: [
+      "Established pregnancy (note: does not terminate pregnancy but is ineffective)",
+    ],
+    cautions: [
+      "Reduced efficacy if >72 hr; >70 kg body weight or BMI >26 — consider UPA or copper IUD",
+      "Enzyme inducers (rifampicin, carbamazepine, phenytoin): use double dose (3 mg) or copper IUD",
+      "If woman is taking ulipristal acetate (EllaOne) hormonal contraception: do not take progestogen-based EC for 5 days after UPA",
+      "May cause irregular next period — if >7 days late, do pregnancy test",
+      "Not intended for regular use — advise on ongoing contraception",
+    ],
+    pregnancySafety: "Not for use in established pregnancy. No evidence of harm to established pregnancy.",
+    sources: [
+      { label: "BNF — Levonorgestrel (emergency)", href: "https://bnf.nice.org.uk/drugs/levonorgestrel/" },
+      { label: "FSRH Guideline — Emergency Contraception", href: "https://www.fsrh.org/documents/ceu-clinical-guidance-emergency-contraception/" },
+    ],
+  },
+  {
+    id: "ulipristal_ec",
+    name: "Ulipristal Acetate EC",
+    class: "Emergency contraception — selective progesterone receptor modulator (EllaOne®)",
+    color: "pink",
+    routes: [
+      {
+        type: "oral",
+        shortLabel: "Oral — emergency contraception 120 hr",
+        label: "Oral — emergency contraception (within 120 hours)",
+        dose: "30 mg ulipristal acetate",
+        frequency: "Single dose — take as soon as possible after unprotected sex",
+        maxDose: "30 mg single dose; within 120 hours (5 days)",
+        notes: "More effective than levonorgestrel EC, particularly between 72–120 hours. Effective up to 120 hours after unprotected sex. Weight >70 kg: UPA preferred over levonorgestrel EC. Mechanism: delays ovulation even after LH surge has begun — more effective than LNG in the peri-ovulatory phase. IMPORTANT INTERACTION: UPA inhibits progestogen action — do not start hormonal contraception (COCP, POP, implant, injection) until 5 days after taking UPA; use barrier contraception in the interim. If LNG-IUS or Mirena in situ: can still prescribe UPA (IUS itself is not affected). Vomiting within 3 hours: repeat dose.",
+      },
+    ],
+    contraindications: [
+      "Established pregnancy",
+      "Severe hepatic impairment",
+      "Severe asthma on oral corticosteroids",
+    ],
+    cautions: [
+      "Do NOT start hormonal contraception for 5 days after taking UPA — progestogen antagonism reduces UPA efficacy",
+      "Breastfeeding: express and discard milk for 1 week after taking UPA",
+      "Enzyme inducers: significantly reduce UPA efficacy — use copper IUD instead",
+      "May delay next period — if >7 days late, do pregnancy test",
+    ],
+    pregnancySafety: "Not for use in established pregnancy. Limited data on fetal effects — avoid in confirmed pregnancy.",
+    sources: [
+      { label: "BNF — Ulipristal acetate", href: "https://bnf.nice.org.uk/drugs/ulipristal-acetate/" },
+      { label: "FSRH Guideline — Emergency Contraception", href: "https://www.fsrh.org/documents/ceu-clinical-guidance-emergency-contraception/" },
+    ],
+  },
+];

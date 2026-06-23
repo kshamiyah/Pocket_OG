@@ -12,6 +12,7 @@ import {
   GTG31_SECTIONS, GTG17_SECTIONS, CG192_SECTIONS,
   NG133_SECTIONS,
   BASHH_PID_SECTIONS,
+  NG73_SECTIONS,
 } from "@pocket-og/guidelines";
 
 function escapeRe(s) {
@@ -57,6 +58,7 @@ const _WIKI = [
   ...GTG31_SECTIONS, ...GTG17_SECTIONS, ...CG192_SECTIONS,
   ...NG133_SECTIONS,
   ...BASHH_PID_SECTIONS,
+  ...NG73_SECTIONS,
 ];
 
 export const SEARCH_INDEX = _WIKI.map(page => ({
