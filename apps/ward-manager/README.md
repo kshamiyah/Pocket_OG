@@ -9,13 +9,21 @@ A mobile-first clinical tool for managing the labour ward board during a shift. 
 - Bed cards with real-time alert status, obs dots, and quick + VE / + CTG actions
 - **Tasks tab** — ward-wide task list grouped by urgency (Urgent / Warning / Routine), each item tappable to navigate directly to the relevant bed
 
-### Admission wizard
-- 4-step wizard: bed number + parity + gestation → labour stage → mode of onset + analgesia → risk flags + admission time
-- Risk flags: GBS+, Diabetic (T1/T2/GDM), VBAC, Previous LSCS, Hypertensive
+### Admission wizard (one question per page)
+Linear pager with phase labels (**Patient · Handover · Finish**). Single-select auto-advances; multi-select uses **Continue**.
+
+**Full admit:** bed → parity & gestation → risk flags → stage → analgesia → mode → membranes (+ liquor if ruptured; skipped for PPROM) → *(if induced)* method, indications, IOL start → admission time → VE on handover?
+
+**IOL express admit** (from IOL queue): bed → stage → method → IOL start *(defaults from queue time)* → VE on handover? — gestation & indications pre-filled.
+
+- **No VE** → confirm summary → board (toast + bed highlight; no forced VE sheet)
+- **Yes** → VE time → dilation → optional station & contractions
+- Times default to **Today · now** (compact; tap Edit to expand)
+- **PPROM** auto-sets ruptured membranes; **2nd stage** pre-selects VE Yes
 
 ### Vaginal examination (VE)
 - Dilation (0–10 cm), membranes, station, presentation, contractions/10 min
-- NowField with quick offset pills (−15 m / −30 m / −1 h / −2 h / −3 h / −4 h) and ago confirmation
+- NowField: preview with ±15 min stepper, date row, quick time presets, optional custom
 
 ### CTG review (NICE NG229 — Fetal Monitoring in Labour, Dec 2022)
 - Feature entry: baseline HR stepper, variability (5-25 / <5 / >25 / sinusoidal) with duration buckets, decelerations with duration sub-classification, accelerations, contractions
