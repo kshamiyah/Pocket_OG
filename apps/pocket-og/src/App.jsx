@@ -281,7 +281,7 @@ export default function App() {
         <>
           {/* Hero / idle state */}
           {!hasQuery && (
-            <div className="flex flex-col items-center justify-center min-h-screen px-5 pb-24">
+            <div className="flex flex-col items-center justify-start min-h-screen px-5 pt-20 pb-32">
               <div className="w-full max-w-lg">
 
                 {/* Hero */}
@@ -340,9 +340,9 @@ export default function App() {
       {hasQuery && (
         <>
           {/* Sticky compact header */}
-          <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md">
+          <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-gray-100">
             {/* Search row */}
-            <div className="max-w-lg mx-auto px-4 pt-3 pb-2">
+            <div className="max-w-lg mx-auto px-4 pt-12 pb-2">
               <div className="relative">
                 <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />

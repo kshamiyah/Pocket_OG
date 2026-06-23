@@ -99,7 +99,7 @@ function ScenarioList({ onSelect }) {
                     <button
                       key={s.id}
                       onClick={() => onSelect(s.id)}
-                      className="flex items-start gap-3 w-full px-4 py-3 h-[120px] hover:bg-gray-50 active:bg-gray-100 transition-colors text-left border-t border-gray-50"
+                      className="flex items-start gap-3 w-full px-4 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left border-t border-gray-50"
                     >
                       <div className={`w-1 h-12 rounded-full shrink-0 ${s.color.accent}`} />
                       <div className="flex-1 min-w-0">

@@ -252,7 +252,7 @@ export default function RxPage() {
 
           {/* Header */}
           <div className="px-5 pt-14 pb-1">
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Drug Reference</h2>
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Rx</h2>
             <p className="text-xs text-gray-400 mt-0.5">
               {activeCategory ? `${filtered.length} of ${ALL_DRUGS.length} drugs` : `${ALL_DRUGS.length} drugs`} — quick dose lookup
             </p>
@@ -342,11 +342,13 @@ export default function RxPage() {
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-gray-900 leading-snug">{drug.name}</p>
                             <p className="text-xs text-gray-400 mt-0.5">{drug.class}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className={`text-[10px] font-semibold ${CATEGORY_COLOR[drug.category] ?? "text-gray-400"}`}>
-                                {drug.category}
-                              </span>
-                              {routeTypes.length > 0 && (
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              {!activeCategory && (
+                                <span className={`text-[10px] font-semibold ${CATEGORY_COLOR[drug.category] ?? "text-gray-400"}`}>
+                                  {drug.category}
+                                </span>
+                              )}
+                              {!activeCategory && routeTypes.length > 0 && (
                                 <span className="text-gray-200 text-[10px]">·</span>
                               )}
                               {routeTypes.map(rt => (
