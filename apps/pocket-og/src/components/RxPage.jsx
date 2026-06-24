@@ -312,8 +312,8 @@ export default function RxPage() {
             </div>
           </div>
 
-          {/* Drug list */}
-          <div className="px-5 pt-3">
+          {/* Drug list — pr-10 clears the 32px alphabet scrubber fixed at right-1 */}
+          <div className="pl-5 pr-10 pt-3">
             {filtered.length === 0 ? (
               <p className="text-sm text-gray-400 text-center py-10">No drugs match &ldquo;{searchQuery}&rdquo;</p>
             ) : (

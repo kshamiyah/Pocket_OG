@@ -285,7 +285,7 @@ export default function App() {
               <div className="w-full max-w-lg">
 
                 {/* Hero */}
-                <div className="text-center mb-10">
+                <div className="text-center mb-6">
                   <h1 className="text-[36px] sm:text-[50px] font-[800] tracking-[0.04em] text-black">Pocket O&G</h1>
                   <p className="mt-3 text-base leading-relaxed text-gray-400">
                     Local and national guidelines.<br />Whenever and wherever you need them.
@@ -342,7 +342,7 @@ export default function App() {
           {/* Sticky compact header */}
           <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-gray-100">
             {/* Search row */}
-            <div className="max-w-lg mx-auto px-4 pt-12 pb-2">
+            <div className="max-w-lg mx-auto px-4 pt-6 pb-2">
               <div className="relative">
                 <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
@@ -386,7 +386,7 @@ export default function App() {
           {/* Results */}
           <div className="max-w-lg mx-auto px-4 py-5 pb-24">
             {!showNoResults && (
-              <p className="text-sm text-gray-500 mb-4">
+              <p className="text-sm text-gray-500 mb-6">
                 <span className="font-semibold text-gray-900">{primary.length}</span>{" "}
                 result{primary.length !== 1 ? "s" : ""} for{" "}
                 <span className="font-semibold text-gray-900">"{query}"</span>
@@ -691,7 +691,7 @@ export default function App() {
           {[
             { id: "search",     label: "Search",  icon: <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" /> },
             { id: "guidelines", label: "Guides",  icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> },
-            { id: "flowcharts", label: "Flow",    icon: <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l8.5 5v10L12 22 3.5 17V7L12 2z" /> },
+            { id: "flowcharts", label: "Flow",    icon: <path strokeLinecap="round" strokeLinejoin="round" d="M12 2L22 12L12 22L2 12L12 2Z" /> },
             { id: "consent",    label: "Consent", icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /> },
             { id: "calculator", label: "Calc",    icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m-6 5h6m-6 5h6M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" /> },
             { id: "rx",         label: "Rx",      icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" /> },
