@@ -22,6 +22,7 @@ export { NG88_SECTIONS } from "./NG88.js";
 export { GTG67_SECTIONS } from "./GTG67.js";
 export { NHSCSP20_SECTIONS } from "./NHSCSP20.js";
 
+export { GTG42_SECTIONS } from "./GTG42.js";
 export { GTG52_SECTIONS } from "./GTG52.js";
 export { GTG69_SECTIONS } from "./GTG69.js";
 export { NG25_SECTIONS } from "./NG25.js";

@@ -1,0 +1,208 @@
+export const GTG42_SECTIONS = [
+  {
+    id: "gtg42-overview", gl: "GTG42", condition: "Shoulder Dystocia", setting: "Overview & Risk Factors",
+    title: "Shoulder Dystocia — Definition, Incidence & Risk Factors",
+    tags: ["shoulder dystocia", "brachial plexus", "erb's palsy", "bpi", "macrosomia", "turtle neck sign", "head-to-body", "dystocia", "risk factors", "diabetes"],
+    content: [
+      { type: "subheading", value: "Definition" },
+      { type: "text", value: "Shoulder dystocia is a vaginal cephalic delivery that requires additional obstetric manoeuvres to deliver the fetus after the head has delivered and gentle traction has failed. It occurs when the anterior (or less commonly posterior) fetal shoulder impacts on the maternal symphysis pubis or sacral promontory." },
+      { type: "subheading", value: "Incidence & Morbidity" },
+      { type: "list", items: [
+        "Incidence: 0.58–0.70% of vaginal cephalic deliveries",
+        "Maternal: PPH 11%, 3rd/4th degree tears 3.8%",
+        "Neonatal BPI: complicates 2.3–16% of shoulder dystocia cases; fewer than 10% result in permanent neurological dysfunction",
+        "NHSLA data: 46% of injuries associated with substandard care — not all BPI is caused by clinician traction (maternal propulsive force also implicated)",
+        "Hypoxic ischaemic injury: low rate if head-to-body delivery time <5 minutes",
+      ]},
+      { type: "subheading", value: "Risk Factors" },
+      { type: "table", headers: ["Pre-labour", "Intrapartum"], rows: [
+        ["Previous shoulder dystocia (recurrence 1–25%)", "Prolonged first stage of labour"],
+        ["Macrosomia >4.5 kg", "Secondary arrest"],
+        ["Diabetes mellitus (2–4× increased risk)", "Prolonged second stage"],
+        ["Maternal BMI >30 kg/m²", "Oxytocin augmentation"],
+        ["Induction of labour", "Assisted vaginal delivery"],
+      ]},
+      { type: "alert", value: "Risk factors have a low positive predictive value — 48% of shoulder dystocia cases occur in infants weighing <4000 g. Shoulder dystocia cannot be reliably predicted or prevented in most cases." },
+    ]
+  },
+
+  {
+    id: "gtg42-prediction-prevention", gl: "GTG42", condition: "Shoulder Dystocia", setting: "Prediction & Prevention",
+    title: "Shoulder Dystocia — Prediction & Prevention",
+    tags: ["shoulder dystocia prevention", "induction of labour macrosomia", "elective caesarean macrosomia", "gestational diabetes delivery", "prediction shoulder dystocia"],
+    content: [
+      { type: "subheading", value: "Can Shoulder Dystocia Be Predicted?" },
+      { type: "text", value: "Clinicians should be aware of existing risk factors but risk assessment tools are insufficiently predictive to prevent the large majority of cases. [C]" },
+      { type: "subheading", value: "Induction of Labour for Suspected Macrosomia" },
+      { type: "list", items: [
+        "Induction of labour does NOT prevent shoulder dystocia in non-diabetic women with a suspected macrosomic fetus [D]",
+        "Induction of labour at term CAN reduce the incidence of shoulder dystocia in women with gestational diabetes [B]",
+        "NICE recommends offering elective birth at 38 weeks to women with gestational diabetes",
+      ]},
+      { type: "subheading", value: "Elective Caesarean Section" },
+      { type: "list", items: [
+        "Elective CS should be considered to reduce morbidity in pregnancies complicated by pre-existing or gestational diabetes with EFW >4.5 kg [D]",
+        "In non-diabetic women, EFW >4.5 kg alone is not a sufficient indication for elective CS — fetal weight estimation is unreliable (≥10% margin of error)",
+        "Either caesarean section or vaginal delivery can be appropriate after a previous shoulder dystocia — decision should be made jointly by the woman and her carers [D]",
+      ]},
+      { type: "alert", value: "Prophylactic McRoberts positioning before delivery of the fetal head is NOT recommended to prevent shoulder dystocia." },
+    ]
+  },
+
+  {
+    id: "gtg42-diagnosis", gl: "GTG42", condition: "Shoulder Dystocia", setting: "Diagnosis & Recognition",
+    title: "Shoulder Dystocia — Diagnosis & Recognition",
+    tags: ["shoulder dystocia diagnosis", "turtle neck sign", "restitution failure", "shoulder dystocia signs", "recognition shoulder dystocia"],
+    content: [
+      { type: "subheading", value: "Signs to Recognise" },
+      { type: "text", value: "Birth attendants should routinely look for the signs of shoulder dystocia. Timely management requires prompt recognition:" },
+      { type: "list", items: [
+        "Difficulty with delivery of the face and chin",
+        "The head remaining tightly applied to the vulva or retracting ('turtle-neck sign')",
+        "Failure of restitution of the fetal head",
+        "Failure of the shoulders to descend",
+      ]},
+      { type: "subheading", value: "Traction" },
+      { type: "text", value: "Routine traction in an axial direction (i.e. in line with the fetal spine, without lateral deviation) can be used to diagnose shoulder dystocia but any other traction should be avoided. [D]" },
+      { type: "alert", value: "Downward traction on the fetal head should be avoided in all births — it is strongly associated with brachial plexus injury. Lateral and rapidly applied traction are also more likely to cause nerve avulsion." },
+      { type: "subheading", value: "Communication" },
+      { type: "list", items: [
+        "State the problem clearly as 'this is shoulder dystocia' to the arriving team",
+        "Stating the problem early has been associated with improvements in outcomes [Evidence level 3]",
+        "Maternal pushing should be discouraged — this may exacerbate impaction of the shoulders",
+      ]},
+    ]
+  },
+
+  {
+    id: "gtg42-management", gl: "GTG42", condition: "Shoulder Dystocia", setting: "Management Algorithm",
+    title: "Shoulder Dystocia — Management (HELPERR Algorithm)",
+    tags: ["helperr", "shoulder dystocia management", "mcroberts manoeuvre", "suprapubic pressure", "episiotomy", "internal rotation", "woods screw", "rubin", "posterior arm", "all fours", "gaskin", "zavanelli", "symphysiotomy", "cleidotomy", "fundal pressure"],
+    content: [
+      { type: "alert", value: "Shoulder dystocia should be managed systematically. Call for help immediately. Fundal pressure must NOT be used — it is associated with a high neonatal complication rate and may result in uterine rupture." },
+      { type: "subheading", value: "STEP 1 — Call for Help" },
+      { type: "list", items: [
+        "Midwife coordinator / labour ward coordinator",
+        "Additional midwifery assistance",
+        "Experienced obstetrician",
+        "Neonatal resuscitation team",
+        "Anaesthetist",
+        "Lie mother flat and move buttocks to edge of bed",
+        "Discourage maternal pushing",
+      ]},
+      { type: "subheading", value: "STEP 2 — McRoberts Manoeuvre (First-Line, Do First)" },
+      { type: "text", value: "McRoberts is a simple, rapid and effective intervention and should be performed first. [D] Success rate up to 90% when combined with suprapubic pressure." },
+      { type: "list", items: [
+        "Remove any pillows from under the woman's back — she should be lying flat",
+        "With one assistant on each side, hyperflexion and abduction of maternal thighs onto abdomen",
+        "If in lithotomy — remove legs from supports first",
+        "Mechanism: straightens the lumbosacral angle, rotates the symphysis pubis superiorly, increases the relative AP diameter of the pelvis",
+        "Apply routine axial traction to fetal head to assess shoulder release",
+      ]},
+      { type: "subheading", value: "STEP 3 — Suprapubic Pressure" },
+      { type: "text", value: "Suprapubic pressure should be used to improve the effectiveness of the McRoberts manoeuvre. [D]" },
+      { type: "list", items: [
+        "Applied by an assistant from the side of the fetal back",
+        "Direction: downward and lateral — just above the maternal symphysis pubis",
+        "Pushes the posterior aspect of the anterior shoulder towards the fetal chest (reduces bisacromial diameter)",
+        "Continuous pressure or 'rocking' (Rubin) movement — no clear difference in efficacy",
+        "Continue routine axial traction to fetal head while pressure applied",
+      ]},
+      { type: "subheading", value: "STEP 4 — Consider Episiotomy" },
+      { type: "list", items: [
+        "An episiotomy does NOT relieve the bony obstruction and is NOT always necessary [D]",
+        "Perform only if needed to allow access for internal vaginal manoeuvres (e.g. posterior arm delivery, internal rotation)",
+        "Does not reduce the risk of brachial plexus injury",
+      ]},
+      { type: "subheading", value: "STEP 5a — Internal Rotational Manoeuvres" },
+      { type: "text", value: "If McRoberts and suprapubic pressure fail, proceed to internal manoeuvres. Access the vagina posteriorly into the sacral hollow (the most spacious part of the pelvis). [Evidence level 4]" },
+      { type: "list", items: [
+        "Rubin II: pressure on the posterior aspect of the anterior shoulder → adducts shoulder towards fetal chest → reduces bisacromial diameter",
+        "Woods screw: pressure on the anterior aspect of the posterior shoulder → rotates shoulders into the wider oblique diameter",
+        "If unsuccessful: try applying pressure on the posterior aspect of the posterior shoulder (further rotation)",
+        "If above fail: apply pressure on anterior aspect of anterior shoulder (Reverse Woods / Rubin III)",
+        "Goal: rotate the fetal trunk 180° (or sufficient rotation) to free the impacted shoulder",
+      ]},
+      { type: "subheading", value: "STEP 5b — Delivery of the Posterior Arm" },
+      { type: "list", items: [
+        "Enter vagina posteriorly into the sacral hollow",
+        "Identify the posterior arm, apply pressure at the antecubital fossa to flex the elbow",
+        "Grasp the fetal wrist and sweep the arm in a straight line across the fetal chest and out of the vagina",
+        "Reduces shoulder girdle width by one arm's diameter",
+        "Associated with humeral fractures in 2–12% — this reflects case severity rather than the technique itself",
+        "Clinical circumstances guide whether to try posterior arm or internal rotation first",
+      ]},
+      { type: "alert", value: "Choose between internal rotation and posterior arm delivery based on clinical circumstances and operator experience. Either can be attempted first." },
+      { type: "subheading", value: "STEP 6 — All-Fours Position (Gaskin Manoeuvre)" },
+      { type: "list", items: [
+        "Roll the mother to the all-fours position",
+        "Reported success rate: 83% in one case series [Evidence level 3]",
+        "Most appropriate for a slim, mobile woman without epidural anaesthesia with a single midwifery attendant",
+        "For less mobile women or those with epidural, internal manoeuvres are more appropriate",
+        "Internal manoeuvres (5a/5b) can be repeated in the all-fours position",
+        "If manoeuvres fail — repeat the whole sequence from the top",
+      ]},
+      { type: "subheading", value: "STEP 7 — Last Resort Manoeuvres" },
+      { type: "text", value: "Third-line manoeuvres should be considered very carefully — significant maternal and neonatal risk. Inform consultant obstetrician and anaesthetist immediately." },
+      { type: "list", items: [
+        "Cleidotomy: surgical division of the anterior clavicle (or bending with a finger) — reduces bisacromial diameter. May occur inadvertently during other manoeuvres.",
+        "Zavanelli manoeuvre: cephalic replacement followed by emergency caesarean section. Requires tocolysis (terbutaline). Intuitive for bilateral shoulder dystocia. High proportion of fetuses have irreversible hypoxia-acidosis by this stage.",
+        "Symphysiotomy: surgical division of the anterior symphyseal ligament — high incidence of serious maternal morbidity. Rarely performed in the UK.",
+      ]},
+    ]
+  },
+
+  {
+    id: "gtg42-aftercare", gl: "GTG42", condition: "Shoulder Dystocia", setting: "After Delivery & Documentation",
+    title: "Shoulder Dystocia — After Delivery & Documentation",
+    tags: ["shoulder dystocia documentation", "after shoulder dystocia", "apgar", "cord blood", "brachial plexus examination", "erb's palsy", "pph after shoulder dystocia", "incident report", "proforma", "training"],
+    content: [
+      { type: "subheading", value: "Immediate Maternal Care" },
+      { type: "list", items: [
+        "Be alert to the possibility of postpartum haemorrhage (PPH) and severe perineal tears — PPH complicates ~11% of cases",
+        "Inspect for 3rd/4th degree tears (3.8%), vaginal lacerations, cervical tears",
+        "Active management of the third stage",
+        "Catheterise and monitor for bladder injury",
+      ]},
+      { type: "subheading", value: "Neonatal Examination" },
+      { type: "list", items: [
+        "The baby should be examined for injury by a neonatal clinician [Good practice point]",
+        "Assess for brachial plexus injury (Erb's palsy — C5/C6; Klumpke's — C8/T1): arm weakness, reduced movement",
+        "Assess for fractured clavicle and humerus",
+        "Assess for hypoxic injury: Apgar scores, cord blood gases",
+        "Any sign of arm weakness, potential bony fracture, or baby admitted to NICU → refer for Consultant Neonatal review",
+        "Baby to be reviewed by neonatologist after birth",
+      ]},
+      { type: "subheading", value: "Communication with Parents" },
+      { type: "list", items: [
+        "An explanation of the delivery should be given to the parents [Good practice point]",
+        "An information leaflet ('A difficult birth: what is shoulder dystocia?') is produced by the RCOG",
+        "Counsel about recurrence risk: 1–25%; rate is 10× higher than general population",
+        "Document explanation given and plan for next delivery",
+      ]},
+      { type: "subheading", value: "Documentation Requirements" },
+      { type: "text", value: "Documentation should be accurate and comprehensive. Complete the AIMS incident form and the shoulder dystocia proforma:" },
+      { type: "list", items: [
+        "Time of delivery of the head and time of delivery of the body (head-to-body delivery interval)",
+        "Anterior shoulder at time of dystocia (left or right)",
+        "Fetal position at delivery (head facing maternal left or right)",
+        "Manoeuvres used — timing, sequence, and by whom",
+        "Whether episiotomy performed and reason",
+        "Description of traction applied (must be routine axial — if not, document reason)",
+        "Staff in attendance and time they arrived",
+        "Maternal: perineal/vaginal examination, estimated blood loss",
+        "Neonatal: Apgar scores at 1, 5, 10 minutes; umbilical cord blood acid-base measurements (arterial pH, BE; venous pH, BE)",
+        "Birth weight",
+        "Explanation given to parents and by whom",
+      ]},
+      { type: "alert", value: "It is particularly important to document the position of the fetal head at delivery — this facilitates identification of which shoulder was anterior and is critical for medico-legal purposes." },
+      { type: "subheading", value: "Training" },
+      { type: "list", items: [
+        "All maternity staff should participate in shoulder dystocia training at least annually [D]",
+        "Annual 'skill drills' are a CNST maternity standard requirement",
+        "Training using high fidelity mannequins is recommended — associated with shorter head-to-body interval and better outcomes",
+        "Manoeuvres should be demonstrated in direct view as they are complex and difficult to understand by description alone",
+      ]},
+    ]
+  },
+];
