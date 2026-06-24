@@ -14,16 +14,9 @@ import AlphabetSidebar from "./components/AlphabetSidebar";
 import GuidelineReader from "./components/GuidelineReader";
 import RxPage from "./components/RxPage";
 import DisclaimerModal from "./components/DisclaimerModal";
+import InstallBanner from "./components/InstallBanner";
 
-const READER_AVAILABLE = new Set([
-  "GL861", "GL952", "GL891", "GL983", "GL880", "GL787", "GL783", "GL895",
-  "CG565", "CG621", "CG623", "QS46", "QS22", "GTG57", "GTG63", "GTG67",
-  "NG88", "NHSCSP20",
-  "GTG52", "GTG69", "NG25", "GTG31", "GTG17", "CG192",
-  "NG133",
-  "BASHH_PID",
-  "NG73",
-]);
+import { READER_AVAILABLE } from "./data/readerAvailable";
 
 const FILTER_OPTIONS = [
   { value: "ALL",        label: "All guidelines",      pill: "All",           filterFn: null,                                                    active: "bg-gray-900 text-white" },
@@ -120,6 +113,7 @@ export default function App() {
   const [glSearchQuery, setGlSearchQuery] = useState("");
   const [fcSearchQuery, setFcSearchQuery] = useState("");
   const [activeGuidelineGl, setActiveGuidelineGl] = useState(null);
+  const [guidelineScrollTo, setGuidelineScrollTo] = useState(null);
   const [activeCalcScenario, setActiveCalcScenario] = useState(null);
   const [calcNavKey, setCalcNavKey] = useState(0);
   const [activeConsentProcedure, setActiveConsentProcedure] = useState(null);
@@ -145,6 +139,7 @@ export default function App() {
     } else if (type === "iol-prioritizer") {
       setShowIOLPrioritizer(true);
     } else if (type === "reader") {
+      setGuidelineScrollTo(null);
       setActiveGuidelineGl(id);
     }
   };
@@ -230,6 +225,21 @@ export default function App() {
   const toggle = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
   const showNoResults = hasQuery && primary.length === 0;
 
+  const openGuidelineFromSearch = (gl, sectionId) => {
+    setGuidelineScrollTo(sectionId);
+    setActiveGuidelineGl(gl);
+  };
+
+  const switchTab = (tabId) => {
+    setActiveGuidelineGl(null);
+    setGuidelineScrollTo(null);
+    setActiveFlowchartId(null);
+    setShowIOLPrioritizer(false);
+    if (tabId !== "consent") setActiveConsentProcedure(null);
+    if (tabId !== "calculator") setActiveCalcScenario(null);
+    setActiveTab(tabId);
+  };
+
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
       <DisclaimerModal />
@@ -254,7 +264,8 @@ export default function App() {
       {activeGuidelineGl && (
         <GuidelineReader
           gl={activeGuidelineGl}
-          onClose={() => setActiveGuidelineGl(null)}
+          scrollToSectionId={guidelineScrollTo}
+          onClose={() => { setActiveGuidelineGl(null); setGuidelineScrollTo(null); }}
           onNavigate={handleNavigate}
         />
       )}
@@ -329,6 +340,8 @@ export default function App() {
                   ))}
                 </div>
 
+                <InstallBanner />
+
               </div>
             </div>
           )}
@@ -392,11 +405,11 @@ export default function App() {
             )}
 
             {showNoResults
-              ? <NoResults query={query} fallbacks={fallback} expanded={expanded} onToggle={toggle} onOpenFlowchart={setActiveFlowchartId} />
+              ? <NoResults query={query} fallbacks={fallback} expanded={expanded} onToggle={toggle} onOpenFlowchart={setActiveFlowchartId} onOpenGuideline={openGuidelineFromSearch} />
               : (
                 <div className="space-y-3">
                   {primary.map(page => (
-                    <WikiCard key={page.id} page={page} query={query} isExpanded={!!expanded[page.id]} onToggle={() => toggle(page.id)} onOpenFlowchart={setActiveFlowchartId} />
+                    <WikiCard key={page.id} page={page} query={query} isExpanded={!!expanded[page.id]} onToggle={() => toggle(page.id)} onOpenFlowchart={setActiveFlowchartId} onOpenGuideline={openGuidelineFromSearch} />
                   ))}
                 </div>
               )
@@ -626,7 +639,7 @@ export default function App() {
                         const canRead = READER_AVAILABLE.has(gl.code);
                         const El = canRead ? "button" : gl.pdf ? "a" : "div";
                         const elProps = canRead
-                          ? { onClick: () => setActiveGuidelineGl(gl.code) }
+                          ? { onClick: () => { setGuidelineScrollTo(null); setActiveGuidelineGl(gl.code); } }
                           : gl.pdf
                           ? { href: gl.pdfUrl || gl.pdfPath || `/guidelines/${gl.code}.pdf`, target: "_blank", rel: "noopener noreferrer" }
                           : {};
@@ -695,7 +708,7 @@ export default function App() {
           ].map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => switchTab(tab.id)}
               aria-pressed={activeTab === tab.id}
               className={`flex-1 flex flex-col items-center gap-0.5 py-3 transition-colors ${
                 activeTab === tab.id ? "text-black" : "text-gray-400"

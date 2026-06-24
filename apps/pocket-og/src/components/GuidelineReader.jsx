@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import {
   GUIDELINES,
   GL861_SECTIONS, GL952_SECTIONS, GL891_SECTIONS, GL983_SECTIONS,
@@ -77,7 +77,7 @@ function computeSectionBlockLinks(section, allLinks) {
   });
 }
 
-export default function GuidelineReader({ gl, onClose, onNavigate }) {
+export default function GuidelineReader({ gl, onClose, onNavigate, scrollToSectionId }) {
   const sections = SECTIONS_MAP[gl] ?? [];
   const guideline = GUIDELINES[gl];
   const theme = glColors(gl);
@@ -100,6 +100,12 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
       sectionRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 150);
   };
+
+  useEffect(() => {
+    if (!scrollToSectionId) return;
+    const timer = setTimeout(() => jumpTo(scrollToSectionId), 200);
+    return () => clearTimeout(timer);
+  }, [gl, scrollToSectionId]);
 
   return (
     <div className="fixed inset-0 z-40 bg-white flex flex-col">
