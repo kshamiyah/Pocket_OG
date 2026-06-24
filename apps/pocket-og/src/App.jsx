@@ -16,6 +16,7 @@ import RxPage from "./components/RxPage";
 import DisclaimerModal from "./components/DisclaimerModal";
 import InstallBanner from "./components/InstallBanner";
 import EmergencyPage from "./components/EmergencyPage";
+import ShoulderDystociaPage from "./components/ShoulderDystociaPage";
 
 import { READER_AVAILABLE } from "./data/readerAvailable";
 
@@ -119,7 +120,8 @@ export default function App() {
   const [calcNavKey, setCalcNavKey] = useState(0);
   const [activeConsentProcedure, setActiveConsentProcedure] = useState(null);
   const [consentNavKey, setConsentNavKey] = useState(0);
-  const [showEmergency, setShowEmergency] = useState(false);
+  const [activeEmergency, setActiveEmergency] = useState(null); // 'pph' | 'shoulder_dystocia' | null
+  const [showEmergencyPicker, setShowEmergencyPicker] = useState(false);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
   const glSectionRefs = useRef({});
@@ -262,7 +264,7 @@ export default function App() {
       {/* Emergency button — always visible */}
       <button
         type="button"
-        onClick={() => setShowEmergency(true)}
+        onClick={() => setShowEmergencyPicker(true)}
         aria-label="Open emergency protocols"
         style={{ bottom: "calc(4rem + env(safe-area-inset-bottom, 0px) + 0.5rem)" }}
         className="fixed right-3 z-[35] flex flex-col items-center justify-center gap-0.5 bg-red-600 hover:bg-red-700 active:scale-95 shadow-lg rounded-2xl px-3 py-2 text-white transition-all"
@@ -273,9 +275,80 @@ export default function App() {
         <span className="text-[10px] font-bold tracking-wide leading-none">SOS</span>
       </button>
 
-      {/* Emergency page overlay */}
-      {showEmergency && (
-        <EmergencyPage onClose={() => setShowEmergency(false)} />
+      {/* Emergency picker */}
+      {showEmergencyPicker && (
+        <div
+          className="fixed inset-0 z-[45] bg-black/60 flex flex-col justify-end"
+          onClick={() => setShowEmergencyPicker(false)}
+        >
+          <div
+            className="bg-white rounded-t-3xl px-4 pt-5"
+            style={{ paddingBottom: "max(20px, env(safe-area-inset-bottom))" }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold text-gray-900">Select Emergency Protocol</h2>
+              <button
+                onClick={() => setShowEmergencyPicker(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-3 mb-3">
+              <button
+                onClick={() => { setActiveEmergency("pph"); setShowEmergencyPicker(false); }}
+                className="w-full flex items-center gap-4 bg-red-50 border border-red-200 rounded-2xl px-4 py-4 text-left active:bg-red-100 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-xl bg-red-700 flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-900">Postpartum Haemorrhage</p>
+                  <p className="text-xs text-gray-500 mt-0.5">GTG52 · Bleeding after delivery</p>
+                </div>
+                <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              <button
+                onClick={() => { setActiveEmergency("shoulder_dystocia"); setShowEmergencyPicker(false); }}
+                className="w-full flex items-center gap-4 bg-orange-50 border border-orange-200 rounded-2xl px-4 py-4 text-left active:bg-orange-100 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-900">Shoulder Dystocia</p>
+                  <p className="text-xs text-gray-500 mt-0.5">GTG42 · Head-to-body impaction · HELPERR</p>
+                </div>
+                <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+            <button
+              onClick={() => setShowEmergencyPicker(false)}
+              className="w-full py-3 rounded-2xl bg-gray-100 text-gray-600 font-semibold text-sm active:bg-gray-200 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Emergency page overlays */}
+      {activeEmergency === "pph" && (
+        <EmergencyPage onClose={() => setActiveEmergency(null)} />
+      )}
+      {activeEmergency === "shoulder_dystocia" && (
+        <ShoulderDystociaPage onClose={() => setActiveEmergency(null)} />
       )}
 
       {/* IOL Prioritizer overlay */}
