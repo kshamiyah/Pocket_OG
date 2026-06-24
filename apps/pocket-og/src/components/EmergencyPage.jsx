@@ -368,7 +368,7 @@ function SummaryScreen({ emergencyStartTime, resolveTime, highestLevel, checked,
       </div>
 
       {/* Summary content */}
-      <div className="flex-1 overflow-y-auto bg-gray-50 pb-32">
+      <div className="flex-1 overflow-y-auto bg-gray-50 pb-4">
 
         {/* Timeline */}
         <div className="mx-4 mt-4 mb-4">
@@ -414,7 +414,7 @@ function SummaryScreen({ emergencyStartTime, resolveTime, highestLevel, checked,
 
       {/* Bottom actions */}
       <div
-        className="fixed inset-x-0 bottom-0 bg-white border-t border-gray-200 px-4 py-3 flex gap-3"
+        className="flex-shrink-0 bg-white border-t border-gray-200 px-4 pt-3 flex gap-3"
         style={{ paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}
       >
         <button
@@ -589,7 +589,7 @@ export default function EmergencyPage({ onClose }) {
           </div>
 
           {/* ── Scrollable content ────────────────────────────────── */}
-          <div className="flex-1 overflow-y-auto pb-40 pt-4">
+          <div className="flex-1 overflow-y-auto pb-4 pt-4">
 
             {/* 1. Call for Help */}
             <Section title="Call for Help">
@@ -688,9 +688,9 @@ export default function EmergencyPage({ onClose }) {
 
           </div>
 
-          {/* ── Sticky bottom ────────────────────────────────────────── */}
+          {/* ── Bottom actions ───────────────────────────────────────── */}
           <div
-            className="fixed inset-x-0 bottom-0 bg-white border-t border-gray-200 px-4 py-3 space-y-2"
+            className="flex-shrink-0 bg-white border-t border-gray-200 px-4 pt-3 space-y-2"
             style={{ paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}
           >
             {/* Escalate */}
