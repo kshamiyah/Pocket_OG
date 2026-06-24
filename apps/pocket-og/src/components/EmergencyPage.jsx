@@ -7,21 +7,38 @@ const ESCALATE_COLORS = {
   massive: null,
 };
 
-function fmt(totalSeconds) {
+function padded(n) { return String(n).padStart(2, "0"); }
+
+function fmtClock(totalSeconds) {
   const h = Math.floor(totalSeconds / 3600);
   const m = Math.floor((totalSeconds % 3600) / 60);
   const s = totalSeconds % 60;
-  if (h > 0) return `${h}h ${String(m).padStart(2, "0")}m`;
-  return `${m}m ${String(s).padStart(2, "0")}s`;
+  if (h > 0) return `${h}h ${padded(m)}m ${padded(s)}s`;
+  return `${padded(m)}m ${padded(s)}s`;
 }
 
+function fmtTime(date) {
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+}
+
+function fmtTimeAgo(date, now) {
+  const secs = Math.floor((now - date) / 1000);
+  if (secs < 60) return `${secs}s ago`;
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return `${mins}m ago`;
+  return `${Math.floor(mins / 60)}h ${padded(mins % 60)}m ago`;
+}
+
+// ── Section wrapper ────────────────────────────────────────────────────────
 function Section({ title, badge, sublabel, children }) {
   return (
     <div className="mx-4 mb-4">
       <div className="flex items-center gap-2 mb-2.5">
         <span className="text-sm font-bold text-gray-800">{title}</span>
         {badge !== undefined && (
-          <span className="text-xs font-semibold bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">{badge}</span>
+          <span className="text-xs font-semibold bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
+            {badge}
+          </span>
         )}
         {sublabel && <span className="text-xs text-gray-400">{sublabel}</span>}
       </div>
@@ -30,13 +47,16 @@ function Section({ title, badge, sublabel, children }) {
   );
 }
 
+// ── Checklist item ─────────────────────────────────────────────────────────
 function ChecklistItem({ item, checked, onToggle }) {
   const done = checked.has(item.id);
   return (
     <button
       onClick={onToggle}
       className={`w-full flex items-start gap-3 rounded-xl px-4 py-3.5 text-left transition-all ${
-        done ? "bg-green-50 border border-green-200" : "bg-white border border-gray-100 shadow-sm"
+        done
+          ? "bg-green-50 border border-green-200"
+          : "bg-white border border-gray-100 shadow-sm"
       }`}
     >
       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all ${
@@ -55,126 +75,232 @@ function ChecklistItem({ item, checked, onToggle }) {
   );
 }
 
-function DrugCard({ drug, carboprostCount, setCarboprostCount, txaBirthTime, setTxaBirthTime, txaElapsedSec, txaRemainingS, txaWindowPct, txaExpired, txaUrgent, txaWarning }) {
+// ── Drug card ──────────────────────────────────────────────────────────────
+function DrugCard({
+  drug,
+  now,
+  carboprostDoses, setCarboprostDoses,
+  drugTimestamps, setDrugTimestamps,
+  txaBirthTime, setTxaBirthTime,
+  txaElapsedSec, txaRemainingS, txaWindowPct,
+  txaExpired, txaUrgent, txaWarning,
+  emergencyStartTime,
+}) {
+  const givenAt = drugTimestamps[drug.id];
+
+  const markGiven = () => {
+    if (!givenAt) {
+      setDrugTimestamps(prev => ({ ...prev, [drug.id]: new Date() }));
+    }
+  };
+
+  const unmarkGiven = () => {
+    setDrugTimestamps(prev => {
+      const next = { ...prev };
+      delete next[drug.id];
+      return next;
+    });
+  };
+
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      {/* Drug info */}
       <div className="px-4 py-3.5">
-        <p className="text-sm font-bold text-gray-900">{drug.name}</p>
-        <p className="text-base font-semibold text-red-700 mt-0.5">{drug.dose}</p>
-        {drug.route && <p className="text-xs text-gray-500 mt-0.5">{drug.route}</p>}
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1">
+            <p className="text-sm font-bold text-gray-900">{drug.name}</p>
+            <p className="text-base font-semibold text-red-700 mt-0.5">{drug.dose}</p>
+            {drug.route && <p className="text-xs text-gray-500 mt-0.5">{drug.route}</p>}
+          </div>
+        </div>
         {drug.note && (
-          <p className="text-xs text-amber-800 bg-amber-50 rounded-lg px-2.5 py-1.5 mt-2 leading-snug">{drug.note}</p>
+          <p className="text-xs text-amber-800 bg-amber-50 rounded-lg px-2.5 py-1.5 mt-2 leading-snug">
+            {drug.note}
+          </p>
         )}
       </div>
 
+      {/* Simple drug: mark given */}
+      {!drug.countable && !drug.timerEnabled && (
+        <div className="px-4 py-3 border-t border-gray-100 bg-gray-50">
+          {givenAt ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-green-700">Given at {fmtTime(givenAt)}</p>
+                  <p className="text-[10px] text-gray-400">{fmtTimeAgo(givenAt, now)}</p>
+                </div>
+              </div>
+              <button onClick={unmarkGiven} className="text-xs text-gray-400 underline underline-offset-2">
+                Undo
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={markGiven}
+              className="w-full py-2.5 rounded-xl border-2 border-dashed border-gray-300 hover:border-green-400 hover:bg-green-50 text-sm font-semibold text-gray-500 hover:text-green-700 transition-all"
+            >
+              Mark given
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Carboprost counter with timestamps */}
       {drug.countable && (
-        <div className={`px-4 py-3 border-t ${carboprostCount >= drug.maxDoses ? "bg-red-50 border-red-200" : carboprostCount >= 6 ? "bg-amber-50 border-amber-200" : "bg-gray-50 border-gray-100"}`}>
-          <div className="flex items-center justify-between">
+        <div className={`px-4 py-3 border-t ${
+          carboprostDoses.length >= drug.maxDoses
+            ? "bg-red-50 border-red-200"
+            : carboprostDoses.length >= 6
+            ? "bg-amber-50 border-amber-200"
+            : "bg-gray-50 border-gray-100"
+        }`}>
+          <div className="flex items-center justify-between mb-2">
             <div>
               <p className="text-xs font-semibold text-gray-600">Doses given</p>
               <p className={`text-xs mt-0.5 font-medium ${
-                carboprostCount >= drug.maxDoses ? "text-red-600" :
-                carboprostCount >= 6 ? "text-amber-700" : "text-gray-400"
+                carboprostDoses.length >= drug.maxDoses ? "text-red-600" :
+                carboprostDoses.length >= 6 ? "text-amber-700" : "text-gray-400"
               }`}>
-                {carboprostCount >= drug.maxDoses
-                  ? "⚠ MAXIMUM REACHED — do not give more"
-                  : carboprostCount >= 6
-                  ? `⚠ ${drug.maxDoses - carboprostCount} dose${drug.maxDoses - carboprostCount === 1 ? "" : "s"} remaining`
+                {carboprostDoses.length >= drug.maxDoses
+                  ? "⚠ MAXIMUM — do not give more"
+                  : carboprostDoses.length >= 6
+                  ? `⚠ ${drug.maxDoses - carboprostDoses.length} dose${drug.maxDoses - carboprostDoses.length === 1 ? "" : "s"} remaining`
                   : `Max ${drug.maxDoses} doses`
                 }
               </p>
             </div>
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setCarboprostCount(c => Math.max(0, c - 1))}
-                disabled={carboprostCount === 0}
+                onClick={() => setCarboprostDoses(d => d.slice(0, -1))}
+                disabled={carboprostDoses.length === 0}
                 className="w-10 h-10 rounded-xl bg-gray-200 hover:bg-gray-300 active:bg-gray-400 disabled:opacity-30 flex items-center justify-center text-xl font-bold text-gray-700 transition-colors"
               >
                 −
               </button>
               <span className={`text-2xl font-bold w-8 text-center tabular-nums ${
-                carboprostCount >= drug.maxDoses ? "text-red-600" :
-                carboprostCount >= 6 ? "text-amber-600" : "text-gray-900"
+                carboprostDoses.length >= drug.maxDoses ? "text-red-600" :
+                carboprostDoses.length >= 6 ? "text-amber-600" : "text-gray-900"
               }`}>
-                {carboprostCount}
+                {carboprostDoses.length}
               </span>
               <button
-                onClick={() => setCarboprostCount(c => Math.min(drug.maxDoses, c + 1))}
-                disabled={carboprostCount >= drug.maxDoses}
+                onClick={() => setCarboprostDoses(d => d.length < drug.maxDoses ? [...d, new Date()] : d)}
+                disabled={carboprostDoses.length >= drug.maxDoses}
                 className="w-10 h-10 rounded-xl bg-red-100 hover:bg-red-200 active:bg-red-300 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-xl font-bold text-red-700 transition-colors"
               >
                 +
               </button>
             </div>
           </div>
+          {/* Dose timestamps */}
+          {carboprostDoses.length > 0 && (
+            <div className="space-y-1 mt-1">
+              {carboprostDoses.map((t, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-gray-400 w-12">Dose {i + 1}</span>
+                  <span className="text-xs font-semibold text-gray-700">{fmtTime(t)}</span>
+                  <span className="text-[10px] text-gray-400">{fmtTimeAgo(t, now)}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
+      {/* TXA timer + mark given */}
       {drug.timerEnabled && (
         <div className={`px-4 py-3.5 border-t ${
           txaExpired ? "bg-red-50 border-red-200" :
-          txaUrgent ? "bg-orange-50 border-orange-200" :
+          txaUrgent  ? "bg-orange-50 border-orange-200" :
           txaWarning ? "bg-amber-50 border-amber-200" :
           "bg-gray-50 border-gray-100"
         }`}>
-          {txaBirthTime === null ? (
-            <button
-              onClick={() => setTxaBirthTime(new Date())}
-              className="w-full py-3 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-sm font-semibold transition-colors"
-            >
-              Set birth time — start TXA 3-hour window
-            </button>
-          ) : (
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <p className="text-xs font-bold text-gray-600">TXA 3-hour window</p>
-                  {txaExpired ? (
-                    <p className="text-sm font-bold text-red-600 mt-0.5">Window expired</p>
-                  ) : (
-                    <p className={`text-sm font-bold mt-0.5 ${txaUrgent ? "text-red-600" : txaWarning ? "text-amber-600" : "text-green-600"}`}>
-                      {fmt(txaRemainingS)} remaining
-                    </p>
-                  )}
+          {/* Mark given row */}
+          <div className="mb-3">
+            {givenAt ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center shrink-0">
+                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-green-700">TXA given at {fmtTime(givenAt)}</p>
+                    <p className="text-[10px] text-gray-400">{fmtTimeAgo(givenAt, now)}</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-[10px] text-gray-400">Elapsed</p>
-                  <p className="text-base font-bold text-gray-700 tabular-nums">{fmt(txaElapsedSec)}</p>
-                </div>
+                <button onClick={unmarkGiven} className="text-xs text-gray-400 underline underline-offset-2">Undo</button>
               </div>
-              <div className="h-2.5 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-1000 ${
-                    txaExpired ? "bg-red-600" :
-                    txaUrgent ? "bg-red-500" :
-                    txaWarning ? "bg-amber-500" : "bg-green-500"
-                  }`}
-                  style={{ width: `${txaWindowPct}%` }}
-                />
-              </div>
-              <div className="flex justify-between mt-1 mb-1">
-                <span className="text-[10px] text-gray-400">Birth</span>
-                <span className="text-[10px] text-gray-400">3 hours</span>
-              </div>
+            ) : (
               <button
-                onClick={() => setTxaBirthTime(null)}
-                className="text-xs text-gray-400 underline underline-offset-2"
+                onClick={markGiven}
+                className="w-full py-2.5 rounded-xl border-2 border-dashed border-gray-300 hover:border-green-400 hover:bg-green-50 text-sm font-semibold text-gray-500 hover:text-green-700 transition-all"
               >
-                Reset timer
+                Mark TXA given
               </button>
+            )}
+          </div>
+
+          {/* 3-hour window timer */}
+          <div className="pt-3 border-t border-gray-200/60">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <p className="text-xs font-bold text-gray-600">3-hour TXA window</p>
+                {txaExpired ? (
+                  <p className="text-sm font-bold text-red-600 mt-0.5">Window expired</p>
+                ) : (
+                  <p className={`text-sm font-bold mt-0.5 ${txaUrgent ? "text-red-600" : txaWarning ? "text-amber-600" : "text-green-600"}`}>
+                    {fmtClock(txaRemainingS)} remaining
+                  </p>
+                )}
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] text-gray-400">From birth</p>
+                <p className="text-base font-bold text-gray-700 tabular-nums">{fmtClock(txaElapsedSec)}</p>
+              </div>
             </div>
-          )}
+            <div className="h-2.5 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-1000 ${
+                  txaExpired ? "bg-red-600" :
+                  txaUrgent  ? "bg-red-500" :
+                  txaWarning ? "bg-amber-500" : "bg-green-500"
+                }`}
+                style={{ width: `${txaWindowPct}%` }}
+              />
+            </div>
+            <div className="flex justify-between mt-1">
+              <span className="text-[10px] text-gray-500">Birth ({fmtTime(txaBirthTime)})</span>
+              <span className="text-[10px] text-gray-400">+3 hours</span>
+            </div>
+            <button
+              onClick={() => setTxaBirthTime(emergencyStartTime)}
+              className="mt-1.5 text-xs text-gray-400 underline underline-offset-2"
+            >
+              Adjust birth time
+            </button>
+          </div>
         </div>
       )}
     </div>
   );
 }
 
+// ── Main component ─────────────────────────────────────────────────────────
 export default function EmergencyPage({ onClose }) {
+  const [emergencyStartTime] = useState(() => new Date());
   const [activeLevel, setActiveLevel] = useState("minor");
   const [checked, setChecked] = useState(new Set());
-  const [carboprostCount, setCarboprostCount] = useState(0);
-  const [txaBirthTime, setTxaBirthTime] = useState(null);
+  const [carboprostDoses, setCarboprostDoses] = useState([]);
+  const [txaBirthTime, setTxaBirthTime] = useState(() => new Date());
+  const [drugTimestamps, setDrugTimestamps] = useState({});
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -195,19 +321,31 @@ export default function EmergencyPage({ onClose }) {
     });
 
   const checkedCount = level.checklist.filter(c => checked.has(c.id)).length;
+  const emergencyElapsed = Math.floor((now - emergencyStartTime) / 1000);
 
-  const txaElapsedSec = txaBirthTime ? Math.floor((now - txaBirthTime) / 1000) : null;
-  const txaRemainingS = txaElapsedSec !== null ? Math.max(0, 3 * 3600 - txaElapsedSec) : null;
-  const txaWindowPct = txaElapsedSec !== null ? Math.min(100, (txaElapsedSec / (3 * 3600)) * 100) : 0;
-  const txaExpired   = txaRemainingS === 0;
-  const txaUrgent    = txaRemainingS !== null && txaRemainingS < 3600;
-  const txaWarning   = txaRemainingS !== null && txaRemainingS < 5400;
+  const txaElapsedSec  = Math.floor((now - txaBirthTime) / 1000);
+  const txaRemainingS  = Math.max(0, 3 * 3600 - txaElapsedSec);
+  const txaWindowPct   = Math.min(100, (txaElapsedSec / (3 * 3600)) * 100);
+  const txaExpired     = txaRemainingS === 0;
+  const txaUrgent      = txaRemainingS < 3600;
+  const txaWarning     = txaRemainingS < 5400;
 
   const resetSession = () => {
     setActiveLevel("minor");
     setChecked(new Set());
-    setCarboprostCount(0);
-    setTxaBirthTime(null);
+    setCarboprostDoses([]);
+    setTxaBirthTime(emergencyStartTime);
+    setDrugTimestamps({});
+  };
+
+  const sharedDrugProps = {
+    now,
+    carboprostDoses, setCarboprostDoses,
+    drugTimestamps, setDrugTimestamps,
+    txaBirthTime, setTxaBirthTime,
+    txaElapsedSec, txaRemainingS, txaWindowPct,
+    txaExpired, txaUrgent, txaWarning,
+    emergencyStartTime,
   };
 
   return (
@@ -215,7 +353,7 @@ export default function EmergencyPage({ onClose }) {
       className="fixed inset-0 z-50 bg-gray-50 flex flex-col"
       style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif" }}
     >
-      {/* ── Header ────────────────────────────────────────── */}
+      {/* ── Header ──────────────────────────────────────────────── */}
       <div
         className="bg-red-800 text-white flex-shrink-0"
         style={{ paddingTop: "max(12px, env(safe-area-inset-top))" }}
@@ -233,6 +371,13 @@ export default function EmergencyPage({ onClose }) {
             <h1 className="text-xl font-bold text-white leading-tight">
               Postpartum Haemorrhage
             </h1>
+            {/* Running emergency clock */}
+            <div className="flex items-center gap-1.5 mt-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-red-300 animate-pulse" />
+              <span className="text-xs font-mono text-red-200 tabular-nums">
+                {fmtClock(emergencyElapsed)} since declared
+              </span>
+            </div>
           </div>
           <div className="flex items-center gap-2 mt-1">
             <button
@@ -276,29 +421,17 @@ export default function EmergencyPage({ onClose }) {
         </div>
       </div>
 
-      {/* ── Scrollable content ────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto pb-32">
+      {/* ── Scrollable content ───────────────────────────────────── */}
+      <div className="flex-1 overflow-y-auto pb-32 pt-4">
 
-        {/* MBRRACE alert */}
-        <div className="mx-4 mt-4 mb-3 bg-rose-50 border border-rose-200 rounded-2xl p-4">
-          <div className="flex items-start gap-2.5">
-            <div className="w-5 h-5 rounded-full bg-rose-600 flex items-center justify-center shrink-0 mt-0.5">
-              <span className="text-white text-[10px] font-black">M</span>
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-rose-500 tracking-wider uppercase mb-1">
-                MBRRACE
-              </p>
-              <p className="text-sm text-rose-900 leading-relaxed">{level.mbrrace}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Call for Help */}
+        {/* 1. Call for Help */}
         <Section title="Call for Help">
           <div className="space-y-1.5">
             {level.call.map((person, i) => (
-              <div key={i} className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100">
+              <div
+                key={i}
+                className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100"
+              >
                 <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center shrink-0">
                   <span className="text-xs font-bold text-red-700">{i + 1}</span>
                 </div>
@@ -308,7 +441,7 @@ export default function EmergencyPage({ onClose }) {
           </div>
         </Section>
 
-        {/* Checklist */}
+        {/* 2. Checklist */}
         <Section
           title="Checklist"
           badge={`${checkedCount} / ${level.checklist.length}`}
@@ -330,39 +463,31 @@ export default function EmergencyPage({ onClose }) {
           )}
         </Section>
 
-        {/* Drugs */}
+        {/* 3. Drugs */}
         <Section title="Drugs">
           <div className="space-y-3">
             {level.drugs.map(drug => (
-              <DrugCard
-                key={drug.id}
-                drug={drug}
-                carboprostCount={carboprostCount}
-                setCarboprostCount={setCarboprostCount}
-                txaBirthTime={txaBirthTime}
-                setTxaBirthTime={setTxaBirthTime}
-                txaElapsedSec={txaElapsedSec}
-                txaRemainingS={txaRemainingS}
-                txaWindowPct={txaWindowPct}
-                txaExpired={txaExpired}
-                txaUrgent={txaUrgent}
-                txaWarning={txaWarning}
-              />
+              <DrugCard key={drug.id} drug={drug} {...sharedDrugProps} />
             ))}
           </div>
         </Section>
 
-        {/* Blood products */}
+        {/* 4. Blood products */}
         {level.bloodProducts && (
           <Section title="Blood Products">
             <div className="space-y-2">
               {level.bloodProducts.map((bp, i) => (
-                <div key={i} className="bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100 flex gap-3 items-start">
-                  <div className="w-1.5 h-full min-h-[2.5rem] rounded-full bg-red-400 shrink-0" />
+                <div
+                  key={i}
+                  className="bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100 flex gap-3 items-start"
+                >
+                  <div className="w-1.5 self-stretch rounded-full bg-red-400 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-gray-900">{bp.product}</p>
                     <p className="text-sm text-red-700 font-medium mt-0.5">{bp.dose}</p>
-                    {bp.note && <p className="text-xs text-gray-500 mt-0.5 leading-snug">{bp.note}</p>}
+                    {bp.note && (
+                      <p className="text-xs text-gray-500 mt-0.5 leading-snug">{bp.note}</p>
+                    )}
                   </div>
                 </div>
               ))}
@@ -370,12 +495,15 @@ export default function EmergencyPage({ onClose }) {
           </Section>
         )}
 
-        {/* Surgical options */}
+        {/* 5. Surgical options (massive) */}
         {level.surgical && (
           <Section title="Surgical Options" sublabel="in order of invasiveness">
             <div className="space-y-2">
               {level.surgical.map((s, i) => (
-                <div key={i} className="bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100 flex gap-3 items-start">
+                <div
+                  key={i}
+                  className="bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100 flex gap-3 items-start"
+                >
                   <div className="w-6 h-6 rounded-full bg-red-700 flex items-center justify-center shrink-0 mt-0.5">
                     <span className="text-[10px] font-bold text-white">{i + 1}</span>
                   </div>
@@ -389,12 +517,15 @@ export default function EmergencyPage({ onClose }) {
           </Section>
         )}
 
-        {/* Post-event care */}
+        {/* 6. Post-event care (massive) */}
         {level.postEvent && (
           <Section title="Post-Event Care">
             <div className="space-y-2">
               {level.postEvent.map((item, i) => (
-                <div key={i} className="bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100 flex gap-3 items-start">
+                <div
+                  key={i}
+                  className="bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100 flex gap-3 items-start"
+                >
                   <svg className="w-4 h-4 text-gray-300 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
@@ -405,9 +536,24 @@ export default function EmergencyPage({ onClose }) {
           </Section>
         )}
 
+        {/* 7. MBRRACE — at the bottom, reference only */}
+        <div className="mx-4 mb-4 bg-rose-50 border border-rose-200 rounded-2xl p-4">
+          <div className="flex items-start gap-2.5">
+            <div className="w-5 h-5 rounded-full bg-rose-600 flex items-center justify-center shrink-0 mt-0.5">
+              <span className="text-white text-[10px] font-black">M</span>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-rose-500 tracking-wider uppercase mb-1">
+                MBRRACE
+              </p>
+              <p className="text-sm text-rose-900 leading-relaxed">{level.mbrrace}</p>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      {/* ── Sticky bottom — Escalate ──────────────────────── */}
+      {/* ── Sticky bottom — Escalate ─────────────────────────────── */}
       <div
         className="fixed inset-x-0 bottom-0 bg-white border-t border-gray-200 px-4 py-3"
         style={{ paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}
@@ -420,8 +566,8 @@ export default function EmergencyPage({ onClose }) {
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
             </svg>
-            Escalate → {nextLevel.label} PPH &nbsp;
-            <span className="font-normal opacity-80">({nextLevel.sublabel})</span>
+            Escalate → {nextLevel.label} PPH
+            <span className="font-normal opacity-80 ml-1">({nextLevel.sublabel})</span>
           </button>
         ) : (
           <div className="flex items-center justify-center gap-2 py-2">
