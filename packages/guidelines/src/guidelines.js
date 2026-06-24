@@ -26,7 +26,7 @@ export const GUIDELINES = {
   NG133: { code: "NG133", label: "Hypertension in Pregnancy",             version: "NG133", date: "June 2019 (updated 2023)",     color: "cyan",   pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng133/resources/hypertension-in-pregnancy-diagnosis-and-management-pdf-66141782348997" },
   BASHH_PID: { code: "BASHH_PID", label: "Pelvic Inflammatory Disease", version: "2019", date: "2018 (updated 2019)", color: "fuchsia", pdf: true, source: "BASHH", pdfUrl: "https://www.bashh.org/resources/6/pid_2019/" },
   NG73: { code: "NG73", label: "Endometriosis", version: "NG73", date: "September 2017 (updated 2024)", color: "purple", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng73/resources/endometriosis-diagnosis-and-management-pdf-1837632548293" },
-  MBRRACE_SLMC2025: { code: "MBRRACE_SLMC2025", label: "Saving Lives, Improving Mothers' Care 2025", version: "2021–23 data", date: "September 2025", color: "rose", pdf: true, source: "MBRRACE", pdfUrl: "https://www.npeu.ox.ac.uk/assets/downloads/mbrrace-uk/reports/maternal-report-2025/MBRRACE-UK%20Maternal%20Report%202025%20-%20Main%20v1.2.pdf" },
+  MBRRACE_SLMC2025: { code: "MBRRACE_SLMC2025", label: "MBRRACE 2025", version: "2021–23 data", date: "September 2025", color: "rose", pdf: true, source: "MBRRACE", pdfUrl: "https://www.npeu.ox.ac.uk/assets/downloads/mbrrace-uk/reports/maternal-report-2025/MBRRACE-UK%20Maternal%20Report%202025%20-%20Main%20v1.2.pdf" },
 };
 
 export const GL_COLORS = {
