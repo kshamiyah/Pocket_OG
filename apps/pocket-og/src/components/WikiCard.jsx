@@ -1,8 +1,9 @@
 import { GUIDELINES } from "@pocket-og/guidelines";
 import ContentBlock, { highlightText } from "./ContentBlock";
 import { glColors } from "../data/glColors";
+import { READER_AVAILABLE } from "../data/readerAvailable";
 
-export default function WikiCard({ page, isExpanded, onToggle, isFallback, query = "", onOpenFlowchart }) {
+export default function WikiCard({ page, isExpanded, onToggle, isFallback, query = "", onOpenFlowchart, onOpenGuideline }) {
   const gl = GUIDELINES[page.gl];
   const highlightTerms = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
   const col = glColors(page.gl);
@@ -68,6 +69,24 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
         {/* Expanded content */}
         {isExpanded && (
           <div className="px-3 sm:px-5 pb-5 border-t border-gray-100 pt-4 overflow-x-hidden">
+            {READER_AVAILABLE.has(page.gl) && onOpenGuideline && (
+              <button
+                type="button"
+                onClick={() => onOpenGuideline(page.gl, page.id)}
+                className="w-full mb-4 flex items-center justify-between px-4 py-3 rounded-2xl bg-gray-50 border border-gray-100 hover:bg-gray-100 active:bg-gray-200 transition-colors group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <svg className="w-4 h-4 text-gray-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-gray-900">Open guideline</p>
+                    <p className="text-xs text-gray-500">{page.gl} · {gl?.label ?? "Full guideline text"}</p>
+                  </div>
+                </div>
+                <span className="text-gray-400 group-hover:text-gray-600 transition-colors">→</span>
+              </button>
+            )}
             {page.flowchartId && onOpenFlowchart && (
               <button
                 onClick={() => onOpenFlowchart(page.flowchartId)}
