@@ -123,7 +123,7 @@ export const GTG69_SECTIONS = [
       ]},
       { type: "subheading", value: "VTE Prophylaxis" },
       { type: "list", items: [
-        "All hospitalised women with HG have increased VTE risk (dehydration + immobility)",
+        { text: "All hospitalised women with HG have increased VTE risk (dehydration + immobility)", mbrrace: "Women admitted with hyperemesis gravidarum are at elevated VTE risk — dehydration and immobility together compound the risk significantly. MBRRACE highlights that thromboprophylaxis was omitted in women admitted with HG who later died from PE." },
         "Prescribe LMWH (enoxaparin) as per VTE risk assessment — start on admission",
         "TED stockings when mobile",
       ]},

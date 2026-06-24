@@ -70,7 +70,7 @@ export const GTG52_SECTIONS = [
     content: [
       { type: "subheading", value: "Immediate Actions" },
       { type: "list", items: [
-        "Call for help — inform midwife in charge and obstetrician",
+        { text: "Call for help — inform midwife in charge and obstetrician", mbrrace: "MBRRACE reviews of PPH deaths consistently identify delayed escalation as a contributing factor. Calling for help early — before the situation becomes critical — is one of the most impactful actions a midwife can take." },
         "Rub up a uterine contraction — bimanual uterine massage",
         "Establish IV access: 16G cannula × 1 (minimum)",
         "Send bloods: FBC, coagulation screen, U&E, LFT, group & screen",
@@ -142,7 +142,7 @@ export const GTG52_SECTIONS = [
       { type: "alert", value: "Massive PPH (>2500 ml or any life-threatening haemorrhage) — activate hospital Massive Haemorrhage Protocol (MHP). Contact haematologist and blood bank immediately." },
       { type: "subheading", value: "Activate MHP" },
       { type: "list", items: [
-        "Call consultant obstetrician, anaesthetist, and haematologist",
+        { text: "Call consultant obstetrician, anaesthetist, and haematologist", mbrrace: "In massive PPH deaths reviewed by MBRRACE, consultant involvement was frequently delayed. The haematologist in particular was often not contacted until coagulopathy was already uncontrollable." },
         "MHP pack: 6 units red cells + 4 units FFP ± platelets ± cryoprecipitate",
         "Cell salvage: use if available (requires haematologist authorisation if Rhesus negative)",
         "Point-of-care coagulation testing (ROTEM/TEG) to guide product replacement",
@@ -166,7 +166,7 @@ export const GTG52_SECTIONS = [
       ]},
       { type: "subheading", value: "Post-Event Care" },
       { type: "list", items: [
-        "HDU or ITU admission after massive PPH",
+        { text: "HDU or ITU admission after massive PPH", mbrrace: "MBRRACE 2025 identified that women surviving massive PPH were sometimes stepped down from HDU/ITU too early, leading to delayed recognition of complications including coagulopathy and renal failure." },
         "VTE assessment and LMWH once haemostasis achieved (high VTE risk post-major PPH)",
         "Debrief: patient and partner, with written summary",
         "Postnatal debrief with consultant before discharge",

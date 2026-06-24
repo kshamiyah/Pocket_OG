@@ -70,7 +70,7 @@ export const GL787_SECTIONS = [
       { type: "subheading", value: "Mastitis / Breast Cellulitis" },
       { type: "list", items: ["PO flucloxacillin 1 g 6 hourly (first choice)","Penicillin allergy: PO/IV clindamycin 450 mg 6 hourly PO or 1.2 g 6 hourly IV","Known MRSA: IV teicoplanin 10 mg/kg 12 hourly × 3 doses, then 24 hourly","Breast abscess: refer for I&D / aspiration"] },
       { type: "subheading", value: "When to Escalate" },
-      { type: "list", items: ["MEOWS ≥3 → treat as Maternal Sepsis (see that section)","Rapidly spreading erythema → urgent senior review","Suspected necrotising fasciitis → emergency surgical review"] },
+      { type: "list", items: [{ text: "MEOWS ≥3 → treat as Maternal Sepsis (see that section)", mbrrace: "MBRRACE consistently finds that sepsis deaths follow delayed escalation. A MEOWS score of ≥3 is a hard threshold that must trigger the sepsis pathway immediately — not a 'monitor and review' response." },{ text: "Rapidly spreading erythema → urgent senior review", mbrrace: "Necrotising fasciitis — frequently presenting as cellulitis that's spreading fast — is overrepresented in sepsis-related maternal deaths. Delay in recognising the need for urgent surgical review is a recurring finding in MBRRACE reports." },"Suspected necrotising fasciitis → emergency surgical review"] },
     ]
   },
   {
