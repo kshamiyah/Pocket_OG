@@ -264,12 +264,13 @@ export default function App() {
         type="button"
         onClick={() => setShowEmergency(true)}
         aria-label="Open emergency protocols"
-        style={{ bottom: "calc(4rem + env(safe-area-inset-bottom, 0px) + 0.625rem)" }}
-        className="fixed right-4 z-30 w-11 h-11 flex items-center justify-center bg-red-600 hover:bg-red-700 active:scale-95 shadow-lg rounded-full text-white transition-all"
+        style={{ bottom: "calc(4rem + env(safe-area-inset-bottom, 0px) + 0.5rem)" }}
+        className="fixed right-3 z-[35] flex flex-col items-center justify-center gap-0.5 bg-red-600 hover:bg-red-700 active:scale-95 shadow-lg rounded-2xl px-3 py-2 text-white transition-all"
       >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
         </svg>
+        <span className="text-[10px] font-bold tracking-wide leading-none">SOS</span>
       </button>
 
       {/* Emergency page overlay */}
