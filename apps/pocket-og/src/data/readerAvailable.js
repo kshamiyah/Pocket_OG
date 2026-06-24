@@ -6,4 +6,5 @@ export const READER_AVAILABLE = new Set([
   "NG133",
   "BASHH_PID",
   "NG73",
+  "MBRRACE_SLMC2025",
 ]);

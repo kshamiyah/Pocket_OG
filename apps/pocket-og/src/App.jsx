@@ -582,7 +582,7 @@ export default function App() {
             {/* Sticky: source filter + search */}
             <div className="sticky top-0 z-20 bg-white border-b border-gray-100 pl-4 pr-12 pt-3 pb-3">
               <div className="flex gap-1.5 mb-2.5">
-                {["ALL", "RBH", "RCOG", "NICE"].map(src => (
+                {["ALL", "RBH", "RCOG", "NICE", "MBRRACE"].map(src => (
                   <button
                     key={src}
                     onClick={() => setGlSourceFilter(src)}

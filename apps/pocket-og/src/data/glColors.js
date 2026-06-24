@@ -32,6 +32,7 @@ export const GL_COLORS = {
   NG133:    { badge: "bg-cyan-50 text-cyan-700",      border: "border-cyan-100",     conditionColor: "text-cyan-600",     icon: "text-cyan-500",     accent: "bg-cyan-500",     solid: "bg-cyan-600",     solidHover: "hover:bg-cyan-700"     },
   NHSCSP20: { badge: "bg-slate-50 text-slate-700",    border: "border-slate-100",    conditionColor: "text-slate-500",    icon: "text-slate-500",    accent: "bg-slate-400",    solid: "bg-slate-600",    solidHover: "hover:bg-slate-700"    },
   CG192:    { badge: "bg-purple-50 text-purple-700",  border: "border-purple-100",   conditionColor: "text-purple-500",   icon: "text-purple-500",   accent: "bg-purple-500",   solid: "bg-purple-600",   solidHover: "hover:bg-purple-700"   },
+  MBRRACE_SLMC2025: { badge: "bg-rose-50 text-rose-700", border: "border-rose-100", conditionColor: "text-rose-500", icon: "text-rose-400", accent: "bg-rose-400", solid: "bg-rose-600", solidHover: "hover:bg-rose-700" },
 };
 
 export const DEFAULT_GL_COLORS = {
