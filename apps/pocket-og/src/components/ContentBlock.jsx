@@ -1,3 +1,4 @@
+import { useState } from "react";
 import RichText from "./RichText";
 
 export function highlightText(text, terms) {
@@ -10,6 +11,41 @@ export function highlightText(text, terms) {
     i % 2 === 1
       ? <mark key={i} className="bg-yellow-200 text-inherit rounded-sm px-0.5">{part}</mark>
       : part
+  );
+}
+
+function MbrraceListItem({ item, rt }) {
+  const [open, setOpen] = useState(false);
+
+  if (typeof item === "string") {
+    return (
+      <li className="flex gap-2 text-sm text-gray-700 leading-snug">
+        <span className="text-blue-400 shrink-0 mt-0.5">›</span>
+        <span>{rt(item)}</span>
+      </li>
+    );
+  }
+
+  return (
+    <li className="text-sm text-gray-700 leading-snug">
+      <div className="flex gap-2 items-start">
+        <span className="text-blue-400 shrink-0 mt-0.5">›</span>
+        <button
+          type="button"
+          onClick={() => setOpen(o => !o)}
+          className="text-left"
+        >
+          <span className="border-b border-dashed border-rose-400 pb-px">{item.text}</span>
+          <span className="inline-flex items-center justify-center ml-1.5 w-4 h-4 rounded-full bg-rose-100 text-rose-500 text-[8px] font-bold align-middle shrink-0">M</span>
+        </button>
+      </div>
+      {open && (
+        <div className="mt-2 ml-5 rounded-xl bg-rose-50 border border-rose-100 px-3 py-2.5">
+          <p className="text-[9px] font-bold text-rose-400 uppercase tracking-widest mb-1">MBRRACE 2025</p>
+          <p className="text-xs text-rose-900 leading-snug">{item.mbrrace}</p>
+        </div>
+      )}
+    </li>
   );
 }
 
@@ -28,9 +64,7 @@ export default function ContentBlock({ block, highlightTerms = [], inlineLinks =
   if (block.type === "list") return (
     <ul className="mb-4 space-y-1.5">
       {block.items.map((item, i) => (
-        <li key={i} className="flex gap-2 text-sm text-gray-700 leading-snug">
-          <span className="text-blue-400 shrink-0 mt-0.5">›</span><span>{rt(item)}</span>
-        </li>
+        <MbrraceListItem key={i} item={item} rt={rt} />
       ))}
     </ul>
   );

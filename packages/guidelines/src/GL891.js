@@ -6,14 +6,14 @@ export const GL891_SECTIONS = [
     content: [
       { type: "subheading", value: "When to Perform Risk Assessment" },
       { type: "list", items: [
-        "At booking",
-        "On each admission",
+        { text: "At booking", mbrrace: "Risk assessment at booking was omitted in multiple VTE deaths reviewed in 2021–23. Women had identifiable risk factors at their first appointment that went unscored and unacted upon." },
+        { text: "On each admission", mbrrace: "Re-assessment on every admission is a repeated MBRRACE message. Women admitted for unrelated conditions developed fatal PE when thromboprophylaxis was not reconsidered at the point of admission." },
         "With development of other intercurrent problems",
         "Post-delivery (before transfer home/to ward)",
       ]},
       { type: "subheading", value: "High Risk — Antenatal LMWH Throughout Pregnancy + 6 Weeks Postnatal" },
       { type: "list", items: [
-        "Any previous VTE (except single event related to major surgery)",
+        { text: "Any previous VTE (except single event related to major surgery)", mbrrace: "Previous VTE was documented in the records of women who died from thromboembolism — but LMWH was not started. Documentation in the notes is not enough: it must trigger immediate action." },
         "Already on long-term oral anticoagulation — switch immediately to therapeutic enoxaparin",
         "GP provides 2-week bridging course of LMWH after positive pregnancy test; DAU appointment then arranged for ongoing supply",
         "Refer to Miss Fayyaz or Miss Gajree's antenatal clinic",
@@ -126,11 +126,12 @@ export const GL891_SECTIONS = [
       ]},
       { type: "subheading", value: "Intermediate Risk — ≥ 10 Days Postnatal Thromboprophylaxis" },
       { type: "list", items: [
-        "Caesarean section in labour", "BMI > 40 kg/m²",
+        { text: "Caesarean section in labour", mbrrace: "MBRRACE consistently identifies postnatal VTE after emergency caesarean as preventable. Risk is compounded by immobility, infection, and the urgency of the delivery — all of which can delay thromboprophylaxis prescribing." },
+        "BMI > 40 kg/m²",
         "Readmission or prolonged admission (≥ 3 days) in puerperium",
         "Any surgical procedure in puerperium (except immediate perineal repair)",
         "Medical co-morbidities: cancer, heart failure, active SLE, IBD/inflammatory polyarthropathy, nephrotic syndrome, Type 1 DM with nephropathy, sickle cell disease, current IVDU",
-        "2 or more cumulative risk factors",
+        { text: "2 or more cumulative risk factors", mbrrace: "Several women who died postnatally had two or more cumulative risk factors clearly documented — but prophylaxis was never prescribed. Reaching the threshold must trigger active prescribing before the woman leaves hospital." },
       ]},
       { type: "subheading", value: "Postnatal Cumulative Risk Factors" },
       { type: "list", items: [
