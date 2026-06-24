@@ -319,83 +319,101 @@ function SummaryScreen({ emergencyStartTime, resolveTime, highestLevel, checked,
     return events.sort((a, b) => a.time - b.time);
   }, [emergencyStartTime, resolveTime, checked, drugTimestamps, carboprostDoses]);
 
-  const typeStyles = {
-    start:     "bg-red-600 text-white",
-    end:       "bg-green-600 text-white",
-    checklist: "bg-blue-100 text-blue-700",
-    drug:      "bg-purple-100 text-purple-700",
+  const dotColor = {
+    start:     "bg-red-500",
+    end:       "bg-green-500",
+    checklist: "bg-blue-400",
+    drug:      "bg-purple-500",
   };
 
-  const typeLabels = {
-    start:     "START",
-    end:       "END",
-    checklist: "DONE",
-    drug:      "DRUG",
-  };
+  const checkedCount = checked.size;
+  const drugCount = Object.keys(drugTimestamps).length + carboprostDoses.length;
 
   return (
     <div className="flex flex-col h-full">
-      {/* Summary header */}
+
+      {/* ── Header ──────────────────────────────────────────────── */}
       <div
         className="bg-green-700 text-white flex-shrink-0"
         style={{ paddingTop: "max(12px, env(safe-area-inset-top))" }}
       >
-        <div className="px-4 pt-2 pb-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <span className="text-[10px] font-bold tracking-widest uppercase text-green-200">
-                  Emergency Resolved
-                </span>
-              </div>
-              <h1 className="text-xl font-bold text-white">PPH Summary</h1>
-              <p className="text-sm text-green-200 mt-0.5">
-                Duration: <span className="font-bold text-white">{fmtClock(duration)}</span>
-                &nbsp;·&nbsp;
-                Highest level: <span className="font-bold text-white">{levelLabel} PPH</span>
-              </p>
-              <p className="text-xs text-green-300 mt-0.5">
-                {fmtTime(emergencyStartTime)} → {fmtTime(resolveTime)}
-              </p>
+        <div className="px-4 pt-3 pb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
+              <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span className="text-[10px] font-bold tracking-widest uppercase text-green-200">
+              Emergency Resolved
+            </span>
+          </div>
+          <h1 className="text-xl font-bold text-white">PPH Summary</h1>
+          <p className="text-xs text-green-300 mt-0.5">
+            {fmtTime(emergencyStartTime)} → {fmtTime(resolveTime)}
+          </p>
+
+          {/* Stats row */}
+          <div className="flex gap-2 mt-3">
+            <div className="flex-1 bg-white/15 rounded-xl px-2 py-2.5 text-center">
+              <p className="text-base font-bold text-white tabular-nums leading-tight">{fmtClock(duration)}</p>
+              <p className="text-[10px] text-green-200 mt-0.5">Duration</p>
+            </div>
+            <div className="flex-1 bg-white/15 rounded-xl px-2 py-2.5 text-center">
+              <p className="text-base font-bold text-white leading-tight">{levelLabel}</p>
+              <p className="text-[10px] text-green-200 mt-0.5">Max level</p>
+            </div>
+            <div className="flex-1 bg-white/15 rounded-xl px-2 py-2.5 text-center">
+              <p className="text-base font-bold text-white tabular-nums leading-tight">{checkedCount}</p>
+              <p className="text-[10px] text-green-200 mt-0.5">Steps done</p>
+            </div>
+            <div className="flex-1 bg-white/15 rounded-xl px-2 py-2.5 text-center">
+              <p className="text-base font-bold text-white tabular-nums leading-tight">{drugCount}</p>
+              <p className="text-[10px] text-green-200 mt-0.5">Drugs given</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Summary content */}
+      {/* ── Scrollable content ───────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto bg-gray-50 pb-4">
 
         {/* Timeline */}
         <div className="mx-4 mt-4 mb-4">
-          <p className="text-sm font-bold text-gray-800 mb-3">Timeline</p>
-          <div className="relative">
-            {/* Vertical line */}
-            <div className="absolute left-[17px] top-3 bottom-3 w-px bg-gray-200" />
+          <p className="text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-2">Timeline</p>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            {timeline.map((event, i) => {
+              const isBookend = event.type === "start" || event.type === "end";
+              return (
+                <div
+                  key={i}
+                  className={`flex items-center gap-3 px-4 py-3 ${i > 0 ? "border-t border-gray-50" : ""} ${isBookend ? "bg-gray-50" : ""}`}
+                >
+                  {/* Fixed-width time column */}
+                  <span className="text-xs tabular-nums font-bold text-gray-400 shrink-0 w-11">
+                    {fmtTime(event.time)}
+                  </span>
 
-            <div className="space-y-2">
-              {timeline.map((event, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <div className="shrink-0 mt-0.5">
-                    <span className={`inline-block text-[9px] font-bold px-1.5 py-0.5 rounded-full ${typeStyles[event.type]}`}>
-                      {typeLabels[event.type]}
-                    </span>
-                  </div>
-                  <div className="flex-1 bg-white rounded-xl px-3 py-2.5 shadow-sm border border-gray-100 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 leading-snug">{event.label}</p>
-                    <p className="text-xs text-gray-400 mt-0.5 tabular-nums">{fmtTime(event.time)}</p>
-                  </div>
+                  {/* Colored dot */}
+                  <div className={`w-2 h-2 rounded-full shrink-0 ${dotColor[event.type]}`} />
+
+                  {/* Event label */}
+                  <p className={`flex-1 text-sm leading-snug min-w-0 ${isBookend ? "font-bold text-gray-900" : "font-medium text-gray-800"}`}>
+                    {event.label}
+                  </p>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
+
+          {timeline.length <= 2 && (
+            <p className="text-xs text-gray-400 text-center mt-3">
+              No actions or drugs were recorded during this emergency.
+            </p>
+          )}
         </div>
 
-        {/* MBRRACE context */}
+        {/* MBRRACE */}
         <div className="mx-4 mb-4 bg-rose-50 border border-rose-200 rounded-2xl p-4">
           <div className="flex items-start gap-2.5">
             <div className="w-5 h-5 rounded-full bg-rose-600 flex items-center justify-center shrink-0 mt-0.5">
@@ -412,14 +430,14 @@ function SummaryScreen({ emergencyStartTime, resolveTime, highestLevel, checked,
 
       </div>
 
-      {/* Bottom actions */}
+      {/* ── Bottom actions ───────────────────────────────────────── */}
       <div
         className="flex-shrink-0 bg-white border-t border-gray-200 px-4 pt-3 flex gap-3"
         style={{ paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}
       >
         <button
           onClick={onNewEmergency}
-          className="flex-1 py-3.5 rounded-2xl bg-red-600 text-white font-bold text-sm active:bg-red-700 transition-colors"
+          className="flex-1 py-3.5 rounded-2xl bg-gray-900 text-white font-bold text-sm active:bg-black transition-colors"
         >
           New Emergency
         </button>
@@ -430,6 +448,7 @@ function SummaryScreen({ emergencyStartTime, resolveTime, highestLevel, checked,
           Close
         </button>
       </div>
+
     </div>
   );
 }
