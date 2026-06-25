@@ -7,7 +7,7 @@ const TASKS = [
   { id: "abc",            level: "minor",   type: "action",   title: "ABC — airway, breathing, circulation",  detail: "Position patient flat\nHigh-flow O₂ if SpO₂ <95%\nAssess for shock — HR, BP, skin perfusion" },
   { id: "call_team",      level: "minor",   type: "call",     title: "Call for help",                         detail: "• Midwife in charge\n• On-call obstetrician",                                                                                                          followUpDelay: 120 },
   { id: "iv_access",      level: "minor",   type: "access",   title: "IV access + bloods",                    detail: "2 × large bore IV cannulas (14–16G)\nBloods: FBC, coagulation, U&E, LFT, group & screen",                                                              followUpDelay: 90  },
-  { id: "bimanual",       level: "minor",   type: "action",   title: "Bimanual uterine massage",              detail: "Rub up a contraction — sustained bimanual compression\nIs the uterus firm after massage? (diagnostic)" },
+  { id: "bimanual",       level: "minor",   type: "action",   title: "Bimanual uterine massage",              detail: "Rub up a contraction — sustained bimanual compression\nIs the uterus firm after massage? (diagnostic)",                                                  followUpDelay: 180 },
   { id: "catheterise",    level: "minor",   type: "action",   title: "Catheterise",                           detail: "Urinary catheter — target output >30 ml/hr\nMonitor hourly" },
   { id: "keep_warm",      level: "minor",   type: "action",   title: "Keep patient warm",                     detail: "Blankets and warming device\nHypothermia worsens coagulopathy" },
   { id: "iv_fluids",      level: "minor",   type: "fluid",    title: "IV fluids",                             detail: "Hartmann's or 0.9% saline — fluid resuscitation",                                                                                                        deps: ["iv_access"] },
@@ -20,7 +20,7 @@ const TASKS = [
   { id: "check_placenta", level: "minor",   type: "action",   title: "Check placenta complete",               detail: "Confirm placenta and membranes complete\nIf uncertain — manual exploration under anaesthesia",                                                              followUpDelay: 120 },
   { id: "coag_review",    level: "minor",   type: "action",   title: "Review coagulation results",            detail: "Review when available\nHaematologist if known or suspected coagulopathy",                                                                                  deps: ["iv_access"] },
   // Major
-  { id: "call_major",     level: "major",   type: "call",     title: "Escalate — major PPH",                  detail: "• Senior obstetrician\n• Anaesthetist\n• Alert theatre\n• Activate major PPH protocol\n• Alert blood transfusion lab",                                   followUpDelay: 120 },
+  { id: "call_major",     level: "major",   type: "call",     title: "Escalate — major PPH",                  detail: "• Senior obstetrician\n• Anaesthetist\n• Alert theatre\n• Activate major PPH protocol\n• Alert blood transfusion lab",                                   followUpDelay: 120, critical: true },
   { id: "second_cannula", level: "major",   type: "access",   title: "2nd large bore cannula",                detail: "14G or 16G — insert now\nCrossmatch 4 units red cells urgently\nRepeat FBC and coagulation",                                                              followUpDelay: 90, critical: true },
   { id: "rapid_cryst",    level: "major",   type: "fluid",    title: "Rapid crystalloid",                     detail: "Hartmann's 1.5–2 L rapidly\nO-negative blood if life-threatening — do not wait for crossmatch",                                                           deps: ["iv_access"] },
   { id: "blood_products", level: "major",   type: "blood",    title: "Blood products",                        detail: "• FFP 4 units — coagulopathy or fibrinogen <1.5 g/L\n• Cryoprecipitate 2 pools — fibrinogen <2 g/L\n• Platelets — if <75 × 10⁹/L",                       deps: ["iv_access"] },
@@ -48,36 +48,50 @@ function getLevel(ml) {
   return "minor";
 }
 
-function computeNextPrompt({ taskStates, level, fourTsDone, log, txaTime, carboCount, carboLastTime, now }) {
+function computeNextPrompt({ taskStates, level, fourTsDone, log, txaTime, txaHandled, carboCount, carboLastTime, now }) {
   function depsOk(task) {
     return (task.deps || []).every(id => ["done", "skipped"].includes(taskStates[id]?.status));
   }
   function relevant(task) { return levelVal(task.level) <= levelVal(level); }
   function st(id) { return taskStates[id]?.status ?? null; }
 
-  if (!fourTsDone && ["done", "skipped"].includes(st("bimanual"))) return { type: "four_ts" };
-
+  // Priority 1 — critical follow-ups (overdue assigned critical tasks)
   for (const t of TASKS) {
     if (!relevant(t) || st(t.id) !== "assigned" || !t.followUpDelay || !t.critical) continue;
     if ((now - (taskStates[t.id].assignedAt || 0)) / 1000 >= t.followUpDelay) return { type: "followup", task: t };
   }
 
+  // Priority 2 — blood loss check
   const blInterval = level === "massive" ? 180 : level === "major" ? 240 : 300;
   const lastBL = [...log].reverse().find(e => e.kind === "blood_loss");
   if (lastBL && (now - lastBL.time) / 1000 > blInterval) return { type: "blood_loss_check" };
 
+  // Priority 3 — Four T's documentation (only after bimanual attempted)
+  if (!fourTsDone && ["done", "skipped"].includes(st("bimanual"))) return { type: "four_ts" };
+
+  // Priority 4 — non-critical follow-ups
   for (const t of TASKS) {
     if (!relevant(t) || st(t.id) !== "assigned" || !t.followUpDelay) continue;
     if ((now - (taskStates[t.id].assignedAt || 0)) / 1000 >= t.followUpDelay) return { type: "followup", task: t };
   }
 
+  // Priority 5 — critical unstarted tasks (surface them ahead of regular queue)
+  for (const t of TASKS) {
+    if (!relevant(t) || st(t.id) !== null || !depsOk(t) || !t.critical) continue;
+    if (t.special === "txa" && txaHandled) continue;
+    if (t.special === "carbo" && carboCount > 0) continue;
+    return { type: "task", task: t };
+  }
+
+  // Priority 6 — carboprost repeat dose
   if (carboCount > 0 && carboCount < 8 && carboLastTime && (now - carboLastTime) / 1000 >= 15 * 60) {
     return { type: "carbo_dose" };
   }
 
+  // Priority 7 — next regular task
   for (const t of TASKS) {
     if (!relevant(t) || st(t.id) !== null || !depsOk(t)) continue;
-    if (t.special === "txa" && txaTime) continue;
+    if (t.special === "txa" && txaHandled) continue;
     if (t.special === "carbo" && carboCount > 0) continue;
     return { type: "task", task: t };
   }
@@ -417,7 +431,8 @@ function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount,
 
 function TaskRow({ task, state, taskStates, now, onConfirm }) {
   const status = state?.status ?? null;
-  const isLocked = !status && (task.deps || []).some(id => !["done", "skipped"].includes(taskStates[id]?.status));
+  const blockingDeps = (task.deps || []).filter(id => !["done", "skipped"].includes(taskStates[id]?.status));
+  const isLocked = !status && blockingDeps.length > 0;
 
   if (status === "done") {
     return (
@@ -451,10 +466,12 @@ function TaskRow({ task, state, taskStates, now, onConfirm }) {
   }
 
   if (isLocked) {
+    const blockingTitle = TASKS.find(t => t.id === blockingDeps[0])?.title ?? blockingDeps[0];
     return (
       <div className="flex items-center gap-3 px-4 py-1.5 opacity-30">
         <span className="text-gray-700 text-xs w-3 shrink-0">○</span>
-        <span className="text-gray-700 text-sm">{task.title}</span>
+        <span className="text-gray-700 text-sm flex-1">{task.title}</span>
+        <span className="text-gray-700 text-xs shrink-0">awaits {blockingTitle}</span>
       </div>
     );
   }
@@ -505,13 +522,29 @@ function TaskList({ taskStates, level, now, onConfirmTask }) {
 
 function SetupScreen({ onConfirm }) {
   const [ml, setMl] = useState("");
+  const [birthTimeInput, setBirthTimeInput] = useState("");
   const presets = [
     { v: 500,  label: "500 ml",   sub: "Minor PPH" },
     { v: 1000, label: "1,000 ml", sub: "Major PPH" },
     { v: 1500, label: "1,500 ml", sub: "Major" },
     { v: 2000, label: "2,000 ml", sub: "Massive PPH" },
   ];
-  function submit(v) { const n = Number(v); if (!isNaN(n) && n >= 0) onConfirm(n); }
+
+  function parseBirthTime() {
+    if (!birthTimeInput.trim()) return null;
+    const [hh, mm] = birthTimeInput.split(":").map(Number);
+    if (isNaN(hh) || isNaN(mm)) return null;
+    const d = new Date();
+    d.setHours(hh, mm, 0, 0);
+    // if parsed time is in the future, assume previous day
+    if (d.getTime() > Date.now()) d.setDate(d.getDate() - 1);
+    return d.getTime();
+  }
+
+  function submit(v) {
+    const n = Number(v);
+    if (!isNaN(n) && n >= 0) onConfirm(n, parseBirthTime());
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col justify-center px-6 gap-8">
@@ -539,6 +572,14 @@ function SetupScreen({ onConfirm }) {
         <button onClick={() => submit(ml)} className="bg-white text-gray-950 font-bold px-6 py-3 rounded-xl text-sm">
           Start →
         </button>
+      </div>
+      <div>
+        <p className="text-gray-600 text-xs mb-2">Birth time <span className="text-gray-700">(for TXA 3-hour window)</span></p>
+        <input
+          type="time" value={birthTimeInput} onChange={e => setBirthTimeInput(e.target.value)}
+          className="w-full bg-gray-900 border border-gray-800 focus:border-gray-600 text-white rounded-xl px-4 py-3 text-sm outline-none transition"
+        />
+        <p className="text-gray-700 text-xs mt-1.5">Leave blank to use emergency start time</p>
       </div>
     </div>
   );
@@ -601,6 +642,8 @@ export default function EmergencyPage({ onClose }) {
   const [fourTsDone, setFourTsDone] = useState(false);
   const [log, setLog] = useState([]);
   const [txaTime, setTxaTime] = useState(null);
+  const [txaHandled, setTxaHandled] = useState(false);
+  const [birthTime, setBirthTime] = useState(null);
   const [carboCount, setCarboCount] = useState(0);
   const [carboLastTime, setCarboLastTime] = useState(null);
   const [resolveTime, setResolveTime] = useState(null);
@@ -638,8 +681,10 @@ export default function EmergencyPage({ onClose }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [level, phase]);
 
+  const effectiveBirthTime = birthTime ?? emergencyStartTime;
+
   const prompt = phase === "active"
-    ? computeNextPrompt({ taskStates, level, fourTsDone, log, txaTime, carboCount, carboLastTime, now })
+    ? computeNextPrompt({ taskStates, level, fourTsDone, log, txaTime, txaHandled, carboCount, carboLastTime, now })
     : null;
 
   const relevantTasks = TASKS.filter(t => levelVal(t.level) <= levelVal(level));
@@ -647,42 +692,43 @@ export default function EmergencyPage({ onClose }) {
 
   // ── Handlers ──
 
-  function handleSetup(ml) {
+  function handleSetup(ml, bt) {
     setBloodLoss(ml);
+    if (bt) setBirthTime(bt);
     prevLevelRef.current = getLevel(ml);
     setLog([{ kind: "blood_loss", label: `Initial blood loss: ${ml} ml`, time: Date.now() }]);
     setPhase("active");
   }
 
   function handleAddBlood(delta) {
-    setBloodLoss(prev => {
-      const next = prev + delta;
-      addLog("blood_loss", `+${delta} ml → ${next} ml`);
-      return next;
-    });
+    const next = bloodLoss + delta;
+    setBloodLoss(next);
+    addLog("blood_loss", `+${delta} ml → ${next} ml`);
   }
 
   function handleDone(task) {
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: Date.now() } }));
     addLog("task_done", `Done: ${task.title}`);
-    if (task.special === "txa") setTxaTime(Date.now());
+    if (task.special === "txa") { setTxaTime(Date.now()); setTxaHandled(true); }
     if (task.special === "carbo") { setCarboCount(1); setCarboLastTime(Date.now()); }
   }
 
   function handleAssign(task) {
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "assigned", assignedAt: Date.now() } }));
     addLog("task_assigned", `Assigned: ${task.title}`);
+    if (task.special === "txa") setTxaHandled(true);
   }
 
   function handleSkip(task) {
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "skipped", skippedAt: Date.now() } }));
     addLog("task_skipped", `Skipped: ${task.title}`);
-    if (task.special === "txa") setTxaTime(Date.now());
+    if (task.special === "txa") setTxaHandled(true);
   }
 
   function handleFollowupYes(task) {
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: Date.now() } }));
     addLog("followup_done", `Confirmed done: ${task.title}`);
+    if (task.special === "txa") { setTxaTime(Date.now()); setTxaHandled(true); }
   }
 
   function handleFollowupNo(task) {
@@ -697,11 +743,9 @@ export default function EmergencyPage({ onClose }) {
   }
 
   function handleBloodAdd(delta) {
-    setBloodLoss(prev => {
-      const next = prev + delta;
-      addLog("blood_loss", `Blood loss check: +${delta} ml → ${next} ml`);
-      return next;
-    });
+    const next = bloodLoss + delta;
+    setBloodLoss(next);
+    addLog("blood_loss", `Blood loss check: +${delta} ml → ${next} ml`);
   }
 
   function handleBloodUnchanged() {
@@ -724,12 +768,20 @@ export default function EmergencyPage({ onClose }) {
     const task = TASKS.find(t => t.id === taskId);
     setTaskStates(prev => ({ ...prev, [taskId]: { status: "done", doneAt: Date.now() } }));
     addLog("task_done", `Confirmed done: ${task?.title ?? taskId}`);
+    if (task?.special === "txa") { setTxaTime(Date.now()); setTxaHandled(true); }
   }
 
   function handleStandDown() {
     const t = Date.now();
+    const unresolvedEntries = TASKS
+      .filter(task => taskStates[task.id]?.status === "assigned")
+      .map(task => ({ kind: "unresolved", label: `Unresolved at stand-down: ${task.title}`, time: t }));
     setResolveTime(t);
-    setLog(prev => [...prev, { kind: "stand_down", label: `Emergency stood down — ${bloodLoss} ml total`, time: t }]);
+    setLog(prev => [
+      ...prev,
+      { kind: "stand_down", label: `Emergency stood down — ${bloodLoss} ml total`, time: t },
+      ...unresolvedEntries,
+    ]);
     setStandDownConfirm(false);
     setPhase("summary");
   }
@@ -764,7 +816,7 @@ export default function EmergencyPage({ onClose }) {
 
       <DrugStrip
         txaTime={txaTime}
-        birthTime={emergencyStartTime}
+        birthTime={effectiveBirthTime}
         carboCount={carboCount}
         carboLastTime={carboLastTime}
         now={now}
