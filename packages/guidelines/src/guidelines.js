@@ -17,6 +17,7 @@ export const GUIDELINES = {
   NG88: { code: "NG88", label: "Heavy Menstrual Bleeding", version: "NG88", date: "September 2023", color: "fuchsia", pdf: true, pdfPath: "/guidelines/heavy-menstrual-bleeding-assessment-and-management-pdf-1837701412549.pdf", source: "NICE" },
   GTG67:    { code: "GTG67",    label: "Management of Endometrial Hyperplasia", version: "GTG67",    date: "February 2016", color: "green", pdf: true, pdfPath: "/guidelines/gtg_67_endometrial_hyperplasia.pdf", source: "RCOG" },
   NHSCSP20: { code: "NHSCSP20", label: "Cervical Screening & Colposcopy",        version: "NHSCSP20", date: "2020 (updated 2025)", color: "slate", pdf: false, source: "NHSCSP" },
+  GTG42: { code: "GTG42", label: "Shoulder Dystocia",                   version: "GTG42", date: "March 2012",                     color: "orange", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/media/d3djxnhh/gtg_42.pdf" },
   GTG52: { code: "GTG52", label: "Postpartum Haemorrhage",                version: "GTG52", date: "December 2016",                color: "red",    pdf: true, source: "RCOG", pdfUrl: "https://obgyn.onlinelibrary.wiley.com/doi/epdf/10.1111/1471-0528.14178" },
   GTG69: { code: "GTG69", label: "Nausea & Vomiting of Pregnancy",        version: "GTG69", date: "June 2016",                     color: "orange", pdf: true, source: "RCOG", pdfUrl: "https://obgyn.onlinelibrary.wiley.com/doi/epdf/10.1111/1471-0528.17739" },
   NG25:  { code: "NG25",  label: "Preterm Labour & Birth",                version: "NG25",  date: "November 2015 (updated 2022)", color: "sky",    pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng25/resources/preterm-labour-and-birth-pdf-1837333576645" },
@@ -25,6 +26,8 @@ export const GUIDELINES = {
   CG192: { code: "CG192", label: "Perinatal Mental Health",               version: "NG192", date: "December 2014 (updated 2020)", color: "purple", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/cg192/resources/antenatal-and-postnatal-mental-health-clinical-management-and-service-guidance-pdf-35109869806789" },
   NG133: { code: "NG133", label: "Hypertension in Pregnancy",             version: "NG133", date: "June 2019 (updated 2023)",     color: "cyan",   pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng133/resources/hypertension-in-pregnancy-diagnosis-and-management-pdf-66141782348997" },
   BASHH_PID: { code: "BASHH_PID", label: "Pelvic Inflammatory Disease", version: "2019", date: "2018 (updated 2019)", color: "fuchsia", pdf: true, source: "BASHH", pdfUrl: "https://www.bashh.org/resources/6/pid_2019/" },
+  NG73: { code: "NG73", label: "Endometriosis", version: "NG73", date: "September 2017 (updated 2024)", color: "purple", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng73/resources/endometriosis-diagnosis-and-management-pdf-1837632548293" },
+  MBRRACE_SLMC2025: { code: "MBRRACE_SLMC2025", label: "MBRRACE 2025", version: "2021–23 data", date: "September 2025", color: "rose", pdf: true, source: "MBRRACE", pdfUrl: "https://www.npeu.ox.ac.uk/assets/downloads/mbrrace-uk/reports/maternal-report-2025/MBRRACE-UK%20Maternal%20Report%202025%20-%20Main%20v1.2.pdf" },
 };
 
 export const GL_COLORS = {
@@ -54,4 +57,5 @@ export const GL_COLORS = {
   CG192: { badge: "bg-purple-900/50 text-purple-300 border-purple-600/40", dot: "bg-purple-400" },
   NG133: { badge: "bg-cyan-900/50 text-cyan-300 border-cyan-600/40",       dot: "bg-cyan-400" },
   BASHH_PID: { badge: "bg-fuchsia-900/50 text-fuchsia-300 border-fuchsia-600/40", dot: "bg-fuchsia-400" },
+  NG73: { badge: "bg-purple-900/50 text-purple-300 border-purple-600/40", dot: "bg-purple-400" },
 };

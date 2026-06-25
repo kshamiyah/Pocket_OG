@@ -22,14 +22,52 @@ function timeInputNow() {
   const d = new Date();
   return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
 }
-function timeToISO(str) {
+
+const DAY_PICKER_OPTIONS = [
+  { label: "Today",     daysAgo: 0 },
+  { label: "Yesterday", daysAgo: 1 },
+  { label: "−2 days",   daysAgo: 2 },
+  { label: "−3 days",   daysAgo: 3 },
+];
+
+function calendarDaysAgo(date) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const sel = new Date(date);
+  sel.setHours(0, 0, 0, 0);
+  return Math.max(0, Math.round((today - sel) / 86400000));
+}
+
+/** HH:MM + explicit daysAgo → Date; on Today only, future times roll to yesterday */
+function resolveTimeInput(str, daysAgo = 0) {
   const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
   const [h, m] = str.split(":").map(Number);
   d.setHours(h, m, 0, 0);
-  // If the result is more than 1 hour in the future, the time refers to yesterday
-  if (d.getTime() > Date.now() + 60 * 60 * 1000) d.setDate(d.getDate() - 1);
-  return d.toISOString();
+  if (daysAgo === 0 && d.getTime() > Date.now() + 60 * 60 * 1000) d.setDate(d.getDate() - 1);
+  return d;
 }
+
+function timeToISO(str, daysAgo = 0) {
+  if (!str) return null;
+  return resolveTimeInput(str, daysAgo).toISOString();
+}
+
+function isoToTimeFields(iso) {
+  if (!iso) return { time: "", daysAgo: 0 };
+  const d = new Date(iso);
+  return {
+    time: fmtTime(iso),
+    daysAgo: Math.min(calendarDaysAgo(d), DAY_PICKER_OPTIONS.at(-1).daysAgo),
+  };
+}
+
+function formatDayLabel(daysAgo, resolvedDate) {
+  if (daysAgo === 0) return "Today";
+  if (daysAgo === 1) return "Yesterday";
+  return resolvedDate.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+}
+
 function fmtTime(iso) {
   if (!iso) return "—";
   const d = new Date(iso);
@@ -69,6 +107,13 @@ const IOL_REASONS = [
   "Maternal request",
   "Other",
 ];
+
+const IOL_START_HINT = {
+  Dinoprostone: "Propess insertion / first dose",
+  Balloon:      "Balloon insertion",
+  Misoprostol:  "First dose",
+  "ARM+Synto":  "ARM or syntocinon start",
+};
 
 const TASK_QUICK = [
   "Repeat FBC",
@@ -346,85 +391,166 @@ function ChipGroup({ options, selected, onChange }) {
   );
 }
 
-/** Time field — Now default + quick offset pills + ago confirmation */
-function NowField({ label, value, onChange }) {
+const COMMON_TIMES = ["08:00", "14:00", "18:00", "22:00"];
+
+function shiftTime(clock, daysAgo, deltaMins) {
+  const d = resolveTimeInput(clock, daysAgo);
+  d.setMinutes(d.getMinutes() + deltaMins);
+  let newDays = calendarDaysAgo(d);
+  const maxDays = DAY_PICKER_OPTIONS.at(-1).daysAgo;
+  if (newDays > maxDays) {
+    newDays = maxDays;
+    const anchored = new Date();
+    anchored.setDate(anchored.getDate() - maxDays);
+    anchored.setHours(d.getHours(), d.getMinutes(), 0, 0);
+    d.setTime(anchored.getTime());
+  }
+  if (newDays < 0) newDays = 0;
+  const time = `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+  return { time, daysAgo: newDays };
+}
+
+function formatWhenPreview(time, daysAgo) {
+  const clock = time || timeInputNow();
+  const d = resolveTimeInput(clock, daysAgo);
+  const ms = Date.now() - d.getTime();
+  const daysBack = calendarDaysAgo(d);
+  const ago = ms >= 60 * 1000 ? `${fmtAge(ms)} ago` : ms >= 0 ? "Just now" : null;
+  let main;
+  if (daysBack === 0) main = `Today at ${clock}`;
+  else if (daysBack === 1) main = `Yesterday at ${clock}`;
+  else main = `${formatDayLabel(daysBack, d)} at ${clock}`;
+  return { main, sub: ago };
+}
+
+/** When? — date + time picker with live preview; compact mode shows summary until Edit */
+function NowField({ label, value, onChange, daysAgo: daysAgoProp = 0, compact = false }) {
   const [modified, setModified]     = useState(false);
   const [showCustom, setShowCustom] = useState(false);
+  const [daysAgo, setDaysAgo]       = useState(daysAgoProp);
+  const [expanded, setExpanded]     = useState(!compact);
 
-  // How long ago is the currently selected time?
-  const agoLabel = (() => {
-    if (!modified || !value) return null;
-    const now = new Date();
-    const [h, m] = value.split(":").map(Number);
-    const sel = new Date();
-    sel.setHours(h, m, 0, 0);
-    const mins = Math.round((now - sel) / 60000);
-    if (mins <= 0) return null;
-    if (mins < 60) return `${mins}m ago`;
-    const hh = Math.floor(mins / 60), mm = mins % 60;
-    return mm > 0 ? `${hh}h ${mm}m ago` : `${hh}h ago`;
-  })();
+  useEffect(() => {
+    setDaysAgo(daysAgoProp);
+    if (daysAgoProp > 0 || (value && value !== timeInputNow())) setModified(true);
+  }, [daysAgoProp, value]);
 
-  const setOffset = mins => {
-    const d = new Date(Date.now() - mins * 60000);
-    onChange(`${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`);
-    setModified(true);
-    setShowCustom(false);
-  };
+  const clock = value || timeInputNow();
+  const preview = formatWhenPreview(modified ? clock : timeInputNow(), modified ? daysAgo : 0);
+
+  const emit = (time, days = daysAgo) => onChange(time, days);
 
   const setNow = () => {
-    onChange(timeInputNow());
+    setDaysAgo(0);
+    emit(timeInputNow(), 0);
     setModified(false);
     setShowCustom(false);
   };
 
+  const pickDay = days => {
+    setDaysAgo(days);
+    emit(clock, days);
+    setModified(true);
+    setShowCustom(false);
+  };
+
+  const pickTime = time => {
+    emit(time, daysAgo);
+    setModified(true);
+    setShowCustom(false);
+  };
+
+  const nudge = deltaMins => {
+    const base = modified ? clock : timeInputNow();
+    const baseDays = modified ? daysAgo : 0;
+    const { time, daysAgo: newDays } = shiftTime(base, baseDays, deltaMins);
+    setDaysAgo(newDays);
+    emit(time, newDays);
+    setModified(true);
+    setExpanded(true);
+  };
+
+  const stepBtn = "w-11 self-stretch rounded-2xl bg-gray-100 flex items-center justify-center text-xl font-bold text-gray-700 active:scale-95 transition-all shrink-0";
+
+  if (compact && !expanded) {
+    return (
+      <button type="button" onClick={() => setExpanded(true)}
+        className="w-full flex items-center justify-between gap-3 rounded-2xl bg-gray-50 border border-gray-200 px-4 py-4 active:scale-[0.99] transition-all">
+        <div className="text-left min-w-0">
+          <p className="text-sm font-bold text-gray-900 truncate">{preview.main}</p>
+          {preview.sub && <p className="text-xs text-gray-400 mt-0.5">{preview.sub}</p>}
+        </div>
+        <span className="text-xs font-bold text-gray-500 shrink-0">Edit</span>
+      </button>
+    );
+  }
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {label && <p className="text-xs font-semibold text-gray-500">{label}</p>}
 
-      {/* Main time row */}
-      <div className="flex gap-2">
-        {!modified ? (
-          <button onClick={setNow}
-            className="flex-1 py-3.5 rounded-xl bg-gray-900 text-white text-sm font-bold active:scale-95 transition-all">
-            Now &nbsp;·&nbsp; {timeInputNow()}
-          </button>
-        ) : (
-          <>
-            <div className="flex-1 py-3.5 px-4 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-between">
-              <span className="text-sm font-bold text-gray-900">{value}</span>
-              {agoLabel && <span className="text-xs font-semibold text-gray-500">{agoLabel}</span>}
-            </div>
-            <button onClick={setNow}
-              className="px-4 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-600 active:scale-95 transition-all">
-              Now
-            </button>
-          </>
-        )}
+      {compact && (
+        <button type="button" onClick={() => { setExpanded(false); setShowCustom(false); }}
+          className="text-[11px] font-semibold text-gray-400 active:text-gray-600">
+          Collapse
+        </button>
+      )}
+
+      {/* Preview + single ±15 min stepper */}
+      <div className="flex items-stretch gap-2">
+        <button type="button" aria-label="15 minutes earlier" onClick={() => nudge(-15)} className={stepBtn}>−</button>
+        <div className="flex-1 rounded-2xl bg-gray-900 text-white px-4 py-3.5 text-center min-w-0">
+          <p className="text-sm font-bold leading-snug">{preview.main}</p>
+          {preview.sub && <p className="text-xs text-gray-400 mt-0.5">{preview.sub}</p>}
+        </div>
+        <button type="button" aria-label="15 minutes later" onClick={() => nudge(15)} className={stepBtn}>+</button>
       </div>
 
-      {/* Quick offset pills */}
+      {modified && (
+        <button type="button" onClick={setNow}
+          className="text-[11px] font-semibold text-gray-400 active:text-gray-600">
+          Reset to now
+        </button>
+      )}
+
+      {/* Date */}
       <div className="flex gap-1.5">
-        {[15, 30, 60, 120, 180, 240].map(mins => (
-          <button key={mins} onClick={() => setOffset(mins)}
-            className="flex-1 py-3 rounded-xl bg-gray-100 text-xs font-bold text-gray-600 active:scale-95 transition-all">
-            {mins < 60 ? `−${mins}m` : `−${mins / 60}h`}
+        {DAY_PICKER_OPTIONS.map(({ label: dayLabelOpt, daysAgo: d }) => (
+          <button key={d} type="button" onClick={() => pickDay(d)}
+            className={`flex-1 py-2.5 rounded-xl text-[11px] font-bold transition-colors active:scale-95 ${
+              (d === 0 && !modified) || (modified && daysAgo === d)
+                ? "bg-gray-900 text-white"
+                : "bg-gray-100 text-gray-600"
+            }`}>
+            {dayLabelOpt}
           </button>
         ))}
       </div>
 
-      {/* Custom time entry */}
-      {showCustom ? (
-        <div className="flex gap-2">
-          <input type="time" autoFocus defaultValue={value || timeInputNow()}
-            onChange={e => { onChange(e.target.value); setModified(true); }}
-            className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-gray-800" />
-          <button onClick={() => setShowCustom(false)}
-            className="px-4 py-3 rounded-xl bg-gray-900 text-white text-sm font-semibold">Done</button>
-        </div>
-      ) : (
-        <button onClick={() => setShowCustom(true)}
-          className="text-[11px] text-gray-400 ml-0.5">Custom time…</button>
+      {/* Quick times — tap to set, use ± above to fine-tune */}
+      <div className="flex gap-1.5">
+        {COMMON_TIMES.map(t => (
+          <button key={t} type="button" onClick={() => pickTime(t)}
+            className={`flex-1 py-2.5 rounded-xl text-[11px] font-bold transition-colors active:scale-95 ${
+              modified && clock === t
+                ? "bg-gray-900 text-white"
+                : "bg-gray-100 text-gray-600"
+            }`}>
+            {t}
+          </button>
+        ))}
+        <button type="button" onClick={() => setShowCustom(v => !v)}
+          className={`px-3 py-2.5 rounded-xl text-[11px] font-bold transition-colors active:scale-95 ${
+            showCustom ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600"
+          }`}>
+          ···
+        </button>
+      </div>
+
+      {showCustom && (
+        <input type="time" autoFocus defaultValue={clock}
+          onChange={e => pickTime(e.target.value)}
+          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:border-gray-400" />
       )}
     </div>
   );
@@ -479,8 +605,14 @@ function VESheet({ bed, editVE, onSave }) {
   const [membTime, setMembTime]  = useState(
     editVE?.membranesTime ? fmtTime(editVE.membranesTime) : timeInputNow()
   );
+  const [membDaysAgo, setMembDaysAgo] = useState(
+    editVE?.membranesTime ? isoToTimeFields(editVE.membranesTime).daysAgo : 0
+  );
   const [veTime, setVETime]      = useState(
     editVE?.time ? fmtTime(editVE.time) : timeInputNow()
+  );
+  const [veDaysAgo, setVeDaysAgo] = useState(
+    editVE?.time ? isoToTimeFields(editVE.time).daysAgo : 0
   );
   const [station, setStn]        = useState(editVE?.station ?? lastVE?.station ?? 0);
   const [presentation, setPres]  = useState(editVE?.presentation ?? "Cephalic");
@@ -491,10 +623,10 @@ function VESheet({ bed, editVE, onSave }) {
     if (dilation === null) return;
     onSave({
       id: editVE?.id ?? `ve-${Date.now()}`,
-      time: timeToISO(veTime),
+      time: timeToISO(veTime, veDaysAgo),
       dilation, station, presentation, membranes,
       membranesTime: membranes !== "Intact"
-        ? (editVE ? timeToISO(membTime) : prevMembTime && lastVE?.membranes === membranes ? prevMembTime : timeToISO(membTime))
+        ? (editVE ? timeToISO(membTime, membDaysAgo) : prevMembTime && lastVE?.membranes === membranes ? prevMembTime : timeToISO(membTime, membDaysAgo))
         : null,
       liquor: membranes !== "Intact" ? liquor : null,
       contractions,
@@ -528,7 +660,8 @@ function VESheet({ bed, editVE, onSave }) {
               <PillRow value={membranes} onChange={setMemb} options={["Intact","SROM","AROM"]} />
               {membranes !== "Intact" && (
                 <div className="mt-3">
-                  <NowField label={`Time of ${membranes}`} value={membTime} onChange={setMembTime} />
+                  <NowField label={`Time of ${membranes}`} value={membTime} daysAgo={membDaysAgo}
+                    onChange={(t, d) => { setMembTime(t); setMembDaysAgo(d); }} />
                 </div>
               )}
             </div>
@@ -551,7 +684,8 @@ function VESheet({ bed, editVE, onSave }) {
 
         {page === 2 && (
           <div className="px-5 pt-2 pb-4 space-y-6">
-            <NowField label="Time of VE" value={veTime} onChange={setVETime} />
+            <NowField label="Time of VE" value={veTime} daysAgo={veDaysAgo}
+              onChange={(t, d) => { setVETime(t); setVeDaysAgo(d); }} />
 
             <div>
               <SLabel className="mb-3">Station</SLabel>
@@ -608,8 +742,14 @@ function OxySheet({ bed, onSave }) {
   const current = bed.oxytocinLog?.[bed.oxytocinLog.length - 1];
   const [dose, setDose]     = useState(current?.dose ?? 2);
   const [oxyTime, setOTime] = useState(timeInputNow);
+  const [oxyDaysAgo, setOxyDaysAgo] = useState(0);
 
-  const save = () => onSave({ id:`ox-${Date.now()}`, startTime: timeToISO(oxyTime), dose, lastIncrementTime: timeToISO(oxyTime) });
+  const save = () => onSave({
+    id:`ox-${Date.now()}`,
+    startTime: timeToISO(oxyTime, oxyDaysAgo),
+    dose,
+    lastIncrementTime: timeToISO(oxyTime, oxyDaysAgo),
+  });
 
   return (
     <>
@@ -626,7 +766,8 @@ function OxySheet({ bed, onSave }) {
             </ul>
           </div>
 
-          <NowField label="Time of dose change" value={oxyTime} onChange={setOTime} />
+          <NowField label="Time of dose change" value={oxyTime} daysAgo={oxyDaysAgo}
+            onChange={(t, d) => { setOTime(t); setOxyDaysAgo(d); }} />
 
           <div>
             <div className="flex items-baseline justify-between mb-3">
@@ -657,7 +798,8 @@ const EBL_PRESETS = [200, 500, 1000, 1500];
 
 function DeliverySheet({ bed, onSave }) {
   const ex = bed.delivery ?? null;
-  const [delivTime, setDelivTime] = useState(timeInputNow);
+  const [delivTime, setDelivTime] = useState(ex?.time ? fmtTime(ex.time) : timeInputNow());
+  const [delivDaysAgo, setDelivDaysAgo] = useState(ex?.time ? isoToTimeFields(ex.time).daysAgo : 0);
   const [mode, setMode]           = useState(ex?.mode ?? "SVD");
   const [ebl, setEbl]             = useState(ex?.ebl != null ? String(ex.ebl) : "");
   const [notes, setNotes]         = useState(ex?.notes ?? "");
@@ -665,7 +807,7 @@ function DeliverySheet({ bed, onSave }) {
   const eblNum = ebl ? parseFloat(ebl) : null;
 
   const save = () => onSave({
-    time:  timeToISO(delivTime),
+    time:  timeToISO(delivTime, delivDaysAgo),
     mode,
     ebl:   eblNum,
     notes: notes.trim() || null,
@@ -676,7 +818,8 @@ function DeliverySheet({ bed, onSave }) {
       <div className="overflow-y-auto overscroll-contain flex-1 min-h-0">
         <div className="px-5 pt-4 pb-4 space-y-5">
 
-          <NowField label="Time of delivery" value={delivTime} onChange={setDelivTime} />
+          <NowField label="Time of delivery" value={delivTime} daysAgo={delivDaysAgo}
+            onChange={(t, d) => { setDelivTime(t); setDelivDaysAgo(d); }} />
 
           <div>
             <SLabel className="mb-2">Mode of delivery</SLabel>
@@ -751,6 +894,7 @@ function CTGSheet({ bed, editCTG = null, onSave }) {
   const prevHR = prevEntry?.baselineHR ?? null;
 
   const [ctgTime, setCTGTime]     = useState(editCTG ? fmtTime(editCTG.time) : timeInputNow());
+  const [ctgDaysAgo, setCtgDaysAgo] = useState(editCTG ? isoToTimeFields(editCTG.time).daysAgo : 0);
   const [hr, setHR]               = useState(editCTG?.baselineHR ?? prevHR ?? 140);
   const [variability, setVar]     = useState(editCTG?.variability ?? "5-25");
   const [varMin, setVarMin]       = useState(editCTG?.variabilityMinutes ?? 0);
@@ -778,7 +922,7 @@ function CTGSheet({ bed, editCTG = null, onSave }) {
 
   const save = () => onSave({
     id: editCTG?.id ?? `ctg-${Date.now()}`,
-    time: timeToISO(ctgTime),
+    time: timeToISO(ctgTime, ctgDaysAgo),
     baselineHR: hr, variability, variabilityMinutes: varMin,
     decelerations: decels, decelerationMinutes: decelMin,
     accelerations, contractionsPerTen: ctxPer10,
@@ -799,7 +943,8 @@ function CTGSheet({ bed, editCTG = null, onSave }) {
             </div>
           </div>
 
-          <NowField label="Time of CTG review" value={ctgTime} onChange={setCTGTime} />
+          <NowField label="Time of CTG review" value={ctgTime} daysAgo={ctgDaysAgo}
+            onChange={(t, d) => { setCTGTime(t); setCtgDaysAgo(d); }} />
 
           {/* Baseline HR */}
           <div>
@@ -978,372 +1123,511 @@ function CTGSheet({ bed, editCTG = null, onSave }) {
   );
 }
 
-// ─── Admission wizard — 2 steps ───────────────────────────────────────────
+// ─── Admission wizard — one question per page ─────────────────────────────
 
-function WizardDots({ step, total = 4 }) {
-  return (
-    <div className="flex gap-1.5">
-      {Array.from({ length: total }, (_, i) => i + 1).map(i => (
-        <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i <= step ? "w-5 bg-gray-900" : "w-1.5 bg-gray-200"}`} />
-      ))}
-    </div>
-  );
+const ADM_PHASE_DEFS = [
+  { id: "patient",  label: "Patient",  ids: ["bed", "demographics"] },
+  { id: "handover", label: "Handover", ids: ["flags", "stage", "analgesia", "mode", "membranes", "liquor"] },
+  { id: "finish",   label: "Finish",   ids: ["indMethod", "iolReasons", "iolStart", "admTime", "handoverVE", "veTime", "dilation", "veExtras"] },
+];
+
+function buildAdmissionQuestions({ mode, admMembranes, handoverVEAnswered, hasHandoverVE, expressIOL }) {
+  if (expressIOL) {
+    const qs = ["bed", "stage", "indMethod", "iolStart", "handoverVE"];
+    if (handoverVEAnswered && hasHandoverVE) qs.push("veTime", "dilation", "veExtras");
+    return qs;
+  }
+  const qs = ["bed", "demographics", "flags", "stage", "analgesia", "mode"];
+  if (mode !== "PPROM") {
+    qs.push("membranes");
+    if (admMembranes !== "Intact") qs.push("liquor");
+  }
+  if (mode === "Induced") qs.push("indMethod", "iolReasons", "iolStart");
+  qs.push("admTime", "handoverVE");
+  if (handoverVEAnswered && hasHandoverVE) qs.push("veTime", "dilation", "veExtras");
+  return qs;
 }
 
-function AdmissionWizard({ existingNumbers, onSave, onCancel, initialValues = null }) {
-  const [step, setStep]       = useState(1);
+function getAdmissionProgress(questions, qIndex) {
+  const qId = questions[qIndex];
+  for (const phase of ADM_PHASE_DEFS) {
+    const inPhase = questions.filter(q => phase.ids.includes(q));
+    const idx = inPhase.indexOf(qId);
+    if (idx >= 0) return { phaseLabel: phase.label, stepInPhase: idx + 1, totalInPhase: inPhase.length };
+  }
+  return { phaseLabel: "Admission", stepInPhase: qIndex + 1, totalInPhase: questions.length };
+}
+
+function admissionContextChip(bedNum, parity, gestWeeks, gestDays) {
+  if (!bedNum.trim()) return null;
+  const parts = [`Bed ${bedNum.trim()}`];
+  if (parity) parts.push(parity.replace("Para ", "P"));
+  parts.push(`${gestWeeks}+${gestDays}`);
+  return parts.join(" · ");
+}
+
+function buildAdmissionSummary(f) {
+  const parts = [`Bed ${f.bedNum.trim()}`];
+  if (!f.expressIOL) parts.push(f.parity.replace("Para ", "P"), `${f.gestWeeks}+${f.gestDays}`);
+  else parts.push(`${f.gestWeeks}+${f.gestDays}`);
+  if (f.stage) parts.push(STAGE_SHORT[f.stage] ?? f.stage);
+  if (f.analgesia && f.analgesia !== "None") parts.push(f.analgesia);
+  if (f.mode === "Induced") parts.push(`Induced${f.indMethod ? ` · ${f.indMethod}` : ""}`);
+  else if (f.mode === "PPROM") parts.push("PPROM");
+  if (f.flags.length) parts.push(f.flags.join(", "));
+  if (f.hasHandoverVE && f.admDilation != null) parts.push(`VE ${f.admDilation} cm`);
+  else if (!f.hasHandoverVE) parts.push("no VE on handover");
+  return parts.filter(Boolean).join(" · ");
+}
+
+const ADM_Q_META = {
+  bed:           { title: "Bed / bay number",        hint: "Which bed or bay?" },
+  demographics:  { title: "Parity & gestation",    hint: "As handed over" },
+  flags:         { title: "Risk flags",            hint: "Select all that apply — or tap None" },
+  stage:         { title: "Reported labour stage", hint: "As handed over — not from an exam now" },
+  analgesia:     { title: "Analgesia",             hint: "Current analgesia" },
+  mode:          { title: "Mode of onset",         hint: null },
+  membranes:     { title: "Membranes",             hint: null },
+  liquor:        { title: "Liquor",                hint: null },
+  indMethod:     { title: "Induction method",      hint: null },
+  iolReasons:    { title: "Indication for IOL",    hint: "Select all that apply" },
+  iolStart:      { title: "When did IOL start?",   hint: "Skip if not known" },
+  admTime:       { title: "Admission time",        hint: "Skip to use now" },
+  handoverVE:    { title: "VE on handover?",       hint: "Record last known VE if handed over" },
+  veTime:        { title: "Last VE time",          hint: null },
+  dilation:      { title: "Dilation at that VE",   hint: "Tap a circle" },
+  veExtras:      { title: "Station & contractions", hint: "Optional — skip if not known" },
+};
+
+const ADM_SLIDE_CSS = `
+  @keyframes admSlideFwd { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
+  @keyframes admSlideBack { from { opacity:0; transform:translateX(-20px); } to { opacity:1; transform:translateX(0); } }
+`;
+
+function AdmissionWizard({ existingNumbers, onSave, onCancel, initialValues = null, expressIOL = false, iolAddedAt = null }) {
+  const iolStartInit = iolAddedAt ? isoToTimeFields(iolAddedAt) : { time: timeInputNow(), daysAgo: 0 };
   const [bedNum, setBedNum]   = useState("");
   const [parity, setParity]   = useState("Para 0");
   const [gestWeeks, setGestW] = useState(initialValues?.gestWeeks ?? 40);
   const [gestDays,  setGestD] = useState(initialValues?.gestDays  ?? 0);
   const [err, setErr]         = useState("");
-  const [stage, setStage]     = useState(null);
+  const [stage, setStage]     = useState(expressIOL ? "Latent" : null);
   const [mode, setMode]       = useState(initialValues?.mode ?? "Spontaneous");
   const [indMethod, setIndM]  = useState("Dinoprostone");
   const [iolReasons, setIolR] = useState(initialValues?.iolReasons ?? []);
   const [analgesia, setAnal]  = useState("None");
   const [flags, setFlags]     = useState([]);
   const [admTime, setAdmT]    = useState(timeInputNow);
-  const [showAdmDetails, setShowAdmDetails] = useState(false);
+  const [admDaysAgo, setAdmDaysAgo] = useState(0);
+  const [iolStartTime, setIolStartTime] = useState(iolStartInit.time || timeInputNow());
+  const [iolDaysAgo, setIolDaysAgo] = useState(iolStartInit.daysAgo);
+  const [skipIolStart, setSkipIolStart] = useState(false);
+  const [skipAdmTime, setSkipAdmTime]   = useState(false);
 
-  // P4-21: warn on accidental browser/tab close mid-wizard
+  const [hasHandoverVE, setHasHandoverVE] = useState(false);
+  const [handoverVEAnswered, setHandoverVEAnswered] = useState(false);
+  const [veTime, setVeTime]               = useState("");
+  const [veDaysAgo, setVeDaysAgo]         = useState(0);
+  const [admDilation, setAdmDil]          = useState(null);
+  const [admMembranes, setAdmMemb]        = useState(mode === "PPROM" ? "SROM" : "Intact");
+  const [admLiquor, setAdmLiquor]         = useState(null);
+  const [admStation, setAdmStn]           = useState(0);
+  const [admContracts, setAdmContr]       = useState(3);
+
+  const [qIndex, setQIndex] = useState(0);
+  const [slideDir, setSlideDir] = useState(1);
+  const [showSummary, setShowSummary] = useState(false);
+
   useEffect(() => {
     const handler = e => { e.preventDefault(); e.returnValue = ""; };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
   }, []);
 
-  // Admission VE — dilation drives stage deduction
-  const [admDilation, setAdmDil]   = useState(null);
-  const [admMembranes, setAdmMemb] = useState("Intact");
-  const [admLiquor, setAdmLiquor]  = useState(null);
-  const [admStation, setAdmStn]    = useState(0);
-  const [admContracts, setAdmContr]= useState(3);
-  const [admPushing, setAdmPush]   = useState(false);
+  const questions = buildAdmissionQuestions({ mode, admMembranes, handoverVEAnswered, hasHandoverVE, expressIOL });
+  const qId = questions[Math.min(qIndex, questions.length - 1)] ?? "bed";
+  const meta  = ADM_Q_META[qId];
+  const { phaseLabel, stepInPhase, totalInPhase } = getAdmissionProgress(questions, qIndex);
+  const demoIdx = questions.indexOf("demographics");
+  const showContext = bedNum.trim() && (expressIOL ? qIndex > 0 : (demoIdx < 0 || qIndex > demoIdx));
+  const contextChip = expressIOL
+    ? [`Bed ${bedNum.trim()}`, `${gestWeeks}+${gestDays}`, "IOL"].join(" · ")
+    : admissionContextChip(bedNum, parity, gestWeeks, gestDays);
 
-  const deduceStage = (d, ctx, isPushing) => {
-    if (d === null) return null; // no dilation → stage not yet determined
-    if (d <= 2) return "Latent";
-    // 3 cm: latent unless contractions are regular/established (≥ 4/10 min)
-    if (d === 3) return ctx.contractions >= 4 ? "Active first stage" : "Latent";
-    if (d <= 9) return "Active first stage";
-    return isPushing ? "Active second stage" : "Passive second stage";
+  useEffect(() => {
+    if (qIndex >= questions.length) setQIndex(Math.max(0, questions.length - 1));
+  }, [questions.length, qIndex]);
+
+  useEffect(() => {
+    if (qId === "handoverVE" && !handoverVEAnswered
+        && (stage === "Passive second stage" || stage === "Active second stage")) {
+      setHasHandoverVE(true);
+    }
+  }, [qId, handoverVEAnswered, stage]);
+
+  const advance = () => {
+    setErr("");
+    setSlideDir(1);
+    setQIndex(i => Math.min(i + 1, questions.length - 1));
   };
 
-  const handleDilationChange = (d) => {
-    setAdmDil(d);
-    setStage(deduceStage(d, { contractions: admContracts }, admPushing));
+  const goBack = () => {
+    setErr("");
+    setShowSummary(false);
+    if (qIndex === 0) {
+      if (!bedNum || window.confirm("Discard this admission?")) onCancel();
+      return;
+    }
+    const prevId = questions[qIndex - 1];
+    if (prevId === "handoverVE") {
+      setHandoverVEAnswered(false);
+      setHasHandoverVE(false);
+    }
+    setSlideDir(-1);
+    setQIndex(i => i - 1);
   };
 
-  const handleContractionChange = (c) => {
-    setAdmContr(c);
-    // Re-deduce at the 3 cm boundary when contractions change
-    if (admDilation === 3) setStage(deduceStage(3, { contractions: c }, admPushing));
-  };
+  const autoAdvance = () => setTimeout(advance, 120);
 
-  const handlePushingChange = (isPushing) => {
-    setAdmPush(isPushing);
-    if (admDilation === 10) setStage(isPushing ? "Active second stage" : "Passive second stage");
-  };
-
-  const handleStageChange = (s) => {
-    setStage(s);
-    // Manual override from fallback picker — also set dilation hint at 10 for 2nd stage
-    if (s === "Active second stage") setAdmDil(10);
-  };
-
-  const goNext = () => {
-    if (step === 1) {
-      const n = bedNum.trim();
-      if (!n) { setErr("Enter a bed number"); return; }
-      if (existingNumbers.includes(n)) { setErr("Already in use"); return; }
-      if (gestWeeks < 28) { setErr("Gestation below 28+0 is not yet supported"); return; }
-      setErr(""); setStep(2);
-    } else if (step === 2) {
-      if (!stage) { setErr("Enter dilation or select a stage"); return; }
-      setErr(""); setStep(3);
-    } else {
-      const id = `bed-${Date.now()}`;
-      const stageTime = admTime ? timeToISO(admTime) : nowISO();
-      const admVE = admDilation !== null ? [{
-        id: `ve-${Date.now()}`,
-        time: stageTime,
-        dilation: admDilation,
-        membranes: admMembranes,
-        membranesTime: admMembranes !== "Intact" ? stageTime : null,
-        liquor: admMembranes !== "Intact" ? admLiquor : null,
-        station: admStation,
-        presentation: "Cephalic",
-        contractions: admContracts,
-      }] : [];
-      onSave({
-        id, bedNumber: bedNum.trim(),
-        admissionTime: admTime ? timeToISO(admTime) : nowISO(),
-        parity, gestation: `${gestWeeks}+${gestDays}`,
-        modeOfOnset: mode,
-        inductionMethod: mode === "Induced" ? indMethod : null,
-        iolReasons: mode === "Induced" ? iolReasons : [],
-        analgesia, riskFlags: flags, labourStage: stage,
-        activeFirstStageStartTime: stage === "Active first stage" ? stageTime : null,
-        passiveStartTime: stage === "Passive second stage" ? stageTime : null,
-        pushingStartTime: stage === "Active second stage"  ? stageTime : null,
-        armTime: null, oxytocinStartTime: null,
-        ves: admVE, oxytocinLog: [], ctgLog: [], observations: {},
-      });
+  const applyModeDefaults = v => {
+    setMode(v);
+    if (v === "Induced") {
+      setSkipIolStart(false);
+      setIolStartTime(iolStartInit.time || timeInputNow());
+      setIolDaysAgo(iolStartInit.daysAgo);
+      if (!stage) setStage("Latent");
+    }
+    if (v === "PPROM") {
+      if (!stage) setStage("Latent");
+      setAdmMemb("SROM");
+      setAdmLiquor(null);
     }
   };
 
-  const titles = ["", "Patient", "Examination", "Context"];
+  const saveAdmission = () => {
+    const id = `bed-${Date.now()}`;
+    const admissionISO = skipAdmTime || !admTime ? nowISO() : timeToISO(admTime, admDaysAgo);
+    const veTimeISO = hasHandoverVE && veTime ? timeToISO(veTime, veDaysAgo) : null;
+    const stageTime = veTimeISO ?? admissionISO;
+    const membranes = mode === "PPROM" ? "SROM" : admMembranes;
+    const admVE = hasHandoverVE && admDilation !== null ? [{
+      id: `ve-${Date.now()}`,
+      time: veTimeISO ?? nowISO(),
+      dilation: admDilation,
+      membranes,
+      membranesTime: membranes !== "Intact" ? (veTimeISO ?? admissionISO) : null,
+      liquor: membranes !== "Intact" ? admLiquor : null,
+      station: admStation,
+      presentation: "Cephalic",
+      contractions: admContracts,
+    }] : [];
+    onSave({
+      id, bedNumber: bedNum.trim(),
+      admissionTime: admissionISO,
+      parity, gestation: `${gestWeeks}+${gestDays}`,
+      modeOfOnset: mode,
+      inductionMethod: mode === "Induced" ? indMethod : null,
+      iolReasons: mode === "Induced" ? iolReasons : [],
+      inductionStartTime: mode === "Induced" && !skipIolStart && iolStartTime
+        ? timeToISO(iolStartTime, iolDaysAgo) : null,
+      analgesia, riskFlags: flags, labourStage: stage,
+      activeFirstStageStartTime: stage === "Active first stage" ? stageTime : null,
+      passiveStartTime: stage === "Passive second stage" ? stageTime : null,
+      pushingStartTime: stage === "Active second stage"  ? stageTime : null,
+      armTime: membranes === "AROM" ? (veTimeISO ?? admissionISO) : null,
+      oxytocinStartTime: null,
+      ves: admVE, oxytocinLog: [], ctgLog: [], observations: {},
+    });
+  };
+
+  const summaryPayload = () => buildAdmissionSummary({
+    bedNum, parity, gestWeeks, gestDays, stage, analgesia, mode, indMethod,
+    flags, hasHandoverVE, admDilation, expressIOL,
+  });
+
+  const requestSave = () => setShowSummary(true);
+
+  const validateAndAdvance = () => {
+    if (qId === "bed") {
+      const n = bedNum.trim();
+      if (!n) { setErr("Enter a bed number"); return; }
+      if (existingNumbers.includes(n)) { setErr("Already in use"); return; }
+    }
+    if (qId === "demographics" && gestWeeks < 28) {
+      setErr("Gestation below 28+0 is not yet supported"); return;
+    }
+    advance();
+  };
+
+  const onHandoverVE = yes => {
+    setHandoverVEAnswered(true);
+    setHasHandoverVE(yes);
+    if (yes) {
+      if (!veTime) setVeTime(timeInputNow());
+      setSlideDir(1);
+      setTimeout(() => setQIndex(i => i + 1), 120);
+    } else {
+      requestSave();
+    }
+  };
+
+  const needsFooter = ["bed", "demographics", "flags", "iolReasons", "iolStart", "admTime", "veTime", "veExtras"].includes(qId);
+
+  const footerPrimary = () => {
+    if (qId === "bed") return "Next";
+    if (qId === "veExtras") return "Add to ward";
+    return "Continue";
+  };
+
+  const footerAction = () => {
+    if (qId === "veExtras") { requestSave(); return; }
+    validateAndAdvance();
+  };
+
+  const slideAnim = slideDir > 0 ? "admSlideFwd 0.22s ease-out" : "admSlideBack 0.22s ease-out";
 
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col">
-      {/* Top bar */}
-      <div className="px-5 pb-4 flex items-center gap-3 border-b border-gray-100 shrink-0" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}>
-        <button onClick={step === 1
-            ? () => { if (!bedNum || window.confirm("Discard this admission?")) onCancel(); }
-            : () => setStep(s => s - 1)}
-          className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 shrink-0">
-          <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <p className="flex-1 text-base font-bold text-gray-900">{titles[step]}</p>
-        <WizardDots step={step} total={3} />
+      <style>{ADM_SLIDE_CSS}</style>
+
+      <div className="px-5 pb-3 shrink-0 border-b border-gray-100"
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)" }}>
+        <div className="flex items-center gap-3 mb-2">
+          <button onClick={goBack}
+            className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 shrink-0">
+            <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-gray-400">{phaseLabel} · {stepInPhase} of {totalInPhase}</p>
+            <p className="text-base font-bold text-gray-900 truncate">{meta.title}</p>
+          </div>
+        </div>
+        {showContext && contextChip && (
+          <p className="text-xs font-semibold text-gray-500 text-center mb-2 px-2 truncate">{contextChip}</p>
+        )}
+        <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-full bg-gray-900 rounded-full transition-all duration-300"
+            style={{ width: `${(stepInPhase / totalInPhase) * 100}%` }} />
+        </div>
       </div>
 
-      {/* Step content */}
-      <div className="flex-1 overflow-y-auto px-5 py-6 space-y-7">
+      <div className="flex-1 overflow-y-auto px-5 py-8 flex flex-col justify-center min-h-0">
+        <div key={`${qId}-${qIndex}`} style={{ animation: slideAnim }}>
+        {meta.hint && (
+          <p className="text-sm text-gray-500 text-center mb-6 -mt-2">{meta.hint}</p>
+        )}
 
-        {/* ── Step 1: Patient ─────────────────────────────────────── */}
-        {step === 1 && (
-          <>
-            <div>
-              <SLabel className="mb-3 text-center">Bed / bay number</SLabel>
-              <input type="text" inputMode="numeric" autoFocus value={bedNum}
-                onChange={e => { setBedNum(e.target.value); setErr(""); }}
-                placeholder="—"
-                className="w-full text-5xl font-bold text-gray-900 text-center border-b-2 border-gray-200 focus:border-gray-900 pb-2 bg-transparent outline-none transition-colors" />
-              {err && <p className="text-xs text-red-500 text-center mt-2">{err}</p>}
-            </div>
+        {qId === "bed" && (
+          <input type="text" inputMode="numeric" autoFocus value={bedNum}
+            onChange={e => { setBedNum(e.target.value); setErr(""); }}
+            onKeyDown={e => e.key === "Enter" && validateAndAdvance()}
+            placeholder="—"
+            className="w-full text-6xl font-bold text-gray-900 text-center border-b-2 border-gray-200 focus:border-gray-900 pb-3 bg-transparent outline-none" />
+        )}
 
+        {qId === "demographics" && (
+          <div className="space-y-8">
             <div>
-              <SLabel className="mb-3">Parity</SLabel>
+              <SLabel className="mb-3 text-center">Parity</SLabel>
               <PillRow value={parity} onChange={setParity}
                 options={["Para 0","Para 1","Para 2","Para 3+"]}
                 labelFn={o => o.replace("Para ","P")} />
             </div>
-
             <div>
-              <SLabel className="mb-4">Gestation</SLabel>
-              <GestationInput
-                weeks={gestWeeks} days={gestDays}
-                onChange={({ weeks, days }) => { setGestW(weeks); setGestD(days); setErr(""); }}
-              />
+              <SLabel className="mb-4 text-center">Gestation</SLabel>
+              <GestationInput weeks={gestWeeks} days={gestDays}
+                onChange={({ weeks, days }) => { setGestW(weeks); setGestD(days); setErr(""); }} />
             </div>
-          </>
+          </div>
         )}
 
-        {/* ── Step 2: Examination ─────────────────────────────────── */}
-        {step === 2 && (
-          <>
-            {/* Dilation — the hero question on this screen */}
-            <div>
-              <div className="flex items-end justify-between mb-4">
-                <SLabel>Dilation</SLabel>
-                {admDilation !== null
-                  ? <span className="text-3xl font-black text-gray-900 leading-none">{admDilation} <span className="text-lg font-semibold text-gray-400">cm</span></span>
-                  : <span className="text-xs text-gray-400">tap a circle</span>}
-              </div>
-              <NumberGrid value={admDilation} onChange={handleDilationChange} />
-
-              {/* Stage chip — appears as soon as dilation is tapped */}
-              {admDilation !== null && (() => {
-                const chipCls = {
-                  "Latent":               "bg-gray-600 text-white",
-                  "Active first stage":   "bg-blue-600 text-white",
-                  "Passive second stage": "bg-violet-600 text-white",
-                  "Active second stage":  "bg-violet-800 text-white",
-                }[stage] ?? "bg-gray-600 text-white";
-                return (
-                  <div className="flex items-center gap-2 mt-3">
-                    <span className={`inline-flex px-3.5 py-1.5 rounded-full text-sm font-bold ${chipCls}`}>{stage}</span>
-                    {admDilation === 3 && (
-                      <span className="text-[11px] text-gray-400">
-                        {admContracts >= 4 ? "≥ 4 ctx/10 min" : "adjust contractions below to refine"}
-                      </span>
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* Pushing? — only at 10 cm */}
-            {admDilation === 10 && (
-              <div>
-                <SLabel className="mb-3">Actively pushing?</SLabel>
-                <PillRow value={admPushing ? "Yes" : "No"}
-                  onChange={v => handlePushingChange(v === "Yes")}
-                  options={["No","Yes"]} />
-              </div>
-            )}
-
-            {/* Fallback stage picker — only when no dilation entered */}
-            {admDilation === null && (
-              <div>
-                <SLabel className="mb-1">No VE yet — select stage manually</SLabel>
-                <p className="text-[11px] text-gray-400 mb-3">Or tap a dilation circle above to auto-deduce</p>
-                <TileGrid value={stage} onChange={handleStageChange} cols={2}
-                  options={["Latent","Active first stage","Passive second stage","Active second stage"]}
-                  subFn={o => STAGE_SUB[o]} />
-                {err && <p className="text-xs text-red-500 mt-2">{err}</p>}
-              </div>
-            )}
-
-            {/* Rest of VE — only when dilation entered */}
-            {admDilation !== null && (
-              <>
-                <div className="h-px bg-gray-100" />
-
-                <div>
-                  <SLabel className="mb-2">Membranes</SLabel>
-                  <PillRow value={admMembranes} onChange={setAdmMemb} options={["Intact","SROM","AROM"]} />
-                </div>
-
-                {admMembranes !== "Intact" && (
-                  <div>
-                    <SLabel className="mb-2">Liquor</SLabel>
-                    <div className="space-y-2">
-                      <PillRow value={admLiquor} onChange={setAdmLiquor}
-                        options={["Clear","Thin meconium","Thick meconium"]}
-                        labelFn={o => LIQUOR_LABEL[o]} />
-                      <PillRow value={admLiquor} onChange={setAdmLiquor}
-                        options={["Blood-stained","Absent"]}
-                        labelFn={o => LIQUOR_LABEL[o]} />
-                    </div>
-                  </div>
-                )}
-
-                {/* P2-12: Station & contractions behind optional disclosure to reduce load */}
-                <button onClick={() => setShowAdmDetails(v => !v)}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 active:text-gray-600 transition-colors">
-                  <svg className={`w-3.5 h-3.5 transition-transform ${showAdmDetails ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                  {showAdmDetails ? "Hide" : "Station & contractions"}{" "}
-                  {!showAdmDetails && <span className="text-gray-300">· optional</span>}
-                </button>
-
-                {showAdmDetails && (
-                  <>
-                    <div>
-                      <SLabel className="mb-3">Station</SLabel>
-                      <StationStrip value={admStation} onChange={setAdmStn} />
-                    </div>
-
-                    <div>
-                      <div className="flex items-baseline justify-between mb-3">
-                        <SLabel>Contractions / 10 min</SLabel>
-                        <span className="text-xl font-bold text-gray-900">{admContracts}</span>
-                      </div>
-                      <Stepper value={admContracts} onChange={handleContractionChange} min={0} max={10} />
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-          </>
-        )}
-
-        {/* ── Step 3: Context ─────────────────────────────────────── */}
-        {step === 3 && (
-          <>
-            <div>
-              <SLabel className="mb-2">Analgesia</SLabel>
-              <div className="space-y-2">
-                <PillRow value={analgesia} onChange={setAnal} options={["None","Entonox","Pethidine"]} />
-                <PillRow value={analgesia} onChange={setAnal} options={["Epidural","Remifentanil PCA"]} />
-              </div>
-              {(analgesia==="Epidural"||analgesia==="Remifentanil PCA") && (
-                <p className="text-[10px] text-gray-400 mt-1.5">Regional analgesia — 2nd stage time limits extended · NG235 §1.6.5</p>
+        {qId === "flags" && (
+          <div>
+            <button type="button"
+              onClick={() => { setFlags([]); autoAdvance(); }}
+              className={`w-full mb-3 py-3 rounded-xl text-sm font-semibold border transition-colors active:scale-95 ${
+                flags.length === 0 ? "bg-gray-900 border-gray-900 text-white" : "bg-white border-gray-200 text-gray-700"
+              }`}>
+              None
+            </button>
+            <ChipGroup
+              options={["GBS+","GBS pending","Diabetic-T1","Diabetic-T2","Diabetic-GDM","VBAC","Previous LSCS","Hypertensive"]}
+              selected={flags} onChange={setFlags} />
+            <div className="mt-4 space-y-1">
+              {flags.includes("GBS+") && (
+                <p className="text-[11px] text-amber-600 font-semibold">GBS+ → IV benzylpenicillin · GL787</p>
+              )}
+              {flags.some(f => f.startsWith("Diabetic")) && (
+                <p className="text-[11px] text-amber-600 font-semibold">Diabetic → hourly BGL · GL983</p>
               )}
             </div>
-
-            <div>
-              <SLabel className="mb-2">Mode of onset</SLabel>
-              <PillRow value={mode} onChange={setMode}
-                options={["Spontaneous","Induced","PPROM"]}
-                labelFn={o => ({ Spontaneous:"Spontaneous", Induced:"Induced", PPROM:"PPROM" }[o])} />
-              {mode === "Induced" && <p className="text-[10px] text-gray-400 mt-1.5">IOL in progress</p>}
-              {mode === "PPROM" && <p className="text-[10px] text-gray-400 mt-1.5">Pre-term pre-labour rupture of membranes</p>}
-            </div>
-
-            {mode === "Induced" && (
-              <>
-                <div>
-                  <SLabel className="mb-2">Induction method</SLabel>
-                  <div className="space-y-2">
-                    <PillRow value={indMethod} onChange={setIndM}
-                      options={["Dinoprostone","Balloon"]} />
-                    <PillRow value={indMethod} onChange={setIndM}
-                      options={["Misoprostol","ARM+Synto"]} />
-                  </div>
-                </div>
-                <div>
-                  <SLabel className="mb-2">Indication — select all that apply</SLabel>
-                  <ChipGroup options={IOL_REASONS} selected={iolReasons} onChange={setIolR} />
-                </div>
-              </>
-            )}
-
-            <div className="h-px bg-gray-100" />
-
-            <div>
-              <SLabel className="mb-3">Risk flags — select all that apply</SLabel>
-              <ChipGroup
-                options={["GBS+","GBS pending","Diabetic-T1","Diabetic-T2","Diabetic-GDM","VBAC","Previous LSCS","Hypertensive"]}
-                selected={flags} onChange={setFlags} />
-              <div className="mt-3 space-y-1">
-                {flags.includes("GBS+") && (
-                  <p className="text-[11px] text-amber-600 font-semibold">GBS+ → IV benzylpenicillin required intrapartum · GL787 + NG235 §1.2.12</p>
-                )}
-                {flags.includes("GBS pending") && (
-                  <p className="text-[11px] text-amber-600 font-semibold">GBS pending → obtain result urgently; commence antibiotics if positive · GL787</p>
-                )}
-                {flags.some(f=>f.startsWith("Diabetic")) && (
-                  <p className="text-[11px] text-amber-600 font-semibold">Diabetic → hourly BGL, target 4–7 mmol/L · GL983</p>
-                )}
-                {flags.includes("Hypertensive") && (
-                  <p className="text-[11px] text-amber-600 font-semibold">Hypertensive → BP hourly · NG235 §1.4.5</p>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-baseline justify-between mb-2">
-                <SLabel>Admission time</SLabel>
-                <span className="text-[10px] text-gray-400">optional</span>
-              </div>
-              <NowField value={admTime} onChange={setAdmT} />
-              {admTime && (
-                <button onClick={() => setAdmT("")}
-                  className="text-[11px] text-gray-400 mt-1.5 ml-1">
-                  Clear — not known
-                </button>
-              )}
-            </div>
-
-            <p className="text-[10px] text-gray-300 text-center">Bed number only — no patient identifiers stored on this device</p>
-          </>
+          </div>
         )}
+
+        {qId === "stage" && (
+          <TileGrid value={stage} onChange={v => { setStage(v); setErr(""); autoAdvance(); }} cols={2}
+            options={["Latent","Active first stage","Passive second stage","Active second stage"]}
+            subFn={o => STAGE_SUB[o]} />
+        )}
+
+        {qId === "analgesia" && (
+          <div className="space-y-2">
+            <PillRow value={analgesia} onChange={v => { setAnal(v); autoAdvance(); }}
+              options={["None","Entonox","Pethidine"]} />
+            <PillRow value={analgesia} onChange={v => { setAnal(v); autoAdvance(); }}
+              options={["Epidural","Remifentanil PCA"]} />
+          </div>
+        )}
+
+        {qId === "mode" && (
+          <PillRow value={mode} onChange={v => { applyModeDefaults(v); autoAdvance(); }}
+            options={["Spontaneous","Induced","PPROM"]}
+            labelFn={o => ({ Spontaneous:"Spontaneous", Induced:"Induced", PPROM:"PPROM" }[o])} />
+        )}
+
+        {qId === "membranes" && (
+          <PillRow value={admMembranes} onChange={v => {
+              setAdmMemb(v);
+              if (v === "Intact") setAdmLiquor(null);
+              autoAdvance();
+            }}
+            options={["Intact","SROM","AROM"]} />
+        )}
+
+        {qId === "liquor" && (
+          <div className="space-y-2">
+            <PillRow value={admLiquor} onChange={v => { setAdmLiquor(v); autoAdvance(); }}
+              options={["Clear","Thin meconium","Thick meconium"]}
+              labelFn={o => LIQUOR_LABEL[o]} />
+            <PillRow value={admLiquor} onChange={v => { setAdmLiquor(v); autoAdvance(); }}
+              options={["Blood-stained","Absent"]}
+              labelFn={o => LIQUOR_LABEL[o]} />
+          </div>
+        )}
+
+        {qId === "iolStart" && (
+          <div>
+            <p className="text-[10px] text-gray-400 mb-3 text-center">{IOL_START_HINT[indMethod]}</p>
+            <NowField compact value={iolStartTime} daysAgo={iolDaysAgo}
+              onChange={(t, d) => { setIolStartTime(t); setIolDaysAgo(d); setSkipIolStart(false); }} />
+          </div>
+        )}
+
+        {qId === "admTime" && (
+          <NowField compact value={admTime} daysAgo={admDaysAgo}
+            onChange={(t, d) => { setAdmT(t); setAdmDaysAgo(d); setSkipAdmTime(false); }} />
+        )}
+
+        {qId === "handoverVE" && (
+          <div className="space-y-3">
+            <PillRow value={handoverVEAnswered ? (hasHandoverVE ? "Yes" : "No") : (hasHandoverVE ? "Yes" : null)}
+              onChange={v => onHandoverVE(v === "Yes")}
+              options={["No","Yes"]} />
+            <p className="text-xs text-gray-400 text-center leading-relaxed">
+              No — patient goes on the board with reported stage only.<br />
+              Yes — record last known VE findings.
+            </p>
+            {!handoverVEAnswered && (stage === "Passive second stage" || stage === "Active second stage") && (
+              <p className="text-[11px] text-gray-400 text-center">2nd stage — VE usually documented</p>
+            )}
+          </div>
+        )}
+
+        {qId === "veTime" && (
+          <NowField compact value={veTime} daysAgo={veDaysAgo}
+            onChange={(t, d) => { setVeTime(t); setVeDaysAgo(d); setErr(""); }} />
+        )}
+
+        {qId === "indMethod" && (
+          <div className="space-y-2">
+            <PillRow value={indMethod} onChange={v => { setIndM(v); autoAdvance(); }}
+              options={["Dinoprostone","Balloon"]} />
+            <PillRow value={indMethod} onChange={v => { setIndM(v); autoAdvance(); }}
+              options={["Misoprostol","ARM+Synto"]} />
+          </div>
+        )}
+
+        {qId === "iolReasons" && (
+          <ChipGroup options={IOL_REASONS} selected={iolReasons} onChange={setIolR} />
+        )}
+
+        {qId === "dilation" && (
+          <div>
+            <div className="flex items-end justify-between mb-4">
+              {admDilation !== null
+                ? <span className="text-4xl font-black text-gray-900 mx-auto">{admDilation} <span className="text-xl text-gray-400">cm</span></span>
+                : <span className="text-sm text-gray-400 mx-auto">tap a circle</span>}
+            </div>
+            <NumberGrid value={admDilation} onChange={d => { setAdmDil(d); setErr(""); autoAdvance(); }} />
+          </div>
+        )}
+
+        {qId === "veExtras" && (
+          <div className="space-y-6">
+            <div>
+              <SLabel className="mb-3">Station</SLabel>
+              <StationStrip value={admStation} onChange={setAdmStn} />
+            </div>
+            <div>
+              <div className="flex items-baseline justify-between mb-3">
+                <SLabel>Contractions / 10 min</SLabel>
+                <span className="text-xl font-bold text-gray-900">{admContracts}</span>
+              </div>
+              <Stepper value={admContracts} onChange={setAdmContr} min={0} max={10} />
+            </div>
+          </div>
+        )}
+
+        {err && <p className="text-xs text-red-500 text-center mt-4">{err}</p>}
+        </div>
       </div>
 
-      {/* CTA */}
-      <div className="px-5 pt-4 border-t border-gray-100 shrink-0" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.25rem)' }}>
-        <button onClick={goNext}
-          className="w-full py-4 rounded-2xl text-base font-bold bg-gray-900 text-white active:scale-95 transition-all">
-          {step < 3 ? "Next" : "Add to ward"}
-        </button>
-      </div>
+      {needsFooter && (
+        <div className="px-5 pt-3 border-t border-gray-100 shrink-0 flex gap-3"
+          style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1.25rem)" }}>
+          {(qId === "iolStart" || qId === "admTime" || qId === "veExtras") && (
+            <button type="button"
+              onClick={() => {
+                if (qId === "iolStart") { setSkipIolStart(true); advance(); }
+                else if (qId === "admTime") { setSkipAdmTime(true); advance(); }
+                else requestSave();
+              }}
+              className="px-5 py-4 rounded-2xl text-base font-bold bg-gray-100 text-gray-600 active:scale-95 transition-all">
+              Skip
+            </button>
+          )}
+          <button type="button" onClick={footerAction}
+            className="flex-1 py-4 rounded-2xl text-base font-bold bg-gray-900 text-white active:scale-95 transition-all">
+            {qId === "veExtras" ? "Add to ward" : footerPrimary()}
+          </button>
+        </div>
+      )}
+
+      <p className="text-[10px] text-gray-300 text-center pb-3 shrink-0">
+        Bed number only — no patient identifiers stored
+      </p>
+
+      {showSummary && (
+        <div className="absolute inset-0 z-10 bg-black/40 flex items-end sm:items-center justify-center p-5">
+          <div className="w-full max-w-sm bg-white rounded-2xl p-5 shadow-xl"
+            style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1.25rem)" }}>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Confirm admission</p>
+            <p className="text-sm font-semibold text-gray-900 leading-relaxed mb-5">{summaryPayload()}</p>
+            <div className="flex gap-3">
+              <button type="button" onClick={() => setShowSummary(false)}
+                className="flex-1 py-3.5 rounded-xl text-sm font-bold bg-gray-100 text-gray-600 active:scale-95">
+                Back
+              </button>
+              <button type="button" onClick={() => { setShowSummary(false); saveAdmission(); }}
+                className="flex-1 py-3.5 rounded-xl text-sm font-bold bg-gray-900 text-white active:scale-95">
+                Add to ward
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1829,6 +2113,20 @@ function BedDetailView({ bed, alerts, onBack, onUpdate, onDelete, onOpenVE, onEd
                       onChange={v => onUpdate({ iolReasons: v })} />
                     {(bed.iolReasons?.length ?? 0) === 0 && (
                       <p className="text-xs text-gray-400 mt-1.5">None recorded — tap to add</p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1.5">IOL started</p>
+                    <p className="text-[10px] text-gray-400 mb-2">{IOL_START_HINT[bed.inductionMethod] ?? "When IOL began"}</p>
+                    <NowField
+                      value={bed.inductionStartTime ? fmtTime(bed.inductionStartTime) : ""}
+                      daysAgo={isoToTimeFields(bed.inductionStartTime).daysAgo}
+                      onChange={(t, d) => onUpdate({ inductionStartTime: t ? timeToISO(t, d) : null })}
+                    />
+                    {bed.inductionStartTime && (
+                      <p className="text-[11px] text-gray-400 mt-1.5">
+                        {fmtAge(Date.now() - new Date(bed.inductionStartTime).getTime())} ago
+                      </p>
                     )}
                   </div>
                 </div>
@@ -2345,6 +2643,9 @@ function IOLAddSheet({ onSave, initialValues = null }) {
   const [queueTime, setQTime]  = useState(
     initialValues?.addedAt ? fmtTime(initialValues.addedAt) : timeInputNow()
   );
+  const [queueDaysAgo, setQueueDaysAgo] = useState(
+    initialValues?.addedAt ? isoToTimeFields(initialValues.addedAt).daysAgo : 0
+  );
 
   const isEdit = !!initialValues;
 
@@ -2355,7 +2656,7 @@ function IOLAddSheet({ onSave, initialValues = null }) {
     if (!initials.trim() || !indications.length) return;
     onSave({
       id:         initialValues?.id ?? `iol-${Date.now()}`,
-      addedAt:    timeToISO(queueTime),
+      addedAt:    timeToISO(queueTime, queueDaysAgo),
       initials:   initials.trim().toUpperCase(),
       gestWeeks, gestDays, indications,
     });
@@ -2624,7 +2925,7 @@ function IOLTab({ queue, onAdd, onAdmit, onRemove, onEdit }) {
   );
 }
 
-function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, onQuickCTG, onHandover, onUpdateBed, shift, onEndShift, iolQueue, onIOLAdd, onIOLAdmit, onIOLRemove, onIOLEdit }) {
+function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, onQuickCTG, onHandover, onUpdateBed, shift, onEndShift, iolQueue, onIOLAdd, onIOLAdmit, onIOLRemove, onIOLEdit, highlightBedId = null }) {
   const bedList         = Object.values(beds).sort((a,b) => a.bedNumber.localeCompare(b.bedNumber, undefined, {numeric:true}));
   const totalUrgent     = Object.values(alertsMap).flat().filter(a => a.severity === "urgent").length;
   const totalPendingTasks = Object.values(beds).reduce((n, b) => n + (b.tasks ?? []).filter(t => !t.done).length, 0);
@@ -2804,8 +3105,12 @@ function BoardView({ beds, alertsMap, onSelect, onAddBed, onClear, onQuickVE, on
               if (currentOxy) aParts.push(`Oxy ${currentOxy.dose} mU/min`);
             }
 
+            const isHighlighted = bed.id === highlightBedId;
+
             return (
-              <div key={bed.id} className={`rounded-2xl border ${cardCls} overflow-hidden`}>
+              <div key={bed.id} className={`rounded-2xl border ${cardCls} overflow-hidden transition-all duration-300 ${
+                isHighlighted ? "ring-2 ring-gray-900 ring-offset-2 shadow-md" : ""
+              }`}>
                 {/* Main tap area → detail */}
                 <button onClick={() => onSelect(bed.id)} className="w-full p-4 text-left">
                   {/* Header */}
@@ -2927,6 +3232,8 @@ export default function WardPage({ shift, onEndShift }) {
   const [editVE, setEditVE]        = useState(null);    // VE object being edited, or null for new
   const [editCTG, setEditCTG]      = useState(null);    // CTG object being edited, or null for new
   const [tick, setTick]            = useState(0);
+  const [highlightBedId, setHighlightBedId] = useState(null);
+  const [boardToast, setBoardToast] = useState(null);
 
   useEffect(() => { saveBeds(beds); }, [beds]);
   useEffect(() => { saveIOL(iolQueue); }, [iolQueue]);
@@ -2997,10 +3304,15 @@ export default function WardPage({ shift, onEndShift }) {
       setAdmitIOL(null);
     }
     setView("board");
-    if (!bed.ves?.length && bed.labourStage === "Active first stage") {
-      setSheet("ve");
-      setSheetBedId(bed.id);
-    }
+    setHighlightBedId(bed.id);
+    const needsVE = !bed.ves?.length && bed.labourStage === "Active first stage";
+    setBoardToast(
+      needsVE
+        ? `Bed ${bed.bedNumber} added — log VE when examined`
+        : `Bed ${bed.bedNumber} added to ward`
+    );
+    setTimeout(() => setHighlightBedId(null), 3000);
+    setTimeout(() => setBoardToast(null), 4500);
   };
 
   if (view === "wizard") {
@@ -3014,6 +3326,8 @@ export default function WardPage({ shift, onEndShift }) {
       <AdmissionWizard
         existingNumbers={Object.values(beds).map(b => b.bedNumber)}
         initialValues={wizardInitial}
+        expressIOL={!!admitIOL}
+        iolAddedAt={admitIOL?.addedAt ?? null}
         onSave={saveNewBed}
         onCancel={() => { setAdmitIOL(null); setView("board"); }}
       />
@@ -3042,7 +3356,16 @@ export default function WardPage({ shift, onEndShift }) {
           onIOLEdit={entry => { setIolEditEntry(entry); setIolSheetKey(k => k + 1); setIolSheet(true); }}
           onIOLAdmit={entry => { setAdmitIOL(entry); setView("wizard"); }}
           onIOLRemove={id => setIolQueue(prev => prev.filter(e => e.id !== id))}
+          highlightBedId={highlightBedId}
         />
+      )}
+
+      {boardToast && (
+        <div className="fixed bottom-24 left-0 right-0 z-40 px-5 pointer-events-none">
+          <div className="max-w-lg mx-auto bg-gray-900 text-white text-sm font-semibold px-4 py-3 rounded-2xl shadow-lg text-center">
+            {boardToast}
+          </div>
+        </div>
       )}
 
       {view === "detail" && selectedBed && (

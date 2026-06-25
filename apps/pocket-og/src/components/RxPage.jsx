@@ -6,16 +6,20 @@ import { ANTIBIOTICS } from "../data/rx/antibiotics";
 import { TOCOLYTICS } from "../data/rx/tocolytics";
 import { ANTICOAGULANTS } from "../data/rx/anticoagulants";
 import { ANALGESIA } from "../data/rx/analgesia";
+import { ENDOMETRIOSIS_DRUGS } from "../data/rx/endometriosis";
+import { CONTRACEPTION } from "../data/rx/contraception";
 import AlphabetSidebar from "./AlphabetSidebar";
 
 const ALL_DRUGS = [
-  ...ANTIHYPERTENSIVES.map(d => ({ ...d, category: "Antihypertensive" })),
-  ...UTEROTONICS.map(d =>       ({ ...d, category: "Uterotonic" })),
-  ...ANTIEMETICS.map(d =>       ({ ...d, category: "Antiemetic" })),
-  ...ANTIBIOTICS.map(d =>       ({ ...d, category: "Antibiotic" })),
-  ...TOCOLYTICS.map(d =>        ({ ...d, category: "Tocolytic" })),
-  ...ANTICOAGULANTS.map(d =>    ({ ...d, category: "Anticoagulant" })),
-  ...ANALGESIA.map(d =>         ({ ...d, category: "Analgesia" })),
+  ...ANTIHYPERTENSIVES.map(d =>    ({ ...d, category: "Antihypertensive" })),
+  ...UTEROTONICS.map(d =>          ({ ...d, category: "Uterotonic" })),
+  ...ANTIEMETICS.map(d =>          ({ ...d, category: "Antiemetic" })),
+  ...ANTIBIOTICS.map(d =>          ({ ...d, category: "Antibiotic" })),
+  ...TOCOLYTICS.map(d =>           ({ ...d, category: "Tocolytic" })),
+  ...ANTICOAGULANTS.map(d =>       ({ ...d, category: "Anticoagulant" })),
+  ...ANALGESIA.map(d =>            ({ ...d, category: "Analgesia" })),
+  ...ENDOMETRIOSIS_DRUGS.map(d =>  ({ ...d, category: "Endometriosis" })),
+  ...CONTRACEPTION.map(d =>        ({ ...d, category: "Contraception" })),
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 const ACCENT = {
@@ -44,17 +48,22 @@ const CATEGORY_COLOR = {
   "Tocolytic":        "text-sky-500",
   "Anticoagulant":    "text-fuchsia-500",
   "Analgesia":        "text-yellow-600",
+  "Endometriosis":    "text-purple-500",
+  "Contraception":    "text-pink-500",
 };
 
-const ROUTE_LABEL = { oral: "Oral", iv: "IV", im: "IM", sc: "SC", sl: "SL", vag: "Vaginal", rectal: "Rectal" };
+const ROUTE_LABEL = { oral: "Oral", iv: "IV", im: "IM", sc: "SC", sl: "SL", vag: "Vaginal", rectal: "Rectal", patch: "Patch", implant: "Implant", iud: "IUD/IUS" };
 const ROUTE_COLOR = {
-  oral:   "text-emerald-600",
-  iv:     "text-amber-600",
-  im:     "text-orange-500",
-  sc:     "text-indigo-500",
-  sl:     "text-blue-600",
-  vag:    "text-purple-600",
-  rectal: "text-gray-500",
+  oral:    "text-emerald-600",
+  iv:      "text-amber-600",
+  im:      "text-orange-500",
+  sc:      "text-indigo-500",
+  sl:      "text-blue-600",
+  vag:     "text-purple-600",
+  rectal:  "text-gray-500",
+  patch:   "text-violet-500",
+  implant: "text-teal-600",
+  iud:     "text-cyan-600",
 };
 
 // ── Detail overlay ────────────────────────────────────────────────────────────
@@ -197,20 +206,28 @@ function DrugDetailView({ drug, onClose }) {
 
 // ── List view ─────────────────────────────────────────────────────────────────
 
+const CATEGORIES = [
+  "Analgesia", "Antibiotic", "Anticoagulant", "Antiemetic",
+  "Antihypertensive", "Contraception", "Endometriosis", "Tocolytic", "Uterotonic",
+];
+
 export default function RxPage() {
   const [selectedDrug, setSelectedDrug] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState(null);
   const sectionRefs = useRef({});
 
   const filtered = useMemo(() => {
+    let result = ALL_DRUGS;
+    if (activeCategory) result = result.filter(d => d.category === activeCategory);
     const q = searchQuery.toLowerCase().trim();
-    if (!q) return ALL_DRUGS;
-    return ALL_DRUGS.filter(d =>
+    if (q) result = result.filter(d =>
       d.name.toLowerCase().includes(q) ||
       d.class.toLowerCase().includes(q) ||
       d.category.toLowerCase().includes(q)
     );
-  }, [searchQuery]);
+    return result;
+  }, [searchQuery, activeCategory]);
 
   const groupedByLetter = useMemo(() => {
     const groups = {};
@@ -235,12 +252,15 @@ export default function RxPage() {
 
           {/* Header */}
           <div className="px-5 pt-14 pb-1">
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Drug Reference</h2>
-            <p className="text-xs text-gray-400 mt-0.5">{ALL_DRUGS.length} drugs — quick dose lookup</p>
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Rx</h2>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {activeCategory ? `${filtered.length} of ${ALL_DRUGS.length} drugs` : `${ALL_DRUGS.length} drugs`} — quick dose lookup
+            </p>
           </div>
 
-          {/* Sticky search bar */}
-          <div className="sticky top-0 z-20 bg-white border-b border-gray-100 pl-4 pr-12 pt-3 pb-3">
+          {/* Sticky search + filter */}
+          <div className="sticky top-0 z-20 bg-white border-b border-gray-100">
+            <div className="pl-4 pr-12 pt-3 pb-3">
             <div className="relative">
               <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
@@ -264,10 +284,36 @@ export default function RxPage() {
                 </button>
               )}
             </div>
+            </div>
+
+            {/* Category chips */}
+            <div className="flex gap-2 overflow-x-auto px-4 pb-3 scrollbar-none">
+              <button
+                onClick={() => setActiveCategory(null)}
+                className={`shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+                  activeCategory === null ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                }`}
+              >
+                All
+              </button>
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
+                  className={`shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+                    activeCategory === cat
+                      ? "bg-gray-900 text-white"
+                      : `bg-gray-100 hover:bg-gray-200 ${CATEGORY_COLOR[cat] ?? "text-gray-500"}`
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Drug list */}
-          <div className="px-5 pt-3">
+          {/* Drug list — pr-10 clears the 32px alphabet scrubber fixed at right-1 */}
+          <div className="pl-5 pr-10 pt-3">
             {filtered.length === 0 ? (
               <p className="text-sm text-gray-400 text-center py-10">No drugs match &ldquo;{searchQuery}&rdquo;</p>
             ) : (
@@ -296,11 +342,13 @@ export default function RxPage() {
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-gray-900 leading-snug">{drug.name}</p>
                             <p className="text-xs text-gray-400 mt-0.5">{drug.class}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className={`text-[10px] font-semibold ${CATEGORY_COLOR[drug.category] ?? "text-gray-400"}`}>
-                                {drug.category}
-                              </span>
-                              {routeTypes.length > 0 && (
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              {!activeCategory && (
+                                <span className={`text-[10px] font-semibold ${CATEGORY_COLOR[drug.category] ?? "text-gray-400"}`}>
+                                  {drug.category}
+                                </span>
+                              )}
+                              {!activeCategory && routeTypes.length > 0 && (
                                 <span className="text-gray-200 text-[10px]">·</span>
                               )}
                               {routeTypes.map(rt => (
@@ -323,7 +371,7 @@ export default function RxPage() {
           </div>
 
           <p className="text-[10px] text-gray-400 text-center px-5 pt-6 pb-2 leading-relaxed">
-            For guidance only. Verify against current BNF and local protocols.
+            Doses are for guidance only and may not reflect local formulary or patient-specific factors. Always verify against the current BNF, SmPC, and your institution's prescribing protocols. For use by qualified healthcare professionals only.
           </p>
         </div>
 

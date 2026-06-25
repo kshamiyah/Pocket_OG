@@ -6,7 +6,7 @@ export const GL983_SECTIONS = [
     content: [
       { type: "subheading", value: "Referral & MDT" },
       { type: "list", items: [
-        "GP/CMW to refer women to Diabetes Specialist Midwives (DSM) as soon as pregnancy is confirmed",
+        { text: "GP/CMW to refer women to Diabetes Specialist Midwives (DSM) as soon as pregnancy is confirmed", mbrrace: "MBRRACE 2025 identified late referral to specialist diabetes services as a contributing factor in complications during pregnancy. Early specialist midwife involvement — at confirmation of pregnancy — is essential." },
         "DSM remains first point of contact throughout pregnancy and after delivery",
         "Women seen in MDT clinic (Consultant Obstetrician + Consultant Endocrinologist + DSM)",
         "Specialist diabetic dietician available via fortnightly Microsoft Teams drop-in sessions",
@@ -220,7 +220,7 @@ export const GL983_SECTIONS = [
       { type: "alert", value: "DKA is a medical emergency. Any woman known to have diabetes who contacts triage/MAU feeling unwell should be invited in for assessment at whatever gestation." },
       { type: "subheading", value: "Overview" },
       { type: "list", items: [
-        "DKA in pregnancy: stillbirth rate 160 per 1000 births; mortality 5–10% in adults with T1D",
+        { text: "DKA in pregnancy: stillbirth rate 160 per 1000 births; mortality 5–10% in adults with T1D", mbrrace: "DKA in pregnancy is catastrophic but often preventable. MBRRACE reviews have identified sick diabetic women who attended triage but were not fully assessed — the threshold for admitting any unwell known diabetic must be very low." },
         "Can occur in T1D, T2D, and gestational diabetes",
         "DKA in pregnancy may present with normal or modest rise in glucose — do NOT rely on glucose alone",
         "Causes: infection, hyperemesis gravidarum, neglect of diabetes care, steroid prophylaxis, faulty equipment, poor compliance",

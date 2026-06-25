@@ -99,7 +99,7 @@ function ScenarioList({ onSelect }) {
                     <button
                       key={s.id}
                       onClick={() => onSelect(s.id)}
-                      className="flex items-start gap-3 w-full px-4 py-3 h-[120px] hover:bg-gray-50 active:bg-gray-100 transition-colors text-left border-t border-gray-50"
+                      className="flex items-start gap-3 w-full px-4 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left border-t border-gray-50"
                     >
                       <div className={`w-1 h-12 rounded-full shrink-0 ${s.color.accent}`} />
                       <div className="flex-1 min-w-0">
@@ -136,7 +136,7 @@ function ScenarioList({ onSelect }) {
           )}
 
           <p className="text-[10px] text-gray-300 text-center mt-6 px-4 leading-relaxed">
-            All thresholds and interpretation text are taken verbatim from NICE NG126 (last updated August 2023) and RCOG/AEPU Green-top Guideline No. 21 (November 2016). This tool supports — not replaces — clinical judgement.
+            Calculator outputs are decision aids only. Clinical responsibility remains with the treating clinician. Thresholds are derived from national guidelines — verify against your local protocols and current published guidance before applying in practice.
           </p>
         </div>
       </div>

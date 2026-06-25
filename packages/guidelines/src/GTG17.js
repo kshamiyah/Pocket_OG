@@ -106,7 +106,7 @@ export const GTG17_SECTIONS = [
       ]},
       { type: "subheading", value: "Management of Unexplained RM" },
       { type: "list", items: [
-        "Supportive care in early pregnancy unit: early TVS scans and emotional support improve outcomes",
+        { text: "Supportive care in early pregnancy unit: early TVS scans and emotional support improve outcomes", mbrrace: "MBRRACE 2025 reinforces the evidence that structured emotional support in early pregnancy units reduces adverse outcomes. Continuity of care and a named provider within the EPU have measurable impact on women's wellbeing and engagement." },
         "Progesterone (micronised vaginal progesterone 400 mg BD): PRISM trial suggests benefit if ≥1 previous miscarriage + early pregnancy bleeding; PROMISE trial showed no benefit in unexplained RM without bleeding",
         "Dydrogesterone (Duphaston) 10 mg BD: emerging evidence; consider in selected cases",
         "Do NOT routinely offer: LMWH alone (without APS), aspirin alone, prednisolone, intravenous immunoglobulin, or paternal cell immunisation",
@@ -114,7 +114,7 @@ export const GTG17_SECTIONS = [
       ]},
       { type: "subheading", value: "Psychological Support" },
       { type: "list", items: [
-        "Recurrent miscarriage causes significant grief, anxiety, and depression — address at every consultation",
+        { text: "Recurrent miscarriage causes significant grief, anxiety, and depression — address at every consultation", mbrrace: "The psychological sequelae of recurrent miscarriage are frequently underestimated. MBRRACE reviews have identified women with recurrent pregnancy loss who died by suicide and whose mental health history was not adequately explored at perinatal contacts." },
         "Refer to specialist recurrent miscarriage clinic (Tommy's, local RPL clinic)",
         "Peer support: Tommy's Midwives helpline, Sands, Miscarriage Association",
         "Psychological therapy: CBT or counselling if anxiety/depression",

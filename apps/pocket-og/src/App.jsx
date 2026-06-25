@@ -13,14 +13,12 @@ import CalculatorPage from "./components/CalculatorPage";
 import AlphabetSidebar from "./components/AlphabetSidebar";
 import GuidelineReader from "./components/GuidelineReader";
 import RxPage from "./components/RxPage";
+import DisclaimerModal from "./components/DisclaimerModal";
+import InstallBanner from "./components/InstallBanner";
+import EmergencyPage from "./components/EmergencyPage";
+import ShoulderDystociaPage from "./components/ShoulderDystociaPage";
 
-const READER_AVAILABLE = new Set([
-  "GL861", "GL952", "GL891", "GL983", "GL880", "GL787", "GL783", "GL895",
-  "CG565", "CG621", "CG623", "QS46", "QS22", "GTG57", "GTG63", "GTG67",
-  "NG88", "NHSCSP20",
-  "GTG52", "GTG69", "NG25", "GTG31", "GTG17", "CG192",
-  "NG133",
-]);
+import { READER_AVAILABLE } from "./data/readerAvailable";
 
 const FILTER_OPTIONS = [
   { value: "ALL",        label: "All guidelines",      pill: "All",           filterFn: null,                                                    active: "bg-gray-900 text-white" },
@@ -53,8 +51,6 @@ const FLOWCHART_LINKS = [
   { id: "CG621_OUTPATIENT", gl: "CG621" },
   { id: "CG621_INPATIENT",  gl: "CG621" },
   { id: "CG623_MTX",        gl: "CG623" },
-  { id: "GL891_ANTENATAL",  gl: "GL891" },
-  { id: "GL891_POSTNATAL",  gl: "GL891" },
   { id: "GL983_DKA",        gl: "GL983" },
   { id: "GL880_DELIVERY",   gl: "GL880" },
   { id: "QS46_CARE_PATHWAY",   gl: "QS46" },
@@ -79,6 +75,10 @@ const FLOWCHART_LINKS = [
   { id: "NHSCSP20_PREGNANCY",    gl: "NHSCSP20" },
   { id: "GTG52_PPH",             gl: "GTG52" },
   { id: "GTG31_SURVEILLANCE",    gl: "GTG31" },
+  { id: "BASHH_PID_TRIAGE",      gl: "BASHH_PID" },
+  { id: "BASHH_PID_ANTIBIOTICS", gl: "BASHH_PID" },
+  { id: "NG73_DIAGNOSIS",        gl: "NG73" },
+  { id: "NG73_TREATMENT",        gl: "NG73" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -87,7 +87,6 @@ const FLOWCHART_GROUPS = [
   { gl: "CG565", label: "First Trimester Miscarriage" },
   { gl: "CG621", label: "Medical Management of Miscarriage" },
   { gl: "CG623", label: "Ectopic Pregnancy" },
-  { gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
   { gl: "GL983", label: "Diabetes in Pregnancy" },
   { gl: "GL880", label: "Intrahepatic Cholestasis" },
   { gl: "QS46",  label: "Multiple Pregnancy (Twins & Triplets)" },
@@ -99,6 +98,8 @@ const FLOWCHART_GROUPS = [
   { gl: "NHSCSP20", label: "Cervical Screening & Colposcopy" },
   { gl: "GTG52",    label: "Postpartum Haemorrhage" },
   { gl: "GTG31",    label: "Small for Gestational Age / FGR" },
+  { gl: "BASHH_PID", label: "Pelvic Inflammatory Disease" },
+  { gl: "NG73",      label: "Endometriosis" },
 ];
 
 export default function App() {
@@ -114,10 +115,13 @@ export default function App() {
   const [glSearchQuery, setGlSearchQuery] = useState("");
   const [fcSearchQuery, setFcSearchQuery] = useState("");
   const [activeGuidelineGl, setActiveGuidelineGl] = useState(null);
+  const [guidelineScrollTo, setGuidelineScrollTo] = useState(null);
   const [activeCalcScenario, setActiveCalcScenario] = useState(null);
   const [calcNavKey, setCalcNavKey] = useState(0);
   const [activeConsentProcedure, setActiveConsentProcedure] = useState(null);
   const [consentNavKey, setConsentNavKey] = useState(0);
+  const [activeEmergency, setActiveEmergency] = useState(null); // 'pph' | 'shoulder_dystocia' | null
+  const [showEmergencyPicker, setShowEmergencyPicker] = useState(false);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
   const glSectionRefs = useRef({});
@@ -139,6 +143,7 @@ export default function App() {
     } else if (type === "iol-prioritizer") {
       setShowIOLPrioritizer(true);
     } else if (type === "reader") {
+      setGuidelineScrollTo(null);
       setActiveGuidelineGl(id);
     }
   };
@@ -224,8 +229,24 @@ export default function App() {
   const toggle = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
   const showNoResults = hasQuery && primary.length === 0;
 
+  const openGuidelineFromSearch = (gl, sectionId) => {
+    setGuidelineScrollTo(sectionId);
+    setActiveGuidelineGl(gl);
+  };
+
+  const switchTab = (tabId) => {
+    setActiveGuidelineGl(null);
+    setGuidelineScrollTo(null);
+    setActiveFlowchartId(null);
+    setShowIOLPrioritizer(false);
+    if (tabId !== "consent") setActiveConsentProcedure(null);
+    if (tabId !== "calculator") setActiveCalcScenario(null);
+    setActiveTab(tabId);
+  };
+
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
+      <DisclaimerModal />
       <style>{`
         * { box-sizing: border-box; }
         html, body { -ms-overflow-style: none; scrollbar-width: none; }
@@ -240,6 +261,96 @@ export default function App() {
       {/* Feedback button — always visible */}
       <FeedbackButton query={query} filter={filter} />
 
+      {/* Emergency button — always visible */}
+      <button
+        type="button"
+        onClick={() => setShowEmergencyPicker(true)}
+        aria-label="Open emergency protocols"
+        style={{ bottom: "calc(4rem + env(safe-area-inset-bottom, 0px) + 0.5rem)" }}
+        className="fixed right-3 z-[35] flex flex-col items-center justify-center gap-0.5 bg-red-600 hover:bg-red-700 active:scale-95 shadow-lg rounded-2xl px-3 py-2 text-white transition-all"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+        </svg>
+        <span className="text-[10px] font-bold tracking-wide leading-none">SOS</span>
+      </button>
+
+      {/* Emergency picker */}
+      {showEmergencyPicker && (
+        <div
+          className="fixed inset-0 z-[45] bg-black/60 flex flex-col justify-end"
+          onClick={() => setShowEmergencyPicker(false)}
+        >
+          <div
+            className="bg-white rounded-t-3xl px-4 pt-5"
+            style={{ paddingBottom: "max(20px, env(safe-area-inset-bottom))" }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold text-gray-900">Select Emergency Protocol</h2>
+              <button
+                onClick={() => setShowEmergencyPicker(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-3 mb-3">
+              <button
+                onClick={() => { setActiveEmergency("pph"); setShowEmergencyPicker(false); }}
+                className="w-full flex items-center gap-4 bg-red-50 border border-red-200 rounded-2xl px-4 py-4 text-left active:bg-red-100 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-xl bg-red-700 flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-900">Postpartum Haemorrhage</p>
+                  <p className="text-xs text-gray-500 mt-0.5">GTG52 · Bleeding after delivery</p>
+                </div>
+                <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              <button
+                onClick={() => { setActiveEmergency("shoulder_dystocia"); setShowEmergencyPicker(false); }}
+                className="w-full flex items-center gap-4 bg-orange-50 border border-orange-200 rounded-2xl px-4 py-4 text-left active:bg-orange-100 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-900">Shoulder Dystocia</p>
+                  <p className="text-xs text-gray-500 mt-0.5">GTG42 · Head-to-body impaction · HELPERR</p>
+                </div>
+                <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+            <button
+              onClick={() => setShowEmergencyPicker(false)}
+              className="w-full py-3 rounded-2xl bg-gray-100 text-gray-600 font-semibold text-sm active:bg-gray-200 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Emergency page overlays */}
+      {activeEmergency === "pph" && (
+        <EmergencyPage onClose={() => setActiveEmergency(null)} />
+      )}
+      {activeEmergency === "shoulder_dystocia" && (
+        <ShoulderDystociaPage onClose={() => setActiveEmergency(null)} />
+      )}
+
       {/* IOL Prioritizer overlay */}
       {showIOLPrioritizer && <IOLPrioritizer onClose={() => setShowIOLPrioritizer(false)} />}
 
@@ -247,7 +358,8 @@ export default function App() {
       {activeGuidelineGl && (
         <GuidelineReader
           gl={activeGuidelineGl}
-          onClose={() => setActiveGuidelineGl(null)}
+          scrollToSectionId={guidelineScrollTo}
+          onClose={() => { setActiveGuidelineGl(null); setGuidelineScrollTo(null); }}
           onNavigate={handleNavigate}
         />
       )}
@@ -273,11 +385,11 @@ export default function App() {
         <>
           {/* Hero / idle state */}
           {!hasQuery && (
-            <div className="flex flex-col items-center justify-center min-h-screen px-5 pb-24">
+            <div className="flex flex-col items-center justify-start min-h-screen px-5 pt-20 pb-32">
               <div className="w-full max-w-lg">
 
                 {/* Hero */}
-                <div className="text-center mb-10">
+                <div className="text-center mb-6">
                   <h1 className="text-[36px] sm:text-[50px] font-[800] tracking-[0.04em] text-black">Pocket O&G</h1>
                   <p className="mt-3 text-base leading-relaxed text-gray-400">
                     Local and national guidelines.<br />Whenever and wherever you need them.
@@ -322,6 +434,8 @@ export default function App() {
                   ))}
                 </div>
 
+                <InstallBanner />
+
               </div>
             </div>
           )}
@@ -330,9 +444,9 @@ export default function App() {
       {hasQuery && (
         <>
           {/* Sticky compact header */}
-          <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md">
+          <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-gray-100">
             {/* Search row */}
-            <div className="max-w-lg mx-auto px-4 pt-3 pb-2">
+            <div className="max-w-lg mx-auto px-4 pt-6 pb-2">
               <div className="relative">
                 <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
@@ -376,7 +490,7 @@ export default function App() {
           {/* Results */}
           <div className="max-w-lg mx-auto px-4 py-5 pb-24">
             {!showNoResults && (
-              <p className="text-sm text-gray-500 mb-4">
+              <p className="text-sm text-gray-500 mb-6">
                 <span className="font-semibold text-gray-900">{primary.length}</span>{" "}
                 result{primary.length !== 1 ? "s" : ""} for{" "}
                 <span className="font-semibold text-gray-900">"{query}"</span>
@@ -385,18 +499,18 @@ export default function App() {
             )}
 
             {showNoResults
-              ? <NoResults query={query} fallbacks={fallback} expanded={expanded} onToggle={toggle} onOpenFlowchart={setActiveFlowchartId} />
+              ? <NoResults query={query} fallbacks={fallback} expanded={expanded} onToggle={toggle} onOpenFlowchart={setActiveFlowchartId} onOpenGuideline={openGuidelineFromSearch} />
               : (
                 <div className="space-y-3">
                   {primary.map(page => (
-                    <WikiCard key={page.id} page={page} query={query} isExpanded={!!expanded[page.id]} onToggle={() => toggle(page.id)} onOpenFlowchart={setActiveFlowchartId} />
+                    <WikiCard key={page.id} page={page} query={query} isExpanded={!!expanded[page.id]} onToggle={() => toggle(page.id)} onOpenFlowchart={setActiveFlowchartId} onOpenGuideline={openGuidelineFromSearch} />
                   ))}
                 </div>
               )
             }
 
             <div className="mt-10 text-center">
-              <p className="text-xs text-gray-400">Content derived verbatim from RBH trust guidelines · Not a substitute for clinical judgement · Always escalate when uncertain</p>
+              <p className="text-xs text-gray-400">Content summarised from national and local guidelines · For decision support only · Clinical judgement always applies</p>
               <p className="text-xs text-gray-400 mt-1">Built by Khalid Shamiyah</p>
             </div>
           </div>
@@ -562,7 +676,7 @@ export default function App() {
             {/* Sticky: source filter + search */}
             <div className="sticky top-0 z-20 bg-white border-b border-gray-100 pl-4 pr-12 pt-3 pb-3">
               <div className="flex gap-1.5 mb-2.5">
-                {["ALL", "RBH", "RCOG", "NICE"].map(src => (
+                {["ALL", "RBH", "RCOG", "NICE", "MBRRACE"].map(src => (
                   <button
                     key={src}
                     onClick={() => setGlSourceFilter(src)}
@@ -619,7 +733,7 @@ export default function App() {
                         const canRead = READER_AVAILABLE.has(gl.code);
                         const El = canRead ? "button" : gl.pdf ? "a" : "div";
                         const elProps = canRead
-                          ? { onClick: () => setActiveGuidelineGl(gl.code) }
+                          ? { onClick: () => { setGuidelineScrollTo(null); setActiveGuidelineGl(gl.code); } }
                           : gl.pdf
                           ? { href: gl.pdfUrl || gl.pdfPath || `/guidelines/${gl.code}.pdf`, target: "_blank", rel: "noopener noreferrer" }
                           : {};
@@ -681,14 +795,14 @@ export default function App() {
           {[
             { id: "search",     label: "Search",  icon: <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" /> },
             { id: "guidelines", label: "Guides",  icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> },
-            { id: "flowcharts", label: "Flow",    icon: <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l8.5 5v10L12 22 3.5 17V7L12 2z" /> },
+            { id: "flowcharts", label: "Flow",    icon: <path strokeLinecap="round" strokeLinejoin="round" d="M12 2L22 12L12 22L2 12L12 2Z" /> },
             { id: "consent",    label: "Consent", icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /> },
             { id: "calculator", label: "Calc",    icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m-6 5h6m-6 5h6M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" /> },
             { id: "rx",         label: "Rx",      icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" /> },
           ].map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => switchTab(tab.id)}
               aria-pressed={activeTab === tab.id}
               className={`flex-1 flex flex-col items-center gap-0.5 py-3 transition-colors ${
                 activeTab === tab.id ? "text-black" : "text-gray-400"

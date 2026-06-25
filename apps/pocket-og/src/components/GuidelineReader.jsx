@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import {
   GUIDELINES,
   GL861_SECTIONS, GL952_SECTIONS, GL891_SECTIONS, GL983_SECTIONS,
@@ -7,9 +7,12 @@ import {
   QS46_SECTIONS, QS22_SECTIONS,
   GTG57_SECTIONS, GTG63_SECTIONS, GTG67_SECTIONS,
   NG88_SECTIONS, NHSCSP20_SECTIONS,
-  GTG52_SECTIONS, GTG69_SECTIONS, NG25_SECTIONS,
+  GTG42_SECTIONS, GTG52_SECTIONS, GTG69_SECTIONS, NG25_SECTIONS,
   GTG31_SECTIONS, GTG17_SECTIONS, CG192_SECTIONS,
   NG133_SECTIONS,
+  BASHH_PID_SECTIONS,
+  NG73_SECTIONS,
+  MBRRACE_SLMC2025_SECTIONS,
 } from "@pocket-og/guidelines";
 import { FLOWCHARTS } from "../data/flowcharts";
 import { GUIDELINE_KEYWORD_LINKS } from "../data/connections";
@@ -36,6 +39,7 @@ const SECTIONS_MAP = {
   GTG67: GTG67_SECTIONS,
   NG88:  NG88_SECTIONS,
   NHSCSP20: NHSCSP20_SECTIONS,
+  GTG42: GTG42_SECTIONS,
   GTG52: GTG52_SECTIONS,
   GTG69: GTG69_SECTIONS,
   NG25:  NG25_SECTIONS,
@@ -43,6 +47,9 @@ const SECTIONS_MAP = {
   GTG17: GTG17_SECTIONS,
   CG192: CG192_SECTIONS,
   NG133: NG133_SECTIONS,
+  BASHH_PID: BASHH_PID_SECTIONS,
+  NG73: NG73_SECTIONS,
+  MBRRACE_SLMC2025: MBRRACE_SLMC2025_SECTIONS,
 };
 
 
@@ -73,7 +80,7 @@ function computeSectionBlockLinks(section, allLinks) {
   });
 }
 
-export default function GuidelineReader({ gl, onClose, onNavigate }) {
+export default function GuidelineReader({ gl, onClose, onNavigate, scrollToSectionId }) {
   const sections = SECTIONS_MAP[gl] ?? [];
   const guideline = GUIDELINES[gl];
   const theme = glColors(gl);
@@ -96,6 +103,12 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
       sectionRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 150);
   };
+
+  useEffect(() => {
+    if (!scrollToSectionId) return;
+    const timer = setTimeout(() => jumpTo(scrollToSectionId), 200);
+    return () => clearTimeout(timer);
+  }, [gl, scrollToSectionId]);
 
   return (
     <div className="fixed inset-0 z-40 bg-white flex flex-col">
@@ -192,6 +205,7 @@ export default function GuidelineReader({ gl, onClose, onNavigate }) {
               </a>
             )}
             <p className="text-xs text-gray-400">{gl} {guideline?.version} · {guideline?.date}</p>
+            <p className="text-xs text-gray-400 mt-1">Content summarised from source guidelines — verify against current published versions and local protocols. For decision support only.</p>
           </div>
 
         </div>

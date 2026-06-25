@@ -14,7 +14,7 @@ export const QS22_SECTIONS = [
       { type: "text", value: "NICE Quality Standard QS22 (based on NG201) sets 6 quality statements for antenatal care of women with uncomplicated pregnancies." },
       { type: "subheading", value: "The 6 Quality Statements" },
       { type: "list", items: [
-        "QS1: Booking appointment by 10 weeks; self-referral and complex social factors addressed",
+        { text: "QS1: Booking appointment by 10 weeks; self-referral and complex social factors addressed", mbrrace: "Late booking was documented in a disproportionate number of maternal deaths reviewed by MBRRACE 2021–23. Women who book after 10 weeks miss critical early risk assessment windows including VTE, mental health, and hypertension screening." },
         "QS2: Antenatal risk assessment at every appointment; schedule tailored to parity",
         "QS3: Continuity of carer — small named midwife team of 4–8",
         "QS4: Vaccines offered (flu, pertussis/whooping cough, COVID-19) at routine appointments",
@@ -51,7 +51,7 @@ export const QS22_SECTIONS = [
       { type: "subheading", value: "Complex Social Factors" },
       { type: "text", value: "The following require additional support and specialist referral at booking:" },
       { type: "list", items: [
-        "Substance misuse (alcohol, drugs)",
+        { text: "Substance misuse (alcohol, drugs)", mbrrace: "Substance misuse is a major contributor to maternal mortality in MBRRACE 2025. Women with drug or alcohol dependency often disengage from maternity services — proactive outreach and specialist referral at booking are essential." },
         "Domestic abuse or intimate partner violence",
         "Homelessness or very poor housing",
         "Recent immigration, asylum seekers or refugees",

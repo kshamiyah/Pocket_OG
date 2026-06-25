@@ -1,0 +1,105 @@
+export const ENDOMETRIOSIS_DRUGS = [
+  {
+    id: "dienogest",
+    name: "Dienogest",
+    class: "Progestogen — endometriosis-specific (Visanne®)",
+    color: "purple",
+    routes: [
+      {
+        type: "oral",
+        shortLabel: "Oral — endometriosis",
+        label: "Oral — endometriosis pain and suppression",
+        dose: "2 mg",
+        frequency: "Once daily continuously",
+        maxDose: "2 mg/day — do not exceed",
+        notes: "Licensed in the UK specifically for endometriosis. Higher progestogen receptor selectivity than older progestogens. Start on day 1–5 of cycle. Take at the same time each day. Irregular bleeding is common in the first few months — counsel patients. Does not reliably prevent pregnancy — use additional contraception if needed. Can be used long-term.",
+      },
+    ],
+    contraindications: [
+      "Active thromboembolic disorder",
+      "Severe hepatic disease",
+      "Hormone-sensitive malignancy",
+      "Undiagnosed vaginal bleeding",
+      "Pregnancy",
+    ],
+    cautions: [
+      "Irregular vaginal bleeding common in first 3–6 months — counsel patients before starting",
+      "May reduce bone density with prolonged use — consider DEXA if long-term treatment",
+      "Not licensed as a contraceptive — additional contraception required",
+      "Discontinue if jaundice or liver function deteriorates significantly",
+    ],
+    pregnancySafety: "Contraindicated in pregnancy. Not licensed as a contraceptive — use additional contraception.",
+    sources: [
+      { label: "BNF — Dienogest", href: "https://bnf.nice.org.uk/drugs/dienogest/" },
+      { label: "NICE NG73", href: "https://www.nice.org.uk/guidance/ng73" },
+    ],
+  },
+  {
+    id: "goserelin",
+    name: "Goserelin",
+    class: "GnRH agonist (Zoladex®)",
+    color: "purple",
+    routes: [
+      {
+        type: "sc",
+        shortLabel: "SC implant — endometriosis",
+        label: "SC implant — endometriosis / pre-surgical",
+        dose: "3.6 mg (monthly) or 10.8 mg (3-monthly)",
+        frequency: "Monthly (3.6 mg) or every 12 weeks (10.8 mg)",
+        maxDose: "6 months without add-back; longer with add-back HRT",
+        notes: "Injected as a subcutaneous depot into the anterior abdominal wall. Initial flare in symptoms may occur in first 2–4 weeks (transient increase in oestrogen). Always offer add-back HRT to reduce menopausal side effects and protect bone density. Without add-back: maximum 6 months. With add-back: can continue beyond 6 months. Not contraceptive — use barrier contraception.",
+      },
+    ],
+    contraindications: [
+      "Pregnancy or breastfeeding",
+      "Undiagnosed vaginal bleeding",
+      "Previous hypersensitivity to GnRH analogues",
+    ],
+    cautions: [
+      "Offer add-back HRT (e.g. norethisterone 5 mg daily or combined HRT) from start of treatment",
+      "Without add-back: maximum treatment duration is 6 months due to bone density loss",
+      "Initial symptom flare in first 4 weeks — warn patient",
+      "Non-contraceptive — advise barrier contraception during treatment",
+      "Monitor bone density if prolonged treatment",
+      "Depression and mood changes reported",
+    ],
+    pregnancySafety: "Contraindicated in pregnancy. Not contraceptive — use non-hormonal contraception.",
+    sources: [
+      { label: "BNF — Goserelin", href: "https://bnf.nice.org.uk/drugs/goserelin/" },
+      { label: "NICE NG73", href: "https://www.nice.org.uk/guidance/ng73" },
+    ],
+  },
+  {
+    id: "leuprorelin",
+    name: "Leuprorelin",
+    class: "GnRH agonist (Prostap®)",
+    color: "purple",
+    routes: [
+      {
+        type: "im",
+        shortLabel: "IM depot — endometriosis",
+        label: "IM depot — endometriosis pain suppression",
+        dose: "3.75 mg (monthly) or 11.25 mg (3-monthly)",
+        frequency: "Monthly (3.75 mg) or every 3 months (11.25 mg)",
+        maxDose: "6 months without add-back; longer with add-back HRT",
+        notes: "IM injection of depot preparation. Add-back HRT should be co-prescribed from the start to reduce menopausal side effects and bone density loss. Without add-back: limit to 6 months. Same mechanism and effects as goserelin — choice between the two is based on patient preference and formulation availability.",
+      },
+    ],
+    contraindications: [
+      "Pregnancy or breastfeeding",
+      "Undiagnosed vaginal bleeding",
+    ],
+    cautions: [
+      "Offer add-back HRT from start of treatment to protect bone density",
+      "Without add-back: maximum 6 months",
+      "Initial symptom flare in first 2–4 weeks",
+      "Non-contraceptive — advise barrier contraception",
+      "Monitor for depression and mood changes",
+    ],
+    pregnancySafety: "Contraindicated in pregnancy. Not contraceptive — use barrier contraception.",
+    sources: [
+      { label: "BNF — Leuprorelin", href: "https://bnf.nice.org.uk/drugs/leuprorelin-acetate/" },
+      { label: "NICE NG73", href: "https://www.nice.org.uk/guidance/ng73" },
+    ],
+  },
+];

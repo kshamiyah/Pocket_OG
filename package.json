@@ -1,5 +1,11 @@
 {
   "name": "pocket-og-workspace",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"]
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "sharp": "^0.35.2"
+  }
 }

@@ -31,7 +31,7 @@ export const GL952_SECTIONS = [
       { type: "subheading", value: "Length of Stay" },
       { type: "table", headers: ["Severity","Minimum Stay"], rows: [["Mild PET","24–48 hours"],["Moderate/Severe PET","3–5 days; must be >24 hrs since last medication increase"]] },
       { type: "subheading", value: "Discharge Criteria" },
-      { type: "list", items: ["No symptoms of PET","BP ≤150/100 mmHg (with or without antihypertensive)","Blood results stable or improving","Generate postnatal BP management plan on EPR","Prescribe 2 weeks of antihypertensive on TTO"] },
+      { type: "list", items: ["No symptoms of PET","BP ≤150/100 mmHg (with or without antihypertensive)","Blood results stable or improving",{ text: "Generate postnatal BP management plan on EPR", mbrrace: "MBRRACE 2025 highlights that postnatal hypertension was under-recognised and under-managed after discharge. Women who died postnatally had no documented BP plan at the time of discharge." },{ text: "Prescribe 2 weeks of antihypertensive on TTO", mbrrace: "Several women who died from postpartum hypertensive complications had no antihypertensive prescribed on discharge. Supply of medication must accompany every discharge of a woman with PET." }] },
     ]
   },
   {
