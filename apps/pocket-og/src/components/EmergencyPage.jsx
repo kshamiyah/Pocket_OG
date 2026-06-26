@@ -9,9 +9,14 @@ const TASKS = [
   { id: "iv_access",      level: "minor",   type: "access",   title: "IV access + bloods",                    detail: "1 × 16G IV cannula\nBloods: FBC, coagulation, U&E, group & screen",                                                                                    followUpDelay: 90  },
   { id: "fundal_massage", level: "minor",   type: "action",   title: "Fundal massage",                        detail: "Place hand firmly on fundus\nRub up a contraction — sustained circular massage\nAssess uterine tone immediately after" },
   { id: "bimanual",       level: "minor",   type: "action",   title: "Bimanual uterine compression",          detail: "One hand in vagina, one on abdomen\nSustained compression until uterus contracts\nContinue while awaiting uterotonic effect",                               deps: ["fundal_massage"] },
-  // Minor — examination (Trauma / Tissue — assess cause early)
-  { id: "inspect_canal",  level: "minor",   type: "action",   title: "Inspect birth canal",                   detail: "Cervix, vagina, perineum — good exposure and lighting\nSuture all visible lacerations",                                                                   followUpDelay: 120 },
-  { id: "check_placenta", level: "minor",   type: "action",   title: "Check placenta complete",               detail: "Confirm placenta and membranes complete\nIf uncertain — manual exploration under anaesthesia",                                                              followUpDelay: 120 },
+  // Minor — Trauma (assess; treat only if present)
+  { id: "trauma_assess",  level: "minor",   type: "action",   title: "Trauma — inspect birth canal",          detail: "Cervix, vagina, perineum — good exposure and lighting",
+    assess: { question: "Any laceration, haematoma or genital tract trauma?", excludeLabel: "No — none", excludeLog: "Trauma excluded — no genital tract trauma", presentLabel: "Yes — present", presentLog: "Trauma identified — proceeding to repair", treatment: "suture" } },
+  { id: "suture",         level: "minor",   type: "action",   title: "Suture lacerations / surgical haemostasis", detail: "Suture all visible lacerations\nDirect pressure / pack while awaiting senior\nEscalate to theatre if not controlled",                                  hidden: true, followUpDelay: 300, followUpQuestion: "Trauma bleeding controlled?", followUpYesLog: "Trauma controlled — haemostasis achieved", followUpEscalate: "theatre", followUpEscalateLog: "Trauma not controlled at 5 min — escalating to theatre / EUA" },
+  // Minor — Tissue (assess; treat only if retained)
+  { id: "tissue_assess",  level: "minor",   type: "action",   title: "Tissue — check placenta",               detail: "Confirm placenta and membranes complete",
+    assess: { question: "Placenta and membranes complete?", excludeLabel: "Yes — complete", excludeLog: "Tissue excluded — placenta complete", presentLabel: "No — retained", presentLog: "Retained tissue suspected", treatment: "manual_removal" } },
+  { id: "manual_removal", level: "minor",   type: "action",   title: "Manual removal of retained tissue",     detail: "Manual exploration / removal under anaesthesia\nGive prophylactic antibiotics",                                                                          hidden: true, followUpDelay: 300 },
   { id: "catheterise",    level: "minor",   type: "action",   title: "Catheterise",                           detail: "Urinary catheter — target output >30 ml/hr\nMonitor hourly" },
   { id: "iv_fluids",      level: "minor",   type: "fluid",    title: "IV fluids",                             detail: "IV crystalloid resuscitation (Hartmann's / 0.9% saline)",                                                                                                deps: ["iv_access"] },
   // Minor — uterotonics in order
@@ -51,7 +56,7 @@ function getLevel(ml) {
   return "minor";
 }
 
-function computeNextPrompt({ taskStates, level, fourTsDone, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now }) {
+function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now }) {
   function depsOk(task) {
     return (task.deps || []).every(id => ["done", "skipped"].includes(taskStates[id]?.status));
   }
@@ -59,9 +64,12 @@ function computeNextPrompt({ taskStates, level, fourTsDone, toneAssessed, log, t
   // fallback after a higher-tier drug was found contraindicated.
   function relevant(task) { return levelVal(task.level) <= levelVal(level) || (forcedTasks || []).includes(task.id); }
   function st(id) { return taskStates[id]?.status ?? null; }
-  // Before surfacing a drug with listed contraindications, surface a CI check first.
+  // Before surfacing a task, route to the right prompt:
+  // - drugs with contraindications → CI check first
+  // - assessment tasks (Four T's: trauma / tissue) → assess prompt (exclude vs treat)
   function gate(task) {
     if (task.contraindications && !(ciCleared || {})[task.id]) return { type: "ci_check", task };
+    if (task.assess) return { type: "assess", task };
     return { type: "task", task };
   }
 
@@ -79,10 +87,6 @@ function computeNextPrompt({ taskStates, level, fourTsDone, toneAssessed, log, t
   const lastBL = [...log].reverse().find(e => e.kind === "blood_loss");
   if (lastBL && (now - lastBL.time) / 1000 > blInterval) return { type: "blood_loss_check" };
 
-  // Priority 3 — Four T's cause assessment (part of initial assessment, alongside ABC —
-  // fires once help is called and ABC addressed, before the uterine measures)
-  if (!fourTsDone && ["done", "skipped"].includes(st("call_team")) && ["done", "skipped"].includes(st("abc"))) return { type: "four_ts" };
-
   // Priority 4 — non-critical follow-ups
   for (const t of TASKS) {
     if (!relevant(t) || st(t.id) !== "assigned" || !t.followUpDelay) continue;
@@ -94,6 +98,7 @@ function computeNextPrompt({ taskStates, level, fourTsDone, toneAssessed, log, t
   for (const critLevel of ["massive", "major", "minor"]) {
     for (const t of TASKS) {
       if (t.level !== critLevel || !relevant(t) || st(t.id) !== null || !depsOk(t) || !t.critical) continue;
+      if (t.hidden && !(forcedTasks || []).includes(t.id)) continue;
       if (t.special === "txa" && txaHandled) continue;
       if (t.special === "carbo" && carboCount > 0) continue;
       return gate(t);
@@ -116,6 +121,7 @@ function computeNextPrompt({ taskStates, level, fourTsDone, toneAssessed, log, t
   // Priority 7 — next regular task
   for (const t of TASKS) {
     if (!relevant(t) || st(t.id) !== null || !depsOk(t)) continue;
+    if (t.hidden && !(forcedTasks || []).includes(t.id)) continue;
     if (t.special === "txa" && txaHandled) continue;
     if (t.special === "carbo" && carboCount > 0) continue;
     return gate(t);
@@ -328,52 +334,36 @@ function TaskPrompt({ task, onDone, onAssign, onSkip }) {
 
 function FollowupPrompt({ task, onYes, onNo }) {
   useEffect(() => { if ("vibrate" in navigator) navigator.vibrate([100, 60, 100]); }, []);
+  const escalates = !!task.followUpEscalate;
   return (
     <div className="px-4 py-3.5 space-y-2.5">
       <span className="text-xs font-bold uppercase tracking-wider text-amber-500">Follow-up</span>
-      <p className="text-white text-xl font-bold leading-snug">{task.title}</p>
-      <p className="text-gray-600 text-xs">Assigned to team — has it been done?</p>
+      <p className="text-white text-xl font-bold leading-snug">{task.followUpQuestion || task.title}</p>
+      <p className="text-gray-600 text-xs">{task.followUpQuestion ? "Reassess now" : "Assigned to team — has it been done?"}</p>
       <div className="flex gap-2 pt-1">
-        <button onClick={() => onYes(task)} className="flex-1 bg-white text-gray-950 font-bold py-2.5 text-sm rounded-lg">Yes — confirmed ✓</button>
-        <button onClick={() => onNo(task)} className="flex-1 border border-gray-700 text-white font-medium py-2.5 text-sm rounded-lg">Not yet</button>
+        <button onClick={() => onYes(task)} className="flex-1 bg-white text-gray-950 font-bold py-2.5 text-sm rounded-lg">
+          {task.followUpQuestion ? "Yes — controlled ✓" : "Yes — confirmed ✓"}
+        </button>
+        <button onClick={() => onNo(task)} className={`flex-1 border font-medium py-2.5 text-sm rounded-lg ${escalates ? "border-red-800 text-red-400 font-bold" : "border-gray-700 text-white"}`}>
+          {escalates ? "No — escalate →" : "Not yet"}
+        </button>
       </div>
     </div>
   );
 }
 
-function FourTsPrompt({ onConfirm }) {
-  const [selected, setSelected] = useState(new Set());
-  const opts = [
-    { key: "tone",     label: "Tone",     sub: "Uterine atony" },
-    { key: "trauma",   label: "Trauma",   sub: "Lacerations / haematoma" },
-    { key: "tissue",   label: "Tissue",   sub: "Retained placenta" },
-    { key: "thrombin", label: "Thrombin", sub: "Coagulopathy" },
-  ];
-  function toggle(k) {
-    setSelected(prev => { const n = new Set(prev); n.has(k) ? n.delete(k) : n.add(k); return n; });
-  }
-  function confirm() {
-    onConfirm(selected.size > 0 ? selected : new Set(opts.map(o => o.key)));
-  }
+function AssessPrompt({ task, onExclude, onPresent }) {
+  const a = task.assess;
+  useEffect(() => { if ("vibrate" in navigator) navigator.vibrate([100, 60, 100]); }, []);
   return (
     <div className="px-4 py-3.5 space-y-2.5">
-      <span className="text-xs font-bold uppercase tracking-wider text-gray-600">Four T's — suspected cause</span>
-      <p className="text-gray-500 text-xs">Select all that apply (for documentation)</p>
-      <div className="grid grid-cols-4 gap-1.5">
-        {opts.map(o => {
-          const on = selected.has(o.key);
-          return (
-            <button key={o.key} onClick={() => toggle(o.key)}
-              className={`text-left px-2.5 py-3 rounded-lg border text-xs transition ${on ? "border-white text-white bg-gray-800" : "border-gray-800 text-gray-600"}`}>
-              <div className="font-bold">{o.label}</div>
-              <div className="text-gray-600 mt-0.5 leading-tight text-[10px]">{o.sub}</div>
-            </button>
-          );
-        })}
+      <span className="text-xs font-bold uppercase tracking-wider text-amber-500">Assess — {task.title}</span>
+      <p className="text-white text-xl font-bold leading-snug">{a.question}</p>
+      {task.detail && <p className="text-gray-500 text-xs whitespace-pre-line leading-relaxed">{task.detail}</p>}
+      <div className="flex gap-2 pt-1">
+        <button onClick={() => onExclude(task)} className="flex-1 bg-white text-gray-950 font-bold py-3 text-sm rounded-lg">{a.excludeLabel}</button>
+        <button onClick={() => onPresent(task)} className="flex-1 border border-amber-700 text-amber-400 font-bold py-3 text-sm rounded-lg">{a.presentLabel}</button>
       </div>
-      <button onClick={confirm} className="w-full bg-white text-gray-950 font-bold py-2.5 text-sm rounded-lg">
-        {selected.size > 0 ? `Confirm (${selected.size}) →` : "Uncertain — treat all →"}
-      </button>
     </div>
   );
 }
@@ -501,13 +491,13 @@ function CiCheckPrompt({ task, onClear, onContraindicated }) {
 
 function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount, handlers }) {
   if (!prompt) return null;
-  const { onDone, onAssign, onSkip, onFollowupYes, onFollowupNo, onFourTs, onBloodAdd, onBloodUnchanged, onCarboDose, onCarboSkip, onTxaSecondGiven, onTxaSecondNotNeeded, onToneCheckFirm, onToneCheckBoggy, onCiClear, onCiContraindicated } = handlers;
+  const { onDone, onAssign, onSkip, onFollowupYes, onFollowupNo, onAssessExclude, onAssessPresent, onBloodAdd, onBloodUnchanged, onCarboDose, onCarboSkip, onTxaSecondGiven, onTxaSecondNotNeeded, onToneCheckFirm, onToneCheckBoggy, onCiClear, onCiContraindicated } = handlers;
 
   let content;
   switch (prompt.type) {
     case "task":         content = <TaskPrompt task={prompt.task} onDone={onDone} onAssign={onAssign} onSkip={onSkip} />; break;
     case "followup":     content = <FollowupPrompt task={prompt.task} onYes={onFollowupYes} onNo={onFollowupNo} />; break;
-    case "four_ts":      content = <FourTsPrompt onConfirm={onFourTs} />; break;
+    case "assess":       content = <AssessPrompt task={prompt.task} onExclude={onAssessExclude} onPresent={onAssessPresent} />; break;
     case "blood_loss_check": content = <BloodCheckPrompt level={level} bloodLoss={bloodLoss} onAdd={onBloodAdd} onUnchanged={onBloodUnchanged} />; break;
     case "carbo_dose":   content = <CarboDosePrompt count={carboCount} onDose={onCarboDose} onSkip={onCarboSkip} />; break;
     case "txa_second":   content = <TxaSecondPrompt onGiven={onTxaSecondGiven} onNotNeeded={onTxaSecondNotNeeded} />; break;
@@ -517,7 +507,7 @@ function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount,
     default:             return null;
   }
 
-  const isInterrupt = ["followup", "four_ts", "blood_loss_check", "carbo_dose", "txa_second", "tone_check", "ci_check"].includes(prompt.type);
+  const isInterrupt = ["followup", "assess", "blood_loss_check", "carbo_dose", "txa_second", "tone_check", "ci_check"].includes(prompt.type);
 
   return (
     <div className={`flex-shrink-0 border-b border-gray-800 ${isInterrupt ? "bg-gray-900" : "bg-gray-900"}`}>
@@ -753,7 +743,6 @@ export default function EmergencyPage({ onClose }) {
   const [phase, setPhase] = useState("setup");
   const [bloodLoss, setBloodLoss] = useState(0);
   const [taskStates, setTaskStates] = useState({});
-  const [fourTsDone, setFourTsDone] = useState(false);
   const [log, setLog] = useState([]);
   const [txaTime, setTxaTime] = useState(null);
   const [txaHandled, setTxaHandled] = useState(false);
@@ -801,14 +790,14 @@ export default function EmergencyPage({ onClose }) {
 
   useEffect(() => {
     if (phase !== "active") return;
-    saveSession({ emergencyStartTime, phase, bloodLoss, taskStates, fourTsDone, toneAssessed, log,
+    saveSession({ emergencyStartTime, phase, bloodLoss, taskStates, toneAssessed, log,
       txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime, ciCleared, forcedTasks });
-  }, [phase, bloodLoss, taskStates, fourTsDone, toneAssessed, log, txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime, ciCleared, forcedTasks]);
+  }, [phase, bloodLoss, taskStates, toneAssessed, log, txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime, ciCleared, forcedTasks]);
 
   const effectiveBirthTime = birthTime ?? emergencyStartTime;
 
   const prompt = phase === "active"
-    ? computeNextPrompt({ taskStates, level, fourTsDone, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now })
+    ? computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now })
     : null;
 
   const relevantTasks = TASKS.filter(t => levelVal(t.level) <= levelVal(level));
@@ -854,19 +843,33 @@ export default function EmergencyPage({ onClose }) {
 
   function handleFollowupYes(task) {
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: Date.now() } }));
-    addLog("followup_done", `Confirmed done: ${task.title}`);
+    addLog("followup_done", task.followUpYesLog || `Confirmed done: ${task.title}`);
     if (task.special === "txa") { setTxaTime(Date.now()); setTxaHandled(true); }
   }
 
   function handleFollowupNo(task) {
+    // Re-arm the follow-up timer so it checks again.
     setTaskStates(prev => ({ ...prev, [task.id]: { ...prev[task.id], assignedAt: Date.now() } }));
-    addLog("followup_pending", `Still in progress: ${task.title}`);
+    if (task.followUpEscalate) {
+      // Conditional escalation (e.g. trauma not controlled at 5 min → theatre / EUA)
+      setForcedTasks(prev => prev.includes(task.followUpEscalate) ? prev : [...prev, task.followUpEscalate]);
+      addLog("followup_escalate", task.followUpEscalateLog || `Escalating: ${task.title}`);
+    } else {
+      addLog("followup_pending", `Still in progress: ${task.title}`);
+    }
   }
 
-  function handleFourTs(tracksSet) {
-    setFourTsDone(true);
-    const names = [...tracksSet].map(t => t[0].toUpperCase() + t.slice(1)).join(", ");
-    addLog("four_ts", `Four T's: ${names}`);
+  function handleAssessExclude(task) {
+    setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: Date.now() } }));
+    addLog("assess", task.assess.excludeLog || `${task.title} — excluded`);
+  }
+
+  function handleAssessPresent(task) {
+    setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: Date.now() } }));
+    addLog("assess", task.assess.presentLog || `${task.title} — present`);
+    if (task.assess.treatment) {
+      setForcedTasks(prev => prev.includes(task.assess.treatment) ? prev : [...prev, task.assess.treatment]);
+    }
   }
 
   function handleBloodAdd(delta) {
@@ -939,7 +942,6 @@ export default function EmergencyPage({ onClose }) {
     if (!s) return;
     setBloodLoss(s.bloodLoss ?? 0);
     setTaskStates(s.taskStates ?? {});
-    setFourTsDone(s.fourTsDone ?? false);
     setLog(s.log ?? []);
     setTxaTime(s.txaTime ?? null);
     setTxaHandled(s.txaHandled ?? false);
@@ -998,7 +1000,8 @@ export default function EmergencyPage({ onClose }) {
   const handlers = {
     onDone: handleDone, onAssign: handleAssign, onSkip: handleSkip,
     onFollowupYes: handleFollowupYes, onFollowupNo: handleFollowupNo,
-    onFourTs: handleFourTs, onBloodAdd: handleBloodAdd, onBloodUnchanged: handleBloodUnchanged,
+    onAssessExclude: handleAssessExclude, onAssessPresent: handleAssessPresent,
+    onBloodAdd: handleBloodAdd, onBloodUnchanged: handleBloodUnchanged,
     onCarboDose: handleCarboDose, onCarboSkip: handleCarboSkip,
     onTxaSecondGiven: handleTxaSecondGiven, onTxaSecondNotNeeded: handleTxaSecondNotNeeded,
     onToneCheckFirm: handleToneCheckFirm, onToneCheckBoggy: handleToneCheckBoggy,
