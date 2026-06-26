@@ -7,7 +7,8 @@ const TASKS = [
   { id: "abc",            level: "minor",   type: "action",   title: "ABC — airway, breathing, circulation",  detail: "Position patient flat\nHigh-flow O₂ 15 L/min via non-rebreather mask — do not wait for SpO₂ to fall in haemorrhage\nAssess for shock — HR, BP, skin perfusion, capillary refill" },
   { id: "call_team",      level: "minor",   type: "call",     title: "Call for help",                         detail: "• Midwife in charge\n• On-call obstetrician",                                                                                                          followUpDelay: 120 },
   { id: "iv_access",      level: "minor",   type: "access",   title: "IV access + bloods",                    detail: "2 × large bore IV cannulas (14–16G)\nBloods: FBC, coagulation, U&E, LFT, group & screen",                                                              followUpDelay: 90  },
-  { id: "bimanual",       level: "minor",   type: "action",   title: "Bimanual uterine massage",              detail: "Rub up a contraction — sustained bimanual compression\nIs the uterus firm after massage? (diagnostic)",                                                  followUpDelay: 180 },
+  { id: "fundal_massage", level: "minor",   type: "action",   title: "Fundal massage",                        detail: "Place hand firmly on fundus\nRub up a contraction — sustained circular massage\nAssess uterine tone immediately after" },
+  { id: "bimanual",       level: "minor",   type: "action",   title: "Bimanual uterine compression",          detail: "One hand in vagina, one on abdomen\nSustained compression until uterus contracts\nContinue while awaiting uterotonic effect",                               deps: ["fundal_massage"] },
   { id: "catheterise",    level: "minor",   type: "action",   title: "Catheterise",                           detail: "Urinary catheter — target output >30 ml/hr\nMonitor hourly" },
   { id: "keep_warm",      level: "minor",   type: "action",   title: "Keep patient warm",                     detail: "Blankets and warming device\nHypothermia worsens coagulopathy" },
   { id: "iv_fluids",      level: "minor",   type: "fluid",    title: "IV fluids",                             detail: "Hartmann's or 0.9% saline — fluid resuscitation",                                                                                                        deps: ["iv_access"] },
@@ -49,12 +50,15 @@ function getLevel(ml) {
   return "minor";
 }
 
-function computeNextPrompt({ taskStates, level, fourTsDone, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, now }) {
+function computeNextPrompt({ taskStates, level, fourTsDone, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, now }) {
   function depsOk(task) {
     return (task.deps || []).every(id => ["done", "skipped"].includes(taskStates[id]?.status));
   }
   function relevant(task) { return levelVal(task.level) <= levelVal(level); }
   function st(id) { return taskStates[id]?.status ?? null; }
+
+  // Priority 1.5 — tone assessment after fundal massage (fires immediately when massage done)
+  if (taskStates["fundal_massage"]?.status === "done" && !toneAssessed) return { type: "tone_check" };
 
   // Priority 1 — critical follow-ups (overdue assigned critical tasks)
   for (const t of TASKS) {
@@ -431,6 +435,21 @@ function TxaSecondPrompt({ onGiven, onNotNeeded }) {
   );
 }
 
+function ToneCheckPrompt({ onFirm, onBoggy }) {
+  useEffect(() => { if ("vibrate" in navigator) navigator.vibrate([100, 60, 100]); }, []);
+  return (
+    <div className="px-4 py-3.5 space-y-2">
+      <span className="text-xs font-bold uppercase tracking-wider text-amber-500">Tone assessment</span>
+      <p className="text-white text-xl font-bold">Is the uterus firm after massage?</p>
+      <p className="text-gray-500 text-xs">Assess uterine tone now — determines next step</p>
+      <div className="flex gap-2 pt-1">
+        <button onClick={onFirm} className="flex-1 bg-white text-gray-950 font-bold py-2.5 text-sm rounded-lg">Firm ✓</button>
+        <button onClick={onBoggy} className="flex-1 border border-gray-700 text-white font-medium py-2.5 text-sm rounded-lg">Still boggy →</button>
+      </div>
+    </div>
+  );
+}
+
 function MonitoringPrompt({ assignedCount }) {
   return (
     <div className="px-4 py-4">
@@ -448,7 +467,7 @@ function MonitoringPrompt({ assignedCount }) {
 
 function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount, handlers }) {
   if (!prompt) return null;
-  const { onDone, onAssign, onSkip, onFollowupYes, onFollowupNo, onFourTs, onBloodAdd, onBloodUnchanged, onCarboDose, onCarboSkip, onTxaSecondGiven, onTxaSecondNotNeeded } = handlers;
+  const { onDone, onAssign, onSkip, onFollowupYes, onFollowupNo, onFourTs, onBloodAdd, onBloodUnchanged, onCarboDose, onCarboSkip, onTxaSecondGiven, onTxaSecondNotNeeded, onToneCheckFirm, onToneCheckBoggy } = handlers;
 
   let content;
   switch (prompt.type) {
@@ -458,11 +477,12 @@ function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount,
     case "blood_loss_check": content = <BloodCheckPrompt level={level} bloodLoss={bloodLoss} onAdd={onBloodAdd} onUnchanged={onBloodUnchanged} />; break;
     case "carbo_dose":   content = <CarboDosePrompt count={carboCount} onDose={onCarboDose} onSkip={onCarboSkip} />; break;
     case "txa_second":   content = <TxaSecondPrompt onGiven={onTxaSecondGiven} onNotNeeded={onTxaSecondNotNeeded} />; break;
+    case "tone_check":   content = <ToneCheckPrompt onFirm={onToneCheckFirm} onBoggy={onToneCheckBoggy} />; break;
     case "monitoring":   content = <MonitoringPrompt assignedCount={assignedCount} />; break;
     default:             return null;
   }
 
-  const isInterrupt = ["followup", "four_ts", "blood_loss_check", "carbo_dose", "txa_second"].includes(prompt.type);
+  const isInterrupt = ["followup", "four_ts", "blood_loss_check", "carbo_dose", "txa_second", "tone_check"].includes(prompt.type);
 
   return (
     <div className={`flex-shrink-0 border-b border-gray-800 ${isInterrupt ? "bg-gray-900" : "bg-gray-900"}`}>
@@ -703,6 +723,7 @@ export default function EmergencyPage({ onClose }) {
   const [txaTime, setTxaTime] = useState(null);
   const [txaHandled, setTxaHandled] = useState(false);
   const [txaSecondDone, setTxaSecondDone] = useState(false);
+  const [toneAssessed, setToneAssessed] = useState(false);
   const [birthTime, setBirthTime] = useState(null);
   const [carboCount, setCarboCount] = useState(0);
   const [carboLastTime, setCarboLastTime] = useState(null);
@@ -743,14 +764,14 @@ export default function EmergencyPage({ onClose }) {
 
   useEffect(() => {
     if (phase !== "active") return;
-    saveSession({ emergencyStartTime, phase, bloodLoss, taskStates, fourTsDone, log,
+    saveSession({ emergencyStartTime, phase, bloodLoss, taskStates, fourTsDone, toneAssessed, log,
       txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime });
-  }, [phase, bloodLoss, taskStates, fourTsDone, log, txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime]);
+  }, [phase, bloodLoss, taskStates, fourTsDone, toneAssessed, log, txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime]);
 
   const effectiveBirthTime = birthTime ?? emergencyStartTime;
 
   const prompt = phase === "active"
-    ? computeNextPrompt({ taskStates, level, fourTsDone, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, now })
+    ? computeNextPrompt({ taskStates, level, fourTsDone, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, now })
     : null;
 
   const relevantTasks = TASKS.filter(t => levelVal(t.level) <= levelVal(level));
@@ -843,6 +864,17 @@ export default function EmergencyPage({ onClose }) {
     addLog("txa_second", "TXA second dose — not needed / bleeding resolved");
   }
 
+  function handleToneCheckFirm() {
+    setToneAssessed(true);
+    setTaskStates(prev => ({ ...prev, bimanual: { status: "skipped", skippedAt: Date.now() } }));
+    addLog("tone_check", "Tone: uterus firm after fundal massage — bimanual not required");
+  }
+
+  function handleToneCheckBoggy() {
+    setToneAssessed(true);
+    addLog("tone_check", "Tone: uterus still boggy — proceeding to bimanual compression");
+  }
+
   function handleConfirmTask(taskId) {
     const task = TASKS.find(t => t.id === taskId);
     setTaskStates(prev => ({ ...prev, [taskId]: { status: "done", doneAt: Date.now() } }));
@@ -862,6 +894,7 @@ export default function EmergencyPage({ onClose }) {
     setTxaTime(s.txaTime ?? null);
     setTxaHandled(s.txaHandled ?? false);
     setTxaSecondDone(s.txaSecondDone ?? false);
+    setToneAssessed(s.toneAssessed ?? false);
     setBirthTime(s.birthTime ?? null);
     setCarboCount(s.carboCount ?? 0);
     setCarboLastTime(s.carboLastTime ?? null);
@@ -916,6 +949,7 @@ export default function EmergencyPage({ onClose }) {
     onFourTs: handleFourTs, onBloodAdd: handleBloodAdd, onBloodUnchanged: handleBloodUnchanged,
     onCarboDose: handleCarboDose, onCarboSkip: handleCarboSkip,
     onTxaSecondGiven: handleTxaSecondGiven, onTxaSecondNotNeeded: handleTxaSecondNotNeeded,
+    onToneCheckFirm: handleToneCheckFirm, onToneCheckBoggy: handleToneCheckBoggy,
   };
 
   return (
