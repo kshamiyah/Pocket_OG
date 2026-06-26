@@ -340,14 +340,28 @@ function FollowupPrompt({ task, onYes, onNo }) {
       <span className="text-xs font-bold uppercase tracking-wider text-amber-500">Follow-up</span>
       <p className="text-white text-xl font-bold leading-snug">{task.followUpQuestion || task.title}</p>
       <p className="text-gray-600 text-xs">{task.followUpQuestion ? "Reassess now" : "Assigned to team — has it been done?"}</p>
-      <div className="flex gap-2 pt-1">
-        <button onClick={() => onYes(task)} className="flex-1 bg-white text-gray-950 font-bold py-2.5 text-sm rounded-lg">
-          {task.followUpQuestion ? "Yes — controlled ✓" : "Yes — confirmed ✓"}
-        </button>
-        <button onClick={() => onNo(task)} className={`flex-1 border font-medium py-2.5 text-sm rounded-lg ${escalates ? "border-red-800 text-red-400 font-bold" : "border-gray-700 text-white"}`}>
-          {escalates ? "No — escalate →" : "Not yet"}
-        </button>
-      </div>
+      {escalates ? (
+        <div className="flex flex-col gap-2 pt-1">
+          <button onClick={() => onYes(task)} className="w-full bg-white text-gray-950 font-bold py-2.5 text-sm rounded-lg">
+            Yes — controlled ✓
+          </button>
+          <button onClick={() => onNo(task, false)} className="w-full border border-gray-700 text-white font-medium py-2.5 text-sm rounded-lg">
+            Improving — check back in 5 min
+          </button>
+          <button onClick={() => onNo(task, true)} className="w-full border border-red-800 text-red-400 font-bold py-2.5 text-sm rounded-lg">
+            Not controlled — consider theatre →
+          </button>
+        </div>
+      ) : (
+        <div className="flex gap-2 pt-1">
+          <button onClick={() => onYes(task)} className="flex-1 bg-white text-gray-950 font-bold py-2.5 text-sm rounded-lg">
+            Yes — confirmed ✓
+          </button>
+          <button onClick={() => onNo(task, false)} className="flex-1 border border-gray-700 text-white font-medium py-2.5 text-sm rounded-lg">
+            Not yet
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -847,11 +861,11 @@ export default function EmergencyPage({ onClose }) {
     if (task.special === "txa") { setTxaTime(Date.now()); setTxaHandled(true); }
   }
 
-  function handleFollowupNo(task) {
+  function handleFollowupNo(task, escalate = false) {
     // Re-arm the follow-up timer so it checks again.
     setTaskStates(prev => ({ ...prev, [task.id]: { ...prev[task.id], assignedAt: Date.now() } }));
-    if (task.followUpEscalate) {
-      // Conditional escalation (e.g. trauma not controlled at 5 min → theatre / EUA)
+    if (task.followUpEscalate && escalate) {
+      // Clinician explicitly chose to escalate (e.g. trauma not controlled → consider theatre)
       setForcedTasks(prev => prev.includes(task.followUpEscalate) ? prev : [...prev, task.followUpEscalate]);
       addLog("followup_escalate", task.followUpEscalateLog || `Escalating: ${task.title}`);
     } else {
