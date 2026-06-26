@@ -14,7 +14,7 @@ const TASKS = [
   // Minor — uterotonics in order
   { id: "oxytocin_bolus", level: "minor",   type: "drug",     title: "Oxytocin 5 IU IV",                      detail: "Slowly IV over ~1 minute\nOnly if not already given for active management of third stage",                                                               followUpDelay: 120, deps: ["iv_access"] },
   { id: "oxytocin_inf",   level: "minor",   type: "drug",     title: "Oxytocin infusion",                     detail: "40 IU in 500 ml Hartmann's at 125 ml/hr IV",                                                                                                             followUpDelay: 60, deps: ["iv_access"] },
-  { id: "ergometrine",    level: "minor",   type: "drug",     title: "Ergometrine 500 mcg",                   detail: "IM or slow IV\nIf oxytocin alone insufficient\n⚠ Avoid if hypertension, pre-eclampsia, cardiac disease or obliterative vascular disease",                       followUpDelay: 300, deps: ["iv_access"] },
+  { id: "ergometrine",    level: "minor",   type: "drug",     title: "Ergometrine 500 mcg",                   detail: "IM or slow IV\nIf oxytocin alone insufficient",                                                                                                         followUpDelay: 300, deps: ["iv_access"], contraindications: ["Hypertension", "Pre-eclampsia", "Cardiac disease", "Obliterative vascular disease"], fallback: "carboprost" },
   // Minor — examination
   { id: "inspect_canal",  level: "minor",   type: "action",   title: "Inspect birth canal",                   detail: "Cervix, vagina, perineum — good exposure and lighting\nSuture all visible lacerations",                                                                   followUpDelay: 120 },
   { id: "check_placenta", level: "minor",   type: "action",   title: "Check placenta complete",               detail: "Confirm placenta and membranes complete\nIf uncertain — manual exploration under anaesthesia",                                                              followUpDelay: 120 },
@@ -25,7 +25,7 @@ const TASKS = [
   { id: "rapid_cryst",    level: "major",   type: "fluid",    title: "Rapid crystalloid",                     detail: "Up to 500 ml–1 L Hartmann's as a bridge only\nDo not delay blood products for crystalloid\nO-negative blood if life-threatening — do not wait for crossmatch\n⚠ Avoid >1 L crystalloid — dilutional coagulopathy risk",                deps: ["iv_access"] },
   { id: "blood_products", level: "major",   type: "blood",    title: "Blood products",                        detail: "• FFP 4 units — PT/APTT >1.5× normal (clotting factor depletion)\n• Cryoprecipitate 2 pools — fibrinogen <2 g/L (proactive threshold in PPH)\n• Platelets — if <75 × 10⁹/L",                       deps: ["iv_access"] },
   { id: "keep_warm",      level: "major",   type: "action",   title: "Keep patient warm",                     detail: "Blankets and warming device\nHypothermia worsens coagulopathy" },
-  { id: "carboprost",     level: "major",   type: "drug",     title: "Carboprost 0.25 mg IM",                 detail: "Every 15 minutes — up to 8 doses\n⚠ Contraindicated in asthma",                                                                                           special: "carbo" },
+  { id: "carboprost",     level: "major",   type: "drug",     title: "Carboprost 0.25 mg IM",                 detail: "Every 15 minutes — up to 8 doses",                                                                                                                       special: "carbo", contraindications: ["Asthma", "Significant cardiac disease", "Active hepatic disease", "Active renal disease"], fallback: "misoprostol" },
   { id: "misoprostol",    level: "major",   type: "drug",     title: "Misoprostol 800 mcg sublingual",        detail: "Place under tongue\nAlternative if other uterotonics unavailable or failed",                                                                               followUpDelay: 60 },
   { id: "txa",            level: "major",   type: "drug",     title: "Tranexamic acid 1 g IV",                detail: "Over 10 minutes IV\n⚠ TIME CRITICAL — within 3 hours of birth",                                                                                           followUpDelay: 60, critical: true, special: "txa", deps: ["iv_access"] },
   // Massive
@@ -50,12 +50,19 @@ function getLevel(ml) {
   return "minor";
 }
 
-function computeNextPrompt({ taskStates, level, fourTsDone, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, now }) {
+function computeNextPrompt({ taskStates, level, fourTsDone, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now }) {
   function depsOk(task) {
     return (task.deps || []).every(id => ["done", "skipped"].includes(taskStates[id]?.status));
   }
-  function relevant(task) { return levelVal(task.level) <= levelVal(level); }
+  // A task is relevant at the current level, OR if it has been force-activated as a
+  // fallback after a higher-tier drug was found contraindicated.
+  function relevant(task) { return levelVal(task.level) <= levelVal(level) || (forcedTasks || []).includes(task.id); }
   function st(id) { return taskStates[id]?.status ?? null; }
+  // Before surfacing a drug with listed contraindications, surface a CI check first.
+  function gate(task) {
+    if (task.contraindications && !(ciCleared || {})[task.id]) return { type: "ci_check", task };
+    return { type: "task", task };
+  }
 
   // Priority 1.5 — tone assessment after fundal massage (fires immediately when massage done)
   if (taskStates["fundal_massage"]?.status === "done" && !toneAssessed) return { type: "tone_check" };
@@ -88,7 +95,7 @@ function computeNextPrompt({ taskStates, level, fourTsDone, toneAssessed, log, t
       if (t.level !== critLevel || !relevant(t) || st(t.id) !== null || !depsOk(t) || !t.critical) continue;
       if (t.special === "txa" && txaHandled) continue;
       if (t.special === "carbo" && carboCount > 0) continue;
-      return { type: "task", task: t };
+      return gate(t);
     }
   }
 
@@ -110,7 +117,7 @@ function computeNextPrompt({ taskStates, level, fourTsDone, toneAssessed, log, t
     if (!relevant(t) || st(t.id) !== null || !depsOk(t)) continue;
     if (t.special === "txa" && txaHandled) continue;
     if (t.special === "carbo" && carboCount > 0) continue;
-    return { type: "task", task: t };
+    return gate(t);
   }
 
   return { type: "monitoring" };
@@ -464,11 +471,36 @@ function MonitoringPrompt({ assignedCount }) {
   );
 }
 
+// ─── Contraindication check ───────────────────────────────────────────────────
+
+function CiCheckPrompt({ task, onClear, onContraindicated }) {
+  const fallback = TASKS.find(t => t.id === task.fallback);
+  useEffect(() => { if ("vibrate" in navigator) navigator.vibrate([100, 60, 100]); }, []);
+  return (
+    <div className="px-4 py-3.5 space-y-2.5">
+      <span className="text-xs font-bold uppercase tracking-wider text-amber-500">Before giving — check contraindications</span>
+      <p className="text-white text-xl font-bold leading-snug">{task.title}</p>
+      <p className="text-gray-400 text-sm">Any of these present?</p>
+      <ul className="text-gray-300 text-sm space-y-1 pl-1">
+        {task.contraindications.map(ci => (
+          <li key={ci} className="flex gap-2"><span className="text-amber-500">•</span>{ci}</li>
+        ))}
+      </ul>
+      <div className="flex gap-2 pt-1.5">
+        <button onClick={() => onClear(task)} className="flex-1 bg-white text-gray-950 font-bold py-3 text-sm rounded-lg">None present — give</button>
+        <button onClick={() => onContraindicated(task)} className="flex-1 border border-amber-700 text-amber-400 font-bold py-3 text-sm rounded-lg">
+          {fallback ? `Contraindicated → ${fallback.title}` : "Contraindicated"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Active prompt area ───────────────────────────────────────────────────────
 
 function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount, handlers }) {
   if (!prompt) return null;
-  const { onDone, onAssign, onSkip, onFollowupYes, onFollowupNo, onFourTs, onBloodAdd, onBloodUnchanged, onCarboDose, onCarboSkip, onTxaSecondGiven, onTxaSecondNotNeeded, onToneCheckFirm, onToneCheckBoggy } = handlers;
+  const { onDone, onAssign, onSkip, onFollowupYes, onFollowupNo, onFourTs, onBloodAdd, onBloodUnchanged, onCarboDose, onCarboSkip, onTxaSecondGiven, onTxaSecondNotNeeded, onToneCheckFirm, onToneCheckBoggy, onCiClear, onCiContraindicated } = handlers;
 
   let content;
   switch (prompt.type) {
@@ -479,11 +511,12 @@ function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount,
     case "carbo_dose":   content = <CarboDosePrompt count={carboCount} onDose={onCarboDose} onSkip={onCarboSkip} />; break;
     case "txa_second":   content = <TxaSecondPrompt onGiven={onTxaSecondGiven} onNotNeeded={onTxaSecondNotNeeded} />; break;
     case "tone_check":   content = <ToneCheckPrompt onFirm={onToneCheckFirm} onBoggy={onToneCheckBoggy} />; break;
+    case "ci_check":     content = <CiCheckPrompt task={prompt.task} onClear={onCiClear} onContraindicated={onCiContraindicated} />; break;
     case "monitoring":   content = <MonitoringPrompt assignedCount={assignedCount} />; break;
     default:             return null;
   }
 
-  const isInterrupt = ["followup", "four_ts", "blood_loss_check", "carbo_dose", "txa_second", "tone_check"].includes(prompt.type);
+  const isInterrupt = ["followup", "four_ts", "blood_loss_check", "carbo_dose", "txa_second", "tone_check", "ci_check"].includes(prompt.type);
 
   return (
     <div className={`flex-shrink-0 border-b border-gray-800 ${isInterrupt ? "bg-gray-900" : "bg-gray-900"}`}>
@@ -728,6 +761,8 @@ export default function EmergencyPage({ onClose }) {
   const [birthTime, setBirthTime] = useState(null);
   const [carboCount, setCarboCount] = useState(0);
   const [carboLastTime, setCarboLastTime] = useState(null);
+  const [ciCleared, setCiCleared] = useState({});
+  const [forcedTasks, setForcedTasks] = useState([]);
   const [resolveTime, setResolveTime] = useState(null);
   const [now, setNow] = useState(() => Date.now());
   const [escalationAlert, setEscalationAlert] = useState(null);
@@ -766,13 +801,13 @@ export default function EmergencyPage({ onClose }) {
   useEffect(() => {
     if (phase !== "active") return;
     saveSession({ emergencyStartTime, phase, bloodLoss, taskStates, fourTsDone, toneAssessed, log,
-      txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime });
-  }, [phase, bloodLoss, taskStates, fourTsDone, toneAssessed, log, txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime]);
+      txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime, ciCleared, forcedTasks });
+  }, [phase, bloodLoss, taskStates, fourTsDone, toneAssessed, log, txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime, ciCleared, forcedTasks]);
 
   const effectiveBirthTime = birthTime ?? emergencyStartTime;
 
   const prompt = phase === "active"
-    ? computeNextPrompt({ taskStates, level, fourTsDone, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, now })
+    ? computeNextPrompt({ taskStates, level, fourTsDone, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now })
     : null;
 
   const relevantTasks = TASKS.filter(t => levelVal(t.level) <= levelVal(level));
@@ -865,6 +900,19 @@ export default function EmergencyPage({ onClose }) {
     addLog("txa_second", "TXA second dose — not needed / bleeding resolved");
   }
 
+  function handleCiClear(task) {
+    setCiCleared(prev => ({ ...prev, [task.id]: true }));
+    addLog("ci_check", `${task.title} — contraindications checked, none present`);
+  }
+
+  function handleCiContraindicated(task) {
+    setTaskStates(prev => ({ ...prev, [task.id]: { status: "skipped", skippedAt: Date.now() } }));
+    const fb = TASKS.find(t => t.id === task.fallback);
+    addLog("ci_check", `${task.title} contraindicated${fb ? ` — switching to ${fb.title}` : ""}`);
+    if (task.special === "txa") setTxaHandled(true);
+    if (task.fallback) setForcedTasks(prev => prev.includes(task.fallback) ? prev : [...prev, task.fallback]);
+  }
+
   function handleToneCheckFirm() {
     setToneAssessed(true);
     setTaskStates(prev => ({ ...prev, bimanual: { status: "skipped", skippedAt: Date.now() } }));
@@ -899,6 +947,8 @@ export default function EmergencyPage({ onClose }) {
     setBirthTime(s.birthTime ?? null);
     setCarboCount(s.carboCount ?? 0);
     setCarboLastTime(s.carboLastTime ?? null);
+    setCiCleared(s.ciCleared ?? {});
+    setForcedTasks(s.forcedTasks ?? []);
     prevLevelRef.current = getLevel(s.bloodLoss ?? 0);
     setPhase("active");
   }
@@ -951,6 +1001,7 @@ export default function EmergencyPage({ onClose }) {
     onCarboDose: handleCarboDose, onCarboSkip: handleCarboSkip,
     onTxaSecondGiven: handleTxaSecondGiven, onTxaSecondNotNeeded: handleTxaSecondNotNeeded,
     onToneCheckFirm: handleToneCheckFirm, onToneCheckBoggy: handleToneCheckBoggy,
+    onCiClear: handleCiClear, onCiContraindicated: handleCiContraindicated,
   };
 
   return (
