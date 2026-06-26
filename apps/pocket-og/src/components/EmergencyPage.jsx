@@ -181,7 +181,7 @@ function Header({ elapsed, bloodLoss, level, assignedCount, onAddBlood, onStandD
           {assignedCount > 0 && <span className="text-amber-500 text-xs">{assignedCount} in progress</span>}
           <span className="text-gray-600 text-xs">{levelLabel}</span>
         </div>
-        <button onClick={onStandDown} className="text-gray-600 hover:text-gray-300 text-xs transition">Stand down</button>
+        <button onClick={onStandDown} className="text-gray-600 hover:text-gray-300 text-xs border border-gray-800 hover:border-gray-600 px-2.5 py-1.5 rounded transition">Stand down</button>
       </div>
       <div className="flex items-center justify-between">
         <div className="flex items-baseline gap-2">
@@ -191,7 +191,7 @@ function Header({ elapsed, bloodLoss, level, assignedCount, onAddBlood, onStandD
         <div className="flex gap-2">
           {[100, 250, 500].map(n => (
             <button key={n} onClick={() => onAddBlood(n)}
-              className="text-gray-600 hover:text-gray-300 text-xs border border-gray-800 hover:border-gray-600 px-2 py-1 rounded transition">
+              className="text-gray-600 hover:text-gray-300 text-xs border border-gray-800 hover:border-gray-600 px-2 py-2 rounded transition min-h-[44px]">
               +{n}
             </button>
           ))}
@@ -276,9 +276,9 @@ function TaskPrompt({ task, onDone, onAssign, onSkip }) {
         </>
       )}
       <div className="flex gap-2 pt-1">
-        <button onClick={() => onDone(task)} className="flex-1 bg-white text-gray-950 font-bold py-2.5 text-sm rounded-lg">Done ✓</button>
-        <button onClick={() => onAssign(task)} className="flex-1 border border-gray-700 hover:border-gray-500 text-white font-medium py-2.5 text-sm rounded-lg transition">Assign →</button>
-        <button onClick={() => onSkip(task)} className="text-gray-700 hover:text-gray-500 text-xs px-2 transition">Skip</button>
+        <button onClick={() => onDone(task)} className="flex-1 bg-white text-gray-950 font-bold py-3 text-sm rounded-lg">Done ✓</button>
+        <button onClick={() => onAssign(task)} className="flex-1 border border-gray-700 hover:border-gray-500 text-white font-medium py-3 text-sm rounded-lg transition">Assign →</button>
+        <button onClick={() => onSkip(task)} className="text-gray-700 hover:text-gray-500 text-xs px-4 py-3 transition">Skip</button>
       </div>
     </div>
   );
@@ -322,9 +322,9 @@ function FourTsPrompt({ onConfirm }) {
           const on = selected.has(o.key);
           return (
             <button key={o.key} onClick={() => toggle(o.key)}
-              className={`text-left px-2.5 py-2 rounded-lg border text-xs transition ${on ? "border-white text-white bg-gray-800" : "border-gray-800 text-gray-600"}`}>
+              className={`text-left px-2.5 py-3 rounded-lg border text-xs transition ${on ? "border-white text-white bg-gray-800" : "border-gray-800 text-gray-600"}`}>
               <div className="font-bold">{o.label}</div>
-              <div className="text-gray-600 mt-0.5 leading-tight hidden sm:block">{o.sub}</div>
+              <div className="text-gray-600 mt-0.5 leading-tight text-[10px]">{o.sub}</div>
             </button>
           );
         })}
@@ -355,7 +355,7 @@ function BloodCheckPrompt({ level, bloodLoss, onAdd, onUnchanged }) {
       <div className="flex gap-2">
         {[100, 250, 500].map(n => (
           <button key={n} onClick={() => onAdd(n)}
-            className="flex-1 border border-gray-700 hover:border-gray-500 text-white font-medium py-2 text-sm rounded-lg transition">
+            className="flex-1 border border-gray-700 hover:border-gray-500 text-white font-medium py-3 text-sm rounded-lg transition">
             +{n}
           </button>
         ))}
@@ -423,7 +423,7 @@ function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount,
     <div className={`flex-shrink-0 border-b border-gray-800 ${isInterrupt ? "bg-gray-900" : "bg-gray-900"}`}>
       {isInterrupt && (
         <div className="px-4 pt-2.5 pb-0">
-          <div className="h-px bg-amber-500/30 w-full" />
+          <div className="h-px bg-amber-500/50 w-full" />
         </div>
       )}
       {content}
@@ -530,7 +530,7 @@ function SetupScreen({ onConfirm }) {
   const presets = [
     { v: 500,  label: "500 ml",   sub: "Minor PPH" },
     { v: 1000, label: "1,000 ml", sub: "Major PPH" },
-    { v: 1500, label: "1,500 ml", sub: "Major" },
+    { v: 1500, label: "1,500 ml", sub: "Major PPH" },
     { v: 2000, label: "2,000 ml", sub: "Massive PPH" },
   ];
 
@@ -551,7 +551,7 @@ function SetupScreen({ onConfirm }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col justify-center px-6 gap-8">
+    <div className="min-h-screen bg-gray-950 flex flex-col px-6 pt-12 pb-8 gap-6">
       <div>
         <p className="text-gray-600 text-xs uppercase tracking-widest mb-2">PPH</p>
         <h1 className="text-white text-3xl font-black">Initial blood loss</h1>
@@ -797,10 +797,16 @@ export default function EmergencyPage({ onClose }) {
 
   // ── Render ──
 
-  if (phase === "setup") return <SetupScreen onConfirm={handleSetup} />;
-  if (phase === "summary") {
-    return <SummaryScreen log={log} emergencyStartTime={emergencyStartTime} resolveTime={resolveTime} bloodLoss={bloodLoss} onBack={onClose} />;
-  }
+  if (phase === "setup") return (
+    <div className="fixed inset-0 z-50 bg-gray-950 overflow-y-auto">
+      <SetupScreen onConfirm={handleSetup} />
+    </div>
+  );
+  if (phase === "summary") return (
+    <div className="fixed inset-0 z-50 bg-gray-950 overflow-y-auto">
+      <SummaryScreen log={log} emergencyStartTime={emergencyStartTime} resolveTime={resolveTime} bloodLoss={bloodLoss} onBack={onClose} />
+    </div>
+  );
 
   const handlers = {
     onDone: handleDone, onAssign: handleAssign, onSkip: handleSkip,
@@ -810,7 +816,7 @@ export default function EmergencyPage({ onClose }) {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-950 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex flex-col bg-gray-950 overflow-hidden">
       {escalationAlert && <EscalationOverlay level={escalationAlert} onDismiss={() => setEscalationAlert(null)} />}
       {standDownConfirm && <StandDownConfirm bloodLoss={bloodLoss} onConfirm={handleStandDown} onCancel={() => setStandDownConfirm(false)} />}
 
