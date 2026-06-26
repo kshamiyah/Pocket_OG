@@ -38,8 +38,8 @@ const TASKS = [
   { id: "misoprostol",    level: "major",   type: "drug",     title: "Misoprostol 800 mcg sublingual",        detail: "Place under tongue\nAlternative if other uterotonics unavailable or failed",                                                                               followUpDelay: 60 },
   // Massive
   { id: "call_massive",   level: "massive", type: "call",     title: "Activate massive PPH",                  detail: "• Consultant obstetrician — NOW\n• Consultant anaesthetist — NOW\n• Haematologist — NOW\n• Blood bank — activate MHP\n• IR if UAE planned",               followUpDelay: 120, critical: true },
-  { id: "mhp_pack",       level: "massive", type: "blood",    title: "MHP pack immediately",                  detail: "As per local MHP pack — target 1:1 red cells to FFP ratio\n± Platelets ± Cryoprecipitate\nCall blood bank now",                                                                     followUpDelay: 120, critical: true, deps: ["iv_access"] },
-  { id: "cell_salvage",   level: "massive", type: "action",   title: "Cell salvage",                          detail: "Activate if available\nHaematologist authorisation if Rh-negative" },
+  { id: "mhp_pack",       level: "massive", type: "blood",    title: "MHP pack immediately",                  detail: "Empirical — do not wait for lab results\nTarget pack: 6 units red cells + 4 units FFP\n± Platelets ± Cryoprecipitate\nMove to 1:1 RBC:FFP ratio if bleeding ongoing\nCall blood bank now",                          followUpDelay: 120, critical: true, deps: ["iv_access"] },
+  { id: "cell_salvage",   level: "massive", type: "action",   title: "Cell salvage",                          detail: "Activate if available\nHaematologist authorisation if Rh-negative", naOption: { label: "Not available", log: "Cell salvage not available in this unit" } },
   { id: "bakri",          level: "massive", type: "surgical", title: "Bakri balloon tamponade",               detail: "300–500 ml saline — tamponade test\nIf bleeding stops, may avoid theatre\nHave theatre prepared regardless" },
   { id: "theatre",        level: "massive", type: "surgical", title: "Transfer to theatre",                   detail: "• Stepwise uterine devascularisation\n• Bilateral uterine artery ligation\n• B-Lynch / Hayman brace suture\n• UAE if stable\n• Peripartum hysterectomy — last resort" },
   { id: "cardiac_arrest_ref", level: "massive", type: "call", title: "If cardiac arrest — call 2222", detail: "Call 2222 — maternal cardiac arrest\nStart CPR immediately — 30:2, hard and fast\nDo not stop haemorrhage management during CPR\nTreat reversible cause: Hypovolaemia (4 Hs)\nAnaesthetist to manage airway\nFull maternal cardiac arrest protocol applies" },
@@ -694,6 +694,53 @@ function SetupScreen({ onConfirm }) {
   );
 }
 
+// ─── Aftercare checklist ──────────────────────────────────────────────────────
+// Post-control care from GTG52 (minor_resolved / major_resolved / end_massive).
+// Each item surfaces once the haemorrhage reached its minLevel.
+
+const AFTERCARE = [
+  { id: "oxy_continue",        minLevel: "minor",   text: "Continue oxytocin infusion for ≥4 hours" },
+  { id: "obs",                 minLevel: "minor",   text: "Hourly BP, pulse and urine output for ≥4 hours" },
+  { id: "fbc_check",           minLevel: "minor",   text: "Check FBC — transfuse if Hb <80 g/L or symptomatic" },
+  { id: "vte",                 minLevel: "minor",   text: "VTE prophylaxis — restart LMWH once haemostasis confirmed" },
+  { id: "document",            minLevel: "minor",   text: "Document cause, management and response in notes" },
+  { id: "debrief",             minLevel: "minor",   text: "Debrief patient and partner — written summary" },
+  { id: "hdu",                 minLevel: "major",   text: "HDU / ITU admission for ongoing monitoring" },
+  { id: "serial_bloods",       minLevel: "major",   text: "Serial bloods: FBC, coagulation, U&E (4-hourly if massive)" },
+  { id: "consultant_debrief",  minLevel: "major",   text: "Postnatal consultant debrief before discharge" },
+  { id: "mbrrace",             minLevel: "massive", text: "MBRRACE notification if maternal death or near-miss" },
+];
+
+function AftercareScreen({ level, onComplete }) {
+  const items = AFTERCARE.filter(a => levelVal(level) >= levelVal(a.minLevel));
+  const [checked, setChecked] = useState({});
+  function toggle(id) { setChecked(prev => ({ ...prev, [id]: !prev[id] })); }
+  return (
+    <div className="min-h-screen bg-gray-950 flex flex-col">
+      <div className="px-5 py-5 border-b border-gray-800 flex-shrink-0">
+        <p className="text-gray-600 text-xs uppercase tracking-widest mb-1">Post-PPH</p>
+        <h2 className="text-white text-2xl font-black">Aftercare checklist</h2>
+        <p className="text-gray-500 text-sm mt-1">Haemostasis achieved — complete before handover.</p>
+      </div>
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
+        {items.map(a => (
+          <button key={a.id} onClick={() => toggle(a.id)}
+            className={`w-full text-left flex items-start gap-3 px-4 py-3 rounded-lg border transition ${checked[a.id] ? "border-gray-700 bg-gray-900" : "border-gray-800"}`}>
+            <span className={`mt-0.5 w-5 h-5 rounded flex items-center justify-center text-xs font-bold flex-shrink-0 ${checked[a.id] ? "bg-white text-gray-950" : "border border-gray-600 text-transparent"}`}>✓</span>
+            <span className={`text-sm leading-snug ${checked[a.id] ? "text-gray-400 line-through" : "text-white"}`}>{a.text}</span>
+          </button>
+        ))}
+      </div>
+      <div className="px-4 py-4 border-t border-gray-800 flex-shrink-0">
+        <button onClick={() => onComplete(items.filter(a => checked[a.id]))}
+          className="w-full bg-white text-gray-950 font-bold py-3.5 rounded-lg text-sm">
+          Complete — view record
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Summary screen ───────────────────────────────────────────────────────────
 
 function SummaryScreen({ log, emergencyStartTime, resolveTime, bloodLoss, onBack }) {
@@ -989,6 +1036,15 @@ export default function EmergencyPage({ onClose }) {
     ]);
     setStandDownConfirm(false);
     clearSession();
+    setPhase("aftercare");
+  }
+
+  function handleAftercareComplete(doneItems) {
+    const t = Date.now();
+    setLog(prev => [
+      ...prev,
+      ...doneItems.map(a => ({ kind: "aftercare", label: `Aftercare done: ${a.text}`, time: t })),
+    ]);
     setPhase("summary");
   }
 
@@ -1009,6 +1065,11 @@ export default function EmergencyPage({ onClose }) {
         </div>
       )}
       <SetupScreen onConfirm={handleSetup} />
+    </div>
+  );
+  if (phase === "aftercare") return (
+    <div className="fixed inset-0 z-50 bg-gray-950 overflow-y-auto">
+      <AftercareScreen level={level} onComplete={handleAftercareComplete} />
     </div>
   );
   if (phase === "summary") return (
