@@ -48,7 +48,7 @@ function getLevel(ml) {
   return "minor";
 }
 
-function computeNextPrompt({ taskStates, level, fourTsDone, log, txaTime, txaHandled, carboCount, carboLastTime, now }) {
+function computeNextPrompt({ taskStates, level, fourTsDone, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, now }) {
   function depsOk(task) {
     return (task.deps || []).every(id => ["done", "skipped"].includes(taskStates[id]?.status));
   }
@@ -89,6 +89,14 @@ function computeNextPrompt({ taskStates, level, fourTsDone, log, txaTime, txaHan
   // Priority 6 — carboprost repeat dose
   if (carboCount > 0 && carboCount < 8 && carboLastTime && (now - carboLastTime) / 1000 >= 15 * 60) {
     return { type: "carbo_dose" };
+  }
+
+  // Priority 6.5 — TXA second dose (WOMAN trial: give if bleeding continues ≥30 min after first dose,
+  // still within 3-hour birth window, and at major or massive level)
+  if (txaTime && !txaSecondDone && levelVal(level) >= levelVal("major")) {
+    const sinceFirst = (now - txaTime) / 1000;
+    const windowOpen = effectiveBirthTime + 3 * 60 * 60 * 1000 > now;
+    if (sinceFirst >= 30 * 60 && windowOpen) return { type: "txa_second" };
   }
 
   // Priority 7 — next regular task
@@ -407,6 +415,21 @@ function CarboDosePrompt({ count, onDose, onSkip }) {
   );
 }
 
+function TxaSecondPrompt({ onGiven, onNotNeeded }) {
+  useEffect(() => { if ("vibrate" in navigator) navigator.vibrate([100, 60, 100]); }, []);
+  return (
+    <div className="px-4 py-3.5 space-y-2">
+      <span className="text-xs font-bold uppercase tracking-wider text-amber-500">TXA — second dose</span>
+      <p className="text-white text-xl font-bold">Is bleeding continuing?</p>
+      <p className="text-gray-500 text-xs">30 min since first TXA dose · WOMAN trial: give second 1 g IV over 10 min if haemorrhage continues · Still within 3-hour window</p>
+      <div className="flex gap-2 pt-1">
+        <button onClick={onGiven} className="flex-1 bg-white text-gray-950 font-bold py-2.5 text-sm rounded-lg">Give second dose ✓</button>
+        <button onClick={onNotNeeded} className="border border-gray-700 text-gray-400 text-sm px-4 py-2.5 rounded-lg">Not needed</button>
+      </div>
+    </div>
+  );
+}
+
 function MonitoringPrompt({ assignedCount }) {
   return (
     <div className="px-4 py-4">
@@ -424,7 +447,7 @@ function MonitoringPrompt({ assignedCount }) {
 
 function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount, handlers }) {
   if (!prompt) return null;
-  const { onDone, onAssign, onSkip, onFollowupYes, onFollowupNo, onFourTs, onBloodAdd, onBloodUnchanged, onCarboDose, onCarboSkip } = handlers;
+  const { onDone, onAssign, onSkip, onFollowupYes, onFollowupNo, onFourTs, onBloodAdd, onBloodUnchanged, onCarboDose, onCarboSkip, onTxaSecondGiven, onTxaSecondNotNeeded } = handlers;
 
   let content;
   switch (prompt.type) {
@@ -433,11 +456,12 @@ function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount,
     case "four_ts":      content = <FourTsPrompt onConfirm={onFourTs} />; break;
     case "blood_loss_check": content = <BloodCheckPrompt level={level} bloodLoss={bloodLoss} onAdd={onBloodAdd} onUnchanged={onBloodUnchanged} />; break;
     case "carbo_dose":   content = <CarboDosePrompt count={carboCount} onDose={onCarboDose} onSkip={onCarboSkip} />; break;
+    case "txa_second":   content = <TxaSecondPrompt onGiven={onTxaSecondGiven} onNotNeeded={onTxaSecondNotNeeded} />; break;
     case "monitoring":   content = <MonitoringPrompt assignedCount={assignedCount} />; break;
     default:             return null;
   }
 
-  const isInterrupt = ["followup", "four_ts", "blood_loss_check", "carbo_dose"].includes(prompt.type);
+  const isInterrupt = ["followup", "four_ts", "blood_loss_check", "carbo_dose", "txa_second"].includes(prompt.type);
 
   return (
     <div className={`flex-shrink-0 border-b border-gray-800 ${isInterrupt ? "bg-gray-900" : "bg-gray-900"}`}>
@@ -667,6 +691,7 @@ export default function EmergencyPage({ onClose }) {
   const [log, setLog] = useState([]);
   const [txaTime, setTxaTime] = useState(null);
   const [txaHandled, setTxaHandled] = useState(false);
+  const [txaSecondDone, setTxaSecondDone] = useState(false);
   const [birthTime, setBirthTime] = useState(null);
   const [carboCount, setCarboCount] = useState(0);
   const [carboLastTime, setCarboLastTime] = useState(null);
@@ -708,7 +733,7 @@ export default function EmergencyPage({ onClose }) {
   const effectiveBirthTime = birthTime ?? emergencyStartTime;
 
   const prompt = phase === "active"
-    ? computeNextPrompt({ taskStates, level, fourTsDone, log, txaTime, txaHandled, carboCount, carboLastTime, now })
+    ? computeNextPrompt({ taskStates, level, fourTsDone, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, now })
     : null;
 
   const relevantTasks = TASKS.filter(t => levelVal(t.level) <= levelVal(level));
@@ -791,6 +816,16 @@ export default function EmergencyPage({ onClose }) {
     addLog("carbo_skip", "Carboprost dose skipped");
   }
 
+  function handleTxaSecondGiven() {
+    setTxaSecondDone(true);
+    addLog("txa_second", "TXA second dose 1 g IV given");
+  }
+
+  function handleTxaSecondNotNeeded() {
+    setTxaSecondDone(true);
+    addLog("txa_second", "TXA second dose — not needed / bleeding resolved");
+  }
+
   function handleConfirmTask(taskId) {
     const task = TASKS.find(t => t.id === taskId);
     setTaskStates(prev => ({ ...prev, [taskId]: { status: "done", doneAt: Date.now() } }));
@@ -833,6 +868,7 @@ export default function EmergencyPage({ onClose }) {
     onFollowupYes: handleFollowupYes, onFollowupNo: handleFollowupNo,
     onFourTs: handleFourTs, onBloodAdd: handleBloodAdd, onBloodUnchanged: handleBloodUnchanged,
     onCarboDose: handleCarboDose, onCarboSkip: handleCarboSkip,
+    onTxaSecondGiven: handleTxaSecondGiven, onTxaSecondNotNeeded: handleTxaSecondNotNeeded,
   };
 
   return (
