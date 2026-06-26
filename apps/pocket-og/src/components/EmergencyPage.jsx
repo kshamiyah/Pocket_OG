@@ -71,8 +71,9 @@ function computeNextPrompt({ taskStates, level, fourTsDone, toneAssessed, log, t
   const lastBL = [...log].reverse().find(e => e.kind === "blood_loss");
   if (lastBL && (now - lastBL.time) / 1000 > blInterval) return { type: "blood_loss_check" };
 
-  // Priority 3 — Four T's documentation (only after bimanual attempted)
-  if (!fourTsDone && ["done", "skipped"].includes(st("bimanual"))) return { type: "four_ts" };
+  // Priority 3 — Four T's cause assessment (part of initial assessment, alongside ABC —
+  // fires once help is called and ABC addressed, before the uterine measures)
+  if (!fourTsDone && ["done", "skipped"].includes(st("call_team")) && ["done", "skipped"].includes(st("abc"))) return { type: "four_ts" };
 
   // Priority 4 — non-critical follow-ups
   for (const t of TASKS) {
