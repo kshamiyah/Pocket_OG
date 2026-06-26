@@ -33,7 +33,7 @@ const TASKS = [
   { id: "blood_products", level: "major",   type: "blood",    title: "Blood products",                        detail: "• FFP 4 units — PT/APTT >1.5× normal (clotting factor depletion)\n• Cryoprecipitate 2 pools — fibrinogen <2 g/L (proactive threshold in PPH)\n• Platelets — if <75 × 10⁹/L",                       deps: ["iv_access"] },
   { id: "keep_warm",      level: "major",   type: "action",   title: "Keep patient warm",                     detail: "Blankets and warming device\nHypothermia worsens coagulopathy" },
   { id: "calcium",        level: "major",   type: "drug",     title: "Calcium gluconate 10 ml 10% IV",        detail: "Treat hypocalcaemia — common in massive transfusion (citrate chelates calcium)\nCheck ionised calcium; correct acidosis\nGive slowly IV with cardiac monitoring" },
-  { id: "rotem_teg",      level: "major",   type: "action",   title: "ROTEM / TEG coagulation",               detail: "Point-of-care coagulation to guide product selection — if available\nNot present in all units — otherwise use lab PT/APTT/fibrinogen\nMaintain normothermia — correct acidosis" },
+  { id: "rotem_teg",      level: "major",   type: "action",   title: "ROTEM / TEG coagulation",               detail: "Point-of-care coagulation to guide product selection — if available\nNot present in all units — otherwise use lab PT/APTT/fibrinogen\nMaintain normothermia — correct acidosis", naOption: { label: "Not available", log: "ROTEM/TEG not available — using lab PT/APTT/fibrinogen" } },
   { id: "carboprost",     level: "major",   type: "drug",     title: "Carboprost 0.25 mg IM",                 detail: "Every 15 minutes — up to 8 doses",                                                                                                                       special: "carbo", contraindications: ["Asthma", "Significant cardiac disease", "Active hepatic disease", "Active renal disease"], fallback: "misoprostol" },
   { id: "misoprostol",    level: "major",   type: "drug",     title: "Misoprostol 800 mcg sublingual",        detail: "Place under tongue\nAlternative if other uterotonics unavailable or failed",                                                                               followUpDelay: 60 },
   // Massive
@@ -279,7 +279,7 @@ function DrugStrip({ txaTime, birthTime, carboCount, carboLastTime, now }) {
 
 // ─── Active prompt sub-components ────────────────────────────────────────────
 
-function TaskPrompt({ task, onDone, onAssign, onSkip }) {
+function TaskPrompt({ task, onDone, onAssign, onSkip, onNotAvailable }) {
   const autoExpand = task.type === "drug" || task.type === "blood" || task.critical;
   const [showDetail, setShowDetail] = useState(autoExpand);
   const [skipConfirm, setSkipConfirm] = useState(false);
@@ -325,7 +325,9 @@ function TaskPrompt({ task, onDone, onAssign, onSkip }) {
       <div className="flex gap-2 pt-1">
         <button onClick={() => onDone(task)} className="flex-1 bg-white text-gray-950 font-bold py-3 text-sm rounded-lg">Done ✓</button>
         <button onClick={() => onAssign(task)} className="flex-1 border border-gray-700 hover:border-gray-500 text-white font-medium py-3 text-sm rounded-lg transition">Assign →</button>
-        <button onClick={handleSkipClick} className="text-gray-700 hover:text-gray-500 text-xs px-4 py-3 transition">Skip</button>
+        {task.naOption
+          ? <button onClick={() => onNotAvailable(task)} className="border border-gray-700 hover:border-gray-500 text-gray-400 font-medium px-4 py-3 text-xs rounded-lg transition">{task.naOption.label}</button>
+          : <button onClick={handleSkipClick} className="text-gray-700 hover:text-gray-500 text-xs px-4 py-3 transition">Skip</button>}
       </div>
     </div>
   );
@@ -504,11 +506,11 @@ function CiCheckPrompt({ task, onClear, onContraindicated }) {
 
 function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount, handlers }) {
   if (!prompt) return null;
-  const { onDone, onAssign, onSkip, onFollowupYes, onFollowupNo, onAssessExclude, onAssessPresent, onBloodAdd, onBloodUnchanged, onCarboDose, onCarboSkip, onTxaSecondGiven, onTxaSecondNotNeeded, onToneCheckFirm, onToneCheckBoggy, onCiClear, onCiContraindicated } = handlers;
+  const { onDone, onAssign, onSkip, onNotAvailable, onFollowupYes, onFollowupNo, onAssessExclude, onAssessPresent, onBloodAdd, onBloodUnchanged, onCarboDose, onCarboSkip, onTxaSecondGiven, onTxaSecondNotNeeded, onToneCheckFirm, onToneCheckBoggy, onCiClear, onCiContraindicated } = handlers;
 
   let content;
   switch (prompt.type) {
-    case "task":         content = <TaskPrompt task={prompt.task} onDone={onDone} onAssign={onAssign} onSkip={onSkip} />; break;
+    case "task":         content = <TaskPrompt task={prompt.task} onDone={onDone} onAssign={onAssign} onSkip={onSkip} onNotAvailable={onNotAvailable} />; break;
     case "followup":     content = <FollowupPrompt task={prompt.task} onYes={onFollowupYes} onNo={onFollowupNo} />; break;
     case "assess":       content = <AssessPrompt task={prompt.task} onExclude={onAssessExclude} onPresent={onAssessPresent} />; break;
     case "blood_loss_check": content = <BloodCheckPrompt level={level} bloodLoss={bloodLoss} onAdd={onBloodAdd} onUnchanged={onBloodUnchanged} />; break;
@@ -854,6 +856,11 @@ export default function EmergencyPage({ onClose }) {
     if (task.special === "txa") setTxaHandled(true);
   }
 
+  function handleNotAvailable(task) {
+    setTaskStates(prev => ({ ...prev, [task.id]: { status: "skipped", skippedAt: Date.now() } }));
+    addLog("task_skipped", task.naOption?.log || `Not available: ${task.title}`);
+  }
+
   function handleFollowupYes(task) {
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: Date.now() } }));
     addLog("followup_done", task.followUpYesLog || `Confirmed done: ${task.title}`);
@@ -1011,7 +1018,7 @@ export default function EmergencyPage({ onClose }) {
   );
 
   const handlers = {
-    onDone: handleDone, onAssign: handleAssign, onSkip: handleSkip,
+    onDone: handleDone, onAssign: handleAssign, onSkip: handleSkip, onNotAvailable: handleNotAvailable,
     onFollowupYes: handleFollowupYes, onFollowupNo: handleFollowupNo,
     onAssessExclude: handleAssessExclude, onAssessPresent: handleAssessPresent,
     onBloodAdd: handleBloodAdd, onBloodUnchanged: handleBloodUnchanged,
