@@ -847,7 +847,7 @@ export default function EmergencyPage({ onClose }) {
     try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; } catch { return null; }
   });
   const [recoveryDismissed, setRecoveryDismissed] = useState(false);
-  const [emergencyStartTime] = useState(() => savedSession?.emergencyStartTime ?? Date.now());
+  const [emergencyStartTime, setEmergencyStartTime] = useState(() => savedSession?.emergencyStartTime ?? Date.now());
   const [phase, setPhase] = useState("setup");
   const [bloodLoss, setBloodLoss] = useState(0);
   const [taskStates, setTaskStates] = useState({});
@@ -919,6 +919,9 @@ export default function EmergencyPage({ onClose }) {
   // ── Handlers ──
 
   function handleSetup(ml, bt) {
+    // Fresh emergency — reset the clock to now (a discarded prior session must
+    // not carry its elapsed time over into the new one).
+    setEmergencyStartTime(Date.now());
     setBloodLoss(ml);
     if (bt) setBirthTime(bt);
     prevLevelRef.current = getLevel(ml);
@@ -1058,6 +1061,7 @@ export default function EmergencyPage({ onClose }) {
   function handleRecover() {
     const s = savedSession;
     if (!s) return;
+    setEmergencyStartTime(s.emergencyStartTime ?? Date.now());
     setBloodLoss(s.bloodLoss ?? 0);
     setTaskStates(s.taskStates ?? {});
     setLog(s.log ?? []);
