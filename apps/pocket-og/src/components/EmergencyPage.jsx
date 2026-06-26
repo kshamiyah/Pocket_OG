@@ -29,7 +29,7 @@ const TASKS = [
   { id: "txa",            level: "major",   type: "drug",     title: "Tranexamic acid 1 g IV",                detail: "Over 10 minutes IV\n⚠ TIME CRITICAL — within 3 hours of birth",                                                                                           followUpDelay: 60, critical: true, special: "txa", deps: ["iv_access"] },
   // Massive
   { id: "call_massive",   level: "massive", type: "call",     title: "Activate massive PPH",                  detail: "• Consultant obstetrician — NOW\n• Consultant anaesthetist — NOW\n• Haematologist — NOW\n• Blood bank — activate MHP\n• IR if UAE planned",               followUpDelay: 120, critical: true },
-  { id: "mhp_pack",       level: "massive", type: "blood",    title: "MHP pack immediately",                  detail: "6 units red cells + 4 units FFP\n± Platelets ± Cryoprecipitate\nCall blood bank now",                                                                     followUpDelay: 120, deps: ["iv_access"] },
+  { id: "mhp_pack",       level: "massive", type: "blood",    title: "MHP pack immediately",                  detail: "6 units red cells + 4 units FFP\n± Platelets ± Cryoprecipitate\nCall blood bank now",                                                                     followUpDelay: 120, critical: true, deps: ["iv_access"] },
   { id: "txa_massive",    level: "massive", type: "drug",     title: "TXA if not yet given",                  detail: "1 g IV over 10 minutes\n⚠ Within 3 hours of birth",                                                                                                       critical: true, special: "txa", deps: ["iv_access"] },
   { id: "calcium",        level: "massive", type: "drug",     title: "Calcium gluconate",                     detail: "10 ml of 10% per 4 units red cells transfused\nPrevents citrate-induced hypocalcaemia",                                                                    deps: ["iv_access"] },
   { id: "rotem_teg",      level: "massive", type: "action",   title: "ROTEM / TEG coagulation",               detail: "Point-of-care coagulation to guide product selection\nMaintain normothermia — correct acidosis" },
@@ -75,12 +75,15 @@ function computeNextPrompt({ taskStates, level, fourTsDone, log, txaTime, txaHan
     if ((now - (taskStates[t.id].assignedAt || 0)) / 1000 >= t.followUpDelay) return { type: "followup", task: t };
   }
 
-  // Priority 5 — critical unstarted tasks (surface them ahead of regular queue)
-  for (const t of TASKS) {
-    if (!relevant(t) || st(t.id) !== null || !depsOk(t) || !t.critical) continue;
-    if (t.special === "txa" && txaHandled) continue;
-    if (t.special === "carbo" && carboCount > 0) continue;
-    return { type: "task", task: t };
+  // Priority 5 — critical unstarted tasks, highest level first so call_massive
+  // surfaces before second_cannula when at massive PPH
+  for (const critLevel of ["massive", "major", "minor"]) {
+    for (const t of TASKS) {
+      if (t.level !== critLevel || !relevant(t) || st(t.id) !== null || !depsOk(t) || !t.critical) continue;
+      if (t.special === "txa" && txaHandled) continue;
+      if (t.special === "carbo" && carboCount > 0) continue;
+      return { type: "task", task: t };
+    }
   }
 
   // Priority 6 — carboprost repeat dose
@@ -133,6 +136,7 @@ function EscalationOverlay({ level, onDismiss }) {
     massive: { title: "Massive PPH", body: "Blood loss ≥ 2,000 ml\nActivate massive haemorrhage protocol immediately" },
   };
   const c = cfg[level];
+  if (!c) return null;
   useEffect(() => { if ("vibrate" in navigator) navigator.vibrate([300, 100, 300, 100, 300]); }, []);
   return (
     <div className="fixed inset-0 bg-gray-950 z-50 flex flex-col items-center justify-center gap-5 p-8" onClick={onDismiss}>
@@ -717,6 +721,9 @@ export default function EmergencyPage({ onClose }) {
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "assigned", assignedAt: Date.now() } }));
     addLog("task_assigned", `Assigned: ${task.title}`);
     if (task.special === "txa") setTxaHandled(true);
+    // Track first carbo dose so DrugStrip shows and repeat prompts work.
+    // carboLastTime left null until confirmed — timer starts at confirmation.
+    if (task.special === "carbo") setCarboCount(1);
   }
 
   function handleSkip(task) {
@@ -769,6 +776,8 @@ export default function EmergencyPage({ onClose }) {
     setTaskStates(prev => ({ ...prev, [taskId]: { status: "done", doneAt: Date.now() } }));
     addLog("task_done", `Confirmed done: ${task?.title ?? taskId}`);
     if (task?.special === "txa") { setTxaTime(Date.now()); setTxaHandled(true); }
+    // Confirming assigned carboprost from the task row starts the 15-min repeat timer.
+    if (task?.special === "carbo") { setCarboCount(prev => prev === 0 ? 1 : prev); setCarboLastTime(Date.now()); }
   }
 
   function handleStandDown() {
