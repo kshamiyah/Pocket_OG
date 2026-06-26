@@ -681,10 +681,20 @@ function SummaryScreen({ log, emergencyStartTime, resolveTime, bloodLoss, onBack
   );
 }
 
+// ─── Session persistence ──────────────────────────────────────────────────────
+
+const STORAGE_KEY = "pocket_og_pph_session";
+function saveSession(data) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {} }
+function clearSession() { try { localStorage.removeItem(STORAGE_KEY); } catch {} }
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function EmergencyPage({ onClose }) {
-  const [emergencyStartTime] = useState(() => Date.now());
+  const [savedSession] = useState(() => {
+    try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; } catch { return null; }
+  });
+  const [recoveryDismissed, setRecoveryDismissed] = useState(false);
+  const [emergencyStartTime] = useState(() => savedSession?.emergencyStartTime ?? Date.now());
   const [phase, setPhase] = useState("setup");
   const [bloodLoss, setBloodLoss] = useState(0);
   const [taskStates, setTaskStates] = useState({});
@@ -730,6 +740,12 @@ export default function EmergencyPage({ onClose }) {
     prevLevelRef.current = level;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [level, phase]);
+
+  useEffect(() => {
+    if (phase !== "active") return;
+    saveSession({ emergencyStartTime, phase, bloodLoss, taskStates, fourTsDone, log,
+      txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime });
+  }, [phase, bloodLoss, taskStates, fourTsDone, log, txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime]);
 
   const effectiveBirthTime = birthTime ?? emergencyStartTime;
 
@@ -836,6 +852,23 @@ export default function EmergencyPage({ onClose }) {
     if (task?.special === "carbo") { setCarboCount(prev => prev === 0 ? 1 : prev); setCarboLastTime(Date.now()); }
   }
 
+  function handleRecover() {
+    const s = savedSession;
+    if (!s) return;
+    setBloodLoss(s.bloodLoss ?? 0);
+    setTaskStates(s.taskStates ?? {});
+    setFourTsDone(s.fourTsDone ?? false);
+    setLog(s.log ?? []);
+    setTxaTime(s.txaTime ?? null);
+    setTxaHandled(s.txaHandled ?? false);
+    setTxaSecondDone(s.txaSecondDone ?? false);
+    setBirthTime(s.birthTime ?? null);
+    setCarboCount(s.carboCount ?? 0);
+    setCarboLastTime(s.carboLastTime ?? null);
+    prevLevelRef.current = getLevel(s.bloodLoss ?? 0);
+    setPhase("active");
+  }
+
   function handleStandDown() {
     const t = Date.now();
     const unresolvedEntries = TASKS
@@ -848,6 +881,7 @@ export default function EmergencyPage({ onClose }) {
       ...unresolvedEntries,
     ]);
     setStandDownConfirm(false);
+    clearSession();
     setPhase("summary");
   }
 
@@ -855,6 +889,18 @@ export default function EmergencyPage({ onClose }) {
 
   if (phase === "setup") return (
     <div className="fixed inset-0 z-50 bg-gray-950 overflow-y-auto">
+      {savedSession && !recoveryDismissed && (
+        <div className="bg-amber-950/90 border-b border-amber-800/60 px-4 py-4">
+          <p className="text-amber-300 text-sm font-bold mb-1">Unfinished session found</p>
+          <p className="text-amber-500 text-xs mb-3">
+            {({ minor: "Minor", major: "Major", massive: "Massive" })[getLevel(savedSession.bloodLoss ?? 0)]} PPH · {savedSession.bloodLoss ?? 0} ml · {savedSession.log?.length ?? 0} events logged
+          </p>
+          <div className="flex gap-2">
+            <button onClick={handleRecover} className="flex-1 bg-amber-500 text-gray-950 font-bold py-2.5 text-sm rounded-lg">Resume session</button>
+            <button onClick={() => { setRecoveryDismissed(true); clearSession(); }} className="flex-1 border border-amber-800 text-amber-400 text-sm py-2.5 rounded-lg">Discard</button>
+          </div>
+        </div>
+      )}
       <SetupScreen onConfirm={handleSetup} />
     </div>
   );
