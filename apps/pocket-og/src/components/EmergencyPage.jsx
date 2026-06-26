@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 
 const TASKS = [
   // Minor — stabilisation
-  { id: "abc",            level: "minor",   type: "action",   title: "ABC — airway, breathing, circulation",  detail: "Position patient flat\nHigh-flow O₂ if SpO₂ <95%\nAssess for shock — HR, BP, skin perfusion" },
+  { id: "abc",            level: "minor",   type: "action",   title: "ABC — airway, breathing, circulation",  detail: "Position patient flat\nHigh-flow O₂ 15 L/min via non-rebreather mask — do not wait for SpO₂ to fall in haemorrhage\nAssess for shock — HR, BP, skin perfusion, capillary refill" },
   { id: "call_team",      level: "minor",   type: "call",     title: "Call for help",                         detail: "• Midwife in charge\n• On-call obstetrician",                                                                                                          followUpDelay: 120 },
   { id: "iv_access",      level: "minor",   type: "access",   title: "IV access + bloods",                    detail: "2 × large bore IV cannulas (14–16G)\nBloods: FBC, coagulation, U&E, LFT, group & screen",                                                              followUpDelay: 90  },
   { id: "bimanual",       level: "minor",   type: "action",   title: "Bimanual uterine massage",              detail: "Rub up a contraction — sustained bimanual compression\nIs the uterus firm after massage? (diagnostic)",                                                  followUpDelay: 180 },
