@@ -55,6 +55,36 @@ function getLevel(ml) {
   return "minor";
 }
 
+// Rate of blood loss in ml/min, derived from timestamped cumulative-total
+// log entries over a rolling window (default 10 min). Smooths out the
+// burst of taps when a clinician enters a large loss in one go.
+function bloodLossRate(log, now, windowMs = 10 * 60 * 1000) {
+  const points = log.filter(e => e.kind === "blood_loss" && typeof e.total === "number");
+  if (points.length < 2) return 0;
+  const latest = points[points.length - 1];
+  const cutoff = now - windowMs;
+  // Reference = the last measurement at or before the window start, else the
+  // first measurement we have (average since start when all points are recent).
+  let ref = points[0];
+  for (const p of points) { if (p.time <= cutoff) ref = p; }
+  const elapsedMin = (latest.time - ref.time) / 60000;
+  if (elapsedMin <= 0) return 0;
+  return Math.max(0, (latest.total - ref.total) / elapsedMin);
+}
+
+// Reassessment interval (seconds) as a function of bleed rate. The current
+// level sets the slowest acceptable cadence; a faster rate only shortens it.
+function reassessInterval(rate, level) {
+  const levelCap = level === "massive" ? 180 : level === "major" ? 240 : 300;
+  let rateInterval;
+  if (rate >= 150)      rateInterval = 60;   // catastrophic — check every minute
+  else if (rate >= 50)  rateInterval = 120;  // brisk
+  else if (rate >= 10)  rateInterval = 180;  // moderate
+  else if (rate >= 1)   rateInterval = 300;  // slow ooze
+  else                  rateInterval = 420;  // settled
+  return Math.min(levelCap, rateInterval);
+}
+
 function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now }) {
   function depsOk(task) {
     return (task.deps || []).every(id => ["done", "skipped"].includes(taskStates[id]?.status));
@@ -82,9 +112,10 @@ function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaH
   }
 
   // Priority 2 — blood loss check
-  const blInterval = level === "massive" ? 180 : level === "major" ? 240 : 300;
+  const blRate = bloodLossRate(log, now);
+  const blInterval = reassessInterval(blRate, level);
   const lastBL = [...log].reverse().find(e => e.kind === "blood_loss");
-  if (lastBL && (now - lastBL.time) / 1000 > blInterval) return { type: "blood_loss_check" };
+  if (lastBL && (now - lastBL.time) / 1000 > blInterval) return { type: "blood_loss_check", rate: blRate, interval: blInterval };
 
   // Priority 4 — non-critical follow-ups
   for (const t of TASKS) {
@@ -383,9 +414,17 @@ function AssessPrompt({ task, onExclude, onPresent }) {
   );
 }
 
-function BloodCheckPrompt({ level, bloodLoss, onAdd, onUnchanged }) {
+function BloodCheckPrompt({ level, bloodLoss, rate, interval, onAdd, onUnchanged }) {
   const [custom, setCustom] = useState("");
-  const interval = { massive: "3 min", major: "4 min", minor: "5 min" }[level];
+  const rateRounded = rate != null ? Math.round(rate) : null;
+  const rateDesc = rateRounded == null ? null
+    : rateRounded >= 150 ? "catastrophic"
+    : rateRounded >= 50  ? "brisk"
+    : rateRounded >= 10  ? "moderate"
+    : rateRounded >= 1   ? "slow"
+    : "settled";
+  const rateColor = rateRounded >= 150 ? "text-red-400" : rateRounded >= 50 ? "text-orange-400" : rateRounded >= 10 ? "text-yellow-300" : "text-gray-500";
+  const intervalLabel = interval != null ? `${Math.round(interval / 60 * 10) / 10} min` : null;
   function submitCustom() {
     const n = Number(custom);
     if (!isNaN(n) && n > 0) { onAdd(n); setCustom(""); }
@@ -394,10 +433,11 @@ function BloodCheckPrompt({ level, bloodLoss, onAdd, onUnchanged }) {
     <div className="px-4 py-3.5 space-y-2.5">
       <div className="flex items-baseline gap-2">
         <span className="text-xs font-bold uppercase tracking-wider text-gray-600">Blood loss check</span>
-        <span className="text-gray-700 text-xs">{interval} interval</span>
+        {rateRounded != null && <span className={`text-xs font-bold ${rateColor}`}>~{rateRounded} ml/min · {rateDesc}</span>}
       </div>
       <p className="text-gray-500 text-xs">
         Current: <span className={`font-bold ${bloodLossClass(bloodLoss)}`}>{bloodLoss} ml</span> — additional loss?
+        {intervalLabel && <span className="text-gray-700"> · next check ~{intervalLabel}</span>}
       </p>
       <div className="flex gap-2">
         {[100, 250, 500].map(n => (
@@ -513,7 +553,7 @@ function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount,
     case "task":         content = <TaskPrompt task={prompt.task} onDone={onDone} onAssign={onAssign} onSkip={onSkip} onNotAvailable={onNotAvailable} />; break;
     case "followup":     content = <FollowupPrompt task={prompt.task} onYes={onFollowupYes} onNo={onFollowupNo} />; break;
     case "assess":       content = <AssessPrompt task={prompt.task} onExclude={onAssessExclude} onPresent={onAssessPresent} />; break;
-    case "blood_loss_check": content = <BloodCheckPrompt level={level} bloodLoss={bloodLoss} onAdd={onBloodAdd} onUnchanged={onBloodUnchanged} />; break;
+    case "blood_loss_check": content = <BloodCheckPrompt level={level} bloodLoss={bloodLoss} rate={prompt.rate} interval={prompt.interval} onAdd={onBloodAdd} onUnchanged={onBloodUnchanged} />; break;
     case "carbo_dose":   content = <CarboDosePrompt count={carboCount} onDose={onCarboDose} onSkip={onCarboSkip} />; break;
     case "txa_second":   content = <TxaSecondPrompt onGiven={onTxaSecondGiven} onNotNeeded={onTxaSecondNotNeeded} />; break;
     case "tone_check":   content = <ToneCheckPrompt onFirm={onToneCheckFirm} onBoggy={onToneCheckBoggy} />; break;
@@ -840,6 +880,11 @@ export default function EmergencyPage({ onClose }) {
     setLog(prev => [...prev, { kind, label, time: Date.now() }]);
   }
 
+  // Blood-loss entries carry the cumulative total so rate can be computed.
+  function addBloodLog(label, total) {
+    setLog(prev => [...prev, { kind: "blood_loss", label, total, time: Date.now() }]);
+  }
+
   useEffect(() => {
     if (phase !== "active") return;
     if (prevLevelRef.current && prevLevelRef.current !== level) {
@@ -871,14 +916,14 @@ export default function EmergencyPage({ onClose }) {
     setBloodLoss(ml);
     if (bt) setBirthTime(bt);
     prevLevelRef.current = getLevel(ml);
-    setLog([{ kind: "blood_loss", label: `Initial blood loss: ${ml} ml`, time: Date.now() }]);
+    setLog([{ kind: "blood_loss", label: `Initial blood loss: ${ml} ml`, total: ml, time: Date.now() }]);
     setPhase("active");
   }
 
   function handleAddBlood(delta) {
     const next = bloodLoss + delta;
     setBloodLoss(next);
-    addLog("blood_loss", `+${delta} ml → ${next} ml`);
+    addBloodLog(`+${delta} ml → ${next} ml`, next);
   }
 
   function handleDone(task) {
@@ -942,11 +987,11 @@ export default function EmergencyPage({ onClose }) {
   function handleBloodAdd(delta) {
     const next = bloodLoss + delta;
     setBloodLoss(next);
-    addLog("blood_loss", `Blood loss check: +${delta} ml → ${next} ml`);
+    addBloodLog(`Blood loss check: +${delta} ml → ${next} ml`, next);
   }
 
   function handleBloodUnchanged() {
-    addLog("blood_loss", `Blood loss check: unchanged (${bloodLoss} ml)`);
+    addBloodLog(`Blood loss check: unchanged (${bloodLoss} ml)`, bloodLoss);
   }
 
   function handleCarboDose() {
