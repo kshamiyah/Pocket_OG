@@ -255,6 +255,26 @@ function DrugStrip({ txaTime, birthTime, carboCount, carboLastTime, now }) {
 function TaskPrompt({ task, onDone, onAssign, onSkip }) {
   const autoExpand = task.type === "drug" || task.type === "blood" || task.critical;
   const [showDetail, setShowDetail] = useState(autoExpand);
+  const [skipConfirm, setSkipConfirm] = useState(false);
+
+  function handleSkipClick() {
+    if (task.critical) { setSkipConfirm(true); } else { onSkip(task); }
+  }
+
+  if (skipConfirm) {
+    return (
+      <div className="px-4 py-3.5 space-y-3">
+        <span className="text-xs font-bold uppercase tracking-wider text-red-400">Critical task — confirm skip</span>
+        <p className="text-white text-base font-bold leading-snug">{task.title}</p>
+        <p className="text-gray-500 text-xs">This task is marked critical. Are you sure you want to skip it?</p>
+        <div className="flex gap-2 pt-1">
+          <button onClick={() => setSkipConfirm(false)} className="flex-1 border border-gray-700 text-gray-300 font-medium py-3 text-sm rounded-lg">Cancel</button>
+          <button onClick={() => { setSkipConfirm(false); onSkip(task); }} className="flex-1 border border-red-900 text-red-400 font-bold py-3 text-sm rounded-lg">Skip anyway</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="px-4 py-3.5 space-y-2.5">
       <div className="flex items-center gap-2">
@@ -278,7 +298,7 @@ function TaskPrompt({ task, onDone, onAssign, onSkip }) {
       <div className="flex gap-2 pt-1">
         <button onClick={() => onDone(task)} className="flex-1 bg-white text-gray-950 font-bold py-3 text-sm rounded-lg">Done ✓</button>
         <button onClick={() => onAssign(task)} className="flex-1 border border-gray-700 hover:border-gray-500 text-white font-medium py-3 text-sm rounded-lg transition">Assign →</button>
-        <button onClick={() => onSkip(task)} className="text-gray-700 hover:text-gray-500 text-xs px-4 py-3 transition">Skip</button>
+        <button onClick={handleSkipClick} className="text-gray-700 hover:text-gray-500 text-xs px-4 py-3 transition">Skip</button>
       </div>
     </div>
   );
