@@ -20,9 +20,9 @@ const TASKS = [
   { id: "catheterise",    level: "minor",   type: "action",   title: "Catheterise",                           detail: "Urinary catheter — target output >30 ml/hr\nMonitor hourly" },
   { id: "iv_fluids",      level: "minor",   type: "fluid",    title: "IV fluids",                             detail: "IV crystalloid resuscitation (Hartmann's / 0.9% saline)",                                                                                                deps: ["iv_access"] },
   // Minor — uterotonics in order
-  { id: "oxytocin_bolus", level: "minor",   type: "drug",     title: "Oxytocin 5 IU IV",                      detail: "Slowly IV over ~1 minute\nOnly if not already given for active management of third stage",                                                               followUpDelay: 120, deps: ["iv_access"] },
-  { id: "oxytocin_inf",   level: "minor",   type: "drug",     title: "Oxytocin infusion",                     detail: "40 IU in 500 ml Hartmann's at 125 ml/hr IV",                                                                                                             followUpDelay: 60, deps: ["iv_access"] },
-  { id: "ergometrine",    level: "minor",   type: "drug",     title: "Ergometrine 500 mcg",                   detail: "IM or slow IV\nIf oxytocin alone insufficient",                                                                                                         followUpDelay: 300, deps: ["iv_access"], contraindications: ["Hypertension", "Pre-eclampsia", "Cardiac disease", "Obliterative vascular disease"], fallback: "carboprost" },
+  { id: "oxytocin_bolus", level: "minor",   type: "drug",     title: "Oxytocin 5 IU IV",                      detail: "Slowly IV over ~1 minute\nOnly if not already given for active management of third stage",                                                               deps: ["iv_access"] },
+  { id: "oxytocin_inf",   level: "minor",   type: "drug",     title: "Oxytocin infusion",                     detail: "40 IU in 500 ml Hartmann's at 125 ml/hr IV",                                                                                                             deps: ["iv_access"] },
+  { id: "ergometrine",    level: "minor",   type: "drug",     title: "Ergometrine 500 mcg",                   detail: "IM or slow IV\nIf oxytocin alone insufficient",                                                                                                         deps: ["iv_access"], contraindications: ["Hypertension", "Pre-eclampsia", "Cardiac disease", "Obliterative vascular disease"], fallback: "carboprost" },
   // Minor — Thrombin
   { id: "coag_review",    level: "minor",   type: "action",   title: "Review coagulation results",            detail: "Review when available\nHaematologist if known or suspected coagulopathy",                                                                                  deps: ["iv_access"] },
   // Major
@@ -35,7 +35,7 @@ const TASKS = [
   { id: "calcium",        level: "major",   type: "drug",     title: "Calcium gluconate 10 ml 10% IV",        detail: "Treat hypocalcaemia — common in massive transfusion (citrate chelates calcium)\nCheck ionised calcium; correct acidosis\nGive slowly IV with cardiac monitoring" },
   { id: "rotem_teg",      level: "major",   type: "action",   title: "ROTEM / TEG coagulation",               detail: "Point-of-care coagulation to guide product selection — if available\nNot present in all units — otherwise use lab PT/APTT/fibrinogen\nMaintain normothermia — correct acidosis", naOption: { label: "Not available", log: "ROTEM/TEG not available — using lab PT/APTT/fibrinogen" } },
   { id: "carboprost",     level: "major",   type: "drug",     title: "Carboprost 0.25 mg IM",                 detail: "Every 15 minutes — up to 8 doses",                                                                                                                       special: "carbo", contraindications: ["Asthma", "Significant cardiac disease", "Active hepatic disease", "Active renal disease"], fallback: "misoprostol" },
-  { id: "misoprostol",    level: "major",   type: "drug",     title: "Misoprostol 800 mcg sublingual",        detail: "Place under tongue\nAlternative if other uterotonics unavailable or failed",                                                                               followUpDelay: 60 },
+  { id: "misoprostol",    level: "major",   type: "drug",     title: "Misoprostol 800 mcg sublingual",        detail: "Place under tongue\nAlternative if other uterotonics unavailable or failed" },
   // Massive
   { id: "call_massive",   level: "massive", type: "call",     title: "Activate massive PPH",                  detail: "• Consultant obstetrician — NOW\n• Consultant anaesthetist — NOW\n• Haematologist — NOW\n• Blood bank — activate MHP\n• IR if UAE planned",               followUpDelay: 90, critical: true },
   { id: "mhp_pack",       level: "massive", type: "blood",    title: "MHP pack immediately",                  detail: "Empirical — do not wait for lab results\nTarget pack: 6 units red cells + 4 units FFP\n± Platelets ± Cryoprecipitate\nMove to 1:1 RBC:FFP ratio if bleeding ongoing\nCall blood bank now",                          followUpDelay: 90, critical: true, deps: ["iv_access"] },
@@ -261,23 +261,29 @@ function Header({ elapsed, bloodLoss, level, assignedCount, onAddBlood, onStandD
 
 // ─── Drug strip ───────────────────────────────────────────────────────────────
 
-function DrugStrip({ txaTime, birthTime, carboCount, carboLastTime, now }) {
+function DrugStrip({ txaTime, txaSecondDone, level, birthTime, carboCount, carboLastTime, now }) {
   const items = [];
 
-  if (txaTime) {
-    const windowMs = 3 * 60 * 60 * 1000;
-    const remaining = Math.max(0, birthTime + windowMs - now);
+  // TXA 3-hour window. Shown only while clinically actionable:
+  //  • before the first dose (at major+) → "give it in time"
+  //  • between first and second dose → "2nd dose window"
+  // Hidden once the second dose is given or the window has closed.
+  const windowMs = 3 * 60 * 60 * 1000;
+  const remaining = Math.max(0, birthTime + windowMs - now);
+  const txaRelevant = levelVal(level) >= levelVal("major");
+  const showTxaWindow = txaRelevant && remaining > 0 && !txaSecondDone;
+  if (showTxaWindow) {
     const pct = Math.max(0, Math.min(100, (remaining / windowMs) * 100));
-    const closed = remaining === 0;
-    const urgent = !closed && remaining < 30 * 60 * 1000;
+    const urgent = remaining < 30 * 60 * 1000;
+    const label = txaTime ? "2nd dose window" : "TXA window";
     items.push(
       <div key="txa" className="flex items-center gap-3">
-        <span className="text-gray-600 text-xs w-18 shrink-0">TXA window</span>
+        <span className="text-gray-600 text-xs w-24 shrink-0">{label}</span>
         <div className="flex-1 bg-gray-800 h-px relative">
-          <div className={`absolute top-0 left-0 h-px transition-all ${closed ? "bg-red-500" : urgent ? "bg-orange-400" : "bg-gray-500"}`} style={{ width: `${pct}%` }} />
+          <div className={`absolute top-0 left-0 h-px transition-all ${urgent ? "bg-orange-400" : "bg-gray-500"}`} style={{ width: `${pct}%` }} />
         </div>
-        <span className={`text-xs font-mono tabular-nums w-14 text-right shrink-0 ${closed ? "text-red-400" : urgent ? "text-orange-400" : "text-gray-500"}`}>
-          {closed ? "closed" : fmt(remaining)}
+        <span className={`text-xs font-mono tabular-nums w-14 text-right shrink-0 ${urgent ? "text-orange-400" : "text-gray-500"}`}>
+          {fmt(remaining)}
         </span>
       </div>
     );
@@ -1150,6 +1156,8 @@ export default function EmergencyPage({ onClose }) {
 
       <DrugStrip
         txaTime={txaTime}
+        txaSecondDone={txaSecondDone}
+        level={level}
         birthTime={effectiveBirthTime}
         carboCount={carboCount}
         carboLastTime={carboLastTime}
