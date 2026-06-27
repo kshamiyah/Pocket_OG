@@ -506,8 +506,18 @@ function Header({ startTime, now, gestation, onClose }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
+// ─── Session persistence ──────────────────────────────────────────────────────
+
+const CA_STORAGE_KEY = "pocket_og_cardiac_arrest_session";
+function caSave(data) { try { localStorage.setItem(CA_STORAGE_KEY, JSON.stringify(data)); } catch {} }
+function caClear() { try { localStorage.removeItem(CA_STORAGE_KEY); } catch {} }
+
 export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
-  const [phase, setPhase] = useState("setup"); // setup | active
+  const [savedSession] = useState(() => {
+    try { const r = localStorage.getItem(CA_STORAGE_KEY); return r ? JSON.parse(r) : null; } catch { return null; }
+  });
+  const [recoveryDismissed, setRecoveryDismissed] = useState(false);
+  const [phase, setPhase] = useState("setup"); // setup | active | postresus | summary
   const [gestation, setGestation] = useState(null);
   const [startTime, setStartTime] = useState(null);
   const [now, setNow] = useState(() => Date.now());
@@ -533,12 +543,57 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
   const [postResusDone, setPostResusDone] = useState([]);
   const wakeLockRef = useRef(null);
 
-  // 1-second tick while active
+  // 1-second tick while resus is in progress
   useEffect(() => {
-    if (phase !== "active") return;
+    if (phase !== "active" && phase !== "postresus") return;
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, [phase]);
+
+  // Persist the in-progress session on every change so it can be recovered.
+  useEffect(() => {
+    if (phase !== "active" && phase !== "postresus") return;
+    caSave({
+      phase, gestation, startTime, rosc, pmcsAcknowledged, pmcsAlarmDismissed, actionsDone,
+      cycleStart, cycleNumber, shockCount, adrenalineCount, lastAdrenalineAt, adrenalineArmed,
+      amio300Given, amio150Given, causesConsidered, antidotesGiven, outcome, outcomeTime, postResusDone,
+    });
+  }, [phase, gestation, startTime, rosc, pmcsAcknowledged, pmcsAlarmDismissed, actionsDone,
+      cycleStart, cycleNumber, shockCount, adrenalineCount, lastAdrenalineAt, adrenalineArmed,
+      amio300Given, amio150Given, causesConsidered, antidotesGiven, outcome, outcomeTime, postResusDone]);
+
+  function handleRecover() {
+    const s = savedSession;
+    if (!s) return;
+    setGestation(s.gestation ?? null);
+    setStartTime(s.startTime ?? Date.now());
+    setRosc(s.rosc ?? false);
+    setPmcsAcknowledged(s.pmcsAcknowledged ?? false);
+    setPmcsAlarmDismissed(s.pmcsAlarmDismissed ?? false);
+    setActionsDone(s.actionsDone ?? []);
+    setCycleStart(s.cycleStart ?? Date.now());
+    setCycleNumber(s.cycleNumber ?? 1);
+    setShockCount(s.shockCount ?? 0);
+    setAdrenalineCount(s.adrenalineCount ?? 0);
+    setLastAdrenalineAt(s.lastAdrenalineAt ?? null);
+    setAdrenalineArmed(s.adrenalineArmed ?? false);
+    setAmio300Given(s.amio300Given ?? false);
+    setAmio150Given(s.amio150Given ?? false);
+    setCausesConsidered(s.causesConsidered ?? []);
+    setAntidotesGiven(s.antidotesGiven ?? []);
+    setOutcome(s.outcome ?? null);
+    setOutcomeTime(s.outcomeTime ?? null);
+    setPostResusDone(s.postResusDone ?? []);
+    setPhase(s.phase === "postresus" ? "postresus" : "active");
+  }
+
+  function handleClose() {
+    if (phase === "summary") caClear();
+    onClose?.();
+  }
+
+  // The summary is terminal — clear the saved session so it won't offer to resume.
+  useEffect(() => { if (phase === "summary") caClear(); }, [phase]);
 
   // Keep the screen awake during an active arrest
   useEffect(() => {
@@ -606,6 +661,18 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
   if (phase === "setup") {
     return (
       <div className="fixed inset-0 z-50 bg-gray-950 overflow-y-auto">
+        {savedSession && !recoveryDismissed && (
+          <div className="bg-amber-950/60 border-b border-amber-800 px-4 py-3 flex flex-col gap-2">
+            <p className="text-amber-300 text-sm font-bold">Resume previous arrest?</p>
+            <p className="text-amber-400/80 text-xs">
+              In-progress resuscitation found — {savedSession.shockCount ?? 0} shock{(savedSession.shockCount ?? 0) === 1 ? "" : "s"}, {savedSession.adrenalineCount ?? 0} adrenaline.
+            </p>
+            <div className="flex gap-2">
+              <button onClick={handleRecover} className="flex-1 bg-amber-500 text-gray-950 font-bold py-2.5 text-sm rounded-lg">Resume</button>
+              <button onClick={() => { setRecoveryDismissed(true); caClear(); }} className="flex-1 border border-amber-800 text-amber-400 text-sm py-2.5 rounded-lg">Discard</button>
+            </div>
+          </div>
+        )}
         <SetupScreen onConfirm={handleSetup} postpartum={!!context?.postpartum} />
       </div>
     );
@@ -632,7 +699,7 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
           shockCount={shockCount} adrenalineCount={adrenalineCount}
           amio300Given={amio300Given} amio150Given={amio150Given}
           pmcsAcknowledged={pmcsAcknowledged} causesConsidered={causesConsidered}
-          antidotesGiven={antidotesGiven} onClose={onClose}
+          antidotesGiven={antidotesGiven} onClose={handleClose}
         />
       </div>
     );
@@ -659,7 +726,7 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
         <ShockPrompt shockNumber={shockCount + 1} onDelivered={handleShockDelivered} />
       )}
 
-      <Header startTime={startTime} now={now} gestation={gestation} onClose={onClose} />
+      <Header startTime={startTime} now={now} gestation={gestation} onClose={handleClose} />
 
       {/* Active body */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
