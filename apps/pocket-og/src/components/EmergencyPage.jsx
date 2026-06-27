@@ -28,8 +28,8 @@ const TASKS = [
   { id: "coag_review",    level: "minor",   type: "action",   title: "Review coagulation results",            detail: "Review when available\nHaematologist if known or suspected coagulopathy",                                                                                  deps: ["iv_access"] },
   // Major
   { id: "call_major",     level: "major",   type: "call",     title: "Call for help — major PPH",             detail: "• Midwife in charge\n• On-call obstetrician\n• Senior obstetrician\n• Anaesthetist\n• Alert theatre\n• Activate major PPH protocol\n• Alert blood transfusion lab", followUpDelay: 90, critical: true },
-  { id: "second_cannula", level: "major",   type: "access",   title: "2nd large bore cannula",                detail: "14G or 16G — insert now\nCrossmatch 4 units red cells urgently\nRepeat FBC and coagulation",                                                              followUpDelay: 90, critical: true, deps: ["iv_access"] },
   { id: "txa",            level: "major",   type: "drug",     title: "Tranexamic acid 1 g IV",                detail: "Over 10 minutes IV\n⚠ TIME CRITICAL — give ASAP, within 3 hours of birth",                                                                                 followUpDelay: 90, critical: true, special: "txa", deps: ["iv_access"] },
+  { id: "second_cannula", level: "major",   type: "access",   title: "2nd large bore cannula",                detail: "14G or 16G — insert now\nCrossmatch 4 units red cells urgently\nRepeat FBC and coagulation",                                                              followUpDelay: 90, critical: true, deps: ["iv_access"] },
   { id: "rapid_cryst",    level: "major",   type: "fluid",    title: "Rapid crystalloid",                     detail: "Up to 1.5–2 L Hartmann's pending blood products\nO-negative blood if life-threatening — do not wait for crossmatch\nDo not delay blood products for crystalloid",                deps: ["iv_access"] },
   { id: "carboprost",     level: "major",   type: "drug",     title: "Carboprost 0.25 mg IM",                 detail: "Every 15 minutes — up to 8 doses\nContraindicated in asthma",                                                                                              uterotonic: true, special: "carbo", followUpDelay: 90, followUpYesLog: "Carboprost dose 1 confirmed given", contraindications: ["Asthma", "Significant cardiac disease", "Active hepatic disease", "Active renal disease"], fallback: "misoprostol" },
   { id: "misoprostol",    level: "major",   type: "drug",     title: "Misoprostol 800 mcg",                   detail: "PR or sublingual — place under tongue or per rectum\nAlternative if other uterotonics unavailable or failed",                                          uterotonic: true },
@@ -42,7 +42,7 @@ const TASKS = [
   { id: "mhp_pack",       level: "massive", type: "blood",    title: "MHP pack immediately",                  detail: "Empirical — do not wait for lab results\nTarget pack: 6 units red cells + 4 units FFP\n± Platelets ± Cryoprecipitate\nMove to 1:1 RBC:FFP ratio if bleeding ongoing\nCall blood bank now",                          followUpDelay: 90, critical: true, deps: ["iv_access"] },
   { id: "cell_salvage",   level: "massive", type: "action",   title: "Cell salvage",                          detail: "Activate if available\nHaematologist authorisation if Rh-negative", naOption: { label: "Not available", log: "Cell salvage not available in this unit" } },
   { id: "bakri",          level: "massive", type: "surgical", title: "Bakri balloon tamponade",               detail: "300–500 ml saline — tamponade test\nIf bleeding stops, may avoid theatre\nHave theatre prepared regardless", consider: true, considerLead: "If bleeding continues despite resuscitation" },
-  { id: "theatre",        level: "massive", type: "surgical", title: "Transfer to theatre",                   detail: "• Stepwise uterine devascularisation\n• Bilateral uterine artery ligation\n• B-Lynch / Hayman brace suture\n• UAE if stable\n• Peripartum hysterectomy — last resort", consider: true, considerLead: "If haemorrhage not controlled — prepare early" },
+  { id: "theatre",        level: "massive", type: "surgical", title: "Transfer to theatre",                   detail: "• Stepwise uterine devascularisation\n• Bilateral uterine artery ligation\n• B-Lynch / Hayman brace suture\n• UAE if stable\n• Peripartum hysterectomy — last resort", consider: true, considerLead: "If haemorrhage not controlled — prepare early", followUpDelay: 300, followUpQuestion: "Patient in theatre?", followUpYesLog: "Patient transferred to theatre — procedure underway" },
   { id: "cardiac_arrest_ref", level: "minor", type: "call", title: "Cardiac arrest — 2222", detail: "Call 2222 — maternal cardiac arrest\nStart CPR immediately — 30:2, hard and fast\nDo not stop haemorrhage management during CPR\nTreat reversible cause: Hypovolaemia (4 Hs)\nAnaesthetist to manage airway\nFull maternal cardiac arrest protocol applies", consider: true, considerArrestCheck: true, hidden: true },
 ];
 
@@ -56,6 +56,36 @@ const PHARM_DELAY_SEC = {
   misoprostol:    600,
 };
 const IV_ACCESS_MAX_RETRIES = 2;
+
+// Critical queue order — at massive after IV: MHP → TXA → 2nd cannula; at major: TXA → 2nd cannula
+const CRITICAL_TASK_PRIORITY = {
+  call_massive: 0,
+  mhp_pack: 1,
+  txa: 2,
+  second_cannula: 3,
+  call_major: 0,
+};
+
+const MASSIVE_RESUS_AFTER_IV = ["mhp_pack", "txa", "second_cannula"];
+const FOUR_T_TASK_IDS = new Set(["fundal_massage", "bimanual", "trauma_assess", "tissue_assess"]);
+
+function massiveResusTrioPending(taskStates, level) {
+  if (levelVal(level) < levelVal("massive")) return false;
+  if (taskStates.iv_access?.status !== "done") return false;
+  return MASSIVE_RESUS_AFTER_IV.some(id => {
+    const s = taskStates[id]?.status;
+    return s !== "done" && s !== "already_given" && s !== "skipped";
+  });
+}
+
+function deferFourTs(task, taskStates, level) {
+  return FOUR_T_TASK_IDS.has(task.id) && massiveResusTrioPending(taskStates, level);
+}
+
+function theatreTransferSnoozed(taskStates, now) {
+  const until = taskStates.theatre?.transferSnoozeUntil;
+  return until != null && now < until;
+}
 
 function considerSnoozeMs(level) {
   if (levelVal(level) >= levelVal("massive")) return 2 * 60 * 1000;
@@ -163,6 +193,15 @@ function reassessInterval(rate, level) {
   return Math.min(levelCap, rateInterval);
 }
 
+function bloodCheckCountdown(log, now, level, sessionRecoveredAt) {
+  const lastCheck = [...log].reverse().find(isBloodCheckEvent);
+  if (!lastCheck) return null;
+  const intervalSec = reassessInterval(bloodLossRate(log, now), level);
+  const anchor = Math.max(lastCheck.time, sessionRecoveredAt ?? 0);
+  const dueAt = anchor + intervalSec * 1000;
+  return { remainingMs: dueAt - now, intervalSec, overdue: now >= dueAt };
+}
+
 function bleedingSettled(log, now) {
   return bloodLossRate(log, now) < 1;
 }
@@ -207,7 +246,11 @@ function depSatisfied(depId, taskStates) {
 }
 
 function shouldOfferInfusionReassess(taskStates) {
-  return !uterotonicTaken(taskStates, "oxytocin_inf") && taskStates.oxytocin_inf?.status !== "not_indicated";
+  if (uterotonicTaken(taskStates, "oxytocin_inf")) return false;
+  if (taskStates.oxytocin_inf?.status === "not_indicated") return false;
+  // Only when IV unlocks a pending infusion decision — not on every fresh IV completion.
+  if (taskStates.oxytocin_inf?.status === "assigned") return true;
+  return UTEROTONIC_ORDER.some(id => id !== "oxytocin_inf" && uterotonicTaken(taskStates, id));
 }
 
 // Hold 90s IV follow-ups until the current attempt window expires
@@ -279,7 +322,7 @@ function countMonitoringPending({ taskStates, level, forcedTasks, txaTime }) {
   return { blocked, inProgress };
 }
 
-function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, infusionReassess, sessionRecoveredAt, forcedFollowUpId }) {
+function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, ivFailSnoozeUntil, infusionReassess, sessionRecoveredAt, forcedFollowUpId }) {
   function depsOk(task) {
     return (task.deps || []).every(id => depSatisfied(id, taskStates));
   }
@@ -288,6 +331,7 @@ function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaH
   function relevant(task) { return levelVal(task.level) <= levelVal(level) || (forcedTasks || []).includes(task.id); }
   function st(id) { return effectiveTaskStatus(id, taskStates, level, txaTime); }
   function toneGate(task) {
+    if (deferFourTs(task, taskStates, level)) return true;
     if (toneAssessed) return false;
     if (task.id === "bimanual" || task.id === "trauma_assess" || task.id === "tissue_assess") {
       const fundal = taskStates["fundal_massage"]?.status;
@@ -322,25 +366,6 @@ function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaH
     return null;
   }
 
-  // Priority 1 — IV attempt window expired → IM route (before IV follow-up chasers)
-  if (taskStates.iv_access?.status !== "done" && ivAccessPendingSince) {
-    const windowMs = ivAccessDeadlineMs(level, ivAccessRetries);
-    if (now - ivAccessPendingSince >= windowMs) {
-      const imOpts = ["ergometrine", "carboprost", "misoprostol"].filter(id => {
-        const t = TASKS.find(x => x.id === id);
-        return t && levelVal(t.level) <= levelVal(level) && !uterotonicTaken(taskStates, id) && taskStates[id]?.status !== "skipped";
-      });
-      return {
-        type: "iv_fail",
-        imOptions: imOpts.map(id => TASKS.find(x => x.id === id)),
-        retries: ivAccessRetries,
-        maxRetries: IV_ACCESS_MAX_RETRIES,
-        windowMs,
-        level,
-      };
-    }
-  }
-
   // Priority 1.04 — cardiac arrest check (flagged from ABC instability, any PPH level)
   if ((forcedTasks || []).includes("cardiac_arrest_ref")) {
     const arrestTask = TASKS.find(x => x.id === "cardiac_arrest_ref");
@@ -350,7 +375,31 @@ function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaH
   // Priority 1.05 — user tapped an assigned row in the checklist
   if (forcedFollowUpId) {
     const t = TASKS.find(x => x.id === forcedFollowUpId);
-    if (t && taskStates[t.id]?.status === "assigned") return { type: "followup", task: t };
+    if (t && taskStates[t.id]?.status === "assigned") {
+      if (t.id === "theatre") return { type: "theatre_transfer", task: t };
+      return { type: "followup", task: t };
+    }
+  }
+
+  // Priority 1.55 — theatre preparing → confirm patient transferred
+  if (taskStates.theatre?.status === "assigned" && !theatreTransferSnoozed(taskStates, now)) {
+    const theatreTask = TASKS.find(x => x.id === "theatre");
+    if (theatreTask && relevant(theatreTask)) return { type: "theatre_transfer", task: theatreTask };
+  }
+
+  // Priority 1.06 — queued uterotonic (IV-fail IM route or accepted escalation) — must beat iv_fail
+  if (queuedUterotonicId) {
+    const qt = TASKS.find(x => x.id === queuedUterotonicId);
+    if (qt && st(qt.id) == null && depsOk(qt)) return gate(qt);
+  }
+
+  // Priority 1.08 — blood loss check (must not sit behind iv_fail indefinitely)
+  const blRate = bloodLossRate(log, now);
+  const blInterval = reassessInterval(blRate, level);
+  const lastCheck = [...log].reverse().find(isBloodCheckEvent);
+  const checkAnchor = Math.max(lastCheck?.time ?? 0, sessionRecoveredAt ?? 0);
+  if (lastCheck && (now - checkAnchor) / 1000 > blInterval) {
+    return { type: "blood_loss_check", rate: blRate, interval: blInterval };
   }
 
   // Priority 1.1 — critical follow-ups (most overdue first)
@@ -367,25 +416,39 @@ function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaH
       bestCritFollowup = t;
     }
   }
-  if (bestCritFollowup) return { type: "followup", task: bestCritFollowup };
+  if (bestCritFollowup) {
+    if (bestCritFollowup.id === "theatre") return { type: "theatre_transfer", task: bestCritFollowup };
+    return { type: "followup", task: bestCritFollowup };
+  }
 
-  // Priority 1.5 — tone assessment after fundal massage (or if fundal skipped)
+  // Priority 1.5 — tone assessment after fundal massage (deferred at massive until MHP/TXA/cannula)
   const fundalStatus = taskStates["fundal_massage"]?.status;
-  if ((fundalStatus === "done" || fundalStatus === "skipped") && !toneAssessed) return { type: "tone_check" };
+  if ((fundalStatus === "done" || fundalStatus === "skipped") && !toneAssessed && !massiveResusTrioPending(taskStates, level)) {
+    return { type: "tone_check" };
+  }
 
   // Priority 1.75 — force-activated fallbacks/treatments (carboprost after ergometrine CI, suture after trauma, etc.)
   const forced = nextForcedTask();
   if (forced) return forced;
 
-  // Priority 1.85 — IV just established → reassess infusion need
-  if (infusionReassess && taskStates.iv_access?.status === "done" && !uterotonicTaken(taskStates, "oxytocin_inf") && taskStates.oxytocin_inf?.status !== "not_indicated") {
-    return { type: "infusion_reassess" };
-  }
-
-  // Priority 1.9 — queued uterotonic (user accepted escalation)
-  if (queuedUterotonicId) {
-    const qt = TASKS.find(x => x.id === queuedUterotonicId);
-    if (qt && st(qt.id) == null && depsOk(qt)) return gate(qt);
+  // Priority 1.12 — IV attempt window expired → IM route offer (optional — not a forced ladder)
+  const ivFailSnoozed = ivFailSnoozeUntil != null && now < ivFailSnoozeUntil;
+  if (!queuedUterotonicId && !ivFailSnoozed && taskStates.iv_access?.status !== "done" && ivAccessPendingSince) {
+    const windowMs = ivAccessDeadlineMs(level, ivAccessRetries);
+    if (now - ivAccessPendingSince >= windowMs) {
+      const imOpts = ["ergometrine", "carboprost", "misoprostol"].filter(id => {
+        const t = TASKS.find(x => x.id === id);
+        return t && levelVal(t.level) <= levelVal(level) && !uterotonicTaken(taskStates, id) && taskStates[id]?.status !== "skipped";
+      });
+      return {
+        type: "iv_fail",
+        imOptions: imOpts.map(id => TASKS.find(x => x.id === id)).filter(Boolean),
+        retries: ivAccessRetries,
+        maxRetries: IV_ACCESS_MAX_RETRIES,
+        windowMs,
+        level,
+      };
+    }
   }
 
   // Priority 2.2 — uterotonic escalation offer (after blood-loss assess)
@@ -397,13 +460,6 @@ function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaH
       sinceTitle: last ? TASKS.find(x => x.id === last.id)?.title : null,
     };
   }
-
-  // Priority 2 — blood loss check
-  const blRate = bloodLossRate(log, now);
-  const blInterval = reassessInterval(blRate, level);
-  const lastCheck = [...log].reverse().find(isBloodCheckEvent);
-  const checkAnchor = Math.max(lastCheck?.time ?? 0, sessionRecoveredAt ?? 0);
-  if (lastCheck && (now - checkAnchor) / 1000 > blInterval) return { type: "blood_loss_check", rate: blRate, interval: blInterval };
 
   // Priority 4 — non-critical follow-ups (most overdue first)
   let bestFollowup = null;
@@ -419,7 +475,10 @@ function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaH
       bestFollowup = t;
     }
   }
-  if (bestFollowup) return { type: "followup", task: bestFollowup };
+  if (bestFollowup) {
+    if (bestFollowup.id === "theatre") return { type: "theatre_transfer", task: bestFollowup };
+    return { type: "followup", task: bestFollowup };
+  }
 
   // Priority 4.9 — stabilisation trio in fixed order before other critical tasks
   for (const id of [stabilisationCallId(level), "abc", "iv_access"]) {
@@ -428,17 +487,23 @@ function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaH
     return gate(t);
   }
 
-  // Priority 5 — critical unstarted tasks, highest level first so call_massive
-  // surfaces before second_cannula when at massive PPH
+  // Priority 5 — critical unstarted tasks (massive: MHP → TXA → 2nd cannula)
   for (const critLevel of ["massive", "major", "minor"]) {
-    for (const t of TASKS) {
-      if (t.level !== critLevel || !relevant(t) || st(t.id) !== null || !depsOk(t) || !taskCriticalForQueue(t)) continue;
-      if (t.hidden && !(forcedTasks || []).includes(t.id)) continue;
-      if (t.special === "txa" && !txaEligible(taskStates, level, txaTime)) continue;
-      if (t.special === "carbo" && carboCount > 0 && carboLastTime) continue;
-      if (toneGate(t)) continue;
-      return gate(t);
-    }
+    const candidates = TASKS.filter(t => {
+      if (t.level !== critLevel || !relevant(t) || st(t.id) !== null || !depsOk(t) || !taskCriticalForQueue(t)) return false;
+      if (t.hidden && !(forcedTasks || []).includes(t.id)) return false;
+      if (t.special === "txa" && !txaEligible(taskStates, level, txaTime)) return false;
+      if (t.special === "carbo" && carboCount > 0 && carboLastTime) return false;
+      if (toneGate(t)) return false;
+      return true;
+    });
+    candidates.sort((a, b) => (CRITICAL_TASK_PRIORITY[a.id] ?? 50) - (CRITICAL_TASK_PRIORITY[b.id] ?? 50));
+    if (candidates.length) return gate(candidates[0]);
+  }
+
+  // Priority 5.8 — IV established late → reassess infusion (after resus trio + before Four T's)
+  if (infusionReassess && taskStates.iv_access?.status === "done" && !uterotonicTaken(taskStates, "oxytocin_inf") && taskStates.oxytocin_inf?.status !== "not_indicated" && !massiveResusTrioPending(taskStates, level)) {
+    return { type: "infusion_reassess" };
   }
 
   // Priority 6 — carboprost repeat dose (requires confirmed first dose with timestamp)
@@ -573,9 +638,28 @@ function StandDownConfirm({ bloodLoss, onConfirm, onCancel }) {
   );
 }
 
+function ExitConfirm({ active, onConfirm, onCancel }) {
+  return (
+    <div className="fixed inset-0 bg-black/80 z-40 flex items-end p-4" onClick={onCancel}>
+      <div className="bg-gray-900 border border-gray-700 rounded-xl p-5 w-full" onClick={e => e.stopPropagation()}>
+        <p className="text-white font-bold mb-1">{active ? "Exit simulator?" : "Exit without starting?"}</p>
+        <p className="text-gray-500 text-sm mb-4">
+          {active
+            ? "This discards the session without a stand-down record. If the emergency is resolved, use Stand down instead."
+            : "Opened by mistake? No session will be saved."}
+        </p>
+        <div className="flex gap-3">
+          <button onClick={onCancel} className="flex-1 border border-gray-700 text-gray-300 font-medium py-2.5 rounded-lg text-sm">Stay</button>
+          <button onClick={onConfirm} className="flex-1 bg-red-600 text-white font-bold py-2.5 rounded-lg text-sm">Exit</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Header ──────────────────────────────────────────────────────────────────
 
-function Header({ elapsed, bloodLoss, level, assignedCount, showQuickAdd, onAddBlood, onCorrectBlood, onStandDown }) {
+function Header({ elapsed, bloodLoss, level, assignedCount, showQuickAdd, onAddBlood, onCorrectBlood, onStandDown, onExit }) {
   const levelLabel = { minor: "Minor PPH", major: "Major PPH", massive: "Massive PPH" }[level];
   const [correcting, setCorrecting] = useState(false);
   const [correctVal, setCorrectVal] = useState("");
@@ -597,7 +681,10 @@ function Header({ elapsed, bloodLoss, level, assignedCount, showQuickAdd, onAddB
     <div className="bg-gray-900 px-4 pt-3 pb-3 border-b border-gray-800 flex-shrink-0 max-w-full overflow-x-hidden">
       <div className="flex items-center justify-between gap-2 mb-1">
         <span className="font-mono text-white text-xl font-bold tabular-nums shrink-0">{fmt(elapsed)}</span>
-        <button onClick={onStandDown} className="text-gray-600 hover:text-gray-300 text-xs border border-gray-800 hover:border-gray-600 px-2.5 py-1.5 rounded transition shrink-0">Stand down</button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button onClick={onExit} className="text-gray-600 hover:text-gray-300 text-xs border border-gray-800 hover:border-gray-600 px-2.5 py-1.5 rounded transition">Exit</button>
+          <button onClick={onStandDown} className="text-gray-600 hover:text-gray-300 text-xs border border-gray-800 hover:border-gray-600 px-2.5 py-1.5 rounded transition">Stand down</button>
+        </div>
       </div>
       <div className="flex items-center gap-2 mb-2 flex-wrap">
         {assignedCount > 0 && <span className="text-amber-500 text-xs">{assignedCount} in progress</span>}
@@ -642,8 +729,30 @@ function Header({ elapsed, bloodLoss, level, assignedCount, showQuickAdd, onAddB
 
 // ─── Drug strip ───────────────────────────────────────────────────────────────
 
-function DrugStrip({ txaTime, txaSecondDone, taskStates, level, birthTime, carboCount, carboLastTime, now }) {
+function DrugStrip({ txaTime, txaSecondDone, taskStates, level, birthTime, carboCount, carboLastTime, log, sessionRecoveredAt, now }) {
   const items = [];
+
+  const bloodDue = bloodCheckCountdown(log, now, level, sessionRecoveredAt);
+  if (bloodDue) {
+    const { remainingMs, overdue } = bloodDue;
+    items.push(
+      <div key="blood" className="flex items-center gap-3">
+        <span className="text-gray-600 text-xs w-24 shrink-0">Blood check</span>
+        <div className="flex-1 bg-gray-800 h-px relative">
+          {!overdue && (
+            <div
+              className="absolute top-0 left-0 h-px bg-gray-500 transition-all"
+              style={{ width: `${Math.max(0, Math.min(100, (1 - remainingMs / (bloodDue.intervalSec * 1000)) * 100))}%` }}
+            />
+          )}
+          {overdue && <div className="absolute top-0 left-0 h-px w-full bg-amber-400" />}
+        </div>
+        <span className={`text-xs font-mono tabular-nums w-14 text-right shrink-0 ${overdue ? "text-amber-400 font-bold" : "text-gray-500"}`}>
+          {overdue ? "due now" : fmt(remainingMs)}
+        </span>
+      </div>
+    );
+  }
 
   // TXA 3-hour window. Shown only while clinically actionable:
   //  • before the first dose (at major+) → "give it in time"
@@ -824,6 +933,25 @@ function FollowupPrompt({ task, onYes, onNo }) {
   );
 }
 
+function TheatreTransferPrompt({ task, onInTheatre, onStillPreparing }) {
+  useEffect(() => { if ("vibrate" in navigator) navigator.vibrate([100, 60, 100]); }, []);
+  return (
+    <div className="px-4 py-3.5 space-y-2.5">
+      <span className="text-xs font-bold uppercase tracking-wider text-violet-400">Theatre transfer</span>
+      <p className="text-white text-xl font-bold leading-snug">Patient in theatre?</p>
+      <p className="text-gray-500 text-xs">Team preparing — confirm when the patient has transferred and procedure is underway</p>
+      <div className="flex flex-col gap-2 pt-1">
+        <button onClick={() => onInTheatre(task)} className="w-full bg-white text-gray-950 font-bold py-3 text-sm rounded-lg">
+          Yes — in theatre now ✓
+        </button>
+        <button onClick={() => onStillPreparing(task)} className="w-full border border-gray-700 text-white font-medium py-2.5 text-sm rounded-lg">
+          Still preparing — not transferred yet
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function AssessPrompt({ task, onExclude, onPresent }) {
   const a = task.assess;
   useEffect(() => { if ("vibrate" in navigator) navigator.vibrate([100, 60, 100]); }, []);
@@ -987,7 +1115,7 @@ function UterotonicEscalatePrompt({ nextTask, sinceTitle, onYes, onHold, onNotYe
   );
 }
 
-function IvFailPrompt({ imOptions, retries, maxRetries, windowMs, level, onRetry, onImDrug }) {
+function IvFailPrompt({ imOptions, retries, maxRetries, windowMs, level, onRetry, onImDrug, onDismiss }) {
   useEffect(() => { if ("vibrate" in navigator) navigator.vibrate([100, 60, 100]); }, []);
   const canRetry = retries < maxRetries;
   const nextWindow = fmtIvWindow(ivAccessDeadlineMs(level, retries + 1));
@@ -995,24 +1123,25 @@ function IvFailPrompt({ imOptions, retries, maxRetries, windowMs, level, onRetry
     ? `No IV after ${fmtIvWindow(windowMs)}`
     : "Still no IV access";
   const detail = canRetry
-    ? `Cannula not in — IM / sublingual route if not achieved soon. ${maxRetries - retries} retry${maxRetries - retries !== 1 ? "ies" : ""} left.`
-    : "IV access not achieved — give uterotonic by IM / sublingual route. Infusion unavailable until IV in.";
+    ? `Cannula not in — consider IM / sublingual uterotonics. ${maxRetries - retries} formal retry${maxRetries - retries !== 1 ? "ies" : ""} left.`
+    : "Formal retries used — keep attempting IV or give IM uterotonics if indicated. Infusion needs IV.";
   return (
     <div className="px-4 py-3.5 space-y-2.5">
       <span className="text-xs font-bold uppercase tracking-wider text-red-400">IV access</span>
       <p className="text-white text-xl font-bold leading-snug">{title}</p>
       <p className="text-gray-500 text-xs">{detail}</p>
       <div className="flex flex-col gap-2 pt-1">
-        {canRetry && (
-          <button onClick={onRetry} className="w-full border border-gray-700 text-white font-medium py-2.5 text-sm rounded-lg">
-            Keep trying — another {nextWindow}
-          </button>
-        )}
+        <button onClick={onRetry} className="w-full border border-gray-700 text-white font-medium py-2.5 text-sm rounded-lg">
+          {canRetry ? `Keep trying — another ${nextWindow}` : "Keep trying IV — reset timer"}
+        </button>
         {imOptions.map(t => (
           <button key={t.id} onClick={() => onImDrug(t)} className="w-full bg-white text-gray-950 font-bold py-2.5 text-sm rounded-lg">
             {t.title}
           </button>
         ))}
+        <button onClick={onDismiss} className="w-full border border-gray-800 text-gray-500 text-sm py-2 rounded-lg">
+          Not now — use checklist
+        </button>
       </div>
     </div>
   );
@@ -1124,19 +1253,20 @@ function ConsiderPrompt({ task, remindMin, onPrepare, onNotIndicated, onNotNow, 
 
 function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount, ivAccessDone, cardiacArrestPending, handlers }) {
   if (!prompt) return null;
-  const { onDone, onAssign, onSkip, onNotAvailable, onAlreadyGiven, onFollowupYes, onFollowupNo, onAssessExclude, onAssessPresent, onBloodAdd, onBloodUnchanged, onBloodPending, onBloodCorrect, onCarboDose, onCarboSkip, onTxaSecondGiven, onTxaSecondNotNeeded, onToneCheckFirm, onToneCheckBoggy, onCiClear, onCiContraindicated, onUterotonicEscalateYes, onUterotonicEscalateHold, onUterotonicEscalateNotYet, onIvFailRetry, onIvFailImDrug, onInfusionYes, onInfusionAssign, onInfusionNotNeeded, onConsiderPrepare, onConsiderNotIndicated, onConsiderNotNow, onConsiderArrestYes, onConsiderArrestNo, onCheckCardiacArrest } = handlers;
+  const { onDone, onAssign, onSkip, onNotAvailable, onAlreadyGiven, onFollowupYes, onFollowupNo, onAssessExclude, onAssessPresent, onBloodAdd, onBloodUnchanged, onBloodPending, onBloodCorrect, onCarboDose, onCarboSkip, onTxaSecondGiven, onTxaSecondNotNeeded, onToneCheckFirm, onToneCheckBoggy, onCiClear, onCiContraindicated, onUterotonicEscalateYes, onUterotonicEscalateHold, onUterotonicEscalateNotYet, onIvFailRetry, onIvFailImDrug, onIvFailDismiss, onInfusionYes, onInfusionAssign, onInfusionNotNeeded, onConsiderPrepare, onConsiderNotIndicated, onConsiderNotNow, onConsiderArrestYes, onConsiderArrestNo, onCheckCardiacArrest, onTheatreInTheatre, onTheatreStillPreparing } = handlers;
 
   let content;
   switch (prompt.type) {
     case "task":         content = <TaskPrompt task={prompt.task} onDone={onDone} onAssign={onAssign} onSkip={onSkip} onNotAvailable={onNotAvailable} onAlreadyGiven={onAlreadyGiven} ivAccessDone={ivAccessDone} onCheckCardiacArrest={prompt.task.id === "abc" && cardiacArrestPending ? onCheckCardiacArrest : undefined} />; break;
     case "followup":     content = <FollowupPrompt task={prompt.task} onYes={onFollowupYes} onNo={onFollowupNo} />; break;
+    case "theatre_transfer": content = <TheatreTransferPrompt task={prompt.task} onInTheatre={onTheatreInTheatre} onStillPreparing={onTheatreStillPreparing} />; break;
     case "assess":       content = <AssessPrompt task={prompt.task} onExclude={onAssessExclude} onPresent={onAssessPresent} />; break;
     case "blood_loss_check": content = <BloodCheckPrompt level={level} bloodLoss={bloodLoss} rate={prompt.rate} interval={prompt.interval} onAdd={onBloodAdd} onUnchanged={onBloodUnchanged} onPending={onBloodPending} onCorrect={onBloodCorrect} />; break;
     case "carbo_dose":   content = <CarboDosePrompt count={carboCount} onDose={onCarboDose} onSkip={onCarboSkip} />; break;
     case "txa_second":   content = <TxaSecondPrompt onGiven={onTxaSecondGiven} onNotNeeded={onTxaSecondNotNeeded} />; break;
     case "tone_check":   content = <ToneCheckPrompt onFirm={onToneCheckFirm} onBoggy={onToneCheckBoggy} />; break;
     case "uterotonic_escalate": content = <UterotonicEscalatePrompt nextTask={prompt.nextTask} sinceTitle={prompt.sinceTitle} onYes={() => onUterotonicEscalateYes(prompt.nextTask)} onHold={onUterotonicEscalateHold} onNotYet={onUterotonicEscalateNotYet} />; break;
-    case "iv_fail":      content = <IvFailPrompt imOptions={prompt.imOptions} retries={prompt.retries} maxRetries={prompt.maxRetries} windowMs={prompt.windowMs} level={prompt.level} onRetry={onIvFailRetry} onImDrug={onIvFailImDrug} />; break;
+    case "iv_fail":      content = <IvFailPrompt imOptions={prompt.imOptions} retries={prompt.retries} maxRetries={prompt.maxRetries} windowMs={prompt.windowMs} level={prompt.level} onRetry={onIvFailRetry} onImDrug={onIvFailImDrug} onDismiss={onIvFailDismiss} />; break;
     case "infusion_reassess": content = <InfusionReassessPrompt onYes={onInfusionYes} onAssign={onInfusionAssign} onNotNeeded={onInfusionNotNeeded} />; break;
     case "ci_check":     content = <CiCheckPrompt task={prompt.task} onClear={onCiClear} onContraindicated={onCiContraindicated} />; break;
     case "consider":     content = <ConsiderPrompt task={prompt.task} remindMin={Math.round(considerSnoozeMs(level) / 60000)} onPrepare={onConsiderPrepare} onNotIndicated={onConsiderNotIndicated} onNotNow={onConsiderNotNow} onArrestYes={onConsiderArrestYes} onArrestNo={onConsiderArrestNo} />; break;
@@ -1144,10 +1274,10 @@ function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount,
     default:             return null;
   }
 
-  const isInterrupt = ["followup", "assess", "blood_loss_check", "carbo_dose", "txa_second", "tone_check", "ci_check", "uterotonic_escalate", "iv_fail", "infusion_reassess", "consider"].includes(prompt.type);
+  const isInterrupt = ["followup", "theatre_transfer", "assess", "blood_loss_check", "carbo_dose", "txa_second", "tone_check", "ci_check", "uterotonic_escalate", "iv_fail", "infusion_reassess", "consider"].includes(prompt.type);
 
   return (
-    <div className={`flex-shrink-0 border-b border-gray-800 ${isInterrupt ? "bg-gray-900" : "bg-gray-900"}`}>
+    <div className={`flex-shrink-0 border-b border-gray-800 relative z-10 ${isInterrupt ? "bg-gray-900" : "bg-gray-900"}`}>
       {isInterrupt && (
         <div className="px-4 pt-2.5 pb-0">
           <div className="h-px bg-amber-500/50 w-full" />
@@ -1165,7 +1295,8 @@ function TaskRow({ task, state, taskStates, level, txaTime, now, emergencyStartT
   const txaDeferred = task.id === "txa" && rawStatus === "skipped" && txaEligible(taskStates, level, txaTime);
   const status = txaDeferred ? null : rawStatus;
   const blockingDeps = (task.deps || []).filter(id => !depSatisfied(id, taskStates));
-  const isLocked = !status && blockingDeps.length > 0;
+  const fourTsLocked = deferFourTs(task, taskStates, level);
+  const isLocked = !status && (blockingDeps.length > 0 || fourTsLocked);
 
   function completedMark() {
     const ts = task.id === "txa" && txaTime
@@ -1185,6 +1316,7 @@ function TaskRow({ task, state, taskStates, level, txaTime, now, emergencyStartT
       : null;
     const refNote = state?.arrestConfirmed ? "2222 called"
       : state?.considerNoArrest ? "no arrest"
+      : state?.inTheatre ? "in theatre"
       : null;
     const mark = completedMark();
     return (
@@ -1222,18 +1354,23 @@ function TaskRow({ task, state, taskStates, level, txaTime, now, emergencyStartT
 
   if (status === "assigned") {
     const sinceMs = now - (state.assignedAt || now);
+    const statusNote = task.id === "theatre" ? "preparing" : null;
     return (
       <button onClick={() => onConfirm(task.id)}
         className="w-full flex items-center gap-3 px-4 py-2.5 text-left active:bg-gray-900 transition">
         <span className="text-amber-500 text-xs w-3 shrink-0">→</span>
         <span className="text-white text-sm flex-1">{task.title}</span>
-        <span className="text-gray-600 text-xs tabular-nums">{fmt(sinceMs)}</span>
+        <span className="text-gray-600 text-xs tabular-nums shrink-0 text-right">
+          {[statusNote, fmt(sinceMs)].filter(Boolean).join(" · ")}
+        </span>
       </button>
     );
   }
 
   if (isLocked) {
-    const blockingTitle = TASKS.find(t => t.id === blockingDeps[0])?.title ?? blockingDeps[0];
+    const blockingTitle = fourTsLocked
+      ? "MHP / TXA / 2nd cannula"
+      : (TASKS.find(t => t.id === blockingDeps[0])?.title ?? blockingDeps[0]);
     return (
       <div className="flex items-center gap-3 px-4 py-1.5 opacity-30">
         <span className="text-gray-700 text-xs w-3 shrink-0">○</span>
@@ -1314,7 +1451,7 @@ function TaskList({ taskStates, level, now, onConfirmTask, forcedTasks, txaTime,
 
 // ─── Setup screen ─────────────────────────────────────────────────────────────
 
-function SetupScreen({ onConfirm }) {
+function SetupScreen({ onConfirm, onExit }) {
   const [ml, setMl] = useState("");
   const [birthTimeInput, setBirthTimeInput] = useState("");
   const presets = [
@@ -1346,10 +1483,21 @@ function SetupScreen({ onConfirm }) {
 
   return (
     <div className="w-full min-w-0 box-border min-h-screen bg-gray-950 flex flex-col px-4 pt-8 pb-8 gap-6">
-      <div className="w-full min-w-0">
+      <div className="flex items-start justify-between gap-3 w-full min-w-0">
+        <div className="min-w-0 flex-1">
         <p className="text-gray-600 text-xs uppercase tracking-widest mb-2">PPH</p>
         <h1 className="text-white text-2xl font-black leading-tight">Initial blood loss</h1>
         <p className="text-gray-500 text-sm mt-1">How much has been lost?</p>
+        </div>
+        <button
+          onClick={onExit}
+          className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-800 text-gray-500 hover:text-gray-300 hover:border-gray-600 shrink-0"
+          aria-label="Exit"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
       <div className="grid grid-cols-2 gap-3 w-full min-w-0">
         {presets.map(({ v, label, sub }) => (
@@ -1537,6 +1685,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   const [queuedUterotonicId, setQueuedUterotonicId] = useState(null);
   const [ivAccessPendingSince, setIvAccessPendingSince] = useState(null);
   const [ivAccessRetries, setIvAccessRetries] = useState(0);
+  const [ivFailSnoozeUntil, setIvFailSnoozeUntil] = useState(null);
   const [forcedFollowUpId, setForcedFollowUpId] = useState(null);
   const [infusionReassess, setInfusionReassess] = useState(false);
   const [sessionRecoveredAt, setSessionRecoveredAt] = useState(null);
@@ -1544,6 +1693,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   const [now, setNow] = useState(() => Date.now());
   const [escalationAlert, setEscalationAlert] = useState(null);
   const [standDownConfirm, setStandDownConfirm] = useState(false);
+  const [exitConfirm, setExitConfirm] = useState(false);
   const [peakBloodLoss, setPeakBloodLoss] = useState(0);
   const [aftercareCompleted, setAftercareCompleted] = useState(false);
 
@@ -1615,8 +1765,8 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
     if (phase !== "active") return;
     saveSession({ emergencyStartTime, phase, bloodLoss, peakBloodLoss, aftercareCompleted, taskStates, toneAssessed, log,
       txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime, ciCleared, forcedTasks,
-      uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, infusionReassess, sessionRecoveredAt });
-  }, [phase, bloodLoss, peakBloodLoss, aftercareCompleted, taskStates, toneAssessed, log, txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime, ciCleared, forcedTasks, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, infusionReassess, sessionRecoveredAt]);
+      uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, ivFailSnoozeUntil, infusionReassess, sessionRecoveredAt });
+  }, [phase, bloodLoss, peakBloodLoss, aftercareCompleted, taskStates, toneAssessed, log, txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime, ciCleared, forcedTasks, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, ivFailSnoozeUntil, infusionReassess, sessionRecoveredAt]);
 
   const effectiveBirthTime = birthTime ?? emergencyStartTime;
   const ivAccessDone = taskStates.iv_access?.status === "done";
@@ -1636,7 +1786,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   }
 
   const prompt = phase === "active"
-    ? computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, infusionReassess, sessionRecoveredAt, forcedFollowUpId })
+    ? computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, ivFailSnoozeUntil, infusionReassess, sessionRecoveredAt, forcedFollowUpId })
     : null;
 
   const relevantTasks = TASKS.filter(t => levelVal(t.level) <= levelVal(level));
@@ -1702,7 +1852,13 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
     if (task.special === "txa") { setTxaTime(t); setTxaHandled(true); }
     if (task.special === "carbo") { setCarboCount(1); setCarboLastTime(t); }
     if (task.id === "iv_access") onIvAccessEstablished({ ...taskStates, iv_access: { status: "done", doneAt: t } });
-    if (task.uterotonic) { setUterotonicEscalate(null); setQueuedUterotonicId(null); }
+    if (task.uterotonic) {
+      setUterotonicEscalate(null);
+      setQueuedUterotonicId(null);
+      if (taskStates.iv_access?.status !== "done") {
+        setIvFailSnoozeUntil(Date.now() + 5 * 60 * 1000);
+      }
+    }
   }
 
   function handleAlreadyGiven(task) {
@@ -1845,17 +2001,28 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   function handleIvFailRetry() {
     const t = Date.now();
     setIvAccessPendingSince(t);
-    setIvAccessRetries(prev => prev + 1);
+    setIvFailSnoozeUntil(null);
+    if (ivAccessRetries < IV_ACCESS_MAX_RETRIES) {
+      setIvAccessRetries(prev => prev + 1);
+      addLog("iv_fail", `IV access — keep trying (${ivAccessRetries + 1}/${IV_ACCESS_MAX_RETRIES} retries used)`);
+    } else {
+      addLog("iv_fail", "IV access — keep trying (timer reset)");
+    }
     setTaskStates(prev => ({
       ...prev,
       iv_access: { ...prev.iv_access, status: "assigned", assignedAt: t },
     }));
-    addLog("iv_fail", `IV access — keep trying (${ivAccessRetries + 1}/${IV_ACCESS_MAX_RETRIES} retries used)`);
   }
 
   function handleIvFailImDrug(task) {
+    if (!task?.id) return;
     setQueuedUterotonicId(task.id);
     addLog("iv_fail", `IV not in — proceeding to ${task.title}`);
+  }
+
+  function handleIvFailDismiss() {
+    setIvFailSnoozeUntil(Date.now() + 3 * 60 * 1000);
+    addLog("iv_fail", "IV access — IM route deferred; use checklist");
   }
 
   function handleInfusionYes() {
@@ -1883,8 +2050,45 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
 
   function handleConsiderPrepare(task) {
     const t = Date.now();
-    setTaskStates(prev => ({ ...prev, [task.id]: { status: "assigned", assignedAt: t } }));
-    addLog("consider", `Consider ${task.title} — team preparing`);
+    if (task.id === "theatre") {
+      setTaskStates(prev => ({
+        ...prev,
+        [task.id]: {
+          status: "assigned",
+          assignedAt: t,
+          preparing: true,
+          transferSnoozeUntil: t + 2 * 60 * 1000,
+        },
+      }));
+      addLog("consider", `Theatre team preparing — ${task.title}`);
+    } else {
+      setTaskStates(prev => ({ ...prev, [task.id]: { status: "assigned", assignedAt: t } }));
+      addLog("consider", `Consider ${task.title} — team preparing`);
+    }
+  }
+
+  function handleTheatreInTheatre(task) {
+    const t = Date.now();
+    setTaskStates(prev => ({
+      ...prev,
+      [task.id]: { status: "done", doneAt: t, inTheatre: true },
+    }));
+    addLog("theatre_transfer", task.followUpYesLog || "Patient transferred to theatre — procedure underway");
+    setForcedFollowUpId(null);
+  }
+
+  function handleTheatreStillPreparing(task) {
+    const t = Date.now();
+    setTaskStates(prev => ({
+      ...prev,
+      [task.id]: {
+        ...prev[task.id],
+        status: "assigned",
+        transferSnoozeUntil: t + 3 * 60 * 1000,
+      },
+    }));
+    addLog("theatre_transfer", "Theatre team preparing — patient not yet transferred");
+    setForcedFollowUpId(null);
   }
 
   function handleConsiderNotIndicated(task) {
@@ -2014,12 +2218,19 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
     setQueuedUterotonicId(s.queuedUterotonicId ?? null);
     setIvAccessPendingSince(s.ivAccessPendingSince ?? null);
     setIvAccessRetries(s.ivAccessRetries ?? 0);
+    setIvFailSnoozeUntil(s.ivFailSnoozeUntil ?? null);
     setInfusionReassess(s.infusionReassess ?? false);
     prevLevelRef.current = getLevel(s.bloodLoss ?? 0);
     const t = Date.now();
     setSessionRecoveredAt(t);
     setLog(prev => [...prev, { kind: "session_resumed", label: "Session resumed — blood check timer reset", time: t }]);
     setPhase("active");
+  }
+
+  function handleExit() {
+    setExitConfirm(false);
+    clearSession();
+    onClose();
   }
 
   function handleStandDown() {
@@ -2052,6 +2263,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
 
   if (phase === "setup") return (
     <div className="emergency-shell fixed inset-0 z-50 bg-gray-950 overflow-y-auto overflow-x-hidden w-full max-w-full" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
+      {exitConfirm && <ExitConfirm active={false} onConfirm={handleExit} onCancel={() => setExitConfirm(false)} />}
       {savedSession && !recoveryDismissed && (
         <div className="bg-amber-950/90 border-b border-amber-800/60 px-4 py-4 w-full min-w-0 box-border">
           <p className="text-amber-300 text-sm font-bold mb-1">Unfinished session found</p>
@@ -2064,7 +2276,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
           </div>
         </div>
       )}
-      <SetupScreen onConfirm={handleSetup} />
+      <SetupScreen onConfirm={handleSetup} onExit={() => setExitConfirm(true)} />
     </div>
   );
   if (phase === "aftercare") return (
@@ -2090,17 +2302,19 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
     onCiClear: handleCiClear, onCiContraindicated: handleCiContraindicated,
     onUterotonicEscalateYes: handleUterotonicEscalateYes, onUterotonicEscalateHold: handleUterotonicEscalateHold,
     onUterotonicEscalateNotYet: handleUterotonicEscalateNotYet,
-    onIvFailRetry: handleIvFailRetry, onIvFailImDrug: handleIvFailImDrug,
+    onIvFailRetry: handleIvFailRetry, onIvFailImDrug: handleIvFailImDrug, onIvFailDismiss: handleIvFailDismiss,
     onInfusionYes: handleInfusionYes, onInfusionAssign: handleInfusionAssign, onInfusionNotNeeded: handleInfusionNotNeeded,
     onConsiderPrepare: handleConsiderPrepare, onConsiderNotIndicated: handleConsiderNotIndicated,
     onConsiderNotNow: handleConsiderNotNow, onConsiderArrestYes: handleConsiderArrestYes, onConsiderArrestNo: handleConsiderArrestNo,
     onCheckCardiacArrest: handleCheckCardiacArrest,
+    onTheatreInTheatre: handleTheatreInTheatre, onTheatreStillPreparing: handleTheatreStillPreparing,
   };
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-gray-950 overflow-hidden w-full max-w-full emergency-shell" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
       {escalationAlert && <EscalationOverlay level={escalationAlert.level} note={escalationAlert.note} onDismiss={() => setEscalationAlert(null)} />}
       {standDownConfirm && <StandDownConfirm bloodLoss={bloodLoss} onConfirm={handleStandDown} onCancel={() => setStandDownConfirm(false)} />}
+      {exitConfirm && <ExitConfirm active onConfirm={handleExit} onCancel={() => setExitConfirm(false)} />}
 
       <Header
         elapsed={now - emergencyStartTime}
@@ -2111,6 +2325,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
         onAddBlood={handleAddBlood}
         onCorrectBlood={handleBloodCorrect}
         onStandDown={() => setStandDownConfirm(true)}
+        onExit={() => setExitConfirm(true)}
       />
 
       <DrugStrip
@@ -2121,6 +2336,8 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
         birthTime={effectiveBirthTime}
         carboCount={carboCount}
         carboLastTime={carboLastTime}
+        log={log}
+        sessionRecoveredAt={sessionRecoveredAt}
         now={now}
       />
 
