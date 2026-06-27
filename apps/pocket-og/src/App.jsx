@@ -17,6 +17,7 @@ import DisclaimerModal from "./components/DisclaimerModal";
 import InstallBanner from "./components/InstallBanner";
 import EmergencyPage from "./components/EmergencyPage";
 import ShoulderDystociaPage from "./components/ShoulderDystociaPage";
+import CardiacArrestPage from "./components/CardiacArrestPage";
 
 import { READER_AVAILABLE } from "./data/readerAvailable";
 
@@ -120,7 +121,7 @@ export default function App() {
   const [calcNavKey, setCalcNavKey] = useState(0);
   const [activeConsentProcedure, setActiveConsentProcedure] = useState(null);
   const [consentNavKey, setConsentNavKey] = useState(0);
-  const [activeEmergency, setActiveEmergency] = useState(null); // 'pph' | 'shoulder_dystocia' | null
+  const [activeEmergency, setActiveEmergency] = useState(null); // 'pph' | 'shoulder_dystocia' | 'cardiac_arrest' | null
   const [showEmergencyPicker, setShowEmergencyPicker] = useState(false);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
@@ -332,6 +333,23 @@ export default function App() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </button>
+              <button
+                onClick={() => { setActiveEmergency("cardiac_arrest"); setShowEmergencyPicker(false); }}
+                className="w-full flex items-center gap-4 bg-red-50 border border-red-200 rounded-2xl px-4 py-4 text-left active:bg-red-100 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-xl bg-red-800 flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h3l2.25-6 4.5 12 2.25-6h4.5" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-900">Maternal Cardiac Arrest</p>
+                  <p className="text-xs text-gray-500 mt-0.5">GTG56 · Maternal collapse · PMCS</p>
+                </div>
+                <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             </div>
             <button
               onClick={() => setShowEmergencyPicker(false)}
@@ -349,6 +367,9 @@ export default function App() {
       )}
       {activeEmergency === "shoulder_dystocia" && (
         <ShoulderDystociaPage onClose={() => setActiveEmergency(null)} />
+      )}
+      {activeEmergency === "cardiac_arrest" && (
+        <CardiacArrestPage onClose={() => setActiveEmergency(null)} />
       )}
 
       {/* IOL Prioritizer overlay */}
