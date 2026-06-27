@@ -343,6 +343,124 @@ function ReversibleCauses({ consideredSet, antidotesGiven, onConsider, onAntidot
   );
 }
 
+// ─── Box B — other ALS / obstetric drugs (reference) ──────────────────────────
+
+const BOX_B_DRUGS = [
+  { label: "Magnesium", dose: "2 g IV (polymorphic VT / hypomagnesaemia) · 4 g IV (eclampsia)" },
+  { label: "Atropine", dose: "0.5–1 mg IV up to 3 mg — if vagal tone likely (not routine for asystole)" },
+  { label: "Calcium", dose: "10 ml 10% IV — Mg toxicity, low calcium, hyperkalaemia" },
+  { label: "Intralipid 20%", dose: "1.5 ml/kg IV bolus, then 15 ml/kg/hr — LA toxicity" },
+  { label: "Fluids", dose: "500 ml IV crystalloid bolus" },
+  { label: "Thrombolysis / PCI", dose: "suspected massive PE / MI" },
+  { label: "Tranexamic acid", dose: "1 g IV if haemorrhage" },
+];
+
+function BoxBReference() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-xl border border-gray-800">
+      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between px-4 py-3">
+        <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">Box B — other ALS drugs</span>
+        <span className="text-gray-600 text-xs">{open ? "↑" : "↓"}</span>
+      </button>
+      {open && (
+        <div className="px-4 pb-3 space-y-2">
+          {BOX_B_DRUGS.map(d => (
+            <div key={d.label} className="text-xs">
+              <span className="text-white font-bold">{d.label}</span>
+              <span className="text-gray-500"> — {d.dose}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Post-resuscitation checklist (ROSC) ──────────────────────────────────────
+
+const POST_RESUS = [
+  { id: "haemorrhage", text: "If haemorrhage — activate Massive Haemorrhage Protocol; uterotonics, fibrinogen, TXA", pphLink: true },
+  { id: "haemostasis", text: "Surgical haemostasis — uterine tamponade / sutures, aortic compression, hysterectomy" },
+  { id: "ecg", text: "12-lead ECG; treat underlying cause; expert cardiology if cardiac" },
+  { id: "icu", text: "Transfer to ICU — consultant intensivist; targeted temperature management" },
+  { id: "debrief", text: "Debrief patient/family and team; MBRRACE notification if maternal death or near-miss" },
+];
+
+function PostResusScreen({ done, onToggle, onLaunchPph, onFinish }) {
+  return (
+    <div className="min-h-screen bg-gray-950 flex flex-col">
+      <div className="px-5 py-5 border-b border-gray-800 flex-shrink-0">
+        <p className="text-green-400 text-xs font-bold uppercase tracking-widest mb-1">ROSC achieved</p>
+        <h2 className="text-white text-2xl font-black">Post-resuscitation care</h2>
+      </div>
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
+        {POST_RESUS.map(p => {
+          const isDone = done.includes(p.id);
+          return (
+            <div key={p.id} className={`rounded-xl border ${isDone ? "border-gray-800 bg-gray-900/40" : "border-gray-700"}`}>
+              <button onClick={() => onToggle(p.id)} className="w-full flex items-start gap-3 px-4 py-3 text-left">
+                <span className={`mt-0.5 w-5 h-5 rounded flex items-center justify-center text-xs font-bold shrink-0 ${isDone ? "bg-white text-gray-950" : "border border-gray-600 text-transparent"}`}>✓</span>
+                <span className={`text-sm leading-snug ${isDone ? "text-gray-500 line-through" : "text-white"}`}>{p.text}</span>
+              </button>
+              {p.pphLink && !isDone && (
+                <div className="px-4 pb-3">
+                  <button onClick={onLaunchPph} className="w-full bg-red-700 text-white font-bold py-2.5 rounded-lg text-sm">Open PPH SOS →</button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <div className="px-4 py-4 border-t border-gray-800 flex-shrink-0">
+        <button onClick={onFinish} className="w-full bg-white text-gray-950 font-bold py-3.5 rounded-lg text-sm">View record</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Summary ──────────────────────────────────────────────────────────────────
+
+function SummaryScreen({ startTime, outcome, outcomeTime, shockCount, adrenalineCount, amio300Given, amio150Given, pmcsAcknowledged, causesConsidered, antidotesGiven, onClose }) {
+  const duration = (outcomeTime ?? Date.now()) - startTime;
+  const row = (label, value) => (
+    <div className="flex justify-between px-5 py-2.5 border-b border-gray-900">
+      <span className="text-gray-500 text-sm">{label}</span>
+      <span className="text-gray-200 text-sm font-medium text-right">{value}</span>
+    </div>
+  );
+  const causeLabels = causesConsidered.map(id => REVERSIBLE_CAUSES.find(c => c.id === id)?.label).filter(Boolean);
+  return (
+    <div className="min-h-screen bg-gray-950 flex flex-col">
+      <div className="px-5 py-5 border-b border-gray-800 flex-shrink-0">
+        <p className="text-gray-600 text-xs uppercase tracking-widest mb-2">Maternal cardiac arrest record</p>
+        <h2 className={`text-2xl font-black ${outcome === "rosc" ? "text-green-400" : "text-gray-300"}`}>
+          {outcome === "rosc" ? "ROSC achieved" : "Resuscitation stopped"}
+        </h2>
+      </div>
+      <div className="flex-1 overflow-y-auto">
+        {row("Arrest time", fmtTime(startTime))}
+        {row("Duration", fmtClock(duration))}
+        {row("Shocks delivered", shockCount)}
+        {row("Adrenaline doses", adrenalineCount)}
+        {row("Amiodarone", amio150Given ? "300 + 150 mg" : amio300Given ? "300 mg" : "—")}
+        {row("Perimortem caesarean", pmcsAcknowledged ? "Performed / acknowledged" : "Not performed")}
+        {row("Antidotes given", antidotesGiven.length ? antidotesGiven.join(", ") : "—")}
+        <div className="px-5 py-3 border-b border-gray-900">
+          <p className="text-gray-500 text-sm mb-1">Reversible causes considered</p>
+          <p className="text-gray-200 text-sm">{causeLabels.length ? causeLabels.join(" · ") : "—"}</p>
+        </div>
+      </div>
+      <div className="px-5 py-5 border-t border-gray-800 flex-shrink-0">
+        <p className="text-gray-500 text-xs leading-relaxed border-l-2 border-gray-700 pl-3 mb-4">
+          Complete documentation. Debrief team and family. MBRRACE-UK notification if maternal death or near-miss.
+        </p>
+        <button onClick={onClose} className="w-full border border-gray-800 text-gray-500 font-medium py-3 rounded-xl text-sm">Close</button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Dual-clock header ────────────────────────────────────────────────────────
 
 function Header({ startTime, now, gestation, onClose }) {
@@ -403,6 +521,9 @@ export default function CardiacArrestPage({ onClose, onLaunchPph }) {
   const [amio150Given, setAmio150Given] = useState(false);
   const [causesConsidered, setCausesConsidered] = useState([]);
   const [antidotesGiven, setAntidotesGiven] = useState([]);
+  const [outcome, setOutcome] = useState(null); // "rosc" | "stopped"
+  const [outcomeTime, setOutcomeTime] = useState(null);
+  const [postResusDone, setPostResusDone] = useState([]);
   const wakeLockRef = useRef(null);
 
   // 1-second tick while active
@@ -459,11 +580,53 @@ export default function CardiacArrestPage({ onClose, onLaunchPph }) {
     setLastAdrenalineAt(Date.now());
     setAdrenalineArmed(false);
   }
+  function handleRosc() {
+    setRosc(true);
+    setOutcome("rosc");
+    setOutcomeTime(Date.now());
+    setRhythmPromptOpen(false);
+    setPendingShock(false);
+    setPhase("postresus");
+  }
+  function handleStop() {
+    setOutcome("stopped");
+    setOutcomeTime(Date.now());
+    setRhythmPromptOpen(false);
+    setPendingShock(false);
+    setPhase("summary");
+  }
 
   if (phase === "setup") {
     return (
       <div className="fixed inset-0 z-50 bg-gray-950 overflow-y-auto">
         <SetupScreen onConfirm={handleSetup} />
+      </div>
+    );
+  }
+
+  if (phase === "postresus") {
+    return (
+      <div className="fixed inset-0 z-50 bg-gray-950 overflow-y-auto">
+        <PostResusScreen
+          done={postResusDone}
+          onToggle={(id) => setPostResusDone(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
+          onLaunchPph={() => onLaunchPph?.()}
+          onFinish={() => setPhase("summary")}
+        />
+      </div>
+    );
+  }
+
+  if (phase === "summary") {
+    return (
+      <div className="fixed inset-0 z-50 bg-gray-950 overflow-y-auto">
+        <SummaryScreen
+          startTime={startTime} outcome={outcome} outcomeTime={outcomeTime}
+          shockCount={shockCount} adrenalineCount={adrenalineCount}
+          amio300Given={amio300Given} amio150Given={amio150Given}
+          pmcsAcknowledged={pmcsAcknowledged} causesConsidered={causesConsidered}
+          antidotesGiven={antidotesGiven} onClose={onClose}
+        />
       </div>
     );
   }
@@ -516,7 +679,13 @@ export default function CardiacArrestPage({ onClose, onLaunchPph }) {
           onAntidote={(id) => setAntidotesGiven(prev => prev.includes(id) ? prev : [...prev, id])}
           onLaunchPph={() => onLaunchPph?.()}
         />
-        {/* ROSC + summary built next in the walkthrough. */}
+        <BoxBReference />
+      </div>
+
+      {/* Outcome action bar */}
+      <div className="px-4 py-3 border-t border-gray-800 flex gap-2 flex-shrink-0">
+        <button onClick={handleRosc} className="flex-1 bg-green-600 text-white font-black py-3.5 rounded-xl text-sm">ROSC achieved</button>
+        <button onClick={handleStop} className="px-5 border border-gray-700 text-gray-400 font-medium py-3.5 rounded-xl text-sm">Stopped</button>
       </div>
     </div>
   );
