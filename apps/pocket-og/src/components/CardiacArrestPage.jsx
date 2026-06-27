@@ -111,6 +111,46 @@ function PmcsAlarm({ onAcknowledge }) {
   );
 }
 
+// ─── Immediate actions (concurrent checklist) ─────────────────────────────────
+// These happen in parallel the moment CPR starts (GTG56 Appendix 4).
+
+const IMMEDIATE_ACTIONS = [
+  { id: "call_2222", title: "Call 2222 — maternal cardiac arrest",
+    detail: "Cardiac arrest team + senior obstetrician + senior obstetric anaesthetist + senior midwife\nNeonatal team if antepartum > 22 weeks" },
+  { id: "cpr", title: "Start CPR — 30:2",
+    detail: "Centre of chest · 100–120/min · depth 5–6 cm\nMinimise interruptions" },
+  { id: "mlud", title: "Manual uterine displacement — to the LEFT", over20Only: true,
+    detail: "Displace the uterus up and to the left to relieve aortocaval compression\nPreferred over tilt — keeps her supine for effective compressions" },
+  { id: "airway", title: "Airway — high-flow O₂",
+    detail: "Early intubation (cuffed ETT) by experienced anaesthetist — difficult airway, high aspiration risk\nBag-mask / supraglottic airway until then" },
+  { id: "iv_access", title: "IV access — 2 × wide-bore ≥ 16G",
+    detail: "Intraosseous or central access if peripheral fails\nAggressive volume replacement (caution in pre-eclampsia/eclampsia)" },
+  { id: "defib", title: "Attach defibrillator — assess rhythm",
+    detail: "Same energy as non-pregnant (200 J biphasic)\nShockable (VF/pVT) vs non-shockable (asystole/PEA)" },
+];
+
+function ImmediateActions({ gestation, doneSet, onToggle }) {
+  const items = IMMEDIATE_ACTIONS.filter(a => !a.over20Only || gestation === "over20");
+  return (
+    <div className="space-y-2">
+      <p className="text-gray-400 text-xs font-bold uppercase tracking-wider px-1">Immediate actions — do all now</p>
+      {items.map(a => {
+        const done = doneSet.includes(a.id);
+        return (
+          <button key={a.id} onClick={() => onToggle(a.id)}
+            className={`w-full text-left flex items-start gap-3 px-4 py-3 rounded-xl border transition ${done ? "border-gray-800 bg-gray-900/60" : "border-gray-700"}`}>
+            <span className={`mt-0.5 w-5 h-5 rounded flex items-center justify-center text-xs font-bold shrink-0 ${done ? "bg-white text-gray-950" : "border border-gray-600 text-transparent"}`}>✓</span>
+            <span className="min-w-0">
+              <span className={`block text-sm font-bold leading-snug ${done ? "text-gray-500 line-through" : "text-white"}`}>{a.title}</span>
+              {!done && <span className="block text-gray-500 text-xs whitespace-pre-line leading-relaxed mt-0.5">{a.detail}</span>}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Dual-clock header ────────────────────────────────────────────────────────
 
 function Header({ startTime, now, gestation, onClose }) {
@@ -157,6 +197,7 @@ export default function CardiacArrestPage({ onClose }) {
   const [rosc, setRosc] = useState(false);
   const [pmcsAcknowledged, setPmcsAcknowledged] = useState(false);
   const [pmcsAlarmDismissed, setPmcsAlarmDismissed] = useState(false);
+  const [actionsDone, setActionsDone] = useState([]);
   const wakeLockRef = useRef(null);
 
   // 1-second tick while active
@@ -201,10 +242,14 @@ export default function CardiacArrestPage({ onClose }) {
 
       <Header startTime={startTime} now={now} gestation={gestation} onClose={onClose} />
 
-      {/* Active body — immediate actions, CPR cycle and reversible causes are
-          built next in the guided walkthrough. */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
-        <p className="text-gray-600 text-sm">Resuscitation in progress — algorithm content next.</p>
+      {/* Active body */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
+        <ImmediateActions
+          gestation={gestation}
+          doneSet={actionsDone}
+          onToggle={(id) => setActionsDone(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
+        />
+        {/* CPR cycle, reversible causes and ROSC built next in the walkthrough. */}
       </div>
     </div>
   );
