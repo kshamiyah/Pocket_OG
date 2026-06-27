@@ -17,7 +17,7 @@ const LETTER_BG = { H: "bg-red-600", E: "bg-orange-500", L: "bg-amber-500", P: "
 const LETTER_TEXT = { P: "text-gray-900" };
 
 // ── Head-delivered setup ──────────────────────────────────────────────────
-function HeadSetupScreen({ onConfirm }) {
+function HeadSetupScreen({ onConfirm, onExit }) {
   const presets = [
     { label: "Just now", secs: 0 },
     { label: "~1 min ago", secs: 60 },
@@ -27,9 +27,20 @@ function HeadSetupScreen({ onConfirm }) {
   return (
     <div className="flex flex-col h-full bg-red-800"
       style={{ paddingTop: "max(20px, env(safe-area-inset-top))", paddingBottom: "max(20px, env(safe-area-inset-bottom))" }}>
-      <div className="flex items-center gap-2 px-5 pt-2 pb-6">
-        <div className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+      <div className="flex items-center justify-between gap-3 px-5 pt-2 pb-6">
+        <div className="flex items-center gap-2 min-w-0">
+        <div className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse shrink-0" />
         <span className="text-[10px] font-bold tracking-widest uppercase text-red-300">Shoulder Dystocia · GTG42</span>
+        </div>
+        <button
+          onClick={onExit}
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-red-700/60 shrink-0"
+          aria-label="Exit"
+        >
+          <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
       <div className="flex-1 flex flex-col items-center justify-center px-6">
         <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-6">
@@ -62,8 +73,27 @@ function HeadSetupScreen({ onConfirm }) {
   );
 }
 
+function ExitConfirm({ active, onConfirm, onCancel }) {
+  return (
+    <div className="fixed inset-0 bg-black/70 z-[60] flex items-end p-4" onClick={onCancel}>
+      <div className="bg-white rounded-2xl p-5 w-full shadow-xl" onClick={e => e.stopPropagation()}>
+        <p className="text-gray-900 font-bold mb-1">{active ? "Exit simulator?" : "Exit without starting?"}</p>
+        <p className="text-gray-500 text-sm mb-4">
+          {active
+            ? "This discards the session without a stand-down record. If the emergency is resolved, use Stand down instead."
+            : "Opened by mistake? No session will be saved."}
+        </p>
+        <div className="flex gap-3">
+          <button onClick={onCancel} className="flex-1 border border-gray-200 text-gray-700 font-medium py-2.5 rounded-xl text-sm">Stay</button>
+          <button onClick={onConfirm} className="flex-1 bg-red-600 text-white font-bold py-2.5 rounded-xl text-sm">Exit</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Persistent header strip ───────────────────────────────────────────────
-function Header({ emergencyStartTime, headDeliveredTime, now, onStandDown, onClose }) {
+function Header({ emergencyStartTime, headDeliveredTime, now, onStandDown, onExit }) {
   const elapsed = Math.floor((now - emergencyStartTime) / 1000);
   const headSecs = headDeliveredTime ? Math.floor((now - headDeliveredTime) / 1000) : null;
   const warn = headSecs !== null && headSecs >= 300;
@@ -104,8 +134,9 @@ function Header({ emergencyStartTime, headDeliveredTime, now, onStandDown, onClo
             Stand Down
           </button>
           <button
-            onClick={onClose}
+            onClick={onExit}
             className="w-8 h-8 flex items-center justify-center rounded-full bg-red-700/60"
+            aria-label="Exit"
           >
             <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -156,7 +187,7 @@ function ProgressBar({ currentIndex, stepTimestamps }) {
 }
 
 // ── Single HELPERR step ───────────────────────────────────────────────────
-function StepScreen({ stepIndex, stepTimestamps, emergencyStartTime, headDeliveredTime, now, onDone, onStandDown, onClose }) {
+function StepScreen({ stepIndex, stepTimestamps, emergencyStartTime, headDeliveredTime, now, onDone, onStandDown, onExit }) {
   const step = EM.helperr[stepIndex];
   const nextStep = EM.helperr[stepIndex + 1];
   const bg = LETTER_BG[step.letter] || "bg-gray-600";
@@ -169,7 +200,7 @@ function StepScreen({ stepIndex, stepTimestamps, emergencyStartTime, headDeliver
         headDeliveredTime={headDeliveredTime}
         now={now}
         onStandDown={onStandDown}
-        onClose={onClose}
+        onExit={onExit}
       />
       <ProgressBar currentIndex={stepIndex} stepTimestamps={stepTimestamps} />
 
@@ -230,7 +261,7 @@ function StepScreen({ stepIndex, stepTimestamps, emergencyStartTime, headDeliver
 }
 
 // ── Last resorts ──────────────────────────────────────────────────────────
-function LastResortsScreen({ emergencyStartTime, headDeliveredTime, now, onStandDown, onClose }) {
+function LastResortsScreen({ emergencyStartTime, headDeliveredTime, now, onStandDown, onExit }) {
   return (
     <div className="flex flex-col h-full">
       <Header
@@ -238,7 +269,7 @@ function LastResortsScreen({ emergencyStartTime, headDeliveredTime, now, onStand
         headDeliveredTime={headDeliveredTime}
         now={now}
         onStandDown={onStandDown}
-        onClose={onClose}
+        onExit={onExit}
       />
 
       <div className="flex-shrink-0 bg-red-900 px-4 py-2.5">
@@ -392,6 +423,14 @@ export default function ShoulderDystociaPage({ onClose }) {
   const [stepTimestamps, setStepTimestamps] = useState(new Map());
   const [resolveTime, setResolveTime] = useState(null);
   const [now, setNow] = useState(() => new Date());
+  const [exitConfirm, setExitConfirm] = useState(false);
+
+  const exitActive = phase !== "head-setup";
+  const requestExit = () => setExitConfirm(true);
+  const handleExit = () => {
+    setExitConfirm(false);
+    onClose();
+  };
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
@@ -438,8 +477,11 @@ export default function ShoulderDystociaPage({ onClose }) {
       className="fixed inset-0 z-50 bg-gray-50 flex flex-col"
       style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif" }}
     >
+      {exitConfirm && (
+        <ExitConfirm active={exitActive} onConfirm={handleExit} onCancel={() => setExitConfirm(false)} />
+      )}
       {phase === "head-setup" && (
-        <HeadSetupScreen onConfirm={handleHeadConfirm} />
+        <HeadSetupScreen onConfirm={handleHeadConfirm} onExit={requestExit} />
       )}
       {phase === "helperr" && (
         <StepScreen
@@ -450,7 +492,7 @@ export default function ShoulderDystociaPage({ onClose }) {
           now={now}
           onDone={handleStepDone}
           onStandDown={handleStandDown}
-          onClose={onClose}
+          onExit={requestExit}
         />
       )}
       {phase === "last-resorts" && (
@@ -459,7 +501,7 @@ export default function ShoulderDystociaPage({ onClose }) {
           headDeliveredTime={headDeliveredTime}
           now={now}
           onStandDown={handleStandDown}
-          onClose={onClose}
+          onExit={requestExit}
         />
       )}
       {phase === "summary" && (

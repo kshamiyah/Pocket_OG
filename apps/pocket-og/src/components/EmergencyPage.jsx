@@ -573,9 +573,28 @@ function StandDownConfirm({ bloodLoss, onConfirm, onCancel }) {
   );
 }
 
+function ExitConfirm({ active, onConfirm, onCancel }) {
+  return (
+    <div className="fixed inset-0 bg-black/80 z-40 flex items-end p-4" onClick={onCancel}>
+      <div className="bg-gray-900 border border-gray-700 rounded-xl p-5 w-full" onClick={e => e.stopPropagation()}>
+        <p className="text-white font-bold mb-1">{active ? "Exit simulator?" : "Exit without starting?"}</p>
+        <p className="text-gray-500 text-sm mb-4">
+          {active
+            ? "This discards the session without a stand-down record. If the emergency is resolved, use Stand down instead."
+            : "Opened by mistake? No session will be saved."}
+        </p>
+        <div className="flex gap-3">
+          <button onClick={onCancel} className="flex-1 border border-gray-700 text-gray-300 font-medium py-2.5 rounded-lg text-sm">Stay</button>
+          <button onClick={onConfirm} className="flex-1 bg-red-600 text-white font-bold py-2.5 rounded-lg text-sm">Exit</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Header ──────────────────────────────────────────────────────────────────
 
-function Header({ elapsed, bloodLoss, level, assignedCount, showQuickAdd, onAddBlood, onCorrectBlood, onStandDown }) {
+function Header({ elapsed, bloodLoss, level, assignedCount, showQuickAdd, onAddBlood, onCorrectBlood, onStandDown, onExit }) {
   const levelLabel = { minor: "Minor PPH", major: "Major PPH", massive: "Massive PPH" }[level];
   const [correcting, setCorrecting] = useState(false);
   const [correctVal, setCorrectVal] = useState("");
@@ -597,7 +616,10 @@ function Header({ elapsed, bloodLoss, level, assignedCount, showQuickAdd, onAddB
     <div className="bg-gray-900 px-4 pt-3 pb-3 border-b border-gray-800 flex-shrink-0 max-w-full overflow-x-hidden">
       <div className="flex items-center justify-between gap-2 mb-1">
         <span className="font-mono text-white text-xl font-bold tabular-nums shrink-0">{fmt(elapsed)}</span>
-        <button onClick={onStandDown} className="text-gray-600 hover:text-gray-300 text-xs border border-gray-800 hover:border-gray-600 px-2.5 py-1.5 rounded transition shrink-0">Stand down</button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button onClick={onExit} className="text-gray-600 hover:text-gray-300 text-xs border border-gray-800 hover:border-gray-600 px-2.5 py-1.5 rounded transition">Exit</button>
+          <button onClick={onStandDown} className="text-gray-600 hover:text-gray-300 text-xs border border-gray-800 hover:border-gray-600 px-2.5 py-1.5 rounded transition">Stand down</button>
+        </div>
       </div>
       <div className="flex items-center gap-2 mb-2 flex-wrap">
         {assignedCount > 0 && <span className="text-amber-500 text-xs">{assignedCount} in progress</span>}
@@ -1314,7 +1336,7 @@ function TaskList({ taskStates, level, now, onConfirmTask, forcedTasks, txaTime,
 
 // ─── Setup screen ─────────────────────────────────────────────────────────────
 
-function SetupScreen({ onConfirm }) {
+function SetupScreen({ onConfirm, onExit }) {
   const [ml, setMl] = useState("");
   const [birthTimeInput, setBirthTimeInput] = useState("");
   const presets = [
@@ -1346,10 +1368,21 @@ function SetupScreen({ onConfirm }) {
 
   return (
     <div className="w-full min-w-0 box-border min-h-screen bg-gray-950 flex flex-col px-4 pt-8 pb-8 gap-6">
-      <div className="w-full min-w-0">
+      <div className="flex items-start justify-between gap-3 w-full min-w-0">
+        <div className="min-w-0 flex-1">
         <p className="text-gray-600 text-xs uppercase tracking-widest mb-2">PPH</p>
         <h1 className="text-white text-2xl font-black leading-tight">Initial blood loss</h1>
         <p className="text-gray-500 text-sm mt-1">How much has been lost?</p>
+        </div>
+        <button
+          onClick={onExit}
+          className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-800 text-gray-500 hover:text-gray-300 hover:border-gray-600 shrink-0"
+          aria-label="Exit"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
       <div className="grid grid-cols-2 gap-3 w-full min-w-0">
         {presets.map(({ v, label, sub }) => (
@@ -1544,6 +1577,7 @@ export default function EmergencyPage({ onClose }) {
   const [now, setNow] = useState(() => Date.now());
   const [escalationAlert, setEscalationAlert] = useState(null);
   const [standDownConfirm, setStandDownConfirm] = useState(false);
+  const [exitConfirm, setExitConfirm] = useState(false);
   const [peakBloodLoss, setPeakBloodLoss] = useState(0);
   const [aftercareCompleted, setAftercareCompleted] = useState(false);
 
@@ -2019,6 +2053,12 @@ export default function EmergencyPage({ onClose }) {
     setPhase("active");
   }
 
+  function handleExit() {
+    setExitConfirm(false);
+    clearSession();
+    onClose();
+  }
+
   function handleStandDown() {
     const t = Date.now();
     const unresolvedEntries = TASKS
@@ -2049,6 +2089,7 @@ export default function EmergencyPage({ onClose }) {
 
   if (phase === "setup") return (
     <div className="emergency-shell fixed inset-0 z-50 bg-gray-950 overflow-y-auto overflow-x-hidden w-full max-w-full" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
+      {exitConfirm && <ExitConfirm active={false} onConfirm={handleExit} onCancel={() => setExitConfirm(false)} />}
       {savedSession && !recoveryDismissed && (
         <div className="bg-amber-950/90 border-b border-amber-800/60 px-4 py-4 w-full min-w-0 box-border">
           <p className="text-amber-300 text-sm font-bold mb-1">Unfinished session found</p>
@@ -2061,7 +2102,7 @@ export default function EmergencyPage({ onClose }) {
           </div>
         </div>
       )}
-      <SetupScreen onConfirm={handleSetup} />
+      <SetupScreen onConfirm={handleSetup} onExit={() => setExitConfirm(true)} />
     </div>
   );
   if (phase === "aftercare") return (
@@ -2098,6 +2139,7 @@ export default function EmergencyPage({ onClose }) {
     <div className="fixed inset-0 z-50 flex flex-col bg-gray-950 overflow-hidden w-full max-w-full emergency-shell" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
       {escalationAlert && <EscalationOverlay level={escalationAlert.level} note={escalationAlert.note} onDismiss={() => setEscalationAlert(null)} />}
       {standDownConfirm && <StandDownConfirm bloodLoss={bloodLoss} onConfirm={handleStandDown} onCancel={() => setStandDownConfirm(false)} />}
+      {exitConfirm && <ExitConfirm active onConfirm={handleExit} onCancel={() => setExitConfirm(false)} />}
 
       <Header
         elapsed={now - emergencyStartTime}
@@ -2108,6 +2150,7 @@ export default function EmergencyPage({ onClose }) {
         onAddBlood={handleAddBlood}
         onCorrectBlood={handleBloodCorrect}
         onStandDown={() => setStandDownConfirm(true)}
+        onExit={() => setExitConfirm(true)}
       />
 
       <DrugStrip
