@@ -151,6 +151,117 @@ function ImmediateActions({ gestation, doneSet, onToggle }) {
   );
 }
 
+// ─── CPR cycle constants ──────────────────────────────────────────────────────
+
+const CPR_CYCLE_SEC = 2 * 60;       // rhythm check every 2 minutes
+const ADRENALINE_INTERVAL_SEC = 180; // every 3 minutes
+const SHOCK_ENERGY = "200 J biphasic";
+
+// ─── Rhythm check interrupt ───────────────────────────────────────────────────
+
+function RhythmCheckPrompt({ cycleNumber, onShockable, onNonShockable }) {
+  useEffect(() => { if ("vibrate" in navigator) navigator.vibrate([150, 80, 150]); }, []);
+  return (
+    <div className="fixed inset-0 z-[55] bg-gray-950/95 flex flex-col items-center justify-center gap-5 p-8">
+      <p className="text-amber-400 text-xs font-bold uppercase tracking-widest">End of cycle {cycleNumber} — pause &lt;5 s</p>
+      <h2 className="text-white text-3xl font-black text-center">Rhythm check</h2>
+      <div className="flex flex-col gap-3 w-full max-w-sm">
+        <button onClick={onShockable} className="w-full bg-red-600 text-white font-black py-5 rounded-xl text-lg">
+          Shockable<span className="block text-red-200 text-xs font-medium mt-0.5">VF / pulseless VT</span>
+        </button>
+        <button onClick={onNonShockable} className="w-full border border-gray-600 text-white font-bold py-5 rounded-xl text-lg">
+          Non-shockable<span className="block text-gray-500 text-xs font-medium mt-0.5">Asystole / PEA</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Shock confirm ────────────────────────────────────────────────────────────
+
+function ShockPrompt({ shockNumber, onDelivered }) {
+  const triggersAdrenaline = shockNumber >= 3;
+  const triggersAmio300 = shockNumber === 3;
+  const triggersAmio150 = shockNumber === 5;
+  return (
+    <div className="fixed inset-0 z-[55] bg-gray-950/95 flex flex-col items-center justify-center gap-5 p-8 text-center">
+      <p className="text-red-400 text-xs font-bold uppercase tracking-widest">Shockable rhythm</p>
+      <h2 className="text-white text-3xl font-black">Shock #{shockNumber}</h2>
+      <p className="text-gray-300 text-base">{SHOCK_ENERGY} — then resume CPR immediately</p>
+      {(triggersAdrenaline || triggersAmio300 || triggersAmio150) && (
+        <div className="text-amber-300 text-sm leading-relaxed border border-amber-800 rounded-lg px-4 py-3">
+          {triggersAdrenaline && <p>Give <span className="font-bold">adrenaline 1 mg IV</span> after this shock</p>}
+          {triggersAmio300 && <p>Give <span className="font-bold">amiodarone 300 mg IV</span></p>}
+          {triggersAmio150 && <p>Give <span className="font-bold">amiodarone 150 mg IV</span></p>}
+        </div>
+      )}
+      <button onClick={onDelivered} className="mt-2 bg-white text-gray-950 font-black px-10 py-4 rounded-xl">
+        Shock delivered — resume CPR
+      </button>
+    </div>
+  );
+}
+
+// ─── CPR cycle panel ──────────────────────────────────────────────────────────
+
+function CprPanel({ cycleStart, cycleNumber, shockCount, now, onRhythmCheck }) {
+  const remaining = CPR_CYCLE_SEC * 1000 - (now - cycleStart);
+  const due = remaining <= 0;
+  return (
+    <div className="rounded-xl border border-gray-800 bg-gray-900/60 px-4 py-3.5 space-y-2.5">
+      <div className="flex items-center justify-between">
+        <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">CPR cycle {cycleNumber}</span>
+        <span className="text-gray-600 text-xs">{shockCount} shock{shockCount === 1 ? "" : "s"}</span>
+      </div>
+      <div className="flex items-baseline gap-2">
+        <span className={`font-mono text-3xl font-bold tabular-nums ${due ? "text-amber-400" : "text-white"}`}>{fmtClock(Math.max(0, remaining))}</span>
+        <span className="text-gray-600 text-xs">{due ? "rhythm check due" : "to next rhythm check"}</span>
+      </div>
+      <button onClick={onRhythmCheck}
+        className={`w-full font-bold py-3 rounded-lg text-sm ${due ? "bg-amber-500 text-gray-950" : "border border-gray-700 text-white"}`}>
+        Rhythm check now
+      </button>
+    </div>
+  );
+}
+
+// ─── Drug strip (adrenaline / amiodarone) ─────────────────────────────────────
+
+function DrugStrip({ adrenalineCount, lastAdrenalineAt, adrenalineDue, amio300Given, amio150Given, shockCount, now, onAdrenaline, onAmio300, onAmio150 }) {
+  const sinceAdr = lastAdrenalineAt ? (now - lastAdrenalineAt) / 1000 : null;
+  const amio300Due = shockCount >= 3 && !amio300Given;
+  const amio150Due = shockCount >= 5 && !amio150Given;
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-3 rounded-xl border border-gray-800 px-4 py-3">
+        <div className="flex-1 min-w-0">
+          <p className="text-white text-sm font-bold">Adrenaline 1 mg IV</p>
+          <p className="text-gray-500 text-xs">
+            {adrenalineCount === 0 ? "not yet given" : `${adrenalineCount} given`}
+            {sinceAdr != null && ` · ${fmtClock(sinceAdr * 1000)} ago`}
+          </p>
+        </div>
+        <button onClick={onAdrenaline}
+          className={`shrink-0 font-bold px-4 py-2.5 rounded-lg text-sm ${adrenalineDue ? "bg-amber-500 text-gray-950" : "border border-gray-700 text-white"}`}>
+          {adrenalineDue ? "Due — give" : "Log dose"}
+        </button>
+      </div>
+      {(amio300Due || amio150Due || amio300Given) && (
+        <div className="flex items-center gap-3 rounded-xl border border-gray-800 px-4 py-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-white text-sm font-bold">Amiodarone</p>
+            <p className="text-gray-500 text-xs">
+              {amio150Given ? "300 mg + 150 mg given" : amio300Given ? "300 mg given" : amio300Due ? "300 mg due (after 3rd shock)" : "—"}
+            </p>
+          </div>
+          {amio300Due && <button onClick={onAmio300} className="shrink-0 bg-amber-500 text-gray-950 font-bold px-4 py-2.5 rounded-lg text-sm">300 mg</button>}
+          {amio150Due && <button onClick={onAmio150} className="shrink-0 bg-amber-500 text-gray-950 font-bold px-4 py-2.5 rounded-lg text-sm">150 mg</button>}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Dual-clock header ────────────────────────────────────────────────────────
 
 function Header({ startTime, now, gestation, onClose }) {
@@ -198,6 +309,17 @@ export default function CardiacArrestPage({ onClose }) {
   const [pmcsAcknowledged, setPmcsAcknowledged] = useState(false);
   const [pmcsAlarmDismissed, setPmcsAlarmDismissed] = useState(false);
   const [actionsDone, setActionsDone] = useState([]);
+  // CPR cycle state
+  const [cycleStart, setCycleStart] = useState(null);
+  const [cycleNumber, setCycleNumber] = useState(1);
+  const [shockCount, setShockCount] = useState(0);
+  const [rhythmPromptOpen, setRhythmPromptOpen] = useState(false);
+  const [pendingShock, setPendingShock] = useState(false);
+  const [adrenalineCount, setAdrenalineCount] = useState(0);
+  const [lastAdrenalineAt, setLastAdrenalineAt] = useState(null);
+  const [adrenalineArmed, setAdrenalineArmed] = useState(false); // first dose indicated (non-shockable, or after 3rd shock)
+  const [amio300Given, setAmio300Given] = useState(false);
+  const [amio150Given, setAmio150Given] = useState(false);
   const wakeLockRef = useRef(null);
 
   // 1-second tick while active
@@ -218,7 +340,41 @@ export default function CardiacArrestPage({ onClose }) {
   function handleSetup({ gestation, startTime }) {
     setGestation(gestation);
     setStartTime(startTime);
+    setCycleStart(Date.now());
     setPhase("active");
+  }
+
+  // Auto-fire the rhythm check when a 2-min cycle elapses (no other overlay open).
+  useEffect(() => {
+    if (phase !== "active" || rosc || !cycleStart) return;
+    if (rhythmPromptOpen || pendingShock) return;
+    if ((now - cycleStart) / 1000 >= CPR_CYCLE_SEC) setRhythmPromptOpen(true);
+  }, [phase, rosc, cycleStart, now, rhythmPromptOpen, pendingShock]);
+
+  function resumeCpr() {
+    setCycleStart(Date.now());
+    setCycleNumber(n => n + 1);
+  }
+  function handleShockable() {
+    setRhythmPromptOpen(false);
+    setPendingShock(true);
+  }
+  function handleShockDelivered() {
+    const newCount = shockCount + 1;
+    setShockCount(newCount);
+    if (newCount >= 3) setAdrenalineArmed(true); // adrenaline indicated from 3rd shock
+    setPendingShock(false);
+    resumeCpr();
+  }
+  function handleNonShockable() {
+    setRhythmPromptOpen(false);
+    setAdrenalineArmed(true); // adrenaline immediately in non-shockable
+    resumeCpr();
+  }
+  function handleAdrenaline() {
+    setAdrenalineCount(c => c + 1);
+    setLastAdrenalineAt(Date.now());
+    setAdrenalineArmed(false);
   }
 
   if (phase === "setup") {
@@ -234,22 +390,43 @@ export default function CardiacArrestPage({ onClose }) {
     gestation === "over20" && !rosc && !pmcsAcknowledged && elapsedSec >= PMCS_DECISION_SEC;
   const showAlarm = pmcsTriggered && !pmcsAlarmDismissed;
 
+  const adrenalineDue =
+    !rosc && ((adrenalineArmed && adrenalineCount === 0) ||
+      (lastAdrenalineAt != null && (now - lastAdrenalineAt) / 1000 >= ADRENALINE_INTERVAL_SEC));
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-gray-950 overflow-hidden">
       {showAlarm && (
         <PmcsAlarm onAcknowledge={() => { setPmcsAcknowledged(true); setPmcsAlarmDismissed(true); }} />
+      )}
+      {!rosc && rhythmPromptOpen && (
+        <RhythmCheckPrompt cycleNumber={cycleNumber} onShockable={handleShockable} onNonShockable={handleNonShockable} />
+      )}
+      {!rosc && pendingShock && (
+        <ShockPrompt shockNumber={shockCount + 1} onDelivered={handleShockDelivered} />
       )}
 
       <Header startTime={startTime} now={now} gestation={gestation} onClose={onClose} />
 
       {/* Active body */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
+        <CprPanel
+          cycleStart={cycleStart} cycleNumber={cycleNumber} shockCount={shockCount} now={now}
+          onRhythmCheck={() => setRhythmPromptOpen(true)}
+        />
+        <DrugStrip
+          adrenalineCount={adrenalineCount} lastAdrenalineAt={lastAdrenalineAt} adrenalineDue={adrenalineDue}
+          amio300Given={amio300Given} amio150Given={amio150Given} shockCount={shockCount} now={now}
+          onAdrenaline={handleAdrenaline}
+          onAmio300={() => setAmio300Given(true)}
+          onAmio150={() => setAmio150Given(true)}
+        />
         <ImmediateActions
           gestation={gestation}
           doneSet={actionsDone}
           onToggle={(id) => setActionsDone(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
         />
-        {/* CPR cycle, reversible causes and ROSC built next in the walkthrough. */}
+        {/* Reversible causes and ROSC built next in the walkthrough. */}
       </div>
     </div>
   );
