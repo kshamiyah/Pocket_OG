@@ -123,8 +123,8 @@ const IMMEDIATE_ACTIONS = [
     detail: "Displace the uterus up and to the left to relieve aortocaval compression\nPreferred over tilt — keeps her supine for effective compressions" },
   { id: "airway", title: "Airway — high-flow O₂",
     detail: "Early intubation (cuffed ETT) by experienced anaesthetist — difficult airway, high aspiration risk\nBag-mask / supraglottic airway until then" },
-  { id: "iv_access", title: "IV access — 2 × wide-bore ≥ 16G",
-    detail: "Intraosseous or central access if peripheral fails\nAggressive volume replacement (caution in pre-eclampsia/eclampsia)" },
+  { id: "iv_access", title: "IV access — above the diaphragm",
+    detail: "2 × wide-bore ≥ 16G ABOVE the diaphragm — lower-limb access is ineffective with aortocaval compression\nUpper-limb intraosseous (IO) if peripheral fails\n500 ml crystalloid bolus; aggressive volume replacement (caution in pre-eclampsia/eclampsia)" },
   { id: "defib", title: "Attach defibrillator — assess rhythm",
     detail: "Same energy as non-pregnant (200 J biphasic)\nShockable (VF/pVT) vs non-shockable (asystole/PEA)" },
 ];
@@ -272,7 +272,7 @@ const REVERSIBLE_CAUSES = [
     detail: "Obstetric haemorrhage — may be CONCEALED (abruption, ruptured uterus/ectopic, post-CS)\nMajor haemorrhage protocol + TXA · deliver fetus/placenta if APH",
     pphLink: true },
   { id: "metabolic", group: "4 H", label: "Hypo/hyperkalaemia + metabolic",
-    detail: "Check K⁺, glucose, Ca²⁺, Mg²⁺\nHyponatraemia may follow oxytocin use" },
+    detail: "Check K⁺, glucose, Ca²⁺, Mg²⁺\nHyponatraemia may follow oxytocin use\nHyperkalaemia → calcium chloride/gluconate 10 ml 10% IV" },
   { id: "hypothermia", group: "4 H", label: "Hypothermia",
     detail: "Active warming" },
   { id: "thromboembolism", group: "4 T", label: "Thromboembolism",
@@ -281,14 +281,14 @@ const REVERSIBLE_CAUSES = [
     detail: "Local anaesthetic toxicity or magnesium toxicity — stop the offending drug",
     antidotes: [
       { id: "intralipid", label: "Intralipid 20% (LA toxicity)", dose: "1.5 ml/kg IV bolus over 1 min, then 15 ml/kg/hr infusion", log: "Intralipid 20% lipid rescue started" },
-      { id: "calcium_gluconate", label: "Calcium gluconate (Mg toxicity)", dose: "10 ml 10% IV by slow injection", log: "Calcium gluconate 10 ml 10% given — magnesium toxicity" },
+      { id: "calcium", label: "Calcium gluconate/chloride (Mg toxicity)", dose: "10 ml 10% IV by slow injection", log: "Calcium 10 ml 10% given — magnesium toxicity" },
     ] },
   { id: "tamponade", group: "4 T", label: "Cardiac tamponade",
     detail: "Usually following trauma — consider pericardiocentesis / thoracotomy" },
   { id: "tension_pneumo", group: "4 T", label: "Tension pneumothorax",
     detail: "Usually following trauma — needle / finger decompression" },
   { id: "eclampsia", group: "E", label: "Eclampsia / pre-eclampsia",
-    detail: "Magnesium sulfate (NICE CG107)\nIncludes intracranial haemorrhage — early neurosurgical involvement" },
+    detail: "Magnesium sulfate 4 g IV (NICE CG107)\nIncludes intracranial haemorrhage — early neurosurgical involvement" },
 ];
 
 function ReversibleCauses({ consideredSet, antidotesGiven, onConsider, onAntidote, onLaunchPph }) {
