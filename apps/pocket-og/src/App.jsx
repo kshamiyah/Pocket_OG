@@ -369,7 +369,7 @@ export default function App() {
         <ShoulderDystociaPage onClose={() => setActiveEmergency(null)} />
       )}
       {activeEmergency === "cardiac_arrest" && (
-        <CardiacArrestPage onClose={() => setActiveEmergency(null)} />
+        <CardiacArrestPage onClose={() => setActiveEmergency(null)} onLaunchPph={() => setActiveEmergency("pph")} />
       )}
 
       {/* IOL Prioritizer overlay */}

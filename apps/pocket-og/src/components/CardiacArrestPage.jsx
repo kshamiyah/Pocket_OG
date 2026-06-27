@@ -262,6 +262,87 @@ function DrugStrip({ adrenalineCount, lastAdrenalineAt, adrenalineDue, amio300Gi
   );
 }
 
+// ─── Reversible causes (4 Hs / 4 Ts / Eclampsia) ──────────────────────────────
+// GTG56 Appendix 2 + management sections. Antidotes are tappable with doses.
+
+const REVERSIBLE_CAUSES = [
+  { id: "hypoxia", group: "4 H", label: "Hypoxia",
+    detail: "Pregnant women desaturate rapidly\nEarly intubation by experienced anaesthetist · high-flow O₂" },
+  { id: "hypovolaemia", group: "4 H", label: "Hypovolaemia",
+    detail: "Obstetric haemorrhage — may be CONCEALED (abruption, ruptured uterus/ectopic, post-CS)\nMajor haemorrhage protocol + TXA · deliver fetus/placenta if APH",
+    pphLink: true },
+  { id: "metabolic", group: "4 H", label: "Hypo/hyperkalaemia + metabolic",
+    detail: "Check K⁺, glucose, Ca²⁺, Mg²⁺\nHyponatraemia may follow oxytocin use" },
+  { id: "hypothermia", group: "4 H", label: "Hypothermia",
+    detail: "Active warming" },
+  { id: "thromboembolism", group: "4 T", label: "Thromboembolism",
+    detail: "Pulmonary embolism → thrombolysis (GTG37b)\nAmniotic fluid embolism → supportive; FFP for coagulopathy; avoid rFVIIa" },
+  { id: "toxicity", group: "4 T", label: "Toxicity",
+    detail: "Local anaesthetic toxicity or magnesium toxicity — stop the offending drug",
+    antidotes: [
+      { id: "intralipid", label: "Intralipid 20% (LA toxicity)", dose: "1.5 ml/kg IV bolus over 1 min, then 15 ml/kg/hr infusion", log: "Intralipid 20% lipid rescue started" },
+      { id: "calcium_gluconate", label: "Calcium gluconate (Mg toxicity)", dose: "10 ml 10% IV by slow injection", log: "Calcium gluconate 10 ml 10% given — magnesium toxicity" },
+    ] },
+  { id: "tamponade", group: "4 T", label: "Cardiac tamponade",
+    detail: "Usually following trauma — consider pericardiocentesis / thoracotomy" },
+  { id: "tension_pneumo", group: "4 T", label: "Tension pneumothorax",
+    detail: "Usually following trauma — needle / finger decompression" },
+  { id: "eclampsia", group: "E", label: "Eclampsia / pre-eclampsia",
+    detail: "Magnesium sulfate (NICE CG107)\nIncludes intracranial haemorrhage — early neurosurgical involvement" },
+];
+
+function ReversibleCauses({ consideredSet, antidotesGiven, onConsider, onAntidote, onLaunchPph }) {
+  const [expanded, setExpanded] = useState(null);
+  return (
+    <div className="space-y-2">
+      <p className="text-gray-400 text-xs font-bold uppercase tracking-wider px-1">Reversible causes — consider throughout</p>
+      {REVERSIBLE_CAUSES.map(c => {
+        const open = expanded === c.id;
+        const considered = consideredSet.includes(c.id);
+        return (
+          <div key={c.id} className={`rounded-xl border transition ${considered ? "border-gray-800 bg-gray-900/40" : "border-gray-700"}`}>
+            <button onClick={() => setExpanded(open ? null : c.id)} className="w-full flex items-center gap-3 px-4 py-3 text-left">
+              <span className="text-gray-600 text-[10px] font-bold uppercase tracking-wider w-7 shrink-0">{c.group}</span>
+              <span className={`flex-1 text-sm font-bold ${considered ? "text-gray-500" : "text-white"}`}>{c.label}</span>
+              {considered && <span className="text-gray-600 text-xs shrink-0">✓ considered</span>}
+              <span className="text-gray-600 text-xs shrink-0">{open ? "↑" : "↓"}</span>
+            </button>
+            {open && (
+              <div className="px-4 pb-3.5 space-y-3">
+                <p className="text-gray-400 text-xs whitespace-pre-line leading-relaxed">{c.detail}</p>
+                {c.antidotes?.map(a => {
+                  const given = antidotesGiven.includes(a.id);
+                  return (
+                    <div key={a.id} className="flex items-center gap-3 rounded-lg border border-gray-800 px-3 py-2.5">
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-bold ${given ? "text-gray-500 line-through" : "text-white"}`}>{a.label}</p>
+                        <p className="text-gray-500 text-xs">{a.dose}</p>
+                      </div>
+                      <button onClick={() => onAntidote(a.id, a.log)} disabled={given}
+                        className={`shrink-0 font-bold px-3 py-2 rounded-lg text-xs ${given ? "border border-gray-800 text-gray-600" : "bg-amber-500 text-gray-950"}`}>
+                        {given ? "given" : "Give"}
+                      </button>
+                    </div>
+                  );
+                })}
+                {c.pphLink && (
+                  <button onClick={onLaunchPph} className="w-full bg-red-700 text-white font-bold py-2.5 rounded-lg text-sm">
+                    Open PPH SOS →
+                  </button>
+                )}
+                <button onClick={() => onConsider(c.id)}
+                  className={`w-full font-medium py-2.5 rounded-lg text-sm ${considered ? "border border-gray-800 text-gray-500" : "border border-gray-600 text-white"}`}>
+                  {considered ? "Considered ✓" : "Mark considered"}
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Dual-clock header ────────────────────────────────────────────────────────
 
 function Header({ startTime, now, gestation, onClose }) {
@@ -300,7 +381,7 @@ function Header({ startTime, now, gestation, onClose }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function CardiacArrestPage({ onClose }) {
+export default function CardiacArrestPage({ onClose, onLaunchPph }) {
   const [phase, setPhase] = useState("setup"); // setup | active
   const [gestation, setGestation] = useState(null);
   const [startTime, setStartTime] = useState(null);
@@ -320,6 +401,8 @@ export default function CardiacArrestPage({ onClose }) {
   const [adrenalineArmed, setAdrenalineArmed] = useState(false); // first dose indicated (non-shockable, or after 3rd shock)
   const [amio300Given, setAmio300Given] = useState(false);
   const [amio150Given, setAmio150Given] = useState(false);
+  const [causesConsidered, setCausesConsidered] = useState([]);
+  const [antidotesGiven, setAntidotesGiven] = useState([]);
   const wakeLockRef = useRef(null);
 
   // 1-second tick while active
@@ -426,7 +509,14 @@ export default function CardiacArrestPage({ onClose }) {
           doneSet={actionsDone}
           onToggle={(id) => setActionsDone(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
         />
-        {/* Reversible causes and ROSC built next in the walkthrough. */}
+        <ReversibleCauses
+          consideredSet={causesConsidered}
+          antidotesGiven={antidotesGiven}
+          onConsider={(id) => setCausesConsidered(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
+          onAntidote={(id) => setAntidotesGiven(prev => prev.includes(id) ? prev : [...prev, id])}
+          onLaunchPph={() => onLaunchPph?.()}
+        />
+        {/* ROSC + summary built next in the walkthrough. */}
       </div>
     </div>
   );
