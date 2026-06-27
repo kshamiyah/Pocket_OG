@@ -122,6 +122,7 @@ export default function App() {
   const [activeConsentProcedure, setActiveConsentProcedure] = useState(null);
   const [consentNavKey, setConsentNavKey] = useState(0);
   const [activeEmergency, setActiveEmergency] = useState(null); // 'pph' | 'shoulder_dystocia' | 'cardiac_arrest' | null
+  const [emergencyContext, setEmergencyContext] = useState(null); // extra context when one SOS launches another
   const [showEmergencyPicker, setShowEmergencyPicker] = useState(false);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
@@ -363,13 +364,20 @@ export default function App() {
 
       {/* Emergency page overlays */}
       {activeEmergency === "pph" && (
-        <EmergencyPage onClose={() => setActiveEmergency(null)} />
+        <EmergencyPage
+          onClose={() => setActiveEmergency(null)}
+          onLaunchCardiacArrest={(ctx) => { setEmergencyContext(ctx || null); setActiveEmergency("cardiac_arrest"); }}
+        />
       )}
       {activeEmergency === "shoulder_dystocia" && (
         <ShoulderDystociaPage onClose={() => setActiveEmergency(null)} />
       )}
       {activeEmergency === "cardiac_arrest" && (
-        <CardiacArrestPage onClose={() => setActiveEmergency(null)} onLaunchPph={() => setActiveEmergency("pph")} />
+        <CardiacArrestPage
+          context={emergencyContext}
+          onClose={() => { setActiveEmergency(null); setEmergencyContext(null); }}
+          onLaunchPph={() => { setEmergencyContext(null); setActiveEmergency("pph"); }}
+        />
       )}
 
       {/* IOL Prioritizer overlay */}

@@ -27,8 +27,8 @@ function fmtTime(d) {
 // Captures gestation band (drives MLUD + PMCS) and time since collapse so the
 // PMCS countdown is anchored to the real arrest time, not app-open time.
 
-function SetupScreen({ onConfirm }) {
-  const [gestation, setGestation] = useState(null); // "under20" | "over20"
+function SetupScreen({ onConfirm, postpartum }) {
+  const [gestation, setGestation] = useState(postpartum ? "delivered" : null); // "under20" | "over20" | "delivered"
   const [minsSince, setMinsSince] = useState(0);     // minutes already elapsed since collapse
 
   const canStart = gestation != null;
@@ -41,22 +41,29 @@ function SetupScreen({ onConfirm }) {
         <p className="text-gray-500 text-sm mt-2">GTG56 · Resus Council UK ALS</p>
       </div>
 
-      {/* Gestation */}
-      <div className="space-y-2">
-        <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Gestation</p>
-        <div className="flex flex-col gap-2">
-          <button onClick={() => setGestation("over20")}
-            className={`w-full text-left px-4 py-4 rounded-xl border transition ${gestation === "over20" ? "border-red-600 bg-red-950/40" : "border-gray-800"}`}>
-            <span className="text-white font-bold text-base">≥ 20 weeks</span>
-            <span className="block text-gray-500 text-xs mt-0.5">or uterus palpable at/above umbilicus — MLUD + PMCS apply</span>
-          </button>
-          <button onClick={() => setGestation("under20")}
-            className={`w-full text-left px-4 py-4 rounded-xl border transition ${gestation === "under20" ? "border-red-600 bg-red-950/40" : "border-gray-800"}`}>
-            <span className="text-white font-bold text-base">&lt; 20 weeks</span>
-            <span className="block text-gray-500 text-xs mt-0.5">standard ALS — PMCS not indicated for maternal benefit</span>
-          </button>
+      {/* Gestation — skipped when launched postpartum from PPH */}
+      {postpartum ? (
+        <div className="rounded-xl border border-gray-800 bg-gray-900/40 px-4 py-3">
+          <p className="text-white text-sm font-bold">Postpartum (from PPH)</p>
+          <p className="text-gray-500 text-xs mt-0.5">Standard ALS — PMCS and MLUD not indicated (already delivered)</p>
         </div>
-      </div>
+      ) : (
+        <div className="space-y-2">
+          <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Gestation</p>
+          <div className="flex flex-col gap-2">
+            <button onClick={() => setGestation("over20")}
+              className={`w-full text-left px-4 py-4 rounded-xl border transition ${gestation === "over20" ? "border-red-600 bg-red-950/40" : "border-gray-800"}`}>
+              <span className="text-white font-bold text-base">≥ 20 weeks</span>
+              <span className="block text-gray-500 text-xs mt-0.5">or uterus palpable at/above umbilicus — MLUD + PMCS apply</span>
+            </button>
+            <button onClick={() => setGestation("under20")}
+              className={`w-full text-left px-4 py-4 rounded-xl border transition ${gestation === "under20" ? "border-red-600 bg-red-950/40" : "border-gray-800"}`}>
+              <span className="text-white font-bold text-base">&lt; 20 weeks</span>
+              <span className="block text-gray-500 text-xs mt-0.5">standard ALS — PMCS not indicated for maternal benefit</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Time since collapse */}
       <div className="space-y-2">
@@ -499,7 +506,7 @@ function Header({ startTime, now, gestation, onClose }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function CardiacArrestPage({ onClose, onLaunchPph }) {
+export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
   const [phase, setPhase] = useState("setup"); // setup | active
   const [gestation, setGestation] = useState(null);
   const [startTime, setStartTime] = useState(null);
@@ -599,7 +606,7 @@ export default function CardiacArrestPage({ onClose, onLaunchPph }) {
   if (phase === "setup") {
     return (
       <div className="fixed inset-0 z-50 bg-gray-950 overflow-y-auto">
-        <SetupScreen onConfirm={handleSetup} />
+        <SetupScreen onConfirm={handleSetup} postpartum={!!context?.postpartum} />
       </div>
     );
   }

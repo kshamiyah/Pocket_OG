@@ -1513,7 +1513,7 @@ function clearSession() { try { localStorage.removeItem(STORAGE_KEY); } catch {}
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function EmergencyPage({ onClose }) {
+export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   const [savedSession] = useState(() => {
     try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; } catch { return null; }
   });
@@ -1909,6 +1909,9 @@ export default function EmergencyPage({ onClose }) {
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: t, arrestConfirmed: true } }));
     addLog("consider", "Maternal cardiac arrest — 2222 called");
     if ("vibrate" in navigator) navigator.vibrate([300, 100, 300, 100, 300]);
+    // Launch the full Maternal Cardiac Arrest SOS. Patient is postpartum (PPH),
+    // so PMCS/MLUD don't apply — pass that context so setup skips the gestation step.
+    if (onLaunchCardiacArrest) onLaunchCardiacArrest({ postpartum: true });
   }
 
   function handleConsiderArrestNo(task) {
