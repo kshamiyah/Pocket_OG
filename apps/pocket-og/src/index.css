@@ -1,3 +1,26 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html,
+body,
+#root {
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* iOS Safari auto-zooms inputs below 16px — breaks emergency full-screen layout */
+.emergency-shell input,
+.emergency-shell select,
+.emergency-shell textarea {
+  font-size: 16px;
+}
