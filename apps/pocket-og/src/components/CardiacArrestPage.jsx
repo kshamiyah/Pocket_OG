@@ -11,6 +11,7 @@ import { useState, useEffect, useRef } from "react";
 
 const PMCS_DECISION_SEC = 4 * 60;   // start PMCS if no ROSC by 4 min
 const PMCS_DELIVERY_SEC = 5 * 60;   // aim to deliver by 5 min
+const CPR_CYCLE_SEC = 2 * 60;       // rhythm check every 2 minutes of CPR
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -23,72 +24,283 @@ function fmtTime(d) {
   return new Date(d).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
+const CA_SAFE_TOP = "max(12px, env(safe-area-inset-top))";
+const CA_SAFE_BOTTOM = "max(16px, env(safe-area-inset-bottom))";
+
+function CaStickyFooter({ children, className = "" }) {
+  return (
+    <div
+      className={`flex-shrink-0 px-4 pt-3 border-t border-gray-800 bg-gray-950 ${className}`}
+      style={{ paddingBottom: CA_SAFE_BOTTOM }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function CaOverlayShell({ children, className = "", zClass = "z-[55]" }) {
+  return (
+    <div
+      className={`fixed inset-0 ${zClass} overflow-y-auto ${className}`}
+      style={{ paddingTop: CA_SAFE_TOP, paddingBottom: CA_SAFE_BOTTOM }}
+    >
+      <div className="min-h-full flex flex-col items-center justify-center gap-5 px-6 py-4">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function ExitConfirm({ active, onConfirm, onCancel }) {
+  return (
+    <div
+      className="fixed inset-0 bg-black/80 z-[70] flex items-end p-4"
+      style={{ paddingBottom: CA_SAFE_BOTTOM }}
+      onClick={onCancel}
+    >
+      <div className="bg-gray-900 border border-gray-700 rounded-xl p-5 w-full" onClick={e => e.stopPropagation()}>
+        <p className="text-white font-bold mb-1">{active ? "Leave active arrest?" : "Exit without starting?"}</p>
+        <p className="text-gray-500 text-sm mb-4">
+          {active
+            ? <>Session stays saved — reopen Maternal Cardiac Arrest to resume. Use <span className="text-gray-300">ROSC achieved</span> or <span className="text-gray-300">Stopped</span> to record an outcome.</>
+            : "Opened by mistake? No new session will be started."}
+        </p>
+        <div className="flex gap-3">
+          <button onClick={onCancel} className="flex-1 border border-gray-700 text-gray-300 font-medium py-2.5 rounded-lg text-sm">Stay</button>
+          <button onClick={onConfirm} className="flex-1 bg-red-600 text-white font-bold py-2.5 rounded-lg text-sm">{active ? "Leave" : "Exit"}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Setup screen ───────────────────────────────────────────────────────────
-// Captures gestation band (drives MLUD + PMCS) and time since collapse so the
-// PMCS countdown is anchored to the real arrest time, not app-open time.
+// Captures gestation band (MLUD + PMCS), collapse time (PMCS / arrest clock),
+// and CPR start (2-min rhythm cycles) — they may differ if CPR was delayed.
 
-function SetupScreen({ onConfirm, postpartum }) {
+function nowTimeString() {
+  const d = new Date();
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function parseClockTime(input) {
+  if (!input.trim()) return null;
+  const [hh, mm] = input.split(":").map(Number);
+  if (isNaN(hh) || isNaN(mm) || hh < 0 || hh > 23 || mm < 0 || mm > 59) return null;
+  const d = new Date();
+  d.setSeconds(0, 0);
+  d.setHours(hh, mm, 0, 0);
+  if (d.getTime() > Date.now()) d.setDate(d.getDate() - 1);
+  return d.getTime();
+}
+
+function formatElapsedMs(ms) {
+  const totalSec = Math.max(0, Math.floor(ms / 1000));
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  if (m === 0) return `${s}s`;
+  if (s === 0) return `${m} min`;
+  return `${m} min ${s}s`;
+}
+
+function collapseHelperFromTs(collapseTime) {
+  const elapsed = Date.now() - collapseTime;
+  if (elapsed < 60 * 1000) return "Collapse recorded — PMCS decision at 4 min from collapse.";
+  const ago = formatElapsedMs(elapsed);
+  const pmcsRemainingMs = PMCS_DECISION_SEC * 1000 - elapsed;
+  if (pmcsRemainingMs <= 0) {
+    return `Collapse ${ago} ago — PMCS decision due now if no ROSC.`;
+  }
+  return `Collapse ${ago} ago — PMCS decision in ${formatElapsedMs(pmcsRemainingMs)} if no ROSC.`;
+}
+
+function cprHelperFromTs(collapseTime, cprTime) {
+  const cprElapsed = Date.now() - cprTime;
+  const delayMs = cprTime - collapseTime;
+  const elapsedSec = Math.floor(cprElapsed / 1000);
+  const due = elapsedSec > 0 && elapsedSec % CPR_CYCLE_SEC === 0;
+  const remSec = due ? 0 : CPR_CYCLE_SEC - (elapsedSec % CPR_CYCLE_SEC);
+
+  if (cprElapsed < 60 * 1000) {
+    return delayMs > 0
+      ? `CPR starting now — ${formatElapsedMs(delayMs)} after collapse. First rhythm check in 2 min.`
+      : "CPR starting now — first rhythm check in 2 min.";
+  }
+  const ago = formatElapsedMs(cprElapsed);
+  if (due) {
+    return delayMs > 0
+      ? `CPR ${ago} (${formatElapsedMs(delayMs)} after collapse) — rhythm check due on open.`
+      : `CPR ${ago} — rhythm check due on open.`;
+  }
+  const remLabel = remSec >= 60 ? formatElapsedMs(remSec * 1000) : "<1 min";
+  return delayMs > 0
+    ? `CPR ${ago} (${formatElapsedMs(delayMs)} after collapse) — next rhythm check in ${remLabel}.`
+    : `CPR ${ago} — next rhythm check in ${remLabel}.`;
+}
+
+function TimestampField({ label, value, onChange, onNow, onSecondary, secondaryLabel, helper, error }) {
+  return (
+    <div className="space-y-2">
+      <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">{label}</p>
+      <div className="flex gap-2">
+        <input
+          type="time"
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          className={`flex-1 min-w-0 bg-gray-900 border rounded-xl px-3 py-2.5 text-white tabular-nums ${
+            error ? "border-red-600" : "border-gray-800"
+          }`}
+        />
+        <button
+          type="button"
+          onClick={onNow}
+          className="shrink-0 px-3 py-2.5 rounded-xl border border-gray-800 text-white text-sm font-bold"
+        >
+          Now
+        </button>
+        {onSecondary && (
+          <button
+            type="button"
+            onClick={onSecondary}
+            className="shrink-0 px-3 py-2.5 rounded-xl border border-gray-800 text-gray-400 text-xs font-medium max-w-[5.5rem] leading-tight"
+          >
+            {secondaryLabel}
+          </button>
+        )}
+      </div>
+      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {!error && helper && <p className="text-gray-600 text-xs">{helper}</p>}
+    </div>
+  );
+}
+
+function initialCycleFromCprStart(cprStartTime) {
+  const elapsed = Math.max(0, Date.now() - cprStartTime);
+  const cycleMs = CPR_CYCLE_SEC * 1000;
+  const intoCycle = elapsed % cycleMs;
+  const dueNow = elapsed > 0 && intoCycle === 0;
+  return {
+    cycleNumber: Math.floor(elapsed / cycleMs) + 1,
+    cycleStart: dueNow ? Date.now() - cycleMs : Date.now() - intoCycle,
+  };
+}
+
+function SetupScreen({ onConfirm, onExit, postpartum }) {
   const [gestation, setGestation] = useState(postpartum ? "delivered" : null); // "under20" | "over20" | "delivered"
-  const [minsSince, setMinsSince] = useState(0);     // minutes already elapsed since collapse
+  const [collapseTimeInput, setCollapseTimeInput] = useState("");
+  const [cprTimeInput, setCprTimeInput] = useState("");
 
-  const canStart = gestation != null;
+  const collapseTime = collapseTimeInput.trim() ? parseClockTime(collapseTimeInput) : Date.now();
+  const cprTime = cprTimeInput.trim() ? parseClockTime(cprTimeInput) : collapseTime;
+
+  const collapseParseError = collapseTimeInput.trim() && collapseTime === null;
+  const cprParseError = cprTimeInput.trim() && parseClockTime(cprTimeInput) === null;
+  const collapseFuture = collapseTimeInput.trim() && collapseTime != null && collapseTime > Date.now();
+  const cprFuture = cprTimeInput.trim() && cprTime != null && cprTime > Date.now();
+  const cprBeforeCollapse = collapseTime != null && cprTime != null && cprTime < collapseTime;
+
+  const collapseError = collapseParseError
+    ? "Enter a valid time (HH:MM)."
+    : collapseFuture
+      ? "Collapse time cannot be in the future."
+      : null;
+  const cprError = cprParseError
+    ? "Enter a valid time (HH:MM)."
+    : cprFuture
+      ? "CPR start cannot be in the future."
+      : cprBeforeCollapse
+        ? "CPR cannot start before collapse."
+        : null;
+
+  const timesValid = !collapseError && !cprError;
+  const canStart = gestation != null && timesValid;
+
+  function toggleGestation(value) {
+    setGestation(prev => (prev === value ? null : value));
+  }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col px-5 pt-12 pb-8 gap-6">
-      <div>
-        <p className="text-red-500 text-xs font-bold uppercase tracking-widest mb-1">Maternal cardiac arrest</p>
-        <h1 className="text-white text-3xl font-black leading-tight">Start resuscitation</h1>
-        <p className="text-gray-500 text-sm mt-2">GTG56 · Resus Council UK ALS</p>
-      </div>
-
-      {/* Gestation — skipped when launched postpartum from PPH */}
-      {postpartum ? (
-        <div className="rounded-xl border border-gray-800 bg-gray-900/40 px-4 py-3">
-          <p className="text-white text-sm font-bold">Postpartum (from PPH)</p>
-          <p className="text-gray-500 text-xs mt-0.5">Standard ALS — PMCS and MLUD not indicated (already delivered)</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Gestation</p>
-          <div className="flex flex-col gap-2">
-            <button onClick={() => setGestation("over20")}
-              className={`w-full text-left px-4 py-4 rounded-xl border transition ${gestation === "over20" ? "border-red-600 bg-red-950/40" : "border-gray-800"}`}>
-              <span className="text-white font-bold text-base">≥ 20 weeks</span>
-              <span className="block text-gray-500 text-xs mt-0.5">or uterus palpable at/above umbilicus — MLUD + PMCS apply</span>
-            </button>
-            <button onClick={() => setGestation("under20")}
-              className={`w-full text-left px-4 py-4 rounded-xl border transition ${gestation === "under20" ? "border-red-600 bg-red-950/40" : "border-gray-800"}`}>
-              <span className="text-white font-bold text-base">&lt; 20 weeks</span>
-              <span className="block text-gray-500 text-xs mt-0.5">standard ALS — PMCS not indicated for maternal benefit</span>
-            </button>
+    <div className="flex flex-col flex-1 min-h-0 w-full">
+      <div className="flex-1 min-h-0 overflow-y-auto px-5 pt-2 pb-4 space-y-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-red-500 text-xs font-bold uppercase tracking-widest mb-1">Maternal cardiac arrest</p>
+            <h1 className="text-white text-2xl font-black leading-tight">Start resuscitation</h1>
+            <p className="text-gray-500 text-sm mt-1.5">GTG56 · Resus Council UK ALS</p>
           </div>
+          <button
+            onClick={onExit}
+            className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-800 text-gray-500 hover:text-gray-300 hover:border-gray-600 shrink-0"
+            aria-label="Exit"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-      )}
 
-      {/* Time since collapse */}
-      <div className="space-y-2">
-        <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Time since collapse</p>
-        <div className="grid grid-cols-5 gap-2">
-          {[0, 1, 2, 3, 4].map(m => (
-            <button key={m} onClick={() => setMinsSince(m)}
-              className={`py-3 rounded-xl border text-sm font-bold transition ${minsSince === m ? "border-white bg-white text-gray-950" : "border-gray-800 text-white"}`}>
-              {m === 0 ? "Now" : `${m}m`}
-            </button>
-          ))}
-        </div>
-        <p className="text-gray-600 text-xs">
-          {minsSince === 0
-            ? "Collapse is happening now — clock starts at 0."
-            : `Collapse was ~${minsSince} min ago — PMCS decision at 4 min fires in ${Math.max(0, 4 - minsSince)} min.`}
-        </p>
+        {/* Gestation — skipped when launched postpartum from PPH */}
+        {postpartum ? (
+          <div className="rounded-xl border border-gray-800 bg-gray-900/40 px-4 py-3">
+            <p className="text-white text-sm font-bold">Postpartum (from PPH)</p>
+            <p className="text-gray-500 text-xs mt-0.5">Standard ALS — PMCS and MLUD not indicated (already delivered)</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Gestation</p>
+            <div className="flex flex-col gap-2">
+              <button onClick={() => toggleGestation("over20")}
+                className={`w-full text-left px-4 py-3 rounded-xl border transition ${gestation === "over20" ? "border-red-600 bg-red-950/40" : "border-gray-800"}`}>
+                <span className="text-white font-bold text-base">≥ 20 weeks</span>
+                <span className="block text-gray-500 text-xs mt-0.5">or uterus palpable at/above umbilicus — MLUD + PMCS apply</span>
+              </button>
+              <button onClick={() => toggleGestation("under20")}
+                className={`w-full text-left px-4 py-3 rounded-xl border transition ${gestation === "under20" ? "border-red-600 bg-red-950/40" : "border-gray-800"}`}>
+                <span className="text-white font-bold text-base">&lt; 20 weeks</span>
+                <span className="block text-gray-500 text-xs mt-0.5">standard ALS — PMCS not indicated for maternal benefit</span>
+              </button>
+            </div>
+            {gestation != null && (
+              <p className="text-gray-600 text-xs">Tap your selection again to clear, or choose the other band.</p>
+            )}
+          </div>
+        )}
+
+        <TimestampField
+          label="Collapse occurred at"
+          value={collapseTimeInput}
+          onChange={setCollapseTimeInput}
+          onNow={() => setCollapseTimeInput(nowTimeString())}
+          helper={timesValid && collapseTime != null ? collapseHelperFromTs(collapseTime) : "Clock time · blank = happening now"}
+          error={collapseError}
+        />
+
+        <TimestampField
+          label="CPR started at"
+          value={cprTimeInput}
+          onChange={setCprTimeInput}
+          onNow={() => setCprTimeInput(nowTimeString())}
+          onSecondary={() => setCprTimeInput(collapseTimeInput)}
+          secondaryLabel="Same as collapse"
+          helper={timesValid && collapseTime != null && cprTime != null
+            ? cprHelperFromTs(collapseTime, cprTime)
+            : "Clock time · blank = same as collapse"}
+          error={cprError}
+        />
       </div>
 
-      <button
-        disabled={!canStart}
-        onClick={() => onConfirm({ gestation, startTime: Date.now() - minsSince * 60 * 1000 })}
-        className={`mt-auto w-full py-4 rounded-xl font-black text-base transition ${canStart ? "bg-red-600 text-white" : "bg-gray-800 text-gray-600"}`}>
-        Start CPR clock
-      </button>
+      <CaStickyFooter className="px-5">
+        <button
+          disabled={!canStart}
+          onClick={() => onConfirm({
+            gestation,
+            startTime: collapseTime,
+            cprStartTime: cprTime,
+          })}
+          className={`w-full py-3.5 rounded-xl font-black text-base transition ${canStart ? "bg-red-600 text-white" : "bg-gray-800 text-gray-600"}`}>
+          Start resuscitation
+        </button>
+      </CaStickyFooter>
     </div>
   );
 }
@@ -103,18 +315,18 @@ function PmcsAlarm({ onAcknowledge }) {
     return () => clearInterval(id);
   }, []);
   return (
-    <div className="fixed inset-0 z-[60] bg-red-700 flex flex-col items-center justify-center gap-6 p-8 text-center">
+    <CaOverlayShell className="bg-red-700 text-center" zClass="z-[60]">
       <p className="text-red-200 text-sm font-bold uppercase tracking-widest">4 minutes — no ROSC</p>
-      <h2 className="text-white text-4xl font-black leading-tight">Start perimortem caesarean now</h2>
+      <h2 className="text-white text-3xl font-black leading-tight">Start perimortem caesarean now</h2>
       <p className="text-red-100 text-base leading-relaxed">
         Deliver by 5 minutes.<br />
         Do <span className="font-black">NOT</span> move the patient — operate here.<br />
         Continue CPR throughout.
       </p>
-      <button onClick={onAcknowledge} className="mt-6 bg-white text-red-700 font-black text-base px-10 py-4 rounded-xl">
+      <button onClick={onAcknowledge} className="bg-white text-red-700 font-black text-base px-10 py-4 rounded-xl">
         PMCS started / acknowledged
       </button>
-    </div>
+    </CaOverlayShell>
   );
 }
 
@@ -160,7 +372,6 @@ function ImmediateActions({ gestation, doneSet, onToggle }) {
 
 // ─── CPR cycle constants ──────────────────────────────────────────────────────
 
-const CPR_CYCLE_SEC = 2 * 60;       // rhythm check every 2 minutes
 const ADRENALINE_INTERVAL_SEC = 180; // every 3 minutes
 const SHOCK_ENERGY = "200 J biphasic";
 
@@ -169,18 +380,18 @@ const SHOCK_ENERGY = "200 J biphasic";
 function RhythmCheckPrompt({ cycleNumber, onShockable, onNonShockable }) {
   useEffect(() => { if ("vibrate" in navigator) navigator.vibrate([150, 80, 150]); }, []);
   return (
-    <div className="fixed inset-0 z-[55] bg-gray-950/95 flex flex-col items-center justify-center gap-5 p-8">
+    <CaOverlayShell className="bg-gray-950/95">
       <p className="text-amber-400 text-xs font-bold uppercase tracking-widest">End of cycle {cycleNumber} — pause &lt;5 s</p>
-      <h2 className="text-white text-3xl font-black text-center">Rhythm check</h2>
+      <h2 className="text-white text-2xl font-black text-center">Rhythm check</h2>
       <div className="flex flex-col gap-3 w-full max-w-sm">
-        <button onClick={onShockable} className="w-full bg-red-600 text-white font-black py-5 rounded-xl text-lg">
+        <button onClick={onShockable} className="w-full bg-red-600 text-white font-black py-4 rounded-xl text-lg">
           Shockable<span className="block text-red-200 text-xs font-medium mt-0.5">VF / pulseless VT</span>
         </button>
-        <button onClick={onNonShockable} className="w-full border border-gray-600 text-white font-bold py-5 rounded-xl text-lg">
+        <button onClick={onNonShockable} className="w-full border border-gray-600 text-white font-bold py-4 rounded-xl text-lg">
           Non-shockable<span className="block text-gray-500 text-xs font-medium mt-0.5">Asystole / PEA</span>
         </button>
       </div>
-    </div>
+    </CaOverlayShell>
   );
 }
 
@@ -191,21 +402,21 @@ function ShockPrompt({ shockNumber, onDelivered }) {
   const triggersAmio300 = shockNumber === 3;
   const triggersAmio150 = shockNumber === 5;
   return (
-    <div className="fixed inset-0 z-[55] bg-gray-950/95 flex flex-col items-center justify-center gap-5 p-8 text-center">
+    <CaOverlayShell className="bg-gray-950/95 text-center">
       <p className="text-red-400 text-xs font-bold uppercase tracking-widest">Shockable rhythm</p>
-      <h2 className="text-white text-3xl font-black">Shock #{shockNumber}</h2>
+      <h2 className="text-white text-2xl font-black">Shock #{shockNumber}</h2>
       <p className="text-gray-300 text-base">{SHOCK_ENERGY} — then resume CPR immediately</p>
       {(triggersAdrenaline || triggersAmio300 || triggersAmio150) && (
-        <div className="text-amber-300 text-sm leading-relaxed border border-amber-800 rounded-lg px-4 py-3">
+        <div className="text-amber-300 text-sm leading-relaxed border border-amber-800 rounded-lg px-4 py-3 w-full max-w-sm">
           {triggersAdrenaline && <p>Give <span className="font-bold">adrenaline 1 mg IV</span> after this shock</p>}
           {triggersAmio300 && <p>Give <span className="font-bold">amiodarone 300 mg IV</span></p>}
           {triggersAmio150 && <p>Give <span className="font-bold">amiodarone 150 mg IV</span></p>}
         </div>
       )}
-      <button onClick={onDelivered} className="mt-2 bg-white text-gray-950 font-black px-10 py-4 rounded-xl">
+      <button onClick={onDelivered} className="bg-white text-gray-950 font-black px-10 py-4 rounded-xl w-full max-w-sm">
         Shock delivered — resume CPR
       </button>
-    </div>
+    </CaOverlayShell>
   );
 }
 
@@ -396,12 +607,12 @@ const POST_RESUS = [
 
 function PostResusScreen({ done, onToggle, onLaunchPph, onFinish }) {
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col">
-      <div className="px-5 py-5 border-b border-gray-800 flex-shrink-0">
+    <div className="flex flex-col flex-1 min-h-0 w-full">
+      <div className="px-5 py-4 border-b border-gray-800 flex-shrink-0">
         <p className="text-green-400 text-xs font-bold uppercase tracking-widest mb-1">ROSC achieved</p>
         <h2 className="text-white text-2xl font-black">Post-resuscitation care</h2>
       </div>
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-2">
         {POST_RESUS.map(p => {
           const isDone = done.includes(p.id);
           return (
@@ -419,9 +630,9 @@ function PostResusScreen({ done, onToggle, onLaunchPph, onFinish }) {
           );
         })}
       </div>
-      <div className="px-4 py-4 border-t border-gray-800 flex-shrink-0">
+      <CaStickyFooter>
         <button onClick={onFinish} className="w-full bg-white text-gray-950 font-bold py-3.5 rounded-lg text-sm">View record</button>
-      </div>
+      </CaStickyFooter>
     </div>
   );
 }
@@ -438,14 +649,14 @@ function SummaryScreen({ startTime, outcome, outcomeTime, shockCount, adrenaline
   );
   const causeLabels = causesConsidered.map(id => REVERSIBLE_CAUSES.find(c => c.id === id)?.label).filter(Boolean);
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col">
-      <div className="px-5 py-5 border-b border-gray-800 flex-shrink-0">
+    <div className="flex flex-col flex-1 min-h-0 w-full">
+      <div className="px-5 py-4 border-b border-gray-800 flex-shrink-0">
         <p className="text-gray-600 text-xs uppercase tracking-widest mb-2">Maternal cardiac arrest record</p>
         <h2 className={`text-2xl font-black ${outcome === "rosc" ? "text-green-400" : "text-gray-300"}`}>
           {outcome === "rosc" ? "ROSC achieved" : "Resuscitation stopped"}
         </h2>
       </div>
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto">
         {row("Arrest time", fmtTime(startTime))}
         {row("Duration", fmtClock(duration))}
         {row("Shocks delivered", shockCount)}
@@ -458,12 +669,12 @@ function SummaryScreen({ startTime, outcome, outcomeTime, shockCount, adrenaline
           <p className="text-gray-200 text-sm">{causeLabels.length ? causeLabels.join(" · ") : "—"}</p>
         </div>
       </div>
-      <div className="px-5 py-5 border-t border-gray-800 flex-shrink-0">
-        <p className="text-gray-500 text-xs leading-relaxed border-l-2 border-gray-700 pl-3 mb-4">
+      <CaStickyFooter className="px-5">
+        <p className="text-gray-500 text-xs leading-relaxed border-l-2 border-gray-700 pl-3 mb-3">
           Complete documentation. Debrief team and family. MBRRACE-UK notification if maternal death or near-miss.
         </p>
         <button onClick={onClose} className="w-full border border-gray-800 text-gray-500 font-medium py-3 rounded-xl text-sm">Close</button>
-      </div>
+      </CaStickyFooter>
     </div>
   );
 }
@@ -541,6 +752,7 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
   const [outcome, setOutcome] = useState(null); // "rosc" | "stopped"
   const [outcomeTime, setOutcomeTime] = useState(null);
   const [postResusDone, setPostResusDone] = useState([]);
+  const [exitConfirm, setExitConfirm] = useState(false);
   const wakeLockRef = useRef(null);
 
   // 1-second tick while resus is in progress
@@ -592,6 +804,16 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
     onClose?.();
   }
 
+  function requestClose() {
+    if (phase === "active" || phase === "setup") setExitConfirm(true);
+    else handleClose();
+  }
+
+  function confirmExit() {
+    setExitConfirm(false);
+    onClose?.();
+  }
+
   // The summary is terminal — clear the saved session so it won't offer to resume.
   useEffect(() => { if (phase === "summary") caClear(); }, [phase]);
 
@@ -603,10 +825,12 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
     return () => { try { lock?.release(); } catch {} };
   }, [phase]);
 
-  function handleSetup({ gestation, startTime }) {
+  function handleSetup({ gestation, startTime, cprStartTime }) {
     setGestation(gestation);
     setStartTime(startTime);
-    setCycleStart(Date.now());
+    const { cycleNumber: n, cycleStart: cs } = initialCycleFromCprStart(cprStartTime);
+    setCycleNumber(n);
+    setCycleStart(cs);
     setPhase("active");
   }
 
@@ -660,9 +884,12 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
 
   if (phase === "setup") {
     return (
-      <div className="fixed inset-0 z-50 bg-gray-950 overflow-y-auto">
+      <div
+        className="fixed inset-0 z-50 bg-gray-950 flex flex-col overflow-hidden emergency-shell"
+        style={{ paddingTop: CA_SAFE_TOP }}
+      >
         {savedSession && !recoveryDismissed && (
-          <div className="bg-amber-950/60 border-b border-amber-800 px-4 py-3 flex flex-col gap-2">
+          <div className="bg-amber-950/60 border-b border-amber-800 px-4 py-3 flex flex-col gap-2 flex-shrink-0">
             <p className="text-amber-300 text-sm font-bold">Resume previous arrest?</p>
             <p className="text-amber-400/80 text-xs">
               In-progress resuscitation found — {savedSession.shockCount ?? 0} shock{(savedSession.shockCount ?? 0) === 1 ? "" : "s"}, {savedSession.adrenalineCount ?? 0} adrenaline.
@@ -673,14 +900,24 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
             </div>
           </div>
         )}
-        <SetupScreen onConfirm={handleSetup} postpartum={!!context?.postpartum} />
+        {exitConfirm && (
+          <ExitConfirm
+            active={false}
+            onConfirm={confirmExit}
+            onCancel={() => setExitConfirm(false)}
+          />
+        )}
+        <SetupScreen onConfirm={handleSetup} onExit={requestClose} postpartum={!!context?.postpartum} />
       </div>
     );
   }
 
   if (phase === "postresus") {
     return (
-      <div className="fixed inset-0 z-50 bg-gray-950 overflow-y-auto">
+      <div
+        className="fixed inset-0 z-50 bg-gray-950 flex flex-col overflow-hidden emergency-shell"
+        style={{ paddingTop: CA_SAFE_TOP }}
+      >
         <PostResusScreen
           done={postResusDone}
           onToggle={(id) => setPostResusDone(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
@@ -693,7 +930,10 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
 
   if (phase === "summary") {
     return (
-      <div className="fixed inset-0 z-50 bg-gray-950 overflow-y-auto">
+      <div
+        className="fixed inset-0 z-50 bg-gray-950 flex flex-col overflow-hidden emergency-shell"
+        style={{ paddingTop: CA_SAFE_TOP }}
+      >
         <SummaryScreen
           startTime={startTime} outcome={outcome} outcomeTime={outcomeTime}
           shockCount={shockCount} adrenalineCount={adrenalineCount}
@@ -715,7 +955,10 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
       (lastAdrenalineAt != null && (now - lastAdrenalineAt) / 1000 >= ADRENALINE_INTERVAL_SEC));
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-gray-950 overflow-hidden">
+    <div
+      className="fixed inset-0 z-50 flex flex-col bg-gray-950 overflow-hidden emergency-shell"
+      style={{ paddingTop: CA_SAFE_TOP }}
+    >
       {showAlarm && (
         <PmcsAlarm onAcknowledge={() => { setPmcsAcknowledged(true); setPmcsAlarmDismissed(true); }} />
       )}
@@ -726,7 +969,15 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
         <ShockPrompt shockNumber={shockCount + 1} onDelivered={handleShockDelivered} />
       )}
 
-      <Header startTime={startTime} now={now} gestation={gestation} onClose={handleClose} />
+      {exitConfirm && (
+        <ExitConfirm
+          active
+          onConfirm={confirmExit}
+          onCancel={() => setExitConfirm(false)}
+        />
+      )}
+
+      <Header startTime={startTime} now={now} gestation={gestation} onClose={requestClose} />
 
       {/* Active body */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
@@ -757,10 +1008,10 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
       </div>
 
       {/* Outcome action bar */}
-      <div className="px-4 py-3 border-t border-gray-800 flex gap-2 flex-shrink-0">
+      <CaStickyFooter className="flex gap-2">
         <button onClick={handleRosc} className="flex-1 bg-green-600 text-white font-black py-3.5 rounded-xl text-sm">ROSC achieved</button>
         <button onClick={handleStop} className="px-5 border border-gray-700 text-gray-400 font-medium py-3.5 rounded-xl text-sm">Stopped</button>
-      </div>
+      </CaStickyFooter>
     </div>
   );
 }
