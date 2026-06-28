@@ -40,9 +40,12 @@ Trauma / tissue / thrombin add a separate, tone-independent bleed term
 ## B. Blood volume & resuscitation in
 
 ### R-VOL-1 — Starting maternal blood volume
-Pregnancy raises blood volume ~40–50%. Candidate start **≈ 5,000 ml [ASSUMED
-baseline]**, to be replaced with weight-based maternal value (~90–100 ml/kg).
-☐ OK ☐ Correct: __________
+Pregnancy raises blood volume ~40–50%, so a term mother carries ~90–100 ml/kg.
+**Volume is weight-based, not flat:**
+`blood_volume_start = weight_kg × 95 ml/kg`  (e.g. 70 kg → ~6,650 ml).
+This adds **patient weight** as a required scenario input.
+_(~95 ml/kg term-maternal value; exact ml/kg still to be pinned to a citation.)_
+☑ **ACCEPTED — weight-based** (2026-06-28); flat 5,000 ml declined
 
 ### R-VOL-2 — Volume balance each tick
 `blood_volume += (fluids_in + blood_in − bleed_rate × dt)`
