@@ -20,7 +20,7 @@ At term, blood flow through the placental bed is **≈ 700 ml/min**; an atonic
 uterus can bleed at "faucet flow" **≈ 750 ml/min**.
 `BASELINE_FLOW = 700 ml/min`
 _Source: Uterine Atony overview (ScienceDirect); PPH overview (Medscape)._
-☐ OK ☐ Correct: __________
+☑ **ACCEPTED** (2026-06-28)
 
 ### R-BLEED-2 — Tone controls the bleed
 Bleeding rate is the baseline flow scaled by how _un_-contracted the uterus is:
