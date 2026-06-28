@@ -86,7 +86,8 @@ correctly reproducing late maternal decompensation.
 Below ~15% loss, MAP holds (heart rate compensates). Past ~30–40% loss,
 compensation fails and **MAP falls steeply**.
 _Source: StatPearls staging; ZenCur baroreflex behaviour._
-☐ OK ☐ Correct: __________
+☑ **ACCEPTED** (2026-06-28); models the "compensate then crash off a cliff"
+behaviour — the reason early action wins.
 
 ---
 
