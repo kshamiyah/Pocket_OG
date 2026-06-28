@@ -298,9 +298,19 @@ export default function App() {
                 <div className="text-center mb-6">
                   <h1 className="text-[36px] sm:text-[50px] font-[800] tracking-[0.04em] text-black">Pocket O&G</h1>
                   <p className="mt-3 text-base leading-relaxed text-gray-400">
-                    Local and national guidelines.<br />Whenever and wherever you need them.
+                    Pocket the evidence. Make the call.
                   </p>
-                  <p className="mt-2 text-sm font-medium text-gray-400">Built by Khalid Shamiyah</p>
+                  <p className="mt-2 text-sm font-medium text-gray-400">
+                    Built by{" "}
+                    <a
+                      href="https://drshamiyah.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-2 hover:text-gray-600 transition-colors"
+                    >
+                      Khalid Shamiyah
+                    </a>
+                  </p>
                 </div>
 
                 {/* Search */}
@@ -417,7 +427,17 @@ export default function App() {
 
             <div className="mt-10 text-center">
               <p className="text-xs text-gray-400">Content summarised from national and local guidelines · For decision support only · Clinical judgement always applies</p>
-              <p className="text-xs text-gray-400 mt-1">Built by Khalid Shamiyah</p>
+              <p className="text-xs text-gray-400 mt-1">
+                Built by{" "}
+                <a
+                  href="https://drshamiyah.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2 hover:text-gray-600 transition-colors"
+                >
+                  Khalid Shamiyah
+                </a>
+              </p>
             </div>
           </div>
         </>
