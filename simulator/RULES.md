@@ -56,7 +56,9 @@ _Source: mass-balance of haemorrhage models (Curcio 2020/2021)._
 Body shifts interstitial fluid into circulation, partly offsetting early loss —
 modelled as a slow top-up term, magnitude per Zenker model.
 _Source: transcapillary refill in ZenCur model (Curcio 2020)._
-☐ OK ☐ Correct: __________
+☑ **DEFERRED to Stage 2** (2026-06-28); not in Stage 1 sandbox. Rate to be
+lifted from the Zenker model when added. (Stage 1 patient is therefore slightly
+more pessimistic — drains without this self-top-up.)
 
 ---
 
