@@ -33,7 +33,7 @@ arteries (Uterine Atony overview)._
 ### R-BLEED-3 — Non-atonic causes (the other three T's) **[ASSUMED]**
 Trauma / tissue / thrombin add a separate, tone-independent bleed term
 (`bleed_extra`), set per scenario until sourced individually.
-☐ OK ☐ Correct: __________
+☑ **ACCEPTED — concept** (2026-06-28); per-cause ml/min still to be sourced/assigned
 
 ---
 
