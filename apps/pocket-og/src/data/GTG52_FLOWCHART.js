@@ -55,7 +55,7 @@ export const GTG52_PPH_FLOWCHART = {
         "Catheterise — target urine output >30 ml/hr",
         "Bimanual uterine compression if atonic",
         "Uterotonics: oxytocin 5 IU IV slowly, then 40 IU in 500 ml Hartmann's at 125 ml/hr",
-        "Ergometrine 500 mcg IM/IV if oxytocin alone insufficient (avoid if hypertensive)",
+        "Ergometrine 500 mcg IM/IV if oxytocin alone insufficient (avoid if hypertensive or cardiac disease)",
         "Inspect placenta (complete?), cavity, cervix, vagina, and perineum",
       ],
       next: "minor_response",
