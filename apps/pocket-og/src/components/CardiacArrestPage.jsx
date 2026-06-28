@@ -6,9 +6,20 @@ import {
   ADRENALINE_INTERVAL_SEC,
   SHOCK_ENERGY,
   JOINT_ARREST_QUICK_TIMES,
+  STANDALONE_IMMEDIATE_ACTIONS,
+  filterImmediateActions,
+  computeArrestNowPrompt,
+  computeArrestComingUpItems,
   minsAgoToTimestamp,
   initialCycleFromCprStart,
 } from "../data/emergency/cardiac-arrest-shared.js";
+import {
+  JointInstrumentStrip,
+  ArrestNowCard,
+  JointComingUpPanel,
+  CollapsibleArrestChecklist,
+} from "./JointResusDeck.jsx";
+import { SosExitConfirm } from "./sos-ui.jsx";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -48,26 +59,17 @@ function CaOverlayShell({ children, className = "", zClass = "z-[55]" }) {
   );
 }
 
-function ExitConfirm({ active, onConfirm, onCancel }) {
+function ExitConfirm(props) {
   return (
-    <div
-      className="fixed inset-0 bg-black/80 z-[70] flex items-end p-4"
-      style={{ paddingBottom: CA_SAFE_BOTTOM }}
-      onClick={onCancel}
-    >
-      <div className="bg-gray-900 border border-gray-700 rounded-xl p-5 w-full" onClick={e => e.stopPropagation()}>
-        <p className="text-white font-bold mb-1">{active ? "Leave active arrest?" : "Exit without starting?"}</p>
-        <p className="text-gray-500 text-sm mb-4">
-          {active
-            ? <>Session stays saved — reopen Maternal Cardiac Arrest to resume. Use <span className="text-gray-300">ROSC achieved</span> or <span className="text-gray-300">Stopped</span> to record an outcome.</>
-            : "Opened by mistake? No new session will be started."}
-        </p>
-        <div className="flex gap-3">
-          <button onClick={onCancel} className="flex-1 border border-gray-700 text-gray-300 font-medium py-2.5 rounded-lg text-sm">Stay</button>
-          <button onClick={onConfirm} className="flex-1 bg-red-600 text-white font-bold py-2.5 rounded-lg text-sm">{active ? "Leave" : "Exit"}</button>
-        </div>
-      </div>
-    </div>
+    <SosExitConfirm
+      {...props}
+      activeTitle="Leave active arrest?"
+      inactiveTitle="Exit without starting?"
+      activeBody={<>Session stays saved — reopen Maternal Cardiac Arrest to resume. Use <span className="text-gray-300">ROSC achieved</span> or <span className="text-gray-300">Stopped</span> to record an outcome.</>}
+      inactiveBody="Opened by mistake? No new session will be started."
+      confirmLabel={props.active ? "Leave" : "Exit"}
+      zClass="z-[70]"
+    />
   );
 }
 
@@ -309,149 +311,7 @@ function PmcsAlarm({ onAcknowledge }) {
 // ─── Immediate actions (concurrent checklist) ─────────────────────────────────
 // These happen in parallel the moment CPR starts (GTG56 Appendix 4).
 
-const IMMEDIATE_ACTIONS = [
-  { id: "call_2222", title: "Call 2222 — maternal cardiac arrest",
-    detail: "Cardiac arrest team + senior obstetrician + senior obstetric anaesthetist + senior midwife\nNeonatal team if antepartum > 22 weeks" },
-  { id: "cpr", title: "Start CPR — 30:2",
-    detail: "Centre of chest · 100–120/min · depth 5–6 cm\nMinimise interruptions" },
-  { id: "mlud", title: "Manual uterine displacement — to the LEFT", over20Only: true,
-    detail: "Displace the uterus up and to the left to relieve aortocaval compression\nPreferred over tilt — keeps her supine for effective compressions" },
-  { id: "airway", title: "Airway — high-flow O₂",
-    detail: "Early intubation (cuffed ETT) by experienced anaesthetist — difficult airway, high aspiration risk\nBag-mask / supraglottic airway until then" },
-  { id: "iv_access", title: "IV access — above the diaphragm",
-    detail: "2 × wide-bore ≥ 16G ABOVE the diaphragm — lower-limb access is ineffective with aortocaval compression\nUpper-limb intraosseous (IO) if peripheral fails\n500 ml crystalloid bolus; aggressive volume replacement (caution in pre-eclampsia/eclampsia)" },
-  { id: "defib", title: "Attach defibrillator — assess rhythm",
-    detail: "Same energy as non-pregnant (200 J biphasic)\nShockable (VF/pVT) vs non-shockable (asystole/PEA)" },
-];
-
-function ImmediateActions({ gestation, doneSet, onToggle }) {
-  const items = IMMEDIATE_ACTIONS.filter(a => !a.over20Only || gestation === "over20");
-  return (
-    <div className="space-y-2">
-      <p className="text-gray-400 text-xs font-bold uppercase tracking-wider px-1">Immediate actions — do all now</p>
-      {items.map(a => {
-        const done = doneSet.includes(a.id);
-        return (
-          <button key={a.id} onClick={() => onToggle(a.id)}
-            className={`w-full text-left flex items-start gap-3 px-4 py-3 rounded-xl border transition ${done ? "border-gray-800 bg-gray-900/60" : "border-gray-700"}`}>
-            <span className={`mt-0.5 w-5 h-5 rounded flex items-center justify-center text-xs font-bold shrink-0 ${done ? "bg-white text-gray-950" : "border border-gray-600 text-transparent"}`}>✓</span>
-            <span className="min-w-0">
-              <span className={`block text-sm font-bold leading-snug ${done ? "text-gray-500 line-through" : "text-white"}`}>{a.title}</span>
-              {!done && <span className="block text-gray-500 text-xs whitespace-pre-line leading-relaxed mt-0.5">{a.detail}</span>}
-            </span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
 // ─── CPR cycle constants ──────────────────────────────────────────────────────
-
-// ─── Rhythm check interrupt ───────────────────────────────────────────────────
-
-function RhythmCheckPrompt({ cycleNumber, onShockable, onNonShockable }) {
-  useEffect(() => { if ("vibrate" in navigator) navigator.vibrate([150, 80, 150]); }, []);
-  return (
-    <CaOverlayShell className="bg-gray-950/95">
-      <p className="text-amber-400 text-xs font-bold uppercase tracking-widest">End of cycle {cycleNumber} — pause &lt;5 s</p>
-      <h2 className="text-white text-2xl font-black text-center">Rhythm check</h2>
-      <div className="flex flex-col gap-3 w-full max-w-sm">
-        <button onClick={onShockable} className="w-full bg-red-600 text-white font-black py-4 rounded-xl text-lg">
-          Shockable<span className="block text-red-200 text-xs font-medium mt-0.5">VF / pulseless VT</span>
-        </button>
-        <button onClick={onNonShockable} className="w-full border border-gray-600 text-white font-bold py-4 rounded-xl text-lg">
-          Non-shockable<span className="block text-gray-500 text-xs font-medium mt-0.5">Asystole / PEA</span>
-        </button>
-      </div>
-    </CaOverlayShell>
-  );
-}
-
-// ─── Shock confirm ────────────────────────────────────────────────────────────
-
-function ShockPrompt({ shockNumber, onDelivered }) {
-  const triggersAdrenaline = shockNumber >= 3;
-  const triggersAmio300 = shockNumber === 3;
-  const triggersAmio150 = shockNumber === 5;
-  return (
-    <CaOverlayShell className="bg-gray-950/95 text-center">
-      <p className="text-red-400 text-xs font-bold uppercase tracking-widest">Shockable rhythm</p>
-      <h2 className="text-white text-2xl font-black">Shock #{shockNumber}</h2>
-      <p className="text-gray-300 text-base">{SHOCK_ENERGY} — then resume CPR immediately</p>
-      {(triggersAdrenaline || triggersAmio300 || triggersAmio150) && (
-        <div className="text-amber-300 text-sm leading-relaxed border border-amber-800 rounded-lg px-4 py-3 w-full max-w-sm">
-          {triggersAdrenaline && <p>Give <span className="font-bold">adrenaline 1 mg IV</span> after this shock</p>}
-          {triggersAmio300 && <p>Give <span className="font-bold">amiodarone 300 mg IV</span></p>}
-          {triggersAmio150 && <p>Give <span className="font-bold">amiodarone 150 mg IV</span></p>}
-        </div>
-      )}
-      <button onClick={onDelivered} className="bg-white text-gray-950 font-black px-10 py-4 rounded-xl w-full max-w-sm">
-        Shock delivered — resume CPR
-      </button>
-    </CaOverlayShell>
-  );
-}
-
-// ─── CPR cycle panel ──────────────────────────────────────────────────────────
-
-function CprPanel({ cycleStart, cycleNumber, shockCount, now, onRhythmCheck }) {
-  const remaining = CPR_CYCLE_SEC * 1000 - (now - cycleStart);
-  const due = remaining <= 0;
-  return (
-    <div className="rounded-xl border border-gray-800 bg-gray-900/60 px-4 py-3.5 space-y-2.5">
-      <div className="flex items-center justify-between">
-        <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">CPR cycle {cycleNumber}</span>
-        <span className="text-gray-600 text-xs">{shockCount} shock{shockCount === 1 ? "" : "s"}</span>
-      </div>
-      <div className="flex items-baseline gap-2">
-        <span className={`font-mono text-3xl font-bold tabular-nums ${due ? "text-amber-400" : "text-white"}`}>{fmtClock(Math.max(0, remaining))}</span>
-        <span className="text-gray-600 text-xs">{due ? "rhythm check due" : "to next rhythm check"}</span>
-      </div>
-      <button onClick={onRhythmCheck}
-        className={`w-full font-bold py-3 rounded-lg text-sm ${due ? "bg-amber-500 text-gray-950" : "border border-gray-700 text-white"}`}>
-        Rhythm check now
-      </button>
-    </div>
-  );
-}
-
-// ─── Drug strip (adrenaline / amiodarone) ─────────────────────────────────────
-
-function DrugStrip({ adrenalineCount, lastAdrenalineAt, adrenalineDue, amio300Given, amio150Given, shockCount, now, onAdrenaline, onAmio300, onAmio150 }) {
-  const sinceAdr = lastAdrenalineAt ? (now - lastAdrenalineAt) / 1000 : null;
-  const amio300Due = shockCount >= 3 && !amio300Given;
-  const amio150Due = shockCount >= 5 && !amio150Given;
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-3 rounded-xl border border-gray-800 px-4 py-3">
-        <div className="flex-1 min-w-0">
-          <p className="text-white text-sm font-bold">Adrenaline 1 mg IV</p>
-          <p className="text-gray-500 text-xs">
-            {adrenalineCount === 0 ? "not yet given" : `${adrenalineCount} given`}
-            {sinceAdr != null && ` · ${fmtClock(sinceAdr * 1000)} ago`}
-          </p>
-        </div>
-        <button onClick={onAdrenaline}
-          className={`shrink-0 font-bold px-4 py-2.5 rounded-lg text-sm ${adrenalineDue ? "bg-amber-500 text-gray-950" : "border border-gray-700 text-white"}`}>
-          {adrenalineDue ? "Due — give" : "Log dose"}
-        </button>
-      </div>
-      {(amio300Due || amio150Due || amio300Given) && (
-        <div className="flex items-center gap-3 rounded-xl border border-gray-800 px-4 py-3">
-          <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-bold">Amiodarone</p>
-            <p className="text-gray-500 text-xs">
-              {amio150Given ? "300 mg + 150 mg given" : amio300Given ? "300 mg given" : amio300Due ? "300 mg due (after 3rd shock)" : "—"}
-            </p>
-          </div>
-          {amio300Due && <button onClick={onAmio300} className="shrink-0 bg-amber-500 text-gray-950 font-bold px-4 py-2.5 rounded-lg text-sm">300 mg</button>}
-          {amio150Due && <button onClick={onAmio150} className="shrink-0 bg-amber-500 text-gray-950 font-bold px-4 py-2.5 rounded-lg text-sm">150 mg</button>}
-        </div>
-      )}
-    </div>
-  );
-}
 
 // ─── Reversible causes (4 Hs / 4 Ts / Eclampsia) ──────────────────────────────
 // GTG56 Appendix 2 + management sections. Antidotes are tappable with doses.
@@ -880,6 +740,12 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, onReturnToPph,
     setLastAdrenalineAt(Date.now());
     setAdrenalineArmed(false);
   }
+  function handleResusDone(actionId) {
+    setActionsDone(prev => (prev.includes(actionId) ? prev : [...prev, actionId]));
+  }
+  function handleResusToggle(actionId) {
+    setActionsDone(prev => prev.includes(actionId) ? prev.filter(x => x !== actionId) : [...prev, actionId]);
+  }
   function handleRosc() {
     setRosc(true);
     setOutcome("rosc");
@@ -969,9 +835,36 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, onReturnToPph,
     gestation === "over20" && !rosc && !pmcsAcknowledged && elapsedSec >= PMCS_DECISION_SEC;
   const showAlarm = pmcsTriggered && !pmcsAlarmDismissed;
 
-  const adrenalineDue =
-    !rosc && ((adrenalineArmed && adrenalineCount === 0) ||
-      (lastAdrenalineAt != null && (now - lastAdrenalineAt) / 1000 >= ADRENALINE_INTERVAL_SEC));
+  const immediateActions = filterImmediateActions(STANDALONE_IMMEDIATE_ACTIONS, { gestation });
+  const arrestState = {
+    active: true,
+    rosc,
+    cycleStart,
+    cycleNumber,
+    shockCount,
+    pendingShock,
+    rhythmPromptOpen,
+    adrenalineCount,
+    lastAdrenalineAt,
+    adrenalineArmed,
+    amio300Given,
+    amio150Given,
+    actionsDone,
+  };
+  const arrestCore = computeArrestNowPrompt(arrestState, now, immediateActions);
+  const nowPrompt = arrestCore
+    ? {
+        ...arrestCore,
+        ...(arrestCore.type === "arrest_shock" ? { onDelivered: handleShockDelivered } : {}),
+        ...(arrestCore.type === "arrest_rhythm"
+          ? { onShockable: handleShockable, onNonShockable: handleNonShockable }
+          : {}),
+        ...(arrestCore.type === "arrest_resus"
+          ? { onDone: () => handleResusDone(arrestCore.action.id) }
+          : {}),
+      }
+    : null;
+  const comingUp = computeArrestComingUpItems(arrestState, now, immediateActions);
 
   return (
     <div
@@ -980,12 +873,6 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, onReturnToPph,
     >
       {showAlarm && (
         <PmcsAlarm onAcknowledge={() => { setPmcsAcknowledged(true); setPmcsAlarmDismissed(true); }} />
-      )}
-      {!rosc && rhythmPromptOpen && (
-        <RhythmCheckPrompt cycleNumber={cycleNumber} onShockable={handleShockable} onNonShockable={handleNonShockable} />
-      )}
-      {!rosc && pendingShock && (
-        <ShockPrompt shockNumber={shockCount + 1} onDelivered={handleShockDelivered} />
       )}
 
       {exitConfirm && (
@@ -998,24 +885,45 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, onReturnToPph,
 
       <Header startTime={startTime} now={now} gestation={gestation} onClose={requestClose} onReturnToPph={onReturnToPph} />
 
-      {/* Active body */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
-        <CprPanel
-          cycleStart={cycleStart} cycleNumber={cycleNumber} shockCount={shockCount} now={now}
-          onRhythmCheck={() => setRhythmPromptOpen(true)}
-        />
-        <DrugStrip
-          adrenalineCount={adrenalineCount} lastAdrenalineAt={lastAdrenalineAt} adrenalineDue={adrenalineDue}
-          amio300Given={amio300Given} amio150Given={amio150Given} shockCount={shockCount} now={now}
-          onAdrenaline={handleAdrenaline}
-          onAmio300={() => setAmio300Given(true)}
-          onAmio150={() => setAmio150Given(true)}
-        />
-        <ImmediateActions
-          gestation={gestation}
-          doneSet={actionsDone}
-          onToggle={(id) => setActionsDone(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
-        />
+      {!rosc && (
+        <>
+          <JointInstrumentStrip
+            showPph={false}
+            pphElapsed={now - startTime}
+            bloodLoss={0}
+            bloodLossClass="text-white"
+            levelLabel=""
+            onAddBlood={() => {}}
+            onExit={requestClose}
+            onStandDown={requestClose}
+            arrest={arrestState}
+            now={now}
+            onRhythmCheck={() => setRhythmPromptOpen(true)}
+            onRosc={handleRosc}
+            onAdrenaline={handleAdrenaline}
+            onAmio300={() => setAmio300Given(true)}
+            onAmio150={() => setAmio150Given(true)}
+          />
+          <ArrestNowCard
+            prompt={nowPrompt}
+            onAdrenaline={handleAdrenaline}
+            onAmio300={() => setAmio300Given(true)}
+            onAmio150={() => setAmio150Given(true)}
+            arrest={arrestState}
+          />
+          <JointComingUpPanel items={comingUp} now={now} skipFirst={!!nowPrompt} />
+        </>
+      )}
+
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-5">
+        {!rosc && (
+          <CollapsibleArrestChecklist
+            arrest={arrestState}
+            actions={immediateActions}
+            title="Immediate actions"
+            onToggle={handleResusToggle}
+          />
+        )}
         <ReversibleCauses
           consideredSet={causesConsidered}
           antidotesGiven={antidotesGiven}

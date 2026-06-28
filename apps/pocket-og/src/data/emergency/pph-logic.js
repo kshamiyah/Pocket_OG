@@ -1,9 +1,19 @@
 // Pure logic extracted from EmergencyPage.jsx so it can be unit-tested
 // independently of React. EmergencyPage.jsx imports everything from here.
 
-import { getPphLevel, pphLevelVal, PPH_LEVEL_ORDER, PPH_THRESHOLDS } from "./pph-shared.js";
+import {
+  getPphLevel,
+  pphLevelVal,
+  PPH_LEVEL_ORDER,
+  PPH_THRESHOLDS,
+  UTEROTONIC_PHARM_DELAY_SEC,
+  effectiveUterotonicDelaySec,
+  effectiveCarboRepeatDelaySec,
+} from "./pph-shared.js";
 
-export { getPphLevel, pphLevelVal, PPH_LEVEL_ORDER, PPH_THRESHOLDS };
+export { getPphLevel, pphLevelVal, PPH_LEVEL_ORDER, PPH_THRESHOLDS, UTEROTONIC_PHARM_DELAY_SEC };
+/** @deprecated Use UTEROTONIC_PHARM_DELAY_SEC from pph-shared.js */
+export const PHARM_DELAY_SEC = UTEROTONIC_PHARM_DELAY_SEC;
 
 export function levelVal(l) { return pphLevelVal(l); }
 export function getLevel(ml) { return getPphLevel(ml); }
@@ -53,13 +63,6 @@ export const TASKS = [
 ];
 
 export const UTEROTONIC_ORDER = ["oxytocin_bolus", "oxytocin_inf", "ergometrine", "carboprost", "misoprostol"];
-export const PHARM_DELAY_SEC = {
-  oxytocin_bolus: 180,
-  oxytocin_inf:   300,
-  ergometrine:    300,
-  carboprost:     900,
-  misoprostol:    600,
-};
 export const IV_ACCESS_MAX_RETRIES = 2;
 
 // ─── Pure helper functions ────────────────────────────────────────────────────
@@ -151,15 +154,27 @@ export function hadBloodCheckSince(log, since) {
   return log.some(e => isBloodCheckEvent(e) && e.time > since);
 }
 
+export function uterotonicTimingBlocked(last, log, now, uterotonicHold) {
+  if (!last) return false;
+  const rate = bloodLossRate(log, now);
+  const delayMs = effectiveUterotonicDelaySec(last.id, rate) * 1000;
+  if (now - last.at < delayMs) return true;
+  if (!hadBloodCheckSince(log, last.at)) return true;
+  if (uterotonicHold && bleedingSettled(log, now)) return true;
+  return false;
+}
+
+export function carboRepeatDue(carboLastTime, now, log) {
+  const delaySec = effectiveCarboRepeatDelaySec(bloodLossRate(log, now));
+  return (now - carboLastTime) / 1000 >= delaySec;
+}
+
 export function canEscalateUterotonic({ taskStates, log, now, level, uterotonicHold, forcedTasks }) {
   const next = getNextUterotonic(taskStates, level, forcedTasks);
   if (!next) return null;
   const last = getLastUterotonic(taskStates);
   if (!last) return next;
-  const delayMs = (PHARM_DELAY_SEC[last.id] || 180) * 1000;
-  if (now - last.at < delayMs) return null;
-  if (!hadBloodCheckSince(log, last.at)) return null;
-  if (uterotonicHold && bleedingSettled(log, now)) return null;
+  if (uterotonicTimingBlocked(last, log, now, uterotonicHold)) return null;
   if (next.requiresIv && taskStates.iv_access?.status !== "done") return null;
   return next;
 }
@@ -377,9 +392,9 @@ export function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTim
     }
   }
 
-  // Priority 6 — carboprost repeat dose
+  // Priority 6 — carboprost repeat dose (rate-scaled interval)
   const carboActive = carboCount > 0 && carboLastTime;
-  if (carboActive && carboCount < 8 && (now - carboLastTime) / 1000 >= 15 * 60) {
+  if (carboActive && carboCount < 8 && carboRepeatDue(carboLastTime, now, log)) {
     return { type: "carbo_dose" };
   }
 
@@ -402,12 +417,7 @@ export function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTim
       const nextUt = getNextUterotonic(taskStates, level, forcedTasks);
       if (!nextUt || t.id !== nextUt.id) continue;
       const last = getLastUterotonic(taskStates);
-      if (last) {
-        const delayMs = (PHARM_DELAY_SEC[last.id] || 180) * 1000;
-        if (now - last.at < delayMs) continue;
-        if (!hadBloodCheckSince(log, last.at)) continue;
-        if (uterotonicHold && bleedingSettled(log, now)) continue;
-      }
+      if (last && uterotonicTimingBlocked(last, log, now, uterotonicHold)) continue;
     }
     return gate(t);
   }

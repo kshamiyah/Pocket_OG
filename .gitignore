@@ -25,3 +25,12 @@ dist-ssr
 .vercel
 .claude/
 screenshots*.js
+
+# Capacitor iOS — sync/build artifacts (regenerate via `npx cap sync ios`)
+ios/App/App/public/
+ios/App/App/capacitor.config.json
+ios/App/App/config.xml
+ios/App/App.xcodeproj/project.xcworkspace/xcuserdata/
+ios/App/App.xcodeproj/xcuserdata/
+ios/App/CapApp-SPM/.swiftpm/xcode/xcuserdata/
+ios/capacitor-cordova-ios-plugins/
