@@ -123,6 +123,7 @@ export default function App() {
   const [consentNavKey, setConsentNavKey] = useState(0);
   const [activeEmergency, setActiveEmergency] = useState(null); // 'pph' | 'shoulder_dystocia' | 'cardiac_arrest' | null
   const [emergencyContext, setEmergencyContext] = useState(null); // extra context when one SOS launches another
+  const [pphResumeFromCa, setPphResumeFromCa] = useState(false);
   const [showEmergencyPicker, setShowEmergencyPicker] = useState(false);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
@@ -335,7 +336,7 @@ export default function App() {
                 </svg>
               </button>
               <button
-                onClick={() => { setActiveEmergency("cardiac_arrest"); setShowEmergencyPicker(false); }}
+                onClick={() => { setEmergencyContext(null); setActiveEmergency("cardiac_arrest"); setShowEmergencyPicker(false); }}
                 className="w-full flex items-center gap-4 bg-red-50 border border-red-200 rounded-2xl px-4 py-4 text-left active:bg-red-100 transition-colors"
               >
                 <div className="w-10 h-10 rounded-xl bg-red-800 flex items-center justify-center shrink-0">
@@ -365,7 +366,9 @@ export default function App() {
       {/* Emergency page overlays */}
       {activeEmergency === "pph" && (
         <EmergencyPage
-          onClose={() => setActiveEmergency(null)}
+          resumeFromParallel={pphResumeFromCa}
+          onParallelResumeHandled={() => setPphResumeFromCa(false)}
+          onClose={() => { setPphResumeFromCa(false); setActiveEmergency(null); }}
           onLaunchCardiacArrest={(ctx) => { setEmergencyContext(ctx || null); setActiveEmergency("cardiac_arrest"); }}
         />
       )}
@@ -376,7 +379,8 @@ export default function App() {
         <CardiacArrestPage
           context={emergencyContext}
           onClose={() => { setActiveEmergency(null); setEmergencyContext(null); }}
-          onLaunchPph={() => { setEmergencyContext(null); setActiveEmergency("pph"); }}
+          onLaunchPph={() => { setPphResumeFromCa(true); setEmergencyContext(null); setActiveEmergency("pph"); }}
+          onReturnToPph={emergencyContext?.fromPph ? () => { setPphResumeFromCa(true); setActiveEmergency("pph"); } : undefined}
         />
       )}
 

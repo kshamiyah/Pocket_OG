@@ -1,17 +1,14 @@
 import { useState, useEffect, useRef } from "react";
-
-// ─── Maternal Cardiac Arrest SOS ──────────────────────────────────────────────
-// Benchmarked against RCOG GTG56 (Maternal Collapse in Pregnancy and the
-// Puerperium, 2019) Appendix 4 algorithm + Resuscitation Council (UK) ALS.
-//
-// Defining time-critical decision: perimortem caesarean (PMCS). From 20 weeks,
-// if no ROSC within 4 minutes of collapse → start PMCS, deliver by 5 minutes.
-// The PMCS clock is anchored to the TRUE collapse time, which may pre-date the
-// moment this tool was opened.
-
-const PMCS_DECISION_SEC = 4 * 60;   // start PMCS if no ROSC by 4 min
-const PMCS_DELIVERY_SEC = 5 * 60;   // aim to deliver by 5 min
-const CPR_CYCLE_SEC = 2 * 60;       // rhythm check every 2 minutes of CPR
+import {
+  PMCS_DECISION_SEC,
+  PMCS_DELIVERY_SEC,
+  CPR_CYCLE_SEC,
+  ADRENALINE_INTERVAL_SEC,
+  SHOCK_ENERGY,
+  JOINT_ARREST_QUICK_TIMES,
+  minsAgoToTimestamp,
+  initialCycleFromCprStart,
+} from "../data/emergency/cardiac-arrest-shared.js";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -78,22 +75,6 @@ function ExitConfirm({ active, onConfirm, onCancel }) {
 // Captures gestation band (MLUD + PMCS), collapse time (PMCS / arrest clock),
 // and CPR start (2-min rhythm cycles) — they may differ if CPR was delayed.
 
-function nowTimeString() {
-  const d = new Date();
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-function parseClockTime(input) {
-  if (!input.trim()) return null;
-  const [hh, mm] = input.split(":").map(Number);
-  if (isNaN(hh) || isNaN(mm) || hh < 0 || hh > 23 || mm < 0 || mm > 59) return null;
-  const d = new Date();
-  d.setSeconds(0, 0);
-  d.setHours(hh, mm, 0, 0);
-  if (d.getTime() > Date.now()) d.setDate(d.getDate() - 1);
-  return d.getTime();
-}
-
 function formatElapsedMs(ms) {
   const totalSec = Math.max(0, Math.floor(ms / 1000));
   const m = Math.floor(totalSec / 60);
@@ -138,81 +119,60 @@ function cprHelperFromTs(collapseTime, cprTime) {
     : `CPR ${ago} — next rhythm check in ${remLabel}.`;
 }
 
-function TimestampField({ label, value, onChange, onNow, onSecondary, secondaryLabel, helper, error }) {
+const QUICK_TIME_OPTIONS = JOINT_ARREST_QUICK_TIMES;
+
+function formatWallClock(ts) {
+  const d = new Date(ts);
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function QuickTimePicker({ label, minsAgo, onSelect, helper, error, footer }) {
   return (
     <div className="space-y-2">
       <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">{label}</p>
-      <div className="flex gap-2">
-        <input
-          type="time"
-          value={value}
-          onChange={e => onChange(e.target.value)}
-          className={`flex-1 min-w-0 bg-gray-900 border rounded-xl px-3 py-2.5 text-white tabular-nums ${
-            error ? "border-red-600" : "border-gray-800"
-          }`}
-        />
-        <button
-          type="button"
-          onClick={onNow}
-          className="shrink-0 px-3 py-2.5 rounded-xl border border-gray-800 text-white text-sm font-bold"
-        >
-          Now
-        </button>
-        {onSecondary && (
+      <div className="flex flex-wrap gap-2">
+        {QUICK_TIME_OPTIONS.map(opt => (
           <button
+            key={opt.mins}
             type="button"
-            onClick={onSecondary}
-            className="shrink-0 px-3 py-2.5 rounded-xl border border-gray-800 text-gray-400 text-xs font-medium max-w-[5.5rem] leading-tight"
+            onClick={() => onSelect(opt.mins)}
+            className={`px-3 py-2 rounded-lg text-sm font-medium border transition ${
+              minsAgo === opt.mins
+                ? "bg-white text-gray-950 border-white"
+                : "border-gray-800 text-gray-300 hover:border-gray-600"
+            }`}
           >
-            {secondaryLabel}
+            {opt.label}
           </button>
-        )}
+        ))}
       </div>
+      {footer}
+      {minsAgo != null && (
+        <p className="text-gray-500 text-xs tabular-nums">≈ {formatWallClock(minsAgoToTimestamp(minsAgo))}</p>
+      )}
       {error && <p className="text-red-400 text-xs">{error}</p>}
       {!error && helper && <p className="text-gray-600 text-xs">{helper}</p>}
     </div>
   );
 }
 
-function initialCycleFromCprStart(cprStartTime) {
-  const elapsed = Math.max(0, Date.now() - cprStartTime);
-  const cycleMs = CPR_CYCLE_SEC * 1000;
-  const intoCycle = elapsed % cycleMs;
-  const dueNow = elapsed > 0 && intoCycle === 0;
-  return {
-    cycleNumber: Math.floor(elapsed / cycleMs) + 1,
-    cycleStart: dueNow ? Date.now() - cycleMs : Date.now() - intoCycle,
-  };
+function initialCycleFromCprStartLocal(cprStartTime) {
+  return initialCycleFromCprStart(cprStartTime, Date.now());
 }
 
-function SetupScreen({ onConfirm, onExit, postpartum }) {
+function SetupScreen({ onConfirm, onExit, onReturnToPph, postpartum }) {
   const [gestation, setGestation] = useState(postpartum ? "delivered" : null); // "under20" | "over20" | "delivered"
-  const [collapseTimeInput, setCollapseTimeInput] = useState("");
-  const [cprTimeInput, setCprTimeInput] = useState("");
+  const [collapseMinsAgo, setCollapseMinsAgo] = useState(0);
+  const [cprSameAsCollapse, setCprSameAsCollapse] = useState(true);
+  const [cprMinsAgo, setCprMinsAgo] = useState(0);
 
-  const collapseTime = collapseTimeInput.trim() ? parseClockTime(collapseTimeInput) : Date.now();
-  const cprTime = cprTimeInput.trim() ? parseClockTime(cprTimeInput) : collapseTime;
+  const collapseTime = minsAgoToTimestamp(collapseMinsAgo);
+  const cprTime = cprSameAsCollapse ? collapseTime : minsAgoToTimestamp(cprMinsAgo);
 
-  const collapseParseError = collapseTimeInput.trim() && collapseTime === null;
-  const cprParseError = cprTimeInput.trim() && parseClockTime(cprTimeInput) === null;
-  const collapseFuture = collapseTimeInput.trim() && collapseTime != null && collapseTime > Date.now();
-  const cprFuture = cprTimeInput.trim() && cprTime != null && cprTime > Date.now();
-  const cprBeforeCollapse = collapseTime != null && cprTime != null && cprTime < collapseTime;
+  const cprBeforeCollapse = !cprSameAsCollapse && cprMinsAgo > collapseMinsAgo;
+  const cprError = cprBeforeCollapse ? "CPR cannot start before collapse." : null;
 
-  const collapseError = collapseParseError
-    ? "Enter a valid time (HH:MM)."
-    : collapseFuture
-      ? "Collapse time cannot be in the future."
-      : null;
-  const cprError = cprParseError
-    ? "Enter a valid time (HH:MM)."
-    : cprFuture
-      ? "CPR start cannot be in the future."
-      : cprBeforeCollapse
-        ? "CPR cannot start before collapse."
-        : null;
-
-  const timesValid = !collapseError && !cprError;
+  const timesValid = !cprError;
   const canStart = gestation != null && timesValid;
 
   function toggleGestation(value) {
@@ -228,15 +188,25 @@ function SetupScreen({ onConfirm, onExit, postpartum }) {
             <h1 className="text-white text-2xl font-black leading-tight">Start resuscitation</h1>
             <p className="text-gray-500 text-sm mt-1.5">GTG56 · Resus Council UK ALS</p>
           </div>
-          <button
-            onClick={onExit}
-            className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-800 text-gray-500 hover:text-gray-300 hover:border-gray-600 shrink-0"
-            aria-label="Exit"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {onReturnToPph && (
+              <button
+                onClick={onReturnToPph}
+                className="text-violet-400 hover:text-violet-300 text-xs border border-violet-900/60 hover:border-violet-700 px-2.5 py-1.5 rounded transition whitespace-nowrap"
+              >
+                ← PPH
+              </button>
+            )}
+            <button
+              onClick={onExit}
+              className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-800 text-gray-500 hover:text-gray-300 hover:border-gray-600 shrink-0"
+              aria-label="Exit"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Gestation — skipped when launched postpartum from PPH */}
@@ -266,25 +236,31 @@ function SetupScreen({ onConfirm, onExit, postpartum }) {
           </div>
         )}
 
-        <TimestampField
+        <QuickTimePicker
           label="Collapse occurred at"
-          value={collapseTimeInput}
-          onChange={setCollapseTimeInput}
-          onNow={() => setCollapseTimeInput(nowTimeString())}
-          helper={timesValid && collapseTime != null ? collapseHelperFromTs(collapseTime) : "Clock time · blank = happening now"}
-          error={collapseError}
+          minsAgo={collapseMinsAgo}
+          onSelect={setCollapseMinsAgo}
+          helper={timesValid ? collapseHelperFromTs(collapseTime) : "Tap when collapse happened"}
         />
 
-        <TimestampField
+        <QuickTimePicker
           label="CPR started at"
-          value={cprTimeInput}
-          onChange={setCprTimeInput}
-          onNow={() => setCprTimeInput(nowTimeString())}
-          onSecondary={() => setCprTimeInput(collapseTimeInput)}
-          secondaryLabel="Same as collapse"
-          helper={timesValid && collapseTime != null && cprTime != null
-            ? cprHelperFromTs(collapseTime, cprTime)
-            : "Clock time · blank = same as collapse"}
+          minsAgo={cprSameAsCollapse ? collapseMinsAgo : cprMinsAgo}
+          onSelect={(mins) => { setCprSameAsCollapse(false); setCprMinsAgo(mins); }}
+          footer={(
+            <button
+              type="button"
+              onClick={() => setCprSameAsCollapse(true)}
+              className={`mt-1 px-3 py-2 rounded-lg text-xs font-medium border transition ${
+                cprSameAsCollapse
+                  ? "bg-gray-800 text-white border-gray-600"
+                  : "border-gray-800 text-gray-400 hover:border-gray-600"
+              }`}
+            >
+              Same as collapse
+            </button>
+          )}
+          helper={timesValid ? cprHelperFromTs(collapseTime, cprTime) : "Tap when CPR started"}
           error={cprError}
         />
       </div>
@@ -371,9 +347,6 @@ function ImmediateActions({ gestation, doneSet, onToggle }) {
 }
 
 // ─── CPR cycle constants ──────────────────────────────────────────────────────
-
-const ADRENALINE_INTERVAL_SEC = 180; // every 3 minutes
-const SHOCK_ENERGY = "200 J biphasic";
 
 // ─── Rhythm check interrupt ───────────────────────────────────────────────────
 
@@ -681,7 +654,7 @@ function SummaryScreen({ startTime, outcome, outcomeTime, shockCount, adrenaline
 
 // ─── Dual-clock header ────────────────────────────────────────────────────────
 
-function Header({ startTime, now, gestation, onClose }) {
+function Header({ startTime, now, gestation, onClose, onReturnToPph }) {
   const elapsedMs = now - startTime;
   const pmcsRemainingMs = PMCS_DECISION_SEC * 1000 - elapsedMs;
   const pmcsDue = pmcsRemainingMs <= 0;
@@ -695,7 +668,17 @@ function Header({ startTime, now, gestation, onClose }) {
           <span className="text-gray-600 text-xs">Arrest</span>
           <span className="font-mono text-white text-2xl font-bold tabular-nums">{fmtClock(elapsedMs)}</span>
         </div>
-        <button onClick={onClose} className="text-gray-600 hover:text-gray-300 text-xs border border-gray-800 hover:border-gray-600 px-2.5 py-1.5 rounded transition">Close</button>
+        <div className="flex items-center gap-2 shrink-0">
+          {onReturnToPph && (
+            <button
+              onClick={onReturnToPph}
+              className="text-violet-400 hover:text-violet-300 text-xs border border-violet-900/60 hover:border-violet-700 px-2.5 py-1.5 rounded transition whitespace-nowrap"
+            >
+              ← PPH
+            </button>
+          )}
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-300 text-xs border border-gray-800 hover:border-gray-600 px-2.5 py-1.5 rounded transition">Close</button>
+        </div>
       </div>
       {showPmcs && (
         <div className="flex items-center gap-3">
@@ -723,12 +706,28 @@ const CA_STORAGE_KEY = "pocket_og_cardiac_arrest_session";
 function caSave(data) { try { localStorage.setItem(CA_STORAGE_KEY, JSON.stringify(data)); } catch {} }
 function caClear() { try { localStorage.removeItem(CA_STORAGE_KEY); } catch {} }
 
-export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
+function readActiveCaSnapshot() {
+  try {
+    const s = JSON.parse(localStorage.getItem(CA_STORAGE_KEY));
+    return (s?.phase === "active" || s?.phase === "postresus") ? s : null;
+  } catch {
+    return null;
+  }
+}
+
+export default function CardiacArrestPage({ onClose, onLaunchPph, onReturnToPph, context }) {
   const [savedSession] = useState(() => {
     try { const r = localStorage.getItem(CA_STORAGE_KEY); return r ? JSON.parse(r) : null; } catch { return null; }
   });
   const [recoveryDismissed, setRecoveryDismissed] = useState(false);
-  const [phase, setPhase] = useState("setup"); // setup | active | postresus | summary
+  const [phase, setPhase] = useState(() => {
+    if (context?.resumeCa) {
+      const s = readActiveCaSnapshot();
+      if (s?.phase === "postresus") return "postresus";
+      if (s?.phase === "active") return "active";
+    }
+    return "setup";
+  });
   const [gestation, setGestation] = useState(null);
   const [startTime, setStartTime] = useState(null);
   const [now, setNow] = useState(() => Date.now());
@@ -754,6 +753,7 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
   const [postResusDone, setPostResusDone] = useState([]);
   const [exitConfirm, setExitConfirm] = useState(false);
   const wakeLockRef = useRef(null);
+  const caAutoResumed = useRef(false);
 
   // 1-second tick while resus is in progress
   useEffect(() => {
@@ -777,6 +777,11 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
   function handleRecover() {
     const s = savedSession;
     if (!s) return;
+    applyCaSnapshot(s);
+  }
+
+  function applyCaSnapshot(s) {
+    if (!s) return;
     setGestation(s.gestation ?? null);
     setStartTime(s.startTime ?? Date.now());
     setRosc(s.rosc ?? false);
@@ -798,6 +803,15 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
     setPostResusDone(s.postResusDone ?? []);
     setPhase(s.phase === "postresus" ? "postresus" : "active");
   }
+
+  useEffect(() => {
+    if (!context?.resumeCa || caAutoResumed.current) return;
+    const s = readActiveCaSnapshot();
+    if (!s) return;
+    caAutoResumed.current = true;
+    applyCaSnapshot(s);
+    setRecoveryDismissed(true);
+  }, [context?.resumeCa]);
 
   function handleClose() {
     if (phase === "summary") caClear();
@@ -907,7 +921,12 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
             onCancel={() => setExitConfirm(false)}
           />
         )}
-        <SetupScreen onConfirm={handleSetup} onExit={requestClose} postpartum={!!context?.postpartum} />
+        <SetupScreen
+          onConfirm={handleSetup}
+          onExit={requestClose}
+          onReturnToPph={onReturnToPph}
+          postpartum={!!context?.postpartum}
+        />
       </div>
     );
   }
@@ -977,7 +996,7 @@ export default function CardiacArrestPage({ onClose, onLaunchPph, context }) {
         />
       )}
 
-      <Header startTime={startTime} now={now} gestation={gestation} onClose={requestClose} />
+      <Header startTime={startTime} now={now} gestation={gestation} onClose={requestClose} onReturnToPph={onReturnToPph} />
 
       {/* Active body */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5">

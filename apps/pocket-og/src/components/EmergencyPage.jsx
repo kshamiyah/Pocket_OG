@@ -1,5 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 import { getPphLevel, pphLevelVal, PPH_LEVEL_ORDER, PPH_THRESHOLDS } from "../data/emergency/pph-shared.js";
+import {
+  createJointArrestState,
+  emptyJointArrestState,
+  minsAgoToTimestamp,
+  rhythmCheckDue,
+  advanceCprCycle,
+  computeJointArrestPrompt,
+} from "../data/emergency/cardiac-arrest-shared.js";
+import {
+  JointArrestSetupSheet,
+  JointArrestStrip,
+  JointArrestRhythmPrompt,
+  JointArrestShockPrompt,
+  JointArrestRoscBanner,
+} from "./JointArrestPanel.jsx";
 
 // ─── Task registry ──────────────────────────────────────────────────────────
 
@@ -280,6 +295,44 @@ function effectiveTaskStatus(id, taskStates, level, txaTime) {
   return s;
 }
 
+const LEAD_MODES = { GUIDED: "guided", AUTONOMOUS: "autonomous" };
+/** In autonomous mode, hide step-by-step coaching only — keep all timing/safety interrupts. */
+const AUTONOMOUS_HIDDEN_PROMPT_TYPES = new Set(["task", "monitoring"]);
+
+const AUTONOMY_TYPES = new Set(["drug", "blood", "fluid", "access", "action"]);
+const AUTONOMY_EXCLUDED_IDS = new Set(["fundal_massage"]);
+const PARALLEL_WITH_CALL_IDS = new Set([
+  "abc", "iv_access", "txa", "second_cannula", "mhp_pack", "rapid_cryst", "blood_products", "iv_fluids",
+]);
+
+function isAutonomyEligible(task, forcedTasks) {
+  if (!AUTONOMY_TYPES.has(task.type)) return false;
+  if (AUTONOMY_EXCLUDED_IDS.has(task.id)) return false;
+  if (task.consider) return false;
+  if (task.hidden && !(forcedTasks || []).includes(task.id)) return false;
+  return true;
+}
+
+function autonomyButtonLabel(task) {
+  return task.type === "drug" ? "Give" : "Done";
+}
+
+function getSuggestedSequenceDrug(taskStates, level, forcedTasks, txaTime) {
+  if (txaEligible(taskStates, level, txaTime) && effectiveTaskStatus("txa", taskStates, level, txaTime) === null) {
+    if (depSatisfied("iv_access", taskStates)) return TASKS.find(t => t.id === "txa") ?? null;
+  }
+  const nextUt = getNextUterotonic(taskStates, level, forcedTasks);
+  if (nextUt) return nextUt;
+  for (const t of TASKS) {
+    if (t.type !== "drug" || t.uterotonic || t.id === "txa") continue;
+    if (levelVal(t.level) > levelVal(level) && !(forcedTasks || []).includes(t.id)) continue;
+    if (effectiveTaskStatus(t.id, taskStates, level, txaTime) !== null) continue;
+    if (!(t.deps || []).every(id => depSatisfied(id, taskStates))) continue;
+    return t;
+  }
+  return null;
+}
+
 function stabilisationCallId(level) {
   if (levelVal(level) >= levelVal("massive")) return "call_massive";
   if (levelVal(level) >= levelVal("major")) return "call_major";
@@ -381,7 +434,7 @@ function countMonitoringPending({ taskStates, level, forcedTasks, txaTime }) {
   return { blocked, inProgress };
 }
 
-function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, ivFailSnoozeUntil, infusionReassess, sessionRecoveredAt, forcedFollowUpId }) {
+function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, ivFailSnoozeUntil, infusionReassess, sessionRecoveredAt, forcedFollowUpId, jointArrest }) {
   function depsOk(task) {
     return (task.deps || []).every(id => depSatisfied(id, taskStates));
   }
@@ -431,12 +484,18 @@ function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaH
     if (arrestTask && st("cardiac_arrest_ref") == null) return gate(arrestTask);
   }
 
+  // Priority 1.045 — embedded arrest (Option F): rhythm / shock while PPH continues
+  const jointPrompt = computeJointArrestPrompt(jointArrest, now);
+  if (jointPrompt) return jointPrompt;
+
   // Priority 1.05 — user tapped an assigned row in the checklist
   if (forcedFollowUpId) {
     const t = TASKS.find(x => x.id === forcedFollowUpId);
     if (t && taskStates[t.id]?.status === "assigned") {
-      if (t.id === "theatre") return { type: "theatre_transfer", task: t };
-      return { type: "followup", task: t };
+      const assignedAt = taskStates[t.id]?.assignedAt;
+      const chaseEarly = !!(t.followUpDelay && assignedAt && (now - assignedAt) / 1000 < t.followUpDelay);
+      if (t.id === "theatre") return { type: "theatre_transfer", task: t, early: chaseEarly };
+      return { type: "followup", task: t, early: chaseEarly };
     }
   }
 
@@ -624,6 +683,122 @@ function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaH
   return { type: "monitoring", ...pending };
 }
 
+const PROMPT_SUGGESTED_TYPES = new Set([
+  "task", "ci_check", "assess", "followup", "theatre_transfer", "consider",
+]);
+
+function getAlgorithmSuggestedTask(prompt, taskStates, level, forcedTasks, txaTime) {
+  if (!prompt) return null;
+  if (PROMPT_SUGGESTED_TYPES.has(prompt.type) && prompt.task) {
+    const t = prompt.task;
+    if (levelVal(t.level) > levelVal(level) && !(forcedTasks || []).includes(t.id)) return null;
+    if (effectiveTaskStatus(t.id, taskStates, level, txaTime) !== null) return null;
+    return t;
+  }
+  if (prompt.type === "uterotonic_escalate" && prompt.nextTask) {
+    const t = prompt.nextTask;
+    if (effectiveTaskStatus(t.id, taskStates, level, txaTime) === null) return t;
+  }
+  return null;
+}
+
+function getSuggestedAutonomyTask(prompt, taskStates, level, forcedTasks, txaTime) {
+  const fromPrompt = getAlgorithmSuggestedTask(prompt, taskStates, level, forcedTasks, txaTime);
+  if (fromPrompt) return fromPrompt;
+  if (levelVal(level) >= levelVal("massive") && taskStates.iv_access?.status === "done") {
+    for (const id of MASSIVE_RESUS_AFTER_IV) {
+      const t = TASKS.find(x => x.id === id);
+      if (!t || effectiveTaskStatus(id, taskStates, level, txaTime) !== null) continue;
+      if (!(t.deps || []).every(depId => depSatisfied(depId, taskStates))) continue;
+      return t;
+    }
+  }
+  if (levelVal(level) >= levelVal("major")) {
+    for (const id of ["txa", "second_cannula"]) {
+      const t = TASKS.find(x => x.id === id);
+      if (!t || effectiveTaskStatus(id, taskStates, level, txaTime) !== null) continue;
+      if (id === "txa" && !txaEligible(taskStates, level, txaTime)) continue;
+      if (!(t.deps || []).every(depId => depSatisfied(depId, taskStates))) continue;
+      return t;
+    }
+  }
+  const drug = getSuggestedSequenceDrug(taskStates, level, forcedTasks, txaTime);
+  if (drug) return drug;
+  for (const id of [stabilisationCallId(level), "iv_access", "abc"]) {
+    const t = TASKS.find(x => x.id === id);
+    if (!t || effectiveTaskStatus(id, taskStates, level, txaTime) !== null) continue;
+    if (!(t.deps || []).every(depId => depSatisfied(depId, taskStates))) continue;
+    return t;
+  }
+  return null;
+}
+
+function taskNeedsAutonomyWarning(task, suggested) {
+  if (!suggested) return false;
+  if (task.id === suggested.id) return false;
+  if (suggested.type === "call" && PARALLEL_WITH_CALL_IDS.has(task.id)) return false;
+  return true;
+}
+
+function autonomyWarnCopy(task, suggestedTitle, taskStates, level) {
+  const proceedLabel = task.type === "drug" ? "Give anyway" : "Do anyway";
+  if (deferFourTs(task, taskStates, level)) {
+    return {
+      headline: "Not next on GTG52 path",
+      body: `Complete massive resus (MHP · TXA · 2nd cannula) first. Suggested next: ${suggestedTitle}. Out-of-sequence actions are logged for handover — clinical judgment remains with you.`,
+      proceedLabel,
+    };
+  }
+  const verb = task.type === "drug" ? "giving" : "action";
+  return {
+    headline: "Not next on GTG52 ladder",
+    body: `Suggested next: ${suggestedTitle}. Out-of-sequence ${verb} is logged for handover — clinical judgment remains with you.`,
+    proceedLabel,
+  };
+}
+
+function shouldShowPromptRail(leadMode, prompt) {
+  if (leadMode === LEAD_MODES.GUIDED) return !!prompt;
+  if (!prompt) return false;
+  return !AUTONOMOUS_HIDDEN_PROMPT_TYPES.has(prompt.type);
+}
+
+function LeadModeToggle({ value, onChange, compact = false }) {
+  const isAutonomous = value === LEAD_MODES.AUTONOMOUS;
+  return (
+    <div
+      className={`flex rounded-lg border border-gray-800 bg-gray-950 p-0.5 ${compact ? "w-auto min-w-[11rem]" : "w-full"}`}
+      role="group"
+      aria-label="Session mode"
+    >
+      <button
+        type="button"
+        aria-pressed={!isAutonomous}
+        onClick={() => onChange(LEAD_MODES.GUIDED)}
+        className={`flex-1 font-bold rounded-md transition ${compact ? "px-3 py-1 text-[11px]" : "py-2.5 text-xs"} ${
+          !isAutonomous
+            ? "bg-amber-950/60 text-amber-300 shadow-sm"
+            : "text-gray-500 hover:text-gray-300"
+        }`}
+      >
+        Guided
+      </button>
+      <button
+        type="button"
+        aria-pressed={isAutonomous}
+        onClick={() => onChange(LEAD_MODES.AUTONOMOUS)}
+        className={`flex-1 font-bold rounded-md transition ${compact ? "px-3 py-1 text-[11px]" : "py-2.5 text-xs"} ${
+          isAutonomous
+            ? "bg-violet-950/60 text-violet-300 shadow-sm"
+            : "text-gray-500 hover:text-gray-300"
+        }`}
+      >
+        Autonomous
+      </button>
+    </div>
+  );
+}
+
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function fmt(ms) {
@@ -718,8 +893,9 @@ function ExitConfirm({ active, onConfirm, onCancel }) {
 
 // ─── Header ──────────────────────────────────────────────────────────────────
 
-function Header({ elapsed, bloodLoss, level, assignedCount, showQuickAdd, onAddBlood, onCorrectBlood, onStandDown, onExit }) {
+function Header({ elapsed, bloodLoss, level, assignedCount, leadMode, showQuickAdd, arrestNav, onAddBlood, onCorrectBlood, onStandDown, onExit, onLeadModeChange, onOpenCardiacArrest }) {
   const levelLabel = { minor: "Minor PPH", major: "Major PPH", massive: "Massive PPH" }[level];
+  const isAutonomous = leadMode === LEAD_MODES.AUTONOMOUS;
   const [correcting, setCorrecting] = useState(false);
   const [correctVal, setCorrectVal] = useState("");
 
@@ -741,6 +917,14 @@ function Header({ elapsed, bloodLoss, level, assignedCount, showQuickAdd, onAddB
       <div className="flex items-center justify-between gap-2 mb-1">
         <span className="font-mono text-white text-xl font-bold tabular-nums shrink-0">{fmt(elapsed)}</span>
         <div className="flex items-center gap-2 shrink-0">
+          {arrestNav && (
+            <button
+              onClick={onOpenCardiacArrest}
+              className="text-red-400 hover:text-red-300 text-xs border border-red-900/60 hover:border-red-700 px-2.5 py-1.5 rounded transition whitespace-nowrap"
+            >
+              {arrestNav.active ? `← Arrest${arrestNav.cycle ? ` · c${arrestNav.cycle}` : ""}` : "Arrest SOS →"}
+            </button>
+          )}
           <button onClick={onExit} className="text-gray-600 hover:text-gray-300 text-xs border border-gray-800 hover:border-gray-600 px-2.5 py-1.5 rounded transition">Exit</button>
           <button onClick={onStandDown} className="text-gray-600 hover:text-gray-300 text-xs border border-gray-800 hover:border-gray-600 px-2.5 py-1.5 rounded transition">Stand down</button>
         </div>
@@ -748,6 +932,12 @@ function Header({ elapsed, bloodLoss, level, assignedCount, showQuickAdd, onAddB
       <div className="flex items-center gap-2 mb-2 flex-wrap">
         {assignedCount > 0 && <span className="text-amber-500 text-xs">{assignedCount} in progress</span>}
         <span className="text-gray-600 text-xs">{levelLabel}</span>
+      </div>
+      <div className="mb-2">
+        <LeadModeToggle value={leadMode} onChange={onLeadModeChange} compact />
+        <p className="text-gray-700 text-[10px] mt-1">
+          {isAutonomous ? "Checklist & timers — you lead" : "Step-by-step prompts"}
+        </p>
       </div>
       <div className="space-y-2">
         <div className="flex items-baseline gap-2 min-w-0">
@@ -788,7 +978,7 @@ function Header({ elapsed, bloodLoss, level, assignedCount, showQuickAdd, onAddB
 
 // ─── Drug strip ───────────────────────────────────────────────────────────────
 
-function DrugStrip({ txaTime, txaSecondDone, taskStates, level, birthTime, carboCount, carboLastTime, log, sessionRecoveredAt, now, forcedTasks }) {
+function DrugStrip({ txaTime, txaSecondDone, taskStates, level, birthTime, carboCount, carboLastTime, log, sessionRecoveredAt, now, forcedTasks, onAssignedTap }) {
   const items = [];
   const ASSIGNED_STRIP_MAX = 3;
 
@@ -821,7 +1011,12 @@ function DrugStrip({ txaTime, txaSecondDone, taskStates, level, birthTime, carbo
     const { id, label, remainingMs, overdue, delayMs } = chase;
     const rem = Math.max(0, remainingMs);
     items.push(
-      <div key={`assigned-${id}`} className="flex items-center gap-3">
+      <button
+        key={`assigned-${id}`}
+        type="button"
+        onClick={() => onAssignedTap?.(id)}
+        className="w-full flex items-center gap-3 text-left active:opacity-80 transition"
+      >
         <span className="text-gray-600 text-xs w-24 shrink-0 truncate" title={label}>{label}</span>
         <div className="flex-1 bg-gray-800 h-px relative">
           {!overdue && (
@@ -835,7 +1030,7 @@ function DrugStrip({ txaTime, txaSecondDone, taskStates, level, birthTime, carbo
         <span className={`text-xs font-mono tabular-nums w-14 text-right shrink-0 ${overdue ? "text-amber-400 font-bold" : "text-violet-300/80"}`}>
           {overdue ? "due now" : fmt(rem)}
         </span>
-      </div>
+      </button>
     );
   }
   if (overflowChases > 0) {
@@ -1009,14 +1204,18 @@ function TaskPrompt({ task, onDone, onAssign, onSkip, onNotAvailable, onAlreadyG
   );
 }
 
-function FollowupPrompt({ task, onYes, onNo }) {
+function FollowupPrompt({ task, onYes, onNo, early = false }) {
   useEffect(() => { if ("vibrate" in navigator) navigator.vibrate([100, 60, 100]); }, []);
   const escalates = !!task.followUpEscalate;
   return (
     <div className="px-4 py-3.5 space-y-2.5">
       <span className="text-xs font-bold uppercase tracking-wider text-amber-500">Follow-up</span>
       <p className="text-white text-xl font-bold leading-snug">{task.followUpQuestion || task.title}</p>
-      <p className="text-gray-600 text-xs">{task.followUpQuestion ? "Reassess now" : "Assigned to team — has it been done?"}</p>
+      <p className="text-gray-600 text-xs">
+        {early && task.followUpDelay
+          ? "Chase timer still running — confirm done to clear early"
+          : task.followUpQuestion ? "Reassess now" : "Assigned to team — has it been done?"}
+      </p>
       {escalates ? (
         <div className="flex flex-col gap-2 pt-1">
           <button onClick={() => onYes(task)} className="w-full bg-white text-gray-950 font-bold py-2.5 text-sm rounded-lg">
@@ -1387,12 +1586,14 @@ function ConsiderPrompt({ task, remindMin, onPrepare, onNotIndicated, onNotNow, 
 
 function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount, ivAccessDone, cardiacArrestPending, handlers }) {
   if (!prompt) return null;
-  const { onDone, onAssign, onSkip, onNotAvailable, onAlreadyGiven, onFollowupYes, onFollowupNo, onAssessExclude, onAssessPresent, onBloodAdd, onBloodUnchanged, onBloodPending, onBloodCorrect, onCarboDose, onCarboSkip, onTxaSecondGiven, onTxaSecondNotNeeded, onToneCheckFirm, onToneCheckBoggy, onCiClear, onCiContraindicated, onUterotonicEscalateYes, onUterotonicEscalateHold, onUterotonicEscalateNotYet, onIvFailRetry, onIvFailImDrug, onIvFailDismiss, onInfusionYes, onInfusionAssign, onInfusionNotNeeded, onConsiderPrepare, onConsiderNotIndicated, onConsiderNotNow, onConsiderArrestYes, onConsiderArrestNo, onCheckCardiacArrest, onTheatreInTheatre, onTheatreStillPreparing } = handlers;
+  const { onDone, onAssign, onSkip, onNotAvailable, onAlreadyGiven, onFollowupYes, onFollowupNo, onAssessExclude, onAssessPresent, onBloodAdd, onBloodUnchanged, onBloodPending, onBloodCorrect, onCarboDose, onCarboSkip, onTxaSecondGiven, onTxaSecondNotNeeded, onToneCheckFirm, onToneCheckBoggy, onCiClear, onCiContraindicated, onUterotonicEscalateYes, onUterotonicEscalateHold, onUterotonicEscalateNotYet, onIvFailRetry, onIvFailImDrug, onIvFailDismiss, onInfusionYes, onInfusionAssign, onInfusionNotNeeded, onConsiderPrepare, onConsiderNotIndicated, onConsiderNotNow, onConsiderArrestYes, onConsiderArrestNo, onCheckCardiacArrest, onTheatreInTheatre, onTheatreStillPreparing, onArrestRhythmShockable, onArrestRhythmNonShockable, onArrestShockDelivered } = handlers;
 
   let content;
   switch (prompt.type) {
+    case "arrest_rhythm": content = <JointArrestRhythmPrompt cycleNumber={prompt.cycleNumber} onShockable={onArrestRhythmShockable} onNonShockable={onArrestRhythmNonShockable} />; break;
+    case "arrest_shock":  content = <JointArrestShockPrompt shockNumber={prompt.shockNumber} onDelivered={onArrestShockDelivered} />; break;
     case "task":         content = <TaskPrompt task={prompt.task} onDone={onDone} onAssign={onAssign} onSkip={onSkip} onNotAvailable={onNotAvailable} onAlreadyGiven={onAlreadyGiven} ivAccessDone={ivAccessDone} onCheckCardiacArrest={prompt.task.id === "abc" && cardiacArrestPending ? onCheckCardiacArrest : undefined} />; break;
-    case "followup":     content = <FollowupPrompt task={prompt.task} onYes={onFollowupYes} onNo={onFollowupNo} />; break;
+    case "followup":     content = <FollowupPrompt task={prompt.task} onYes={onFollowupYes} onNo={onFollowupNo} early={prompt.early} />; break;
     case "theatre_transfer": content = <TheatreTransferPrompt task={prompt.task} onInTheatre={onTheatreInTheatre} onStillPreparing={onTheatreStillPreparing} />; break;
     case "assess":       content = <AssessPrompt task={prompt.task} onExclude={onAssessExclude} onPresent={onAssessPresent} />; break;
     case "blood_loss_check": content = <BloodCheckPrompt level={level} bloodLoss={bloodLoss} rate={prompt.rate} interval={prompt.interval} onAdd={onBloodAdd} onUnchanged={onBloodUnchanged} onPending={onBloodPending} onCorrect={onBloodCorrect} />; break;
@@ -1408,7 +1609,7 @@ function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount,
     default:             return null;
   }
 
-  const isInterrupt = ["followup", "theatre_transfer", "assess", "blood_loss_check", "carbo_dose", "txa_second", "tone_check", "ci_check", "uterotonic_escalate", "iv_fail", "infusion_reassess", "consider"].includes(prompt.type);
+  const isInterrupt = ["followup", "theatre_transfer", "assess", "blood_loss_check", "carbo_dose", "txa_second", "tone_check", "ci_check", "uterotonic_escalate", "iv_fail", "infusion_reassess", "consider", "arrest_rhythm", "arrest_shock"].includes(prompt.type);
 
   return (
     <div className={`flex-shrink-0 border-b border-gray-800 relative z-10 ${isInterrupt ? "bg-gray-900" : "bg-gray-900"}`}>
@@ -1422,15 +1623,318 @@ function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount,
   );
 }
 
+// ─── Checklist autonomy + lead mode ───────────────────────────────────────────
+
+function AutonomousModeBanner() {
+  return (
+    <div className="flex-shrink-0 px-4 py-2 border-b border-violet-900/40 bg-violet-950/20">
+      <p className="text-violet-300 text-xs font-medium">Checklist mode — work from the list below. Timers stay active.</p>
+    </div>
+  );
+}
+
+function OutOfSequenceConfirm({ task, suggestedTitle, taskStates, level, onProceed, onCancel }) {
+  const { headline, body, proceedLabel } = autonomyWarnCopy(task, suggestedTitle, taskStates, level);
+  return (
+    <div className="fixed inset-0 bg-black/80 z-[55] flex items-end p-4" onClick={onCancel}>
+      <div className="bg-gray-900 border border-amber-800/60 rounded-xl p-5 w-full" onClick={e => e.stopPropagation()}>
+        <p className="text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">{headline}</p>
+        <p className="text-white font-bold text-base mb-1">{task.title}</p>
+        <p className="text-gray-500 text-sm mb-4">{body}</p>
+        <div className="flex gap-3">
+          <button onClick={onCancel} className="flex-1 border border-gray-700 text-gray-300 font-medium py-2.5 rounded-lg text-sm">Cancel</button>
+          <button onClick={onProceed} className="flex-1 bg-amber-600 text-white font-bold py-2.5 rounded-lg text-sm">{proceedLabel}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChecklistAutonomyActions({ task, ivAccessDone, ciCleared, isAutonomousLead, onDone, onDoneWithIv, onAlreadyGiven, onAssign, onSkip, onNotAvailable, onAssessExclude, onAssessPresent, onCancel }) {
+  const [skipConfirm, setSkipConfirm] = useState(false);
+  const isDrug = task.type === "drug";
+  const needsIvForGive = isDrug && (task.id === "oxytocin_bolus" || task.requiresIv);
+  const canGive = !needsIvForGive || ivAccessDone;
+  const ciPending = isDrug && task.contraindications?.length && !(ciCleared || {})[task.id];
+  const doneLabel = isDrug ? "Given now ✓" : "Done ✓";
+  const sheetTitle = isDrug ? "Checklist — give drug" : "Checklist";
+
+  if (isAutonomousLead && needsIvForGive && !ivAccessDone) {
+    return (
+      <div className="fixed inset-0 bg-black/80 z-[55] flex items-end p-4" onClick={onCancel}>
+        <div className="bg-gray-900 border border-gray-700 rounded-xl p-5 w-full" onClick={e => e.stopPropagation()}>
+          <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">IV access</p>
+          <p className="text-white text-lg font-bold mb-1">Is IV in?</p>
+          <p className="text-gray-500 text-sm mb-4">
+            Needed for <span className="text-gray-300">{task.title}</span>.
+            {" "}Confirming will record IV access and this step together.
+          </p>
+          <div className="flex flex-col gap-2">
+            <button onClick={() => onDoneWithIv(task)} className="w-full bg-white text-gray-950 font-bold py-3 text-sm rounded-lg">
+              Yes — IV in ✓
+            </button>
+            {task.uterotonic && (
+              <button onClick={() => onAlreadyGiven(task)} className="w-full border border-amber-700 text-amber-400 font-bold py-3 text-sm rounded-lg">
+                Already given (other route)
+              </button>
+            )}
+            <button onClick={onCancel} className="text-gray-500 text-sm py-2">Not yet</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (skipConfirm) {
+    return (
+      <div className="fixed inset-0 bg-black/80 z-[55] flex items-end p-4" onClick={() => setSkipConfirm(false)}>
+        <div className="bg-gray-900 border border-gray-700 rounded-xl p-5 w-full" onClick={e => e.stopPropagation()}>
+          <p className="text-red-400 text-xs font-bold uppercase tracking-wider mb-1">{isDrug ? "Critical drug — confirm skip" : "Confirm skip"}</p>
+          <p className="text-white font-bold mb-3">{task.title}</p>
+          <div className="flex gap-3">
+            <button onClick={() => setSkipConfirm(false)} className="flex-1 border border-gray-700 text-gray-300 py-2.5 rounded-lg text-sm">Cancel</button>
+            <button onClick={() => { setSkipConfirm(false); onSkip(task); }} className="flex-1 border border-red-900 text-red-400 font-bold py-2.5 rounded-lg text-sm">Skip anyway</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (task.assess) {
+    return (
+      <div className="fixed inset-0 bg-black/80 z-[55] flex items-end p-4" onClick={onCancel}>
+        <div className="bg-gray-900 border border-gray-700 rounded-xl p-5 w-full max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Checklist — assess</p>
+          <p className="text-white text-lg font-bold mb-2">{task.title}</p>
+          {task.detail && <p className="text-gray-500 text-xs whitespace-pre-line leading-relaxed mb-3">{task.detail}</p>}
+          <p className="text-gray-300 text-sm mb-4">{task.assess.question}</p>
+          <div className="flex flex-col gap-2">
+            <button onClick={() => onAssessExclude(task)} className="w-full border border-gray-700 text-white font-medium py-3 text-sm rounded-lg">{task.assess.excludeLabel}</button>
+            <button onClick={() => onAssessPresent(task)} className="w-full bg-white text-gray-950 font-bold py-3 text-sm rounded-lg">{task.assess.presentLabel}</button>
+            <button onClick={onCancel} className="text-gray-600 text-sm py-2">Cancel</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/80 z-[55] flex items-end p-4" onClick={onCancel}>
+      <div className="bg-gray-900 border border-gray-700 rounded-xl p-5 w-full max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">{sheetTitle}</p>
+        <p className="text-white text-lg font-bold mb-2">{task.title}</p>
+        {task.detail && <p className="text-gray-500 text-xs whitespace-pre-line leading-relaxed mb-3">{task.detail}</p>}
+        {ciPending && (
+          <p className="text-amber-400/90 text-xs border border-amber-900/50 rounded-lg px-3 py-2 mb-3">
+            Contraindications not yet screened in the prompt flow — confirm safe to give.
+          </p>
+        )}
+        {needsIvForGive && !ivAccessDone && (
+          <p className="text-gray-500 text-xs mb-3">IV access not recorded — use Already given if route was IM/SL/PR or given before.</p>
+        )}
+        <div className="flex flex-col gap-2">
+          {isDrug && task.uterotonic && (
+            <button onClick={() => onAlreadyGiven(task)} className="w-full border border-amber-700 text-amber-400 font-bold py-3 text-sm rounded-lg">Already given</button>
+          )}
+          {task.naOption && (
+            <button onClick={() => onNotAvailable(task)} className="w-full border border-gray-700 text-gray-300 font-medium py-3 text-sm rounded-lg">{task.naOption.label}</button>
+          )}
+          <div className="flex gap-2">
+            <button onClick={() => onDone(task)} disabled={isDrug && !canGive} className="flex-1 bg-white text-gray-950 font-bold py-3 text-sm rounded-lg disabled:opacity-40">{doneLabel}</button>
+            {!task.noDelegate && (
+              <button onClick={() => onAssign(task)} className="flex-1 border border-gray-700 text-white font-medium py-3 text-sm rounded-lg">Assign →</button>
+            )}
+          </div>
+          {!task.noSkip && (
+            <button onClick={() => (isDrug && task.critical) ? setSkipConfirm(true) : onSkip(task)} className="text-gray-600 hover:text-gray-400 text-xs py-2">
+              {isDrug ? "Skip this drug" : "Skip this step"}
+            </button>
+          )}
+          <button onClick={onCancel} className="text-gray-600 text-sm py-2">Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChecklistDetailSheet({
+  task,
+  state,
+  status,
+  taskStates,
+  level,
+  txaTime,
+  forcedTasks,
+  ivAccessDone,
+  isAutonomousLead,
+  cardiacArrestPending,
+  onClose,
+  onDone,
+  onAssign,
+  onSkip,
+  onNotAvailable,
+  onAlreadyGiven,
+  onConsiderPrepare,
+  onConsiderNotIndicated,
+  onConsiderNotNow,
+  onAutonomyAction,
+  onCheckCardiacArrest,
+  onAssignedDone,
+  onAssessExclude,
+  onAssessPresent,
+  onConfirmTask,
+}) {
+  const blockingDeps = (task.deps || []).filter(id => !depSatisfied(id, taskStates));
+  const fourTsLocked = deferFourTs(task, taskStates, level);
+  const isLocked = !status && (blockingDeps.length > 0 || fourTsLocked);
+  const lockNote = fourTsLocked
+    ? "Complete massive resus (MHP · TXA · 2nd cannula) first"
+    : blockingDeps.length > 0
+      ? `Awaits: ${TASKS.find(t => t.id === blockingDeps[0])?.title ?? blockingDeps[0]}`
+      : null;
+  const remindMin = Math.round(considerSnoozeMs(level) / 60000);
+  const isConsider = task.consider && !task.considerArrestCheck;
+  const canAutonomy = isAutonomyEligible(task, forcedTasks) && status === null;
+  const isDrug = task.type === "drug";
+
+  function act(fn) {
+    fn(task);
+    onClose();
+  }
+
+  function statusSummary() {
+    if (status === "done" || status === "already_given") {
+      const ts = state?.doneAt ?? state?.alreadyGivenAt;
+      return [status === "already_given" && "Already given", state?.outOfSequence && "Out of sequence", ts && taskCompletedTimeLabel(ts)].filter(Boolean).join(" · ");
+    }
+    if (status === "not_indicated") return "Not indicated";
+    if (status === "skipped") return state?.skipReason === "not_required" ? "Not required — uterus firm" : "Skipped";
+    if (status === "assigned") return task.id === "theatre" ? "Team preparing" : "Assigned — in progress";
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/80 z-[54] flex items-end p-4" onClick={onClose}>
+      <div className="bg-gray-900 border border-gray-700 rounded-xl p-5 w-full max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">
+          {TYPE_LABEL[task.type] ?? task.type}{task.critical ? " — critical" : ""}{isConsider ? " — consider" : ""}
+        </p>
+        <p className="text-white text-lg font-bold mb-2">{task.title}</p>
+        {task.considerLead && status === null && (
+          <p className="text-violet-300/90 text-sm mb-2">{task.considerLead}</p>
+        )}
+        {task.detail && (
+          <p className="text-gray-400 text-xs whitespace-pre-line leading-relaxed mb-3 border-l-2 border-gray-800 pl-3">{task.detail}</p>
+        )}
+        {isLocked && lockNote && (
+          <p className="text-gray-500 text-xs border border-gray-800 rounded-lg px-3 py-2 mb-3">{lockNote}</p>
+        )}
+        {statusSummary() && (
+          <p className="text-gray-600 text-xs mb-3">{statusSummary()}</p>
+        )}
+
+        <div className="flex flex-col gap-2">
+          {status === null && isConsider && (
+            <>
+              <button onClick={() => act(onConsiderPrepare)} className="w-full border border-gray-600 text-white font-medium py-3 text-sm rounded-lg">
+                Prepare — assign team
+              </button>
+              <button onClick={() => act(onConsiderNotIndicated)} className="w-full border border-gray-800 text-gray-400 text-sm py-2.5 rounded-lg">
+                Not indicated
+              </button>
+              <button onClick={() => { onConsiderNotNow(task); onClose(); }} className="w-full text-gray-600 text-sm py-2 rounded-lg">
+                Not now — remind in {remindMin} min
+              </button>
+            </>
+          )}
+
+          {status === null && task.type === "call" && (
+            <>
+              <div className="flex gap-2">
+                <button onClick={() => act(onDone)} className="flex-1 bg-white text-gray-950 font-bold py-3 text-sm rounded-lg">Done ✓</button>
+                <button onClick={() => act(onAssign)} className="flex-1 border border-gray-700 text-white font-medium py-3 text-sm rounded-lg">Assign →</button>
+              </div>
+            </>
+          )}
+
+          {status === null && task.id === "fundal_massage" && (
+            <button onClick={() => act(onDone)} className="w-full bg-white text-gray-950 font-bold py-3 text-sm rounded-lg">Done ✓</button>
+          )}
+
+          {status === null && task.assess && (
+            <>
+              <button onClick={() => act(onAssessExclude)} className="w-full border border-gray-700 text-white font-medium py-3 text-sm rounded-lg">{task.assess.excludeLabel}</button>
+              <button onClick={() => act(onAssessPresent)} className="w-full bg-white text-gray-950 font-bold py-3 text-sm rounded-lg">{task.assess.presentLabel}</button>
+            </>
+          )}
+
+          {status === null && canAutonomy && !isConsider && task.type !== "call" && !task.assess && task.id !== "fundal_massage" && (
+            <>
+              {isDrug && task.uterotonic && (
+                <button onClick={() => act(onAlreadyGiven)} className="w-full border border-amber-700 text-amber-400 font-bold py-3 text-sm rounded-lg">Already given</button>
+              )}
+              {task.naOption && (
+                <button onClick={() => act(onNotAvailable)} className="w-full border border-gray-700 text-gray-300 font-medium py-3 text-sm rounded-lg">{task.naOption.label}</button>
+              )}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => (isAutonomousLead && !isDrug ? act(onDone) : (() => { onClose(); onAutonomyAction(task); })())}
+                  className="flex-1 bg-white text-gray-950 font-bold py-3 text-sm rounded-lg"
+                >
+                  {autonomyButtonLabel(task)}{isDrug ? "" : " ✓"}
+                </button>
+                {!task.noDelegate && (
+                  <button onClick={() => act(onAssign)} className="flex-1 border border-gray-700 text-white font-medium py-3 text-sm rounded-lg">Assign →</button>
+                )}
+              </div>
+              {task.id === "abc" && cardiacArrestPending && onCheckCardiacArrest && (
+                <button
+                  onClick={() => { onCheckCardiacArrest(); onClose(); }}
+                  className="w-full border border-red-900/50 text-red-400 font-medium py-2.5 text-sm rounded-lg"
+                >
+                  Unstable — check for cardiac arrest
+                </button>
+              )}
+              {!task.noSkip && (
+                <button onClick={() => act(onSkip)} className="text-gray-600 hover:text-gray-400 text-xs py-2">
+                  {isDrug ? "Skip this drug" : "Skip this step"}
+                </button>
+              )}
+            </>
+          )}
+
+          {status === "assigned" && (
+            <>
+              <button onClick={() => { onAssignedDone(task.id); onClose(); }} className="w-full bg-white text-gray-950 font-bold py-3 text-sm rounded-lg">Done ✓</button>
+              <button onClick={() => { onClose(); onConfirmTask(task.id); }} className="w-full border border-gray-700 text-white font-medium py-2.5 text-sm rounded-lg">
+                Reassess — not yet?
+              </button>
+            </>
+          )}
+
+          <button onClick={onClose} className="text-gray-600 text-sm py-2 mt-1">Close</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Task list ────────────────────────────────────────────────────────────────
 
-function TaskRow({ task, state, taskStates, level, txaTime, now, emergencyStartTime, onConfirm }) {
+function TaskRow({ task, state, taskStates, level, txaTime, now, emergencyStartTime, onConfirm, onAssignedDone, onAutonomyAction, onOpenDetail, suggestedTaskId, forcedTasks, isAutonomousLead }) {
   const rawStatus = state?.status ?? null;
   const txaDeferred = task.id === "txa" && rawStatus === "skipped" && txaEligible(taskStates, level, txaTime);
   const status = txaDeferred ? null : rawStatus;
   const blockingDeps = (task.deps || []).filter(id => !depSatisfied(id, taskStates));
   const fourTsLocked = deferFourTs(task, taskStates, level);
   const isLocked = !status && (blockingDeps.length > 0 || fourTsLocked);
+  const isSuggested = suggestedTaskId === task.id;
+  const isPendingAutonomy = isAutonomyEligible(task, forcedTasks) && status === null;
+  const lockHint = fourTsLocked
+    ? "awaits MHP / TXA / 2nd cannula"
+    : blockingDeps.length > 0
+      ? `awaits ${TASKS.find(t => t.id === blockingDeps[0])?.title ?? blockingDeps[0]}`
+      : null;
 
   function completedMark() {
     const ts = task.id === "txa" && txaTime
@@ -1453,36 +1957,37 @@ function TaskRow({ task, state, taskStates, level, txaTime, now, emergencyStartT
       : state?.inTheatre ? "in theatre"
       : null;
     const mark = completedMark();
+    const oosNote = state?.outOfSequence ? "out of sequence" : null;
     return (
-      <div className="flex items-center gap-3 px-4 py-1.5">
+      <button type="button" onClick={() => onOpenDetail(task)} className="w-full flex items-center gap-3 px-4 py-1.5 text-left active:bg-gray-900/40 transition">
         <span className="text-gray-700 text-xs w-3 shrink-0">✓</span>
-        <span className="text-gray-700 text-sm min-w-0">{task.title}</span>
-        <span className="text-gray-800 text-xs ml-auto shrink-0 text-right tabular-nums">
-          {[status === "already_given" && "already given", assessNote, callNote, refNote, mark].filter(Boolean).join(" · ")}
+        <span className="text-gray-700 text-sm min-w-0 flex-1">{task.title}</span>
+        <span className="text-gray-800 text-xs shrink-0 text-right tabular-nums">
+          {[status === "already_given" && "already given", oosNote, assessNote, callNote, refNote, mark].filter(Boolean).join(" · ")}
         </span>
-      </div>
+      </button>
     );
   }
 
   if (status === "not_indicated") {
     return (
-      <div className="flex items-center gap-3 px-4 py-1.5">
+      <button type="button" onClick={() => onOpenDetail(task)} className="w-full flex items-center gap-3 px-4 py-1.5 text-left active:bg-gray-900/40 transition">
         <span className="text-gray-800 text-xs w-3 shrink-0">–</span>
-        <span className="text-gray-800 text-sm">{task.title}</span>
+        <span className="text-gray-800 text-sm flex-1">{task.title}</span>
         <span className="text-gray-800 text-xs ml-auto">not indicated</span>
-      </div>
+      </button>
     );
   }
 
   if (status === "skipped") {
     return (
-      <div className="flex items-center gap-3 px-4 py-1.5">
+      <button type="button" onClick={() => onOpenDetail(task)} className="w-full flex items-center gap-3 px-4 py-1.5 text-left active:bg-gray-900/40 transition">
         <span className="text-gray-800 text-xs w-3 shrink-0">–</span>
-        <span className="text-gray-800 text-sm">{task.title}</span>
+        <span className="text-gray-800 text-sm flex-1">{task.title}</span>
         <span className="text-gray-800 text-xs ml-auto">
           {state?.skipReason === "not_required" ? "not required — uterus firm" : "skipped"}
         </span>
-      </div>
+      </button>
     );
   }
 
@@ -1496,51 +2001,153 @@ function TaskRow({ task, state, taskStates, level, txaTime, now, emergencyStartT
     } else {
       timeLabel = fmt(now - assignedAt);
     }
+    const chaseOverdue = task.followUpDelay && assignedAt + task.followUpDelay * 1000 - now <= 0;
     return (
-      <button onClick={() => onConfirm(task.id)}
-        className="w-full flex items-center gap-3 px-4 py-2.5 text-left active:bg-gray-900 transition">
-        <span className="text-amber-500 text-xs w-3 shrink-0">→</span>
-        <span className="text-white text-sm flex-1">{task.title}</span>
-        <span className={`text-xs tabular-nums shrink-0 text-right ${task.followUpDelay && assignedAt + task.followUpDelay * 1000 - now <= 0 ? "text-amber-400 font-medium" : "text-gray-600"}`}>
-          {[statusNote, timeLabel].filter(Boolean).join(" · ")}
-        </span>
-      </button>
-    );
-  }
-
-  if (isLocked) {
-    const blockingTitle = fourTsLocked
-      ? "MHP / TXA / 2nd cannula"
-      : (TASKS.find(t => t.id === blockingDeps[0])?.title ?? blockingDeps[0]);
-    return (
-      <div className="flex items-center gap-3 px-4 py-1.5 opacity-30">
-        <span className="text-gray-700 text-xs w-3 shrink-0">○</span>
-        <span className="text-gray-700 text-sm flex-1">{task.title}</span>
-        <span className="text-gray-700 text-xs shrink-0">awaits {blockingTitle}</span>
+      <div className="flex items-center gap-2 px-4 py-2.5">
+        <button
+          type="button"
+          onClick={() => onOpenDetail(task)}
+          className="flex items-center gap-3 flex-1 min-w-0 text-left active:opacity-80 transition"
+        >
+          <span className="text-amber-500 text-xs w-3 shrink-0">→</span>
+          <span className="text-white text-sm flex-1 min-w-0">{task.title}</span>
+          <span className={`text-xs tabular-nums shrink-0 text-right ${chaseOverdue ? "text-amber-400 font-medium" : "text-gray-600"}`}>
+            {[statusNote, timeLabel].filter(Boolean).join(" · ")}
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onAssignedDone(task.id)}
+          className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-600 text-white hover:border-gray-400 transition"
+        >
+          Done ✓
+        </button>
       </div>
     );
   }
 
-  // Pending
+  if (isLocked && !isPendingAutonomy) {
+    const blockingTitle = fourTsLocked
+      ? "MHP / TXA / 2nd cannula"
+      : (TASKS.find(t => t.id === blockingDeps[0])?.title ?? blockingDeps[0]);
+    return (
+      <button type="button" onClick={() => onOpenDetail(task)} className="w-full flex items-center gap-3 px-4 py-1.5 text-left opacity-50 active:opacity-70 transition">
+        <span className="text-gray-700 text-xs w-3 shrink-0">○</span>
+        <span className="text-gray-700 text-sm flex-1">{task.title}</span>
+        <span className="text-gray-700 text-xs shrink-0">awaits {blockingTitle}</span>
+      </button>
+    );
+  }
+
+  if (isPendingAutonomy) {
+    return (
+      <div className={`flex items-center gap-2 px-4 py-2 ${isSuggested ? "bg-amber-950/20" : ""}`}>
+        <button
+          type="button"
+          onClick={() => onOpenDetail(task)}
+          className="flex items-center gap-2 flex-1 min-w-0 text-left active:opacity-80 transition"
+        >
+          <span className={`text-xs w-3 shrink-0 ${isSuggested ? "text-amber-500" : txaDeferred ? "text-amber-500" : "text-gray-700"}`}>
+            {isSuggested ? "▸" : "·"}
+          </span>
+          <span className={`text-sm flex-1 min-w-0 ${isSuggested ? "text-white font-medium" : txaDeferred ? "text-amber-200" : isLocked ? "text-gray-400" : "text-gray-300"}`}>
+            {task.title}
+          </span>
+          {txaDeferred && !isSuggested && <span className="text-amber-600 text-xs shrink-0">still needed</span>}
+          {isLocked && lockHint && (
+            <span className="text-gray-600 text-[10px] shrink-0 hidden sm:inline max-w-[8rem] truncate">{lockHint}</span>
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={() => onAutonomyAction(task)}
+          className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-600 text-white hover:border-gray-400 transition"
+        >
+          {autonomyButtonLabel(task)}
+        </button>
+      </div>
+    );
+  }
+
+  // Pending non-autonomy (calls, consider surgical, fundal, etc.)
+  if (isAutonomousLead && task.type === "call" && status === null) {
+    return (
+      <div className={`flex items-center gap-2 px-4 py-2.5 ${isSuggested ? "bg-amber-950/20" : ""}`}>
+        <button
+          type="button"
+          onClick={() => onOpenDetail(task)}
+          className="flex items-center gap-2 flex-1 min-w-0 text-left active:opacity-80 transition"
+        >
+          <span className={`text-xs w-3 shrink-0 ${isSuggested ? "text-amber-500" : "text-gray-700"}`}>
+            {isSuggested ? "▸" : "·"}
+          </span>
+          <span className={`text-sm flex-1 min-w-0 ${isSuggested ? "text-white font-medium" : "text-gray-300"}`}>{task.title}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onAutonomyAction(task)}
+          className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-600 text-white hover:border-gray-400 transition"
+        >
+          Done ✓
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex items-center gap-3 px-4 py-2">
-      <span className={`text-xs w-3 shrink-0 ${txaDeferred ? "text-amber-500" : "text-gray-700"}`}>·</span>
-      <span className={`text-sm flex-1 ${txaDeferred ? "text-amber-200" : "text-gray-300"}`}>{task.title}</span>
+    <button
+      type="button"
+      onClick={() => onOpenDetail(task)}
+      className="w-full flex items-center gap-3 px-4 py-2 text-left active:bg-gray-900/40 transition"
+    >
+      <span className={`text-xs w-3 shrink-0 ${txaDeferred ? "text-amber-500" : task.consider ? "text-violet-500/70" : "text-gray-700"}`}>
+        {task.consider ? "◇" : "·"}
+      </span>
+      <span className={`text-sm flex-1 ${txaDeferred ? "text-amber-200" : task.consider ? "text-violet-200/90" : "text-gray-300"}`}>{task.title}</span>
       {txaDeferred && <span className="text-amber-600 text-xs shrink-0">still needed</span>}
-    </div>
+      {task.consider && status === null && <span className="text-violet-500/60 text-[10px] shrink-0">consider</span>}
+    </button>
   );
 }
 
-function TaskList({ taskStates, level, now, onConfirmTask, forcedTasks, txaTime, emergencyStartTime }) {
+function TaskList({ taskStates, level, now, onConfirmTask, onAssignedDone, onAutonomyAction, onOpenDetail, forcedTasks, txaTime, emergencyStartTime, suggestedTaskId, leadMode }) {
   const relevantLevels = LEVEL_ORDER.filter(l => levelVal(l) <= levelVal(level));
   const showSections = relevantLevels.length > 1;
   const sectionLabels = { minor: "Initial response", major: "Major PPH", massive: "Massive PPH" };
+  const isAutonomousLead = leadMode === LEAD_MODES.AUTONOMOUS;
+  const pinnedCallId = isAutonomousLead ? stabilisationCallId(level) : null;
+  const pinnedCallTask = pinnedCallId ? TASKS.find(t => t.id === pinnedCallId) : null;
+  const pinnedCallPending = pinnedCallTask && (taskStates[pinnedCallTask.id]?.status ?? null) === null;
   const forcedAbove = (forcedTasks || [])
     .map(id => TASKS.find(t => t.id === id))
     .filter(t => t && levelVal(t.level) > levelVal(level));
 
   return (
     <div className="flex-1 overflow-y-auto">
+      {pinnedCallPending && pinnedCallTask && (
+        <div className="border-b border-amber-900/50 bg-amber-950/25">
+          <div className="px-4 py-2 border-b border-amber-900/30">
+            <span className="text-amber-500 text-xs font-bold uppercase tracking-widest">Call — activate now</span>
+          </div>
+          <TaskRow
+            key={pinnedCallTask.id}
+            task={pinnedCallTask}
+            state={taskStates[pinnedCallTask.id]}
+            taskStates={taskStates}
+            level={level}
+            txaTime={txaTime}
+            now={now}
+            emergencyStartTime={emergencyStartTime}
+            onConfirm={onConfirmTask}
+            onAssignedDone={onAssignedDone}
+            onAutonomyAction={onAutonomyAction}
+            onOpenDetail={onOpenDetail}
+            suggestedTaskId={suggestedTaskId}
+            forcedTasks={forcedTasks}
+            isAutonomousLead={isAutonomousLead}
+          />
+        </div>
+      )}
       {forcedAbove.length > 0 && (
         <div>
           <div className="px-4 py-2 border-b border-gray-900">
@@ -1557,12 +2164,18 @@ function TaskList({ taskStates, level, now, onConfirmTask, forcedTasks, txaTime,
               now={now}
               emergencyStartTime={emergencyStartTime}
               onConfirm={onConfirmTask}
+              onAssignedDone={onAssignedDone}
+              onAutonomyAction={onAutonomyAction}
+              onOpenDetail={onOpenDetail}
+              suggestedTaskId={suggestedTaskId}
+              forcedTasks={forcedTasks}
+              isAutonomousLead={isAutonomousLead}
             />
           ))}
         </div>
       )}
       {relevantLevels.map(sectionLevel => {
-        const tasks = TASKS.filter(t => t.level === sectionLevel && (!t.hidden || (forcedTasks || []).includes(t.id)) && callTaskVisibleInChecklist(t, level));
+        const tasks = TASKS.filter(t => t.level === sectionLevel && (!t.hidden || (forcedTasks || []).includes(t.id)) && callTaskVisibleInChecklist(t, level) && t.id !== pinnedCallId);
         return (
           <div key={sectionLevel}>
             {showSections && (
@@ -1581,6 +2194,12 @@ function TaskList({ taskStates, level, now, onConfirmTask, forcedTasks, txaTime,
                 now={now}
                 emergencyStartTime={emergencyStartTime}
                 onConfirm={onConfirmTask}
+              onAssignedDone={onAssignedDone}
+              onAutonomyAction={onAutonomyAction}
+              onOpenDetail={onOpenDetail}
+              suggestedTaskId={suggestedTaskId}
+              forcedTasks={forcedTasks}
+              isAutonomousLead={isAutonomousLead}
               />
             ))}
           </div>
@@ -1595,6 +2214,7 @@ function TaskList({ taskStates, level, now, onConfirmTask, forcedTasks, txaTime,
 function SetupScreen({ onConfirm, onExit }) {
   const [ml, setMl] = useState("");
   const [birthTimeInput, setBirthTimeInput] = useState("");
+  const [leadMode, setLeadMode] = useState(LEAD_MODES.GUIDED);
   const presets = [
     { v: 500,  label: "500 ml",   sub: "Minor PPH" },
     { v: 1000, label: "1,000 ml", sub: "Major PPH" },
@@ -1616,7 +2236,7 @@ function SetupScreen({ onConfirm, onExit }) {
   function submit(v) {
     if (v === "" || v == null || (typeof v === "string" && !v.trim())) return;
     const n = Number(v);
-    if (!isNaN(n) && n > 0) onConfirm(n, parseBirthTime());
+    if (!isNaN(n) && n > 0) onConfirm(n, parseBirthTime(), leadMode);
   }
 
   const customMl = ml.trim();
@@ -1639,6 +2259,15 @@ function SetupScreen({ onConfirm, onExit }) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
+      </div>
+      <div className="w-full min-w-0 space-y-2">
+        <p className="text-gray-600 text-xs uppercase tracking-widest">Session mode</p>
+        <LeadModeToggle value={leadMode} onChange={setLeadMode} />
+        <p className="text-gray-600 text-xs">
+          {leadMode === LEAD_MODES.AUTONOMOUS
+            ? "Checklist & timers — you lead, no step prompts"
+            : "Step-by-step prompts — next task surfaced for you"}
+        </p>
       </div>
       <div className="grid grid-cols-2 gap-3 w-full min-w-0">
         {presets.map(({ v, label, sub }) => (
@@ -1797,52 +2426,134 @@ function SummaryScreen({ log, emergencyStartTime, resolveTime, bloodLoss, peakBl
 // ─── Session persistence ──────────────────────────────────────────────────────
 
 const STORAGE_KEY = "pocket_og_pph_session";
+const CA_STORAGE_KEY = "pocket_og_cardiac_arrest_session";
 function saveSession(data) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {} }
 function clearSession() { try { localStorage.removeItem(STORAGE_KEY); } catch {} }
 
+function readActivePphSnapshot() {
+  try {
+    const s = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    return s?.phase === "active" ? s : null;
+  } catch {
+    return null;
+  }
+}
+
+function readActiveCaSnapshot() {
+  try {
+    const s = JSON.parse(localStorage.getItem(CA_STORAGE_KEY));
+    return (s?.phase === "active" || s?.phase === "postresus") ? s : null;
+  } catch {
+    return null;
+  }
+}
+
+// ─── Dev clock ────────────────────────────────────────────────────────────────
+// Testing aid only. Rendered exclusively behind import.meta.env.DEV, so it never
+// appears in a production / PWA build. Advancing the offset fast-forwards the whole
+// emergency clock, letting timed paths (uterotonic delays, carboprost 15-min
+// repeats, the TXA window, IV-fail windows) be tested without real-time waits.
+function DevClock({ offsetMs, onAdvance, onReset }) {
+  const totalMin = Math.round(offsetMs / 60000);
+  const hh = Math.floor(totalMin / 60);
+  const mm = totalMin % 60;
+  const label = offsetMs === 0 ? "real time" : `+${hh ? `${hh}h ` : ""}${mm}m`;
+  const steps = [
+    { label: "+1 min",  ms: 60_000 },
+    { label: "+5 min",  ms: 5 * 60_000 },
+    { label: "+15 min", ms: 15 * 60_000 },
+    { label: "+30 min", ms: 30 * 60_000 },
+  ];
+  return (
+    <div className="flex-shrink-0 border-t border-violet-900/60 bg-violet-950/40 px-3 py-2 flex items-center gap-2 flex-wrap">
+      <span className="text-violet-300 text-[11px] font-bold uppercase tracking-wider shrink-0">⏩ Dev clock</span>
+      {steps.map(s => (
+        <button key={s.label} onClick={() => onAdvance(s.ms)}
+          className="border border-violet-700 text-violet-200 text-xs px-2.5 py-1 rounded-md hover:bg-violet-900/50 transition">
+          {s.label}
+        </button>
+      ))}
+      <span className="text-violet-400 text-xs ml-auto tabular-nums shrink-0">offset: {label}</span>
+      <button onClick={onReset} className="border border-violet-800 text-violet-400 text-xs px-2 py-1 rounded-md shrink-0">reset</button>
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
+export default function EmergencyPage({ onClose, onLaunchCardiacArrest, resumeFromParallel = false, onParallelResumeHandled }) {
+  const [resumeSnapshot] = useState(() => (resumeFromParallel ? readActivePphSnapshot() : null));
   const [savedSession] = useState(() => {
     try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; } catch { return null; }
   });
-  const [recoveryDismissed, setRecoveryDismissed] = useState(false);
-  const [emergencyStartTime, setEmergencyStartTime] = useState(() => savedSession?.emergencyStartTime ?? Date.now());
-  const [phase, setPhase] = useState("setup");
-  const [bloodLoss, setBloodLoss] = useState(0);
-  const [taskStates, setTaskStates] = useState({});
-  const [log, setLog] = useState([]);
-  const [txaTime, setTxaTime] = useState(null);
-  const [txaHandled, setTxaHandled] = useState(false);
-  const [txaSecondDone, setTxaSecondDone] = useState(false);
-  const [toneAssessed, setToneAssessed] = useState(false);
-  const [birthTime, setBirthTime] = useState(null);
-  const [carboCount, setCarboCount] = useState(0);
-  const [carboLastTime, setCarboLastTime] = useState(null);
-  const [ciCleared, setCiCleared] = useState({});
-  const [forcedTasks, setForcedTasks] = useState([]);
-  const [uterotonicHold, setUterotonicHold] = useState(false);
-  const [uterotonicEscalate, setUterotonicEscalate] = useState(null);
-  const [queuedUterotonicId, setQueuedUterotonicId] = useState(null);
-  const [ivAccessPendingSince, setIvAccessPendingSince] = useState(null);
-  const [ivAccessRetries, setIvAccessRetries] = useState(0);
-  const [ivFailSnoozeUntil, setIvFailSnoozeUntil] = useState(null);
+  const [recoveryDismissed, setRecoveryDismissed] = useState(() => !!resumeSnapshot);
+  const [emergencyStartTime, setEmergencyStartTime] = useState(() => resumeSnapshot?.emergencyStartTime ?? savedSession?.emergencyStartTime ?? Date.now());
+  const [phase, setPhase] = useState(() => (resumeSnapshot ? "active" : "setup"));
+  const [bloodLoss, setBloodLoss] = useState(() => resumeSnapshot?.bloodLoss ?? 0);
+  const [taskStates, setTaskStates] = useState(() => resumeSnapshot?.taskStates ?? {});
+  const [log, setLog] = useState(() => resumeSnapshot?.log ?? []);
+  const [txaTime, setTxaTime] = useState(() => resumeSnapshot?.txaTime ?? null);
+  const [txaHandled, setTxaHandled] = useState(() => resumeSnapshot?.txaHandled ?? false);
+  const [txaSecondDone, setTxaSecondDone] = useState(() => resumeSnapshot?.txaSecondDone ?? false);
+  const [toneAssessed, setToneAssessed] = useState(() => resumeSnapshot?.toneAssessed ?? false);
+  const [birthTime, setBirthTime] = useState(() => resumeSnapshot?.birthTime ?? null);
+  const [carboCount, setCarboCount] = useState(() => {
+    const s = resumeSnapshot;
+    if (!s) return 0;
+    if ((s.carboCount ?? 0) > 0 && !s.carboLastTime && !["done", "already_given"].includes(s.taskStates?.carboprost?.status)) return 0;
+    return s.carboCount ?? 0;
+  });
+  const [carboLastTime, setCarboLastTime] = useState(() => resumeSnapshot?.carboLastTime ?? null);
+  const [ciCleared, setCiCleared] = useState(() => resumeSnapshot?.ciCleared ?? {});
+  const [forcedTasks, setForcedTasks] = useState(() => resumeSnapshot?.forcedTasks ?? []);
+  const [uterotonicHold, setUterotonicHold] = useState(() => resumeSnapshot?.uterotonicHold ?? false);
+  const [uterotonicEscalate, setUterotonicEscalate] = useState(() => resumeSnapshot?.uterotonicEscalate ?? null);
+  const [queuedUterotonicId, setQueuedUterotonicId] = useState(() => resumeSnapshot?.queuedUterotonicId ?? null);
+  const [ivAccessPendingSince, setIvAccessPendingSince] = useState(() => resumeSnapshot?.ivAccessPendingSince ?? null);
+  const [ivAccessRetries, setIvAccessRetries] = useState(() => resumeSnapshot?.ivAccessRetries ?? 0);
+  const [ivFailSnoozeUntil, setIvFailSnoozeUntil] = useState(() => resumeSnapshot?.ivFailSnoozeUntil ?? null);
   const [forcedFollowUpId, setForcedFollowUpId] = useState(null);
-  const [infusionReassess, setInfusionReassess] = useState(false);
-  const [sessionRecoveredAt, setSessionRecoveredAt] = useState(null);
+  const [infusionReassess, setInfusionReassess] = useState(() => resumeSnapshot?.infusionReassess ?? false);
+  const [sessionRecoveredAt, setSessionRecoveredAt] = useState(() => (resumeSnapshot ? Date.now() : null));
   const [resolveTime, setResolveTime] = useState(null);
   const [now, setNow] = useState(() => Date.now());
+  const [clockOffset, setClockOffset] = useState(0); // dev fast-forward (testing only)
   const [escalationAlert, setEscalationAlert] = useState(null);
   const [standDownConfirm, setStandDownConfirm] = useState(false);
   const [exitConfirm, setExitConfirm] = useState(false);
-  const [peakBloodLoss, setPeakBloodLoss] = useState(0);
-  const [aftercareCompleted, setAftercareCompleted] = useState(false);
+  const [leadMode, setLeadMode] = useState(() =>
+    (resumeSnapshot?.leadMode ?? savedSession?.leadMode) === LEAD_MODES.AUTONOMOUS ? LEAD_MODES.AUTONOMOUS : LEAD_MODES.GUIDED
+  );
+  const [checklistAutonomyFlow, setChecklistAutonomyFlow] = useState(null);
+  const [checklistDetailTask, setChecklistDetailTask] = useState(null);
+  const [peakBloodLoss, setPeakBloodLoss] = useState(() => resumeSnapshot?.peakBloodLoss ?? resumeSnapshot?.bloodLoss ?? 0);
+  const [aftercareCompleted, setAftercareCompleted] = useState(() => resumeSnapshot?.aftercareCompleted ?? false);
+  const [jointArrest, setJointArrest] = useState(() => resumeSnapshot?.jointArrest ?? emptyJointArrestState());
+  const [jointArrestSetupOpen, setJointArrestSetupOpen] = useState(false);
 
-  const prevLevelRef = useRef(null);
+  const prevLevelRef = useRef(resumeSnapshot ? getLevel(resumeSnapshot.bloodLoss ?? 0) : null);
   const wakeLockRef = useRef(null);
+  const parallelReturnLogged = useRef(false);
+
+  // Dev fast-forward clock. Every timestamp and the ticking `now` run through
+  // nowTs(), so advancing the offset makes all timers (drug delays, carboprost
+  // repeats, TXA window, IV-fail windows) behave as if real time had passed.
+  // The control that drives this only renders in dev builds — see DevClock below.
+  const clockOffsetRef = useRef(0);
+  const nowTs = () => Date.now() + clockOffsetRef.current;
+  function advanceClock(ms) {
+    clockOffsetRef.current += ms;
+    setClockOffset(clockOffsetRef.current);
+    setNow(nowTs());
+  }
+  function resetClock() {
+    clockOffsetRef.current = 0;
+    setClockOffset(0);
+    setNow(nowTs());
+  }
 
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
+    const id = setInterval(() => setNow(nowTs()), 1000);
     return () => clearInterval(id);
   }, []);
 
@@ -1871,12 +2582,12 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   const level = getLevel(bloodLoss);
 
   function addLog(kind, label) {
-    setLog(prev => [...prev, { kind, label, time: Date.now() }]);
+    setLog(prev => [...prev, { kind, label, time: nowTs() }]);
   }
 
   function recordBloodLossDelta(delta, label) {
     const next = bloodLoss + delta;
-    const at = Date.now();
+    const at = nowTs();
     const newLog = [...log, { kind: "blood_loss", label, total: next, time: at }];
     setBloodLoss(next);
     setPeakBloodLoss(prev => Math.max(prev, next));
@@ -1932,6 +2643,8 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
       ivFailSnoozeUntil,
       infusionReassess,
       sessionRecoveredAt,
+      leadMode,
+      jointArrest,
       ...overrides,
     };
   }
@@ -1944,7 +2657,28 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   useEffect(() => {
     if (phase !== "active") return;
     flushSession();
-  }, [phase, bloodLoss, peakBloodLoss, aftercareCompleted, taskStates, toneAssessed, log, txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime, ciCleared, forcedTasks, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, ivFailSnoozeUntil, infusionReassess, sessionRecoveredAt]);
+  }, [phase, bloodLoss, peakBloodLoss, aftercareCompleted, taskStates, toneAssessed, log, txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime, ciCleared, forcedTasks, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, ivFailSnoozeUntil, infusionReassess, sessionRecoveredAt, leadMode, jointArrest]);
+
+  useEffect(() => {
+    if (!resumeSnapshot || parallelReturnLogged.current) return;
+    parallelReturnLogged.current = true;
+    const t = Date.now();
+    setLog(prev => [...prev, {
+      kind: "parallel_return",
+      label: "Returned from cardiac arrest — PPH management continues",
+      time: t,
+    }]);
+    onParallelResumeHandled?.();
+  }, [resumeSnapshot, onParallelResumeHandled]);
+
+  // Auto-open rhythm check when CPR cycle elapses (embedded arrest).
+  useEffect(() => {
+    if (phase !== "active" || !jointArrest.active || jointArrest.rosc) return;
+    if (jointArrest.pendingShock || jointArrest.rhythmPromptOpen) return;
+    if (rhythmCheckDue(jointArrest, nowTs())) {
+      setJointArrest(prev => ({ ...prev, rhythmPromptOpen: true }));
+    }
+  }, [phase, jointArrest.active, jointArrest.rosc, jointArrest.cycleStart, jointArrest.pendingShock, jointArrest.rhythmPromptOpen, now]);
 
   function evaluateEscalationAfterBlood(newLog, newLevel, at, bloodLossMl) {
     const esc = canEscalateUterotonic({ taskStates, log: newLog, now: at, level: newLevel, uterotonicHold, forcedTasks });
@@ -1961,8 +2695,33 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   }
 
   const prompt = phase === "active"
-    ? computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, ivFailSnoozeUntil, infusionReassess, sessionRecoveredAt, forcedFollowUpId })
+    ? computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, ivFailSnoozeUntil, infusionReassess, sessionRecoveredAt, forcedFollowUpId, jointArrest })
     : null;
+
+  const suggestedAutonomyTask = phase === "active"
+    ? getSuggestedAutonomyTask(prompt, taskStates, level, forcedTasks, txaTime)
+    : null;
+  const suggestedTaskId = suggestedAutonomyTask && isAutonomyEligible(suggestedAutonomyTask, forcedTasks)
+    ? suggestedAutonomyTask.id
+    : null;
+
+  const showPromptRail = phase === "active" && shouldShowPromptRail(leadMode, prompt);
+  const isAutonomousLead = leadMode === LEAD_MODES.AUTONOMOUS;
+
+  const activeCaSession = phase === "active" && !jointArrest.active ? readActiveCaSnapshot() : null;
+  const arrestConfirmed = !!taskStates.cardiac_arrest_ref?.arrestConfirmed;
+  const arrestNav = !jointArrest.active && (activeCaSession || (arrestConfirmed && !jointArrestSetupOpen))
+    ? { active: !!activeCaSession, cycle: activeCaSession?.cycleNumber ?? null }
+    : null;
+
+  function handleOpenCardiacArrest() {
+    flushSession();
+    onLaunchCardiacArrest?.({
+      postpartum: true,
+      fromPph: true,
+      resumeCa: !!readActiveCaSnapshot(),
+    });
+  }
 
   const relevantTasks = TASKS.filter(t => levelVal(t.level) <= levelVal(level));
   const assignedCount = relevantTasks.filter(t => taskStates[t.id]?.status === "assigned").length;
@@ -1983,17 +2742,22 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
     setForcedFollowUpId(prev => (prev === taskId ? null : prev));
   }
 
-  function handleSetup(ml, bt) {
+  function handleSetup(ml, bt, mode = LEAD_MODES.GUIDED) {
     // Fresh emergency — reset the clock to now (a discarded prior session must
     // not carry its elapsed time over into the new one).
-    setEmergencyStartTime(Date.now());
+    setEmergencyStartTime(nowTs());
     setBloodLoss(ml);
     setPeakBloodLoss(ml);
     if (bt) setBirthTime(bt);
+    setLeadMode(mode === LEAD_MODES.AUTONOMOUS ? LEAD_MODES.AUTONOMOUS : LEAD_MODES.GUIDED);
     const initialLevel = getLevel(ml);
     prevLevelRef.current = initialLevel;
-    const t = Date.now();
-    const logEntries = [{ kind: "blood_loss", label: `Initial blood loss: ${ml} ml`, total: ml, time: t }];
+    const t = nowTs();
+    const modeLabel = mode === LEAD_MODES.AUTONOMOUS ? "Autonomous" : "Guided";
+    const logEntries = [
+      { kind: "blood_loss", label: `Initial blood loss: ${ml} ml`, total: ml, time: t },
+      { kind: "mode", label: `Session mode: ${modeLabel}`, time: t },
+    ];
     if (levelVal(initialLevel) >= levelVal("major")) {
       logEntries.push({
         kind: "escalated",
@@ -2012,14 +2776,17 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
     recordBloodLossDelta(delta, `+${delta} ml → ${next} ml`);
   }
 
-  function handleDone(task) {
-    const t = Date.now();
+  function handleDone(task, opts = {}) {
+    const t = nowTs();
     const scheduleFollowUp = task.followUpDelay && task.followUpQuestion;
     setTaskStates(prev => ({
       ...prev,
-      [task.id]: scheduleFollowUp
-        ? { status: "done", doneAt: t, followUpAt: t }
-        : { status: "done", doneAt: t },
+      [task.id]: {
+        ...(scheduleFollowUp
+          ? { status: "done", doneAt: t, followUpAt: t }
+          : { status: "done", doneAt: t }),
+        ...(opts.outOfSequence ? { outOfSequence: true } : {}),
+      },
     }));
     addLog("task_done", `Done: ${task.title}`);
     if (task.id === "call_major" || task.id === "call_massive") absorbLowerCallSteps(setTaskStates, task.id, t);
@@ -2035,9 +2802,17 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
     }
   }
 
-  function handleAlreadyGiven(task) {
-    const t = Date.now();
-    setTaskStates(prev => ({ ...prev, [task.id]: { status: "already_given", doneAt: t, alreadyGivenAt: t } }));
+  function handleAlreadyGiven(task, opts = {}) {
+    const t = nowTs();
+    setTaskStates(prev => ({
+      ...prev,
+      [task.id]: {
+        status: "already_given",
+        doneAt: t,
+        alreadyGivenAt: t,
+        ...(opts.outOfSequence ? { outOfSequence: true } : {}),
+      },
+    }));
     addLog("task_already_given", `Already given: ${task.title}`);
     if (task.special === "carbo") { setCarboCount(1); setCarboLastTime(t); }
     setUterotonicEscalate(null);
@@ -2045,16 +2820,16 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   }
 
   function handleAssign(task) {
-    setTaskStates(prev => ({ ...prev, [task.id]: { status: "assigned", assignedAt: Date.now() } }));
+    setTaskStates(prev => ({ ...prev, [task.id]: { status: "assigned", assignedAt: nowTs() } }));
     addLog("task_assigned", `Assigned: ${task.title}`);
     if (task.id === "iv_access") {
-      setIvAccessPendingSince(Date.now());
+      setIvAccessPendingSince(nowTs());
       setIvAccessRetries(0);
     }
   }
 
   function handleSkip(task) {
-    setTaskStates(prev => ({ ...prev, [task.id]: { status: "skipped", skippedAt: Date.now() } }));
+    setTaskStates(prev => ({ ...prev, [task.id]: { status: "skipped", skippedAt: nowTs() } }));
     addLog("task_skipped", `Skipped: ${task.title}`);
     if (task.fallback) {
       const fb = TASKS.find(t => t.id === task.fallback);
@@ -2068,12 +2843,124 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   }
 
   function handleNotAvailable(task) {
-    setTaskStates(prev => ({ ...prev, [task.id]: { status: "skipped", skippedAt: Date.now() } }));
+    setTaskStates(prev => ({ ...prev, [task.id]: { status: "skipped", skippedAt: nowTs() } }));
     addLog("task_skipped", task.naOption?.log || `Not available: ${task.title}`);
   }
 
+  function handleOpenChecklistDetail(task) {
+    setChecklistDetailTask(task);
+  }
+
+  function checklistDetailStatus(task) {
+    const rawStatus = taskStates[task.id]?.status ?? null;
+    if (task.id === "txa" && rawStatus === "skipped" && txaEligible(taskStates, level, txaTime)) return null;
+    return rawStatus;
+  }
+
+  function handleLeadModeChange(mode) {
+    if (mode === leadMode) return;
+    setLeadMode(mode);
+    addLog("mode", `Switched to ${mode === LEAD_MODES.AUTONOMOUS ? "Autonomous" : "Guided"} mode`);
+    setChecklistAutonomyFlow(null);
+  }
+
+  function handleChecklistAutonomy(task) {
+    if (leadMode === LEAD_MODES.AUTONOMOUS) {
+      if (task.type === "drug" || task.assess) {
+        setChecklistAutonomyFlow({ task, step: "actions", outOfSequence: false });
+        return;
+      }
+      handleDone(task);
+      setChecklistDetailTask(null);
+      return;
+    }
+    const suggested = getSuggestedAutonomyTask(prompt, taskStates, level, forcedTasks, txaTime);
+    if (taskNeedsAutonomyWarning(task, suggested)) {
+      setChecklistAutonomyFlow({
+        task,
+        step: "warn",
+        suggestedTitle: suggested?.title ?? "Next on ladder",
+      });
+    } else {
+      setChecklistAutonomyFlow({ task, step: "actions", outOfSequence: false });
+    }
+  }
+
+  function handleOutOfSequenceProceed() {
+    const { task, suggestedTitle } = checklistAutonomyFlow;
+    addLog("out_of_sequence", `Out of sequence: ${task.title} (GTG52 suggested: ${suggestedTitle})`);
+    setChecklistAutonomyFlow({ task, step: "actions", outOfSequence: true, suggestedTitle });
+  }
+
+  function finishChecklistAutonomyFlow(task, outOfSequence, fn) {
+    fn(task, outOfSequence ? { outOfSequence: true } : {});
+    setChecklistAutonomyFlow(null);
+  }
+
+  function handleChecklistAutonomyDone(task) {
+    finishChecklistAutonomyFlow(task, checklistAutonomyFlow?.outOfSequence, handleDone);
+  }
+
+  function handleChecklistAutonomyDoneWithIv(task) {
+    const t = nowTs();
+    const oos = checklistAutonomyFlow?.outOfSequence ? { outOfSequence: true } : {};
+    const scheduleFollowUp = task.followUpDelay && task.followUpQuestion;
+    const ivWasPending = taskStates.iv_access?.status !== "done";
+
+    setTaskStates(prev => {
+      const next = { ...prev };
+      if (ivWasPending) next.iv_access = { status: "done", doneAt: t };
+      next[task.id] = {
+        ...(scheduleFollowUp
+          ? { status: "done", doneAt: t, followUpAt: t }
+          : { status: "done", doneAt: t }),
+        ...oos,
+      };
+      return next;
+    });
+
+    if (ivWasPending) addLog("task_done", "Done: IV access + bloods");
+    addLog("task_done", `Done: ${task.title}`);
+
+    if (task.special === "txa") { setTxaTime(t); setTxaHandled(true); }
+    if (task.special === "carbo") { setCarboCount(1); setCarboLastTime(t); }
+    if (ivWasPending) {
+      onIvAccessEstablished({ ...taskStates, iv_access: { status: "done", doneAt: t } });
+    }
+    if (task.uterotonic) {
+      setUterotonicEscalate(null);
+      setQueuedUterotonicId(null);
+    }
+
+    setChecklistAutonomyFlow(null);
+  }
+
+  function handleChecklistAutonomyAlreadyGiven(task) {
+    finishChecklistAutonomyFlow(task, checklistAutonomyFlow?.outOfSequence, handleAlreadyGiven);
+  }
+
+  function handleChecklistAutonomyAssign(task) {
+    finishChecklistAutonomyFlow(task, false, handleAssign);
+  }
+
+  function handleChecklistAutonomySkip(task) {
+    finishChecklistAutonomyFlow(task, false, handleSkip);
+  }
+
+  function handleChecklistAutonomyNotAvailable(task) {
+    finishChecklistAutonomyFlow(task, false, handleNotAvailable);
+  }
+
+  function handleChecklistAutonomyAssessExclude(task) {
+    finishChecklistAutonomyFlow(task, checklistAutonomyFlow?.outOfSequence, handleAssessExclude);
+  }
+
+  function handleChecklistAutonomyAssessPresent(task) {
+    finishChecklistAutonomyFlow(task, checklistAutonomyFlow?.outOfSequence, handleAssessPresent);
+  }
+
   function handleFollowupYes(task) {
-    const t = Date.now();
+    const t = nowTs();
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: t } }));
     addLog("followup_done", task.followUpYesLog || `Confirmed done: ${task.title}`);
     clearForcedFollowUp(task.id);
@@ -2090,24 +2977,40 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
         prev.includes(task.followUpEscalate) ? prev : [...prev, task.followUpEscalate],
         taskStates,
       ));
-      setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: Date.now(), escalatedAt: Date.now() } }));
+      setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: nowTs(), escalatedAt: nowTs() } }));
       addLog("followup_escalate", task.followUpEscalateLog || `Escalating: ${task.title}`);
     } else if (task.followUpQuestion) {
-      setTaskStates(prev => ({ ...prev, [task.id]: { ...prev[task.id], followUpAt: Date.now() } }));
+      setTaskStates(prev => ({ ...prev, [task.id]: { ...prev[task.id], followUpAt: nowTs() } }));
       addLog("followup_pending", task.followUpEscalate ? "Still in progress — check back in 5 min" : `Still in progress: ${task.title}`);
     } else {
-      setTaskStates(prev => ({ ...prev, [task.id]: { ...prev[task.id], assignedAt: Date.now() } }));
+      setTaskStates(prev => ({ ...prev, [task.id]: { ...prev[task.id], assignedAt: nowTs() } }));
       addLog("followup_pending", `Still in progress: ${task.title}`);
     }
   }
 
-  function handleAssessExclude(task) {
-    setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: Date.now(), assessOutcome: "excluded" } }));
+  function handleAssessExclude(task, opts = {}) {
+    setTaskStates(prev => ({
+      ...prev,
+      [task.id]: {
+        status: "done",
+        doneAt: nowTs(),
+        assessOutcome: "excluded",
+        ...(opts.outOfSequence ? { outOfSequence: true } : {}),
+      },
+    }));
     addLog("assess", task.assess.excludeLog || `${task.title} — excluded`);
   }
 
-  function handleAssessPresent(task) {
-    setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: Date.now(), assessOutcome: "present" } }));
+  function handleAssessPresent(task, opts = {}) {
+    setTaskStates(prev => ({
+      ...prev,
+      [task.id]: {
+        status: "done",
+        doneAt: nowTs(),
+        assessOutcome: "present",
+        ...(opts.outOfSequence ? { outOfSequence: true } : {}),
+      },
+    }));
     addLog("assess", task.assess.presentLog || `${task.title} — present`);
     if (task.assess.treatment) {
       setForcedTasks(prev => prev.includes(task.assess.treatment) ? prev : [...prev, task.assess.treatment]);
@@ -2115,19 +3018,18 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   }
 
   function handleBloodAdd(delta) {
-    const next = bloodLoss + delta;
-    recordBloodLossDelta(delta, `Blood loss check: +${delta} ml → ${next} ml`);
+    recordBloodLossDelta(delta, `Blood loss check: +${delta} ml → ${bloodLoss + delta} ml`);
   }
 
   function handleBloodUnchanged() {
-    const at = Date.now();
+    const at = nowTs();
     const newLog = [...log, { kind: "blood_loss_unchanged", label: `Blood loss check: unchanged (${bloodLoss} ml)`, time: at }];
     setLog(newLog);
     evaluateEscalationAfterBlood(newLog, level, at, bloodLoss);
   }
 
   function handleBloodPending() {
-    const at = Date.now();
+    const at = nowTs();
     const newLog = [...log, { kind: "blood_loss_pending", label: `Blood loss check: pending — no update (${bloodLoss} ml)`, time: at }];
     setLog(newLog);
     evaluateEscalationAfterBlood(newLog, level, at, bloodLoss);
@@ -2137,7 +3039,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
     const prev = bloodLoss;
     const next = Math.max(0, Math.round(newTotal));
     if (next === prev) return;
-    const at = Date.now();
+    const at = nowTs();
     const newLevel = getLevel(next);
     const newLog = [...log, {
       kind: "blood_loss_correction",
@@ -2168,7 +3070,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   }
 
   function handleIvFailRetry() {
-    const t = Date.now();
+    const t = nowTs();
     setIvAccessPendingSince(t);
     setIvFailSnoozeUntil(null);
     if (ivAccessRetries < IV_ACCESS_MAX_RETRIES) {
@@ -2200,13 +3102,13 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   }
 
   function handleInfusionAssign() {
-    setTaskStates(prev => ({ ...prev, oxytocin_inf: { status: "assigned", assignedAt: Date.now() } }));
+    setTaskStates(prev => ({ ...prev, oxytocin_inf: { status: "assigned", assignedAt: nowTs() } }));
     addLog("task_assigned", "Assigned: Oxytocin infusion");
     setInfusionReassess(false);
   }
 
   function handleInfusionNotNeeded() {
-    setTaskStates(prev => ({ ...prev, oxytocin_inf: { status: "not_indicated", doneAt: Date.now() } }));
+    setTaskStates(prev => ({ ...prev, oxytocin_inf: { status: "not_indicated", doneAt: nowTs() } }));
     addLog("task_skipped", "Oxytocin infusion — not indicated after reassessment");
     setInfusionReassess(false);
   }
@@ -2218,7 +3120,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   }
 
   function handleConsiderPrepare(task) {
-    const t = Date.now();
+    const t = nowTs();
     if (task.id === "theatre") {
       setTaskStates(prev => ({
         ...prev,
@@ -2237,7 +3139,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   }
 
   function handleTheatreInTheatre(task) {
-    const t = Date.now();
+    const t = nowTs();
     setTaskStates(prev => ({
       ...prev,
       [task.id]: { status: "done", doneAt: t, inTheatre: true },
@@ -2247,7 +3149,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   }
 
   function handleTheatreStillPreparing(task) {
-    const t = Date.now();
+    const t = nowTs();
     setTaskStates(prev => ({
       ...prev,
       [task.id]: {
@@ -2261,13 +3163,13 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   }
 
   function handleConsiderNotIndicated(task) {
-    const t = Date.now();
+    const t = nowTs();
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "not_indicated", doneAt: t } }));
     addLog("consider", `${task.title} — not indicated`);
   }
 
   function handleConsiderNotNow(task) {
-    const t = Date.now();
+    const t = nowTs();
     const snoozeMs = considerSnoozeMs(getLevel(bloodLoss));
     const mins = Math.round(snoozeMs / 60000);
     setTaskStates(prev => ({
@@ -2278,20 +3180,73 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   }
 
   function handleConsiderArrestYes(task) {
-    const t = Date.now();
+    const t = nowTs();
     const nextTaskStates = { ...taskStates, [task.id]: { status: "done", doneAt: t, arrestConfirmed: true } };
     const nextLog = [...log, { kind: "consider", label: "Maternal cardiac arrest — 2222 called", time: t }];
     setTaskStates(nextTaskStates);
     setLog(nextLog);
     flushSession({ taskStates: nextTaskStates, log: nextLog });
     if ("vibrate" in navigator) navigator.vibrate([300, 100, 300, 100, 300]);
-    // Launch the full Maternal Cardiac Arrest SOS. Patient is postpartum (PPH),
-    // so PMCS/MLUD don't apply — pass that context so setup skips the gestation step.
-    if (onLaunchCardiacArrest) onLaunchCardiacArrest({ postpartum: true });
+    setJointArrestSetupOpen(true);
+  }
+
+  function handleJointArrestStart({ collapseMinsAgo, cprSameAsCollapse, cprMinsAgo }) {
+    const t = nowTs();
+    const collapseTime = minsAgoToTimestamp(collapseMinsAgo, t);
+    const cprStartTime = cprSameAsCollapse ? collapseTime : minsAgoToTimestamp(cprMinsAgo, t);
+    const nextArrest = createJointArrestState({ collapseTime, cprStartTime, now: t });
+    setJointArrest(nextArrest);
+    setJointArrestSetupOpen(false);
+    addLog("arrest", "Embedded arrest resus started — CPR cycles active alongside PPH");
+    flushSession({ jointArrest: nextArrest });
+  }
+
+  function handleJointArrestRhythmManual() {
+    setJointArrest(prev => ({ ...prev, rhythmPromptOpen: true }));
+  }
+
+  function handleArrestRhythmShockable() {
+    setJointArrest(prev => ({ ...prev, rhythmPromptOpen: false, pendingShock: true }));
+    addLog("arrest", `Rhythm check cycle ${jointArrest.cycleNumber} — shockable`);
+  }
+
+  function handleArrestRhythmNonShockable() {
+    const t = nowTs();
+    setJointArrest(prev => {
+      const next = advanceCprCycle(prev, t);
+      return { ...next, adrenalineArmed: true };
+    });
+    addLog("arrest", `Rhythm check cycle ${jointArrest.cycleNumber} — non-shockable · CPR continues`);
+  }
+
+  function handleArrestShockDelivered() {
+    const t = nowTs();
+    setJointArrest(prev => {
+      const newCount = prev.shockCount + 1;
+      const next = advanceCprCycle(prev, t);
+      return {
+        ...next,
+        shockCount: newCount,
+        adrenalineArmed: newCount >= 3 || prev.adrenalineArmed,
+      };
+    });
+    addLog("arrest", `Shock ${jointArrest.shockCount + 1} delivered — resume CPR`);
+  }
+
+  function handleJointArrestRosc() {
+    const t = nowTs();
+    setJointArrest(prev => ({
+      ...prev,
+      rosc: true,
+      roscTime: t,
+      rhythmPromptOpen: false,
+      pendingShock: false,
+    }));
+    addLog("arrest", "ROSC — embedded arrest cycles stopped; continue PPH haemorrhage management");
   }
 
   function handleConsiderArrestNo(task) {
-    const t = Date.now();
+    const t = nowTs();
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: t, considerNoArrest: true } }));
     addLog("consider", "No cardiac arrest — continue PPH resus");
   }
@@ -2299,14 +3254,14 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   function handleCarboDose() {
     const next = carboCount + 1;
     setCarboCount(next);
-    setCarboLastTime(Date.now());
+    setCarboLastTime(nowTs());
     addLog("carbo_dose", `Carboprost dose ${next}/8`);
   }
 
   function handleCarboSkip() {
     const next = Math.min(carboCount + 1, 8);
     setCarboCount(next);
-    setCarboLastTime(Date.now());
+    setCarboLastTime(nowTs());
     addLog("carbo_skip", `Carboprost dose ${next}/8 skipped`);
   }
 
@@ -2326,7 +3281,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   }
 
   function handleCiContraindicated(task) {
-    setTaskStates(prev => ({ ...prev, [task.id]: { status: "skipped", skippedAt: Date.now() } }));
+    setTaskStates(prev => ({ ...prev, [task.id]: { status: "skipped", skippedAt: nowTs() } }));
     const fb = TASKS.find(t => t.id === task.fallback);
     addLog("ci_check", `${task.title} contraindicated${fb ? ` — switching to ${fb.title}` : ""}`);
     if (task.special === "txa") setTxaHandled(true);
@@ -2341,7 +3296,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
 
   function handleToneCheckFirm() {
     setToneAssessed(true);
-    setTaskStates(prev => ({ ...prev, bimanual: { status: "skipped", skippedAt: Date.now(), skipReason: "not_required" } }));
+    setTaskStates(prev => ({ ...prev, bimanual: { status: "skipped", skippedAt: nowTs(), skipReason: "not_required" } }));
     addLog("tone_check", "Tone: uterus firm after fundal massage — bimanual not required");
   }
 
@@ -2356,17 +3311,32 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
       setForcedFollowUpId(taskId);
       return;
     }
-    setTaskStates(prev => ({ ...prev, [taskId]: { status: "done", doneAt: Date.now() } }));
+    setTaskStates(prev => ({ ...prev, [taskId]: { status: "done", doneAt: nowTs() } }));
     addLog("task_done", `Confirmed done: ${task?.title ?? taskId}`);
-    if (task?.special === "txa") { setTxaTime(Date.now()); setTxaHandled(true); }
-    if (task?.special === "carbo") { setCarboCount(prev => prev === 0 ? 1 : prev); setCarboLastTime(Date.now()); }
+    if (task?.special === "txa") { setTxaTime(nowTs()); setTxaHandled(true); }
+    if (task?.special === "carbo") { setCarboCount(prev => prev === 0 ? 1 : prev); setCarboLastTime(nowTs()); }
     if (task?.uterotonic) { setQueuedUterotonicId(null); setUterotonicEscalate(null); }
+  }
+
+  function handleAssignedTap(taskId) {
+    handleConfirmTask(taskId);
+  }
+
+  function handleAssignedDone(taskId) {
+    const task = TASKS.find(t => t.id === taskId);
+    if (!task || taskStates[taskId]?.status !== "assigned") return;
+    clearForcedFollowUp(taskId);
+    if (task.id === "theatre") {
+      handleTheatreInTheatre(task);
+      return;
+    }
+    handleFollowupYes(task);
   }
 
   function handleRecover() {
     const s = savedSession;
     if (!s) return;
-    setEmergencyStartTime(s.emergencyStartTime ?? Date.now());
+    setEmergencyStartTime(s.emergencyStartTime ?? nowTs());
     setBloodLoss(s.bloodLoss ?? 0);
     setPeakBloodLoss(s.peakBloodLoss ?? s.bloodLoss ?? 0);
     setAftercareCompleted(s.aftercareCompleted ?? false);
@@ -2392,8 +3362,10 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
     setIvAccessRetries(s.ivAccessRetries ?? 0);
     setIvFailSnoozeUntil(s.ivFailSnoozeUntil ?? null);
     setInfusionReassess(s.infusionReassess ?? false);
+    setLeadMode(s.leadMode === LEAD_MODES.AUTONOMOUS ? LEAD_MODES.AUTONOMOUS : LEAD_MODES.GUIDED);
+    setJointArrest(s.jointArrest ?? emptyJointArrestState());
     prevLevelRef.current = getLevel(s.bloodLoss ?? 0);
-    const t = Date.now();
+    const t = nowTs();
     setSessionRecoveredAt(t);
     setLog(prev => [...prev, { kind: "session_resumed", label: "Session resumed — blood check timer reset", time: t }]);
     setPhase("active");
@@ -2406,7 +3378,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   }
 
   function handleStandDown() {
-    const t = Date.now();
+    const t = nowTs();
     const unresolvedEntries = TASKS
       .filter(task => taskStates[task.id]?.status === "assigned")
       .map(task => ({ kind: "unresolved", label: `Unresolved at stand-down: ${task.title}`, time: t }));
@@ -2422,7 +3394,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
   }
 
   function handleAftercareComplete(doneItems) {
-    const t = Date.now();
+    const t = nowTs();
     setAftercareCompleted(true);
     setLog(prev => [
       ...prev,
@@ -2479,6 +3451,9 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
     onConsiderPrepare: handleConsiderPrepare, onConsiderNotIndicated: handleConsiderNotIndicated,
     onConsiderNotNow: handleConsiderNotNow, onConsiderArrestYes: handleConsiderArrestYes, onConsiderArrestNo: handleConsiderArrestNo,
     onCheckCardiacArrest: handleCheckCardiacArrest,
+    onArrestRhythmShockable: handleArrestRhythmShockable,
+    onArrestRhythmNonShockable: handleArrestRhythmNonShockable,
+    onArrestShockDelivered: handleArrestShockDelivered,
     onTheatreInTheatre: handleTheatreInTheatre, onTheatreStillPreparing: handleTheatreStillPreparing,
   };
 
@@ -2487,18 +3462,93 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
       {escalationAlert && <EscalationOverlay level={escalationAlert.level} note={escalationAlert.note} onDismiss={() => setEscalationAlert(null)} />}
       {standDownConfirm && <StandDownConfirm bloodLoss={bloodLoss} onConfirm={handleStandDown} onCancel={() => setStandDownConfirm(false)} />}
       {exitConfirm && <ExitConfirm active onConfirm={handleExit} onCancel={() => setExitConfirm(false)} />}
+      {checklistDetailTask && (
+        <ChecklistDetailSheet
+          task={checklistDetailTask}
+          state={taskStates[checklistDetailTask.id]}
+          status={checklistDetailStatus(checklistDetailTask)}
+          taskStates={taskStates}
+          level={level}
+          txaTime={txaTime}
+          forcedTasks={forcedTasks}
+          ivAccessDone={ivAccessDone}
+          isAutonomousLead={isAutonomousLead}
+          cardiacArrestPending={!taskStates.cardiac_arrest_ref?.status}
+          onClose={() => setChecklistDetailTask(null)}
+          onDone={handleDone}
+          onAssign={handleAssign}
+          onSkip={handleSkip}
+          onNotAvailable={handleNotAvailable}
+          onAlreadyGiven={handleAlreadyGiven}
+          onConsiderPrepare={handleConsiderPrepare}
+          onConsiderNotIndicated={handleConsiderNotIndicated}
+          onConsiderNotNow={handleConsiderNotNow}
+          onAutonomyAction={handleChecklistAutonomy}
+          onCheckCardiacArrest={handleCheckCardiacArrest}
+          onAssignedDone={handleAssignedDone}
+          onAssessExclude={handleAssessExclude}
+          onAssessPresent={handleAssessPresent}
+          onConfirmTask={handleConfirmTask}
+        />
+      )}
+      {checklistAutonomyFlow?.step === "warn" && (
+        <OutOfSequenceConfirm
+          task={checklistAutonomyFlow.task}
+          suggestedTitle={checklistAutonomyFlow.suggestedTitle}
+          taskStates={taskStates}
+          level={level}
+          onProceed={handleOutOfSequenceProceed}
+          onCancel={() => setChecklistAutonomyFlow(null)}
+        />
+      )}
+      {checklistAutonomyFlow?.step === "actions" && (
+        <ChecklistAutonomyActions
+          task={checklistAutonomyFlow.task}
+          ivAccessDone={ivAccessDone}
+          ciCleared={ciCleared}
+          isAutonomousLead={isAutonomousLead}
+          onDone={handleChecklistAutonomyDone}
+          onDoneWithIv={handleChecklistAutonomyDoneWithIv}
+          onAlreadyGiven={handleChecklistAutonomyAlreadyGiven}
+          onAssign={handleChecklistAutonomyAssign}
+          onSkip={handleChecklistAutonomySkip}
+          onNotAvailable={handleChecklistAutonomyNotAvailable}
+          onAssessExclude={handleChecklistAutonomyAssessExclude}
+          onAssessPresent={handleChecklistAutonomyAssessPresent}
+          onCancel={() => setChecklistAutonomyFlow(null)}
+        />
+      )}
+
+      {jointArrestSetupOpen && (
+        <JointArrestSetupSheet
+          onConfirm={handleJointArrestStart}
+          onCancel={() => setJointArrestSetupOpen(false)}
+        />
+      )}
 
       <Header
         elapsed={now - emergencyStartTime}
         bloodLoss={bloodLoss}
         level={level}
         assignedCount={assignedCount}
+        leadMode={leadMode}
         showQuickAdd={prompt?.type !== "blood_loss_check"}
+        arrestNav={arrestNav}
         onAddBlood={handleAddBlood}
         onCorrectBlood={handleBloodCorrect}
         onStandDown={() => setStandDownConfirm(true)}
         onExit={() => setExitConfirm(true)}
+        onLeadModeChange={handleLeadModeChange}
+        onOpenCardiacArrest={handleOpenCardiacArrest}
       />
+
+      <JointArrestStrip
+        arrest={jointArrest}
+        now={nowTs()}
+        onRhythmCheck={handleJointArrestRhythmManual}
+        onRosc={handleJointArrestRosc}
+      />
+      <JointArrestRoscBanner arrest={jointArrest} onDismiss={() => {}} />
 
       <DrugStrip
         txaTime={txaTime}
@@ -2512,28 +3562,42 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest }) {
         sessionRecoveredAt={sessionRecoveredAt}
         now={now}
         forcedTasks={forcedTasks}
+        onAssignedTap={handleAssignedTap}
       />
 
-      <ActivePromptArea
-        prompt={prompt}
-        bloodLoss={bloodLoss}
-        level={level}
-        carboCount={carboCount}
-        assignedCount={assignedCount}
-        ivAccessDone={ivAccessDone}
-        cardiacArrestPending={!taskStates.cardiac_arrest_ref?.status}
-        handlers={handlers}
-      />
+      {isAutonomousLead && !showPromptRail && <AutonomousModeBanner />}
+
+      {showPromptRail && (
+        <ActivePromptArea
+          prompt={prompt}
+          bloodLoss={bloodLoss}
+          level={level}
+          carboCount={carboCount}
+          assignedCount={assignedCount}
+          ivAccessDone={ivAccessDone}
+          cardiacArrestPending={!taskStates.cardiac_arrest_ref?.status}
+          handlers={handlers}
+        />
+      )}
 
       <TaskList
         taskStates={taskStates}
         level={level}
         now={now}
         onConfirmTask={handleConfirmTask}
+        onAssignedDone={handleAssignedDone}
+        onAutonomyAction={handleChecklistAutonomy}
+        onOpenDetail={handleOpenChecklistDetail}
         forcedTasks={forcedTasks}
         txaTime={txaTime}
         emergencyStartTime={emergencyStartTime}
+        suggestedTaskId={suggestedTaskId}
+        leadMode={leadMode}
       />
+
+      {import.meta.env.DEV && (
+        <DevClock offsetMs={clockOffset} onAdvance={advanceClock} onReset={resetClock} />
+      )}
     </div>
   );
 }
