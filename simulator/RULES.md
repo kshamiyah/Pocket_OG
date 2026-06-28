@@ -78,7 +78,9 @@ more pessimistic — drains without this self-top-up.)
 | III | 30–40% | 120–140 | Falls |
 | IV | >40% | >140 | Markedly low |
 _Source: Hemorrhagic Shock (StatPearls); CV Physiology._
-☐ OK ☐ Correct: __________
+☑ **ACCEPTED** (2026-06-28); percentages applied to the weight-based maternal
+volume (R-VOL-1), so a mother reaches each class at a higher absolute loss —
+correctly reproducing late maternal decompensation.
 
 ### R-CIRC-2 — Compensation then collapse
 Below ~15% loss, MAP holds (heart rate compensates). Past ~30–40% loss,
