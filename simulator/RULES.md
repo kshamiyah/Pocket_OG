@@ -28,7 +28,7 @@ Bleeding rate is the baseline flow scaled by how _un_-contracted the uterus is:
 → tone 0 → ~700 ml/min; tone 0.5 → ~350; tone 1 → ~0.
 _Source: haemostasis depends on myometrial contraction compressing spiral
 arteries (Uterine Atony overview)._
-☐ OK ☐ Correct: __________
+☑ **ACCEPTED** (2026-06-28)
 
 ### R-BLEED-3 — Non-atonic causes (the other three T's) **[ASSUMED]**
 Trauma / tissue / thrombin add a separate, tone-independent bleed term
