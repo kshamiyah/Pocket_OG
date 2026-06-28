@@ -14,6 +14,7 @@ import AlphabetSidebar from "./components/AlphabetSidebar";
 import GuidelineReader from "./components/GuidelineReader";
 import RxPage from "./components/RxPage";
 import DisclaimerModal from "./components/DisclaimerModal";
+import AboutModal from "./components/AboutModal";
 import InstallBanner from "./components/InstallBanner";
 
 import { READER_AVAILABLE } from "./data/readerAvailable";
@@ -118,6 +119,7 @@ export default function App() {
   const [calcNavKey, setCalcNavKey] = useState(0);
   const [activeConsentProcedure, setActiveConsentProcedure] = useState(null);
   const [consentNavKey, setConsentNavKey] = useState(0);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
   const glSectionRefs = useRef({});
@@ -243,6 +245,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
       <DisclaimerModal />
+      <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
       <style>{`
         * { box-sizing: border-box; }
         html, body { -ms-overflow-style: none; scrollbar-width: none; }
@@ -256,6 +259,21 @@ export default function App() {
 
       {/* Feedback button — always visible */}
       <FeedbackButton query={query} filter={filter} />
+
+      {/* About — info icon on search tab */}
+      {activeTab === "search" && (
+        <button
+          type="button"
+          onClick={() => setAboutOpen(true)}
+          aria-label="About Pocket O&G"
+          className="fixed right-4 z-30 w-8 h-8 flex items-center justify-center bg-white/95 backdrop-blur border border-gray-200 shadow-sm rounded-full text-gray-400 hover:text-gray-600 hover:shadow-md active:scale-95 transition-all"
+          style={{ top: "max(1rem, env(safe-area-inset-top))" }}
+        >
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+          </svg>
+        </button>
+      )}
 
       {/* IOL Prioritizer overlay */}
       {showIOLPrioritizer && <IOLPrioritizer onClose={() => setShowIOLPrioritizer(false)} />}
@@ -291,12 +309,18 @@ export default function App() {
         <>
           {/* Hero / idle state */}
           {!hasQuery && (
-            <div className="flex flex-col items-center justify-start min-h-screen px-5 pt-20 pb-32">
+            <div
+              className="flex flex-col items-center justify-center min-h-[100dvh] px-5"
+              style={{
+                paddingTop: "max(3rem, calc(env(safe-area-inset-top) + 2rem))",
+                paddingBottom: "calc(5.5rem + env(safe-area-inset-bottom, 0px))",
+              }}
+            >
               <div className="w-full max-w-lg">
 
                 {/* Hero */}
-                <div className="text-center mb-6">
-                  <h1 className="text-[36px] sm:text-[50px] font-[800] tracking-[0.04em] text-black">Pocket O&G</h1>
+                <div className="text-center mb-12 sm:mb-14">
+                  <h1 className="text-[42px] sm:text-[56px] font-[800] tracking-[0.14em] sm:tracking-[0.16em] text-black">Pocket O&G</h1>
                   <p className="mt-3 text-base leading-relaxed text-gray-400">
                     Pocket the evidence. Make the call.
                   </p>
@@ -314,7 +338,7 @@ export default function App() {
                 </div>
 
                 {/* Search */}
-                <div className="relative mb-5">
+                <div className="relative mb-10 sm:mb-12">
                   <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
                   </svg>
@@ -338,7 +362,7 @@ export default function App() {
                 </div>
 
                 {/* Suggestion chips */}
-                <div className="flex flex-wrap gap-2 mt-3">
+                <div className="flex flex-wrap justify-center gap-2">
                   {SUGGESTIONS.map(s => (
                     <button
                       key={s}
