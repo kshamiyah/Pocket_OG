@@ -1049,6 +1049,37 @@ const STORAGE_KEY = "pocket_og_pph_session";
 function saveSession(data) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {} }
 function clearSession() { try { localStorage.removeItem(STORAGE_KEY); } catch {} }
 
+// ─── Dev clock ────────────────────────────────────────────────────────────────
+// Testing aid only. Rendered exclusively behind import.meta.env.DEV, so it never
+// appears in a production / PWA build. Advancing the offset fast-forwards the whole
+// emergency clock, letting timed paths (uterotonic delays, carboprost 15-min
+// repeats, the TXA window, IV-fail windows) be tested without real-time waits.
+function DevClock({ offsetMs, onAdvance, onReset }) {
+  const totalMin = Math.round(offsetMs / 60000);
+  const hh = Math.floor(totalMin / 60);
+  const mm = totalMin % 60;
+  const label = offsetMs === 0 ? "real time" : `+${hh ? `${hh}h ` : ""}${mm}m`;
+  const steps = [
+    { label: "+1 min",  ms: 60_000 },
+    { label: "+5 min",  ms: 5 * 60_000 },
+    { label: "+15 min", ms: 15 * 60_000 },
+    { label: "+30 min", ms: 30 * 60_000 },
+  ];
+  return (
+    <div className="flex-shrink-0 border-t border-violet-900/60 bg-violet-950/40 px-3 py-2 flex items-center gap-2 flex-wrap">
+      <span className="text-violet-300 text-[11px] font-bold uppercase tracking-wider shrink-0">⏩ Dev clock</span>
+      {steps.map(s => (
+        <button key={s.label} onClick={() => onAdvance(s.ms)}
+          className="border border-violet-700 text-violet-200 text-xs px-2.5 py-1 rounded-md hover:bg-violet-900/50 transition">
+          {s.label}
+        </button>
+      ))}
+      <span className="text-violet-400 text-xs ml-auto tabular-nums shrink-0">offset: {label}</span>
+      <button onClick={onReset} className="border border-violet-800 text-violet-400 text-xs px-2 py-1 rounded-md shrink-0">reset</button>
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function EmergencyPage({ onClose }) {
@@ -1080,6 +1111,7 @@ export default function EmergencyPage({ onClose }) {
   const [sessionRecoveredAt, setSessionRecoveredAt] = useState(null);
   const [resolveTime, setResolveTime] = useState(null);
   const [now, setNow] = useState(() => Date.now());
+  const [clockOffset, setClockOffset] = useState(0); // dev fast-forward (testing only)
   const [escalationAlert, setEscalationAlert] = useState(null);
   const [standDownConfirm, setStandDownConfirm] = useState(false);
   const [peakBloodLoss, setPeakBloodLoss] = useState(0);
@@ -1088,8 +1120,25 @@ export default function EmergencyPage({ onClose }) {
   const prevLevelRef = useRef(null);
   const wakeLockRef = useRef(null);
 
+  // Dev fast-forward clock. Every timestamp and the ticking `now` run through
+  // nowTs(), so advancing the offset makes all timers (drug delays, carboprost
+  // repeats, TXA window, IV-fail windows) behave as if real time had passed.
+  // The control that drives this only renders in dev builds — see DevClock below.
+  const clockOffsetRef = useRef(0);
+  const nowTs = () => Date.now() + clockOffsetRef.current;
+  function advanceClock(ms) {
+    clockOffsetRef.current += ms;
+    setClockOffset(clockOffsetRef.current);
+    setNow(nowTs());
+  }
+  function resetClock() {
+    clockOffsetRef.current = 0;
+    setClockOffset(0);
+    setNow(nowTs());
+  }
+
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
+    const id = setInterval(() => setNow(nowTs()), 1000);
     return () => clearInterval(id);
   }, []);
 
@@ -1118,7 +1167,7 @@ export default function EmergencyPage({ onClose }) {
   const level = getLevel(bloodLoss);
 
   function addLog(kind, label) {
-    setLog(prev => [...prev, { kind, label, time: Date.now() }]);
+    setLog(prev => [...prev, { kind, label, time: nowTs() }]);
   }
 
   function bumpPeak(ml) {
@@ -1127,7 +1176,7 @@ export default function EmergencyPage({ onClose }) {
 
   function addBloodLog(label, total) {
     bumpPeak(total);
-    setLog(prev => [...prev, { kind: "blood_loss", label, total, time: Date.now() }]);
+    setLog(prev => [...prev, { kind: "blood_loss", label, total, time: nowTs() }]);
   }
 
   useEffect(() => {
@@ -1199,13 +1248,13 @@ export default function EmergencyPage({ onClose }) {
   function handleSetup(ml, bt) {
     // Fresh emergency — reset the clock to now (a discarded prior session must
     // not carry its elapsed time over into the new one).
-    setEmergencyStartTime(Date.now());
+    setEmergencyStartTime(nowTs());
     setBloodLoss(ml);
     setPeakBloodLoss(ml);
     if (bt) setBirthTime(bt);
     const initialLevel = getLevel(ml);
     prevLevelRef.current = initialLevel;
-    const t = Date.now();
+    const t = nowTs();
     const logEntries = [{ kind: "blood_loss", label: `Initial blood loss: ${ml} ml`, total: ml, time: t }];
     if (levelVal(initialLevel) >= levelVal("major")) {
       logEntries.push({
@@ -1227,7 +1276,7 @@ export default function EmergencyPage({ onClose }) {
   }
 
   function handleDone(task) {
-    const t = Date.now();
+    const t = nowTs();
     const scheduleFollowUp = task.followUpDelay && task.followUpQuestion;
     setTaskStates(prev => ({
       ...prev,
@@ -1244,7 +1293,7 @@ export default function EmergencyPage({ onClose }) {
   }
 
   function handleAlreadyGiven(task) {
-    const t = Date.now();
+    const t = nowTs();
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "already_given", doneAt: t, alreadyGivenAt: t } }));
     addLog("task_already_given", `Already given: ${task.title}`);
     if (task.special === "carbo") { setCarboCount(1); setCarboLastTime(t); }
@@ -1253,16 +1302,16 @@ export default function EmergencyPage({ onClose }) {
   }
 
   function handleAssign(task) {
-    setTaskStates(prev => ({ ...prev, [task.id]: { status: "assigned", assignedAt: Date.now() } }));
+    setTaskStates(prev => ({ ...prev, [task.id]: { status: "assigned", assignedAt: nowTs() } }));
     addLog("task_assigned", `Assigned: ${task.title}`);
     if (task.id === "iv_access") {
-      setIvAccessPendingSince(Date.now());
+      setIvAccessPendingSince(nowTs());
       setIvAccessRetries(0);
     }
   }
 
   function handleSkip(task) {
-    setTaskStates(prev => ({ ...prev, [task.id]: { status: "skipped", skippedAt: Date.now() } }));
+    setTaskStates(prev => ({ ...prev, [task.id]: { status: "skipped", skippedAt: nowTs() } }));
     addLog("task_skipped", `Skipped: ${task.title}`);
     if (task.fallback) {
       const fb = TASKS.find(t => t.id === task.fallback);
@@ -1276,12 +1325,12 @@ export default function EmergencyPage({ onClose }) {
   }
 
   function handleNotAvailable(task) {
-    setTaskStates(prev => ({ ...prev, [task.id]: { status: "skipped", skippedAt: Date.now() } }));
+    setTaskStates(prev => ({ ...prev, [task.id]: { status: "skipped", skippedAt: nowTs() } }));
     addLog("task_skipped", task.naOption?.log || `Not available: ${task.title}`);
   }
 
   function handleFollowupYes(task) {
-    const t = Date.now();
+    const t = nowTs();
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: t } }));
     addLog("followup_done", task.followUpYesLog || `Confirmed done: ${task.title}`);
     clearForcedFollowUp(task.id);
@@ -1298,24 +1347,24 @@ export default function EmergencyPage({ onClose }) {
         prev.includes(task.followUpEscalate) ? prev : [...prev, task.followUpEscalate],
         taskStates,
       ));
-      setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: Date.now(), escalatedAt: Date.now() } }));
+      setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: nowTs(), escalatedAt: nowTs() } }));
       addLog("followup_escalate", task.followUpEscalateLog || `Escalating: ${task.title}`);
     } else if (task.followUpQuestion) {
-      setTaskStates(prev => ({ ...prev, [task.id]: { ...prev[task.id], followUpAt: Date.now() } }));
+      setTaskStates(prev => ({ ...prev, [task.id]: { ...prev[task.id], followUpAt: nowTs() } }));
       addLog("followup_pending", task.followUpEscalate ? "Still in progress — check back in 5 min" : `Still in progress: ${task.title}`);
     } else {
-      setTaskStates(prev => ({ ...prev, [task.id]: { ...prev[task.id], assignedAt: Date.now() } }));
+      setTaskStates(prev => ({ ...prev, [task.id]: { ...prev[task.id], assignedAt: nowTs() } }));
       addLog("followup_pending", `Still in progress: ${task.title}`);
     }
   }
 
   function handleAssessExclude(task) {
-    setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: Date.now(), assessOutcome: "excluded" } }));
+    setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: nowTs(), assessOutcome: "excluded" } }));
     addLog("assess", task.assess.excludeLog || `${task.title} — excluded`);
   }
 
   function handleAssessPresent(task) {
-    setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: Date.now(), assessOutcome: "present" } }));
+    setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: nowTs(), assessOutcome: "present" } }));
     addLog("assess", task.assess.presentLog || `${task.title} — present`);
     if (task.assess.treatment) {
       setForcedTasks(prev => prev.includes(task.assess.treatment) ? prev : [...prev, task.assess.treatment]);
@@ -1324,7 +1373,7 @@ export default function EmergencyPage({ onClose }) {
 
   function handleBloodAdd(delta) {
     const next = bloodLoss + delta;
-    const at = Date.now();
+    const at = nowTs();
     const newLog = [...log, { kind: "blood_loss", label: `Blood loss check: +${delta} ml → ${next} ml`, total: next, time: at }];
     setBloodLoss(next);
     setPeakBloodLoss(prev => Math.max(prev, next));
@@ -1333,14 +1382,14 @@ export default function EmergencyPage({ onClose }) {
   }
 
   function handleBloodUnchanged() {
-    const at = Date.now();
+    const at = nowTs();
     const newLog = [...log, { kind: "blood_loss_unchanged", label: `Blood loss check: unchanged (${bloodLoss} ml)`, time: at }];
     setLog(newLog);
     evaluateEscalationAfterBlood(newLog, level, at, bloodLoss);
   }
 
   function handleBloodPending() {
-    const at = Date.now();
+    const at = nowTs();
     const newLog = [...log, { kind: "blood_loss_pending", label: `Blood loss check: pending — no update (${bloodLoss} ml)`, time: at }];
     setLog(newLog);
     evaluateEscalationAfterBlood(newLog, level, at, bloodLoss);
@@ -1350,7 +1399,7 @@ export default function EmergencyPage({ onClose }) {
     const prev = bloodLoss;
     const next = Math.max(0, Math.round(newTotal));
     if (next === prev) return;
-    const at = Date.now();
+    const at = nowTs();
     const newLevel = getLevel(next);
     const newLog = [...log, {
       kind: "blood_loss_correction",
@@ -1381,7 +1430,7 @@ export default function EmergencyPage({ onClose }) {
   }
 
   function handleIvFailRetry() {
-    const t = Date.now();
+    const t = nowTs();
     setIvAccessPendingSince(t);
     setIvAccessRetries(prev => prev + 1);
     setTaskStates(prev => ({
@@ -1402,13 +1451,13 @@ export default function EmergencyPage({ onClose }) {
   }
 
   function handleInfusionAssign() {
-    setTaskStates(prev => ({ ...prev, oxytocin_inf: { status: "assigned", assignedAt: Date.now() } }));
+    setTaskStates(prev => ({ ...prev, oxytocin_inf: { status: "assigned", assignedAt: nowTs() } }));
     addLog("task_assigned", "Assigned: Oxytocin infusion");
     setInfusionReassess(false);
   }
 
   function handleInfusionNotNeeded() {
-    setTaskStates(prev => ({ ...prev, oxytocin_inf: { status: "not_indicated", doneAt: Date.now() } }));
+    setTaskStates(prev => ({ ...prev, oxytocin_inf: { status: "not_indicated", doneAt: nowTs() } }));
     addLog("task_skipped", "Oxytocin infusion — not indicated after reassessment");
     setInfusionReassess(false);
   }
@@ -1420,19 +1469,19 @@ export default function EmergencyPage({ onClose }) {
   }
 
   function handleConsiderPrepare(task) {
-    const t = Date.now();
+    const t = nowTs();
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "assigned", assignedAt: t } }));
     addLog("consider", `Consider ${task.title} — team preparing`);
   }
 
   function handleConsiderNotIndicated(task) {
-    const t = Date.now();
+    const t = nowTs();
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "not_indicated", doneAt: t } }));
     addLog("consider", `${task.title} — not indicated`);
   }
 
   function handleConsiderNotNow(task) {
-    const t = Date.now();
+    const t = nowTs();
     const snoozeMs = considerSnoozeMs(getLevel(bloodLoss));
     const mins = Math.round(snoozeMs / 60000);
     setTaskStates(prev => ({
@@ -1443,14 +1492,14 @@ export default function EmergencyPage({ onClose }) {
   }
 
   function handleConsiderArrestYes(task) {
-    const t = Date.now();
+    const t = nowTs();
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: t, arrestConfirmed: true } }));
     addLog("consider", "Maternal cardiac arrest — 2222 called");
     if ("vibrate" in navigator) navigator.vibrate([300, 100, 300, 100, 300]);
   }
 
   function handleConsiderArrestNo(task) {
-    const t = Date.now();
+    const t = nowTs();
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "done", doneAt: t, considerNoArrest: true } }));
     addLog("consider", "No cardiac arrest — continue PPH resus");
   }
@@ -1458,14 +1507,14 @@ export default function EmergencyPage({ onClose }) {
   function handleCarboDose() {
     const next = carboCount + 1;
     setCarboCount(next);
-    setCarboLastTime(Date.now());
+    setCarboLastTime(nowTs());
     addLog("carbo_dose", `Carboprost dose ${next}/8`);
   }
 
   function handleCarboSkip() {
     const next = Math.min(carboCount + 1, 8);
     setCarboCount(next);
-    setCarboLastTime(Date.now());
+    setCarboLastTime(nowTs());
     addLog("carbo_skip", `Carboprost dose ${next}/8 skipped`);
   }
 
@@ -1485,7 +1534,7 @@ export default function EmergencyPage({ onClose }) {
   }
 
   function handleCiContraindicated(task) {
-    setTaskStates(prev => ({ ...prev, [task.id]: { status: "skipped", skippedAt: Date.now() } }));
+    setTaskStates(prev => ({ ...prev, [task.id]: { status: "skipped", skippedAt: nowTs() } }));
     const fb = TASKS.find(t => t.id === task.fallback);
     addLog("ci_check", `${task.title} contraindicated${fb ? ` — switching to ${fb.title}` : ""}`);
     if (task.special === "txa") setTxaHandled(true);
@@ -1500,7 +1549,7 @@ export default function EmergencyPage({ onClose }) {
 
   function handleToneCheckFirm() {
     setToneAssessed(true);
-    setTaskStates(prev => ({ ...prev, bimanual: { status: "skipped", skippedAt: Date.now(), skipReason: "not_required" } }));
+    setTaskStates(prev => ({ ...prev, bimanual: { status: "skipped", skippedAt: nowTs(), skipReason: "not_required" } }));
     addLog("tone_check", "Tone: uterus firm after fundal massage — bimanual not required");
   }
 
@@ -1515,17 +1564,17 @@ export default function EmergencyPage({ onClose }) {
       setForcedFollowUpId(taskId);
       return;
     }
-    setTaskStates(prev => ({ ...prev, [taskId]: { status: "done", doneAt: Date.now() } }));
+    setTaskStates(prev => ({ ...prev, [taskId]: { status: "done", doneAt: nowTs() } }));
     addLog("task_done", `Confirmed done: ${task?.title ?? taskId}`);
-    if (task?.special === "txa") { setTxaTime(Date.now()); setTxaHandled(true); }
-    if (task?.special === "carbo") { setCarboCount(prev => prev === 0 ? 1 : prev); setCarboLastTime(Date.now()); }
+    if (task?.special === "txa") { setTxaTime(nowTs()); setTxaHandled(true); }
+    if (task?.special === "carbo") { setCarboCount(prev => prev === 0 ? 1 : prev); setCarboLastTime(nowTs()); }
     if (task?.uterotonic) { setQueuedUterotonicId(null); setUterotonicEscalate(null); }
   }
 
   function handleRecover() {
     const s = savedSession;
     if (!s) return;
-    setEmergencyStartTime(s.emergencyStartTime ?? Date.now());
+    setEmergencyStartTime(s.emergencyStartTime ?? nowTs());
     setBloodLoss(s.bloodLoss ?? 0);
     setPeakBloodLoss(s.peakBloodLoss ?? s.bloodLoss ?? 0);
     setAftercareCompleted(s.aftercareCompleted ?? false);
@@ -1551,14 +1600,14 @@ export default function EmergencyPage({ onClose }) {
     setIvAccessRetries(s.ivAccessRetries ?? 0);
     setInfusionReassess(s.infusionReassess ?? false);
     prevLevelRef.current = getLevel(s.bloodLoss ?? 0);
-    const t = Date.now();
+    const t = nowTs();
     setSessionRecoveredAt(t);
     setLog(prev => [...prev, { kind: "session_resumed", label: "Session resumed — blood check timer reset", time: t }]);
     setPhase("active");
   }
 
   function handleStandDown() {
-    const t = Date.now();
+    const t = nowTs();
     const unresolvedEntries = TASKS
       .filter(task => taskStates[task.id]?.status === "assigned")
       .map(task => ({ kind: "unresolved", label: `Unresolved at stand-down: ${task.title}`, time: t }));
@@ -1574,7 +1623,7 @@ export default function EmergencyPage({ onClose }) {
   }
 
   function handleAftercareComplete(doneItems) {
-    const t = Date.now();
+    const t = nowTs();
     setAftercareCompleted(true);
     setLog(prev => [
       ...prev,
@@ -1679,6 +1728,10 @@ export default function EmergencyPage({ onClose }) {
         txaTime={txaTime}
         emergencyStartTime={emergencyStartTime}
       />
+
+      {import.meta.env.DEV && (
+        <DevClock offsetMs={clockOffset} onAdvance={advanceClock} onReset={resetClock} />
+      )}
     </div>
   );
 }
