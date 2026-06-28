@@ -50,7 +50,7 @@ _(~95 ml/kg term-maternal value; exact ml/kg still to be pinned to a citation.)_
 ### R-VOL-2 — Volume balance each tick
 `blood_volume += (fluids_in + blood_in − bleed_rate × dt)`
 _Source: mass-balance of haemorrhage models (Curcio 2020/2021)._
-☐ OK ☐ Correct: __________
+☑ **ACCEPTED** (2026-06-28)
 
 ### R-VOL-3 — Transcapillary refill (partial self-compensation) **[ASSUMED rate]**
 Body shifts interstitial fluid into circulation, partly offsetting early loss —
