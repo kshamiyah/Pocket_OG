@@ -151,11 +151,29 @@ rate set in the tone-magnitude exercise below.
 
 ### R-TONE-RESP — Responsiveness from risk factors
 `R` starts at 1.0 (typical, low-risk) and is reduced by each present PPH risk
-factor. Risk-factor list and weights to be drawn from **GTG52** (antenatal +
-intrapartum risk factors). A heavily loaded patient → low `R` → refractory atony
-that drugs barely shift, forcing balloon / sutures / hysterectomy.
-_Source: GTG52 risk factors (list/weights to be transcribed and signed off)._
-☐ OK ☐ Correct: __________
+factor, floored at 0.1 (drugs always do *something*). A heavily loaded patient →
+low `R` → refractory atony that drugs barely shift, forcing balloon / sutures /
+hysterectomy.
+
+**Risk factors — transcribed from the app's GTG52 guideline** ("Risk Factors for
+Atonic PPH"), with candidate weights (the amount each subtracts from `R`).
+Weights are **[ASSUMED]** pending sign-off; the **list is from GTG52**.
+
+| GTG52 atonic-PPH risk factor | Candidate weight (−R) |
+|---|---|
+| Previous PPH | 0.15 |
+| Multiple pregnancy / polyhydramnios (overdistension) | 0.20 |
+| Macrosomia (EFW >4 kg) | 0.15 |
+| Grand multiparity (≥5 deliveries) | 0.10 |
+| Prolonged labour (esp. third stage >30 min) | 0.15 |
+| Chorioamnionitis / pyrexia in labour | 0.15 |
+| Uterine fibroids | 0.10 |
+| General anaesthesia / oxytocin augmentation | 0.10 |
+| Placenta praevia or accreta suspected | 0.20 |
+
+`R = max(0.1, 1.0 − Σ weights of present factors)`
+_Source: GTG52 "Risk Factors for Atonic PPH" (Pocket O&G guideline content)._
+☑ **ACCEPTED — list from GTG52** (2026-06-28); per-factor weights to be signed off.
 
 ### R-TONE-GAIN — How a drug raises tone (scaled by R)
 Each uterotonic has a **potential target tone** `T_drug` (what it achieves in a
@@ -175,7 +193,8 @@ sign-off):
 | Misoprostol | 0.95 | Adjunct |
 | Fundal massage | +0.3 transient, decays ~0.1/min | Mechanical bridge (R-DRUG-MASSAGE) |
 | Surgical (balloon/sutures) | ~0.98 | Mechanical control independent of R |
-☐ OK ☐ Correct: __________
+☑ **ACCEPTED — formula + candidate targets** (2026-06-28); targets [ASSUMED],
+revisable.
 
 ---
 
