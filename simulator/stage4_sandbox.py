@@ -139,11 +139,12 @@ class PatientV4:
 
 
 def simulate(scenario):
-    """Run a scenario and return structured results (no printing).
+    """DEPRECATED — legacy "ideal operator" (an autonomous hand-coded clinician).
 
-    Returns dict: { responsiveness, start_volume, rows[], verdict, verdict_min,
-    total_blood, peak_ebl, blood_volumes }. Each row is a per-minute snapshot.
-    This is the single source of truth used by both the CLI printer and the UI.
+    This is NOT the product. The product is the patient driven by the REAL SOS-PPH
+    algorithm: simulator/bridge/app_operator.py + app_live.py. This function is kept
+    only as a quick CLI smoke-test of the PatientV4 physiology; its drug/surgery
+    DECISIONS do not represent the app and should not be used for clinical testing.
     """
     p = PatientV4(scenario.get("weight_kg", 70), scenario.get("risk_factors", []),
                   scenario.get("surgical_ineffective"), bmi=scenario.get("bmi", 25),

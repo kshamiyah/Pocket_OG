@@ -32,9 +32,10 @@ RISK_FACTORS = {
 }
 
 st.set_page_config(page_title="SOS engine — live", layout="wide")
-st.title("PPH SOS engine — live on the simulated patient")
-st.caption("The REAL app decision engine (computeNextPrompt) drives the validated "
-           "patient. Watch its recommendations and the patient's response in real time.")
+st.title("PPH SOS algorithm — live on the simulated patient")
+st.caption("The patient just bleeds. The REAL SOS-PPH algorithm (computeNextPrompt "
+           "from the emergency branch) is the sole decision-maker — the team follows "
+           "it step by step. We watch whether, by following the algorithm, she stabilises.")
 
 with st.sidebar:
     st.header("Patient")
