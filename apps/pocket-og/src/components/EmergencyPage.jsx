@@ -49,7 +49,7 @@ import { SosExitConfirm } from "./sos-ui.jsx";
 const CALL_FOLLOWUP_SEC = 60; // Assign → move on → chase after 1 min (calls + resus trio)
 const STANDARD_CALL_IDS = new Set(["call_team", "call_major", "call_massive"]);
 
-const TASKS = [
+export const TASKS = [
   // Minor — stabilisation
   { id: "call_team",      level: "minor",   type: "call",     title: "Call for help",                         detail: "• Midwife in charge\n• On-call obstetrician",                                                                                                          followUpDelay: CALL_FOLLOWUP_SEC },
   { id: "abc",            level: "minor",   type: "action",   title: "ABC — airway, breathing, circulation",  detail: "Position patient flat\nHigh-flow O₂ 15 L/min via non-rebreather mask — do not wait for SpO₂ to fall in haemorrhage\nAssess for shock — HR, BP, skin perfusion, capillary refill" },
@@ -465,7 +465,7 @@ function countMonitoringPending({ taskStates, level, forcedTasks, txaTime }) {
   return { blocked, inProgress };
 }
 
-function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, ivFailSnoozeUntil, infusionReassess, sessionRecoveredAt, forcedFollowUpId, jointArrest, undoPromptHold }) {
+export function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, ivFailSnoozeUntil, infusionReassess, sessionRecoveredAt, forcedFollowUpId, jointArrest, undoPromptHold }) {
   function depsOk(task) {
     return (task.deps || []).every(id => depSatisfied(id, taskStates));
   }
