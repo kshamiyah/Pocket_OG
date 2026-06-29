@@ -200,10 +200,33 @@ revisable.
 
 ## E. Cardiac arrest layer
 
-### R-ARR-1 — Trigger
-If `MAP` stays below a critical line for longer than a tolerated window →
-hypovolaemic cardiac arrest (`rhythm` → PEA/asystole). Threshold **[ASSUMED]**,
-to be set against shock literature.
+### R-ARR-1 — Cause-agnostic arrest & death via oxygen delivery / debt
+**Design decision (2026-06-28):** the arrest trigger is **not** blood-volume
+specific (so the model extends to sepsis, cardiac, etc.). The universal currency
+is **oxygen delivery (DO₂)** — every shock type lowers it by its own mechanism
+(haemorrhage: ↓volume→↓output; sepsis: ↓vascular resistance/maldistribution;
+cardiac: ↓pump; hypoxia: ↓O₂ content).
+
+Two distinct consequences, both off the same variable:
+
+1. **Acute arrest event** — heart stops when oxygen delivery acutely collapses
+   (circulatory output → near zero). For the haemorrhage pathway this is
+   **calibrated** to coincide with ~40–50% volume loss (~4–5 min for an
+   untreated full atonic bleed at 700 ml/min from a ~6,650 ml maternal volume).
+   The volume figure is a _calibration anchor for bleeding_, not the universal
+   trigger.
+2. **Death / irreversibility** — governed by **cumulative oxygen debt** =
+   ∫(demand − delivery)dt. Evidence-based threshold: **LD50 ≈ 113.5 mL/kg**
+   (50% mortality), with metabolic correlates **lactate ≈ 12.9 mmol/L** and
+   **base excess ≈ −18.8 mmol/L** at that point. Debt repaid within ~2 h →
+   survivable; debt that lingers → organ failure → death.
+
+Central new state variable: **oxygen delivery / cumulative oxygen debt** (lactate
+as its visible readout). Each pathology plugs into it.
+
+_Sources: Rixen & Siegel, "Bench-to-bedside review: oxygen debt…" (Critical Care,
+cc3526); "Oxygen debt and metabolic acidemia as quantitative predictors of
+mortality…" (PubMed 1989759); "Blood failure / oxygen debt" (Transfusion 2016)._
 ☐ OK ☐ Correct: __________
 
 ### R-ARR-2 — Defibrillation window
