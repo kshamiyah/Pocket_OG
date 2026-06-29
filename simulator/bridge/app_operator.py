@@ -24,7 +24,7 @@ sys.path.insert(0, SIM)
 
 from stage4_sandbox import PatientV4   # noqa: E402
 from stage3_sandbox import (           # noqa: E402
-    PPH_MAJOR_ML, PPH_MASSIVE_ML, MAJOR_INFUSION_ML_MIN, MASSIVE_INFUSION_ML_MIN,
+    PPH_MAJOR_ML, PPH_MASSIVE_ML, MAJOR_PRBC_ML_MIN, MASSIVE_PRBC_ML_MIN,
 )
 
 # app drug task id -> our physiology drug id
@@ -174,8 +174,8 @@ def stream(scenario, max_steps=300):
         # ── transfusion each step (rate-limited by cannulae) ──
         blood_in = 0.0
         if transfusing and session["level"] in ("major", "massive"):
-            rate = MASSIVE_INFUSION_ML_MIN if session["level"] == "massive" else MAJOR_INFUSION_ML_MIN
-            blood_in = min(rate, p.bleed_rate) * step_dt
+            rate = MASSIVE_PRBC_ML_MIN if session["level"] == "massive" else MAJOR_PRBC_ML_MIN
+            blood_in = rate * step_dt   # fixed PRBC ceiling; no bleed-rate cap
 
         # advance first, then snapshot, so the figures reflect the RESULT of this
         # step's action (not the instant before the drug took effect).

@@ -91,12 +91,15 @@ PPH_MAJOR_ML = 1000
 PPH_MASSIVE_ML = 2000
 BLOOD_PREP_MIN = 0            # IDEAL model: blood instant. Real time-to-blood is a
                              # HUMAN-FACTORS item -> deferred to that later layer.
-# Infusion ceilings from cannula flow rates (16G "grey" = ~180 ml/min, BD Venflon).
-# Clinical practice: >=1 grey cannula routinely; a SECOND grey sited in major/massive
-# haemorrhage -> ~2 x 180. (Gravity figures; blood is more viscous but pressure
-# bags compensate.)  [source: 16G grey cannula flow rate ~180 ml/min]
-MAJOR_INFUSION_ML_MIN = 180     # one grey cannula
-MASSIVE_INFUSION_ML_MIN = 360   # two grey cannulae
+# PRBC infusion ceilings — packed cells flow ~50% slower than crystalloid through
+# the same cannula (undiluted RBC ~80–110 ml/min per 16G; PMC8053387). Two greys
+# + rapid infuser can approach ~200 ml/min in an optimistic MTP setup.
+# NOT capped at bleed rate: when haemorrhage outpaces infusion, volume falls.
+MAJOR_PRBC_ML_MIN = 100      # one 16G, undiluted packed red cells
+MASSIVE_PRBC_ML_MIN = 200    # two greys + pressurised / rapid infuser
+# Legacy names (deprecated sandboxes import these)
+MAJOR_INFUSION_ML_MIN = MAJOR_PRBC_ML_MIN
+MASSIVE_INFUSION_ML_MIN = MASSIVE_PRBC_ML_MIN
 
 
 class PatientV3:
@@ -223,8 +226,8 @@ def run(scenario):
                 transfusion_started_min = minute
                 action += f"START transfusion ({p.level}, EBL {p.cumulative_bled:.0f}) "
             if minute >= transfusion_started_min + BLOOD_PREP_MIN:
-                max_rate = MASSIVE_INFUSION_ML_MIN if p.level == "massive" else MAJOR_INFUSION_ML_MIN
-                blood_in = min(max_rate, p.bleed_rate)   # replace ongoing loss, capped
+                max_rate = MASSIVE_PRBC_ML_MIN if p.level == "massive" else MAJOR_PRBC_ML_MIN
+                blood_in = max_rate   # fixed PRBC ceiling; deficit when bleed > rate
                 total_blood += blood_in
                 if p.level == "massive" and "MHP" not in action:
                     action += "MHP "

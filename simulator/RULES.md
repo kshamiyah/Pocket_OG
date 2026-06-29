@@ -403,13 +403,15 @@ and gives blood only per `PPH_THRESHOLDS` (I1):
 - **≥ 2,000 ml (massive):** MHP pack.
 _Source: app `PPH_THRESHOLDS` / `getPphLevel` (I1)._ ☑ **ACCEPTED**.
 
-### R-TX-3 — Infusion ceiling from cannula flow
-Transfusion is rate-limited by cannula flow — it cannot outrun a torrential
-bleed. **16G "grey" ≈ 180 ml/min**; clinical practice sites ≥1 grey routinely
-and a **second grey** in major/massive haemorrhage:
-- **major: ~180 ml/min** (one grey)
-- **massive: ~360 ml/min** (two greys)
-_Source: 16G grey cannula flow rate ~180 ml/min (R17)._ ☑ **ACCEPTED**.
+### R-TX-3 — Infusion ceiling from cannula flow (PRBC)
+Transfusion is rate-limited by cannula flow and **blood viscosity** — packed
+red cells flow ~50% slower than crystalloid through the same line (PMC8053387).
+Infusion runs at a **fixed PRBC ceiling**, not capped at the current bleed rate:
+when haemorrhage outpaces infusion, circulating volume falls and MAP drops.
+- **major: ~100 ml/min** (one 16G, undiluted PRBC)
+- **massive: ~200 ml/min** (two greys + pressurised / rapid infuser)
+Crystalloid ceilings (~180 ml/min per 16G) are separate — Step 2+ in the build.
+_Source: 16G flow (R17); PRBC viscosity halving (PMC8053387)._ ☑ **ACCEPTED** (2026-06-29 PRBC revision).
 Blood-prep delay (time to bedside): **0 in the ideal model** — real time-to-blood
 (O-neg ~mins vs crossmatched 15–30+ min) is a **human-factors** item, ⏸ **DEFERRED**
 to that later layer (2026-06-29).

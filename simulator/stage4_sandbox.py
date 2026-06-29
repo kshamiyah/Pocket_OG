@@ -30,7 +30,7 @@ from stage3_sandbox import (
     UTEROTONIC_PHARM_DELAY_SEC, scale_delay_by_bleed_rate,
     ONSET_MIN, TARGET_TONE, LADDER, MASSAGE_BONUS, MASSAGE_DECAY_PER_MIN,
     CONTROLLED_BLEED, PPH_MAJOR_ML, PPH_MASSIVE_ML, BLOOD_PREP_MIN,
-    MAJOR_INFUSION_ML_MIN, MASSIVE_INFUSION_ML_MIN,
+    MAJOR_PRBC_ML_MIN, MASSIVE_PRBC_ML_MIN,
     CARBO_MAX_DOSES, CARBO_REPEAT_BASE_SEC, CARBO_REPEAT_FLOOR_SEC,
     URGENCY_EBL_ML, URGENCY_BLEED_ML_MIN, DRUG_INCREMENT, DRUG_TONE_CEILING,
 )
@@ -214,8 +214,8 @@ def simulate(scenario):
             if transfusion_started_min is None:
                 transfusion_started_min = minute; action += f"START transfusion ({p.level}) "
             if minute >= transfusion_started_min + BLOOD_PREP_MIN:
-                rate = MASSIVE_INFUSION_ML_MIN if p.level == "massive" else MAJOR_INFUSION_ML_MIN
-                blood_in = min(rate, p.bleed_rate); total_blood += blood_in
+                rate = MASSIVE_PRBC_ML_MIN if p.level == "massive" else MAJOR_PRBC_ML_MIN
+                blood_in = rate; total_blood += blood_in
 
         rows.append({
             "min": minute, "EBL": round(p.cumulative_bled), "tone": round(p.tone, 2),
