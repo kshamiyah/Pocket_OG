@@ -395,6 +395,10 @@ Some causes blunt mechanical efficacy (e.g. **placenta accreta** → balloon/
 sutures ineffective → hysterectomy is definitive).
 _Source: GTG52 surgical management; app `bakri` task (I2)._
 Tone targets ☐ **[ASSUMED]**; ladder/escalation order ☑ **ACCEPTED**.
+**Escalation timing (2026-06-29):** in the ideal model the operator escalates to
+the next surgical step only **after the previous step's onset has had its chance**
+to work (place it, see if it controls her, else escalate). Theatre-mobilisation
+time is a **human factor → deferred**. ☑ **ACCEPTED — onset-paced escalation**.
 
 ---
 

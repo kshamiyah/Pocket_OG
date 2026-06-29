@@ -35,7 +35,9 @@ from stage3_sandbox import (
 SURGICAL_LADDER = ["balloon", "sutures", "hysterectomy"]
 SURG_ONSET_MIN = {"balloon": 2, "sutures": 6, "hysterectomy": 10}
 SURG_TARGET = {"balloon": 0.95, "sutures": 0.97, "hysterectomy": 0.999}
-SURG_ESCALATION_WAIT = 4   # min to assess response / mobilise theatre [ASSUMED]
+# Escalation between surgical steps waits for the PREVIOUS step's onset (time to
+# see if it worked), then escalates if still bleeding. Theatre-mobilisation time is
+# a human factor -> deferred, so the ideal model has no extra logistics delay.
 
 
 class PatientV4:
@@ -120,7 +122,7 @@ def run(scenario):
 
     next_rung = 0
     last_drug_id, last_drug_min = None, None
-    surg_rung, last_surg_min = 0, None
+    surg_rung, last_surg_min, last_surg_step = 0, None, None
     total_blood = 0.0
     transfusion_started_min = None
 
@@ -147,9 +149,11 @@ def run(scenario):
 
         # surgical ladder — once drugs exhausted and still bleeding (R-SURG-1)
         elif next_rung >= len(LADDER) and p.bleed_rate >= CONTROLLED_BLEED and surg_rung < len(SURGICAL_LADDER):
-            if last_surg_min is None or (minute - last_surg_min) >= SURG_ESCALATION_WAIT:
+            # escalate only after the previous step has had its onset to work
+            if last_surg_min is None or (minute - last_surg_min) > SURG_ONSET_MIN[last_surg_step]:
                 step = SURGICAL_LADDER[surg_rung]; p.give_surgical(step, minute)
-                last_surg_min = minute; surg_rung += 1
+                last_surg_min, last_surg_step = minute, step
+                surg_rung += 1
                 action += f">> SURGERY: {step} "
 
         # transfusion (R-TX-2/3): only at major+, rate-limited by cannulae
