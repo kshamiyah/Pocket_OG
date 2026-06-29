@@ -47,20 +47,31 @@ SURG_TARGET = {"balloon": 0.95, "sutures": 0.97, "hysterectomy": 0.999}
 # a human factor -> deferred, so the ideal model has no extra logistics delay.
 
 
+from patient_profile import (  # noqa: E402
+    uterotonics_refractory, massage_refractory, surgical_ineffective_steps,
+)
+
+
 class PatientV4:
     def __init__(self, weight_kg=70, risk_factors=None, surgical_ineffective=None, bmi=25,
-                 start_ebl=500, base_tone=BASE_START_TONE):
+                 start_ebl=500, base_tone=BASE_START_TONE, treatment_response=None):
         # start_ebl = blood already lost when PPH is recognised / SOS is opened.
         # SOS is not triggered below ~500 ml (minor PPH), so default to 500.
         self.weight_kg = weight_kg
         self.bmi = bmi
         self.start_volume = weight_kg * maternal_ml_per_kg(bmi)   # full volume before loss
         self.blood_volume = self.start_volume - start_ebl          # already down by start_ebl
-        self.surgical_ineffective = set(surgical_ineffective or [])   # e.g. accreta
-        # Structural causes (accreta) are DRUG-REFRACTORY: uterotonics can't fix
-        # abnormal placentation. This is a structural property, NOT a risk-factor
-        # effect. Accreta (balloon/sutures ineffective) implies drug-refractory.
-        self.drug_refractory = "balloon" in self.surgical_ineffective
+        if treatment_response:
+            self.treatment_response = dict(treatment_response)
+            self.surgical_ineffective = set(surgical_ineffective_steps(self.treatment_response))
+            self.drug_refractory = uterotonics_refractory(self.treatment_response)
+            self.massage_ineffective = massage_refractory(self.treatment_response)
+        else:
+            # Legacy path (deprecated sandboxes)
+            self.treatment_response = None
+            self.surgical_ineffective = set(surgical_ineffective or [])
+            self.drug_refractory = "balloon" in self.surgical_ineffective
+            self.massage_ineffective = False
         # R-SEVERITY: risk factors set how ATONIC she starts (severity / bleed rate),
         # not treatability. Lower starting tone = faster bleed.
         self.start_tone = start_tone_from_risk_factors(risk_factors or [], base_tone)
@@ -105,7 +116,9 @@ class PatientV4:
     def give_surgical(self, step, now_min):
         self._pending_surg.append((now_min + SURG_ONSET_MIN[step], SURG_TARGET[step], step))
 
-    def give_massage(self): self.massage_bonus = MASSAGE_BONUS
+    def give_massage(self):
+        if not self.massage_ineffective:
+            self.massage_bonus = MASSAGE_BONUS
 
     def tick(self, now_min, dt_min=1.0, blood_in=0.0):
         # surgical control first — MECHANICAL, independent of R (R-SURG-1)
@@ -148,7 +161,8 @@ def simulate(scenario):
     """
     p = PatientV4(scenario.get("weight_kg", 70), scenario.get("risk_factors", []),
                   scenario.get("surgical_ineffective"), bmi=scenario.get("bmi", 25),
-                  start_ebl=scenario.get("start_ebl", 500))
+                  start_ebl=scenario.get("start_ebl", 500),
+                  treatment_response=scenario.get("treatment_response"))
     duration = scenario.get("duration_min", 40)
 
     next_rung = 0

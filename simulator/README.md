@@ -21,10 +21,11 @@ pip install -r requirements.txt               # Python deps (one time)
 streamlit run simulator/bridge/app_live.py
 ```
 
-Pick a patient (weight, BMI, blood loss at recognition, risk factors, accreta),
-press **Run**, and watch the real algorithm manage her live — its NOW
-recommendation, her vitals, and charts of tone, MAP, bleeding and EBL, ending in
-a verdict (stabilised / arrest / exsanguinating).
+Pick a patient (weight, BMI, blood loss at recognition, risk factors),
+choose a **case phenotype** (what treatments work for this patient — presets
+or custom per treatment), press **Run**, and watch the real algorithm manage
+her live — its NOW recommendation, her vitals, and charts of tone, MAP,
+bleeding and EBL, ending in a verdict (stabilised / arrest / exsanguinating).
 
 ## Files
 
@@ -34,6 +35,7 @@ a verdict (stabilised / arrest / exsanguinating).
 | `stage1`…`stage4_sandbox.py` | The patient physiology (built up in stages) |
 | `bridge/server.mjs` | Node bridge wrapping the real `computeNextPrompt` |
 | `bridge/app_operator.py` | The loop: real algorithm ↔ patient (translation) |
+| `patient_profile.py` | **Patient phenotype** — presentation + treatment response presets |
 | `bridge/app_live.py` | **The product** — live Streamlit view |
 
 > Note: `stage4_sandbox.simulate()` is a **deprecated** legacy "ideal operator"

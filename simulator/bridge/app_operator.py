@@ -74,9 +74,14 @@ def stream(scenario, max_steps=300):
     Each snapshot: {t, ebl, tone, bleed, map, lactate, ptype, tid, note, acted,
     verdict}. The final snapshot carries the terminal verdict."""
     start_ebl = scenario.get("start_ebl", 500)
-    p = PatientV4(scenario.get("weight_kg", 70), scenario.get("risk_factors", []),
-                  scenario.get("surgical_ineffective"), bmi=scenario.get("bmi", 25),
-                  start_ebl=start_ebl)
+    p = PatientV4(
+        scenario.get("weight_kg", 70),
+        scenario.get("risk_factors", []),
+        scenario.get("surgical_ineffective"),
+        bmi=scenario.get("bmi", 25),
+        start_ebl=start_ebl,
+        treatment_response=scenario.get("treatment_response"),
+    )
     # no reflexive massage — the app prompts fundal_massage/bimanual itself, so she
     # presents at her true starting tone until the app actually orders massage.
     bridge = AppBridge()
@@ -122,7 +127,10 @@ def stream(scenario, max_steps=300):
                     session["carboCount"] = max(1, session["carboCount"])
                     session["carboLastTime"] = now_ms
                 mark_done(tid)
-                note = f"GIVE {tid}"
+                if p.drug_refractory:
+                    note = f"GIVE {tid} (no uterotonic response)"
+                else:
+                    note = f"GIVE {tid}"
         elif ptype == "carbo_dose":
             p.give_uterotonic("carboprost", t_min)
             session["carboCount"] += 1
@@ -135,21 +143,48 @@ def stream(scenario, max_steps=300):
                 mark_done(nxt)
                 note = f"escalate -> {nxt}"
         elif ptype == "task" and tid == "fundal_massage":
-            p.give_massage(); mark_done(tid); note = "massage"
+            p.give_massage(); mark_done(tid)
+            note = "massage" if not p.massage_ineffective else "massage (no response)"
         elif ptype == "task" and tid == "bimanual":
-            p.give_massage(); mark_done(tid); note = "bimanual compression"
+            p.give_massage(); mark_done(tid)
+            note = "bimanual compression" if not p.massage_ineffective else "bimanual (no response)"
         elif ptype == "task" and tid in ("blood_products", "mhp_pack", "rapid_cryst"):
             transfusing = True; mark_done(tid); note = f"START transfusion ({tid})"
         elif ptype == "consider" and tid == "bakri":
             if surg_idx < len(SURGICAL_SEQUENCE):
-                p.give_surgical(SURGICAL_SEQUENCE[surg_idx], t_min)
-                note = f">> SURGERY: {SURGICAL_SEQUENCE[surg_idx]}"; surg_idx += 1
+                step = SURGICAL_SEQUENCE[surg_idx]
+                p.give_surgical(step, t_min)
+                note = f">> SURGERY: {step}"
+                if p.treatment_response and p.treatment_response.get(step) == "ineffective":
+                    note += " (no physiological response)"
+                surg_idx += 1
             mark_done(tid)
+        elif ptype == "consider" and tid == "theatre":
+            session["taskStates"]["theatre"] = {
+                "status": "assigned", "assignedAt": now_ms, "preparing": True,
+            }
+            note = "theatre team preparing (assigned)"
         elif ptype == "theatre_transfer":
-            if surg_idx < len(SURGICAL_SEQUENCE):
-                p.give_surgical(SURGICAL_SEQUENCE[surg_idx], t_min)
-                note = f">> THEATRE: {SURGICAL_SEQUENCE[surg_idx]}"; surg_idx += 1
-            mark_done("theatre")
+            # In theatre the team may proceed through the ladder in one mobilisation
+            # (e.g. sutures fail → hysterectomy) without a second app prompt.
+            steps_done = []
+            while surg_idx < len(SURGICAL_SEQUENCE):
+                step = SURGICAL_SEQUENCE[surg_idx]
+                p.give_surgical(step, t_min)
+                steps_done.append(step)
+                surg_idx += 1
+                if step not in p.surgical_ineffective:
+                    break
+            if steps_done:
+                note = " >> THEATRE: " + " → ".join(steps_done)
+                failed = [s for s in steps_done if s in p.surgical_ineffective]
+                if failed:
+                    note += f" ({', '.join(failed)} — no physiological response)"
+            else:
+                note = "theatre transfer (surgical ladder complete)"
+            session["taskStates"]["theatre"] = {
+                "status": "done", "doneAt": now_ms, "inTheatre": True,
+            }
         elif ptype == "tone_check":
             session["toneAssessed"] = True; note = "assess tone"
         elif ptype == "blood_loss_check":
@@ -159,6 +194,8 @@ def stream(scenario, max_steps=300):
         elif ptype in ("task", "ci_check", "consider", "followup") and tid:
             if ptype == "ci_check":
                 session["ciCleared"][tid] = True
+            elif tid == "theatre":
+                pass  # handled above
             else:
                 if tid == "txa":
                     session["txaTime"] = now_ms; session["txaHandled"] = True
