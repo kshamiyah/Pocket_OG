@@ -72,11 +72,12 @@ CONTROLLED_BLEED = 100        # ml/min — operator stops escalating below this
 PPH_MAJOR_ML = 1000
 PPH_MASSIVE_ML = 2000
 BLOOD_PREP_MIN = 2            # time to get O-neg / pack to the bedside [ASSUMED]
-# realistic SUSTAINED infusion ceilings — transfusion CANNOT outrun a torrential
-# uncontrolled bleed (and without modelling coagulopathy this cap stands in for
-# that reality: an unstopped source outpaces resuscitation) [ASSUMED]
-MAJOR_INFUSION_ML_MIN = 120
-MASSIVE_INFUSION_ML_MIN = 180
+# Infusion ceilings from cannula flow rates (16G "grey" = ~180 ml/min, BD Venflon).
+# Clinical practice: >=1 grey cannula routinely; a SECOND grey sited in major/massive
+# haemorrhage -> ~2 x 180. (Gravity figures; blood is more viscous but pressure
+# bags compensate.)  [source: 16G grey cannula flow rate ~180 ml/min]
+MAJOR_INFUSION_ML_MIN = 180     # one grey cannula
+MASSIVE_INFUSION_ML_MIN = 360   # two grey cannulae
 
 
 class PatientV3:
@@ -219,8 +220,18 @@ def run(scenario):
             return "ARREST"
 
     controlled = p.bleed_rate < 50 and p.map > 60
-    print(f"    outcome: {'CONTROLLED — tap closed, perfusion restored' if controlled else 'ongoing shock'}")
-    print(f"    final tone {p.tone:.2f} | total blood {total_blood:.0f} ml | peak O2 debt {p.oxygen_debt:.1f} mL/kg")
+    if controlled:
+        verdict = "CONTROLLED — tap closed, perfusion restored"
+    elif total_blood >= p.start_volume:
+        # ~one entire blood volume transfused with no control — exsanguination
+        # being held only by transfusion. Surgical control is mandatory.
+        verdict = ("EXSANGUINATING — ~1 blood volume transfused, still bleeding: "
+                   "held by transfusion alone -> SURGICAL CONTROL MANDATORY")
+    else:
+        verdict = "ongoing shock"
+    print(f"    outcome: {verdict}")
+    print(f"    final tone {p.tone:.2f} | total blood {total_blood:.0f} ml "
+          f"({total_blood / p.start_volume:.1f} blood volumes) | peak O2 debt {p.oxygen_debt:.1f} mL/kg")
     return "SURVIVE" if controlled else "ONGOING"
 
 
@@ -235,7 +246,7 @@ SCENARIOS = [
         "name": "Refractory uterus — full ladder still not enough (needs surgery)",
         "weight_kg": 70,
         "risk_factors": ["overdistension", "previous_pph", "prolonged_labour", "praevia_or_accreta"],  # R = 0.30
-        "duration_min": 30,
+        "duration_min": 45,
     },
 ]
 
