@@ -386,15 +386,21 @@ depletion**. ☑ **ACCEPTED — concept**; coagulopathy modelling deferred.
 Unlike drugs (scaled by `R`), mechanical control physically compresses the
 bleeding source, so it raises tone **regardless of `R`**. Ladder, escalated when
 the uterotonic ladder is exhausted and bleeding continues:
-| Step | Effect (tone target) | Note |
+| Step | Effect (tone target) | Published success rate |
 |---|---|---|
-| Bakri balloon tamponade | ~0.95 | first-line mechanical; may avoid theatre |
-| Compression sutures (B-Lynch) + vessel ligation | ~0.97 | laparotomy |
-| Hysterectomy | ~0.999 | definitive |
-Some causes blunt mechanical efficacy (e.g. **placenta accreta** → balloon/
-sutures ineffective → hysterectomy is definitive).
-_Source: GTG52 surgical management; app `bakri` task (I2)._
-Tone targets ☐ **[ASSUMED]**; ladder/escalation order ☑ **ACCEPTED**.
+| Bakri balloon tamponade | ~0.95 | **85.9%** pooled (atony 87%, accreta **66.7%**) — R27 |
+| Compression sutures (B-Lynch) + vessel ligation | ~0.97 | **~91%** pooled — R28 |
+| Hysterectomy | ~0.999 | definitive (removes the organ) |
+
+Tone targets are now **anchored to published success rates** (ordering balloon <
+sutures < hysterectomy matches 86% < 91% < definitive). The cause-specific failure
+is handled by the **accreta** flag (balloon/sutures ineffective → hysterectomy),
+directly supported by the balloon's drop to 66.7% in accreta (R27). Deterministic
+for the ideal model; a future probabilistic version could use 86%/91% as literal
+probabilities.
+_Sources: Bakri systematic review (R27); B-Lynch meta-analysis (R28); GTG52 /
+app `bakri` task (I2)._
+☑ **ACCEPTED — targets evidence-anchored** (2026-06-29); ladder/escalation order ✓.
 **Escalation timing (2026-06-29):** in the ideal model the operator escalates to
 the next surgical step only **after the previous step's onset has had its chance**
 to work (place it, see if it controls her, else escalate). Theatre-mobilisation
@@ -457,6 +463,8 @@ cite the repository file and the specific named symbol/section.
 | R24 | Maternal body weight and estimated circulating blood volume (review, non-linear approach) | Br J Anaesth 2022; DOI: 10.1016/j.bja.2022.07.009 | https://www.bjanaesthesia.org.uk/article/S0007-0912(22)00453-6/fulltext |
 | R25 | Plasma volume expansion in pregnancy (~100 ml/kg at term) | ScienceDirect / PMC5701717 | https://pmc.ncbi.nlm.nih.gov/articles/PMC5701717/ |
 | R26 | Blood volume in obese vs normal-weight gravidas (hydroxyethyl-starch); ml/kg vs BMI regression | Vricella et al.; PMID: 25981844 / PMC4589161 | https://pmc.ncbi.nlm.nih.gov/articles/PMC4589161/ |
+| R27 | Uterine balloon tamponade success (85.9% pooled; by cause incl. accreta 66.7%) | Systematic review, 91 studies / PMC10086883 | https://pmc.ncbi.nlm.nih.gov/articles/PMC10086883/ |
+| R28 | B-Lynch compression suture success (~91% pooled) | Meta-analysis / PMC9734287 | https://pmc.ncbi.nlm.nih.gov/articles/PMC9734287/ |
 
 ### Internal sources (Pocket O&G repository)
 
