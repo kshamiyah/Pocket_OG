@@ -139,11 +139,43 @@ drug to sustain it. No app timing constant (not a drug); onset ≈ immediate.
 ☑ **ACCEPTED — concept (immediate bump + decay)** (2026-06-28); magnitude & decay
 rate set in the tone-magnitude exercise below.
 
-### OPEN: tone magnitudes (separate decision, deferred)
-How much each agent raises `tone` (and the ceiling when stacked) is unresolved
-and tracked here, not inside the rules above. To be set with the clinician as a
-dedicated exercise. Until then, Stage 1 may use a single placeholder for
-oxytocin only, clearly labelled.
+## D2. Tone magnitude — the responsiveness model
+
+**Decisions (2026-06-28, clinician):**
+1. **Per-patient responsiveness dial — YES.** Each patient has a value
+   `responsiveness R ∈ [0,1]`: how well her uterus answers uterotonics.
+2. **Typical responder is controllable by oxytocin alone** — at `R = 1`,
+   oxytocin reaches "controlled" tone (~0.95).
+3. **R is derived from PPH risk factors** — more / worse risk factors → lower R
+   → drugs work less → the app must escalate sooner (incl. surgical).
+
+### R-TONE-RESP — Responsiveness from risk factors
+`R` starts at 1.0 (typical, low-risk) and is reduced by each present PPH risk
+factor. Risk-factor list and weights to be drawn from **GTG52** (antenatal +
+intrapartum risk factors). A heavily loaded patient → low `R` → refractory atony
+that drugs barely shift, forcing balloon / sutures / hysterectomy.
+_Source: GTG52 risk factors (list/weights to be transcribed and signed off)._
+☐ OK ☐ Correct: __________
+
+### R-TONE-GAIN — How a drug raises tone (scaled by R)
+Each uterotonic has a **potential target tone** `T_drug` (what it achieves in a
+fully responsive patient, R = 1). Actual tone reached climbs toward that target
+scaled by responsiveness:
+`tone_after = tone_before + (T_drug − tone_before) × R`   (only if positive)
+Stacking drugs lets a partial responder climb higher; a very low-R uterus never
+reaches control on drugs alone → surgical escalation is the only winning move.
+
+Candidate targets at R = 1 (magnitudes — for review, **[ASSUMED]** pending
+sign-off):
+| Agent | Target tone `T` at R=1 | Meaning |
+|---|---|---|
+| Oxytocin | 0.95 | Controls a typical responder alone (decision 2) |
+| Ergometrine | 0.95 | Second agent; helps partial responders climb |
+| Carboprost | 0.97 | Strong prostaglandin; higher ceiling |
+| Misoprostol | 0.95 | Adjunct |
+| Fundal massage | +0.3 transient, decays ~0.1/min | Mechanical bridge (R-DRUG-MASSAGE) |
+| Surgical (balloon/sutures) | ~0.98 | Mechanical control independent of R |
+☐ OK ☐ Correct: __________
 
 ---
 
