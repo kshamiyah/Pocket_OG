@@ -73,14 +73,16 @@ def stream(scenario, max_steps=300):
     """Generator: yields a per-step snapshot dict so a UI can animate it live.
     Each snapshot: {t, ebl, tone, bleed, map, lactate, ptype, tid, note, acted,
     verdict}. The final snapshot carries the terminal verdict."""
+    start_ebl = scenario.get("start_ebl", 500)
     p = PatientV4(scenario.get("weight_kg", 70), scenario.get("risk_factors", []),
-                  scenario.get("surgical_ineffective"), bmi=scenario.get("bmi", 25))
+                  scenario.get("surgical_ineffective"), bmi=scenario.get("bmi", 25),
+                  start_ebl=start_ebl)
     p.give_massage()   # bimanual compression is reflexive; app will also prompt it
     bridge = AppBridge()
 
     session = {
-        "taskStates": {}, "level": "minor", "toneAssessed": False,
-        "log": [{"kind": "blood_loss", "total": 0, "time": 0}],
+        "taskStates": {}, "level": level_from_ebl(start_ebl), "toneAssessed": False,
+        "log": [{"kind": "blood_loss", "total": round(start_ebl), "time": 0}],
         "txaTime": None, "txaHandled": False, "txaSecondDone": False,
         "effectiveBirthTime": 0, "carboCount": 0, "carboLastTime": None,
         "ciCleared": {}, "forcedTasks": [], "now": 0,

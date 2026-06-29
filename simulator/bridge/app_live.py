@@ -40,6 +40,8 @@ with st.sidebar:
     st.header("Patient")
     weight = st.slider("Weight (kg)", 40, 150, 70)
     bmi = st.slider("BMI", 18, 50, 25)
+    start_ebl = st.slider("Blood loss at recognition (ml)", 500, 2000, 500, step=50,
+                          help="Blood already lost when SOS is opened (not called below ~500 ml).")
     chosen = [k for k, v in RISK_FACTORS.items() if st.checkbox(v)]
     accreta = st.checkbox("Accreta (balloon/sutures ineffective)")
     speed = st.select_slider("Playback speed", ["slow", "normal", "fast"], "normal")
@@ -48,7 +50,8 @@ with st.sidebar:
 delay = {"slow": 0.5, "normal": 0.22, "fast": 0.05}[speed]
 
 scenario = {
-    "name": "live", "weight_kg": weight, "bmi": bmi, "risk_factors": chosen,
+    "name": "live", "weight_kg": weight, "bmi": bmi, "start_ebl": start_ebl,
+    "risk_factors": chosen,
     "surgical_ineffective": ["balloon", "sutures"] if accreta else None,
 }
 

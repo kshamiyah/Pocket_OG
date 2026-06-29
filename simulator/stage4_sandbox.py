@@ -43,17 +43,20 @@ SURG_TARGET = {"balloon": 0.95, "sutures": 0.97, "hysterectomy": 0.999}
 
 
 class PatientV4:
-    def __init__(self, weight_kg=70, risk_factors=None, surgical_ineffective=None, bmi=25):
+    def __init__(self, weight_kg=70, risk_factors=None, surgical_ineffective=None, bmi=25,
+                 start_ebl=500):
+        # start_ebl = blood already lost when PPH is recognised / SOS is opened.
+        # SOS is not triggered below ~500 ml (minor PPH), so default to 500.
         self.weight_kg = weight_kg
         self.bmi = bmi
-        self.blood_volume = weight_kg * maternal_ml_per_kg(bmi)
-        self.start_volume = self.blood_volume
+        self.start_volume = weight_kg * maternal_ml_per_kg(bmi)   # full volume before loss
+        self.blood_volume = self.start_volume - start_ebl          # already down by start_ebl
         self.responsiveness = responsiveness_from_risk_factors(risk_factors or [])
         self.surgical_ineffective = set(surgical_ineffective or [])   # e.g. accreta
         self.sustained_tone = 0.0
         self.massage_bonus = 0.0
         self.oxygen_debt = 0.0
-        self.cumulative_bled = 0.0
+        self.cumulative_bled = float(start_ebl)   # EBL starts at the recognition point
         self._pending = []           # uterotonics: (effect_min, target)  — scaled by R
         self._pending_surg = []      # surgical: (effect_min, target, step) — mechanical
 
@@ -125,7 +128,8 @@ def simulate(scenario):
     This is the single source of truth used by both the CLI printer and the UI.
     """
     p = PatientV4(scenario.get("weight_kg", 70), scenario.get("risk_factors", []),
-                  scenario.get("surgical_ineffective"), bmi=scenario.get("bmi", 25))
+                  scenario.get("surgical_ineffective"), bmi=scenario.get("bmi", 25),
+                  start_ebl=scenario.get("start_ebl", 500))
     duration = scenario.get("duration_min", 40)
 
     next_rung = 0

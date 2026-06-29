@@ -38,6 +38,9 @@ with st.sidebar:
     st.header("Patient")
     weight = st.slider("Weight (kg)", 40, 150, 70)
     bmi = st.slider("BMI (kg/m²)", 18, 50, 25)
+    start_ebl = st.slider("Blood loss at recognition (ml)", 500, 2000, 500, step=50,
+                          help="Blood already lost when PPH is recognised / SOS is opened "
+                               "(SOS is not called below ~500 ml = minor PPH).")
     duration = st.slider("Duration to simulate (min)", 15, 60, 40)
 
     st.header("Risk factors")
@@ -51,6 +54,7 @@ scenario = {
     "name": "UI patient",
     "weight_kg": weight,
     "bmi": bmi,
+    "start_ebl": start_ebl,
     "risk_factors": chosen,
     "duration_min": duration,
     "surgical_ineffective": ["balloon", "sutures"] if accreta else None,
