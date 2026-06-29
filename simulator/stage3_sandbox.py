@@ -66,7 +66,17 @@ LADDER = ["oxytocin", "ergometrine", "carboprost", "misoprostol"]
 MASSAGE_BONUS = 0.30
 MASSAGE_DECAY_PER_MIN = 0.10
 CONTROLLED_BLEED = 100        # ml/min — operator stops escalating below this
-TRANSFUSION_CAP_ML = 3000     # realistic ceiling for this sandbox
+
+# Transfusion triggers — from app PPH_THRESHOLDS (I1): blood only once EBL crosses
+# major (1 L); MHP at massive (2 L). Below 1 L → no transfusion.
+PPH_MAJOR_ML = 1000
+PPH_MASSIVE_ML = 2000
+BLOOD_PREP_MIN = 2            # time to get O-neg / pack to the bedside [ASSUMED]
+# realistic SUSTAINED infusion ceilings — transfusion CANNOT outrun a torrential
+# uncontrolled bleed (and without modelling coagulopathy this cap stands in for
+# that reality: an unstopped source outpaces resuscitation) [ASSUMED]
+MAJOR_INFUSION_ML_MIN = 120
+MASSIVE_INFUSION_ML_MIN = 180
 
 
 class PatientV3:
@@ -78,7 +88,17 @@ class PatientV3:
         self.sustained_tone = 0.0
         self.massage_bonus = 0.0
         self.oxygen_debt = 0.0
+        self.cumulative_bled = 0.0   # true estimated blood loss (EBL), gross of transfusion
         self._pending = []     # (effect_min, target)
+
+    @property
+    def level(self):
+        # app getPphLevel(EBL): minor < 1 L, major >= 1 L, massive >= 2 L (I1)
+        if self.cumulative_bled >= PPH_MASSIVE_ML:
+            return "massive"
+        if self.cumulative_bled >= PPH_MAJOR_ML:
+            return "major"
+        return "minor"
 
     @property
     def tone(self):
@@ -128,7 +148,9 @@ class PatientV3:
                 keep.append((effect_min, target))
         self._pending = keep
         self.massage_bonus = max(0.0, self.massage_bonus - MASSAGE_DECAY_PER_MIN * dt_min)
-        self.blood_volume += blood_in - self.bleed_rate * dt_min
+        bled = self.bleed_rate * dt_min
+        self.cumulative_bled += bled                 # true EBL (gross)
+        self.blood_volume += blood_in - bled
         if self.blood_volume < 0:
             self.blood_volume = 0.0
         if self.perfusion_adequacy < DEBT_ADEQUACY_FLOOR:
@@ -144,12 +166,12 @@ def run(scenario):
     next_rung = 0
     last_drug_id, last_drug_min = None, None
     total_blood = 0.0
-    transfused_at_fraction = -1
+    transfusion_started_min = None
 
     print(f"\n=== {scenario['name']} ===")
     print(f"weight {p.weight_kg} kg | risk {scenario.get('risk_factors', []) or 'none'} -> R = {p.responsiveness:.2f}")
-    print(f"{'min':>3} | {'blood':>5} | {'tone':>4} | {'bleed':>5} | {'HR':>3} | {'MAP':>3} | {'lact':>4} | operator action")
-    print("-" * 78)
+    print(f"{'min':>3} | {'blood':>5} | {'EBL':>5} | {'tone':>4} | {'bleed':>5} | {'HR':>3} | {'MAP':>3} | {'lact':>4} | operator action")
+    print("-" * 90)
 
     for minute in range(duration + 1):
         action = ""
@@ -173,15 +195,20 @@ def run(scenario):
                 last_drug_id, last_drug_min = drug, minute
                 next_rung += 1
                 action += f"give {drug} "
-        # transfusion: modest boluses per ~15% lost, capped
-        band = int(max(0.0, p.fraction_lost) / 0.15)
-        if band > transfused_at_fraction and total_blood < TRANSFUSION_CAP_ML:
-            blood_in = 1000.0
-            total_blood += 1000.0
-            transfused_at_fraction = band
-            action += "+ blood 1000 "
+        # transfusion: only once EBL crosses major (1 L); MHP rate at massive (2 L).
+        # app gives NO blood below major. Infusion is rate-limited (can't outrun a torrent).
+        if p.level in ("major", "massive"):
+            if transfusion_started_min is None:
+                transfusion_started_min = minute
+                action += f"START transfusion ({p.level}, EBL {p.cumulative_bled:.0f}) "
+            if minute >= transfusion_started_min + BLOOD_PREP_MIN:
+                max_rate = MASSIVE_INFUSION_ML_MIN if p.level == "massive" else MAJOR_INFUSION_ML_MIN
+                blood_in = min(max_rate, p.bleed_rate)   # replace ongoing loss, capped
+                total_blood += blood_in
+                if p.level == "massive" and "MHP" not in action:
+                    action += "MHP "
 
-        print(f"{minute:>3} | {p.blood_volume:>5.0f} | {p.tone:>4.2f} | {p.bleed_rate:>5.0f} | "
+        print(f"{minute:>3} | {p.blood_volume:>5.0f} | {p.cumulative_bled:>5.0f} | {p.tone:>4.2f} | {p.bleed_rate:>5.0f} | "
               f"{p.heart_rate:>3.0f} | {p.map:>3.0f} | {p.lactate:>4.1f} | {action.strip()}")
 
         p.tick(minute, dt_min=1.0, blood_in=blood_in)
