@@ -126,8 +126,8 @@ def run(scenario):
     print(f"\n=== {scenario['name']} ===")
     extra = f" | accreta (balloon/sutures ineffective)" if p.surgical_ineffective else ""
     print(f"weight {p.weight_kg} kg | risk {scenario.get('risk_factors', []) or 'none'} -> R = {p.responsiveness:.2f}{extra}")
-    print(f"{'min':>3} | {'EBL':>5} | {'tone':>4} | {'bleed':>5} | {'MAP':>3} | action")
-    print("-" * 76)
+    print(f"{'min':>3} | {'EBL(ml)':>7} | {'tone':>4} | {'bleed/min':>9} | {'MAP':>3} | action")
+    print("-" * 80)
 
     for minute in range(duration + 1):
         action = ""
@@ -159,7 +159,7 @@ def run(scenario):
                 rate = MASSIVE_INFUSION_ML_MIN if p.level == "massive" else MAJOR_INFUSION_ML_MIN
                 blood_in = min(rate, p.bleed_rate); total_blood += blood_in
 
-        print(f"{minute:>3} | {p.cumulative_bled:>5.0f} | {p.tone:>4.2f} | {p.bleed_rate:>5.0f} | {p.map:>3.0f} | {action.strip()}")
+        print(f"{minute:>3} | {p.cumulative_bled:>7.0f} | {p.tone:>4.2f} | {p.bleed_rate:>9.0f} | {p.map:>3.0f} | {action.strip()}")
         p.tick(minute, dt_min=1.0, blood_in=blood_in)
 
         if p.arrested:
