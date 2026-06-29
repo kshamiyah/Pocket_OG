@@ -292,6 +292,60 @@ of the algorithm's pass/fail yet.
 
 ---
 
+## G. Resuscitation & transfusion
+
+### R-TX-1 — Drug timing uses TWO separate clocks
+The simulator separates two things the app conflates into one number:
+- **Escalation clock** — when the operator *gives the next* uterotonic =
+  the app's `UTEROTONIC_PHARM_DELAY_SEC` **scaled by bleed rate**
+  (`scaleDelayByBleedRate`): brisk bleeding shortens the wait toward a 60 s
+  floor. _Source: app `pph-shared.js` (I1)._ ☑ **ACCEPTED**.
+- **Onset clock** — when a given drug *starts raising tone*. Separate,
+  pharmacological; the app does not model it.
+  Candidates: oxytocin 2 min, ergometrine 2 min, carboprost 4 min,
+  misoprostol 10 min. ☐ **[ASSUMED] — needs sign-off**.
+
+### R-TX-2 — Transfusion triggers on EBL, at the app's thresholds
+The operator tracks **true EBL** (cumulative blood lost, gross of transfusion)
+and gives blood only per `PPH_THRESHOLDS` (I1):
+- **< 1,000 ml (minor):** no blood.
+- **≥ 1,000 ml (major):** blood products + rapid crystalloid.
+- **≥ 2,000 ml (massive):** MHP pack.
+_Source: app `PPH_THRESHOLDS` / `getPphLevel` (I1)._ ☑ **ACCEPTED**.
+
+### R-TX-3 — Infusion ceiling from cannula flow
+Transfusion is rate-limited by cannula flow — it cannot outrun a torrential
+bleed. **16G "grey" ≈ 180 ml/min**; clinical practice sites ≥1 grey routinely
+and a **second grey** in major/massive haemorrhage:
+- **major: ~180 ml/min** (one grey)
+- **massive: ~360 ml/min** (two greys)
+_Source: 16G grey cannula flow rate ~180 ml/min (R17)._ ☑ **ACCEPTED**.
+Blood-prep delay (time to bedside) ~2 min ☐ **[ASSUMED]**.
+
+### R-TX-4 — Exsanguination signal → surgery
+If ~**1 whole blood volume** has been transfused and bleeding continues
+(held by transfusion alone), surgical control is mandatory. Stands in for the
+not-yet-modelled limits: **dilutional coagulopathy** and **blood-bank
+depletion**. ☑ **ACCEPTED — concept**; coagulopathy modelling deferred.
+
+## H. Surgical / mechanical control (Stage 4)
+
+### R-SURG-1 — Mechanical control is independent of responsiveness
+Unlike drugs (scaled by `R`), mechanical control physically compresses the
+bleeding source, so it raises tone **regardless of `R`**. Ladder, escalated when
+the uterotonic ladder is exhausted and bleeding continues:
+| Step | Effect (tone target) | Note |
+|---|---|---|
+| Bakri balloon tamponade | ~0.95 | first-line mechanical; may avoid theatre |
+| Compression sutures (B-Lynch) + vessel ligation | ~0.97 | laparotomy |
+| Hysterectomy | ~0.999 | definitive |
+Some causes blunt mechanical efficacy (e.g. **placenta accreta** → balloon/
+sutures ineffective → hysterectomy is definitive).
+_Source: GTG52 surgical management; app `bakri` task (I2)._
+Tone targets ☐ **[ASSUMED]**; ladder/escalation order ☑ **ACCEPTED**.
+
+---
+
 ## How these become code (Stage 1 preview)
 
 Each tick (`dt = 1 min`):
@@ -337,6 +391,7 @@ cite the repository file and the specific named symbol/section.
 | R14 | Bjerkvig et al., "'Blood failure': oxygen debt, coagulopathy and endothelial damage" Transfusion (2016) | DOI: 10.1111/trf.13500 | https://onlinelibrary.wiley.com/doi/full/10.1111/trf.13500 |
 | R15 | "Class of hemorrhagic shock … diastolic coronary flow reversal" (swine exsanguination model) | PMCID: PMC9795012 | https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9795012/ |
 | R16 | Critical Thresholds of Hemorrhagic Shock (blood-loss % to arrest, summary) | MED-TAC / tactical-medicine review | https://www.tactical-medicine.com/blogs/news/how-much-blood-loss-is-fatal-the-critical-thresholds-of-hemorrhagic-shock |
+| R17 | 16G grey cannula flow rate (~180 ml/min) | BD Venflon 16G spec / IV cannula flow-rate references | https://www.midmeds.co.uk/shop/md391455-1-bd-venflon-iv-cannula-16g-grey-x-1-69600 |
 
 ### Internal sources (Pocket O&G repository)
 
