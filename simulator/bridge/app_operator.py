@@ -69,7 +69,10 @@ def level_from_ebl(ebl):
     return "minor"
 
 
-def run(scenario, max_steps=160, verbose=True):
+def stream(scenario, max_steps=300):
+    """Generator: yields a per-step snapshot dict so a UI can animate it live.
+    Each snapshot: {t, ebl, tone, bleed, map, lactate, ptype, tid, note, acted,
+    verdict}. The final snapshot carries the terminal verdict."""
     p = PatientV4(scenario.get("weight_kg", 70), scenario.get("risk_factors", []),
                   scenario.get("surgical_ineffective"), bmi=scenario.get("bmi", 25))
     p.give_massage()   # bimanual compression is reflexive; app will also prompt it
@@ -89,8 +92,6 @@ def run(scenario, max_steps=160, verbose=True):
     transfusing = False
     surg_idx = 0
     t_min = 0.0
-    verdict = "ONGOING"
-    log_lines = []
 
     def mark_done(task_id):
         session["taskStates"][task_id] = {"status": "done", "doneAt": session["now"]}
@@ -164,7 +165,7 @@ def run(scenario, max_steps=160, verbose=True):
             note = "(nothing / monitoring)"
 
         # active management is fast; idle/monitoring fast-forwards the clock
-        acted = note and note != "(nothing / monitoring)"
+        acted = bool(note and note != "(nothing / monitoring)")
         step_dt = DT_ACTION_MIN if acted else DT_IDLE_MIN
 
         # ── transfusion each step (rate-limited by cannulae) ──
@@ -173,22 +174,40 @@ def run(scenario, max_steps=160, verbose=True):
             rate = MASSIVE_INFUSION_ML_MIN if session["level"] == "massive" else MAJOR_INFUSION_ML_MIN
             blood_in = min(rate, p.bleed_rate) * step_dt
 
-        if verbose and acted:
-            log_lines.append(f"  t={t_min:>4.1f}  EBL={p.cumulative_bled:>5.0f}  "
-                             f"tone={p.tone:.2f}  bleed={p.bleed_rate:>4.0f}  MAP={p.map:>3.0f}  "
-                             f"| app: {ptype or '-'} {tid or ''} -> {note}")
+        snap = {
+            "t": round(t_min, 2), "ebl": round(p.cumulative_bled), "tone": round(p.tone, 2),
+            "bleed": round(p.bleed_rate), "map": round(p.map), "lactate": round(p.lactate, 1),
+            "level": session["level"], "ptype": ptype, "tid": tid, "note": note,
+            "acted": acted, "verdict": None,
+        }
 
         p.tick(t_min, dt_min=step_dt, blood_in=blood_in)
         t_min += step_dt
 
         if p.arrested:
-            verdict = "ARREST"; break
+            snap["verdict"] = "ARREST"; bridge.close(); yield snap; return
         if p.bleed_rate < 50 and p.map > 60:
-            verdict = "CONTROLLED"; break
+            snap["verdict"] = "CONTROLLED"; bridge.close(); yield snap; return
+        yield snap
 
     bridge.close()
-    return {"verdict": verdict, "t": round(t_min, 1), "ebl": round(p.cumulative_bled),
-            "final_tone": round(p.tone, 2), "log": log_lines}
+    yield {"t": round(t_min, 2), "ebl": round(p.cumulative_bled), "tone": round(p.tone, 2),
+           "bleed": round(p.bleed_rate), "map": round(p.map), "lactate": round(p.lactate, 1),
+           "level": session.get("level"), "ptype": None, "tid": None, "note": "(time up)",
+           "acted": False, "verdict": "ONGOING"}
+
+
+def run(scenario, verbose=True):
+    """CLI consumer of stream() — single source of truth."""
+    last, logs = None, []
+    for snap in stream(scenario):
+        last = snap
+        if snap["acted"]:
+            logs.append(f"  t={snap['t']:>4.1f}  EBL={snap['ebl']:>5.0f}  tone={snap['tone']:.2f}  "
+                        f"bleed={snap['bleed']:>4.0f}  MAP={snap['map']:>3.0f}  | app: "
+                        f"{snap['ptype'] or '-'} {snap['tid'] or ''} -> {snap['note']}")
+    return {"verdict": last["verdict"], "t": last["t"], "ebl": last["ebl"],
+            "final_tone": last["tone"], "log": logs}
 
 
 if __name__ == "__main__":
