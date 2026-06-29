@@ -4,6 +4,13 @@ const RECIPIENT = "khalid@drshamiyah.com";
 const SUBJECT = "Pocket O&G — Feedback";
 const TAB_BAR_CLEARANCE = "calc(4rem + env(safe-area-inset-bottom, 0px) + 0.625rem)";
 
+const linkBtn =
+  "flex-1 min-w-0 py-2 rounded-xl text-sm font-semibold text-center no-underline active:opacity-90";
+const linkBtnPrimary = `${linkBtn} bg-gray-900 text-white`;
+const linkBtnSecondary = `${linkBtn} border border-gray-200 text-gray-700`;
+const linkBtnFullPrimary =
+  "block w-full py-2.5 rounded-xl text-sm font-semibold text-center no-underline bg-gray-900 text-white active:opacity-90";
+
 function buildFeedbackPayload(message, query, filter) {
   const contextLines = [
     query ? `Search query: "${query}"` : null,
@@ -23,18 +30,25 @@ function buildFeedbackPayload(message, query, filter) {
     `?subject=${encodeURIComponent(SUBJECT)}` +
     `&body=${encodeURIComponent(body)}`;
 
+  const gmailHref =
+    `https://mail.google.com/mail/?${new URLSearchParams({
+      view: "cm",
+      fs: "1",
+      to: RECIPIENT,
+      su: SUBJECT,
+      body,
+    }).toString()}`;
+
+  const outlookHref =
+    `https://outlook.live.com/mail/0/deeplink/compose?${new URLSearchParams({
+      to: RECIPIENT,
+      subject: SUBJECT,
+      body,
+    }).toString()}`;
+
   const clipboardText = `To: ${RECIPIENT}\nSubject: ${SUBJECT}\n\n${body}`;
 
-  return { body, mailtoHref, clipboardText };
-}
-
-function openMailto(href) {
-  const link = document.createElement("a");
-  link.href = href;
-  link.style.display = "none";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  return { body, mailtoHref, gmailHref, outlookHref, clipboardText };
 }
 
 async function copyToClipboard(text) {
@@ -46,6 +60,31 @@ async function copyToClipboard(text) {
   }
 }
 
+function usePrefersFinePointer() {
+  const [fine, setFine] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(pointer: fine)").matches,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia("(pointer: fine)");
+    const update = () => setFine(mq.matches);
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  return fine;
+}
+
+function useIsIOS() {
+  return useState(() => {
+    if (typeof navigator === "undefined") return false;
+    return (
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+    );
+  })[0];
+}
+
 export default function FeedbackButton({ query = "", filter = "ALL" }) {
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState("compose");
@@ -53,6 +92,9 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
   const [sentPayload, setSentPayload] = useState(null);
   const [clipboardOk, setClipboardOk] = useState(false);
   const fallbackRef = useRef(null);
+  const isDesktop = usePrefersFinePointer();
+  const isIOS = useIsIOS();
+  const mailLabel = isIOS ? "Mail" : "Email app";
 
   function close() {
     setOpen(false);
@@ -66,7 +108,6 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
     if (!message.trim()) return;
     const payload = buildFeedbackPayload(message, query, filter);
     const copied = await copyToClipboard(payload.clipboardText);
-    openMailto(payload.mailtoHref);
     setSentPayload(payload);
     setClipboardOk(copied);
     setPhase("sent");
@@ -125,7 +166,11 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
                 <>
                   <h2 className="text-sm font-semibold text-gray-900">Send feedback</h2>
                   <p className="text-[11px] text-gray-400 mt-0.5">
-                    Copies your message, then opens your email app if one is set up
+                    {isDesktop
+                      ? "Copies your message — then open Gmail or Outlook"
+                      : isIOS
+                        ? "Copies your message — then open Mail (or webmail)"
+                        : "Copies your message — then Email app, Gmail, or Outlook"}
                   </p>
 
                   {query && (
@@ -177,11 +222,12 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
                 <>
                   <h2 className="text-sm font-semibold text-gray-900">Feedback ready</h2>
                   <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
-                    {clipboardOk
-                      ? "Copied to clipboard. If your email app opened, review and send there."
-                      : "Select the text below, copy it, and email it manually."}
-                    {" "}If nothing opened, send to{" "}
-                    <span className="font-medium text-gray-700">{RECIPIENT}</span>.
+                    {clipboardOk ? "Copied to clipboard. " : "Copy failed — select the text below. "}
+                    {isDesktop
+                      ? "Use Gmail or Outlook below — desktop browsers need webmail, not a local mail app."
+                      : isIOS
+                        ? `Tap ${mailLabel} to compose in Apple Mail — or Gmail/Outlook if you use webmail.`
+                        : `Tap ${mailLabel} to pick your mail app — or Gmail/Outlook for webmail.`}
                   </p>
 
                   <textarea
@@ -192,22 +238,38 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
                     className="mt-2 w-full box-border border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 bg-gray-50 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
                   />
 
+                  {!isDesktop && (
+                    <a href={sentPayload?.mailtoHref} className={`${linkBtnFullPrimary} mt-2`}>
+                      {mailLabel}
+                    </a>
+                  )}
+
                   <div className="flex gap-2 mt-2">
-                    <button
-                      type="button"
-                      onClick={close}
-                      className="flex-1 min-w-0 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 active:bg-gray-50"
+                    <a
+                      href={sentPayload?.gmailHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={isDesktop ? linkBtnPrimary : linkBtnSecondary}
                     >
-                      Done
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => sentPayload && openMailto(sentPayload.mailtoHref)}
-                      className="flex-1 min-w-0 py-2 rounded-xl bg-gray-900 text-sm font-semibold text-white active:bg-gray-800"
+                      Gmail
+                    </a>
+                    <a
+                      href={sentPayload?.outlookHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={isDesktop ? linkBtnPrimary : linkBtnSecondary}
                     >
-                      Open email app
-                    </button>
+                      Outlook
+                    </a>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={close}
+                    className="w-full mt-2 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 active:bg-gray-50"
+                  >
+                    Done
+                  </button>
                 </>
               )}
             </div>
