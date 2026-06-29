@@ -16,8 +16,14 @@ Run:  python3 simulator/stage1_sandbox.py
 # ── Constants (each tagged to a signed-off rule) ───────────────────────────
 
 BASELINE_FLOW_ML_MIN = 700        # R-BLEED-1: atonic uterus blood flow at term
-MATERNAL_ML_PER_KG = 95           # R-VOL-1: weight-based maternal blood volume
 ARREST_FRACTION = 0.40            # R-ARR-1 (bleeding calibration): arrest at >40% loss
+
+
+def maternal_ml_per_kg(bmi=25):
+    """R-VOL-1: blood volume per kg FALLS with BMI (adipose carries less blood).
+    Vricella regression (R26): ml/kg = -1.372 x BMI + 130, clamped to a sane band.
+    ~96 ml/kg at BMI 25 (≈ lean baseline); ~75 at BMI 40 (obese)."""
+    return max(55.0, min(110.0, -1.372 * bmi + 130.0))
 
 # R-DRUG-OXY: onset/effect window from the app (UTEROTONIC_PHARM_DELAY_SEC.oxytocin_bolus = 180 s)
 OXYTOCIN_ONSET_MIN = 3
@@ -46,9 +52,10 @@ def responsiveness_from_risk_factors(factors):
 
 
 class Patient:
-    def __init__(self, weight_kg=70, risk_factors=None, start_tone=0.0):
+    def __init__(self, weight_kg=70, risk_factors=None, start_tone=0.0, bmi=25):
         self.weight_kg = weight_kg
-        self.blood_volume = weight_kg * MATERNAL_ML_PER_KG     # R-VOL-1
+        self.bmi = bmi
+        self.blood_volume = weight_kg * maternal_ml_per_kg(bmi)   # R-VOL-1 (BMI-adjusted)
         self.start_volume = self.blood_volume
         self.tone = start_tone
         self.responsiveness = responsiveness_from_risk_factors(risk_factors or [])

@@ -22,7 +22,7 @@ Run:  python3 simulator/stage3_sandbox.py
 """
 
 from stage1_sandbox import (
-    BASELINE_FLOW_ML_MIN, MATERNAL_ML_PER_KG, responsiveness_from_risk_factors,
+    BASELINE_FLOW_ML_MIN, maternal_ml_per_kg, responsiveness_from_risk_factors,
 )
 from stage2_sandbox import (
     NORMAL_MAP, BASELINE_HR, MAP_ARREST, MAP_BREAKPOINTS, interp,
@@ -84,9 +84,10 @@ MASSIVE_INFUSION_ML_MIN = 360   # two grey cannulae
 
 
 class PatientV3:
-    def __init__(self, weight_kg=70, risk_factors=None):
+    def __init__(self, weight_kg=70, risk_factors=None, bmi=25):
         self.weight_kg = weight_kg
-        self.blood_volume = weight_kg * MATERNAL_ML_PER_KG
+        self.bmi = bmi
+        self.blood_volume = weight_kg * maternal_ml_per_kg(bmi)
         self.start_volume = self.blood_volume
         self.responsiveness = responsiveness_from_risk_factors(risk_factors or [])
         self.sustained_tone = 0.0

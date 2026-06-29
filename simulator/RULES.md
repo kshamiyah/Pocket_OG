@@ -42,16 +42,21 @@ built now to keep the patient tractable.
 
 ## B. Blood volume & resuscitation in
 
-### R-VOL-1 — Starting maternal blood volume
-Pregnancy raises blood volume ~40–50%; whole blood volume at term is **~100 ml/kg
-for a lean mother** (range 90–200). **Volume is weight-based, not flat:**
-`blood_volume_start = weight_kg × 95 ml/kg`  (e.g. 70 kg → ~6,650 ml) — slightly
-conservative within the trusted band. Adds **patient weight** as a required input.
-> **Known limitation:** a flat ml/kg **overestimates in obese patients** (~73 ml/kg;
-> blood volume scales non-linearly with mass). A non-linear weight model is a later
-> refinement.
-_Source: maternal blood-volume review, BJA 2022 (R24); plasma-volume expansion (R25)._
-☑ **ACCEPTED — 95 ml/kg, weight-based** (2026-06-29); flat 5,000 ml declined.
+### R-VOL-1 — Starting maternal blood volume (BMI-adjusted)
+Whole blood volume at term is ~100 ml/kg for a lean mother but **falls with BMI**
+(adipose carries less blood per kg). **Volume is weight-AND-BMI based:**
+`ml_per_kg = clamp(−1.372 × BMI + 130, 55, 110)` (Vricella regression, R26);
+`blood_volume_start = weight_kg × ml_per_kg`.
+- BMI 20 → ~103 ml/kg (70 kg → ~7,180 ml)
+- BMI 25 → ~96 ml/kg (70 kg → ~6,700 ml) ≈ prior lean baseline
+- BMI 40 → ~75 ml/kg (70 kg → ~5,260 ml)
+
+Adds **weight and BMI** as required inputs. Effect: an obese mother arrests
+**earlier** on the same bleed (same loss = larger fraction of a smaller volume) —
+exactly the under-estimation hazard the source warns of.
+_Sources: Vricella et al., hydroxyethyl-starch dilution (R26); Kennedy et al.,
+BJA 2022 non-linear approach (R24); plasma-volume expansion (R25)._
+☑ **ACCEPTED — BMI-adjusted (Vricella)** (2026-06-29); flat ml/kg superseded.
 
 ### R-VOL-2 — Volume balance each tick
 `blood_volume += (fluids_in + blood_in − bleed_rate × dt)`
@@ -445,6 +450,7 @@ cite the repository file and the specific named symbol/section.
 | R23 | Prostaglandins for Postpartum Hemorrhage: pharmacology | Karger, Pharmacology 2021;106:477 | https://karger.com/pha/article/106/9-10/477/820467/Prostaglandins-for-Postpartum-Hemorrhage |
 | R24 | Maternal body weight and estimated circulating blood volume (review, non-linear approach) | Br J Anaesth 2022; DOI: 10.1016/j.bja.2022.07.009 | https://www.bjanaesthesia.org.uk/article/S0007-0912(22)00453-6/fulltext |
 | R25 | Plasma volume expansion in pregnancy (~100 ml/kg at term) | ScienceDirect / PMC5701717 | https://pmc.ncbi.nlm.nih.gov/articles/PMC5701717/ |
+| R26 | Blood volume in obese vs normal-weight gravidas (hydroxyethyl-starch); ml/kg vs BMI regression | Vricella et al.; PMID: 25981844 / PMC4589161 | https://pmc.ncbi.nlm.nih.gov/articles/PMC4589161/ |
 
 ### Internal sources (Pocket O&G repository)
 

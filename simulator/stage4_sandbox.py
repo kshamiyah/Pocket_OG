@@ -18,7 +18,7 @@ Some causes (placenta accreta) blunt balloon/sutures -> hysterectomy is definiti
 Run:  python3 simulator/stage4_sandbox.py
 """
 
-from stage1_sandbox import BASELINE_FLOW_ML_MIN, MATERNAL_ML_PER_KG, responsiveness_from_risk_factors
+from stage1_sandbox import BASELINE_FLOW_ML_MIN, maternal_ml_per_kg, responsiveness_from_risk_factors
 from stage2_sandbox import (
     NORMAL_MAP, BASELINE_HR, MAP_ARREST, MAP_BREAKPOINTS, interp,
     DO2_NORMAL_ML_KG_MIN, VO2_DEMAND_ML_KG_MIN, DEBT_ADEQUACY_FLOOR,
@@ -39,9 +39,10 @@ SURG_ESCALATION_WAIT = 4   # min to assess response / mobilise theatre [ASSUMED]
 
 
 class PatientV4:
-    def __init__(self, weight_kg=70, risk_factors=None, surgical_ineffective=None):
+    def __init__(self, weight_kg=70, risk_factors=None, surgical_ineffective=None, bmi=25):
         self.weight_kg = weight_kg
-        self.blood_volume = weight_kg * MATERNAL_ML_PER_KG
+        self.bmi = bmi
+        self.blood_volume = weight_kg * maternal_ml_per_kg(bmi)
         self.start_volume = self.blood_volume
         self.responsiveness = responsiveness_from_risk_factors(risk_factors or [])
         self.surgical_ineffective = set(surgical_ineffective or [])   # e.g. accreta
@@ -114,7 +115,7 @@ class PatientV4:
 
 def run(scenario):
     p = PatientV4(scenario.get("weight_kg", 70), scenario.get("risk_factors", []),
-                  scenario.get("surgical_ineffective"))
+                  scenario.get("surgical_ineffective"), bmi=scenario.get("bmi", 25))
     duration = scenario.get("duration_min", 40)
 
     next_rung = 0
