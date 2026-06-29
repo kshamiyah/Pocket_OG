@@ -74,7 +74,8 @@ CONTROLLED_BLEED = 100        # ml/min — operator stops escalating below this
 # major (1 L); MHP at massive (2 L). Below 1 L → no transfusion.
 PPH_MAJOR_ML = 1000
 PPH_MASSIVE_ML = 2000
-BLOOD_PREP_MIN = 2            # time to get O-neg / pack to the bedside [ASSUMED]
+BLOOD_PREP_MIN = 0            # IDEAL model: blood instant. Real time-to-blood is a
+                             # HUMAN-FACTORS item -> deferred to that later layer.
 # Infusion ceilings from cannula flow rates (16G "grey" = ~180 ml/min, BD Venflon).
 # Clinical practice: >=1 grey cannula routinely; a SECOND grey sited in major/massive
 # haemorrhage -> ~2 x 180. (Gravity figures; blood is more viscous but pressure

@@ -370,7 +370,9 @@ and a **second grey** in major/massive haemorrhage:
 - **major: ~180 ml/min** (one grey)
 - **massive: ~360 ml/min** (two greys)
 _Source: 16G grey cannula flow rate ~180 ml/min (R17)._ ☑ **ACCEPTED**.
-Blood-prep delay (time to bedside) ~2 min ☐ **[ASSUMED]**.
+Blood-prep delay (time to bedside): **0 in the ideal model** — real time-to-blood
+(O-neg ~mins vs crossmatched 15–30+ min) is a **human-factors** item, ⏸ **DEFERRED**
+to that later layer (2026-06-29).
 
 ### R-TX-4 — Exsanguination signal → surgery
 If ~**1 whole blood volume** has been transfused and bleeding continues
