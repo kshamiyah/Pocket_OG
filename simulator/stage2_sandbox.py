@@ -171,6 +171,18 @@ SCENARIOS = [
         "risk_factors": ["overdistension", "previous_pph", "prolonged_labour", "praevia_or_accreta"],
         "events": {2: ("oxytocin",), 3: ("blood", 1500)},
     },
+    {
+        # Partial responder, under-resuscitated: bleeding slowed but not stopped,
+        # transfusion just keeps her off arrest. She "limps" in sustained shock —
+        # the state where cumulative oxygen debt (and lactate) actually climb.
+        "name": "D — Under-resuscitated: limps in sustained shock (oxygen debt climbs)",
+        "weight_kg": 70,
+        "risk_factors": ["overdistension", "previous_pph", "fibroids"],   # ~R 0.55
+        # oxytocin partially controls the bleed; transfusion just under the
+        # post-control loss rate, so she sinks into and lingers in the shock band.
+        "events": {**{m: ("blood", 345) for m in range(1, 46) if m != 3}, 3: ("oxytocin",)},
+        "duration_min": 45,
+    },
 ]
 
 
