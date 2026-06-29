@@ -107,6 +107,13 @@ const CRITICAL_TASK_PRIORITY = {
 
 const MASSIVE_RESUS_AFTER_IV = ["mhp_pack", "txa", "second_cannula"];
 const FOUR_T_TASK_IDS = new Set(["fundal_massage", "bimanual", "trauma_assess", "tissue_assess"]);
+// After tone pathway: uterotonic bolus before trauma/tissue assessments and catheter/fluids.
+const DEFER_UNTIL_OXY_BOLUS = new Set(["trauma_assess", "tissue_assess", "catheterise", "iv_fluids"]);
+
+function bimanualCleared(taskStates) {
+  const s = taskStates.bimanual?.status;
+  return s === "done" || s === "skipped";
+}
 
 function resusTrioGateClear(status) {
   // Assigned = delegated, algorithm moves on; follow-up chases in 60s
@@ -584,6 +591,16 @@ export function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTim
     return { type: "tone_check" };
   }
 
+  // Priority 1.52 — after tone pathway, give uterotonic bolus before trauma/tissue
+  // assessments and before catheter/fluids (treat atony while Four T's continue in parallel).
+  if (toneAssessed && bimanualCleared(taskStates) && !uterotonicTaken(taskStates, "oxytocin_bolus")) {
+    const oxyBolus = TASKS.find(x => x.id === "oxytocin_bolus");
+    if (oxyBolus && relevant(oxyBolus) && st(oxyBolus.id) == null && depsOk(oxyBolus)) {
+      const g = gate(oxyBolus);
+      if (g) return g;
+    }
+  }
+
   // Priority 1.75 — force-activated fallbacks/treatments (carboprost after ergometrine CI, suture after trauma, etc.)
   const forced = nextForcedTask();
   if (forced) return forced;
@@ -688,6 +705,8 @@ export function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTim
     if (t.hidden && !(forcedTasks || []).includes(t.id)) continue;
     if (t.special === "txa" && !txaEligible(taskStates, level, txaTime)) continue;
     if (t.special === "carbo" && carboCount > 0 && carboLastTime) continue;
+    if (toneAssessed && !uterotonicTaken(taskStates, "oxytocin_bolus")
+        && DEFER_UNTIL_OXY_BOLUS.has(t.id)) continue;
     if (toneGate(t)) continue;
     // Uterotonic ladder — only surface the next rung when allowed
     if (t.uterotonic) {

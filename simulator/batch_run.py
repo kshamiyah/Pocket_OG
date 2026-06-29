@@ -18,6 +18,14 @@ sys.path.insert(0, HERE)
 
 from patient_profile import PRESETS, scenario_from_profile  # noqa: E402
 from app_operator import stream  # noqa: E402
+from stage1_sandbox import start_tone_from_risk_factors, BASELINE_FLOW_ML_MIN  # noqa: E402
+
+# GTG52 atonic risk factors — excludes placenta praevia / accreta (structural phenotype).
+NON_ACCRETA_RISKS = [
+    "overdistension", "previous_pph", "macrosomia", "prolonged_labour",
+    "chorioamnionitis", "ga_or_augmentation", "grand_multiparity", "fibroids",
+]
+FULL_COMORBID = list(NON_ACCRETA_RISKS)   # Σ weights = 1.00 → start tone 0.00
 
 # Low-risk presentation grid (typical_atonic phenotype for all)
 LOW_RISK_COHORT = [
@@ -32,6 +40,28 @@ LOW_RISK_COHORT = [
     {"id": 9,  "weight_kg": 85, "bmi": 32, "start_ebl": 500, "risk_factors": []},
     {"id": 10, "weight_kg": 70, "bmi": 25, "start_ebl": 650, "risk_factors": []},
 ]
+
+# Very comorbid atonic presentations — no praevia/accreta; drugs still work (use typical_atonic).
+COMORBID_COHORT = [
+    {"id": 1,  "weight_kg": 70, "bmi": 28, "start_ebl": 550, "risk_factors": FULL_COMORBID},
+    {"id": 2,  "weight_kg": 50, "bmi": 23, "start_ebl": 500, "risk_factors": FULL_COMORBID},
+    {"id": 3,  "weight_kg": 90, "bmi": 38, "start_ebl": 600, "risk_factors": FULL_COMORBID},
+    {"id": 4,  "weight_kg": 85, "bmi": 32, "start_ebl": 500, "risk_factors": FULL_COMORBID},
+    {"id": 5,  "weight_kg": 65, "bmi": 30, "start_ebl": 650, "risk_factors": FULL_COMORBID},
+    {"id": 6,  "weight_kg": 55, "bmi": 40, "start_ebl": 550, "risk_factors": FULL_COMORBID},
+    {"id": 7,  "weight_kg": 75, "bmi": 26, "start_ebl": 700, "risk_factors": FULL_COMORBID},
+    {"id": 8,  "weight_kg": 60, "bmi": 35, "start_ebl": 500, "risk_factors": FULL_COMORBID},
+    {"id": 9,  "weight_kg": 95, "bmi": 34, "start_ebl": 600, "risk_factors": FULL_COMORBID},
+    {"id": 10, "weight_kg": 48, "bmi": 28, "start_ebl": 500, "risk_factors": [
+        "previous_pph", "overdistension", "prolonged_labour", "chorioamnionitis",
+        "grand_multiparity", "macrosomia", "fibroids", "ga_or_augmentation",
+    ]},
+]
+
+COHORTS = {
+    "low_risk": LOW_RISK_COHORT,
+    "comorbid": COMORBID_COHORT,
+}
 
 ALGORITHM_FLAGS = {
     "massive_pathway": ("call_massive", "mhp_pack", "massive level before control"),
@@ -102,28 +132,33 @@ def run_cohort(cases, preset_key):
         summary["bmi"] = case["bmi"]
         summary["start_ebl"] = case["start_ebl"]
         summary["risk_factors"] = case.get("risk_factors", [])
+        st = start_tone_from_risk_factors(case.get("risk_factors", []))
+        summary["start_tone"] = round(st, 2)
+        summary["start_bleed"] = round(BASELINE_FLOW_ML_MIN * (1 - st))
         results.append(summary)
     return results
 
 
-def print_report(results):
-    print(f"\n{'ID':>3} {'kg':>4} {'BMI':>4} {'start':>5} {'verdict':>10} {'t':>5} {'EBL':>5} {'tone':>5} {'minMAP':>6} {'level':>7}  flags")
-    print("-" * 95)
+def print_report(results, cohort_label="cohort", n=None):
+    n = n or len(results)
+    print(f"\n{'ID':>3} {'kg':>4} {'BMI':>4} {'start':>5} {'sTone':>5} {'sBleed':>6} {'verdict':>10} {'t':>5} {'EBL':>5} {'tone':>5} {'minMAP':>6} {'level':>7}  flags")
+    print("-" * 110)
     for r in results:
         flag_str = "; ".join(r["flags"]) if r["flags"] else "—"
         print(
             f"{r['id']:>3} {r['weight_kg']:>4} {r['bmi']:>4} {r['start_ebl']:>5} "
+            f"{r.get('start_tone', 0):>5.2f} {r.get('start_bleed', 0):>6} "
             f"{r['verdict'] or '?' :>10} {r['t_min']:>5.1f} {r['ebl']:>5} {r['final_tone']:>5.2f} "
             f"{r['min_map']:>6} {r['max_level']:>7}  {flag_str}"
         )
 
     # Aggregate algorithm observations
-    print("\n=== ALGORITHM OBSERVATIONS (low-risk cohort) ===\n")
+    print(f"\n=== ALGORITHM OBSERVATIONS ({cohort_label}) ===\n")
     controlled = [r for r in results if r["verdict"] == "CONTROLLED"]
     arrests = [r for r in results if r["verdict"] == "ARREST"]
     ongoing = [r for r in results if r["verdict"] not in ("CONTROLLED", "ARREST")]
 
-    print(f"Controlled: {len(controlled)}/10 | Arrest: {len(arrests)} | Ongoing: {len(ongoing)}")
+    print(f"Controlled: {len(controlled)}/{n} | Arrest: {len(arrests)} | Ongoing: {len(ongoing)}")
     if controlled:
         ebls = [r["ebl"] - r["start_ebl"] for r in controlled]
         times = [r["t_min"] for r in controlled]
@@ -136,8 +171,8 @@ def print_report(results):
             flag_counts[f] = flag_counts.get(f, 0) + 1
     if flag_counts:
         print("\nFlags across cohort:")
-        for f, n in sorted(flag_counts.items(), key=lambda x: -x[1]):
-            print(f"  [{n}/10] {f}")
+        for f, cnt in sorted(flag_counts.items(), key=lambda x: -x[1]):
+            print(f"  [{cnt}/{n}] {f}")
 
     issues = []
     if arrests:
@@ -167,18 +202,19 @@ def print_report(results):
 
 def main():
     parser = argparse.ArgumentParser(description="Batch-run SERA against the SOS engine")
+    parser.add_argument("--cohort", default="low_risk", choices=list(COHORTS.keys()))
     parser.add_argument("--preset", default="typical_atonic", choices=list(PRESETS.keys()))
     parser.add_argument("--count", type=int, default=10)
     parser.add_argument("--json", action="store_true", help="Print raw JSON results")
     args = parser.parse_args()
 
-    cases = LOW_RISK_COHORT[: args.count]
-    print(f"Running {len(cases)} patients — preset: {args.preset}")
+    cases = COHORTS[args.cohort][: args.count]
+    print(f"Running {len(cases)} patients — cohort: {args.cohort}, preset: {args.preset}")
     results = run_cohort(cases, args.preset)
     if args.json:
         print(json.dumps(results, indent=2))
     else:
-        print_report(results)
+        print_report(results, cohort_label=f"{args.cohort} / {args.preset}", n=len(cases))
 
 
 if __name__ == "__main__":
