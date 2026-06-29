@@ -68,7 +68,18 @@ LADDER = ["oxytocin", "ergometrine", "carboprost", "misoprostol"]
 
 MASSAGE_BONUS = 0.30
 MASSAGE_DECAY_PER_MIN = 0.10
-CONTROLLED_BLEED = 100        # ml/min — operator stops escalating below this
+CONTROLLED_BLEED = 50         # ml/min — operator keeps escalating (drugs->surgery)
+                              # until bleeding is below this; matches the "controlled"
+                              # verdict so there is no untreated 50-100 ml/min dead zone
+
+# Carboprost repeat dosing (mirrors app pph-shared.js, I1) + abandon-to-surgery rule
+CARBO_MAX_DOSES = 8                  # app's hard cap
+CARBO_REPEAT_BASE_SEC = 15 * 60      # 15-min repeat interval (app)
+CARBO_REPEAT_FLOOR_SEC = 5 * 60      # shortened floor under brisk bleeding (app)
+# Urgency override (Axis 2): massive ongoing loss still bleeding briskly -> theatre,
+# don't keep repeating. EBL trigger = app theatreForce (1500 ml); brisk threshold [ASSUMED].
+URGENCY_EBL_ML = 1500
+URGENCY_BLEED_ML_MIN = 200
 
 # Transfusion triggers — from app PPH_THRESHOLDS (I1): blood only once EBL crosses
 # major (1 L); MHP at massive (2 L). Below 1 L → no transfusion.

@@ -380,6 +380,24 @@ If ~**1 whole blood volume** has been transfused and bleeding continues
 not-yet-modelled limits: **dilutional coagulopathy** and **blood-bank
 depletion**. ☑ **ACCEPTED — concept**; coagulopathy modelling deferred.
 
+### R-TX-5 — Carboprost repeat dosing + abandon-to-surgery decision
+The operator does not give carboprost once; it **repeats** it (every ~15 min,
+bleed-rate-scaled to a 5-min floor, up to **8 doses** — app I1), and decides per
+two axes when to **abandon** it for surgery:
+- **Axis 1 — is it working / dose cap:** keep repeating while still bleeding and
+  under 8 doses; the patient's responsiveness `R` decides whether repeats reach
+  control (good responder settles in a few doses) or never do.
+- **Axis 2 — urgency:** if EBL ≥ **1,500 ml** (app `theatreForce`) and bleeding is
+  still brisk (≥ **200 ml/min** [ASSUMED]) → **abandon carboprost, go to surgery**
+  now rather than grinding through 8 doses.
+- **Contraindication:** **asthma → carboprost skipped entirely** (→ next agent).
+Also: the operator keeps escalating (drugs → surgery) until bleeding is below the
+**controlled** line (50 ml/min) — no untreated 50–100 ml/min dead zone.
+_Source: GTG52 ("surgical haemostasis sooner rather than later"); app carbo repeat
++ theatreForce (I1)._ ☑ **ACCEPTED — clinician sign-off** (2026-06-29).
+> Note: the app's 5-min carbo-repeat floor is more aggressive than BNF's "≥15 min"
+> minimum; mirrored here for app-consistency, flagged for later review.
+
 ## H. Surgical / mechanical control (Stage 4)
 
 ### R-SURG-1 — Mechanical control is independent of responsiveness

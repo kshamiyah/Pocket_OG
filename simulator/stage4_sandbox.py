@@ -29,6 +29,8 @@ from stage3_sandbox import (
     ONSET_MIN, TARGET_TONE, LADDER, MASSAGE_BONUS, MASSAGE_DECAY_PER_MIN,
     CONTROLLED_BLEED, PPH_MAJOR_ML, PPH_MASSIVE_ML, BLOOD_PREP_MIN,
     MAJOR_INFUSION_ML_MIN, MASSIVE_INFUSION_ML_MIN,
+    CARBO_MAX_DOSES, CARBO_REPEAT_BASE_SEC, CARBO_REPEAT_FLOOR_SEC,
+    URGENCY_EBL_ML, URGENCY_BLEED_ML_MIN,
 )
 
 # Surgical ladder (R-SURG-1). Tone targets [ASSUMED]; order/independence ACCEPTED.
@@ -128,9 +130,11 @@ def simulate(scenario):
 
     next_rung = 0
     last_drug_id, last_drug_min = None, None
+    carbo_doses = 0
     surg_rung, last_surg_min, last_surg_step = 0, None, None
     total_blood = 0.0
     transfusion_started_min = None
+    asthma = bool(scenario.get("asthma"))
 
     rows = []
     verdict, verdict_min = "ONGOING", None
@@ -143,12 +147,35 @@ def simulate(scenario):
 
         # uterotonic ladder (CLOCK 1: app's bleed-rate-scaled escalation)
         if p.bleed_rate >= CONTROLLED_BLEED and next_rung < len(LADDER):
-            due = last_drug_id is None or (minute - last_drug_min) >= \
-                scale_delay_by_bleed_rate(UTEROTONIC_PHARM_DELAY_SEC[last_drug_id], p.bleed_rate) / 60.0
-            if due:
-                drug = LADDER[next_rung]; p.give_uterotonic(drug, minute)
-                last_drug_id, last_drug_min = drug, minute; next_rung += 1
-                action += f"give {drug} "
+            current = LADDER[next_rung]
+            # Asthma: carboprost contraindicated -> skip the rung entirely
+            if current == "carboprost" and asthma:
+                next_rung += 1
+                action += "carboprost CONTRAINDICATED (asthma) — skip "
+            elif current == "carboprost":
+                # Axis 2 (urgency): massive ongoing loss + still brisk -> abandon to surgery
+                if carbo_doses >= 1 and p.cumulative_bled >= URGENCY_EBL_ML and p.bleed_rate >= URGENCY_BLEED_ML_MIN:
+                    next_rung = len(LADDER)
+                    action += ">> abandon carboprost (massive ongoing loss) -> surgery "
+                else:
+                    # repeat carboprost every ~15 min (bleed-scaled, floor 5 min), up to 8
+                    due = last_drug_id != "carboprost" or (minute - last_drug_min) >= \
+                        scale_delay_by_bleed_rate(CARBO_REPEAT_BASE_SEC, p.bleed_rate, CARBO_REPEAT_FLOOR_SEC) / 60.0
+                    if due and carbo_doses < CARBO_MAX_DOSES:
+                        p.give_uterotonic("carboprost", minute)
+                        last_drug_id, last_drug_min = "carboprost", minute
+                        carbo_doses += 1
+                        action += f"carboprost #{carbo_doses} "
+                    elif carbo_doses >= CARBO_MAX_DOSES:
+                        next_rung += 1   # 8-dose cap reached -> next agent
+                        action += "carboprost max 8 doses -> misoprostol "
+            else:
+                due = last_drug_id is None or (minute - last_drug_min) >= \
+                    scale_delay_by_bleed_rate(UTEROTONIC_PHARM_DELAY_SEC[last_drug_id], p.bleed_rate) / 60.0
+                if due:
+                    p.give_uterotonic(current, minute)
+                    last_drug_id, last_drug_min = current, minute; next_rung += 1
+                    action += f"give {current} "
 
         # surgical ladder — once drugs exhausted and still bleeding (R-SURG-1)
         elif next_rung >= len(LADDER) and p.bleed_rate >= CONTROLLED_BLEED and surg_rung < len(SURGICAL_LADDER):
