@@ -93,31 +93,56 @@ behaviour — the reason early action wins.
 
 ## D. Drug effects on tone (uterotonics)
 
-Each drug raises `tone` **after an onset delay**, by some amount, for some
-duration. Numbers below are timing facts from sources; the _amount_ of tone gain
-is **[ASSUMED]** pending sign-off.
+Each drug raises `tone` **after an onset/effect delay**, by some amount, for some
+duration. **DECISION (2026-06-28): drug timing is adopted directly from the
+existing Pocket O&G algorithm** (`pph-shared.js` → `UTEROTONIC_PHARM_DELAY_SEC`,
+`scaleDelayByBleedRate`, `CARBO_REPEAT_*`), so the simulator and the app share a
+single source of truth and cannot drift. The bleed-rate scaling (waits shorten
+when bleeding is brisk, 60 s floor) is inherited too.
+
+> **Tone magnitude is a SEPARATE open issue.** The app models drugs as a ladder
+> (escalate if not working) and never represents *how firm* the uterus becomes.
+> So each drug's **tone-gain amount** is deliberately left unset here and tracked
+> as its own decision (see `OPEN: tone magnitudes` below). Timing ✓ from app;
+> magnitude ✗ still to be set.
 
 ### R-DRUG-OXY — Oxytocin
-Onset **2–5 min IM** (faster IV); half-life **3–5 min**; uterine effect up to
-**~1 h**. → raises tone after ~3 min, sustained ~60 min.
-_Source: Uterotonics refresher (UCT); WHO uterotonics._
-☐ OK ☐ Correct: __________
+**Onset/effect window = 180 s (3 min), bolus** — from app
+`UTEROTONIC_PHARM_DELAY_SEC.oxytocin_bolus`; infusion = 300 s. Effect sustained
+~60 min then fades.
+_Source: Pocket O&G `pph-shared.js`; corroborated by Uterotonics refresher (UCT)._
+☑ **ACCEPTED — timing (app value 180 s)** (2026-06-28); tone magnitude: OPEN.
 
 ### R-DRUG-ERGO — Ergometrine
-Latent phase **2–5 min**; half-life **30–120 min**; sustained tonic contraction.
-_Source: Uterotonics refresher (UCT)._
-☐ OK ☐ Correct: __________
+**Onset/effect window = 300 s (5 min)** — from app
+`UTEROTONIC_PHARM_DELAY_SEC.ergometrine`; sustained tonic contraction (long
+half-life 30–120 min).
+_Source: Pocket O&G `pph-shared.js`; corroborated by Uterotonics refresher (UCT)._
+☑ **ACCEPTED — timing (app value 300 s)** (2026-06-28); tone magnitude: OPEN.
 
 ### R-DRUG-CARBO — Carboprost
-Prostaglandin F2α analogue; **slower onset, longer duration**; repeat every
-**15 min** up to 8 doses (per protocol).
-_Source: Uterotonics refresher (UCT); app protocol GTG52._
-☐ OK ☐ Correct: __________
+**Onset/effect window = 900 s (15 min)**, **repeat every 15 min** (floor 5 min
+under brisk bleeding), up to 8 doses — from app `CARBO_REPEAT_BASE_SEC` /
+`effectiveCarboRepeatDelaySec`.
+_Source: Pocket O&G `pph-shared.js`; protocol GTG52._
+☑ **ACCEPTED — timing (app value 900 s)** (2026-06-28); tone magnitude: OPEN.
+
+### R-DRUG-MISO — Misoprostol
+**Onset/effect window = 600 s (10 min)** — from app
+`UTEROTONIC_PHARM_DELAY_SEC.misoprostol`.
+_Source: Pocket O&G `pph-shared.js`._
+☑ **ACCEPTED — timing (app value 600 s)** (2026-06-28); tone magnitude: OPEN.
 
 ### R-DRUG-MASSAGE — Fundal massage **[ASSUMED]**
 Mechanical, immediate but **transient** partial tone gain; decays without a
-drug to sustain it.
+drug to sustain it. No app timing constant (not a drug); onset ≈ immediate.
 ☐ OK ☐ Correct: __________
+
+### OPEN: tone magnitudes (separate decision, deferred)
+How much each agent raises `tone` (and the ceiling when stacked) is unresolved
+and tracked here, not inside the rules above. To be set with the clinician as a
+dedicated exercise. Until then, Stage 1 may use a single placeholder for
+oxytocin only, clearly labelled.
 
 ---
 
