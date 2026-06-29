@@ -254,18 +254,41 @@ _Source: AHA; app `PMCS_DECISION_SEC = 240`, `PMCS_DELIVERY_SEC = 300`._
 
 ## F. Outcome function
 
-### R-OUT-DEATH — Death conditions (candidate)
-The patient dies if **either**:
-- MAP below the critical line for longer than the tolerated window (exsanguination), **or**
-- arrest without ROSC beyond the survival window (Tier 6 outcome data).
-Thresholds **[ASSUMED]**, to be anchored to the maternal IHCA survival study.
-_Source: Maternal In-Hospital Cardiac Arrest survival study (PMC)._
-☐ OK ☐ Correct: __________
+### R-OUT-DEATH — Death conditions (deterministic)
+The model recognises **two** death pathways; both use deterministic thresholds
+(not probabilities) for now.
 
-### R-OUT-SURVIVE — Stabilisation
-If bleeding is controlled (`bleed_rate` low) and `blood_volume` restored above a
-safe line before the death thresholds are met → survives / stabilises.
-☐ OK ☐ Correct: __________
+**(1) Acute — used to score the algorithm.**
+Once arrested, death if no return of circulation within the resuscitation window
+and (pregnant arrest) delivery not achieved by ~5 min.
+_Refs: R9 (AHA, 5-min delivery — solid); R10 (maternal IHCA survival)._
+_The resuscitation-window length is **[ASSUMED]** (no clean cut-off in R10)._
+
+**(2) Cumulative oxygen debt — MODELLED & RECORDED, not yet used to judge the
+algorithm.**
+Death if cumulative oxygen debt ≥ **~113 mL/kg** (LD50, treated as a hard line
+for now). This represents later ITU / organ-failure death even after a pulse is
+regained.
+_Refs: R12 / R13 (Rixen & Siegel, PMID 1989759)._
+
+> **Scope decision (2026-06-28):** the algorithm under test manages the **acute
+> emergency only — it does not manage ITU/post-arrest care**, so condition (2) is
+> **recorded as an outcome metric but does NOT count for/against the algorithm's
+> score.** Oxygen debt is still fully modelled (it drives the acute arrest trigger
+> R-ARR-1 and is logged as a severity marker). Scoring on condition (2) is
+> deferred until the app's scope extends to post-resuscitation care.
+> **113 mL/kg is LD50 (50% mortality)** — a future, more rigorous version may make
+> this probabilistic.
+
+☑ **ACCEPTED — deterministic; condition (2) recorded-not-scored** (2026-06-28).
+
+### R-OUT-SURVIVE — Stabilisation (acute)
+The patient survives the acute emergency if **condition (1) is avoided**: bleeding
+controlled (`bleed_rate` low) and `blood_volume` restored above a safe line before
+acute arrest becomes irreversible. Oxygen-debt repayment within ~2 h is recorded
+(R12) as a quality/severity metric but, per the scope decision above, is not part
+of the algorithm's pass/fail yet.
+☑ **ACCEPTED** (2026-06-28).
 
 ---
 
