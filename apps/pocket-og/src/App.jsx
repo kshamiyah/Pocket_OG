@@ -441,9 +441,11 @@ export default function App() {
             {showNoResults
               ? <NoResults query={query} fallbacks={fallback} expanded={expanded} onToggle={toggle} onOpenFlowchart={setActiveFlowchartId} onOpenGuideline={openGuidelineFromSearch} />
               : (
-                <div className="space-y-3">
-                  {primary.map(page => (
-                    <WikiCard key={page.id} page={page} query={query} isExpanded={!!expanded[page.id]} onToggle={() => toggle(page.id)} onOpenFlowchart={setActiveFlowchartId} onOpenGuideline={openGuidelineFromSearch} />
+                <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+                  {primary.map((page, i) => (
+                    <div key={page.id} className={i > 0 ? "border-t border-gray-50" : ""}>
+                      <WikiCard page={page} query={query} grouped isExpanded={!!expanded[page.id]} onToggle={() => toggle(page.id)} onOpenFlowchart={setActiveFlowchartId} onOpenGuideline={openGuidelineFromSearch} />
+                    </div>
                   ))}
                 </div>
               )

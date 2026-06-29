@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 const TRANSITION_MS = 400;
 
@@ -16,6 +17,7 @@ export default function BottomSheet({
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
   const closeTimerRef = useRef(null);
+  const animGenRef = useRef(0);
 
   useEffect(() => {
     if (open) {
@@ -24,22 +26,31 @@ export default function BottomSheet({
         closeTimerRef.current = null;
       }
       setMounted(true);
-      let raf2;
-      const raf1 = requestAnimationFrame(() => {
-        raf2 = requestAnimationFrame(() => setVisible(true));
-      });
-      return () => {
-        cancelAnimationFrame(raf1);
-        if (raf2) cancelAnimationFrame(raf2);
-      };
+      return;
     }
+
+    if (!mounted) return;
 
     setVisible(false);
     closeTimerRef.current = setTimeout(() => {
       setMounted(false);
       closeTimerRef.current = null;
     }, TRANSITION_MS);
-  }, [open]);
+  }, [open, mounted]);
+
+  useLayoutEffect(() => {
+    if (!open || !mounted) {
+      setVisible(false);
+      return;
+    }
+
+    const gen = ++animGenRef.current;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (animGenRef.current === gen) setVisible(true);
+      });
+    });
+  }, [open, mounted]);
 
   useEffect(() => () => {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
@@ -64,7 +75,7 @@ export default function BottomSheet({
   const radiusClass =
     align === "responsive" ? "rounded-t-3xl sm:rounded-3xl mx-0 sm:mx-4" : "rounded-t-3xl";
 
-  return (
+  const sheet = (
     <div
       className={`fixed inset-0 flex ${alignClass} backdrop-blur-sm transition-opacity duration-300 ease-out ${
         visible ? "bg-black/40 opacity-100" : "bg-black/40 opacity-0"
@@ -95,4 +106,6 @@ export default function BottomSheet({
       </div>
     </div>
   );
+
+  return createPortal(sheet, document.body);
 }
