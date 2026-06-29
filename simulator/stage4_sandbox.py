@@ -115,7 +115,13 @@ class PatientV4:
             self.oxygen_debt += VO2_DEMAND_ML_KG_MIN * shortfall * dt_min
 
 
-def run(scenario):
+def simulate(scenario):
+    """Run a scenario and return structured results (no printing).
+
+    Returns dict: { responsiveness, start_volume, rows[], verdict, verdict_min,
+    total_blood, peak_ebl, blood_volumes }. Each row is a per-minute snapshot.
+    This is the single source of truth used by both the CLI printer and the UI.
+    """
     p = PatientV4(scenario.get("weight_kg", 70), scenario.get("risk_factors", []),
                   scenario.get("surgical_ineffective"), bmi=scenario.get("bmi", 25))
     duration = scenario.get("duration_min", 40)
@@ -126,11 +132,8 @@ def run(scenario):
     total_blood = 0.0
     transfusion_started_min = None
 
-    print(f"\n=== {scenario['name']} ===")
-    extra = f" | accreta (balloon/sutures ineffective)" if p.surgical_ineffective else ""
-    print(f"weight {p.weight_kg} kg | risk {scenario.get('risk_factors', []) or 'none'} -> R = {p.responsiveness:.2f}{extra}")
-    print(f"{'min':>3} | {'EBL(ml)':>7} | {'tone':>4} | {'bleed/min':>9} | {'MAP':>3} | action")
-    print("-" * 80)
+    rows = []
+    verdict, verdict_min = "ONGOING", None
 
     for minute in range(duration + 1):
         action = ""
@@ -149,7 +152,6 @@ def run(scenario):
 
         # surgical ladder — once drugs exhausted and still bleeding (R-SURG-1)
         elif next_rung >= len(LADDER) and p.bleed_rate >= CONTROLLED_BLEED and surg_rung < len(SURGICAL_LADDER):
-            # escalate only after the previous step has had its onset to work
             if last_surg_min is None or (minute - last_surg_min) > SURG_ONSET_MIN[last_surg_step]:
                 step = SURGICAL_LADDER[surg_rung]; p.give_surgical(step, minute)
                 last_surg_min, last_surg_step = minute, step
@@ -164,19 +166,49 @@ def run(scenario):
                 rate = MASSIVE_INFUSION_ML_MIN if p.level == "massive" else MAJOR_INFUSION_ML_MIN
                 blood_in = min(rate, p.bleed_rate); total_blood += blood_in
 
-        print(f"{minute:>3} | {p.cumulative_bled:>7.0f} | {p.tone:>4.2f} | {p.bleed_rate:>9.0f} | {p.map:>3.0f} | {action.strip()}")
+        rows.append({
+            "min": minute, "EBL": round(p.cumulative_bled), "tone": round(p.tone, 2),
+            "bleed_ml_min": round(p.bleed_rate), "HR": round(p.heart_rate),
+            "MAP": round(p.map), "lactate": round(p.lactate, 1),
+            "blood_volume": round(p.blood_volume), "total_blood": round(total_blood),
+            "action": action.strip(),
+        })
         p.tick(minute, dt_min=1.0, blood_in=blood_in)
 
         if p.arrested:
-            print(f"    *** ARREST at min {minute+1} (MAP {p.map:.0f}) — total blood {total_blood:.0f} ml ***")
-            return "ARREST"
+            verdict, verdict_min = "ARREST", minute + 1
+            break
         if p.bleed_rate < 50 and p.map > 60:
-            print(f"    >>> CONTROLLED at min {minute+1} — tone {p.tone:.2f}, bleed {p.bleed_rate:.0f} ml/min, "
-                  f"total blood {total_blood:.0f} ml ({total_blood/p.start_volume:.1f} blood vol)")
-            return "SURVIVE"
+            verdict, verdict_min = "CONTROLLED", minute + 1
+            break
+    else:
+        if total_blood >= p.start_volume:
+            verdict = "EXSANGUINATING"
 
-    print(f"    outcome: ongoing — tone {p.tone:.2f}, total blood {total_blood:.0f} ml")
-    return "ONGOING"
+    return {
+        "responsiveness": round(p.responsiveness, 2),
+        "start_volume": round(p.start_volume),
+        "ml_per_kg": round(p.start_volume / p.weight_kg, 1),
+        "rows": rows, "verdict": verdict, "verdict_min": verdict_min,
+        "total_blood": round(total_blood), "peak_ebl": rows[-1]["EBL"] if rows else 0,
+        "final_tone": rows[-1]["tone"] if rows else 0,
+    }
+
+
+def run(scenario):
+    """CLI printer — uses simulate() so output matches the UI exactly."""
+    res = simulate(scenario)
+    print(f"\n=== {scenario['name']} ===")
+    extra = " | accreta (balloon/sutures ineffective)" if scenario.get("surgical_ineffective") else ""
+    print(f"R = {res['responsiveness']} | start {res['start_volume']} ml ({res['ml_per_kg']} ml/kg){extra}")
+    print(f"{'min':>3} | {'EBL(ml)':>7} | {'tone':>4} | {'bleed/min':>9} | {'MAP':>3} | action")
+    print("-" * 80)
+    for r in res["rows"]:
+        print(f"{r['min']:>3} | {r['EBL']:>7} | {r['tone']:>4.2f} | {r['bleed_ml_min']:>9} | {r['MAP']:>3} | {r['action']}")
+    print(f"    >>> {res['verdict']}"
+          + (f" at min {res['verdict_min']}" if res['verdict_min'] else "")
+          + f" — final tone {res['final_tone']}, total blood {res['total_blood']} ml, peak EBL {res['peak_ebl']} ml")
+    return res["verdict"]
 
 
 SCENARIOS = [
