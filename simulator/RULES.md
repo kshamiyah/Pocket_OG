@@ -227,7 +227,8 @@ as its visible readout). Each pathology plugs into it.
 _Sources: Rixen & Siegel, "Bench-to-bedside review: oxygen debt…" (Critical Care,
 cc3526); "Oxygen debt and metabolic acidemia as quantitative predictors of
 mortality…" (PubMed 1989759); "Blood failure / oxygen debt" (Transfusion 2016)._
-☐ OK ☐ Correct: __________
+[refs: R12, R13, R14, R15, R16]
+☑ **ACCEPTED** (2026-06-28).
 
 ### R-ARR-2 — Defibrillation window
 Shockable rhythm (VF/VT): defibrillate within **2 min** for best survival; each
@@ -281,3 +282,60 @@ anything is added.
 
 _Every rule above is a candidate awaiting clinical sign-off against its cited
 source. Corrections to any line change only that line._
+
+---
+
+## References & Audit Trail
+
+Each source carries a **stable identifier** (PMID / PMCID / DOI / ISBN-equivalent)
+so it remains reachable for future audit even if a URL changes. Internal sources
+cite the repository file and the specific named symbol/section.
+
+### External literature
+
+| Ref | Citation | Stable ID | URL |
+|---|---|---|---|
+| R1 | Uterine Atony (overview) | ScienceDirect Topics: "Uterine Atony" | https://www.sciencedirect.com/topics/medicine-and-dentistry/uterine-atony |
+| R2 | Postpartum Haemorrhage (overview), Medscape | Medscape Article 275038 | https://emedicine.medscape.com/article/275038-overview |
+| R3 | Curcio et al., "A Simple Cardiovascular Model for the Study of Hemorrhagic Shock" (2020) | PMCID: PMC7781723; DOI: 10.1155/2020/7936895 | https://pmc.ncbi.nlm.nih.gov/articles/PMC7781723/ |
+| R4 | Curcio et al., "Seven Mathematical Models of Hemorrhagic Shock" (2021) | PMCID: PMC8195646; DOI: 10.1155/2021/6640638 | https://pmc.ncbi.nlm.nih.gov/articles/PMC8195646/ |
+| R5 | Hemorrhagic Shock — StatPearls | NCBI Bookshelf: NBK470382 | https://www.ncbi.nlm.nih.gov/books/NBK470382/ |
+| R6 | CV Physiology — Hemorrhagic Shock | cvphysiology.com BP031 | https://cvphysiology.com/blood-pressure/bp031 |
+| R7 | Uterotonics & Tocolytics — UCT Anaesthesia Refresher (2021) | UCT Refresher Course 2021 | https://anaesthetics.ukzn.ac.za/wp-content/uploads/2024/11/Uterotonics-and-tocolytics-Ref-2021.pdf |
+| R8 | WHO Recommendations: Uterotonics for Prevention of PPH | NCBI Bookshelf: NBK535990 | https://www.ncbi.nlm.nih.gov/books/NBK535990/ |
+| R9 | Cardiac Arrest in Pregnancy — AHA Scientific Statement | DOI: 10.1161/CIR.0000000000000300 | https://www.ahajournals.org/doi/full/10.1161/cir.0000000000000300 |
+| R10 | Survival Outcomes in Maternal In-Hospital Cardiac Arrest | PMCID: PMC8917084 | https://pmc.ncbi.nlm.nih.gov/articles/PMC8917084/ |
+| R11 | Management of Hemorrhagic Shock: Physiology, Timing, Strategies | PMCID: PMC9821021; DOI: 10.3390/jcm12010260 | https://pmc.ncbi.nlm.nih.gov/articles/PMC9821021/ |
+| R12 | Rixen & Siegel, "Bench-to-bedside review: Oxygen debt and its metabolic correlates…" Crit Care (2005) | DOI: 10.1186/cc3526 | https://ccforum.biomedcentral.com/articles/10.1186/cc3526 |
+| R13 | Rixen et al., "Oxygen debt and metabolic acidemia as quantitative predictors of mortality…" (1991) | PMID: 1989759 | https://pubmed.ncbi.nlm.nih.gov/1989759/ |
+| R14 | Bjerkvig et al., "'Blood failure': oxygen debt, coagulopathy and endothelial damage" Transfusion (2016) | DOI: 10.1111/trf.13500 | https://onlinelibrary.wiley.com/doi/full/10.1111/trf.13500 |
+| R15 | "Class of hemorrhagic shock … diastolic coronary flow reversal" (swine exsanguination model) | PMCID: PMC9795012 | https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9795012/ |
+| R16 | Critical Thresholds of Hemorrhagic Shock (blood-loss % to arrest, summary) | MED-TAC / tactical-medicine review | https://www.tactical-medicine.com/blogs/news/how-much-blood-loss-is-fatal-the-critical-thresholds-of-hemorrhagic-shock |
+
+### Internal sources (Pocket O&G repository)
+
+| Ref | Source | Reachable location |
+|---|---|---|
+| I1 | Uterotonic drug timing constants | `apps/pocket-og/src/data/emergency/pph-shared.js` → `UTEROTONIC_PHARM_DELAY_SEC`, `CARBO_REPEAT_BASE_SEC`, `scaleDelayByBleedRate` |
+| I2 | GTG52 atonic-PPH risk factors | `packages/guidelines/src/GTG52.js` → "Risk Factors for Atonic PPH" |
+| I3 | Arrest timing constants (cross-check) | `apps/pocket-og/src/data/emergency/cardiac-arrest-shared.js` → `CPR_CYCLE_SEC`, `ADRENALINE_INTERVAL_SEC`, `PMCS_DECISION_SEC`, `PMCS_DELIVERY_SEC` |
+
+### Rule → reference map
+
+| Rule | References |
+|---|---|
+| R-BLEED-1, R-BLEED-2, R-BLEED-3 | R1, R2 |
+| R-VOL-1 | R1, R2 (maternal volume; exact ml/kg to be pinned) |
+| R-VOL-2, R-VOL-3 | R3, R4 |
+| R-CIRC-1, R-CIRC-2 | R5, R6, R3 |
+| R-DRUG-OXY/ERGO/CARBO/MISO | I1, R7, R8 |
+| R-DRUG-MASSAGE | (clinical convention; magnitude unsourced) |
+| R-TONE-RESP | I2 (list); weights unsourced |
+| R-TONE-GAIN | (targets unsourced — [ASSUMED]) |
+| R-ARR-1 | R12, R13, R14, R15, R16, R11 |
+| R-ARR-2, R-ARR-3, R-ARR-4 | R9, I3 |
+| R-OUT-DEATH, R-OUT-SURVIVE | R10, R12 |
+
+**Audit note:** any value marked `[ASSUMED]` or "unsourced" has **no citation by
+design** and must be set by clinical sign-off before use — these are the lines an
+audit should scrutinise first.
