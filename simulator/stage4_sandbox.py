@@ -28,7 +28,9 @@ from stage2_sandbox import (
 )
 from stage3_sandbox import (
     UTEROTONIC_PHARM_DELAY_SEC, scale_delay_by_bleed_rate,
-    ONSET_MIN, TARGET_TONE, LADDER, MASSAGE_BONUS, MASSAGE_DECAY_PER_MIN,
+    ONSET_MIN, TARGET_TONE, LADDER,
+    FUNDAL_TONE_PULSE, FUNDAL_DECAY_PER_MIN, FUNDAL_FIRM_THRESHOLD,
+    BIMANUAL_DURATION_MIN, BIMANUAL_BLEED_FACTOR,
     CONTROLLED_BLEED, PPH_MAJOR_ML, PPH_MASSIVE_ML, BLOOD_PREP_MIN,
     MAJOR_PRBC_ML_MIN, MASSIVE_PRBC_ML_MIN,
     CARBO_MAX_DOSES, CARBO_REPEAT_BASE_SEC, CARBO_REPEAT_FLOOR_SEC,
@@ -48,7 +50,8 @@ SURG_TARGET = {"balloon": 0.95, "sutures": 0.97, "hysterectomy": 0.999}
 
 
 from patient_profile import (  # noqa: E402
-    uterotonics_refractory, massage_refractory, surgical_ineffective_steps,
+    uterotonics_refractory, fundal_refractory, bimanual_refractory,
+    surgical_ineffective_steps,
 )
 
 
@@ -65,18 +68,22 @@ class PatientV4:
             self.treatment_response = dict(treatment_response)
             self.surgical_ineffective = set(surgical_ineffective_steps(self.treatment_response))
             self.drug_refractory = uterotonics_refractory(self.treatment_response)
-            self.massage_ineffective = massage_refractory(self.treatment_response)
+            self.fundal_ineffective = fundal_refractory(self.treatment_response)
+            self.bimanual_ineffective = bimanual_refractory(self.treatment_response)
         else:
             # Legacy path (deprecated sandboxes)
             self.treatment_response = None
             self.surgical_ineffective = set(surgical_ineffective or [])
             self.drug_refractory = "balloon" in self.surgical_ineffective
-            self.massage_ineffective = False
+            self.fundal_ineffective = False
+            self.bimanual_ineffective = False
         # R-SEVERITY: risk factors set how ATONIC she starts (severity / bleed rate),
         # not treatability. Lower starting tone = faster bleed.
         self.start_tone = start_tone_from_risk_factors(risk_factors or [], base_tone)
         self.sustained_tone = self.start_tone
-        self.massage_bonus = 0.0
+        self.fundal_pulse = 0.0
+        self.compression_until = 0.0   # sim minutes — bimanual mechanical hold
+        self._now_min = 0.0
         self.oxygen_debt = 0.0
         self.cumulative_bled = float(start_ebl)   # EBL starts at the recognition point
         self._pending = []           # uterotonics: (effect_min, target)  — scaled by R
@@ -89,13 +96,28 @@ class PatientV4:
         return "minor"
 
     @property
-    def tone(self): return min(1.0, self.sustained_tone + self.massage_bonus)
+    def palpation_tone(self):
+        return min(1.0, self.sustained_tone + self.fundal_pulse)
+
     @property
-    def bleed_rate(self): return BASELINE_FLOW_ML_MIN * (1.0 - self.tone)
+    def tone(self):
+        return self.palpation_tone
+
+    @property
+    def compression_active(self):
+        return self._now_min < self.compression_until
+
+    @property
+    def bleed_rate(self):
+        base = BASELINE_FLOW_ML_MIN * (1.0 - self.palpation_tone)
+        if self.compression_active and not self.bimanual_ineffective:
+            return base * BIMANUAL_BLEED_FACTOR
+        return base
+
     @property
     def durable_bleed_rate(self):
-        # bleeding from SUSTAINED (drug/surgical) tone only — excludes the transient
-        # massage bonus, so "controlled" means durable control, not a massage spike.
+        # bleeding from SUSTAINED (drug/surgical) tone only — excludes fundal pulse
+        # and bimanual compression, so "controlled" means durable control.
         return BASELINE_FLOW_ML_MIN * (1.0 - self.sustained_tone)
     @property
     def fraction_lost(self): return (self.start_volume - self.blood_volume) / self.start_volume
@@ -116,11 +138,20 @@ class PatientV4:
     def give_surgical(self, step, now_min):
         self._pending_surg.append((now_min + SURG_ONSET_MIN[step], SURG_TARGET[step], step))
 
+    def give_fundal_massage(self):
+        if not self.fundal_ineffective:
+            self.fundal_pulse = FUNDAL_TONE_PULSE
+
+    def start_bimanual_compression(self, now_min):
+        if not self.bimanual_ineffective:
+            self.compression_until = max(self.compression_until, now_min + BIMANUAL_DURATION_MIN)
+
     def give_massage(self):
-        if not self.massage_ineffective:
-            self.massage_bonus = MASSAGE_BONUS
+        """Legacy alias — fundal pulse only."""
+        self.give_fundal_massage()
 
     def tick(self, now_min, dt_min=1.0, blood_in=0.0):
+        self._now_min = now_min
         # surgical control first — MECHANICAL, independent of R (R-SURG-1)
         keep_s = []
         for effect_min, target, step in self._pending_surg:
@@ -141,11 +172,11 @@ class PatientV4:
             else:
                 keep.append((effect_min, drug_id))
         self._pending = keep
-        self.massage_bonus = max(0.0, self.massage_bonus - MASSAGE_DECAY_PER_MIN * dt_min)
         bled = self.bleed_rate * dt_min
         self.cumulative_bled += bled
         self.blood_volume += blood_in - bled
         if self.blood_volume < 0: self.blood_volume = 0.0
+        self.fundal_pulse = max(0.0, self.fundal_pulse - FUNDAL_DECAY_PER_MIN * dt_min)
         if self.perfusion_adequacy < DEBT_ADEQUACY_FLOOR:
             shortfall = (DEBT_ADEQUACY_FLOOR - self.perfusion_adequacy) / DEBT_ADEQUACY_FLOOR
             self.oxygen_debt += VO2_DEMAND_ML_KG_MIN * shortfall * dt_min

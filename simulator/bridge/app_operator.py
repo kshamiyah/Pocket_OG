@@ -22,7 +22,7 @@ SIM = os.path.dirname(HERE)
 REPO = os.path.dirname(SIM)
 sys.path.insert(0, SIM)
 
-from stage4_sandbox import PatientV4   # noqa: E402
+from stage4_sandbox import PatientV4, FUNDAL_FIRM_THRESHOLD, FUNDAL_TONE_PULSE   # noqa: E402
 from stage3_sandbox import (           # noqa: E402
     PPH_MAJOR_ML, PPH_MASSIVE_ML, MAJOR_PRBC_ML_MIN, MASSIVE_PRBC_ML_MIN,
 )
@@ -143,11 +143,11 @@ def stream(scenario, max_steps=300):
                 mark_done(nxt)
                 note = f"escalate -> {nxt}"
         elif ptype == "task" and tid == "fundal_massage":
-            p.give_massage(); mark_done(tid)
-            note = "massage" if not p.massage_ineffective else "massage (no response)"
+            p.give_fundal_massage(); mark_done(tid)
+            note = "fundal massage" if not p.fundal_ineffective else "fundal massage (no response)"
         elif ptype == "task" and tid == "bimanual":
-            p.give_massage(); mark_done(tid)
-            note = "bimanual compression" if not p.massage_ineffective else "bimanual (no response)"
+            p.start_bimanual_compression(t_min); mark_done(tid)
+            note = "bimanual compression" if not p.bimanual_ineffective else "bimanual (no response)"
         elif ptype == "task" and tid in ("blood_products", "mhp_pack", "rapid_cryst"):
             transfusing = True; mark_done(tid); note = f"START transfusion ({tid})"
         elif ptype == "consider" and tid == "bakri":
@@ -186,7 +186,17 @@ def stream(scenario, max_steps=300):
                 "status": "done", "doneAt": now_ms, "inTheatre": True,
             }
         elif ptype == "tone_check":
-            session["toneAssessed"] = True; note = "assess tone"
+            session["toneAssessed"] = True
+            # App asks immediately after massage — assess at peak fundal effect, not decayed.
+            assess_tone = min(1.0, p.sustained_tone + (
+                0.0 if p.fundal_ineffective else FUNDAL_TONE_PULSE))
+            if assess_tone >= FUNDAL_FIRM_THRESHOLD:
+                session["taskStates"]["bimanual"] = {
+                    "status": "skipped", "skippedAt": now_ms, "skipReason": "not_required",
+                }
+                note = f"tone firm ({assess_tone:.2f}) — bimanual not required"
+            else:
+                note = f"tone boggy ({assess_tone:.2f}) — proceed to bimanual"
         elif ptype == "blood_loss_check":
             note = "blood loss check"   # log already reflects EBL
         elif ptype == "assess" and tid:

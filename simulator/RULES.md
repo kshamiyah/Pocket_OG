@@ -152,12 +152,22 @@ _Source: Pocket O&G `pph-shared.js`; protocol GTG52._
 _Source: Pocket O&G `pph-shared.js`._
 ☑ **ACCEPTED — timing (app value 600 s)** (2026-06-28); tone magnitude: OPEN.
 
-### R-DRUG-MASSAGE — Fundal massage **[ASSUMED]**
-Mechanical, immediate but **transient** partial tone gain; decays without a
-drug to sustain it. No app timing constant (not a drug); onset ≈ immediate.
-Magnitude **+0.30 transient, decays 0.10/min** (clinical convention — bimanual
-compression buys time but fades without a uterotonic to sustain it).
-☑ **ACCEPTED — magnitude +0.30 / decay 0.10/min** (2026-06-29).
+### R-FUNDAL — Fundal massage **[ASSUMED]**
+Brief transabdominal contraction stimulus after fundal massage is done. Raises
+**palpation tone** (not sustained tone) by **+0.10**, decaying **0.20/min**.
+At typical starting tone (~0.85) this reads **firm** on tone_check (≥ 0.95) but
+does **not** zero the bleed chart (~35 ml/min remains until uterotonics).
+☑ **ACCEPTED** (2026-06-29).
+
+### R-BIMANUAL — Bimanual compression **[ASSUMED]**
+Mechanical haemostasis while compression is held. On task completion, active for
+**90 s** (matches app `bimanual.followUpDelay`). While active, tone-derived bleed
+is multiplied by **0.35** (65% reduction). Does not raise sustained tone.
+☑ **ACCEPTED** (2026-06-29).
+
+### R-DRUG-MASSAGE — (retired)
+Superseded by R-FUNDAL and R-BIMANUAL (2026-06-29). Previously both steps shared
++0.30 transient tone.
 
 ## D2. Tone magnitude — the responsiveness model
 
@@ -195,8 +205,8 @@ hysterectomy) escalates paced by onset. _Source: GTG52 "surgical haemostasis whe
 medical measures fail"; clinical sign-off._ ☑ **ACCEPTED**.
 
 **R-CONTROL-DURABLE — control means durable.** The "controlled" verdict uses the
-**sustained** (drug/surgical) tone, excluding the transient massage bonus — massage
-buys time (slows actual loss) but doesn't count as definitive control. ☑ **ACCEPTED**.
+**sustained** (drug/surgical) tone, excluding the transient fundal pulse and
+bimanual compression — massage buys time (slows actual loss) but doesn't count as definitive control. ☑ **ACCEPTED**.
 
 ### (history — superseded responsiveness model)
 
@@ -272,7 +282,8 @@ drug uses ~the same target, misoprostol slightly weaker (Cochrane NMA, R20):
 | Ergometrine | 0.95 | equipotent |
 | Carboprost | 0.95 | equipotent |
 | Misoprostol | 0.90 | slightly weaker (Cochrane NMA, R20) |
-| Fundal massage | +0.3 transient, decays ~0.1/min | Mechanical bridge (R-DRUG-MASSAGE) |
+| Fundal massage | +0.10 palpation pulse, decays 0.20/min | R-FUNDAL |
+| Bimanual compression | ×0.35 bleed for 90 s while held | R-BIMANUAL |
 | Surgical (balloon/sutures) | ~0.95–0.999 | Mechanical, independent of R (R-SURG-1) |
 
 _Drug targets: relative ordering evidence-based (R20); absolute values remain

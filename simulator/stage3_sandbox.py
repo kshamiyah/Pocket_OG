@@ -70,8 +70,21 @@ DRUG_INCREMENT = {"oxytocin": 0.30, "ergometrine": 0.30, "carboprost": 0.30, "mi
 DRUG_TONE_CEILING = 0.97   # uterotonics alone can nearly control; surgery exceeds it
 LADDER = ["oxytocin", "ergometrine", "carboprost", "misoprostol"]
 
-MASSAGE_BONUS = 0.30
-MASSAGE_DECAY_PER_MIN = 0.10
+# Fundal massage — brief contraction stimulus (R-FUNDAL). Magnitude [ASSUMED];
+# calibrated so typical atonic (tone ~0.85) reads firm on palpation but does not
+# zero the bleed chart before uterotonics take effect.
+FUNDAL_TONE_PULSE = 0.10
+FUNDAL_DECAY_PER_MIN = 0.20
+FUNDAL_FIRM_THRESHOLD = 0.95   # palpation at/above this → "uterus firm" (app tone_check)
+
+# Bimanual — mechanical compression while held (R-BIMANUAL). Duration matches app
+# bimanual.followUpDelay (90 s).
+BIMANUAL_DURATION_MIN = 1.5
+BIMANUAL_BLEED_FACTOR = 0.35    # multiply tone-derived bleed while compression active
+
+# Legacy names (deprecated stage3 autopilot)
+MASSAGE_BONUS = FUNDAL_TONE_PULSE
+MASSAGE_DECAY_PER_MIN = FUNDAL_DECAY_PER_MIN
 CONTROLLED_BLEED = 50         # ml/min — operator keeps escalating (drugs->surgery)
                               # until bleeding is below this; matches the "controlled"
                               # verdict so there is no untreated 50-100 ml/min dead zone

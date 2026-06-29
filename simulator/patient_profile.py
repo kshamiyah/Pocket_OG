@@ -8,7 +8,8 @@ body responds to each intervention after PPH is recognised.
 
 TREATMENT_LABELS = {
     "uterotonics": "Uterotonics (oxytocin → ergometrine → carboprost → misoprostol)",
-    "massage": "Fundal massage / bimanual compression",
+    "fundal_massage": "Fundal massage",
+    "bimanual": "Bimanual uterine compression",
     "balloon": "Bakri balloon tamponade",
     "sutures": "B-Lynch / compression sutures (theatre)",
     "hysterectomy": "Peripartum hysterectomy",
@@ -27,36 +28,37 @@ PRESET_OPTIONS = {
     "accreta": "Accreta / percreta — only hysterectomy works",
 }
 
+_PRESET_BODY = {
+    "uterotonics": EFFECTIVE,
+    "fundal_massage": EFFECTIVE,
+    "bimanual": EFFECTIVE,
+    "balloon": EFFECTIVE,
+    "sutures": EFFECTIVE,
+    "hysterectomy": EFFECTIVE,
+}
+
 PRESETS = {
-    "typical_atonic": {
-        "uterotonics": EFFECTIVE,
-        "massage": EFFECTIVE,
-        "balloon": EFFECTIVE,
-        "sutures": EFFECTIVE,
-        "hysterectomy": EFFECTIVE,
-    },
-    "refractory_atony": {
-        "uterotonics": INEFFECTIVE,
-        "massage": EFFECTIVE,
-        "balloon": EFFECTIVE,
-        "sutures": EFFECTIVE,
-        "hysterectomy": EFFECTIVE,
-    },
-    "balloon_fails": {
-        "uterotonics": EFFECTIVE,
-        "massage": EFFECTIVE,
-        "balloon": INEFFECTIVE,
-        "sutures": EFFECTIVE,
-        "hysterectomy": EFFECTIVE,
-    },
+    "typical_atonic": dict(_PRESET_BODY),
+    "refractory_atony": {**_PRESET_BODY, "uterotonics": INEFFECTIVE},
+    "balloon_fails": {**_PRESET_BODY, "balloon": INEFFECTIVE},
     "accreta": {
+        **_PRESET_BODY,
         "uterotonics": INEFFECTIVE,
-        "massage": EFFECTIVE,
         "balloon": INEFFECTIVE,
         "sutures": INEFFECTIVE,
-        "hysterectomy": EFFECTIVE,
     },
 }
+
+
+def _migrate_legacy_massage(response):
+    """Old presets / saved sessions used a single 'massage' key."""
+    if "massage" not in response:
+        return response
+    out = dict(response)
+    legacy = out.pop("massage")
+    out.setdefault("fundal_massage", legacy)
+    out.setdefault("bimanual", legacy)
+    return out
 
 
 def default_response():
@@ -76,24 +78,39 @@ def build_response(preset_key, overrides=None):
         for k, v in overrides.items():
             if k in base and v in (EFFECTIVE, INEFFECTIVE):
                 base[k] = v
+            elif k == "massage" and v in (EFFECTIVE, INEFFECTIVE):
+                base["fundal_massage"] = base["bimanual"] = v
     return base
 
 
 def surgical_ineffective_steps(response):
+    response = _migrate_legacy_massage(response)
     return [step for step in ("balloon", "sutures", "hysterectomy")
             if response.get(step) == INEFFECTIVE]
 
 
 def uterotonics_refractory(response):
-    return response.get("uterotonics") == INEFFECTIVE
+    return _migrate_legacy_massage(response).get("uterotonics") == INEFFECTIVE
+
+
+def fundal_refractory(response):
+    r = _migrate_legacy_massage(response)
+    return r.get("fundal_massage") == INEFFECTIVE
+
+
+def bimanual_refractory(response):
+    r = _migrate_legacy_massage(response)
+    return r.get("bimanual") == INEFFECTIVE
 
 
 def massage_refractory(response):
-    return response.get("massage") == INEFFECTIVE
+    """Legacy — both mechanical steps ineffective."""
+    return fundal_refractory(response) and bimanual_refractory(response)
 
 
 def summarise_response(response):
     """One-line human summary for the UI."""
+    response = _migrate_legacy_massage(response)
     works, fails = [], []
     for key, label in TREATMENT_LABELS.items():
         short = label.split(" (")[0].split(" — ")[0]
