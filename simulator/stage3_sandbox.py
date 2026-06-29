@@ -58,8 +58,8 @@ ONSET_MIN = {
     "carboprost": 4,    # starts within minutes (full effect builds later)
     "misoprostol": 10,  # genuinely slow agent
 }
-TARGET_TONE = {        # R-TONE-GAIN targets at R = 1
-    "oxytocin": 0.95, "ergometrine": 0.95, "carboprost": 0.97, "misoprostol": 0.95,
+TARGET_TONE = {        # R-TONE-GAIN: uterotonics roughly EQUIPOTENT (Cochrane NMA);
+    "oxytocin": 0.95, "ergometrine": 0.95, "carboprost": 0.95, "misoprostol": 0.90,  # miso slightly weaker
 }
 LADDER = ["oxytocin", "ergometrine", "carboprost", "misoprostol"]
 

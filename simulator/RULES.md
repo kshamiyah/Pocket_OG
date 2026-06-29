@@ -183,18 +183,31 @@ scaled by responsiveness:
 Stacking drugs lets a partial responder climb higher; a very low-R uterus never
 reaches control on drugs alone → surgical escalation is the only winning move.
 
-Candidate targets at R = 1 (magnitudes — for review, **[ASSUMED]** pending
-sign-off):
+**Tone scale anchoring (clinical sign-off 2026-06-29):** the `tone` variable
+(0 = atonic → 1 = firm) maps to real, measurable clinical scales — the validated
+**0–10 uterine tone score** (0 = no atony … 10 = severe relaxation; inverse of our
+scale) and **intrauterine-pressure (IUPC)** resting tone (normal < 15–20 mmHg).
+_Sources: 0–10 tone score (R18); IUPC resting tone (R19)._
+
+**Uterotonics are roughly EQUIPOTENT (clinical sign-off 2026-06-29).** Clinically
+you stack agents until bleeding settles; if the whole ladder is exhausted and she
+is still bleeding, escalate to surgery. The agents are of similar strength — what
+differs between patients is how refractory the uterus is (the responsiveness `R`,
+which decides whether she settles on drugs or runs out and needs theatre). So each
+drug uses ~the same target, misoprostol slightly weaker (Cochrane NMA, R20):
+
 | Agent | Target tone `T` at R=1 | Meaning |
 |---|---|---|
-| Oxytocin | 0.95 | Controls a typical responder alone (decision 2) |
-| Ergometrine | 0.95 | Second agent; helps partial responders climb |
-| Carboprost | 0.97 | Strong prostaglandin; higher ceiling |
-| Misoprostol | 0.95 | Adjunct |
+| Oxytocin | 0.95 | first-line |
+| Ergometrine | 0.95 | equipotent |
+| Carboprost | 0.95 | equipotent |
+| Misoprostol | 0.90 | slightly weaker (Cochrane NMA, R20) |
 | Fundal massage | +0.3 transient, decays ~0.1/min | Mechanical bridge (R-DRUG-MASSAGE) |
-| Surgical (balloon/sutures) | ~0.98 | Mechanical control independent of R |
-☑ **ACCEPTED — formula + candidate targets** (2026-06-28); targets [ASSUMED],
-revisable.
+| Surgical (balloon/sutures) | ~0.95–0.999 | Mechanical, independent of R (R-SURG-1) |
+
+_Drug targets: relative ordering evidence-based (R20); absolute values remain
+calibration ([ASSUMED]) but anchored to the 0–10 / mmHg scale above._
+☑ **ACCEPTED — equipotent targets** (2026-06-29).
 
 ---
 
@@ -392,6 +405,9 @@ cite the repository file and the specific named symbol/section.
 | R15 | "Class of hemorrhagic shock … diastolic coronary flow reversal" (swine exsanguination model) | PMCID: PMC9795012 | https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9795012/ |
 | R16 | Critical Thresholds of Hemorrhagic Shock (blood-loss % to arrest, summary) | MED-TAC / tactical-medicine review | https://www.tactical-medicine.com/blogs/news/how-much-blood-loss-is-fatal-the-critical-thresholds-of-hemorrhagic-shock |
 | R17 | 16G grey cannula flow rate (~180 ml/min) | BD Venflon 16G spec / IV cannula flow-rate references | https://www.midmeds.co.uk/shop/md391455-1-bd-venflon-iv-cannula-16g-grey-x-1-69600 |
+| R18 | Interrater reliability of a 0–10 uterine tone score (cesarean) | ScienceDirect S2589933321000379 | https://www.sciencedirect.com/science/article/abs/pii/S2589933321000379 |
+| R19 | Normal uterine resting tone on oxytocin by IUPC (<15–20 mmHg) | FDA oxytocin label / IUPC reference | https://www.droracle.ai/articles/535846/what-is-a-normal-uterine-resting-tone-on-oxytocin |
+| R20 | Uterotonic agents for preventing PPH: network meta-analysis | Cochrane CD011689.pub4 (Gallos et al.); DOI: 10.1002/14651858.CD011689.pub4 | https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD011689.pub4/full |
 
 ### Internal sources (Pocket O&G repository)
 
