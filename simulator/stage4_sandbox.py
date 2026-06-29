@@ -18,7 +18,9 @@ Some causes (placenta accreta) blunt balloon/sutures -> hysterectomy is definiti
 Run:  python3 simulator/stage4_sandbox.py
 """
 
-from stage1_sandbox import BASELINE_FLOW_ML_MIN, maternal_ml_per_kg, responsiveness_from_risk_factors
+from stage1_sandbox import (
+    BASELINE_FLOW_ML_MIN, maternal_ml_per_kg, start_tone_from_risk_factors, BASE_START_TONE,
+)
 from stage2_sandbox import (
     NORMAL_MAP, BASELINE_HR, MAP_ARREST, MAP_BREAKPOINTS, interp,
     DO2_NORMAL_ML_KG_MIN, VO2_DEMAND_ML_KG_MIN, DEBT_ADEQUACY_FLOOR,
@@ -30,8 +32,11 @@ from stage3_sandbox import (
     CONTROLLED_BLEED, PPH_MAJOR_ML, PPH_MASSIVE_ML, BLOOD_PREP_MIN,
     MAJOR_INFUSION_ML_MIN, MASSIVE_INFUSION_ML_MIN,
     CARBO_MAX_DOSES, CARBO_REPEAT_BASE_SEC, CARBO_REPEAT_FLOOR_SEC,
-    URGENCY_EBL_ML, URGENCY_BLEED_ML_MIN,
+    URGENCY_EBL_ML, URGENCY_BLEED_ML_MIN, DRUG_INCREMENT, DRUG_TONE_CEILING,
 )
+
+# Surgery is a haemodynamic decision: still bleeding AND becoming unstable.
+SURGERY_MAP_THRESHOLD = 60   # mmHg — MAP falling to here while bleeding -> theatre
 
 # Surgical ladder (R-SURG-1). Tone targets [ASSUMED]; order/independence ACCEPTED.
 SURGICAL_LADDER = ["balloon", "sutures", "hysterectomy"]
@@ -44,16 +49,22 @@ SURG_TARGET = {"balloon": 0.95, "sutures": 0.97, "hysterectomy": 0.999}
 
 class PatientV4:
     def __init__(self, weight_kg=70, risk_factors=None, surgical_ineffective=None, bmi=25,
-                 start_ebl=500):
+                 start_ebl=500, base_tone=BASE_START_TONE):
         # start_ebl = blood already lost when PPH is recognised / SOS is opened.
         # SOS is not triggered below ~500 ml (minor PPH), so default to 500.
         self.weight_kg = weight_kg
         self.bmi = bmi
         self.start_volume = weight_kg * maternal_ml_per_kg(bmi)   # full volume before loss
         self.blood_volume = self.start_volume - start_ebl          # already down by start_ebl
-        self.responsiveness = responsiveness_from_risk_factors(risk_factors or [])
         self.surgical_ineffective = set(surgical_ineffective or [])   # e.g. accreta
-        self.sustained_tone = 0.0
+        # Structural causes (accreta) are DRUG-REFRACTORY: uterotonics can't fix
+        # abnormal placentation. This is a structural property, NOT a risk-factor
+        # effect. Accreta (balloon/sutures ineffective) implies drug-refractory.
+        self.drug_refractory = "balloon" in self.surgical_ineffective
+        # R-SEVERITY: risk factors set how ATONIC she starts (severity / bleed rate),
+        # not treatability. Lower starting tone = faster bleed.
+        self.start_tone = start_tone_from_risk_factors(risk_factors or [], base_tone)
+        self.sustained_tone = self.start_tone
         self.massage_bonus = 0.0
         self.oxygen_debt = 0.0
         self.cumulative_bled = float(start_ebl)   # EBL starts at the recognition point
@@ -71,6 +82,11 @@ class PatientV4:
     @property
     def bleed_rate(self): return BASELINE_FLOW_ML_MIN * (1.0 - self.tone)
     @property
+    def durable_bleed_rate(self):
+        # bleeding from SUSTAINED (drug/surgical) tone only — excludes the transient
+        # massage bonus, so "controlled" means durable control, not a massage spike.
+        return BASELINE_FLOW_ML_MIN * (1.0 - self.sustained_tone)
+    @property
     def fraction_lost(self): return (self.start_volume - self.blood_volume) / self.start_volume
     @property
     def heart_rate(self): return min(180, BASELINE_HR + 160 * max(0.0, self.fraction_lost))
@@ -84,7 +100,7 @@ class PatientV4:
     def arrested(self): return self.map <= MAP_ARREST
 
     def give_uterotonic(self, drug_id, now_min):
-        self._pending.append((now_min + ONSET_MIN[drug_id], TARGET_TONE[drug_id]))
+        self._pending.append((now_min + ONSET_MIN[drug_id], drug_id))
 
     def give_surgical(self, step, now_min):
         self._pending_surg.append((now_min + SURG_ONSET_MIN[step], SURG_TARGET[step], step))
@@ -101,14 +117,16 @@ class PatientV4:
             else:
                 keep_s.append((effect_min, target, step))
         self._pending_surg = keep_s
-        # uterotonics — scaled by responsiveness (R-TONE-GAIN)
+        # uterotonics — each adds an equal increment of tone (R-SEVERITY; no R).
+        # Drug-refractory (structural, e.g. accreta) uteri do NOT respond.
         keep = []
-        for effect_min, target in self._pending:
+        for effect_min, drug_id in self._pending:
             if now_min >= effect_min:
-                if target > self.sustained_tone:
-                    self.sustained_tone += (target - self.sustained_tone) * self.responsiveness
+                if not self.drug_refractory:
+                    self.sustained_tone = min(DRUG_TONE_CEILING,
+                                              self.sustained_tone + DRUG_INCREMENT[drug_id])
             else:
-                keep.append((effect_min, target))
+                keep.append((effect_min, drug_id))
         self._pending = keep
         self.massage_bonus = max(0.0, self.massage_bonus - MASSAGE_DECAY_PER_MIN * dt_min)
         bled = self.bleed_rate * dt_min
@@ -149,30 +167,39 @@ def simulate(scenario):
         if minute == 0:
             p.give_massage(); action += "massage + "
 
-        # uterotonic ladder (CLOCK 1: app's bleed-rate-scaled escalation)
-        if p.bleed_rate >= CONTROLLED_BLEED and next_rung < len(LADDER):
+        bleeding = p.durable_bleed_rate >= CONTROLLED_BLEED
+        # Surgery decision: still bleeding AND (becoming unstable OR has already bled
+        # a massive amount without control). The amount-bled limb catches the case
+        # where transfusion is propping up the pressure but the source won't stop.
+        unstable = p.map <= SURGERY_MAP_THRESHOLD or p.cumulative_bled >= PPH_MASSIVE_ML
+
+        # SURGERY — can fire at any point, even mid-ladder. Accreta etc. handled by
+        # the mechanical-ineffective flag in tick().
+        if bleeding and unstable and surg_rung < len(SURGICAL_LADDER):
+            if last_surg_min is None or (minute - last_surg_min) > SURG_ONSET_MIN[last_surg_step]:
+                step = SURGICAL_LADDER[surg_rung]; p.give_surgical(step, minute)
+                last_surg_min, last_surg_step = minute, step
+                surg_rung += 1
+                action += f">> SURGERY: {step} (MAP {p.map:.0f}) "
+
+        # UTEROTONICS — climb the ladder / repeat carboprost while still bleeding
+        # but haemodynamically holding. Each drug adds an equal tone increment.
+        elif bleeding and next_rung < len(LADDER):
             current = LADDER[next_rung]
-            # Asthma: carboprost contraindicated -> skip the rung entirely
             if current == "carboprost" and asthma:
                 next_rung += 1
                 action += "carboprost CONTRAINDICATED (asthma) — skip "
             elif current == "carboprost":
-                # Axis 2 (urgency): massive ongoing loss + still brisk -> abandon to surgery
-                if carbo_doses >= 1 and p.cumulative_bled >= URGENCY_EBL_ML and p.bleed_rate >= URGENCY_BLEED_ML_MIN:
-                    next_rung = len(LADDER)
-                    action += ">> abandon carboprost (massive ongoing loss) -> surgery "
-                else:
-                    # repeat carboprost every ~15 min (bleed-scaled, floor 5 min), up to 8
-                    due = last_drug_id != "carboprost" or (minute - last_drug_min) >= \
-                        scale_delay_by_bleed_rate(CARBO_REPEAT_BASE_SEC, p.bleed_rate, CARBO_REPEAT_FLOOR_SEC) / 60.0
-                    if due and carbo_doses < CARBO_MAX_DOSES:
-                        p.give_uterotonic("carboprost", minute)
-                        last_drug_id, last_drug_min = "carboprost", minute
-                        carbo_doses += 1
-                        action += f"carboprost #{carbo_doses} "
-                    elif carbo_doses >= CARBO_MAX_DOSES:
-                        next_rung += 1   # 8-dose cap reached -> next agent
-                        action += "carboprost max 8 doses -> misoprostol "
+                due = last_drug_id != "carboprost" or (minute - last_drug_min) >= \
+                    scale_delay_by_bleed_rate(CARBO_REPEAT_BASE_SEC, p.bleed_rate, CARBO_REPEAT_FLOOR_SEC) / 60.0
+                if due and carbo_doses < CARBO_MAX_DOSES:
+                    p.give_uterotonic("carboprost", minute)
+                    last_drug_id, last_drug_min = "carboprost", minute
+                    carbo_doses += 1
+                    action += f"carboprost #{carbo_doses} "
+                elif carbo_doses >= CARBO_MAX_DOSES:
+                    next_rung += 1
+                    action += "carboprost max 8 doses -> misoprostol "
             else:
                 due = last_drug_id is None or (minute - last_drug_min) >= \
                     scale_delay_by_bleed_rate(UTEROTONIC_PHARM_DELAY_SEC[last_drug_id], p.bleed_rate) / 60.0
@@ -180,19 +207,6 @@ def simulate(scenario):
                     p.give_uterotonic(current, minute)
                     last_drug_id, last_drug_min = current, minute; next_rung += 1
                     action += f"give {current} "
-
-        # surgical ladder — once drugs exhausted and still bleeding (R-SURG-1).
-        # Don't escalate until the LAST uterotonic has had its onset to work
-        # (give the drug a chance) — unless it's urgent (massive + brisk bleed).
-        elif next_rung >= len(LADDER) and p.bleed_rate >= CONTROLLED_BLEED and surg_rung < len(SURGICAL_LADDER):
-            drug_had_chance = last_drug_id is None or (minute - last_drug_min) > ONSET_MIN.get(last_drug_id, 0)
-            urgent = p.cumulative_bled >= URGENCY_EBL_ML and p.bleed_rate >= URGENCY_BLEED_ML_MIN
-            ready_for_next = last_surg_min is None or (minute - last_surg_min) > SURG_ONSET_MIN[last_surg_step]
-            if (drug_had_chance or urgent) and ready_for_next:
-                step = SURGICAL_LADDER[surg_rung]; p.give_surgical(step, minute)
-                last_surg_min, last_surg_step = minute, step
-                surg_rung += 1
-                action += f">> SURGERY: {step} "
 
         # transfusion (R-TX-2/3): only at major+, rate-limited by cannulae
         if p.level in ("major", "massive"):
@@ -214,7 +228,7 @@ def simulate(scenario):
         if p.arrested:
             verdict, verdict_min = "ARREST", minute + 1
             break
-        if p.bleed_rate < 50 and p.map > 60:
+        if p.durable_bleed_rate < 50 and p.map > 60:
             verdict, verdict_min = "CONTROLLED", minute + 1
             break
     else:
@@ -222,7 +236,8 @@ def simulate(scenario):
             verdict = "EXSANGUINATING"
 
     return {
-        "responsiveness": round(p.responsiveness, 2),
+        "start_tone": round(p.start_tone, 2),
+        "start_bleed": round(BASELINE_FLOW_ML_MIN * (1 - p.start_tone)),
         "start_volume": round(p.start_volume),
         "ml_per_kg": round(p.start_volume / p.weight_kg, 1),
         "rows": rows, "verdict": verdict, "verdict_min": verdict_min,
@@ -236,7 +251,8 @@ def run(scenario):
     res = simulate(scenario)
     print(f"\n=== {scenario['name']} ===")
     extra = " | accreta (balloon/sutures ineffective)" if scenario.get("surgical_ineffective") else ""
-    print(f"R = {res['responsiveness']} | start {res['start_volume']} ml ({res['ml_per_kg']} ml/kg){extra}")
+    print(f"start tone {res['start_tone']} ({res['start_bleed']} ml/min) | "
+          f"start vol {res['start_volume']} ml ({res['ml_per_kg']} ml/kg){extra}")
     print(f"{'min':>3} | {'EBL(ml)':>7} | {'tone':>4} | {'bleed/min':>9} | {'MAP':>3} | action")
     print("-" * 80)
     for r in res["rows"]:

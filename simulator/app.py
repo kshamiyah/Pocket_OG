@@ -66,7 +66,7 @@ df = pd.DataFrame(res["rows"]).set_index("min")
 
 # ── Patient summary ────────────────────────────────────────────────────────
 c1, c2, c3, c4 = st.columns(4)
-c1.metric("Responsiveness R", res["responsiveness"])
+c1.metric("Starting tone", f"{res['start_tone']}", f"{res['start_bleed']} ml/min at onset")
 c2.metric("Start blood volume", f"{res['start_volume']:,} ml", f"{res['ml_per_kg']} ml/kg")
 c3.metric("Peak blood loss (EBL)", f"{res['peak_ebl']:,} ml")
 c4.metric("Total blood given", f"{res['total_blood']:,} ml")

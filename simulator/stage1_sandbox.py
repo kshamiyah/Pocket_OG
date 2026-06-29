@@ -46,9 +46,22 @@ RISK_FACTOR_WEIGHTS = {
 
 
 def responsiveness_from_risk_factors(factors):
-    """R-TONE-RESP:  R = max(0.1, 1 - sum of present risk-factor weights)."""
+    """R-TONE-RESP (legacy): R = max(0.1, 1 - sum of weights). Kept for the early
+    stage sandboxes; superseded by the severity model below (see RULES R-SEVERITY)."""
     total = sum(RISK_FACTOR_WEIGHTS.get(f, 0.0) for f in factors)
     return max(0.1, 1.0 - total)
+
+
+# Default starting tone for a typical recognised major PPH (~0.85 => ~105 ml/min),
+# inferred from total-loss-over-time-course (literature gives volume, not rate).
+BASE_START_TONE = 0.85
+
+
+def start_tone_from_risk_factors(factors, base_tone=BASE_START_TONE):
+    """R-SEVERITY: risk factors lower the STARTING uterine tone (a more atonic
+    uterus bleeds faster). Risk factors drive SEVERITY, not treatability."""
+    total = sum(RISK_FACTOR_WEIGHTS.get(f, 0.0) for f in factors)
+    return max(0.0, base_tone - total)
 
 
 class Patient:

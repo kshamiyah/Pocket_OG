@@ -190,7 +190,7 @@ def stream(scenario, max_steps=300):
 
         if p.arrested:
             snap["verdict"] = "ARREST"; bridge.close(); yield snap; return
-        if p.bleed_rate < 50 and p.map > 60:
+        if p.durable_bleed_rate < 50 and p.map > 60:
             snap["verdict"] = "CONTROLLED"; bridge.close(); yield snap; return
         yield snap
 

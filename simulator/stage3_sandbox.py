@@ -61,9 +61,13 @@ ONSET_MIN = {
     "carboprost": 15,   # genuinely slow — peak 20-30 min, clinical response within ~30 min
     "misoprostol": 10,  # peak plasma 10-15 min (oral)
 }
-TARGET_TONE = {        # R-TONE-GAIN: uterotonics roughly EQUIPOTENT (Cochrane NMA);
-    "oxytocin": 0.95, "ergometrine": 0.95, "carboprost": 0.95, "misoprostol": 0.90,  # miso slightly weaker
+TARGET_TONE = {        # R-TONE-GAIN (legacy): uterotonic target tones
+    "oxytocin": 0.95, "ergometrine": 0.95, "carboprost": 0.95, "misoprostol": 0.90,
 }
+# R-SEVERITY model: each uterotonic adds a roughly EQUAL increment of tone (Cochrane
+# NMA equipotence). How many drugs she needs falls out of how atonic she started.
+DRUG_INCREMENT = {"oxytocin": 0.30, "ergometrine": 0.30, "carboprost": 0.30, "misoprostol": 0.20}
+DRUG_TONE_CEILING = 0.97   # uterotonics alone can nearly control; surgery exceeds it
 LADDER = ["oxytocin", "ergometrine", "carboprost", "misoprostol"]
 
 MASSAGE_BONUS = 0.30
