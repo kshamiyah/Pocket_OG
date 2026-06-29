@@ -177,9 +177,14 @@ def simulate(scenario):
                     last_drug_id, last_drug_min = current, minute; next_rung += 1
                     action += f"give {current} "
 
-        # surgical ladder — once drugs exhausted and still bleeding (R-SURG-1)
+        # surgical ladder — once drugs exhausted and still bleeding (R-SURG-1).
+        # Don't escalate until the LAST uterotonic has had its onset to work
+        # (give the drug a chance) — unless it's urgent (massive + brisk bleed).
         elif next_rung >= len(LADDER) and p.bleed_rate >= CONTROLLED_BLEED and surg_rung < len(SURGICAL_LADDER):
-            if last_surg_min is None or (minute - last_surg_min) > SURG_ONSET_MIN[last_surg_step]:
+            drug_had_chance = last_drug_id is None or (minute - last_drug_min) > ONSET_MIN.get(last_drug_id, 0)
+            urgent = p.cumulative_bled >= URGENCY_EBL_ML and p.bleed_rate >= URGENCY_BLEED_ML_MIN
+            ready_for_next = last_surg_min is None or (minute - last_surg_min) > SURG_ONSET_MIN[last_surg_step]
+            if (drug_had_chance or urgent) and ready_for_next:
                 step = SURGICAL_LADDER[surg_rung]; p.give_surgical(step, minute)
                 last_surg_min, last_surg_step = minute, step
                 surg_rung += 1

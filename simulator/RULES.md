@@ -351,9 +351,10 @@ The simulator separates two things the app conflates into one number:
   75%; slow), misoprostol **10 min** (peak plasma 10–15 min oral).
   _Sources: R7 (uterotonics pharmacology), R22 (carboprost monograph), R23
   (prostaglandins for PPH)._ ☑ **ACCEPTED — researched onsets** (2026-06-29).
-  > Operator-logic note (follow-up, not a number): "drugs failed → surgery"
-  > should wait for the last drug's onset, not just for all drugs being given —
-  > carboprost's slow onset makes this matter.
+  > Operator-logic note — ✅ RESOLVED (2026-06-29): the operator now waits for the
+  > last uterotonic's onset before escalating drugs → surgery (unless urgent), so a
+  > drug always gets its chance to work. Surfaced by the asthma case (misoprostol
+  > given then balloon 1 min later — fixed to wait the ~10-min onset).
 
 ### R-TX-2 — Transfusion triggers on EBL, at the app's thresholds
 The operator tracks **true EBL** (cumulative blood lost, gross of transfusion)
