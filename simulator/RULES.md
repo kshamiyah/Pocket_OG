@@ -136,8 +136,9 @@ _Source: Pocket O&G `pph-shared.js`._
 ### R-DRUG-MASSAGE — Fundal massage **[ASSUMED]**
 Mechanical, immediate but **transient** partial tone gain; decays without a
 drug to sustain it. No app timing constant (not a drug); onset ≈ immediate.
-☑ **ACCEPTED — concept (immediate bump + decay)** (2026-06-28); magnitude & decay
-rate set in the tone-magnitude exercise below.
+Magnitude **+0.30 transient, decays 0.10/min** (clinical convention — bimanual
+compression buys time but fades without a uterotonic to sustain it).
+☑ **ACCEPTED — magnitude +0.30 / decay 0.10/min** (2026-06-29).
 
 ## D2. Tone magnitude — the responsiveness model
 
