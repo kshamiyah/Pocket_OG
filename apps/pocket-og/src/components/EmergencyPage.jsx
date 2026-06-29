@@ -49,7 +49,7 @@ import { SosExitConfirm } from "./sos-ui.jsx";
 const CALL_FOLLOWUP_SEC = 60; // Assign → move on → chase after 1 min (calls + resus trio)
 const STANDARD_CALL_IDS = new Set(["call_team", "call_major", "call_massive"]);
 
-const TASKS = [
+export const TASKS = [
   // Minor — stabilisation
   { id: "call_team",      level: "minor",   type: "call",     title: "Call for help",                         detail: "• Midwife in charge\n• On-call obstetrician",                                                                                                          followUpDelay: CALL_FOLLOWUP_SEC },
   { id: "abc",            level: "minor",   type: "action",   title: "ABC — airway, breathing, circulation",  detail: "Position patient flat\nHigh-flow O₂ 15 L/min via non-rebreather mask — do not wait for SpO₂ to fall in haemorrhage\nAssess for shock — HR, BP, skin perfusion, capillary refill" },
@@ -107,6 +107,13 @@ const CRITICAL_TASK_PRIORITY = {
 
 const MASSIVE_RESUS_AFTER_IV = ["mhp_pack", "txa", "second_cannula"];
 const FOUR_T_TASK_IDS = new Set(["fundal_massage", "bimanual", "trauma_assess", "tissue_assess"]);
+// After tone pathway: uterotonic bolus before trauma/tissue assessments and catheter/fluids.
+const DEFER_UNTIL_OXY_BOLUS = new Set(["trauma_assess", "tissue_assess", "catheterise", "iv_fluids"]);
+
+function bimanualCleared(taskStates) {
+  const s = taskStates.bimanual?.status;
+  return s === "done" || s === "skipped";
+}
 
 function resusTrioGateClear(status) {
   // Assigned = delegated, algorithm moves on; follow-up chases in 60s
@@ -465,7 +472,7 @@ function countMonitoringPending({ taskStates, level, forcedTasks, txaTime }) {
   return { blocked, inProgress };
 }
 
-function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, ivFailSnoozeUntil, infusionReassess, sessionRecoveredAt, forcedFollowUpId, jointArrest, undoPromptHold }) {
+export function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaHandled, txaSecondDone, effectiveBirthTime, carboCount, carboLastTime, ciCleared, forcedTasks, now, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, ivFailSnoozeUntil, infusionReassess, sessionRecoveredAt, forcedFollowUpId, jointArrest, undoPromptHold }) {
   function depsOk(task) {
     return (task.deps || []).every(id => depSatisfied(id, taskStates));
   }
@@ -584,6 +591,16 @@ function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaH
     return { type: "tone_check" };
   }
 
+  // Priority 1.52 — after tone pathway, give uterotonic bolus before trauma/tissue
+  // assessments and before catheter/fluids (treat atony while Four T's continue in parallel).
+  if (toneAssessed && bimanualCleared(taskStates) && !uterotonicTaken(taskStates, "oxytocin_bolus")) {
+    const oxyBolus = TASKS.find(x => x.id === "oxytocin_bolus");
+    if (oxyBolus && relevant(oxyBolus) && st(oxyBolus.id) == null && depsOk(oxyBolus)) {
+      const g = gate(oxyBolus);
+      if (g) return g;
+    }
+  }
+
   // Priority 1.75 — force-activated fallbacks/treatments (carboprost after ergometrine CI, suture after trauma, etc.)
   const forced = nextForcedTask();
   if (forced) return forced;
@@ -688,6 +705,8 @@ function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTime, txaH
     if (t.hidden && !(forcedTasks || []).includes(t.id)) continue;
     if (t.special === "txa" && !txaEligible(taskStates, level, txaTime)) continue;
     if (t.special === "carbo" && carboCount > 0 && carboLastTime) continue;
+    if (toneAssessed && !uterotonicTaken(taskStates, "oxytocin_bolus")
+        && DEFER_UNTIL_OXY_BOLUS.has(t.id)) continue;
     if (toneGate(t)) continue;
     // Uterotonic ladder — only surface the next rung when allowed
     if (t.uterotonic) {

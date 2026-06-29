@@ -56,12 +56,9 @@ has been walked through against GTG52 and corrected where it deviated.
 
 ### Minor PPH
 Call for help → ABC → IV access (1×16G + FBC/coag/U&E/G&S) → fundal massage →
-tone check → bimanual compression → **Four T's as assessments**:
-- **Trauma**: "any laceration/haematoma?" → if present, surfaces suture task.
-- **Tissue**: "placenta complete?" → if retained, surfaces manual-removal task.
-- **Tone** is the massage/bimanual/uterotonics chain; **Thrombin** is coag review.
-Then catheterise, IV fluids, uterotonics in GTG52 order (oxytocin bolus →
-oxytocin infusion → ergometrine), coag review.
+tone check → bimanual compression (if boggy) → **oxytocin bolus** (as soon as tone
+pathway complete) → **then** trauma/tissue assessments (Four T's), catheterise, IV
+fluids, oxytocin infusion → ergometrine ladder; coag review for Thrombin.
 
 ### Major PPH
 Escalate → 2nd cannula → **TXA (moved up, time-critical)** → rapid crystalloid

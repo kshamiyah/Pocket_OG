@@ -36,11 +36,12 @@ rung, settling, and the stand-down → aftercare → summary flow.
 | 4 | Tap **Done ✓** | Next prompt is **IV access + bloods**. |
 | 5 | Tap **Done ✓** | Next prompt is **Fundal massage**. |
 | 6 | Tap **Done ✓** | **Tone assessment** prompt appears ("Is the uterus firm after massage?"). |
-| 7 | Tap **Still boggy →** | App continues into uterotonics / compression. Next actionable prompt is **Bimanual uterine compression** or **Oxytocin 5 IU IV**. |
-| 8 | Work through the prompts with **Done ✓** until **Oxytocin 5 IU IV** appears, tap **Done ✓** | Oxytocin recorded. |
-| 9 | ⏱ A **Blood loss check** prompt appears on the reassessment interval. Tap **Unchanged** | Loss stays 600 ml, stays Minor. |
-| 10 | Tap **Stand down** (top right) → **Confirm** | **Aftercare checklist** appears with the 6 minor-level items. |
-| 11 | Tick at least one item → **Complete** | **Summary** screen with timeline, peak loss 600 ml, events logged. |
+| 7 | Tap **Still boggy →** | **Bimanual uterine compression** prompt next. |
+| 8 | Tap **Done ✓** on bimanual | Next prompt is **Oxytocin 5 IU IV** (before trauma/tissue assessments). |
+| 9 | Tap **Done ✓** on oxytocin | Uterotonic recorded; trauma/tissue assessments follow. |
+| 10 | ⏱ A **Blood loss check** prompt appears on the reassessment interval. Tap **Unchanged** | Loss stays 600 ml, stays Minor. |
+| 11 | Tap **Stand down** (top right) → **Confirm** | **Aftercare checklist** appears with the 6 minor-level items. |
+| 12 | Tick at least one item → **Complete** | **Summary** screen with timeline, peak loss 600 ml, events logged. |
 
 - [ ] **PASS** / [ ] FAIL — notes:
 
