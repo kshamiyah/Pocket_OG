@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-const RECIPIENT = "k.shamiyah@gmail.com";
+const RECIPIENT = "khalid@drshamiyah.com";
+const SUBJECT = "Pocket O&G — Feedback";
 const TAB_BAR_CLEARANCE = "calc(4rem + env(safe-area-inset-bottom, 0px) + 0.625rem)";
 
-function buildMailtoHref(message, query, filter) {
+function buildFeedbackPayload(message, query, filter) {
   const contextLines = [
     query ? `Search query: "${query}"` : null,
     filter && filter !== "ALL" ? `Filter active: ${filter}` : null,
@@ -17,11 +18,14 @@ function buildMailtoHref(message, query, filter) {
     "Sent from Pocket O&G",
   ].join("\n");
 
-  return (
+  const mailtoHref =
     `mailto:${RECIPIENT}` +
-    `?subject=${encodeURIComponent("Pocket O&G — Feedback")}` +
-    `&body=${encodeURIComponent(body)}`
-  );
+    `?subject=${encodeURIComponent(SUBJECT)}` +
+    `&body=${encodeURIComponent(body)}`;
+
+  const clipboardText = `To: ${RECIPIENT}\nSubject: ${SUBJECT}\n\n${body}`;
+
+  return { body, mailtoHref, clipboardText };
 }
 
 function openMailto(href) {
@@ -33,37 +37,62 @@ function openMailto(href) {
   document.body.removeChild(link);
 }
 
+async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export default function FeedbackButton({ query = "", filter = "ALL" }) {
   const [open, setOpen] = useState(false);
+  const [phase, setPhase] = useState("compose");
   const [message, setMessage] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [sentPayload, setSentPayload] = useState(null);
+  const [clipboardOk, setClipboardOk] = useState(false);
+  const fallbackRef = useRef(null);
 
   function close() {
     setOpen(false);
+    setPhase("compose");
     setMessage("");
-    setCopied(false);
+    setSentPayload(null);
+    setClipboardOk(false);
   }
 
-  function handleSend() {
+  async function submitFeedback() {
     if (!message.trim()) return;
-    const href = buildMailtoHref(message, query, filter);
-    openMailto(href);
-    close();
+    const payload = buildFeedbackPayload(message, query, filter);
+    const copied = await copyToClipboard(payload.clipboardText);
+    openMailto(payload.mailtoHref);
+    setSentPayload(payload);
+    setClipboardOk(copied);
+    setPhase("sent");
   }
 
-  async function handleCopy() {
+  async function handleCopyOnly() {
     if (!message.trim()) return;
-    const href = buildMailtoHref(message, query, filter);
-    const text = decodeURIComponent(href.split("body=")[1] ?? "");
-    try {
-      await navigator.clipboard.writeText(`${RECIPIENT}\n\n${text}`);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      openMailto(href);
-      close();
+    const payload = buildFeedbackPayload(message, query, filter);
+    const copied = await copyToClipboard(payload.clipboardText);
+    if (copied) {
+      setClipboardOk(true);
+      setTimeout(() => setClipboardOk(false), 2000);
+      return;
     }
+    setSentPayload(payload);
+    setClipboardOk(false);
+    setPhase("sent");
   }
+
+  useEffect(() => {
+    if (phase !== "sent" || clipboardOk) return;
+    const el = fallbackRef.current;
+    if (!el) return;
+    el.focus();
+    el.select();
+  }, [phase, clipboardOk]);
 
   return (
     <>
@@ -92,53 +121,95 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
             </div>
 
             <div className="px-4 pb-3 box-border">
-              <h2 className="text-sm font-semibold text-gray-900">Send feedback</h2>
-              <p className="text-[11px] text-gray-400 mt-0.5">Opens Mail on your device</p>
+              {phase === "compose" ? (
+                <>
+                  <h2 className="text-sm font-semibold text-gray-900">Send feedback</h2>
+                  <p className="text-[11px] text-gray-400 mt-0.5">
+                    Copies your message, then opens your email app if one is set up
+                  </p>
 
-              {query && (
-                <p className="mt-2 text-[11px] text-gray-400">
-                  Includes: <span className="text-gray-600 font-medium">"{query}"</span>
-                  {filter !== "ALL" && <span> · {filter}</span>}
-                </p>
+                  {query && (
+                    <p className="mt-2 text-[11px] text-gray-400">
+                      Includes: <span className="text-gray-600 font-medium">"{query}"</span>
+                      {filter !== "ALL" && <span> · {filter}</span>}
+                    </p>
+                  )}
+
+                  <textarea
+                    autoFocus
+                    rows={2}
+                    value={message}
+                    onChange={e => setMessage(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === "Escape") close();
+                    }}
+                    placeholder="Describe the issue or suggestion…"
+                    className="mt-2 w-full box-border border border-gray-200 rounded-xl px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                  />
+
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      type="button"
+                      onClick={close}
+                      className="flex-1 min-w-0 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 active:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCopyOnly}
+                      disabled={!message.trim()}
+                      className="shrink-0 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 disabled:opacity-40 active:bg-gray-50"
+                    >
+                      {clipboardOk ? "Copied" : "Copy only"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={submitFeedback}
+                      disabled={!message.trim()}
+                      className="flex-1 min-w-0 py-2 rounded-xl bg-gray-900 disabled:bg-gray-200 disabled:text-gray-400 text-sm font-semibold text-white active:bg-gray-800"
+                    >
+                      Send
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-sm font-semibold text-gray-900">Feedback ready</h2>
+                  <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
+                    {clipboardOk
+                      ? "Copied to clipboard. If your email app opened, review and send there."
+                      : "Select the text below, copy it, and email it manually."}
+                    {" "}If nothing opened, send to{" "}
+                    <span className="font-medium text-gray-700">{RECIPIENT}</span>.
+                  </p>
+
+                  <textarea
+                    ref={fallbackRef}
+                    readOnly
+                    rows={6}
+                    value={sentPayload?.clipboardText ?? ""}
+                    className="mt-2 w-full box-border border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 bg-gray-50 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                  />
+
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      type="button"
+                      onClick={close}
+                      className="flex-1 min-w-0 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 active:bg-gray-50"
+                    >
+                      Done
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => sentPayload && openMailto(sentPayload.mailtoHref)}
+                      className="flex-1 min-w-0 py-2 rounded-xl bg-gray-900 text-sm font-semibold text-white active:bg-gray-800"
+                    >
+                      Open email app
+                    </button>
+                  </div>
+                </>
               )}
-
-              <textarea
-                autoFocus
-                rows={2}
-                value={message}
-                onChange={e => setMessage(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === "Escape") close();
-                }}
-                placeholder="Describe the issue or suggestion…"
-                className="mt-2 w-full box-border border border-gray-200 rounded-xl px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-              />
-
-              <div className="flex gap-2 mt-2">
-                <button
-                  type="button"
-                  onClick={close}
-                  className="flex-1 min-w-0 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 active:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  disabled={!message.trim()}
-                  className="shrink-0 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 disabled:opacity-40 active:bg-gray-50"
-                >
-                  {copied ? "Copied" : "Copy"}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSend}
-                  disabled={!message.trim()}
-                  className="flex-1 min-w-0 py-2 rounded-xl bg-gray-900 disabled:bg-gray-200 disabled:text-gray-400 text-sm font-semibold text-white active:bg-gray-800"
-                >
-                  Send
-                </button>
-              </div>
             </div>
           </div>
         </div>
