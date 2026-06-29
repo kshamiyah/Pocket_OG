@@ -43,8 +43,9 @@ with st.sidebar:
     st.header("Risk factors")
     chosen = [key for key, label in RISK_FACTORS.items() if st.checkbox(label, value=False)]
 
-    st.header("Cause")
+    st.header("Cause / comorbidity")
     accreta = st.checkbox("Accreta — balloon & sutures ineffective", value=False)
+    asthma = st.checkbox("Asthma — carboprost contraindicated", value=False)
 
 scenario = {
     "name": "UI patient",
@@ -53,6 +54,7 @@ scenario = {
     "risk_factors": chosen,
     "duration_min": duration,
     "surgical_ineffective": ["balloon", "sutures"] if accreta else None,
+    "asthma": asthma,
 }
 
 res = simulate(scenario)
