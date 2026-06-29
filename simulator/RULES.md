@@ -234,18 +234,21 @@ mortality…" (PubMed 1989759); "Blood failure / oxygen debt" (Transfusion 2016)
 Shockable rhythm (VF/VT): defibrillate within **2 min** for best survival; each
 2-min CPR cycle ends in a rhythm check.
 _Source: AHA Cardiac Arrest in Pregnancy; matches app `CPR_CYCLE_SEC = 120`._
-☐ OK ☐ Correct: __________
+[refs: R9, I3]
+☑ **ACCEPTED** (2026-06-28).
 
 ### R-ARR-3 — Adrenaline
 Non-shockable: adrenaline within **5 min**, repeated every **3–5 min**.
 _Source: AHA; app `ADRENALINE_INTERVAL_SEC = 180`._
-☐ OK ☐ Correct: __________
+[refs: R9, I3]
+☑ **ACCEPTED** (2026-06-28).
 
 ### R-ARR-4 — Perimortem caesarean / delivery
 If no ROSC by **5 min** of arrest, deliver — best maternal & neonatal outcome.
 Relieving aortocaval compression also improves CPR effectiveness.
 _Source: AHA; app `PMCS_DECISION_SEC = 240`, `PMCS_DELIVERY_SEC = 300`._
-☐ OK ☐ Correct: __________
+[refs: R9, I3]
+☑ **ACCEPTED** (2026-06-28).
 
 ---
 
