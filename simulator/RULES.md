@@ -155,25 +155,36 @@ factor, floored at 0.1 (drugs always do *something*). A heavily loaded patient �
 low `R` → refractory atony that drugs barely shift, forcing balloon / sutures /
 hysterectomy.
 
-**Risk factors — transcribed from the app's GTG52 guideline** ("Risk Factors for
-Atonic PPH"), with candidate weights (the amount each subtracts from `R`).
-Weights are **[ASSUMED]** pending sign-off; the **list is from GTG52**.
+**Risk factors and weights — from GTG52 Table 1 odds ratios** (Stones et al.
+1993, R21). Each factor's weight is **derived from its odds ratio**, tiered:
 
-| GTG52 atonic-PPH risk factor | Candidate weight (−R) |
-|---|---|
-| Previous PPH | 0.15 |
-| Multiple pregnancy / polyhydramnios (overdistension) | 0.20 |
-| Macrosomia (EFW >4 kg) | 0.15 |
-| Grand multiparity (≥5 deliveries) | 0.10 |
-| Prolonged labour (esp. third stage >30 min) | 0.15 |
-| Chorioamnionitis / pyrexia in labour | 0.15 |
-| Uterine fibroids | 0.10 |
-| General anaesthesia / oxytocin augmentation | 0.10 |
-| Placenta praevia or accreta suspected | 0.20 |
+| OR tier | OR | Weight (−R) |
+|---|---|---|
+| Very high | ≥ 8 | 0.25 |
+| High | 3–5 | 0.15 |
+| Moderate | ~2 | 0.10 |
+
+| Risk factor | GTG52/source OR | Weight (−R) |
+|---|---|---|
+| Placenta praevia / accreta | ~13 | 0.25 |
+| Multiple pregnancy / polyhydramnios (overdistension) | ~4.5 | 0.15 |
+| Previous PPH | ~3 | 0.15 |
+| Macrosomia (EFW >4 kg) | ~2 | 0.10 |
+| Prolonged labour | ~2 | 0.10 |
+| Chorioamnionitis / pyrexia | ~2 | 0.10 |
+| General anaesthesia / oxytocin augmentation | ~2 | 0.10 |
+| Grand multiparity | ~2 | 0.10 |
+| Uterine fibroids | ~2 | 0.10 |
 
 `R = max(0.1, 1.0 − Σ weights of present factors)`
-_Source: GTG52 "Risk Factors for Atonic PPH" (Pocket O&G guideline content)._
-☑ **ACCEPTED — list from GTG52** (2026-06-28); per-factor weights to be signed off.
+
+**Modelling assumption (flagged):** the GTG52 ORs quantify the risk of *having* a
+PPH, not refractoriness to treatment. They are used as a **proxy** for `R` because
+the high-OR factors are mechanistically also the hardest to reverse (overdistension,
+exhausted/augmented or infected myometrium, abnormal lower-segment implantation).
+
+_Source: GTG52 Table 1 / Stones et al. 1993 (R21); factor list from app GTG52 (I2)._
+☑ **ACCEPTED — weights derived from GTG52 ORs** (2026-06-29).
 
 ### R-TONE-GAIN — How a drug raises tone (scaled by R)
 Each uterotonic has a **potential target tone** `T_drug` (what it achieves in a
@@ -408,6 +419,7 @@ cite the repository file and the specific named symbol/section.
 | R18 | Interrater reliability of a 0–10 uterine tone score (cesarean) | ScienceDirect S2589933321000379 | https://www.sciencedirect.com/science/article/abs/pii/S2589933321000379 |
 | R19 | Normal uterine resting tone on oxytocin by IUPC (<15–20 mmHg) | FDA oxytocin label / IUPC reference | https://www.droracle.ai/articles/535846/what-is-a-normal-uterine-resting-tone-on-oxytocin |
 | R20 | Uterotonic agents for preventing PPH: network meta-analysis | Cochrane CD011689.pub4 (Gallos et al.); DOI: 10.1002/14651858.CD011689.pub4 | https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD011689.pub4/full |
+| R21 | Risk factors for major obstetric haemorrhage (GTG52 Table 1 source) | Stones et al. 1993; PMID: 8449256 | https://pubmed.ncbi.nlm.nih.gov/8449256/ |
 
 ### Internal sources (Pocket O&G repository)
 

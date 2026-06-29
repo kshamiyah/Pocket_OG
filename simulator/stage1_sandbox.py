@@ -23,17 +23,19 @@ ARREST_FRACTION = 0.40            # R-ARR-1 (bleeding calibration): arrest at >4
 OXYTOCIN_ONSET_MIN = 3
 OXYTOCIN_TARGET_TONE = 0.95       # R-TONE-GAIN: target tone at full responsiveness
 
-# R-TONE-RESP: GTG52 atonic-PPH risk factors → weight subtracted from responsiveness
+# R-TONE-RESP: GTG52 Table 1 risk factors -> weight subtracted from responsiveness.
+# Weights derived from the guideline odds ratios (Stones et al. 1993), tiered:
+#   OR >= 8  (very high) -> 0.25   | OR 3-5 (high) -> 0.15   | OR ~2 (moderate) -> 0.10
 RISK_FACTOR_WEIGHTS = {
-    "previous_pph": 0.15,
-    "overdistension": 0.20,        # multiple pregnancy / polyhydramnios
-    "macrosomia": 0.15,
-    "grand_multiparity": 0.10,
-    "prolonged_labour": 0.15,
-    "chorioamnionitis": 0.15,
-    "fibroids": 0.10,
-    "ga_or_augmentation": 0.10,
-    "praevia_or_accreta": 0.20,
+    "praevia_or_accreta": 0.25,    # OR ~13 (very high)
+    "overdistension":     0.15,    # multiple pregnancy / polyhydramnios, OR ~4.5 (high)
+    "previous_pph":       0.15,    # OR ~3 (high)
+    "macrosomia":         0.10,    # OR ~2 (moderate)
+    "prolonged_labour":   0.10,    # OR ~2 (moderate)
+    "chorioamnionitis":   0.10,    # OR ~2 (moderate)
+    "ga_or_augmentation": 0.10,    # OR ~2 (moderate)
+    "grand_multiparity":  0.10,    # OR ~2 (moderate)
+    "fibroids":           0.10,    # OR ~2 (moderate)
 }
 
 
