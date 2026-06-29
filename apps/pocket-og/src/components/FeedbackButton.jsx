@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import BottomSheet from "./BottomSheet";
 
 const RECIPIENT = "khalid@drshamiyah.com";
 const SUBJECT = "Pocket O&G — Feedback";
@@ -96,12 +97,16 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
   const isIOS = useIsIOS();
   const mailLabel = isIOS ? "Mail" : "Email app";
 
-  function close() {
-    setOpen(false);
+  function resetForm() {
     setPhase("compose");
     setMessage("");
     setSentPayload(null);
     setClipboardOk(false);
+  }
+
+  function close() {
+    setOpen(false);
+    resetForm();
   }
 
   async function submitFeedback() {
@@ -149,23 +154,20 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
         </svg>
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm">
-          <div className="absolute inset-0" onClick={close} aria-hidden="true" />
-
-          <div
-            className="relative w-full max-w-lg box-border bg-white rounded-t-3xl shadow-2xl overflow-hidden"
-            style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }}
-          >
-            <div className="flex justify-center pt-2.5 pb-1">
-              <div className="w-8 h-1 rounded-full bg-gray-200" />
-            </div>
-
-            <div className="px-4 pb-3 box-border">
+      <BottomSheet
+        open={open}
+        onClose={close}
+        sheetClassName="min-h-[min(380px,78dvh)] sm:min-h-[420px] max-h-[92dvh]"
+      >
+        <div className="px-5 sm:px-6 pb-5 box-border flex-1 overflow-y-auto">
               {phase === "compose" ? (
                 <>
-                  <h2 className="text-sm font-semibold text-gray-900">Send feedback</h2>
-                  <p className="text-[11px] text-gray-400 mt-0.5">
+                  <h2 className="text-lg font-semibold text-gray-900">Send feedback</h2>
+                  <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+                    Your feedback is valuable — whether you&apos;ve spotted an error, found something unclear,
+                    or have an idea to improve the app, it helps us get it right.
+                  </p>
+                  <p className="text-sm text-gray-400 mt-2 leading-relaxed">
                     {isDesktop
                       ? "Copies your message — then open Gmail or Outlook"
                       : isIOS
@@ -174,7 +176,7 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
                   </p>
 
                   {query && (
-                    <p className="mt-2 text-[11px] text-gray-400">
+                    <p className="mt-2 text-sm text-gray-400">
                       Includes: <span className="text-gray-600 font-medium">"{query}"</span>
                       {filter !== "ALL" && <span> · {filter}</span>}
                     </p>
@@ -182,21 +184,21 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
 
                   <textarea
                     autoFocus
-                    rows={2}
+                    rows={5}
                     value={message}
                     onChange={e => setMessage(e.target.value)}
                     onKeyDown={e => {
                       if (e.key === "Escape") close();
                     }}
                     placeholder="Describe the issue or suggestion…"
-                    className="mt-2 w-full box-border border border-gray-200 rounded-xl px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                    className="mt-4 w-full min-h-[140px] box-border border border-gray-200 rounded-2xl px-4 py-3 text-base text-gray-900 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
                   />
 
-                  <div className="flex gap-2 mt-2">
+                  <div className="flex gap-2.5 mt-4">
                     <button
                       type="button"
                       onClick={close}
-                      className="flex-1 min-w-0 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 active:bg-gray-50"
+                      className="flex-1 min-w-0 py-3 rounded-xl border border-gray-200 text-sm text-gray-500 active:bg-gray-50"
                     >
                       Cancel
                     </button>
@@ -204,7 +206,7 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
                       type="button"
                       onClick={handleCopyOnly}
                       disabled={!message.trim()}
-                      className="shrink-0 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 disabled:opacity-40 active:bg-gray-50"
+                      className="shrink-0 px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-500 disabled:opacity-40 active:bg-gray-50"
                     >
                       {clipboardOk ? "Copied" : "Copy only"}
                     </button>
@@ -212,7 +214,7 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
                       type="button"
                       onClick={submitFeedback}
                       disabled={!message.trim()}
-                      className="flex-1 min-w-0 py-2 rounded-xl bg-gray-900 disabled:bg-gray-200 disabled:text-gray-400 text-sm font-semibold text-white active:bg-gray-800"
+                      className="flex-1 min-w-0 py-3 rounded-xl bg-gray-900 disabled:bg-gray-200 disabled:text-gray-400 text-sm font-semibold text-white active:bg-gray-800"
                     >
                       Send
                     </button>
@@ -220,8 +222,8 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
                 </>
               ) : (
                 <>
-                  <h2 className="text-sm font-semibold text-gray-900">Feedback ready</h2>
-                  <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
+                  <h2 className="text-lg font-semibold text-gray-900">Feedback ready</h2>
+                  <p className="text-sm text-gray-500 mt-1 leading-relaxed">
                     {clipboardOk ? "Copied to clipboard. " : "Copy failed — select the text below. "}
                     {isDesktop
                       ? "Use Gmail or Outlook below — desktop browsers need webmail, not a local mail app."
@@ -233,18 +235,18 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
                   <textarea
                     ref={fallbackRef}
                     readOnly
-                    rows={6}
+                    rows={8}
                     value={sentPayload?.clipboardText ?? ""}
-                    className="mt-2 w-full box-border border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 bg-gray-50 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                    className="mt-4 w-full min-h-[160px] box-border border border-gray-200 rounded-2xl px-4 py-3 text-sm text-gray-800 bg-gray-50 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
                   />
 
                   {!isDesktop && (
-                    <a href={sentPayload?.mailtoHref} className={`${linkBtnFullPrimary} mt-2`}>
+                    <a href={sentPayload?.mailtoHref} className={`${linkBtnFullPrimary} mt-4 py-3`}>
                       {mailLabel}
                     </a>
                   )}
 
-                  <div className="flex gap-2 mt-2">
+                  <div className="flex gap-2.5 mt-4">
                     <a
                       href={sentPayload?.gmailHref}
                       target="_blank"
@@ -266,16 +268,14 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
                   <button
                     type="button"
                     onClick={close}
-                    className="w-full mt-2 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 active:bg-gray-50"
+                    className="w-full mt-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-500 active:bg-gray-50"
                   >
                     Done
                   </button>
                 </>
               )}
-            </div>
-          </div>
         </div>
-      )}
+      </BottomSheet>
     </>
   );
 }

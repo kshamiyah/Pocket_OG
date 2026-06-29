@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import BottomSheet from "./BottomSheet";
 
 const STORAGE_KEY = "pocketog_disclaimer_v1";
 const REMIND_EVERY_MS = 2 * 24 * 60 * 60 * 1000; // 2 days
@@ -58,60 +59,54 @@ export default function DisclaimerModal() {
     setOpen(false);
   }
 
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div
-        className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl mx-0 sm:mx-4 overflow-hidden max-h-[82vh] flex flex-col"
-        style={{ paddingBottom: "max(20px, env(safe-area-inset-bottom))" }}
-      >
-        {/* Drag handle */}
-        <div className="flex justify-center pt-3 pb-1 shrink-0">
-          <div className="w-9 h-1 rounded-full bg-gray-200" />
+    <BottomSheet
+      open={open}
+      onClose={accept}
+      dismissible={false}
+      maxWidthClass="max-w-md"
+      align="responsive"
+      sheetClassName="max-h-[82vh]"
+    >
+      <div className="px-6 pt-2 pb-4 overflow-y-auto flex-1">
+        <div className="text-center mb-5">
+          <h2 className="text-xl font-extrabold tracking-wide text-gray-900">Pocket O&G</h2>
+          <p className="text-sm font-medium text-gray-500 mt-1">For healthcare professionals</p>
+          <p className="text-xs text-gray-400 mt-2">Quick read before you start</p>
         </div>
 
-        <div className="px-6 pt-2 pb-4 overflow-y-auto">
-          {/* Brand header */}
-          <div className="text-center mb-5">
-            <h2 className="text-xl font-extrabold tracking-wide text-gray-900">Pocket O&G</h2>
-            <p className="text-sm font-medium text-gray-500 mt-1">For healthcare professionals</p>
-            <p className="text-xs text-gray-400 mt-2">Quick read before you start</p>
-          </div>
-
-          {/* Icon cards */}
-          <div className="space-y-2.5">
-            {POINTS.map(point => (
-              <div
-                key={point.title}
-                className="flex items-start gap-3 rounded-2xl bg-gray-50 px-3.5 py-3"
-              >
-                <div className="w-8 h-8 rounded-xl bg-white border border-gray-100 flex items-center justify-center shrink-0 mt-0.5">
-                  <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-                    {point.icon}
-                  </svg>
-                </div>
-                <div className="min-w-0 pt-0.5">
-                  <p className="text-[15px] font-semibold text-gray-900 leading-snug">{point.title}</p>
-                  <p className="text-[13px] text-gray-500 mt-0.5 leading-snug">{point.detail}</p>
-                </div>
+        <div className="space-y-2.5">
+          {POINTS.map(point => (
+            <div
+              key={point.title}
+              className="flex items-start gap-3 rounded-2xl bg-gray-50 px-3.5 py-3"
+            >
+              <div className="w-8 h-8 rounded-xl bg-white border border-gray-100 flex items-center justify-center shrink-0 mt-0.5">
+                <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                  {point.icon}
+                </svg>
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="px-6 pt-2 pb-1 shrink-0 border-t border-gray-100">
-          <button
-            onClick={accept}
-            className="w-full bg-gray-900 text-white text-sm font-semibold py-3.5 rounded-2xl hover:bg-gray-800 active:scale-[0.98] transition-all"
-          >
-            Continue
-          </button>
-          <p className="text-xs text-gray-400 text-center mt-3 leading-relaxed">
-            By continuing, you confirm you are a qualified healthcare professional and agree to use this app as a decision aid only.
-          </p>
+              <div className="min-w-0 pt-0.5">
+                <p className="text-[15px] font-semibold text-gray-900 leading-snug">{point.title}</p>
+                <p className="text-[13px] text-gray-500 mt-0.5 leading-snug">{point.detail}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-    </div>
+
+      <div className="px-6 pt-2 pb-1 shrink-0 border-t border-gray-100">
+        <button
+          type="button"
+          onClick={accept}
+          className="w-full bg-gray-900 text-white text-sm font-semibold py-3.5 rounded-2xl hover:bg-gray-800 active:scale-[0.98] transition-all"
+        >
+          Continue
+        </button>
+        <p className="text-xs text-gray-400 text-center mt-3 leading-relaxed">
+          By continuing, you confirm you are a qualified healthcare professional and agree to use this app as a decision aid only.
+        </p>
+      </div>
+    </BottomSheet>
   );
 }

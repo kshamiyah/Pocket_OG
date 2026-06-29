@@ -321,10 +321,10 @@ export default function App() {
                 {/* Hero */}
                 <div className="text-center mb-12 sm:mb-14">
                   <h1 className="text-[42px] sm:text-[56px] font-[800] tracking-[0.14em] sm:tracking-[0.16em] text-black">Pocket O&G</h1>
-                  <p className="mt-3 text-base leading-relaxed text-gray-400">
+                  <p className="mt-3 text-lg leading-relaxed text-gray-400">
                     Pocket the evidence. Make the call.
                   </p>
-                  <p className="mt-2 text-sm font-medium text-gray-400">
+                  <p className="mt-2 text-sm font-medium italic text-gray-400">
                     Built by{" "}
                     <a
                       href="https://drshamiyah.com/"
