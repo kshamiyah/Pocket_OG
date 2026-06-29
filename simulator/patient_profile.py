@@ -1,8 +1,9 @@
 """
-Patient phenotype — presentation + treatment response matrix.
+SERA patient phenotype — presentation + treatment response matrix.
 
-The SOS algorithm is fixed (under test). This module configures how the
-simulated patient's body responds to each intervention after PPH is recognised.
+SERA (Simulated Emergency Response Agent) is the virtual obstetric patient.
+The SOS algorithm is fixed (under test). This module configures how SERA's
+body responds to each intervention after PPH is recognised.
 """
 
 TREATMENT_LABELS = {

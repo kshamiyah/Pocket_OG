@@ -1,11 +1,13 @@
-# Virtual Obstetric Patient — PPH simulator
+# SERA — Simulated Emergency Response Agent
 
-A physiology simulator for postpartum haemorrhage (PPH), driven by the **real
-Pocket O&G SOS-PPH algorithm**.
+**SERA** is the virtual obstetric patient used to stress-test the Pocket O&G
+SOS-PPH algorithm locally. A physiology model for postpartum haemorrhage (PPH),
+driven by the **real** `computeNextPrompt` from `EmergencyPage.jsx` — the
+algorithm is never modified; only SERA's body and phenotype are configured.
 
 ## The idea
 
-- **The patient** just bleeds and responds — a validated physiology model
+- **SERA** just bleeds and responds — a validated physiology model
   (`stage1`…`stage4`; every clinical value signed off in `RULES.md`).
 - **The SOS-PPH algorithm** (the real `computeNextPrompt` from `EmergencyPage.jsx`
   on the emergency branch) is the **sole decision-maker** — nothing acts on its own.

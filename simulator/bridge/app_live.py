@@ -66,12 +66,12 @@ def vitals_chart(df, column, title, y_domain=None, height=180):
     return chart
 
 
-st.set_page_config(page_title="SOS engine — live", layout="wide")
-st.title("PPH SOS algorithm — live on the simulated patient")
+st.set_page_config(page_title="SERA — SOS live", layout="wide")
+st.title("SERA — Simulated Emergency Response Agent")
 st.caption(
-    "Configure a **patient phenotype** (what works / what doesn't after PPH is recognised), "
-    "then run the **real SOS algorithm** unchanged. We watch whether following the protocol "
-    "keeps her alive."
+    "**S**imulated **E**mergency **R**esponse **A**gent — configure her phenotype "
+    "(what works / what doesn't after PPH is recognised), then run the **real SOS "
+    "algorithm** unchanged. We watch whether following the protocol keeps her alive."
 )
 
 with st.sidebar:

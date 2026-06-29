@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-App-as-operator loop (Option A) — the REAL Pocket O&G PPH SOS engine drives the
-validated Python patient.
+App-as-operator loop (Option A) — the REAL Pocket O&G PPH SOS engine drives
+SERA (Simulated Emergency Response Agent).
 
 Each step: build the app's session from the patient's physiology, ask the real
 engine (via the Node bridge) for its NOW recommendation, translate that into a
