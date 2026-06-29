@@ -161,6 +161,45 @@ compression buys time but fades without a uterotonic to sustain it).
 
 ## D2. Tone magnitude — the responsiveness model
 
+> ⚠️ **SUPERSEDED (2026-06-29) by the R-SEVERITY redesign in §D3.** Clinical
+> decision: PPH risk factors do **not** affect *treatability*; they affect how
+> *atonic/fast-bleeding* the uterus is. The whole responsiveness (R) model below
+> is retired. Surgery is now a **haemodynamic** decision, and structural causes
+> (accreta) are explicitly **drug-refractory**. The text below is kept for history.
+
+## D3. R-SEVERITY — risk factors drive severity (current model)
+
+**R-SEVERITY — starting tone from risk factors.** Risk factors set how atonic she
+starts (severity → bleed rate), from a base tone of **0.85** (~105 ml/min, a
+typical recognised major PPH inferred from total-loss-over-time; literature gives
+volume not rate). Each present GTG52 factor lowers the starting tone by its
+weight (same weights as before, now applied to severity, not R):
+`start_tone = max(0, 0.85 − Σ weights)`. _Source: GTG52 ORs (R21) for the weights;
+base rate inferred from R24/R25 + total-loss data._ ☑ **ACCEPTED**.
+
+**R-DRUG-INCREMENT — equipotent increments (no R).** Each uterotonic adds an equal
+tone increment (oxy/ergo/carbo +0.30, miso +0.20), capped at 0.97. How many drugs
+she needs falls out of how atonic she started. _Source: Cochrane equipotence
+(R20)._ ☑ **ACCEPTED**.
+
+**R-DRUG-REFRACTORY — structural causes don't respond.** Accreta / abnormal
+placentation is **drug-refractory** (uterotonics can't raise tone) AND mechanically
+refractory (balloon/sutures ineffective → hysterectomy). A structural property,
+NOT a risk-factor effect. ☑ **ACCEPTED**.
+
+**R-SURGERY-TRIGGER — surgery is a haemodynamic decision.** Go to theatre when she
+is **still bleeding** (durable, drug-driven) **AND** (MAP ≤ **60 mmHg** — becoming
+unstable — **OR** has already bled a massive amount, ≥ 2,000 ml, without control).
+Fires at any point, even mid-ladder; the surgical ladder (balloon → sutures →
+hysterectomy) escalates paced by onset. _Source: GTG52 "surgical haemostasis when
+medical measures fail"; clinical sign-off._ ☑ **ACCEPTED**.
+
+**R-CONTROL-DURABLE — control means durable.** The "controlled" verdict uses the
+**sustained** (drug/surgical) tone, excluding the transient massage bonus — massage
+buys time (slows actual loss) but doesn't count as definitive control. ☑ **ACCEPTED**.
+
+### (history — superseded responsiveness model)
+
 **Decisions (2026-06-28, clinician):**
 1. **Per-patient responsiveness dial — YES.** Each patient has a value
    `responsiveness R ∈ [0,1]`: how well her uterus answers uterotonics.
