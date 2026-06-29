@@ -326,9 +326,15 @@ The simulator separates two things the app conflates into one number:
   (`scaleDelayByBleedRate`): brisk bleeding shortens the wait toward a 60 s
   floor. _Source: app `pph-shared.js` (I1)._ ☑ **ACCEPTED**.
 - **Onset clock** — when a given drug *starts raising tone*. Separate,
-  pharmacological; the app does not model it.
-  Candidates: oxytocin 2 min, ergometrine 2 min, carboprost 4 min,
-  misoprostol 10 min. ☐ **[ASSUMED] — needs sign-off**.
+  pharmacological; the app does not model it. **Published onset of effect:**
+  oxytocin **1 min** (IV near-instant; 2–5 min IM), ergometrine **2 min** (2–3 min IM),
+  carboprost **15 min** (peak plasma 20–30 min; clinical response within ~30 min in
+  75%; slow), misoprostol **10 min** (peak plasma 10–15 min oral).
+  _Sources: R7 (uterotonics pharmacology), R22 (carboprost monograph), R23
+  (prostaglandins for PPH)._ ☑ **ACCEPTED — researched onsets** (2026-06-29).
+  > Operator-logic note (follow-up, not a number): "drugs failed → surgery"
+  > should wait for the last drug's onset, not just for all drugs being given —
+  > carboprost's slow onset makes this matter.
 
 ### R-TX-2 — Transfusion triggers on EBL, at the app's thresholds
 The operator tracks **true EBL** (cumulative blood lost, gross of transfusion)
@@ -421,6 +427,8 @@ cite the repository file and the specific named symbol/section.
 | R19 | Normal uterine resting tone on oxytocin by IUPC (<15–20 mmHg) | FDA oxytocin label / IUPC reference | https://www.droracle.ai/articles/535846/what-is-a-normal-uterine-resting-tone-on-oxytocin |
 | R20 | Uterotonic agents for preventing PPH: network meta-analysis | Cochrane CD011689.pub4 (Gallos et al.); DOI: 10.1002/14651858.CD011689.pub4 | https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD011689.pub4/full |
 | R21 | Risk factors for major obstetric haemorrhage (GTG52 Table 1 source) | Stones et al. 1993; PMID: 8449256 | https://pubmed.ncbi.nlm.nih.gov/8449256/ |
+| R22 | Carboprost monograph (onset / peak 20–30 min) | Drugs.com carboprost monograph | https://www.drugs.com/monograph/carboprost.html |
+| R23 | Prostaglandins for Postpartum Hemorrhage: pharmacology | Karger, Pharmacology 2021;106:477 | https://karger.com/pha/article/106/9-10/477/820467/Prostaglandins-for-Postpartum-Hemorrhage |
 
 ### Internal sources (Pocket O&G repository)
 

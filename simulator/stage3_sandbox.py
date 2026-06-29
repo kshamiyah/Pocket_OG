@@ -50,13 +50,16 @@ def scale_delay_by_bleed_rate(base_sec, rate_ml_min, floor_sec=UTEROTONIC_DELAY_
     return floor_sec
 
 
-# ── CLOCK 2: drug onset of effect — SEPARATE, pharmacological [ASSUMED] ─────
+# ── CLOCK 2: drug onset of effect — SEPARATE, pharmacological ───────────────
 # When the drug STARTS raising tone (not the app's escalation wait).
+# Published onset of effect (R7, R22-R23): oxytocin IV ~1 min; ergometrine 2-3 min;
+# carboprost slow (peak 20-30 min, response within 30 min in 75%); misoprostol
+# peak plasma 10-15 min.
 ONSET_MIN = {
-    "oxytocin": 2,      # fast (IV faster than IM)
-    "ergometrine": 2,   # fast
-    "carboprost": 4,    # starts within minutes (full effect builds later)
-    "misoprostol": 10,  # genuinely slow agent
+    "oxytocin": 1,      # IV near-instant (<1 min); 2-5 min IM
+    "ergometrine": 2,   # 2-3 min IM
+    "carboprost": 15,   # genuinely slow — peak 20-30 min, clinical response within ~30 min
+    "misoprostol": 10,  # peak plasma 10-15 min (oral)
 }
 TARGET_TONE = {        # R-TONE-GAIN: uterotonics roughly EQUIPOTENT (Cochrane NMA);
     "oxytocin": 0.95, "ergometrine": 0.95, "carboprost": 0.95, "misoprostol": 0.90,  # miso slightly weaker
