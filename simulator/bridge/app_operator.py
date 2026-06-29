@@ -174,15 +174,17 @@ def stream(scenario, max_steps=300):
             rate = MASSIVE_INFUSION_ML_MIN if session["level"] == "massive" else MAJOR_INFUSION_ML_MIN
             blood_in = min(rate, p.bleed_rate) * step_dt
 
+        # advance first, then snapshot, so the figures reflect the RESULT of this
+        # step's action (not the instant before the drug took effect).
+        p.tick(t_min, dt_min=step_dt, blood_in=blood_in)
+        t_min += step_dt
+
         snap = {
             "t": round(t_min, 2), "ebl": round(p.cumulative_bled), "tone": round(p.tone, 2),
             "bleed": round(p.bleed_rate), "map": round(p.map), "lactate": round(p.lactate, 1),
             "level": session["level"], "ptype": ptype, "tid": tid, "note": note,
             "acted": acted, "verdict": None,
         }
-
-        p.tick(t_min, dt_min=step_dt, blood_in=blood_in)
-        t_min += step_dt
 
         if p.arrested:
             snap["verdict"] = "ARREST"; bridge.close(); yield snap; return
