@@ -33,19 +33,25 @@ arteries (Uterine Atony overview)._
 ### R-BLEED-3 — Non-atonic causes (the other three T's) **[ASSUMED]**
 Trauma / tissue / thrombin add a separate, tone-independent bleed term
 (`bleed_extra`), set per scenario until sourced individually.
-☑ **ACCEPTED — concept** (2026-06-28); per-cause ml/min still to be sourced/assigned
+☑ **ACCEPTED — concept; ⏸ DEFERRED (build after)** (2026-06-29). Trauma/tissue/
+thrombin bleeding is clinically less difficult than atony but adds real modelling
+complexity (separate sources, repair dynamics). Flagged for a later stage — NOT
+built now to keep the patient tractable.
 
 ---
 
 ## B. Blood volume & resuscitation in
 
 ### R-VOL-1 — Starting maternal blood volume
-Pregnancy raises blood volume ~40–50%, so a term mother carries ~90–100 ml/kg.
-**Volume is weight-based, not flat:**
-`blood_volume_start = weight_kg × 95 ml/kg`  (e.g. 70 kg → ~6,650 ml).
-This adds **patient weight** as a required scenario input.
-_(~95 ml/kg term-maternal value; exact ml/kg still to be pinned to a citation.)_
-☑ **ACCEPTED — weight-based** (2026-06-28); flat 5,000 ml declined
+Pregnancy raises blood volume ~40–50%; whole blood volume at term is **~100 ml/kg
+for a lean mother** (range 90–200). **Volume is weight-based, not flat:**
+`blood_volume_start = weight_kg × 95 ml/kg`  (e.g. 70 kg → ~6,650 ml) — slightly
+conservative within the trusted band. Adds **patient weight** as a required input.
+> **Known limitation:** a flat ml/kg **overestimates in obese patients** (~73 ml/kg;
+> blood volume scales non-linearly with mass). A non-linear weight model is a later
+> refinement.
+_Source: maternal blood-volume review, BJA 2022 (R24); plasma-volume expansion (R25)._
+☑ **ACCEPTED — 95 ml/kg, weight-based** (2026-06-29); flat 5,000 ml declined.
 
 ### R-VOL-2 — Volume balance each tick
 `blood_volume += (fluids_in + blood_in − bleed_rate × dt)`
@@ -56,9 +62,10 @@ _Source: mass-balance of haemorrhage models (Curcio 2020/2021)._
 Body shifts interstitial fluid into circulation, partly offsetting early loss —
 modelled as a slow top-up term, magnitude per Zenker model.
 _Source: transcapillary refill in ZenCur model (Curcio 2020)._
-☑ **DEFERRED to Stage 2** (2026-06-28); not in Stage 1 sandbox. Rate to be
-lifted from the Zenker model when added. (Stage 1 patient is therefore slightly
-more pessimistic — drains without this self-top-up.)
+⏸ **DEFERRED — later (too complex now)** (2026-06-29). Confirmed flagged: the
+body's self-refill is genuinely complex to model faithfully; left out for now,
+rate to be lifted from the Zenker model when we build it. (Patient is therefore
+slightly pessimistic — drains without self-top-up.)
 
 ---
 
@@ -436,6 +443,8 @@ cite the repository file and the specific named symbol/section.
 | R21 | Risk factors for major obstetric haemorrhage (GTG52 Table 1 source) | Stones et al. 1993; PMID: 8449256 | https://pubmed.ncbi.nlm.nih.gov/8449256/ |
 | R22 | Carboprost monograph (onset / peak 20–30 min) | Drugs.com carboprost monograph | https://www.drugs.com/monograph/carboprost.html |
 | R23 | Prostaglandins for Postpartum Hemorrhage: pharmacology | Karger, Pharmacology 2021;106:477 | https://karger.com/pha/article/106/9-10/477/820467/Prostaglandins-for-Postpartum-Hemorrhage |
+| R24 | Maternal body weight and estimated circulating blood volume (review, non-linear approach) | Br J Anaesth 2022; DOI: 10.1016/j.bja.2022.07.009 | https://www.bjanaesthesia.org.uk/article/S0007-0912(22)00453-6/fulltext |
+| R25 | Plasma volume expansion in pregnancy (~100 ml/kg at term) | ScienceDirect / PMC5701717 | https://pmc.ncbi.nlm.nih.gov/articles/PMC5701717/ |
 
 ### Internal sources (Pocket O&G repository)
 
