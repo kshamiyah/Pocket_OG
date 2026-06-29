@@ -77,7 +77,8 @@ def stream(scenario, max_steps=300):
     p = PatientV4(scenario.get("weight_kg", 70), scenario.get("risk_factors", []),
                   scenario.get("surgical_ineffective"), bmi=scenario.get("bmi", 25),
                   start_ebl=start_ebl)
-    p.give_massage()   # bimanual compression is reflexive; app will also prompt it
+    # no reflexive massage — the app prompts fundal_massage/bimanual itself, so she
+    # presents at her true starting tone until the app actually orders massage.
     bridge = AppBridge()
 
     session = {

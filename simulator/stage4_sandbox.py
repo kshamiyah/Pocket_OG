@@ -164,8 +164,8 @@ def simulate(scenario):
     for minute in range(duration + 1):
         action = ""
         blood_in = 0.0
-        if minute == 0:
-            p.give_massage(); action += "massage + "
+        # No reflexive massage: it's a transient adjunct that doesn't give durable
+        # control, and applying it at t0 hid the patient's true presenting tone.
 
         bleeding = p.durable_bleed_rate >= CONTROLLED_BLEED
         # Surgery decision: still bleeding AND (becoming unstable OR has already bled
