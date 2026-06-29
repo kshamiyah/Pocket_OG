@@ -89,6 +89,13 @@ _Source: StatPearls staging; ZenCur baroreflex behaviour._
 ☑ **ACCEPTED** (2026-06-28); models the "compensate then crash off a cliff"
 behaviour — the reason early action wins.
 
+**Theme-5 calibration sign-off (2026-06-29):** the specific calibration values —
+MAP-vs-%-lost breakpoints (90→85→75→45→25), the HR curve (80 + 160×fraction,
+cap 180), the arrest threshold (MAP ≤ 35), and the oxygen engine (DO₂ 12,
+VO₂ 3.5, debt floor 0.70 mL/kg/min) — are **ACCEPTED as ATLS-grounded**: they sit
+within the sourced ATLS shock-class bands (R5/R6) and the oxygen-debt physiology
+(R12). ATLS is the accountable authority for the staging.
+
 ---
 
 ## D. Drug effects on tone (uterotonics)
