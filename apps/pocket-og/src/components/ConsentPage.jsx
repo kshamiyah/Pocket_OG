@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef } from "react";
 import AlphabetSidebar from "./AlphabetSidebar";
+import { sourceColors, sourceFromLabel } from "../data/glColors";
 import {
   CONSENT_PROCEDURES,
   FREQ,
@@ -183,7 +184,7 @@ function ProcedureList({ onSelect }) {
                       onClick={() => onSelect(proc.id)}
                       className={`flex items-center gap-3 w-full px-4 py-4 min-h-[80px] hover:bg-gray-50 active:bg-gray-100 transition-colors text-left ${i > 0 ? "border-t border-gray-50" : ""}`}
                     >
-                      <div className={`w-1 h-10 rounded-full shrink-0 ${proc.color.accent}`} />
+                      <div className={`w-1 h-10 rounded-full shrink-0 ${sourceColors(sourceFromLabel(proc.source)).accent}`} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-900 leading-snug">{proc.title}</p>
                         <p className="text-xs text-gray-400 mt-0.5">{proc.subtypes}</p>

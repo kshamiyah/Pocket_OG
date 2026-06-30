@@ -1,4 +1,5 @@
 import BottomSheet from "./BottomSheet";
+import { sourceColors, SOURCE_ORDER, SOURCE_LABELS } from "../data/glColors";
 
 const BUILD = typeof __BUILD_INFO__ !== "undefined" ? __BUILD_INFO__ : { version: "dev", sha: "dev", date: "" };
 
@@ -56,6 +57,15 @@ export default function AboutModal({ open, onClose }) {
             Content summarised from national guidance (RCOG, NICE, and others) and local trust protocols.
             Full PDFs are linked where available.
           </p>
+          <p className="text-[11px] text-gray-400 mt-3 mb-1.5">Colours indicate the source:</p>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 rounded-2xl bg-gray-50 px-3.5 py-3">
+            {SOURCE_ORDER.map(s => (
+              <div key={s} className="flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full shrink-0 ${sourceColors(s).accent}`} />
+                <span className="text-[12px] text-gray-600 leading-snug">{SOURCE_LABELS[s]}</span>
+              </div>
+            ))}
+          </div>
         </section>
 
         <section className="mb-5">

@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import { SEARCH_INDEX, search } from "./search/engine";
 import { FLOWCHARTS } from "./data/flowcharts";
 import { GUIDELINES } from "@pocket-og/guidelines";
-import { glColors } from "./data/glColors";
+import { glColors, sourceColors } from "./data/glColors";
 import WikiCard from "./components/WikiCard";
 import NoResults from "./components/NoResults";
 import FlowchartPlayer from "./components/FlowchartPlayer";
@@ -530,10 +530,11 @@ export default function App() {
                     key={src}
                     onClick={() => setFcSourceFilter(src)}
                     aria-pressed={fcSourceFilter === src}
-                    className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-colors ${
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold transition-colors ${
                       fcSourceFilter === src ? "bg-black text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                     }`}
                   >
+                    {src !== "ALL" && <span className={`w-1.5 h-1.5 rounded-full ${sourceColors(src).accent}`} />}
                     {src}
                   </button>
                 ))}
@@ -674,10 +675,11 @@ export default function App() {
                     key={src}
                     onClick={() => setGlSourceFilter(src)}
                     aria-pressed={glSourceFilter === src}
-                    className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-colors ${
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold transition-colors ${
                       glSourceFilter === src ? "bg-black text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                     }`}
                   >
+                    {src !== "ALL" && <span className={`w-1.5 h-1.5 rounded-full ${sourceColors(src).accent}`} />}
                     {src}
                   </button>
                 ))}
