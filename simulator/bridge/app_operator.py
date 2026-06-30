@@ -25,6 +25,7 @@ sys.path.insert(0, SIM)
 from stage4_sandbox import PatientV4, FUNDAL_FIRM_THRESHOLD, FUNDAL_TONE_PULSE   # noqa: E402
 from stage3_sandbox import (           # noqa: E402
     PPH_MAJOR_ML, PPH_MASSIVE_ML, MAJOR_PRBC_ML_MIN, MASSIVE_PRBC_ML_MIN,
+    MINOR_FLUID_ML_MIN, MAJOR_CRYST_ML_MIN, MAJOR_CRYST_CAP_ML,
 )
 
 # app drug task id -> our physiology drug id
@@ -69,6 +70,20 @@ def level_from_ebl(ebl):
     return "minor"
 
 
+def task_done(session, task_id):
+    return session["taskStates"].get(task_id, {}).get("status") == "done"
+
+
+def crystalloid_rate_ml_min(session):
+    """IV fluids after app tasks complete (R-TX-3b). Rapid crystalloid takes priority."""
+    rapid_ml = session.get("rapidCrystMl", 0.0)
+    if task_done(session, "rapid_cryst") and rapid_ml < MAJOR_CRYST_CAP_ML:
+        return MAJOR_CRYST_ML_MIN
+    if task_done(session, "iv_fluids"):
+        return MINOR_FLUID_ML_MIN
+    return 0.0
+
+
 def stream(scenario, max_steps=300):
     """Generator: yields a per-step snapshot dict so a UI can animate it live.
     Each snapshot: {t, ebl, tone, bleed, map, lactate, ptype, tid, note, acted,
@@ -98,6 +113,7 @@ def stream(scenario, max_steps=300):
         "undoPromptHold": [],
     }
     transfusing = False
+    rapid_cryst_ml = 0.0
     surg_idx = 0
     t_min = 0.0
 
@@ -148,8 +164,12 @@ def stream(scenario, max_steps=300):
         elif ptype == "task" and tid == "bimanual":
             p.start_bimanual_compression(t_min); mark_done(tid)
             note = "bimanual compression" if not p.bimanual_ineffective else "bimanual (no response)"
-        elif ptype == "task" and tid in ("blood_products", "mhp_pack", "rapid_cryst"):
+        elif ptype == "task" and tid in ("blood_products", "mhp_pack"):
             transfusing = True; mark_done(tid); note = f"START transfusion ({tid})"
+        elif ptype == "task" and tid == "rapid_cryst":
+            mark_done(tid); note = "START rapid crystalloid"
+        elif ptype == "task" and tid == "iv_fluids":
+            mark_done(tid); note = "START IV fluids"
         elif ptype == "consider" and tid == "bakri":
             if surg_idx < len(SURGICAL_SEQUENCE):
                 step = SURGICAL_SEQUENCE[surg_idx]
@@ -218,15 +238,24 @@ def stream(scenario, max_steps=300):
         acted = bool(note and note != "(nothing / monitoring)")
         step_dt = DT_ACTION_MIN if acted else DT_IDLE_MIN
 
-        # ── transfusion each step (rate-limited by cannulae) ──
+        # ── infusion each step (rate-limited by cannulae) ──
+        fluids_in = 0.0
         blood_in = 0.0
+        cryst_rate = crystalloid_rate_ml_min(session)
+        if cryst_rate > 0:
+            fluids_in = cryst_rate * step_dt
+            if task_done(session, "rapid_cryst"):
+                room = MAJOR_CRYST_CAP_ML - rapid_cryst_ml
+                fluids_in = min(fluids_in, room)
+                rapid_cryst_ml += fluids_in
+                session["rapidCrystMl"] = rapid_cryst_ml
         if transfusing and session["level"] in ("major", "massive"):
             rate = MASSIVE_PRBC_ML_MIN if session["level"] == "massive" else MAJOR_PRBC_ML_MIN
             blood_in = rate * step_dt   # fixed PRBC ceiling; no bleed-rate cap
 
         # advance first, then snapshot, so the figures reflect the RESULT of this
         # step's action (not the instant before the drug took effect).
-        p.tick(t_min, dt_min=step_dt, blood_in=blood_in)
+        p.tick(t_min, dt_min=step_dt, fluids_in=fluids_in, blood_in=blood_in)
         t_min += step_dt
 
         snap = {

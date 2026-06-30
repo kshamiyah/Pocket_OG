@@ -33,6 +33,8 @@ from stage3_sandbox import (
     BIMANUAL_DURATION_MIN, BIMANUAL_BLEED_FACTOR,
     CONTROLLED_BLEED, PPH_MAJOR_ML, PPH_MASSIVE_ML, BLOOD_PREP_MIN,
     MAJOR_PRBC_ML_MIN, MASSIVE_PRBC_ML_MIN,
+    CRYST_EFF, PRBC_EFF,
+    DEFICIT_FRACTION_CAP, BLEED_STRESS_THRESHOLD_ML_MIN, BLEED_STRESS_K, BLEED_STRESS_CAP_MMHG,
     CARBO_MAX_DOSES, CARBO_REPEAT_BASE_SEC, CARBO_REPEAT_FLOOR_SEC,
     URGENCY_EBL_ML, URGENCY_BLEED_ML_MIN, DRUG_INCREMENT, DRUG_TONE_CEILING,
 )
@@ -86,6 +88,9 @@ class PatientV4:
         self._now_min = 0.0
         self.oxygen_debt = 0.0
         self.cumulative_bled = float(start_ebl)   # EBL starts at the recognition point
+        self.cumulative_fluids_in = 0.0   # crystalloid given (R-VOL-2 / R-TX-3b)
+        self.cumulative_blood_in = 0.0    # PRBC given
+        self._map_bleed_penalty = 0.0     # acute drain stress (R-CIRC-3b)
         self._pending = []           # uterotonics: (effect_min, target)  — scaled by R
         self._pending_surg = []      # surgical: (effect_min, target, step) — mechanical
 
@@ -120,11 +125,33 @@ class PatientV4:
         # and bimanual compression, so "controlled" means durable control.
         return BASELINE_FLOW_ML_MIN * (1.0 - self.sustained_tone)
     @property
-    def fraction_lost(self): return (self.start_volume - self.blood_volume) / self.start_volume
+    def effective_replacement_ml(self):
+        return self.cumulative_fluids_in * CRYST_EFF + self.cumulative_blood_in * PRBC_EFF
+
     @property
-    def heart_rate(self): return min(180, BASELINE_HR + 160 * max(0.0, self.fraction_lost))
+    def haemorrhagic_deficit_ml(self):
+        return max(0.0, self.cumulative_bled - self.effective_replacement_ml)
+
     @property
-    def map(self): return interp(max(0.0, self.fraction_lost), MAP_BREAKPOINTS)
+    def effective_fraction_lost(self):
+        # R-CIRC-3: MAP/HR from haemorrhagic deficit, not transient tank fill.
+        if self.start_volume <= 0:
+            return 0.0
+        return min(DEFICIT_FRACTION_CAP, self.haemorrhagic_deficit_ml / self.start_volume)
+
+    @property
+    def fraction_lost(self):
+        # Net circulating volume (R-VOL-2) — for display / legacy; not used for MAP.
+        return (self.start_volume - self.blood_volume) / self.start_volume
+
+    @property
+    def heart_rate(self):
+        return min(180, BASELINE_HR + 160 * max(0.0, self.effective_fraction_lost))
+
+    @property
+    def map(self):
+        base = interp(max(0.0, self.effective_fraction_lost), MAP_BREAKPOINTS)
+        return max(0.0, base - self._map_bleed_penalty)
     @property
     def perfusion_adequacy(self): return self.map / NORMAL_MAP
     @property
@@ -150,7 +177,7 @@ class PatientV4:
         """Legacy alias — fundal pulse only."""
         self.give_fundal_massage()
 
-    def tick(self, now_min, dt_min=1.0, blood_in=0.0):
+    def tick(self, now_min, dt_min=1.0, fluids_in=0.0, blood_in=0.0):
         self._now_min = now_min
         # surgical control first — MECHANICAL, independent of R (R-SURG-1)
         keep_s = []
@@ -174,8 +201,21 @@ class PatientV4:
         self._pending = keep
         bled = self.bleed_rate * dt_min
         self.cumulative_bled += bled
-        self.blood_volume += blood_in - bled
-        if self.blood_volume < 0: self.blood_volume = 0.0
+        self.cumulative_fluids_in += fluids_in
+        self.cumulative_blood_in += blood_in
+        self.blood_volume += fluids_in + blood_in - bled
+        if self.blood_volume < 0:
+            self.blood_volume = 0.0
+        if dt_min > 0:
+            infusion_ml_min = (fluids_in + blood_in) / dt_min
+        else:
+            infusion_ml_min = 0.0
+        net_balance_ml_min = infusion_ml_min - self.bleed_rate
+        if net_balance_ml_min < -BLEED_STRESS_THRESHOLD_ML_MIN:
+            excess = -net_balance_ml_min - BLEED_STRESS_THRESHOLD_ML_MIN
+            self._map_bleed_penalty = min(BLEED_STRESS_CAP_MMHG, excess * BLEED_STRESS_K)
+        else:
+            self._map_bleed_penalty = 0.0
         self.fundal_pulse = max(0.0, self.fundal_pulse - FUNDAL_DECAY_PER_MIN * dt_min)
         if self.perfusion_adequacy < DEBT_ADEQUACY_FLOOR:
             shortfall = (DEBT_ADEQUACY_FLOOR - self.perfusion_adequacy) / DEBT_ADEQUACY_FLOOR

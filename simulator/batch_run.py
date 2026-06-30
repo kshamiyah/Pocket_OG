@@ -5,6 +5,7 @@ Batch-run SERA against the real SOS engine.
 Usage:
   python3 simulator/batch_run.py
   python3 simulator/batch_run.py --preset typical_atonic --count 10
+  python3 simulator/batch_run.py --cohort comorbid20 --count 20
 """
 
 import argparse
@@ -58,9 +59,34 @@ COMORBID_COHORT = [
     ]},
 ]
 
+# Diverse comorbidity grid: 1–8 atonic risk factors, varied size (regression suite).
+COMORBID_DIVERSE_20 = [
+    {"id": 1,  "weight_kg": 88, "bmi": 32, "start_ebl": 520, "risk_factors": ["macrosomia"]},
+    {"id": 2,  "weight_kg": 72, "bmi": 26, "start_ebl": 500, "risk_factors": ["prolonged_labour"]},
+    {"id": 3,  "weight_kg": 68, "bmi": 27, "start_ebl": 510, "risk_factors": ["fibroids"]},
+    {"id": 4,  "weight_kg": 78, "bmi": 28, "start_ebl": 500, "risk_factors": ["grand_multiparity"]},
+    {"id": 5,  "weight_kg": 70, "bmi": 25, "start_ebl": 540, "risk_factors": ["chorioamnionitis"]},
+    {"id": 6,  "weight_kg": 65, "bmi": 24, "start_ebl": 500, "risk_factors": ["ga_or_augmentation"]},
+    {"id": 7,  "weight_kg": 62, "bmi": 25, "start_ebl": 550, "risk_factors": ["previous_pph"]},
+    {"id": 8,  "weight_kg": 75, "bmi": 29, "start_ebl": 580, "risk_factors": ["overdistension"]},
+    {"id": 9,  "weight_kg": 90, "bmi": 33, "start_ebl": 600, "risk_factors": ["previous_pph", "macrosomia"]},
+    {"id": 10, "weight_kg": 82, "bmi": 30, "start_ebl": 550, "risk_factors": ["overdistension", "prolonged_labour"]},
+    {"id": 11, "weight_kg": 70, "bmi": 28, "start_ebl": 520, "risk_factors": ["previous_pph", "overdistension"]},
+    {"id": 12, "weight_kg": 76, "bmi": 27, "start_ebl": 500, "risk_factors": ["macrosomia", "prolonged_labour", "chorioamnionitis"]},
+    {"id": 13, "weight_kg": 58, "bmi": 26, "start_ebl": 500, "risk_factors": ["previous_pph", "grand_multiparity", "fibroids"]},
+    {"id": 14, "weight_kg": 74, "bmi": 31, "start_ebl": 560, "risk_factors": ["previous_pph", "macrosomia", "prolonged_labour", "ga_or_augmentation"]},
+    {"id": 15, "weight_kg": 68, "bmi": 29, "start_ebl": 580, "risk_factors": ["overdistension", "previous_pph", "macrosomia", "chorioamnionitis", "fibroids"]},
+    {"id": 16, "weight_kg": 80, "bmi": 32, "start_ebl": 600, "risk_factors": ["overdistension", "previous_pph", "prolonged_labour", "chorioamnionitis", "grand_multiparity", "ga_or_augmentation"]},
+    {"id": 17, "weight_kg": 72, "bmi": 30, "start_ebl": 620, "risk_factors": ["overdistension", "previous_pph", "macrosomia", "prolonged_labour", "chorioamnionitis", "grand_multiparity", "fibroids"]},
+    {"id": 18, "weight_kg": 92, "bmi": 36, "start_ebl": 650, "risk_factors": FULL_COMORBID},
+    {"id": 19, "weight_kg": 70, "bmi": 28, "start_ebl": 550, "risk_factors": FULL_COMORBID},
+    {"id": 20, "weight_kg": 50, "bmi": 24, "start_ebl": 500, "risk_factors": FULL_COMORBID},
+]
+
 COHORTS = {
     "low_risk": LOW_RISK_COHORT,
     "comorbid": COMORBID_COHORT,
+    "comorbid20": COMORBID_DIVERSE_20,
 }
 
 ALGORITHM_FLAGS = {

@@ -110,6 +110,18 @@ BLOOD_PREP_MIN = 0            # IDEAL model: blood instant. Real time-to-blood i
 # NOT capped at bleed rate: when haemorrhage outpaces infusion, volume falls.
 MAJOR_PRBC_ML_MIN = 100      # one 16G, undiluted packed red cells
 MASSIVE_PRBC_ML_MIN = 200    # two greys + pressurised / rapid infuser
+# Crystalloid infusion (R-TX-3b — Step A). Rates from 16G flow (R17); cap from GTG52/app.
+MINOR_FLUID_ML_MIN = 90          # iv_fluids — background resuscitation [ASSUMED]
+MAJOR_CRYST_ML_MIN = 180         # rapid_cryst — 16G crystalloid ceiling (R17)
+MAJOR_CRYST_CAP_ML = 2000        # app rapid_cryst: up to 1.5–2 L Hartmann's
+# Perfusion weights — tracked from Step A; applied to MAP in Step B (R-CIRC-3).
+CRYST_EFF = 0.30                 # crystalloid → effective perfusion [ASSUMED]
+PRBC_EFF = 0.80                  # PRBC → effective perfusion [ASSUMED]
+# Step B — deficit-driven MAP (R-CIRC-3) + bleed-outpacing stress [ASSUMED].
+DEFICIT_FRACTION_CAP = 0.55      # max fraction fed into MAP breakpoints
+BLEED_STRESS_THRESHOLD_ML_MIN = 100   # net drain (ml/min) before MAP penalty
+BLEED_STRESS_K = 0.005           # mmHg penalty per ml/min excess drain
+BLEED_STRESS_CAP_MMHG = 8        # cap acute bleed-stress penalty
 # Legacy names (deprecated sandboxes import these)
 MAJOR_INFUSION_ML_MIN = MAJOR_PRBC_ML_MIN
 MASSIVE_INFUSION_ML_MIN = MASSIVE_PRBC_ML_MIN
