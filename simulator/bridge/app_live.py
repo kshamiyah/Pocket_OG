@@ -44,13 +44,15 @@ MAP_CHART_CEIL = 100
 def format_log_line(snap):
     """One line per simulation tick — matches CLI detail (vitals + what happened)."""
     tag = "ACTION" if snap["acted"] else "WAIT  "
+    fib = snap.get("fibrinogen")
+    fib_s = f"  Fib={fib:.1f}" if fib is not None else ""
     return (
         f"t={snap['t']:5.1f}  MAP={snap['map']:3d}  EBL={snap['ebl']:5,}  "
-        f"bleed={snap['bleed']:3d}  tone={snap['tone']:.2f}  | {tag}: {snap['note']}"
+        f"bleed={snap['bleed']:3d}  tone={snap['tone']:.2f}{fib_s}  | {tag}: {snap['note']}"
     )
 
 
-def vitals_chart(df, column, title, y_domain=None, height=180):
+def vitals_chart(df, column, title, y_domain=None, height=180, ref_y=None, ref_label=None):
     enc = {
         "x": alt.X("t:Q", title="Time (min)"),
         "y": alt.Y(f"{column}:Q", title=title),
@@ -63,6 +65,17 @@ def vitals_chart(df, column, title, y_domain=None, height=180):
         .encode(**enc)
         .properties(height=height)
     )
+    if ref_y is not None:
+        rule = alt.Chart(pd.DataFrame({"y": [ref_y]})).mark_rule(
+            strokeDash=[4, 4], color="#c0392b"
+        ).encode(y="y:Q")
+        if ref_label:
+            label = alt.Chart(pd.DataFrame({"y": [ref_y], "label": [ref_label]})).mark_text(
+                align="left", dx=4, dy=-6, color="#c0392b", size=11
+            ).encode(y="y:Q", text="label:N")
+            chart = chart + rule + label
+        else:
+            chart = chart + rule
     return chart
 
 
@@ -123,8 +136,8 @@ if go:
     st.markdown(f"**Phenotype:** {summarise_response(treatment_response)}")
     now_box = st.empty()
     metric_box = st.empty()
-    c1, c2 = st.columns(2)
-    tone_box, map_box = c1.empty(), c2.empty()
+    c1, c2, c3 = st.columns(3)
+    tone_box, map_box, fib_box = c1.empty(), c2.empty(), c3.empty()
     bleed_box, ebl_box = c1.empty(), c2.empty()
     log_box = st.empty()
 
@@ -147,12 +160,16 @@ if go:
             )
 
             map_delta = snap["map"] - baseline_map
-            m1, m2, m3, m4, m5 = metric_box.columns(5)
+            m1, m2, m3, m4, m5, m6 = metric_box.columns(6)
             m1.metric("Time (min)", f"{snap['t']:.1f}")
             m2.metric("Blood loss (EBL)", f"{snap['ebl']:,} ml")
             m3.metric("Uterine tone", f"{snap['tone']:.2f}")
             m4.metric("Bleeding", f"{snap['bleed']} ml/min")
             m5.metric("MAP", f"{snap['map']} mmHg", delta=f"{map_delta:+d} vs start")
+            if snap.get("fibrinogen") is not None:
+                m6.metric("Fibrinogen", f"{snap['fibrinogen']:.1f} g/L",
+                          delta="low" if snap["fibrinogen"] < 2.0 else None,
+                          delta_color="inverse")
 
             tone_box.markdown("**Uterine tone** (0 atonic → 1 firm)")
             tone_box.altair_chart(
@@ -164,6 +181,13 @@ if go:
                 vitals_chart(df, "map", "MAP (mmHg)", y_domain=[MAP_CHART_FLOOR, MAP_CHART_CEIL]),
                 use_container_width=True,
             )
+            if "fibrinogen" in df.columns:
+                fib_box.markdown("**Fibrinogen (g/L)** · treatment line 2.0")
+                fib_box.altair_chart(
+                    vitals_chart(df, "fibrinogen", "g/L", y_domain=[0, 6],
+                                 ref_y=2.0, ref_label="treat ≤2.0"),
+                    use_container_width=True,
+                )
             bleed_box.markdown("**Bleeding (ml/min)**")
             bleed_box.altair_chart(
                 vitals_chart(df, "bleed", "ml/min"),

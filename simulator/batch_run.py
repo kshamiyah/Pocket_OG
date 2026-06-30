@@ -83,10 +83,37 @@ COMORBID_DIVERSE_20 = [
     {"id": 20, "weight_kg": 50, "bmi": 24, "start_ebl": 500, "risk_factors": FULL_COMORBID},
 ]
 
+# Coagulopathy stress — prolonged haemorrhage with PRBC dilution before surgical control.
+# Each case sets `preset` (drug/surgery refractoriness); fibrinogen should fall ≤2 g/L.
+COAG_STRESS_COHORT = [
+    {"id": 1,  "preset": "refractory_atony", "weight_kg": 50, "bmi": 24, "start_ebl": 500,
+     "risk_factors": FULL_COMORBID},
+    {"id": 2,  "preset": "refractory_atony", "weight_kg": 55, "bmi": 26, "start_ebl": 700,
+     "risk_factors": FULL_COMORBID},
+    {"id": 3,  "preset": "refractory_atony", "weight_kg": 48, "bmi": 28, "start_ebl": 900,
+     "risk_factors": FULL_COMORBID},
+    {"id": 4,  "preset": "accreta",          "weight_kg": 60, "bmi": 27, "start_ebl": 550,
+     "risk_factors": FULL_COMORBID},
+    {"id": 5,  "preset": "accreta",          "weight_kg": 52, "bmi": 25, "start_ebl": 800,
+     "risk_factors": FULL_COMORBID},
+    {"id": 6,  "preset": "balloon_fails",    "weight_kg": 65, "bmi": 30, "start_ebl": 600,
+     "risk_factors": FULL_COMORBID},
+    {"id": 7,  "preset": "refractory_atony", "weight_kg": 45, "bmi": 22, "start_ebl": 500,
+     "risk_factors": ["previous_pph", "overdistension", "macrosomia", "prolonged_labour",
+                      "chorioamnionitis", "grand_multiparity"]},
+    {"id": 8,  "preset": "refractory_atony", "weight_kg": 90, "bmi": 34, "start_ebl": 650,
+     "risk_factors": FULL_COMORBID},
+    {"id": 9,  "preset": "accreta",          "weight_kg": 70, "bmi": 29, "start_ebl": 1000,
+     "risk_factors": FULL_COMORBID},
+    {"id": 10, "preset": "refractory_atony", "weight_kg": 58, "bmi": 31, "start_ebl": 1100,
+     "risk_factors": FULL_COMORBID},
+]
+
 COHORTS = {
     "low_risk": LOW_RISK_COHORT,
     "comorbid": COMORBID_COHORT,
     "comorbid20": COMORBID_DIVERSE_20,
+    "coag_stress": COAG_STRESS_COHORT,
 }
 
 ALGORITHM_FLAGS = {
@@ -128,6 +155,15 @@ def analyse_run(snaps):
     oxy_steps = [s for s in acted if "oxytocin" in (s.get("note") or "")]
     first_oxy = oxy_steps[0]["t"] if oxy_steps else None
     first_massage = next((s["t"] for s in acted if "fundal massage" in (s.get("note") or "")), None)
+    fibrinogens = [s["fibrinogen"] for s in snaps if "fibrinogen" in s]
+    min_fibrinogen = min(fibrinogens) if fibrinogens else None
+    coag_mults = [s["coag_mult"] for s in snaps if "coag_mult" in s]
+    max_coag_mult = max(coag_mults) if coag_mults else None
+
+    if min_fibrinogen is not None and min_fibrinogen < 2.0:
+        flags.append(f"coagulopathy (fibrinogen nadir {min_fibrinogen:.1f} g/L)")
+    if max_coag_mult is not None and max_coag_mult > 1.0:
+        flags.append(f"coag bleed multiplier peaked at {max_coag_mult:.2f}×")
 
     return {
         "verdict": last.get("verdict"),
@@ -135,6 +171,8 @@ def analyse_run(snaps):
         "ebl": last.get("ebl"),
         "final_tone": last.get("tone"),
         "min_map": min(maps),
+        "min_fibrinogen": min_fibrinogen,
+        "max_coag_mult": max_coag_mult,
         "max_level": max(levels, key=lambda l: ["minor", "major", "massive"].index(l)),
         "steps": len(snaps),
         "first_massage_t": first_massage,
@@ -144,9 +182,10 @@ def analyse_run(snaps):
 
 
 def run_cohort(cases, preset_key):
-    phenotype = PRESETS[preset_key]
     results = []
     for case in cases:
+        case_preset = case.get("preset", preset_key)
+        phenotype = PRESETS[case_preset]
         sc = scenario_from_profile(
             case["weight_kg"], case["bmi"], case["start_ebl"],
             case.get("risk_factors", []), phenotype,
@@ -161,21 +200,26 @@ def run_cohort(cases, preset_key):
         st = start_tone_from_risk_factors(case.get("risk_factors", []))
         summary["start_tone"] = round(st, 2)
         summary["start_bleed"] = round(BASELINE_FLOW_ML_MIN * (1 - st))
+        summary["preset"] = case_preset
         results.append(summary)
     return results
 
 
 def print_report(results, cohort_label="cohort", n=None):
     n = n or len(results)
-    print(f"\n{'ID':>3} {'kg':>4} {'BMI':>4} {'start':>5} {'sTone':>5} {'sBleed':>6} {'verdict':>10} {'t':>5} {'EBL':>5} {'tone':>5} {'minMAP':>6} {'level':>7}  flags")
-    print("-" * 110)
+    print(f"\n{'ID':>3} {'kg':>4} {'BMI':>4} {'start':>5} {'sTone':>5} {'sBleed':>6} {'verdict':>10} {'t':>5} {'EBL':>5} {'tone':>5} {'minMAP':>6} {'minFib':>6} {'coag×':>5} {'level':>7}  flags")
+    print("-" * 125)
     for r in results:
         flag_str = "; ".join(r["flags"]) if r["flags"] else "—"
+        mf = r.get("min_fibrinogen")
+        mf_str = f"{mf:>6.1f}" if mf is not None else "     —"
+        cm = r.get("max_coag_mult")
+        cm_str = f"{cm:>5.2f}" if cm is not None else "    —"
         print(
             f"{r['id']:>3} {r['weight_kg']:>4} {r['bmi']:>4} {r['start_ebl']:>5} "
             f"{r.get('start_tone', 0):>5.2f} {r.get('start_bleed', 0):>6} "
             f"{r['verdict'] or '?' :>10} {r['t_min']:>5.1f} {r['ebl']:>5} {r['final_tone']:>5.2f} "
-            f"{r['min_map']:>6} {r['max_level']:>7}  {flag_str}"
+            f"{r['min_map']:>6} {mf_str} {cm_str} {r['max_level']:>7}  {flag_str}"
         )
 
     # Aggregate algorithm observations
@@ -190,6 +234,16 @@ def print_report(results, cohort_label="cohort", n=None):
         times = [r["t_min"] for r in controlled]
         print(f"Extra blood loss after recognition: min {min(ebls):.0f} ml, max {max(ebls):.0f} ml, mean {sum(ebls)/len(ebls):.0f} ml")
         print(f"Time to control: {min(times):.1f}–{max(times):.1f} min (mean {sum(times)/len(times):.1f})")
+
+    coag_hits = [r for r in results if r.get("min_fibrinogen") is not None and r["min_fibrinogen"] < 2.0]
+    if coag_hits:
+        print(f"\nCoagulopathy (fibrinogen <2 g/L): {len(coag_hits)}/{n}")
+        for r in coag_hits:
+            preset = r.get("preset", "?")
+            print(f"  #{r['id']} {preset}: nadir {r['min_fibrinogen']:.1f} g/L, "
+                  f"coag× {r.get('max_coag_mult', 0):.2f}, {r['verdict']}, EBL {r['ebl']} ml")
+    else:
+        print(f"\nCoagulopathy (fibrinogen <2 g/L): 0/{n} — model may need harder stress cases")
 
     flag_counts = {}
     for r in results:
@@ -235,7 +289,9 @@ def main():
     args = parser.parse_args()
 
     cases = COHORTS[args.cohort][: args.count]
-    print(f"Running {len(cases)} patients — cohort: {args.cohort}, preset: {args.preset}")
+    presets_used = {c.get("preset", args.preset) for c in cases}
+    preset_label = args.preset if len(presets_used) == 1 else "mixed"
+    print(f"Running {len(cases)} patients — cohort: {args.cohort}, preset: {preset_label}")
     results = run_cohort(cases, args.preset)
     if args.json:
         print(json.dumps(results, indent=2))

@@ -24,7 +24,7 @@ sys.path.insert(0, SIM)
 
 from stage4_sandbox import PatientV4, FUNDAL_FIRM_THRESHOLD, FUNDAL_TONE_PULSE   # noqa: E402
 from stage3_sandbox import (           # noqa: E402
-    PPH_MAJOR_ML, PPH_MASSIVE_ML, MAJOR_PRBC_ML_MIN, MASSIVE_PRBC_ML_MIN,
+    PPH_MAJOR_ML, PPH_MASSIVE_ML, MAJOR_PRBC_ML_MIN, MASSIVE_PRBC_ML_MIN, MASSIVE_FFP_ML_MIN,
     MINOR_FLUID_ML_MIN, MAJOR_CRYST_ML_MIN, MAJOR_CRYST_CAP_ML,
 )
 
@@ -113,6 +113,7 @@ def stream(scenario, max_steps=300):
         "undoPromptHold": [],
     }
     transfusing = False
+    mhp_active = False
     rapid_cryst_ml = 0.0
     surg_idx = 0
     t_min = 0.0
@@ -165,7 +166,11 @@ def stream(scenario, max_steps=300):
             p.start_bimanual_compression(t_min); mark_done(tid)
             note = "bimanual compression" if not p.bimanual_ineffective else "bimanual (no response)"
         elif ptype == "task" and tid in ("blood_products", "mhp_pack"):
-            transfusing = True; mark_done(tid); note = f"START transfusion ({tid})"
+            transfusing = True
+            if tid == "mhp_pack":
+                mhp_active = True
+            mark_done(tid)
+            note = f"START transfusion ({tid})"
         elif ptype == "task" and tid == "rapid_cryst":
             mark_done(tid); note = "START rapid crystalloid"
         elif ptype == "task" and tid == "iv_fluids":
@@ -219,6 +224,10 @@ def stream(scenario, max_steps=300):
                 note = f"tone boggy ({assess_tone:.2f}) — proceed to bimanual"
         elif ptype == "blood_loss_check":
             note = "blood loss check"   # log already reflects EBL
+        elif ptype == "txa_second":
+            p.give_txa(t_min)
+            session["txaSecondDone"] = True
+            note = "GIVE txa 2nd dose"
         elif ptype == "assess" and tid:
             mark_done(tid); note = f"exclude {tid}"   # atony scenarios: no trauma/tissue
         elif ptype in ("task", "ci_check", "consider", "followup") and tid:
@@ -229,6 +238,7 @@ def stream(scenario, max_steps=300):
             else:
                 if tid == "txa":
                     session["txaTime"] = now_ms; session["txaHandled"] = True
+                    p.give_txa(t_min)
                 mark_done(tid)
             note = f"do {tid}"
         elif ptype in (None, "monitoring"):
@@ -241,6 +251,7 @@ def stream(scenario, max_steps=300):
         # ── infusion each step (rate-limited by cannulae) ──
         fluids_in = 0.0
         blood_in = 0.0
+        ffp_in = 0.0
         cryst_rate = crystalloid_rate_ml_min(session)
         if cryst_rate > 0:
             fluids_in = cryst_rate * step_dt
@@ -250,17 +261,20 @@ def stream(scenario, max_steps=300):
                 rapid_cryst_ml += fluids_in
                 session["rapidCrystMl"] = rapid_cryst_ml
         if transfusing and session["level"] in ("major", "massive"):
-            rate = MASSIVE_PRBC_ML_MIN if session["level"] == "massive" else MAJOR_PRBC_ML_MIN
-            blood_in = rate * step_dt   # fixed PRBC ceiling; no bleed-rate cap
+            prbc_rate = (MASSIVE_PRBC_ML_MIN if session["level"] == "massive"
+                         else MAJOR_PRBC_ML_MIN)
+            blood_in = prbc_rate * step_dt
+            if mhp_active and session["level"] == "massive":
+                ffp_in = MASSIVE_FFP_ML_MIN * step_dt
 
-        # advance first, then snapshot, so the figures reflect the RESULT of this
-        # step's action (not the instant before the drug took effect).
-        p.tick(t_min, dt_min=step_dt, fluids_in=fluids_in, blood_in=blood_in)
+        p.tick(t_min, dt_min=step_dt, fluids_in=fluids_in, blood_in=blood_in, ffp_in=ffp_in)
         t_min += step_dt
 
         snap = {
             "t": round(t_min, 2), "ebl": round(p.cumulative_bled), "tone": round(p.tone, 2),
-            "bleed": round(p.bleed_rate), "map": round(p.map), "lactate": round(p.lactate, 1),
+            "bleed": round(p.bleed_rate), "source_bleed": round(p.source_bleed_rate),
+            "map": round(p.map), "lactate": round(p.lactate, 1),
+            "fibrinogen": round(p.fibrinogen_g_l, 2), "coag_mult": round(p.coag_multiplier, 2),
             "level": session["level"], "ptype": ptype, "tid": tid, "note": note,
             "acted": acted, "verdict": None,
         }
@@ -273,7 +287,9 @@ def stream(scenario, max_steps=300):
 
     bridge.close()
     yield {"t": round(t_min, 2), "ebl": round(p.cumulative_bled), "tone": round(p.tone, 2),
-           "bleed": round(p.bleed_rate), "map": round(p.map), "lactate": round(p.lactate, 1),
+           "bleed": round(p.bleed_rate), "source_bleed": round(p.source_bleed_rate),
+           "map": round(p.map), "lactate": round(p.lactate, 1),
+           "fibrinogen": round(p.fibrinogen_g_l, 2), "coag_mult": round(p.coag_multiplier, 2),
            "level": session.get("level"), "ptype": None, "tid": None, "note": "(time up)",
            "acted": False, "verdict": "ONGOING"}
 

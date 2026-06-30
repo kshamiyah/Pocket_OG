@@ -32,9 +32,13 @@ from stage3_sandbox import (
     FUNDAL_TONE_PULSE, FUNDAL_DECAY_PER_MIN, FUNDAL_FIRM_THRESHOLD,
     BIMANUAL_DURATION_MIN, BIMANUAL_BLEED_FACTOR,
     CONTROLLED_BLEED, PPH_MAJOR_ML, PPH_MASSIVE_ML, BLOOD_PREP_MIN,
-    MAJOR_PRBC_ML_MIN, MASSIVE_PRBC_ML_MIN,
-    CRYST_EFF, PRBC_EFF,
+    MAJOR_PRBC_ML_MIN, MASSIVE_PRBC_ML_MIN, MASSIVE_FFP_ML_MIN,
+    CRYST_EFF, PRBC_EFF, FFP_EFF, PRBC_EFF_LOW_FIBRIN,
     DEFICIT_FRACTION_CAP, BLEED_STRESS_THRESHOLD_ML_MIN, BLEED_STRESS_K, BLEED_STRESS_CAP_MMHG,
+    TXA_ONSET_MIN, TXA_FIBRINOLYSIS_FACTOR_1, TXA_FIBRINOLYSIS_FACTOR_2,
+    FIBRINOGEN_START_G_L, FIBRINOGEN_TREAT_THRESHOLD_G_L, FIBRINOGEN_MIN_G_L, FIBRINOGEN_MAX_G_L,
+    FIBRINOGEN_CONSUMPTION_PER_L_EBL, FIBRINOGEN_DILUTION_PER_L_PRBC, FIBRINOGEN_GAIN_PER_L_FFP,
+    FIBRINOLYSIS_G_L_MIN_AT_MAX_BLEED, COAG_MULTIPLIER_BREAKPOINTS,
     CARBO_MAX_DOSES, CARBO_REPEAT_BASE_SEC, CARBO_REPEAT_FLOOR_SEC,
     URGENCY_EBL_ML, URGENCY_BLEED_ML_MIN, DRUG_INCREMENT, DRUG_TONE_CEILING,
 )
@@ -90,7 +94,11 @@ class PatientV4:
         self.cumulative_bled = float(start_ebl)   # EBL starts at the recognition point
         self.cumulative_fluids_in = 0.0   # crystalloid given (R-VOL-2 / R-TX-3b)
         self.cumulative_blood_in = 0.0    # PRBC given
+        self.cumulative_ffp_in = 0.0    # FFP given (R-COAG-4)
+        self.fibrinogen_g_l = FIBRINOGEN_START_G_L
         self._map_bleed_penalty = 0.0     # acute drain stress (R-CIRC-3b)
+        self._txa_doses = 0
+        self._txa_effect_from = float("inf")   # sim minutes — antifibrinolytic effect active
         self._pending = []           # uterotonics: (effect_min, target)  — scaled by R
         self._pending_surg = []      # surgical: (effect_min, target, step) — mechanical
 
@@ -113,20 +121,44 @@ class PatientV4:
         return self._now_min < self.compression_until
 
     @property
-    def bleed_rate(self):
+    def txa_active(self):
+        return self._txa_doses > 0 and self._now_min >= self._txa_effect_from
+
+    @property
+    def txa_fibrinolysis_factor(self):
+        if not self.txa_active:
+            return 1.0
+        return TXA_FIBRINOLYSIS_FACTOR_2 if self._txa_doses >= 2 else TXA_FIBRINOLYSIS_FACTOR_1
+
+    @property
+    def coag_multiplier(self):
+        return interp(self.fibrinogen_g_l, COAG_MULTIPLIER_BREAKPOINTS)
+
+    @property
+    def fibrinogen_low(self):
+        return self.fibrinogen_g_l < FIBRINOGEN_TREAT_THRESHOLD_G_L
+
+    @property
+    def source_bleed_rate(self):
         base = BASELINE_FLOW_ML_MIN * (1.0 - self.palpation_tone)
         if self.compression_active and not self.bimanual_ineffective:
-            return base * BIMANUAL_BLEED_FACTOR
+            base *= BIMANUAL_BLEED_FACTOR
         return base
 
     @property
+    def bleed_rate(self):
+        return self.source_bleed_rate * self.coag_multiplier
+
+    @property
     def durable_bleed_rate(self):
-        # bleeding from SUSTAINED (drug/surgical) tone only — excludes fundal pulse
-        # and bimanual compression, so "controlled" means durable control.
-        return BASELINE_FLOW_ML_MIN * (1.0 - self.sustained_tone)
+        return BASELINE_FLOW_ML_MIN * (1.0 - self.sustained_tone) * self.coag_multiplier
+
     @property
     def effective_replacement_ml(self):
-        return self.cumulative_fluids_in * CRYST_EFF + self.cumulative_blood_in * PRBC_EFF
+        prbc_eff = PRBC_EFF_LOW_FIBRIN if self.fibrinogen_low else PRBC_EFF
+        return (self.cumulative_fluids_in * CRYST_EFF
+                + self.cumulative_blood_in * prbc_eff
+                + self.cumulative_ffp_in * FFP_EFF)
 
     @property
     def haemorrhagic_deficit_ml(self):
@@ -173,11 +205,30 @@ class PatientV4:
         if not self.bimanual_ineffective:
             self.compression_until = max(self.compression_until, now_min + BIMANUAL_DURATION_MIN)
 
+    def give_txa(self, now_min):
+        """Antifibrinolytic — slows fibrinolysis after onset (R-COAG-6 / WOMAN)."""
+        was_active = self.txa_active
+        self._txa_doses = min(2, self._txa_doses + 1)
+        if not was_active:
+            self._txa_effect_from = now_min + TXA_ONSET_MIN
+
+    def _update_coagulation(self, source_bleed, bled_ml, blood_in, ffp_in, dt_min):
+        if dt_min <= 0:
+            return
+        lysis = ((source_bleed / BASELINE_FLOW_ML_MIN)
+                 * FIBRINOLYSIS_G_L_MIN_AT_MAX_BLEED * dt_min * self.txa_fibrinolysis_factor)
+        self.fibrinogen_g_l -= (bled_ml / 1000.0) * FIBRINOGEN_CONSUMPTION_PER_L_EBL
+        self.fibrinogen_g_l -= (blood_in / 1000.0) * FIBRINOGEN_DILUTION_PER_L_PRBC
+        self.fibrinogen_g_l -= lysis
+        self.fibrinogen_g_l += (ffp_in / 1000.0) * FIBRINOGEN_GAIN_PER_L_FFP
+        self.fibrinogen_g_l = max(FIBRINOGEN_MIN_G_L,
+                                  min(FIBRINOGEN_MAX_G_L, self.fibrinogen_g_l))
+
     def give_massage(self):
         """Legacy alias — fundal pulse only."""
         self.give_fundal_massage()
 
-    def tick(self, now_min, dt_min=1.0, fluids_in=0.0, blood_in=0.0):
+    def tick(self, now_min, dt_min=1.0, fluids_in=0.0, blood_in=0.0, ffp_in=0.0):
         self._now_min = now_min
         # surgical control first — MECHANICAL, independent of R (R-SURG-1)
         keep_s = []
@@ -189,7 +240,6 @@ class PatientV4:
                 keep_s.append((effect_min, target, step))
         self._pending_surg = keep_s
         # uterotonics — each adds an equal increment of tone (R-SEVERITY; no R).
-        # Drug-refractory (structural, e.g. accreta) uteri do NOT respond.
         keep = []
         for effect_min, drug_id in self._pending:
             if now_min >= effect_min:
@@ -199,18 +249,22 @@ class PatientV4:
             else:
                 keep.append((effect_min, drug_id))
         self._pending = keep
-        bled = self.bleed_rate * dt_min
+        source_bleed = self.source_bleed_rate
+        effective_bleed = source_bleed * self.coag_multiplier
+        bled = effective_bleed * dt_min
         self.cumulative_bled += bled
         self.cumulative_fluids_in += fluids_in
         self.cumulative_blood_in += blood_in
-        self.blood_volume += fluids_in + blood_in - bled
+        self.cumulative_ffp_in += ffp_in
+        self._update_coagulation(source_bleed, bled, blood_in, ffp_in, dt_min)
+        self.blood_volume += fluids_in + blood_in + ffp_in - bled
         if self.blood_volume < 0:
             self.blood_volume = 0.0
         if dt_min > 0:
-            infusion_ml_min = (fluids_in + blood_in) / dt_min
+            infusion_ml_min = (fluids_in + blood_in + ffp_in) / dt_min
         else:
             infusion_ml_min = 0.0
-        net_balance_ml_min = infusion_ml_min - self.bleed_rate
+        net_balance_ml_min = infusion_ml_min - effective_bleed
         if net_balance_ml_min < -BLEED_STRESS_THRESHOLD_ML_MIN:
             excess = -net_balance_ml_min - BLEED_STRESS_THRESHOLD_ML_MIN
             self._map_bleed_penalty = min(BLEED_STRESS_CAP_MMHG, excess * BLEED_STRESS_K)

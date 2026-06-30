@@ -122,6 +122,25 @@ DEFICIT_FRACTION_CAP = 0.55      # max fraction fed into MAP breakpoints
 BLEED_STRESS_THRESHOLD_ML_MIN = 100   # net drain (ml/min) before MAP penalty
 BLEED_STRESS_K = 0.005           # mmHg penalty per ml/min excess drain
 BLEED_STRESS_CAP_MMHG = 8        # cap acute bleed-stress penalty
+# TXA — antifibrinolytic (WOMAN trial; GTG52 1 g IV ASAP, 2nd dose if bleeding ≥30 min).
+TXA_ONSET_MIN = 2                # IV effect on fibrinolysis [ASSUMED; over 10-min infusion]
+TXA_FIBRINOLYSIS_FACTOR_1 = 0.50 # fibrinolysis drive with 1 g [ASSUMED]
+TXA_FIBRINOLYSIS_FACTOR_2 = 0.40 # with 2nd g [ASSUMED]
+# Coagulation — fibrinogen-centric (R-COAG; Blood Advances 2018; EJA 2023).
+FIBRINOGEN_START_G_L = 4.5       # term pregnancy baseline [ASSUMED band 4–6 g/L]
+FIBRINOGEN_TREAT_THRESHOLD_G_L = 2.0   # PPH treatment threshold (R-COAG-2)
+FIBRINOGEN_MIN_G_L = 0.3
+FIBRINOGEN_MAX_G_L = 6.0
+FIBRINOGEN_CONSUMPTION_PER_L_EBL = 0.12   # g/L lost per L effective haemorrhage [ASSUMED]
+FIBRINOGEN_DILUTION_PER_L_PRBC = 0.20     # g/L drop per L PRBC infused [ASSUMED]
+FIBRINOGEN_GAIN_PER_L_FFP = 0.30          # g/L rise per L FFP [ASSUMED]
+FIBRINOLYSIS_G_L_MIN_AT_MAX_BLEED = 0.04  # g/L/min fibrinogen loss at 700 ml/min source bleed
+COAG_MULTIPLIER_BREAKPOINTS = [   # (fibrinogen g/L, bleed multiplier on source rate)
+    (0.0, 1.40), (1.0, 1.25), (1.5, 1.10), (2.0, 1.00), (6.0, 1.00),
+]
+FFP_EFF = 0.85                   # effective perfusion credit per ml FFP [ASSUMED]
+PRBC_EFF_LOW_FIBRIN = 0.70       # PRBC perfusion credit when fibrinogen < 2 g/L [ASSUMED]
+MASSIVE_FFP_ML_MIN = round(MASSIVE_PRBC_ML_MIN * 4 / 6)  # MHP 6 RBC : 4 FFP ratio
 # Legacy names (deprecated sandboxes import these)
 MAJOR_INFUSION_ML_MIN = MAJOR_PRBC_ML_MIN
 MASSIVE_INFUSION_ML_MIN = MASSIVE_PRBC_ML_MIN

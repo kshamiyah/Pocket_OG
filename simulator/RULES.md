@@ -431,7 +431,47 @@ to that later layer (2026-06-29).
 If ~**1 whole blood volume** has been transfused and bleeding continues
 (held by transfusion alone), surgical control is mandatory. Stands in for the
 not-yet-modelled limits: **dilutional coagulopathy** and **blood-bank
-depletion**. ☑ **ACCEPTED — concept**; coagulopathy modelling deferred.
+depletion**. ☑ **ACCEPTED — concept**; see **R-COAG** (fibrinogen model, 2026).
+
+### R-COAG — Fibrinogen-centric coagulopathy (Tier 1)
+
+Obstetric coagulopathy is rare early but devastating; **fibrinogen falls first**
+and **≤2 g/L** during the first 1.5–2 L of loss predicts severe morbidity
+(Blood Advances 2018; FIBTEM A5 &lt;12 mm ≈ 2 g/L — EJA 2023 / anae.12859).
+
+**R-COAG-1 — Starting fibrinogen:** `4.5 g/L` at term (procoagulant pregnancy baseline;
+band 4–6 g/L). [ASSUMED calibration]
+
+**R-COAG-2 — Treatment threshold:** fibrinogen **≤2.0 g/L** → clinically important
+hypofibrinogenemia (triggers coag bleed multiplier &gt;1).
+
+**R-COAG-3 — Consumption:** each litre of **effective** haemorrhage reduces fibrinogen
+by `0.12 g/L` [ASSUMED].
+
+**R-COAG-4 — Dilution / replacement:**
+- PRBC infusion dilutes: `−0.20 g/L` per litre PRBC [ASSUMED]
+- FFP infusion replenishes: `+0.30 g/L` per litre FFP [ASSUMED]
+- MHP massive pathway: **6 RBC : 4 FFP** infusion ratio (GTG52 empirical pack)
+
+**R-COAG-5 — Effective bleed:**
+`effective_bleed_rate = source_bleed_rate × coag_multiplier(fibrinogen)`
+EBL accumulates from **effective** bleed. Source bleed = tone/bimanual (R-BLEED-2).
+
+| Fibrinogen (g/L) | coag_multiplier |
+|---|---|
+| ≥ 2.0 | 1.00 |
+| 1.5 | 1.10 |
+| 1.0 | 1.25 |
+| &lt; 1.0 | up to 1.40 |
+
+**R-COAG-6 — TXA (antifibrinolytic):** does **not** change uterine tone. After onset,
+reduces **fibrinolysis-driven fibrinogen loss** (WOMAN trial; factors 0.50 / 0.40
+after 1st / 2nd g [ASSUMED]). Timing: 1 g ASAP within 3 h of birth (app/GTG52).
+
+**R-COAG-7 — MAP interaction:** when fibrinogen &lt;2 g/L, `PRBC_EFF` for deficit-MAP
+falls from 0.80 → **0.70** (transfusion less effective during coagulopathic ooze).
+
+☑ **ACCEPTED — structure** (2026); calibration values **[ASSUMED]** pending clinician sign-off.
 
 ### R-TX-5 — Carboprost repeat dosing + abandon-to-surgery decision
 The operator does not give carboprost once; it **repeats** it (every ~15 min,
