@@ -1,5 +1,7 @@
 import BottomSheet from "./BottomSheet";
 
+const BUILD = typeof __BUILD_INFO__ !== "undefined" ? __BUILD_INFO__ : { version: "dev", sha: "dev", date: "" };
+
 const FEATURES = [
   { label: "Search", detail: "Ask a clinical question across summarised guideline content" },
   { label: "Guides", detail: "Browse RCOG, NICE, and local trust guidelines" },
@@ -91,6 +93,9 @@ export default function AboutModal({ open, onClose }) {
         </button>
         <p className="text-xs text-gray-400 text-center mt-3 leading-relaxed">
           Spotted an error? Use the feedback button bottom-left.
+        </p>
+        <p className="text-[10px] text-gray-300 text-center mt-1.5 font-mono">
+          v{BUILD.version} · {BUILD.sha}{BUILD.date ? ` · ${BUILD.date}` : ""}
         </p>
       </div>
     </BottomSheet>

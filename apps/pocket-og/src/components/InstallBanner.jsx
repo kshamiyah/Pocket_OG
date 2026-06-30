@@ -44,6 +44,8 @@ export default function InstallBanner() {
     if (localStorage.getItem(DISMISSED_KEY) === "true") return;
     if (visits < MIN_VISITS) return;
 
+    // Effect must run to record the visit; revealing the banner here is intentional
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setVisible(true);
   }, []);
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import BottomSheet from "./BottomSheet";
 
 const STORAGE_KEY = "pocketog_disclaimer_v1";
@@ -46,13 +46,8 @@ const POINTS = [
 ];
 
 export default function DisclaimerModal() {
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (shouldShowDisclaimer()) {
-      setOpen(true);
-    }
-  }, []);
+  // Lazy init from localStorage — avoids a setState-in-effect cascade
+  const [open, setOpen] = useState(() => shouldShowDisclaimer());
 
   function accept() {
     localStorage.setItem(STORAGE_KEY, String(Date.now()));

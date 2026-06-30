@@ -1,32 +1,52 @@
 # Pocket O&G
 
-Clinical guideline reference app for RBH Maternity. Built with React + Vite + Tailwind CSS, deployed on Vercel.
+Clinical reference app for RBH Maternity — full-text search, in-app guideline readers, interactive decision flowcharts, a drug formulary, consent risk modules, and clinical calculators. Built with React + Vite + Tailwind CSS, deployed on Vercel.
 
 ## Guidelines included
 
-| Code | Title | Version | Date | Flowcharts |
-|------|-------|---------|------|-----------|
-| GL952 | Hypertension in Pregnancy | V6.3 | March 2026 | Triage, Acute, Severe/LW, Postnatal |
-| GL787 | Obstetric Antibiotics | V6.0 | July 2024 | — |
-| CG565 | First Trimester Miscarriage | V6 | September 2024 | Triage |
-| CG621 | Medical Management of Miscarriage | V6 | May 2024 | Outpatient, Inpatient |
-| CG623 | Ectopic Pregnancy — Medical Management | V5 | June 2025 | MTX pathway |
-| GL895 | Preterm Pre-Labour Rupture of Membranes (PPRoM) | V7 | November 2023 | — |
-| GL861 | Induction of Labour & Term PLRoM | V6.10 | May 2026 | IOL pathway |
-| GL783 | Iron Deficiency Anaemia | V5 | January 2024 | — |
-| GL880 | Intrahepatic Cholestasis of Pregnancy | V6 | March 2024 | Delivery timing |
-| GL891 | VTE in Pregnancy & Postnatal | V7 | October 2024 | Antenatal risk, Postnatal risk |
-| GL983 | Diabetes in Pregnancy | V4 | February 2025 | DKA pathway |
-| QS46 | Multiple Pregnancy (Twins & Triplets) — NICE | QS46 | September 2019 | Care pathway, Tertiary FMC referral |
-| QS22 | Antenatal Care — NICE | QS22 | February 2023 | Appointment schedule |
-| GTG57 | Reduced Fetal Movements — RCOG | GTG57 | February 2026 | Care pathway, Gestation triage, Recurrent RFM |
+29 guidelines from RBH, NICE, RCOG, BASHH, NHSCSP and MBRRACE. **Reader** = full searchable in-app text; **Flowchart** = interactive decision pathway.
+
+| Code | Title | Source | Version · Date | Reader | Flowchart |
+|------|-------|--------|----------------|:------:|:---------:|
+| BASHH_PID | Pelvic Inflammatory Disease | BASHH | 2019 · 2018 (updated 2019) | ✓ | ✓ |
+| MBRRACE_SLMC2025 | MBRRACE 2025 | MBRRACE | 2021–23 data · September 2025 | ✓ |  |
+| NHSCSP20 | Cervical Screening & Colposcopy | NHSCSP | 2020 (updated 2025) | ✓ | ✓ |
+| QS22 | Antenatal Care | NICE | February 2023 | ✓ | ✓ |
+| NG73 | Endometriosis | NICE | September 2017 (updated 2024) | ✓ | ✓ |
+| NG229 | Fetal Monitoring in Labour (CTG) | NICE | December 2022 (updated 2026) | ✓ | ✓ |
+| NG88 | Heavy Menstrual Bleeding | NICE | September 2023 | ✓ | ✓ |
+| NG133 | Hypertension in Pregnancy | NICE | June 2019 (updated 2023) | ✓ |  |
+| QS46 | Multiple Pregnancy (Twins & Triplets) | NICE | September 2019 | ✓ | ✓ |
+| CG192 | Perinatal Mental Health | NICE | December 2014 (updated 2020) | ✓ |  |
+| NG25 | Preterm Labour & Birth | NICE | November 2015 (updated 2022) | ✓ |  |
+| GL983 | Diabetes in Pregnancy | RBH | V4 · February 2025 | ✓ | ✓ |
+| CG623 | Ectopic Pregnancy — Medical Management | RBH | V5 · June 2025 | ✓ | ✓ |
+| CG565 | First Trimester Miscarriage | RBH | V6 · September 2024 | ✓ | ✓ |
+| GL952 | Hypertension in Pregnancy | RBH | V6.3 · March 2026 | ✓ | ✓ |
+| GL861 | Induction of Labour & Term PLRoM | RBH | V6.10 · May 2026 | ✓ | ✓ |
+| GL880 | Intrahepatic Cholestasis of Pregnancy | RBH | V6 · March 2024 | ✓ | ✓ |
+| GL783 | Iron Deficiency Anaemia | RBH | V5 · January 2024 | ✓ |  |
+| CG621 | Medical Management of Miscarriage | RBH | V6 · May 2024 | ✓ | ✓ |
+| GL787 | Obstetric Antibiotics | RBH | V6.0 · July 2024 | ✓ |  |
+| GL895 | PPRoM | RBH | V7 · November 2023 | ✓ |  |
+| GL891 | VTE in Pregnancy & Postnatal | RBH | V7 · October 2024 | ✓ |  |
+| GTG63 | Antepartum Haemorrhage | RCOG | November 2011 | ✓ | ✓ |
+| GTG67 | Endometrial Hyperplasia | RCOG | February 2016 | ✓ | ✓ |
+| GTG69 | Nausea & Vomiting of Pregnancy | RCOG | June 2016 | ✓ |  |
+| GTG52 | Postpartum Haemorrhage | RCOG | December 2016 | ✓ | ✓ |
+| GTG17 | Recurrent Miscarriage | RCOG | April 2011 | ✓ |  |
+| GTG57 | Reduced Fetal Movements | RCOG | February 2026 | ✓ | ✓ |
+| GTG31 | Small for Gestational Age Fetus (SGA) | RCOG | February 2013 | ✓ | ✓ |
 
 ## Features
 
-- Full-text search across all guideline sections with synonym expansion and word-boundary scoring
-- Guideline picker to browse and filter by topic
-- Interactive decision flowcharts with per-guideline colour theming
-- System font stack (SF Pro / Helvetica Neue) for a native feel on iOS/macOS
+- **Search** — full-text across all guideline sections with synonym expansion and word-boundary scoring
+- **Guidelines** — browse/filter by source (RBH · NICE · RCOG · …) with in-app readers and source PDFs
+- **Flowcharts** — interactive decision pathways with per-guideline colour theming, including an interactive **CTG classifier** (NG229) that grades each feature and routes into the action pathway
+- **Rx** — obstetric & gynaecology drug formulary
+- **Consent** — procedure risk modules (verbatim RCOG/NICE frequencies)
+- **Calculator** — β-hCG/PUL, ectopic surveillance, VTE risk, PUQE
+- Installable PWA with offline caching; system font stack for a native feel on iOS/macOS
 
 ## Adding a new guideline
 

@@ -1,5 +1,6 @@
 import { GUIDELINES } from "@pocket-og/guidelines";
-import ContentBlock, { highlightText } from "./ContentBlock";
+import ContentBlock from "./ContentBlock";
+import { highlightText } from "../utils/highlight";
 import { glColors } from "../data/glColors";
 import { READER_AVAILABLE } from "../data/readerAvailable";
 

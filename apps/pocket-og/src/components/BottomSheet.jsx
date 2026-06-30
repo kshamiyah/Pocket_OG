@@ -25,6 +25,7 @@ export default function BottomSheet({
         clearTimeout(closeTimerRef.current);
         closeTimerRef.current = null;
       }
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- mount/unmount animation lifecycle
       setMounted(true);
       return;
     }
@@ -40,6 +41,7 @@ export default function BottomSheet({
 
   useLayoutEffect(() => {
     if (!open || !mounted) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- resets slide animation before unmount
       setVisible(false);
       return;
     }
