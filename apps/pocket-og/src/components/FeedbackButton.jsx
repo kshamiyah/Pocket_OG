@@ -1,144 +1,165 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import BottomSheet from "./BottomSheet";
 
+// Where survey responses go. Set VITE_FEEDBACK_ENDPOINT to your form endpoint,
+// e.g. a Formspree form URL: https://formspree.io/f/xxxxxxxx
+// Until it's set (or if the POST fails), we fall back to a structured email so
+// feedback is never lost.
+const ENDPOINT = import.meta.env.VITE_FEEDBACK_ENDPOINT || "";
 const RECIPIENT = "khalid@drshamiyah.com";
 const SUBJECT = "Pocket O&G — Feedback";
 const TAB_BAR_CLEARANCE = "calc(4rem + env(safe-area-inset-bottom, 0px) + 0.625rem)";
+const BUILD = typeof __BUILD_INFO__ !== "undefined" ? __BUILD_INFO__ : { version: "dev", sha: "dev" };
 
-const linkBtn =
-  "flex-1 min-w-0 py-2 rounded-xl text-sm font-semibold text-center no-underline active:opacity-90";
-const linkBtnPrimary = `${linkBtn} bg-gray-900 text-white`;
-const linkBtnSecondary = `${linkBtn} border border-gray-200 text-gray-700`;
-const linkBtnFullPrimary =
-  "block w-full py-2.5 rounded-xl text-sm font-semibold text-center no-underline bg-gray-900 text-white active:opacity-90";
+const ROLES = ["CT1–2", "ST3–5", "ST6–7", "Consultant", "Midwife", "Other"];
+const USE_FREQ = ["Daily", "Weekly", "Occasionally", "No"];
+const SECTIONS = ["Search", "Guidelines", "Flowcharts", "CTG tool", "Rx", "Consent", "Calculators"];
+const SEARCH_HIT = ["Yes", "Mostly", "No", "Didn't use"];
 
-function buildFeedbackPayload(message, query, filter) {
-  const contextLines = [
-    query ? `Search query: "${query}"` : null,
-    filter && filter !== "ALL" ? `Filter active: ${filter}` : null,
-  ].filter(Boolean);
-
-  const body = [
-    message.trim(),
-    "",
-    "— — —",
-    ...contextLines,
-    "Sent from Pocket O&G",
-  ].join("\n");
-
-  const mailtoHref =
-    `mailto:${RECIPIENT}` +
-    `?subject=${encodeURIComponent(SUBJECT)}` +
-    `&body=${encodeURIComponent(body)}`;
-
-  const gmailHref =
-    `https://mail.google.com/mail/?${new URLSearchParams({
-      view: "cm",
-      fs: "1",
-      to: RECIPIENT,
-      su: SUBJECT,
-      body,
-    }).toString()}`;
-
-  const outlookHref =
-    `https://outlook.live.com/mail/0/deeplink/compose?${new URLSearchParams({
-      to: RECIPIENT,
-      subject: SUBJECT,
-      body,
-    }).toString()}`;
-
-  const clipboardText = `To: ${RECIPIENT}\nSubject: ${SUBJECT}\n\n${body}`;
-
-  return { body, mailtoHref, gmailHref, outlookHref, clipboardText };
-}
-
-async function copyToClipboard(text) {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function usePrefersFinePointer() {
-  const [fine, setFine] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(pointer: fine)").matches,
+function Chips({ options, value, onChange, multi = false }) {
+  const active = o => (multi ? value.has(o) : value === o);
+  const toggle = o => {
+    if (multi) {
+      const s = new Set(value);
+      s.has(o) ? s.delete(o) : s.add(o);
+      onChange(s);
+    } else {
+      onChange(value === o ? null : o);
+    }
+  };
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map(o => (
+        <button
+          key={o}
+          type="button"
+          onClick={() => toggle(o)}
+          className={`px-3 py-1.5 rounded-full text-sm border transition-all active:scale-95 ${
+            active(o) ? "bg-gray-900 text-white border-transparent" : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+          }`}
+        >
+          {o}
+        </button>
+      ))}
+    </div>
   );
-
-  useEffect(() => {
-    const mq = window.matchMedia("(pointer: fine)");
-    const update = () => setFine(mq.matches);
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-
-  return fine;
 }
 
-function useIsIOS() {
-  return useState(() => {
-    if (typeof navigator === "undefined") return false;
-    return (
-      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
-    );
-  })[0];
+function Rating({ value, onChange, max = 5 }) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {Array.from({ length: max }, (_, i) => i + 1).map(n => (
+        <button
+          key={n}
+          type="button"
+          onClick={() => onChange(value === n ? 0 : n)}
+          className={`w-9 h-9 rounded-xl text-sm font-semibold border transition-all active:scale-95 ${
+            value === n ? "bg-gray-900 text-white border-transparent" : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
+          }`}
+        >
+          {n}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function Field({ label, hint, children }) {
+  return (
+    <div className="mb-5">
+      <p className="text-sm font-semibold text-gray-900 mb-0.5">{label}</p>
+      {hint && <p className="text-xs text-gray-400 mb-2">{hint}</p>}
+      {!hint && <div className="mb-2" />}
+      {children}
+    </div>
+  );
 }
 
 export default function FeedbackButton({ query = "", filter = "ALL" }) {
   const [open, setOpen] = useState(false);
-  const [phase, setPhase] = useState("compose");
-  const [message, setMessage] = useState("");
-  const [sentPayload, setSentPayload] = useState(null);
-  const [clipboardOk, setClipboardOk] = useState(false);
-  const fallbackRef = useRef(null);
-  const isDesktop = usePrefersFinePointer();
-  const isIOS = useIsIOS();
-  const mailLabel = isIOS ? "Mail" : "Email app";
+  const [phase, setPhase] = useState("form"); // form | done
+  const [submitting, setSubmitting] = useState(false);
+  const [sentVia, setSentVia] = useState("");
 
-  function resetForm() {
-    setPhase("compose");
-    setMessage("");
-    setSentPayload(null);
-    setClipboardOk(false);
+  const [role, setRole] = useState(null);
+  const [useFreq, setUseFreq] = useState(null);
+  const [usefulness, setUsefulness] = useState(0);
+  const [sections, setSections] = useState(new Set());
+  const [searchHit, setSearchHit] = useState(null);
+  const [concerns, setConcerns] = useState("");
+  const [missing, setMissing] = useState("");
+  const [recommend, setRecommend] = useState(0);
+  const [contact, setContact] = useState("");
+
+  function reset() {
+    setPhase("form"); setSubmitting(false); setSentVia("");
+    setRole(null); setUseFreq(null); setUsefulness(0); setSections(new Set());
+    setSearchHit(null); setConcerns(""); setMissing(""); setRecommend(0); setContact("");
   }
 
   function close() {
     setOpen(false);
-    resetForm();
+    reset();
   }
 
-  async function submitFeedback() {
-    if (!message.trim()) return;
-    const payload = buildFeedbackPayload(message, query, filter);
-    const copied = await copyToClipboard(payload.clipboardText);
-    setSentPayload(payload);
-    setClipboardOk(copied);
-    setPhase("sent");
+  const canSubmit =
+    !!role || !!useFreq || usefulness > 0 || sections.size > 0 ||
+    !!searchHit || concerns.trim() || missing.trim() || recommend > 0;
+
+  function buildPayload() {
+    return {
+      role: role ?? "",
+      wouldUseOnWard: useFreq ?? "",
+      overallUsefulness: usefulness || "",
+      sectionsUseful: [...sections],
+      searchFoundIt: searchHit ?? "",
+      clinicalConcerns: concerns.trim(),
+      missingOrAdd: missing.trim(),
+      recommend: recommend || "",
+      contact: contact.trim(),
+      context: { query, filter, version: BUILD.version, build: BUILD.sha },
+      submittedAt: new Date().toISOString(),
+    };
   }
 
-  async function handleCopyOnly() {
-    if (!message.trim()) return;
-    const payload = buildFeedbackPayload(message, query, filter);
-    const copied = await copyToClipboard(payload.clipboardText);
-    if (copied) {
-      setClipboardOk(true);
-      setTimeout(() => setClipboardOk(false), 2000);
-      return;
+  function emailFallback(p) {
+    const body = [
+      `Role: ${p.role || "—"}`,
+      `Would use on ward: ${p.wouldUseOnWard || "—"}`,
+      `Overall usefulness: ${p.overallUsefulness || "—"}/5`,
+      `Sections useful: ${p.sectionsUseful.join(", ") || "—"}`,
+      `Search found it: ${p.searchFoundIt || "—"}`,
+      `Recommend (0–10): ${p.recommend || "—"}`,
+      "",
+      `Clinical concerns / errors:\n${p.clinicalConcerns || "—"}`,
+      "",
+      `Missing / would add:\n${p.missingOrAdd || "—"}`,
+      "",
+      p.contact ? `Contact: ${p.contact}` : null,
+      `— sent from Pocket O&G · "${p.context.query}" / ${p.context.filter} / v${p.context.version} ${p.context.build}`,
+    ].filter(l => l !== null).join("\n");
+    window.location.href = `mailto:${RECIPIENT}?subject=${encodeURIComponent(SUBJECT)}&body=${encodeURIComponent(body)}`;
+  }
+
+  async function submit() {
+    if (!canSubmit || submitting) return;
+    const payload = buildPayload();
+    setSubmitting(true);
+    if (ENDPOINT) {
+      try {
+        const res = await fetch(ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) { setSentVia("survey"); setPhase("done"); setSubmitting(false); return; }
+      } catch { /* fall through to email */ }
     }
-    setSentPayload(payload);
-    setClipboardOk(false);
-    setPhase("sent");
+    emailFallback(payload);
+    setSentVia("email");
+    setSubmitting(false);
+    setPhase("done");
   }
-
-  useEffect(() => {
-    if (phase !== "sent" || clipboardOk) return;
-    const el = fallbackRef.current;
-    if (!el) return;
-    el.focus();
-    el.select();
-  }, [phase, clipboardOk]);
 
   return (
     <>
@@ -154,126 +175,110 @@ export default function FeedbackButton({ query = "", filter = "ALL" }) {
         </svg>
       </button>
 
-      <BottomSheet
-        open={open}
-        onClose={close}
-        sheetClassName="min-h-[min(380px,78dvh)] sm:min-h-[420px] max-h-[92dvh]"
-      >
+      <BottomSheet open={open} onClose={close} sheetClassName="min-h-[min(420px,82dvh)] max-h-[92dvh]">
         <div className="px-5 sm:px-6 pb-5 box-border flex-1 overflow-y-auto">
-              {phase === "compose" ? (
-                <>
-                  <h2 className="text-lg font-semibold text-gray-900">Send feedback</h2>
-                  <p className="text-sm text-gray-600 mt-2 leading-relaxed">
-                    Your feedback is valuable — whether you&apos;ve spotted an error, found something unclear,
-                    or have an idea to improve the app, it helps us get it right.
-                  </p>
-                  <p className="text-sm text-gray-400 mt-2 leading-relaxed">
-                    {isDesktop
-                      ? "Copies your message — then open Gmail or Outlook"
-                      : isIOS
-                        ? "Copies your message — then open Mail (or webmail)"
-                        : "Copies your message — then Email app, Gmail, or Outlook"}
-                  </p>
+          {phase === "form" ? (
+            <>
+              <h2 className="text-lg font-semibold text-gray-900">Quick feedback</h2>
+              <p className="text-sm text-gray-500 mt-1 mb-5 leading-relaxed">
+                A few taps helps shape what comes next. Answer what you like — nothing is required.
+                <span className="block mt-1 text-gray-400">Please don&apos;t include any patient-identifiable information.</span>
+              </p>
 
-                  {query && (
-                    <p className="mt-2 text-sm text-gray-400">
-                      Includes: <span className="text-gray-600 font-medium">"{query}"</span>
-                      {filter !== "ALL" && <span> · {filter}</span>}
-                    </p>
-                  )}
+              <Field label="Your role">
+                <Chips options={ROLES} value={role} onChange={setRole} />
+              </Field>
 
-                  <textarea
-                    autoFocus
-                    rows={5}
-                    value={message}
-                    onChange={e => setMessage(e.target.value)}
-                    onKeyDown={e => {
-                      if (e.key === "Escape") close();
-                    }}
-                    placeholder="Describe the issue or suggestion…"
-                    className="mt-4 w-full min-h-[140px] box-border border border-gray-200 rounded-2xl px-4 py-3 text-base text-gray-900 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                  />
+              <Field label="Would you use this on the ward?">
+                <Chips options={USE_FREQ} value={useFreq} onChange={setUseFreq} />
+              </Field>
 
-                  <div className="flex gap-2.5 mt-4">
-                    <button
-                      type="button"
-                      onClick={close}
-                      className="flex-1 min-w-0 py-3 rounded-xl border border-gray-200 text-sm text-gray-500 active:bg-gray-50"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCopyOnly}
-                      disabled={!message.trim()}
-                      className="shrink-0 px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-500 disabled:opacity-40 active:bg-gray-50"
-                    >
-                      {clipboardOk ? "Copied" : "Copy only"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={submitFeedback}
-                      disabled={!message.trim()}
-                      className="flex-1 min-w-0 py-3 rounded-xl bg-gray-900 disabled:bg-gray-200 disabled:text-gray-400 text-sm font-semibold text-white active:bg-gray-800"
-                    >
-                      Send
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <h2 className="text-lg font-semibold text-gray-900">Feedback ready</h2>
-                  <p className="text-sm text-gray-500 mt-1 leading-relaxed">
-                    {clipboardOk ? "Copied to clipboard. " : "Copy failed — select the text below. "}
-                    {isDesktop
-                      ? "Use Gmail or Outlook below — desktop browsers need webmail, not a local mail app."
-                      : isIOS
-                        ? `Tap ${mailLabel} to compose in Apple Mail — or Gmail/Outlook if you use webmail.`
-                        : `Tap ${mailLabel} to pick your mail app — or Gmail/Outlook for webmail.`}
-                  </p>
+              <Field label="Overall usefulness" hint="1 = not useful · 5 = very useful">
+                <Rating value={usefulness} onChange={setUsefulness} />
+              </Field>
 
-                  <textarea
-                    ref={fallbackRef}
-                    readOnly
-                    rows={8}
-                    value={sentPayload?.clipboardText ?? ""}
-                    className="mt-4 w-full min-h-[160px] box-border border border-gray-200 rounded-2xl px-4 py-3 text-sm text-gray-800 bg-gray-50 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-                  />
+              <Field label="Which sections were useful?" hint="Select any">
+                <Chips options={SECTIONS} value={sections} onChange={setSections} multi />
+              </Field>
 
-                  {!isDesktop && (
-                    <a href={sentPayload?.mailtoHref} className={`${linkBtnFullPrimary} mt-4 py-3`}>
-                      {mailLabel}
-                    </a>
-                  )}
+              <Field label="Did search find what you needed?">
+                <Chips options={SEARCH_HIT} value={searchHit} onChange={setSearchHit} />
+              </Field>
 
-                  <div className="flex gap-2.5 mt-4">
-                    <a
-                      href={sentPayload?.gmailHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={isDesktop ? linkBtnPrimary : linkBtnSecondary}
-                    >
-                      Gmail
-                    </a>
-                    <a
-                      href={sentPayload?.outlookHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={isDesktop ? linkBtnPrimary : linkBtnSecondary}
-                    >
-                      Outlook
-                    </a>
-                  </div>
+              <Field label="Any clinical content errors or concerns?" hint="Most important — this is a clinical tool">
+                <textarea
+                  rows={3}
+                  value={concerns}
+                  onChange={e => setConcerns(e.target.value)}
+                  placeholder="e.g. a dose, threshold, or pathway that looks off…"
+                  className="w-full box-border border border-gray-200 rounded-2xl px-4 py-3 text-base text-gray-900 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                />
+              </Field>
 
-                  <button
-                    type="button"
-                    onClick={close}
-                    className="w-full mt-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-500 active:bg-gray-50"
-                  >
-                    Done
-                  </button>
-                </>
-              )}
+              <Field label="What's missing, or what would you add?">
+                <textarea
+                  rows={3}
+                  value={missing}
+                  onChange={e => setMissing(e.target.value)}
+                  placeholder="Guidelines, calculators, emergencies…"
+                  className="w-full box-border border border-gray-200 rounded-2xl px-4 py-3 text-base text-gray-900 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                />
+              </Field>
+
+              <Field label="Recommend to a colleague?" hint="0 = not at all · 10 = definitely (optional)">
+                <Rating value={recommend} onChange={setRecommend} max={10} />
+              </Field>
+
+              <Field label="Name or contact" hint="Optional — only if you're happy to be followed up">
+                <input
+                  type="text"
+                  value={contact}
+                  onChange={e => setContact(e.target.value)}
+                  placeholder="Optional"
+                  className="w-full box-border border border-gray-200 rounded-2xl px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                />
+              </Field>
+
+              <div className="flex gap-2.5 mt-2">
+                <button
+                  type="button"
+                  onClick={close}
+                  className="flex-1 min-w-0 py-3 rounded-xl border border-gray-200 text-sm text-gray-500 active:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={submit}
+                  disabled={!canSubmit || submitting}
+                  className="flex-1 min-w-0 py-3 rounded-xl bg-gray-900 disabled:bg-gray-200 disabled:text-gray-400 text-sm font-semibold text-white active:bg-gray-800"
+                >
+                  {submitting ? "Sending…" : "Send feedback"}
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="py-6 text-center">
+              <div className="mx-auto w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center mb-3">
+                <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h2 className="text-lg font-semibold text-gray-900">Thank you</h2>
+              <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+                {sentVia === "email"
+                  ? "Your mail app should be opening — just hit send to finish."
+                  : "Your feedback was sent. It genuinely helps."}
+              </p>
+              <button
+                type="button"
+                onClick={close}
+                className="mt-5 w-full py-3 rounded-xl bg-gray-900 text-white text-sm font-semibold active:bg-gray-800"
+              >
+                Done
+              </button>
+            </div>
+          )}
         </div>
       </BottomSheet>
     </>
