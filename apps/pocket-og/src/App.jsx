@@ -79,6 +79,7 @@ const FLOWCHART_LINKS = [
   { id: "NG73_DIAGNOSIS",        gl: "NG73" },
   { id: "NG73_TREATMENT",        gl: "NG73" },
   { id: "NG229_CTG",             gl: "NG229" },
+  { id: "GTG50_CORD",            gl: "GTG50" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -101,6 +102,7 @@ const FLOWCHART_GROUPS = [
   { gl: "BASHH_PID", label: "Pelvic Inflammatory Disease" },
   { gl: "NG73",      label: "Endometriosis" },
   { gl: "NG229",     label: "Fetal Monitoring / CTG" },
+  { gl: "GTG50",     label: "Cord Prolapse (Emergency)" },
 ];
 
 export default function App() {
