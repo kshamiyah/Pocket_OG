@@ -9,32 +9,19 @@ export const NG229_CTG_FLOWCHART = {
   id: "NG229_CTG",
   title: "CTG Interpretation & Action",
   subtitle: "NG229 · Fetal Monitoring in Labour",
-  startId: "assess",
+  startId: "classify",
   nodes: {
 
-    "assess": {
-      type: "action",
-      title: "Assess the Three Features",
-      text: "Read the CTG systematically (DR C BRAVADO) and classify each feature as reassuring, non-reassuring or abnormal.",
-      items: [
-        "Baseline: reassuring 110–160 · non-reassuring 100–109 (⚠ also 161–180, verify vs NG229) · abnormal <100 or >180",
-        "Variability: reassuring 5–25 · non-reassuring <5 for 30–50 min or >25 for a short period · abnormal <5 for >50 min, sinusoidal, or sustained >25",
-        "Decelerations: reassuring none/early/variable without concerning features · non-reassuring variable with concerning features <30 min · abnormal concerning ≥30 min, late, or prolonged ≥3 min",
-        "Always interpret with the whole clinical picture — risk factors, progress, maternal observations.",
-      ],
-      next: "categorise",
-    },
-
-    "categorise": {
-      type: "decision",
-      title: "Overall Category?",
-      text: "Combine the three features into one overall category.",
-      options: [
-        { label: "All three reassuring", sublabel: "Normal", next: "normal" },
-        { label: "1 non-reassuring feature", sublabel: "Suspicious", next: "suspicious" },
-        { label: "≥2 non-reassuring OR ≥1 abnormal", sublabel: "Pathological", next: "pathological" },
-        { label: "Acute bradycardia / prolonged decel ≥3 min", sublabel: "Need for urgent intervention", next: "urgent" },
-      ],
+    "classify": {
+      type: "classifier",
+      title: "Classify the Trace",
+      text: "Grade each feature one at a time (DR C BRAVADO) — the overall category is calculated for you, then continue to the action pathway. Always interpret with the whole clinical picture.",
+      resultMap: {
+        normal: "normal",
+        suspicious: "suspicious",
+        pathological: "pathological",
+        urgent: "urgent",
+      },
     },
 
     "normal": {
