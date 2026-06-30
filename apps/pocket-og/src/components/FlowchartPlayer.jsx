@@ -27,8 +27,10 @@ function getSublabelItems(sublabel) {
     .filter(Boolean);
 }
 
-export default function FlowchartPlayer({ flowchart, gl, theme, onClose, pdfUrl, onNavigate }) {
-  const [currentId, setCurrentId] = useState(flowchart.startId);
+export default function FlowchartPlayer({ flowchart, gl, theme, onClose, pdfUrl, onNavigate, initialNodeId }) {
+  const [currentId, setCurrentId] = useState(
+    initialNodeId && flowchart.nodes[initialNodeId] ? initialNodeId : flowchart.startId
+  );
   const [history, setHistory] = useState([]); // [{ nodeId, label }]
 
   const node = flowchart.nodes[currentId];

@@ -1,5 +1,10 @@
 // Alert engine — rules from NICE NG235 (Intrapartum Care, Sept 2023) and NICE NG25 (Preterm Labour, Nov 2022)
 
+// CTG feature classification (NICE NG229 §1.4.16–1.4.31) now lives in the shared
+// @pocket-og/guidelines package so the pocket-og CTG Classifier and this engine
+// stay in lockstep. Re-exported here so existing imports keep working.
+export { classifyCTGEntry } from "@pocket-og/guidelines";
+
 const MIN = 60 * 1000;
 const HOUR = 60 * MIN;
 
@@ -27,43 +32,6 @@ function parseGestWeeks(str) {
   const w = str.match(/^(\d+)w$/);
   if (w) return parseInt(w[1]);
   return null;
-}
-
-// ─── CTG feature classification (NICE NG229 §1.4.16–1.4.31) ────────────────
-// Scores only baseline HR, variability, and decelerations per NG229 §1.4.
-// Tachysystole (≥5 ctx/10 min) is handled separately as a standalone alert.
-export function classifyCTGEntry(entry, prevBaselineHR = null) {
-  const features = [];
-
-  // Baseline HR
-  const hr   = entry.baselineHR ?? 140;
-  const rise = prevBaselineHR != null ? hr - prevBaselineHR : 0;
-  if (hr < 100 || hr > 160)        features.push("red");
-  // ≥20 bpm rise is a local clinical threshold; NICE NG229 §1.4 scores absolute range only
-  else if (hr < 110 || rise >= 20) features.push("amber");
-  else                              features.push("white");
-
-  // Variability
-  const v    = entry.variability ?? "5-25";
-  const vMin = entry.variabilityMinutes ?? 0;
-  if (v === "sinusoidal")     features.push("red");
-  else if (v === "<5")        features.push(vMin > 50 ? "red" : vMin >= 30 ? "amber" : "white");
-  else if (v === ">25")       features.push(vMin > 10 ? "red" : "amber");
-  else                        features.push("white");
-
-  // Decelerations
-  const d    = entry.decelerations ?? "none";
-  const dMin = entry.decelerationMinutes ?? 0;
-  if (d === "none" || d === "early" || d === "variable") features.push("white");
-  else if (d === "variable-concerning") features.push(dMin >= 30 ? "red" : "amber");
-  else if (d === "late" || d === "prolonged") features.push("red");
-  else features.push("white");
-
-  const reds   = features.filter(f => f === "red").length;
-  const ambers = features.filter(f => f === "amber").length;
-  if (reds >= 1 || ambers >= 2) return "pathological";
-  if (ambers === 1)             return "suspicious";
-  return "normal";
 }
 
 export function computeAlerts(bed, now = Date.now()) {

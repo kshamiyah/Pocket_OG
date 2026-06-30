@@ -1,4 +1,5 @@
 export { GUIDELINES, GL_COLORS } from "./guidelines.js";
+export { classifyCTGEntry, combineFeatureGrades } from "./ctg.js";
 
 export { GL787_SECTIONS } from "./GL787.js";
 export { GL783_SECTIONS } from "./GL783.js";

@@ -16,6 +16,7 @@ import RxPage from "./components/RxPage";
 import DisclaimerModal from "./components/DisclaimerModal";
 import AboutModal from "./components/AboutModal";
 import InstallBanner from "./components/InstallBanner";
+import CTGClassifier from "./components/CTGClassifier";
 
 import { READER_AVAILABLE } from "./data/readerAvailable";
 
@@ -109,7 +110,9 @@ export default function App() {
   const [filter, setFilter] = useState("ALL");
   const [expanded, setExpanded] = useState({});
   const [activeFlowchartId, setActiveFlowchartId] = useState(null);
+  const [activeFlowchartNode, setActiveFlowchartNode] = useState(null);
   const [showIOLPrioritizer, setShowIOLPrioritizer] = useState(false);
+  const [showCTGClassifier, setShowCTGClassifier] = useState(false);
   const [activeTab, setActiveTab] = useState("search");
   const [glSourceFilter, setGlSourceFilter] = useState("ALL");
   const [fcSourceFilter, setFcSourceFilter] = useState("ALL");
@@ -127,14 +130,19 @@ export default function App() {
   const glSectionRefs = useRef({});
   const fcSectionRefs = useRef({});
 
-  const handleNavigate = ({ type, id }) => {
+  const handleNavigate = ({ type, id, node }) => {
     if (type === "calculator") {
       setActiveFlowchartId(null);
       setActiveCalcScenario(id);
       setCalcNavKey(k => k + 1);
       setActiveTab("calculator");
     } else if (type === "flowchart") {
+      setShowCTGClassifier(false);
+      setActiveFlowchartNode(node ?? null);
       setActiveFlowchartId(id);
+    } else if (type === "ctg-classifier") {
+      setActiveFlowchartId(null);
+      setShowCTGClassifier(true);
     } else if (type === "consent") {
       setActiveFlowchartId(null);
       setActiveConsentProcedure(id);
@@ -238,7 +246,9 @@ export default function App() {
     setActiveGuidelineGl(null);
     setGuidelineScrollTo(null);
     setActiveFlowchartId(null);
+    setActiveFlowchartNode(null);
     setShowIOLPrioritizer(false);
+    setShowCTGClassifier(false);
     if (tabId !== "consent") setActiveConsentProcedure(null);
     if (tabId !== "calculator") setActiveCalcScenario(null);
     setActiveTab(tabId);
@@ -280,6 +290,9 @@ export default function App() {
       {/* IOL Prioritizer overlay */}
       {showIOLPrioritizer && <IOLPrioritizer onClose={() => setShowIOLPrioritizer(false)} />}
 
+      {/* CTG Classifier overlay */}
+      {showCTGClassifier && <CTGClassifier onClose={() => setShowCTGClassifier(false)} onNavigate={handleNavigate} />}
+
       {/* Guideline reader overlay */}
       {activeGuidelineGl && (
         <GuidelineReader
@@ -296,10 +309,12 @@ export default function App() {
         const g = fcGl && GUIDELINES[fcGl];
         return (
           <FlowchartPlayer
+            key={`${activeFlowchartId}:${activeFlowchartNode ?? ""}`}
             flowchart={FLOWCHARTS[activeFlowchartId]}
             gl={fcGl}
             theme={glColors(fcGl)}
-            onClose={() => setActiveFlowchartId(null)}
+            initialNodeId={activeFlowchartNode}
+            onClose={() => { setActiveFlowchartId(null); setActiveFlowchartNode(null); }}
             pdfUrl={g?.pdf ? (g.pdfUrl || g.pdfPath || `/guidelines/${fcGl}.pdf`) : null}
             onNavigate={handleNavigate}
           />
@@ -573,6 +588,18 @@ export default function App() {
                             >
                               <div className={`w-1 h-8 rounded-full shrink-0 ${col.accent}`} />
                               <p className="flex-1 text-sm font-medium text-gray-900">IOL Priority List</p>
+                              <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                              </svg>
+                            </button>
+                          )}
+                          {group.gl === "NG229" && (
+                            <button
+                              onClick={() => setShowCTGClassifier(true)}
+                              className="flex items-center gap-3 w-full px-4 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left border-t border-gray-50"
+                            >
+                              <div className={`w-1 h-8 rounded-full shrink-0 ${col.accent}`} />
+                              <p className="flex-1 text-sm font-medium text-gray-900">CTG Classifier</p>
                               <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                               </svg>
