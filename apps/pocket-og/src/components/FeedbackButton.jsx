@@ -12,7 +12,7 @@ const RECIPIENT = "khalid@drshamiyah.com";
 const TAB_BAR_CLEARANCE = "calc(4rem + env(safe-area-inset-bottom, 0px) + 0.625rem)";
 const BUILD = typeof __BUILD_INFO__ !== "undefined" ? __BUILD_INFO__ : { version: "dev", sha: "dev" };
 
-const ROLES = ["CT1–2", "ST3–5", "ST6–7", "Consultant", "Midwife", "Other"];
+const ROLES = ["ST1–2", "ST3–5", "ST6–7", "Consultant", "Midwife", "Medical student", "Other"];
 const USE_FREQ = ["Daily", "Weekly", "Occasionally", "No"];
 const SECTIONS = ["Search", "Guidelines", "Flowcharts", "CTG tool", "Rx", "Consent", "Calculators"];
 const SEARCH_HIT = ["Yes", "Mostly", "No", "Didn't use"];
