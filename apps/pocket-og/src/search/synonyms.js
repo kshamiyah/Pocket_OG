@@ -1,4 +1,19 @@
 export const SYNONYMS = {
+  // Fetal monitoring / CTG (NICE NG229)
+  "ctg": ["cardiotocography","cardiotocograph","fetal monitoring","fetal heart rate","fhr","efm","ng229","pathological ctg","suspicious ctg"],
+  "cardiotocography": ["ctg","fetal monitoring","fetal heart rate","efm","ng229"],
+  "cardiotocograph": ["ctg","cardiotocography","fetal monitoring","ng229"],
+  "efm": ["ctg","cardiotocography","electronic fetal monitoring","fetal monitoring","ng229"],
+  "fetal monitoring": ["ctg","cardiotocography","efm","intermittent auscultation","fetal heart rate","ng229"],
+  "fhr": ["fetal heart rate","ctg","baseline","cardiotocography"],
+  "deceleration": ["decelerations","late decelerations","variable decelerations","prolonged deceleration","ctg"],
+  "decelerations": ["deceleration","late decelerations","variable decelerations","ctg"],
+  "variability": ["baseline variability","reduced variability","ctg","cardiotocography"],
+  "sinusoidal": ["ctg","cardiotocography","pathological ctg","fetal anaemia"],
+  "bravado": ["dr c bravado","ctg","ctg interpretation","fetal monitoring"],
+  "fbs": ["fetal blood sampling","fetal scalp stimulation","ctg","pathological ctg"],
+  "fetal blood sampling": ["fbs","fetal scalp stimulation","ctg","pathological ctg"],
+
   // Induction of labour
   "iol": ["induction of labour","induction","induce","propess","crb","prostin","oxytocin","bishop score"],
   "induction": ["induction of labour","iol","propess","crb","dinoprostone","oxytocin","arm","bishop score"],
