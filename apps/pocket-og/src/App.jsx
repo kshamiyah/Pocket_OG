@@ -251,7 +251,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
+    <div className="min-h-screen bg-white" style={{ fontFamily: "'Geist', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
       <DisclaimerModal />
       <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
       <UpdatesModal open={updatesOpen} onClose={() => setUpdatesOpen(false)} />
@@ -329,7 +329,7 @@ export default function App() {
 
                 {/* Hero */}
                 <div className="text-center mb-12 sm:mb-14">
-                  <h1 className="text-[42px] sm:text-[56px] font-[800] tracking-[0.14em] sm:tracking-[0.16em] text-black">Pocket O&G</h1>
+                  <h1 className="text-[42px] sm:text-[56px] font-[800] tracking-[-0.02em] text-black">Pocket O&G</h1>
                   <p className="mt-3 text-lg leading-relaxed text-gray-400">
                     Pocket the evidence. Make the call.
                   </p>
