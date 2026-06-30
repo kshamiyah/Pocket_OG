@@ -1,19 +1,17 @@
 // NICE NG229 — Fetal monitoring in labour (published 14 December 2022, updated 2026)
 //
-// Source: NICE NG229 §1.2–1.6. The CTG feature classification and overall
-// categorisation reproduced here mirror the tested classification engine in
-// apps/ward-manager (classifyCTGEntry, NG229 §1.4.16–1.4.31) so both apps stay
-// consistent. Management/escalation wording is taken from NG229 §1.5.
+// Source: NICE NG229 §1.2–1.6. The classification table below is the NG229
+// feature classification (verified against published NG229 sources):
+//   Baseline    — reassuring 110–160; non-reassuring 100–109 or 161–180;
+//                 abnormal <100 or >180.
+//   Variability — reassuring 5–25; non-reassuring <5 for 30–50 min or >25 for
+//                 15–25 min; abnormal <5 for >50 min, >25 for >25 min, or sinusoidal.
+// Management/escalation wording is taken from NG229 §1.5.
 //
-// ⚠ VERIFY-BEFORE-PUBLISH (NICE is network-blocked in the build environment, so
-//   two cells below were carried over from the ward-manager engine's operational
-//   simplification and must be reconciled against the NG229 PDF):
-//     1. Baseline upper band — engine treats >160 as abnormal; NG229's published
-//        table is understood to split this (≈161–180 non-reassuring, >180
-//        abnormal). Flagged inline in the classification table.
-//     2. "Rising baseline" — the ≥20 bpm rise is a LOCAL threshold, not an NG229
-//        number. Flagged inline.
-//   The increased-variability timing (>25 bpm) should also be confirmed.
+// NB: ward-manager's numeric classifyCTGEntry (ctg.js) still uses coarser
+//     operational bands (>160 abnormal; >25 cut at 10 min) and a local ≥20 bpm
+//     rising-baseline prompt that is NOT an NG229 number. Reconcile ctg.js +
+//     ward-manager tests with this table when ward-manager is next worked on.
 
 export const NG229_SECTIONS = [
   {
@@ -71,12 +69,11 @@ export const NG229_SECTIONS = [
       { type: "table",
         headers: ["Feature", "Reassuring", "Non-reassuring", "Abnormal"],
         rows: [
-          ["Baseline (bpm)", "110–160", "100–109  ⚠ also 161–180*", "Below 100  ⚠ or above 180*"],
-          ["Variability (bpm)", "5–25", "<5 for 30–50 min, or >25 for ≤10 min*", "<5 for >50 min, >25 for >10 min*, or sinusoidal"],
+          ["Baseline (bpm)", "110–160", "100–109, or 161–180", "Below 100, or above 180"],
+          ["Variability (bpm)", "5–25", "<5 for 30–50 min, or >25 for 15–25 min", "<5 for >50 min, >25 for >25 min, or sinusoidal"],
           ["Decelerations", "None, early, or variable without concerning features", "Variable with concerning features for <30 min", "Variable with concerning features ≥30 min, late, or prolonged (≥3 min)"],
         ],
       },
-      { type: "alert", value: "⚠ VERIFY vs NG229 PDF before publishing. The cells marked * were carried over from the ward-manager engine's simplified scoring (it treats >160 as abnormal and uses a ≤10/>10 min cut for increased variability). NG229's published table is understood to split the baseline upper end (161–180 non-reassuring, >180 abnormal) — confirm against the source and update both this reader and classifyCTGEntry together." },
       { type: "subheading", value: "Accelerations" },
       { type: "text", value: "The presence of accelerations is reassuring. Their absence in an otherwise normal CTG is of uncertain significance and is not classified as a feature on its own." },
       { type: "subheading", value: "Rising baseline" },

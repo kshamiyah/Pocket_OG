@@ -4,8 +4,12 @@ import { combineFeatureGrades } from "@pocket-og/guidelines";
 // Interactive CTG feature picker (NICE NG229 §1.4). Grades each feature as
 // white = reassuring, amber = non-reassuring, red = abnormal, then computes the
 // overall category via the shared combineFeatureGrades engine. Used as the
-// "classifier" node of the NG229_CTG flowchart. Cells marked ⚠ await verbatim
-// verification against the NG229 PDF — keep in lockstep with ctg.js.
+// "classifier" node of the NG229_CTG flowchart. Thresholds verified against
+// NG229: baseline non-reassuring 100–109 or 161–180, abnormal <100 or >180;
+// variability non-reassuring <5 for 30–50 min or >25 for 15–25 min, abnormal
+// <5 for >50 min or >25 for >25 min or sinusoidal.
+// NB: ward-manager's numeric classifyCTGEntry (ctg.js) still uses coarser
+// operational bands (>160 abnormal, >25/>10 min) — reconcile when next touched.
 
 const GRADE = {
   white: { label: "Reassuring",     chip: "bg-emerald-600 text-white", dot: "bg-emerald-500", text: "text-emerald-700" },
@@ -16,9 +20,9 @@ const GRADE = {
 const BASELINE = [
   { id: "110-160", label: "110–160", grade: "white" },
   { id: "100-109", label: "100–109", grade: "amber" },
-  { id: "161-180", label: "161–180 ⚠", grade: "amber" },
+  { id: "161-180", label: "161–180", grade: "amber" },
   { id: "lt100",   label: "< 100",   grade: "red" },
-  { id: "gt180",   label: "> 180 ⚠", grade: "red" },
+  { id: "gt180",   label: "> 180",   grade: "red" },
 ];
 
 const VARIABILITY = [
@@ -28,8 +32,8 @@ const VARIABILITY = [
       { id: "gt50",  label: "> 50 min",  grade: "red" },
   ]},
   { id: "gt25", label: "> 25 bpm", durations: [
-      { id: "short",     label: "≤ 10 min",   grade: "amber" },
-      { id: "sustained", label: "> 10 min ⚠", grade: "red" },
+      { id: "15-25", label: "15–25 min", grade: "amber" },
+      { id: "gt25",  label: "> 25 min",  grade: "red" },
   ]},
   { id: "sinusoidal", label: "Sinusoidal", grade: "red" },
 ];
