@@ -78,6 +78,7 @@ const FLOWCHART_LINKS = [
   { id: "BASHH_PID_ANTIBIOTICS", gl: "BASHH_PID" },
   { id: "NG73_DIAGNOSIS",        gl: "NG73" },
   { id: "NG73_TREATMENT",        gl: "NG73" },
+  { id: "NG229_CTG",             gl: "NG229" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -99,6 +100,7 @@ const FLOWCHART_GROUPS = [
   { gl: "GTG31",    label: "Small for Gestational Age / FGR" },
   { gl: "BASHH_PID", label: "Pelvic Inflammatory Disease" },
   { gl: "NG73",      label: "Endometriosis" },
+  { gl: "NG229",     label: "Fetal Monitoring / CTG" },
 ];
 
 export default function App() {

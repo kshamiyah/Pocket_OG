@@ -98,6 +98,7 @@ export const NG229_SECTIONS = [
     condition: "Fetal Monitoring in Labour",
     setting: "Intrapartum — CTG Interpretation",
     title: "Overall Categorisation & Action",
+    flowchartId: "NG229_CTG",
     tags: [
       "normal ctg", "suspicious ctg", "pathological ctg", "ctg category",
       "categorisation", "urgent intervention", "fetal scalp stimulation",
