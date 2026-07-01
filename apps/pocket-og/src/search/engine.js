@@ -15,6 +15,8 @@ import {
   BASHH_PID_SECTIONS,
   NG73_SECTIONS,
 } from "@pocket-og/guidelines";
+import { QUICKREF_SECTIONS } from "../data/quickref";
+import { APPROACH_SECTIONS } from "../data/approaches";
 
 function escapeRe(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -115,6 +117,8 @@ const _WIKI = [
   ...NG229_SECTIONS,
   ...BASHH_PID_SECTIONS,
   ...NG73_SECTIONS,
+  ...QUICKREF_SECTIONS,
+  ...APPROACH_SECTIONS,
 ];
 
 export const SEARCH_INDEX = _WIKI.map(page => {
