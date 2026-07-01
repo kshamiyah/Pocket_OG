@@ -288,8 +288,8 @@ export default function App() {
       {/* Feedback button — always visible */}
       <FeedbackButton query={query} filter={filter} />
 
-      {/* About — info icon on search tab */}
-      {activeTab === "search" && (
+      {/* About — info icon on the search landing screen (hidden once results appear) */}
+      {activeTab === "search" && !hasQuery && (
         <button
           type="button"
           onClick={() => setAboutOpen(true)}
