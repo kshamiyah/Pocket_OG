@@ -101,4 +101,86 @@ export const TOG_SECTIONS = [
       { type: "text", value: "Summary of a TOG review (Karkhanis & Patni, TOG 2014;16:207–13). Read the full article for the complete discussion, figures and references; verify all doses and thresholds against local protocol." },
     ],
   },
+
+  {
+    id: "tog-oligohydramnios",
+    gl: "TOG",
+    source: "TOG",
+    condition: "TOG Review",
+    setting: "Review — Fetal / Amniotic Fluid",
+    title: "Isolated Oligohydramnios",
+    draft: false,
+    tog: {
+      article: "Management of isolated abnormal amniotic fluid volume in pregnancy",
+      authors: "Falola AO, Filby L, Timmons P, Alleemudder D",
+      citation: "TOG 2026;28:41–50",
+      doi: "10.1111/tog.70021",
+      url: "https://obgyn.onlinelibrary.wiley.com/doi/10.1111/tog.70021",
+    },
+    flowchartId: "TOG_OLIGOHYDRAMNIOS",
+    relatedGl: ["GL895", "GTG31", "GL861"],
+    tags: [
+      "oligohydramnios", "anhydramnios", "low amniotic fluid", "reduced liquor", "low afi",
+      "low amniotic fluid index", "single deepest vertical pocket", "sdvp", "isolated oligohydramnios",
+      "idiopathic oligohydramnios", "potter sequence", "potter's sequence", "renal agenesis",
+      "bilateral renal agenesis", "pulmonary hypoplasia", "amnioinfusion", "cord compression",
+      "placental insufficiency oligohydramnios", "fgr oligohydramnios", "sga oligohydramnios",
+      "induction oligohydramnios", "timing of delivery oligohydramnios", "low liquor volume",
+      "reduced amniotic fluid", "tog review", "amniotic fluid",
+    ],
+    content: [
+      { type: "alert", value: "Bottom line: oligohydramnios = AFI ≤5 cm or SDVP <2 cm; anhydramnios = no measurable pool. Isolated (idiopathic) oligohydramnios is a diagnosis of exclusion, complicating 0.5–5% of pregnancies. There is no consensus on timing of delivery — practice varies widely, and evidence does not clearly show early induction improves outcomes." },
+
+      { type: "subheading", value: "Measurement" },
+      { type: "text", value: "SDVP (single/maximum deepest vertical pocket) is generally preferred to AFI for screening — AFI increases the diagnosis of oligohydramnios (Cochrane 2008; SAFE trial 2015) without improving outcome. Oligohydramnios: AFI ≤5 cm or SDVP <2 cm." },
+
+      { type: "subheading", value: "Early-onset vs isolated oligohydramnios" },
+      { type: "alert", value: "Early-onset (2nd trimester) oligohydramnios is different from term isolated oligohydramnios — it is nearly always due to fetal or maternal pathology (previable PPROM, bilateral renal agenesis or severe renal impairment) and carries major morbidity. Bilateral renal agenesis → Potter's sequence (clubbed feet, pulmonary hypoplasia, cranial/skin abnormalities) — considered incompatible with life; this review focuses on isolated (term) oligohydramnios, not early-onset disease." },
+
+      { type: "subheading", value: "Causes" },
+      { type: "list", items: [
+        "Maternal — placental: hypertensive disease / pre-eclampsia, nephropathy; disruptions to fluid state: hyperemesis, dehydration, anorexia.",
+        "Fetal: congenital infection (toxoplasma, rubella, CMV, HSV); medications (ACE inhibitors, ARBs, NSAIDs/indomethacin); chromosomal abnormality; renal outflow obstruction (bilateral renal agenesis, PUJ obstruction, bilateral MCDK, posterior urethral valves, LUTO); fetal anaemia.",
+        "Placental / other: placental insufficiency (FGR), prolonged/post-dates pregnancy, twin-to-twin transfusion syndrome, rupture of membranes.",
+      ]},
+      { type: "text", value: "Rupture of membranes and placental insufficiency/FGR are the two causes to actively exclude — some authors argue isolated oligohydramnios should always be treated as a possible marker of placental insufficiency and managed as higher risk." },
+
+      { type: "subheading", value: "Assessment & investigations" },
+      { type: "list", items: [
+        "History & exam: speculum if ROM suspected, blood pressure, medication review (ACEi/ARB/NSAID), hydration status, travel/infection history.",
+        "Urine: dipstick/PCr to rule out pre-eclampsia.",
+        "Bloods: PlGF / sFlt-1:PlGF ratio if placental disease suspected; renal function if maternal renal impairment suspected.",
+        "Detailed ultrasound: growth, MCA Dopplers (if FGR or fetal anaemia suspected), structural anomaly screen; consider TORCH screen.",
+        "If all normal (no ROM, infection, placental disease or anomaly) → isolated/idiopathic oligohydramnios.",
+      ]},
+
+      { type: "subheading", value: "Management in pregnancy" },
+      { type: "list", items: [
+        "Increased ultrasound surveillance and monitoring for a deteriorating fetus (consistent ACOG/NICE position).",
+        "Amnioinfusion has limited evidence: mainly studied for cord-compression reduction in labour, not for improving AFV antenatally — not routine UK practice.",
+        "Continuous intrapartum monitoring is advised given the increased risk of fetal hypoxia from cord compression.",
+        "There is an increased rate of SGA only discovered after birth, despite antenatal surveillance — keep a low threshold to reassess growth.",
+      ]},
+
+      { type: "subheading", value: "Timing of delivery — no consensus" },
+      { type: "alert", value: "ACOG, FIGO, NICE and RCOG do not agree on timing of delivery for isolated oligohydramnios. Induction (especially prostaglandin E2 with an unfavourable cervix) is associated with more emergency caesarean sections and non-reassuring CTG, but evidence does not clearly show early induction reduces perinatal morbidity/mortality either way." },
+      { type: "text", value: "Review authors' pragmatic view: given the association between term/post-term isolated oligohydramnios and postnatal diagnosis of SGA, offer induction of labour at term — but individualise to the woman's risk factors pending better evidence." },
+
+      { type: "subheading", value: "After birth" },
+      { type: "list", items: [
+        "Higher rate of respiratory distress and lower Apgar scores reported, particularly post-dates — deliver where neonatal services are accessible.",
+        "Increased rate of placental disorders reported in a subsequent pregnancy after a pregnancy with isolated oligohydramnios — consider increased growth surveillance next time.",
+      ]},
+
+      { type: "subheading", value: "Key points" },
+      { type: "list", items: [
+        "Isolated oligohydramnios is a diagnosis of exclusion — actively rule out ROM, infection, placental disease and fetal anomaly first.",
+        "SDVP is the preferred screening measure over AFI (fewer over-diagnoses, same outcomes).",
+        "No professional body agrees on timing of delivery — decisions should be individualised and discussed with the woman.",
+        "Continuous fetal monitoring in labour is advised because of the cord-compression risk from reduced liquor.",
+      ]},
+
+      { type: "text", value: "Summary of a TOG review (Falola, Filby, Timmons & Alleemudder, TOG 2026;28:41–50), which also updates polyhydramnios data — read the full article for the complete discussion, figures, tables and references; verify all thresholds against local protocol." },
+    ],
+  },
 ];
