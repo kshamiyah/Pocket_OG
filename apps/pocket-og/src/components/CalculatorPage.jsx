@@ -266,18 +266,23 @@ function ResultCard({ result }) {
   );
 }
 
-// ─── Scenario 1: PUL ──────────────────────────────────────────────────
-
-const PUL_MODE_KEY = "pocketog_pul_mode";
-function getPulMode() {
-  try { return localStorage.getItem(PUL_MODE_KEY) === "quick" ? "quick" : "guided"; }
+// ─── Guided / Quick entry mode — shared across the symptom-gated ectopic
+// calculators (PUL, expectant surveillance, post-MTX surveillance). Each
+// scope remembers its own last-picked mode.
+const CALC_MODE_KEYS = {
+  pul: "pocketog_pul_mode",
+  expectant: "pocketog_expectant_mode",
+  mtx: "pocketog_mtx_mode",
+};
+function getCalcMode(scope) {
+  try { return localStorage.getItem(CALC_MODE_KEYS[scope]) === "quick" ? "quick" : "guided"; }
   catch { return "guided"; }
 }
-function setPulModeStored(mode) {
-  try { localStorage.setItem(PUL_MODE_KEY, mode); } catch { /* storage unavailable — ignore */ }
+function setCalcModeStored(scope, mode) {
+  try { localStorage.setItem(CALC_MODE_KEYS[scope], mode); } catch { /* storage unavailable — ignore */ }
 }
 
-function PulModeToggle({ mode, onChange }) {
+function ModeToggle({ mode, onChange }) {
   return (
     <div className="inline-flex bg-gray-100 rounded-xl p-0.5 text-xs font-semibold mb-6">
       {[
@@ -299,8 +304,43 @@ function PulModeToggle({ mode, onChange }) {
   );
 }
 
+// Collapsible amber "read before you rely on this" strip shown in Quick
+// entry in place of the symptom-check gate.
+function QuickAdvisory({ open, onToggle, note, caveats }) {
+  return (
+    <>
+      <button
+        onClick={onToggle}
+        className="w-full mt-6 flex items-center justify-between rounded-2xl bg-amber-50 border border-amber-100 p-4 text-left"
+      >
+        <span className="text-xs font-bold text-amber-700">Before you rely on this — read first</span>
+        <svg className={`w-4 h-4 text-amber-500 shrink-0 transition-transform ${open ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="rounded-2xl bg-gray-50 border border-gray-100 p-4 mt-2">
+          <p className="text-xs text-gray-600 leading-relaxed mb-2">{note}</p>
+          {caveats?.length > 0 && (
+            <ul className="space-y-1.5">
+              {caveats.map((c, i) => (
+                <li key={i} className="flex items-start gap-2 text-xs text-gray-600 leading-relaxed">
+                  <span className="text-gray-300 mt-0.5 shrink-0">•</span>
+                  <span>{c}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
+// ─── Scenario 1: PUL ──────────────────────────────────────────────────
+
 function PulCalculator({ onBack, pdfs, onNavigate }) {
-  const [mode, setMode] = useState(getPulMode);
+  const [mode, setMode] = useState(() => getCalcMode("pul"));
   const [haemodynamicInstability, setHaemodynamicInstability] = useState(null);
   const [worseningPain, setWorseningPain] = useState(null);
   const [heavyBleeding, setHeavyBleeding] = useState(null);
@@ -315,7 +355,7 @@ function PulCalculator({ onBack, pdfs, onNavigate }) {
 
   const changeMode = (m) => {
     setMode(m);
-    setPulModeStored(m);
+    setCalcModeStored("pul", m);
   };
 
   const symptomsAnswered =
@@ -366,7 +406,7 @@ function PulCalculator({ onBack, pdfs, onNavigate }) {
         <StepHeader title="PUL — serial hCG" subtitle="NICE NG126 §1.4.27–1.4.32" onBack={onBack} pdfs={pdfs} />
 
         <div className="px-5 pt-6">
-          {!result && <PulModeToggle mode={mode} onChange={changeMode} />}
+          {!result && <ModeToggle mode={mode} onChange={changeMode} />}
 
           {!result && mode === "quick" && (
             <>
@@ -387,30 +427,12 @@ function PulCalculator({ onBack, pdfs, onNavigate }) {
                 Calculate
               </button>
 
-              <button
-                onClick={() => setCaveatsOpen(o => !o)}
-                className="w-full mt-6 flex items-center justify-between rounded-2xl bg-amber-50 border border-amber-100 p-4 text-left"
-              >
-                <span className="text-xs font-bold text-amber-700">Before you rely on this — read first</span>
-                <svg className={`w-4 h-4 text-amber-500 shrink-0 transition-transform ${caveatsOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {caveatsOpen && (
-                <div className="rounded-2xl bg-gray-50 border border-gray-100 p-4 mt-2">
-                  <p className="text-xs text-gray-600 leading-relaxed mb-2">
-                    This assumes you've already excluded red-flag symptoms (haemodynamic instability, worsening pain, heavy bleeding) and that a TVS was performed and non-diagnostic (no IUP, no adnexal mass/free fluid). If not — switch to Guided.
-                  </p>
-                  <ul className="space-y-1.5">
-                    {PUL_CAVEATS.map((c, i) => (
-                      <li key={i} className="flex items-start gap-2 text-xs text-gray-600 leading-relaxed">
-                        <span className="text-gray-300 mt-0.5 shrink-0">•</span>
-                        <span>{c}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <QuickAdvisory
+                open={caveatsOpen}
+                onToggle={() => setCaveatsOpen(o => !o)}
+                note="This assumes you've already excluded red-flag symptoms (haemodynamic instability, worsening pain, heavy bleeding) and that a TVS was performed and non-diagnostic (no IUP, no adnexal mass/free fluid). If not — switch to Guided."
+                caveats={PUL_CAVEATS}
+              />
             </>
           )}
 
@@ -620,6 +642,7 @@ function EctopicDecisionCalculator({ onBack, pdfs, onNavigate }) {
 // ─── Scenario 3: Expectant surveillance ───────────────────────────────
 
 function ExpectantSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
+  const [mode, setMode] = useState(() => getCalcMode("expectant"));
   const [haemodynamicInstability, setHaemodynamicInstability] = useState(null);
   const [worseningPain, setWorseningPain] = useState(null);
   const [heavyBleeding, setHeavyBleeding] = useState(null);
@@ -627,13 +650,19 @@ function ExpectantSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
   const [day2, setDay2] = useState("");
   const [day4, setDay4] = useState("");
   const [day7, setDay7] = useState("");
+  const [caveatsOpen, setCaveatsOpen] = useState(false);
 
-  const symptomsAnswered =
+  const changeMode = (m) => {
+    setMode(m);
+    setCalcModeStored("expectant", m);
+  };
+
+  const symptomsAnswered = mode === "guided" &&
     haemodynamicInstability !== null && worseningPain !== null && heavyBleeding !== null;
   const override = symptomsAnswered
     ? symptomOverride({ worseningPain, heavyBleeding, haemodynamicInstability })
     : null;
-  const clear = symptomsAnswered && !override;
+  const clear = mode === "quick" || (symptomsAnswered && !override);
 
   const r2 = clear ? interpretExpectantStep({ previous: parseFloat(day0), current: parseFloat(day2), dayLabel: "Day 2" }) : null;
   const r4 = clear ? interpretExpectantStep({ previous: parseFloat(day2), current: parseFloat(day4), dayLabel: "Day 4" }) : null;
@@ -644,6 +673,7 @@ function ExpectantSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
     setWorseningPain(null);
     setHeavyBleeding(null);
     setDay0(""); setDay2(""); setDay4(""); setDay7("");
+    setCaveatsOpen(false);
   };
 
   return (
@@ -652,16 +682,22 @@ function ExpectantSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
         <StepHeader title="Expectant management surveillance" subtitle="NICE NG126 §1.6.5" onBack={onBack} pdfs={pdfs} />
 
         <div className="px-5 pt-6">
-          <h3 className="text-2xl font-bold text-gray-900 mb-1">Symptom check first</h3>
-          <p className="text-sm text-gray-400 mb-6">NG126 §1.4.25: symptoms outrank biochemistry.</p>
+          <ModeToggle mode={mode} onChange={changeMode} />
 
-          <div className="space-y-3 mb-6">
-            <YesNoField label="Haemodynamic instability?" value={haemodynamicInstability} onChange={setHaemodynamicInstability} />
-            <YesNoField label="New or worsening pain?" value={worseningPain} onChange={setWorseningPain} />
-            <YesNoField label="Heavy vaginal bleeding?" value={heavyBleeding} onChange={setHeavyBleeding} />
-          </div>
+          {mode === "guided" && (
+            <>
+              <h3 className="text-2xl font-bold text-gray-900 mb-1">Symptom check first</h3>
+              <p className="text-sm text-gray-400 mb-6">NG126 §1.4.25: symptoms outrank biochemistry.</p>
 
-          {override && <ResultCard result={override} />}
+              <div className="space-y-3 mb-6">
+                <YesNoField label="Haemodynamic instability?" value={haemodynamicInstability} onChange={setHaemodynamicInstability} />
+                <YesNoField label="New or worsening pain?" value={worseningPain} onChange={setWorseningPain} />
+                <YesNoField label="Heavy vaginal bleeding?" value={heavyBleeding} onChange={setHeavyBleeding} />
+              </div>
+
+              {override && <ResultCard result={override} />}
+            </>
+          )}
 
           {clear && (
             <>
@@ -677,6 +713,14 @@ function ExpectantSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
                 <NumberField label="Day 7" value={day7} onChange={setDay7} suffix="IU/L" />
                 {r7 && <ResultCard result={r7} />}
               </div>
+
+              {mode === "quick" && (
+                <QuickAdvisory
+                  open={caveatsOpen}
+                  onToggle={() => setCaveatsOpen(o => !o)}
+                  note="This assumes you've already excluded red-flag symptoms (haemodynamic instability, worsening pain, heavy bleeding). NG126 §1.4.25: symptoms outrank biochemistry — review the woman's condition if any symptoms change. If not already excluded — switch to Guided."
+                />
+              )}
             </>
           )}
 
@@ -705,19 +749,26 @@ function ExpectantSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
 // ─── Scenario 4: Post-MTX surveillance ────────────────────────────────
 
 function MtxSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
+  const [mode, setMode] = useState(() => getCalcMode("mtx"));
   const [haemodynamicInstability, setHaemodynamicInstability] = useState(null);
   const [worseningPain, setWorseningPain] = useState(null);
   const [heavyBleeding, setHeavyBleeding] = useState(null);
   const [day1, setDay1] = useState("");
   const [day4, setDay4] = useState("");
   const [day7, setDay7] = useState("");
+  const [caveatsOpen, setCaveatsOpen] = useState(false);
 
-  const symptomsAnswered =
+  const changeMode = (m) => {
+    setMode(m);
+    setCalcModeStored("mtx", m);
+  };
+
+  const symptomsAnswered = mode === "guided" &&
     haemodynamicInstability !== null && worseningPain !== null && heavyBleeding !== null;
   const override = symptomsAnswered
     ? symptomOverride({ worseningPain, heavyBleeding, haemodynamicInstability })
     : null;
-  const clear = symptomsAnswered && !override;
+  const clear = mode === "quick" || (symptomsAnswered && !override);
 
   const result = clear ? interpretMtxStep({
     day1: day1 ? parseFloat(day1) : null,
@@ -730,6 +781,7 @@ function MtxSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
     setWorseningPain(null);
     setHeavyBleeding(null);
     setDay1(""); setDay4(""); setDay7("");
+    setCaveatsOpen(false);
   };
 
   return (
@@ -738,16 +790,22 @@ function MtxSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
         <StepHeader title="Post-methotrexate surveillance" subtitle="NICE NG126 §1.6.11 · RCOG GTG21 App II" onBack={onBack} pdfs={pdfs} />
 
         <div className="px-5 pt-6">
-          <h3 className="text-2xl font-bold text-gray-900 mb-1">Symptom check first</h3>
-          <p className="text-sm text-gray-400 mb-6">Pain/bleeding override hCG trend (NG126 §1.4.25).</p>
+          <ModeToggle mode={mode} onChange={changeMode} />
 
-          <div className="space-y-3 mb-6">
-            <YesNoField label="Haemodynamic instability?" value={haemodynamicInstability} onChange={setHaemodynamicInstability} />
-            <YesNoField label="New or worsening pain?" value={worseningPain} onChange={setWorseningPain} />
-            <YesNoField label="Heavy vaginal bleeding?" value={heavyBleeding} onChange={setHeavyBleeding} />
-          </div>
+          {mode === "guided" && (
+            <>
+              <h3 className="text-2xl font-bold text-gray-900 mb-1">Symptom check first</h3>
+              <p className="text-sm text-gray-400 mb-6">Pain/bleeding override hCG trend (NG126 §1.4.25).</p>
 
-          {override && <ResultCard result={override} />}
+              <div className="space-y-3 mb-6">
+                <YesNoField label="Haemodynamic instability?" value={haemodynamicInstability} onChange={setHaemodynamicInstability} />
+                <YesNoField label="New or worsening pain?" value={worseningPain} onChange={setWorseningPain} />
+                <YesNoField label="Heavy vaginal bleeding?" value={heavyBleeding} onChange={setHeavyBleeding} />
+              </div>
+
+              {override && <ResultCard result={override} />}
+            </>
+          )}
 
           {clear && (
             <>
@@ -761,6 +819,14 @@ function MtxSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
               </div>
 
               {result && <div className="mt-6"><ResultCard result={result} /></div>}
+
+              {mode === "quick" && (
+                <QuickAdvisory
+                  open={caveatsOpen}
+                  onToggle={() => setCaveatsOpen(o => !o)}
+                  note="This assumes you've already excluded red-flag symptoms (haemodynamic instability, worsening pain, heavy bleeding). NG126 §1.4.25: symptoms outrank biochemistry — review the woman's condition if any symptoms change. If not already excluded — switch to Guided."
+                />
+              )}
             </>
           )}
 
