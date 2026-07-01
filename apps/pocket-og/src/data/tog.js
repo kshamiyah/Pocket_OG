@@ -397,7 +397,12 @@ export const TOG_SECTIONS = [
     source: "TOG",
     condition: "TOG Review",
     setting: "Review — Maternal Medicine",
-    title: "Cardiac Disease in Pregnancy — Acquired Heart Disease & Arrhythmias",
+    // Narrowed from the original "acquired heart disease & arrhythmias" scope —
+    // valvular disease, ischaemic heart disease and arrhythmias now have their
+    // own dedicated, more current cards (Timmons 2022 / Wuntakal 2013 /
+    // Roberts 2019). Cardiomyopathy is the one topic this 2007 review still
+    // covers that none of those newer reviews address.
+    title: "Cardiomyopathy in Pregnancy",
     draft: false,
     tog: {
       article: "Cardiac disease in pregnancy. Part 2: acquired heart disease",
@@ -410,66 +415,321 @@ export const TOG_SECTIONS = [
     flowchartId: "TOG_ACQUIRED_CARDIAC",
     relatedGl: ["GL891", "MBRRACE_SLMC2025"],
     tags: [
-      "acquired heart disease pregnancy", "valvular heart disease pregnancy", "mitral stenosis pregnancy",
-      "mitral regurgitation", "mitral valve prolapse", "aortic stenosis pregnancy",
-      "mechanical heart valve pregnancy", "prosthetic valve anticoagulation", "warfarin pregnancy heart valve",
-      "ischaemic heart disease pregnancy", "myocardial infarction pregnancy", "cardiac arrhythmia pregnancy",
-      "svt pregnancy", "supraventricular tachycardia pregnancy", "atrial fibrillation pregnancy",
-      "ventricular tachycardia pregnancy", "dilated cardiomyopathy pregnancy", "hypertrophic cardiomyopathy pregnancy",
-      "peripartum cardiomyopathy", "rheumatic heart disease pregnancy", "amiodarone pregnancy",
+      "cardiomyopathy pregnancy", "dilated cardiomyopathy pregnancy", "hypertrophic cardiomyopathy pregnancy",
+      "peripartum cardiomyopathy", "heart failure pregnancy", "left ventricular dysfunction pregnancy",
       "tog review",
     ],
     content: [
-      { type: "alert", value: "Bottom line: rheumatic and ischaemic heart disease are both expected to rise in the UK because of immigration patterns and increasing maternal age. Regurgitant valve lesions are generally well tolerated in pregnancy; stenotic lesions are not. Mechanical heart valves need careful anticoagulation planning — every available regimen carries a real fetal loss risk (up to 30%)." },
+      { type: "alert", value: "Bottom line: peripartum cardiomyopathy is a rare (~1 in 2,289 live births) diagnosis of exclusion presenting from the last month of pregnancy to 5 months postpartum. Dilated cardiomyopathy is poorly tolerated in pregnancy; hypertrophic cardiomyopathy is usually well tolerated if the woman was asymptomatic beforehand." },
 
-      { type: "subheading", value: "Causes" },
-      { type: "text", value: "Rheumatic valvular disease is declining in the UK-born population but rising with immigration from countries where rheumatic fever remains prevalent — often first recognised in pregnancy when cardiac demand increases. Ischaemic heart disease is rising with maternal age, diabetes, obesity and smoking. Peripartum cardiomyopathy occurs mainly around delivery, associated with multiple pregnancy and pre-eclampsia." },
-
-      { type: "subheading", value: "Valvular heart disease" },
+      { type: "subheading", value: "Dilated cardiomyopathy" },
       { type: "list", items: [
-        "Mitral stenosis (the most common clinically significant valvular lesion in pregnancy): rising heart rate/stroke volume increases the trans-valvular gradient and left atrial pressure — dyspnoea, orthopnoea, PND, pulmonary oedema, and atrial fibrillation risk (persists into the puerperium). NYHA III/IV or valve area <1cm² → delay conception until after correction. Medical therapy: bed rest and diuretics to reduce volume overload, beta-blockade to optimise filling; AF needs prompt DC cardioversion, beta-blockers or digoxin. Balloon mitral valvuloplasty is safe and effective if symptoms are refractory.",
-        "Mitral valve prolapse (the most common cardiac abnormality in pregnant women, 12–17%): without regurgitation, rarely causes complications.",
-        "Mitral regurgitation: usually well tolerated (falling SVR reduces afterload). Asymptomatic — no treatment needed; symptomatic heart failure — nitrates, hydralazine, diuretics, digoxin.",
-        "Aortic stenosis: usually congenital in young women. Symptomatic, severe (peak gradient >80mmHg), or with LV dysfunction → delay conception until after correction. If symptomatic in pregnancy: bed rest, consider valve replacement — avoid cardiopulmonary bypass where possible (1.5–5% maternal mortality, 16–33% fetal mortality regardless of gestation; fetal mortality can drop to 10% by avoiding hypothermia and maintaining perfusion pressure). Aortic balloon valvuloplasty can palliate until after delivery.",
+        "Poorly tolerated in pregnancy — 7% mortality with NYHA III/IV, and a risk of heart failure, irreversible LV dysfunction and fetal loss.",
+        "Counsel accordingly; offer termination for an unplanned pregnancy in this context.",
       ]},
 
-      { type: "subheading", value: "Mechanical prosthetic valves — anticoagulation" },
-      { type: "alert", value: "Bioprosthetic valves carry no increased risk and don't degenerate faster in pregnancy. Mechanical valves carry a 45% thrombotic-episode incidence and 1–4% maternal mortality — anticoagulation strategy is a genuine trade-off, not a solved problem." },
+      { type: "subheading", value: "Hypertrophic cardiomyopathy" },
+      { type: "list", items: [
+        "Usually well tolerated if the woman was asymptomatic before pregnancy.",
+        "Risk of symptomatic progression, atrial fibrillation, syncope and maternal death if there was pre-existing heart failure or severe symptoms.",
+      ]},
+
+      { type: "subheading", value: "Peripartum cardiomyopathy" },
+      { type: "list", items: [
+        "LV systolic dysfunction/heart failure presenting in the last month of pregnancy to 5 months postpartum. Rare (~1 in 2,289 live births) and a diagnosis of exclusion — rule out other causes of dilated cardiomyopathy with heart failure first.",
+        "Treat with beta-blockers, diuretics, hydralazine and digoxin (switch to ACE inhibitors postpartum).",
+        "~20% die or need transplantation; the rest recover partially or fully.",
+        "A future pregnancy carries a higher relapse risk if LV function hasn't fully recovered — and some residual risk even after full recovery. There's no consensus on recommendations for future pregnancies.",
+      ]},
+
+      { type: "text", value: "Cardiomyopathy section of Part 2 of a two-part TOG review (Gelson, Johnson, Gatzoulis & Uebing, TOG 2007;9:83–87) — see also Part 1: Congenital Heart Disease, and the dedicated newer reviews on Valvular Heart Disease, Myocardial Infarction, and Cardiac Arrhythmias in Pregnancy. Read the full article for the complete discussion and references; verify all doses and thresholds against local protocol." },
+    ],
+  },
+
+  {
+    id: "tog-cardiac-mi",
+    gl: "TOG",
+    source: "TOG",
+    condition: "TOG Review",
+    setting: "Review — Maternal Medicine",
+    title: "Myocardial Infarction in Pregnancy",
+    draft: false,
+    tog: {
+      article: "Myocardial infarction and pregnancy",
+      authors: "Wuntakal R, Shetty N, Ioannou E, Sharma S, Kurian J",
+      citation: "TOG 2013;15:247–255",
+      doi: "10.1111/tog.12052",
+      url: "https://obgyn.onlinelibrary.wiley.com/doi/10.1111/tog.12052",
+      year: 2013,
+    },
+    flowchartId: "TOG_MI_PREGNANCY",
+    relatedGl: ["GL891", "MBRRACE_SLMC2025"],
+    tags: [
+      "myocardial infarction pregnancy", "mi pregnancy", "acute coronary syndrome pregnancy",
+      "acs pregnancy", "chest pain pregnancy", "stemi pregnancy", "nstemi pregnancy",
+      "coronary artery dissection pregnancy", "coronary artery spasm", "troponin pregnancy",
+      "ischaemic heart disease pregnancy", "aspirin pregnancy", "clopidogrel pregnancy",
+      "thrombolysis pregnancy", "percutaneous coronary intervention pregnancy", "pci pregnancy",
+      "coronary angiography pregnancy", "ergometrine contraindication", "tog review",
+    ],
+    content: [
+      { type: "alert", value: "Bottom line: acute MI is rare but the relative risk is 3–4× higher in pregnancy, and cardiac disease is the leading cause of maternal death in the UK. Up to 50% occur in the peripartum period. Keep a low threshold — symptoms are easily attributed to normal pregnancy, and two consecutive UK confidential enquiry reports found a consistent failure to consider AMI in women with risk factors." },
+
+      { type: "subheading", value: "Why pregnancy raises MI risk" },
+      { type: "list", items: [
+        "Pregnancy significantly increases myocardial oxygen demand (rising cardiac output, heart rate); physiological anaemia, hypercoagulability and falling diastolic BP can reduce oxygen supply where coronary flow is already compromised.",
+        "The peripartum period is highest-risk: rising cardiac output from IVC decompression and uterine blood return after delivery, plus more frequent coronary dissection/thrombosis at this time.",
+        "Pregnancy itself is not an established independent risk factor for atherosclerotic MI, but the combination of physiological change with pre-existing risk factors matters.",
+      ]},
+
+      { type: "subheading", value: "Risk factors" },
+      { type: "list", items: [
+        "From confidential enquiry data: higher parity (>3), maternal age >35, pre-existing hypertension/diabetes/ischaemic heart disease, smoking, obesity, strong family history. Risk of AMI is ~30× higher over 40 than under 20.",
+        "Also reported: hyperlipidaemia, pre-eclampsia/eclampsia, thrombophilia, migraine, postpartum infection, blood transfusion.",
+        "Maternal death risk is greatest if the infarct occurs in late pregnancy, or if delivery occurs within 2 weeks of the infarct.",
+      ]},
+
+      { type: "subheading", value: "Causes — not just atherosclerosis" },
+      { type: "alert", value: "Consider non-atherosclerotic causes especially in women with no cardiovascular risk factors — angiography series show roughly half of pregnancy-associated MI is atherosclerotic, but coronary dissection and thrombosis together account for over a third of cases." },
+      { type: "list", items: [
+        "Coronary artery dissection: highest risk in the third trimester to 3 months postpartum; affects the LAD in ~80% of cases; associated mortality 30–40%.",
+        "Coronary artery thrombosis: 8–14% of cases — pregnancy's hypercoagulable state, or underlying hereditary thrombophilia first manifesting now.",
+        "Coronary artery spasm: spontaneous, or drug-induced (terbutaline, ergotamine, bromocriptine, cocaine).",
+        "Other: vasculitis (e.g. Kawasaki disease), collagen vascular disease, amniotic fluid embolism, phaeochromocytoma.",
+      ]},
+
+      { type: "subheading", value: "Diagnosis" },
+      { type: "list", items: [
+        "Chest pain plus pregnancy-typical features (epigastric pain, vomiting, dizziness) in a woman with risk factors should prompt investigation — don't dismiss as normal pregnancy.",
+        "ECG: ST elevation is the most sensitive/specific marker, but 12-lead ECG sensitivity for ischaemia is as low as ~50% — use serial ECGs, changes can evolve over time.",
+        "Troponin I/T is the biomarker of choice — never raised above the upper limit of normal in healthy pregnancy, labour or caesarean section (unlike CK/myoglobin, which do rise in labour). A negative troponin at presentation doesn't exclude damage — it can take 12 hours to peak. Troponin can be raised in pre-eclampsia/gestational hypertension/PE but never above the MI threshold in pre-eclampsia alone.",
+        "Echocardiogram: safe in pregnancy, useful to exclude aortic dissection and assess LV function/wall motion, though limited for diagnosing MI itself.",
+        "Coronary angiography: safe and useful for diagnosis and treatment. Reassure — diagnostic radiation doses in this context (angiography ~1.5mGy fetal, PCI ~3mGy fetal) are well below the 50mGy threshold associated with fetal harm. Use radial access, shield the abdomen, minimise fluoroscopy time.",
+      ]},
+
+      { type: "subheading", value: "Treatment" },
+      { type: "list", items: [
+        "STEMI: primary PCI is treatment of choice (bare metal stents preferred over drug-eluting — lack of pregnancy safety data). Thrombolysis (IV t-PA, doesn't cross the placenta) is a reasonable alternative if PCI access would be significantly delayed — but carries an ~8% maternal haemorrhage risk.",
+        "NSTEMI: first-line antiplatelet therapy; angiography with a view to stenting if symptoms continue despite medical therapy or there's haemodynamic instability.",
+        "Care in an HDU/ICU setting with fetal monitoring; delivery must be considered if the maternal condition deteriorates with a viable fetus.",
+      ]},
+
       { type: "table",
-        headers: ["Regimen", "Maternal thromboembolism", "Fetal abnormality", "Fetal loss"],
+        headers: ["Can use safely", "Limited use only", "Contraindicated"],
         rows: [
-          ["Warfarin throughout, stop at 38 weeks for elective LSCS", "4%", "6%", "~30%"],
-          ["LMWH weeks 6–12, then warfarin to 38 weeks, then LSCS", "9%", "0%", "~30%"],
-          ["LMWH throughout pregnancy", "25%", "0%", "~30%"],
+          ["Low-dose aspirin (60–150mg), heparin (LMWH/UFH), labetalol", "Clopidogrel (shortest duration possible)", "Statins, ACE inhibitors, ARBs"],
+          ["Nifedipine (but avoid immediately after an acute event — increases mortality)", "", ""],
         ],
       },
-      { type: "text", value: "Low-dose aspirin is used as an adjunct to heparin. Monitor LMWH with monthly anti-factor Xa levels, aiming for the high therapeutic range. Whatever regimen is chosen, fetal loss risk is up to 30% — this needs an informed discussion of relative risks and benefits." },
-      { type: "text", value: "Endocarditis prophylaxis: give antibiotics in labour/delivery for all valvular lesions except mitral valve prolapse without regurgitation." },
 
-      { type: "subheading", value: "Ischaemic heart disease" },
+      { type: "subheading", value: "Timing and mode of delivery" },
       { type: "list", items: [
-        "Acute MI is rare in pregnancy (1 in 10,000) but carries 37–50% maternal mortality, mostly at the time of infarction. Pregnancy itself isn't an established independent risk factor, though the physiological changes are plausible contributors.",
-        "Treat exactly as outside pregnancy: heparin, beta-blockers, nitrates. Coronary angiography is safe; PCI is first-line. Thrombolysis can cause placental-site bleeding but remains indicated when needed.",
+        "No standardised guidelines — individualise via MDT (cardiologist, obstetric physician, obstetrician, anaesthetist, neonatologist).",
+        "Where possible, delay delivery by 2–3 weeks after the MI — maternal mortality risk is highest in the immediate aftermath.",
+        "Neither vaginal nor caesarean delivery is associated with higher mortality — choose on obstetric/maternal grounds. If vaginal: epidural analgesia, left lateral position, continuous cardiac + fetal monitoring, shorten the second stage with instrumental delivery.",
+        "Third stage: slow IV oxytocin infusion (<2 U/min) to avoid hypotension. Ergometrine is contraindicated — risk of coronary artery spasm.",
+        "Postpartum: HDU/ICU monitoring for at least 24–48 hours; thromboembolic risk assessment; arrange cardiology follow-up; future pregnancy/contraception advice depends on the underlying cause and residual cardiac function.",
       ]},
 
-      { type: "subheading", value: "Cardiac arrhythmias" },
+      { type: "text", value: "Summary of a TOG review (Wuntakal, Shetty, Ioannou, Sharma & Kurian, TOG 2013;15:247–255). Read the full article for the complete discussion and references; verify all doses and thresholds against local protocol." },
+    ],
+  },
+
+  {
+    id: "tog-cardiac-arrhythmias",
+    gl: "TOG",
+    source: "TOG",
+    condition: "TOG Review",
+    setting: "Review — Maternal Medicine",
+    title: "Cardiac Arrhythmias & Palpitations in Pregnancy",
+    draft: false,
+    tog: {
+      article: "Management of palpitations and cardiac arrhythmias in pregnancy",
+      authors: "Roberts A, Mechery J, Mechery A, Clarke B, Vause S",
+      citation: "TOG 2019;21:263–270",
+      doi: "10.1111/tog.12599",
+      url: "https://obgyn.onlinelibrary.wiley.com/doi/10.1111/tog.12599",
+      year: 2019,
+    },
+    flowchartId: "TOG_ARRHYTHMIAS_PREGNANCY",
+    relatedGl: ["MBRRACE_SLMC2025"],
+    tags: [
+      "palpitations pregnancy", "cardiac arrhythmia pregnancy", "svt pregnancy",
+      "supraventricular tachycardia pregnancy", "atrial fibrillation pregnancy", "atrial flutter pregnancy",
+      "ventricular tachycardia pregnancy", "long qt syndrome pregnancy", "lqts", "wolff-parkinson-white",
+      "bradyarrhythmia pregnancy", "heart block pregnancy", "ectopic beats pregnancy",
+      "holter monitor pregnancy", "adenosine pregnancy", "amiodarone pregnancy", "sotalol pregnancy",
+      "flecainide pregnancy", "tog review",
+    ],
+    content: [
+      { type: "alert", value: "Bottom line: palpitations are common in pregnancy and usually benign — around 50% of women investigated have only ectopic beats or non-sustained arrhythmia. Women with pre-existing cardiac disease are at highest risk of a true arrhythmia. Most anti-arrhythmic drugs are safe in pregnancy (long-term amiodarone is the notable exception), so treat pathological arrhythmias promptly." },
+
+      { type: "subheading", value: "Why pregnancy triggers palpitations" },
       { type: "list", items: [
-        "Pregnancy increases arrhythmia incidence (hormonal changes, autonomic shifts, haemodynamic demand, mild hypokalaemia) — risk is highest during labour and delivery.",
-        "Atrial/ventricular ectopics are common and benign — no further investigation needed.",
-        "SVT (new or worsening) is more common in pregnancy, including AF/flutter (thromboembolism and fetal risk — treat promptly) and re-entrant tachycardias (WPW, LGL).",
-        "Stable SVT: vagal manoeuvre first; IV adenosine is safe if that fails; second-line digoxin, beta-blockers or calcium-channel blockers.",
-        "VT is uncommon and usually reflects structural disease. Stable: lidocaine or procainamide; beta-blockers/sotalol used prophylactically. Amiodarone is contraindicated (fetal hypothyroidism, growth restriction, prematurity).",
-        "Any haemodynamically unstable tachyarrhythmia: electrical cardioversion is safe in pregnancy — manage the airway (aspiration risk) and avoid the supine position (aortocaval compression).",
+        "Cardiac output rises ~50% (mainly via stroke volume); heart rate rises 10–20 bpm, mostly in the third trimester — this alone can feel like a 'pounding heartbeat'.",
+        "50–60% of pregnant women have atrial/ventricular ectopic beats on continuous ECG — usually felt as a 'missed' or 'skipping' beat.",
+        "Arrhythmogenesis is multifactorial: increased atrial/ventricular stretch from higher blood volume, and oestrogen-driven upregulation of alpha-adrenergic receptors.",
       ]},
 
-      { type: "subheading", value: "Cardiomyopathy" },
+      { type: "subheading", value: "History — separating physiology from pathology" },
+      { type: "table",
+        headers: ["Reassuring", "Needs further assessment"],
+        rows: [
+          ["Fast, regular heartbeat, especially lying down", "Fast AND irregular heartbeat"],
+          ["Occasional 'thumping' (ectopic beats)", "Palpitations waking from sleep or occurring at work"],
+          ["Pre-vasovagal symptoms before the episode", "Dizziness, shortness of breath, chest pain, syncope after onset"],
+          ["", "Personal or family history of cardiac disease/sudden death"],
+        ],
+      },
+      { type: "text", value: "Ask specifically: exact sensation, frequency/duration, onset/offset (sudden raises suspicion), triggers, associated syncope/pre-syncope, whether symptoms predate pregnancy, and drug/caffeine use." },
+
+      { type: "subheading", value: "Investigation" },
       { type: "list", items: [
-        "Dilated: poorly tolerated — 7% mortality with NYHA III/IV, risk of heart failure, irreversible LV dysfunction and fetal loss. Counsel accordingly; offer termination for an unplanned pregnancy.",
-        "Hypertrophic: usually well tolerated if asymptomatic pre-pregnancy; risk of symptomatic progression, AF, syncope and maternal death if there was pre-existing heart failure or severe symptoms.",
-        "Peripartum cardiomyopathy: LV systolic dysfunction/heart failure presenting in the last month of pregnancy to 5 months postpartum. Rare (~1 in 2,289 live births) and a diagnosis of exclusion — rule out other causes of dilated cardiomyopathy with heart failure first. Treat with beta-blockers, diuretics, hydralazine and digoxin (switch to ACE inhibitors postpartum). ~20% die or need transplantation; the rest recover partially or fully. A future pregnancy carries a higher relapse risk if LV function hasn't fully recovered — and some residual risk even after full recovery. There's no consensus on recommendations for future pregnancies.",
+        "A clear physiological history with no red flags and a normal exam may not need further investigation.",
+        "Otherwise: FBC (exclude anaemia), TFTs (exclude thyrotoxicosis), 12-lead ECG. An abnormal baseline ECG (delta wave in WPW, LVH pattern in HCM, QTc >460ms in LQTS) should prompt a cardiology opinion.",
+        "Ambulatory ECG (Holter, typically 24–72h) is the most-used tool but has variable sensitivity since symptoms are often infrequent — diagnostic yield for a clinically significant arrhythmia is only 3–24%. Event recorders suit infrequent symptoms.",
+        "Echocardiogram to exclude structural disease — needed for a diagnosed arrhythmia, audible murmur, concerning history, known structural disease, or family history of inherited arrhythmia; not usually needed for clearly physiological symptoms.",
       ]},
 
-      { type: "text", value: "Part 2 of a two-part TOG review (Gelson, Johnson, Gatzoulis & Uebing, TOG 2007;9:83–87) — see also Part 1: Congenital Heart Disease. Read the full article for the complete discussion and references; verify all doses and thresholds against local protocol." },
+      { type: "subheading", value: "Managing specific arrhythmias" },
+      { type: "list", items: [
+        "Sinus tachycardia and ectopic beats: usually benign, no treatment required — but consider inappropriate sinus tachycardia or POTS as alternative diagnoses.",
+        "SVT (the most common non-benign arrhythmia, ~24 per 100,000): vagal manoeuvres first-line; IV adenosine if that fails (terminates ~90%, safe under monitoring); verapamil, metoprolol or DC cardioversion as alternatives if compromised. Beta-blockers for prophylaxis. Catheter ablation isn't usually recommended in pregnancy.",
+        "Atrial fibrillation/flutter (uncommon, usually reflects underlying pathology — e.g. mitral stenosis, electrolyte/metabolic disturbance): investigate the cause. Anticoagulate persistent AF (usually LMWH, MDT with cardiology/haematology). DC cardioversion first-line if compromised; IV flecainide or ibutilide preferred pharmacologically in a structurally normal heart; beta-blockers first-line for rate control.",
+        "Ventricular tachycardia: exclude structural heart disease/channelopathy first. Idiopathic RVOT VT responds to beta-blockade or verapamil. Haemodynamically unstable → electrical cardioversion (safe, no evidence of fetal harm). Stable → pharmacological cardioversion (sotalol/flecainide) guided by the underlying cause. Prophylaxis: beta-blockers, amiodarone, or an ICD.",
+        "Bradyarrhythmias: rare, usually well tolerated. First-degree block and Wenkebach are usually benign. Complete heart block: pace if symptomatic (temporary for delivery, or permanent — safe in pregnancy).",
+      ]},
+
+      { type: "subheading", value: "Long QT syndrome — special considerations" },
+      { type: "alert", value: "Cardiac events are less common during pregnancy in LQTS but rise significantly postpartum, particularly in type 2 LQTS — compounded by sleep deprivation and missed medication doses with a newborn." },
+      { type: "list", items: [
+        "Continue beta-blockers throughout AND after pregnancy — don't stop postpartum.",
+        "Avoid QT-prolonging drugs and electrolyte disturbance. Hyperemesis is high-risk (vomiting → non-adherence + electrolyte disturbance). Commonly-prescribed drugs to avoid include prochlorperazine, ondansetron, trimethoprim and erythromycin.",
+        "LQTS is linked to sudden infant death (a gene variant found in ~10% of SIDS cases) — arrange neonatal review before discharge and a genetics referral for the baby.",
+      ]},
+
+      { type: "subheading", value: "General principles for pre-existing arrhythmias" },
+      { type: "list", items: [
+        "Preconception: condition-specific risk counselling, medication review, optimise control, consider accessory-pathway ablation before pregnancy.",
+        "Antenatal: medication review, growth scans if on beta-blockers, anaesthetic review, birth planning.",
+        "Intrapartum: vaginal birth usually recommended; consider continuous cardiac monitoring if high-risk; ensure the care plan specifies drugs/facilities needed and drugs to avoid.",
+        "Postnatal: period of inpatient monitoring; some conditions (e.g. LQTS) carry high postnatal risk; plan medication and breastfeeding; arrange ongoing cardiology follow-up.",
+      ]},
+
+      { type: "text", value: "Summary of a TOG review (Roberts, Mechery, Mechery, Clarke & Vause, TOG 2019;21:263–270). Read the full article for the complete discussion, drug-safety table and references; verify all doses and thresholds against local protocol." },
+    ],
+  },
+
+  {
+    id: "tog-cardiac-valvular",
+    gl: "TOG",
+    source: "TOG",
+    condition: "TOG Review",
+    setting: "Review — Maternal Medicine",
+    title: "Valvular Heart Disease in Pregnancy",
+    draft: false,
+    tog: {
+      article: "Valvular heart disease in pregnancy",
+      authors: "Timmons P, Partridge G, McKelvey A, Lyall H, Morosan M, Freeman L",
+      citation: "TOG 2023;25:19–27",
+      doi: "10.1111/tog.12857",
+      url: "https://obgyn.onlinelibrary.wiley.com/doi/10.1111/tog.12857",
+      year: 2022,
+    },
+    flowchartId: "TOG_VALVULAR_PREGNANCY",
+    relatedGl: ["GL891", "MBRRACE_SLMC2025"],
+    tags: [
+      "valvular heart disease pregnancy", "mitral stenosis pregnancy", "aortic stenosis pregnancy",
+      "mitral regurgitation pregnancy", "aortic regurgitation pregnancy", "mechanical heart valve pregnancy",
+      "bioprosthetic valve pregnancy", "prosthetic valve anticoagulation", "warfarin pregnancy heart valve",
+      "warfarin embryopathy", "lmwh mechanical valve", "mwho classification", "who classification cardiac",
+      "nyha class", "balloon valvuloplasty pregnancy", "rheumatic heart disease pregnancy",
+      "endocarditis prophylaxis pregnancy", "tog review",
+    ],
+    content: [
+      { type: "alert", value: "Bottom line: regurgitant lesions are generally better tolerated than stenotic lesions in pregnancy, and right-sided lesions better than left-sided. Pre-conception counselling with mWHO risk classification is essential for all women with valvular disease. Anticoagulation for mechanical valves is a genuine trade-off between maternal and fetal risk, not a solved problem." },
+
+      { type: "subheading", value: "Pre-conception assessment" },
+      { type: "list", items: [
+        "See a cardiologist with expertise in pregnancy, a maternal-medicine obstetrician and an obstetric physician. Baseline ECG, echocardiogram and (where appropriate) exercise tolerance test.",
+        "Assess using the modified WHO (mWHO) classification — Class I (no detectable increased risk) through Class IV (pregnancy contraindicated, e.g. severe mitral/aortic stenosis, pulmonary arterial hypertension, LVEF <30%). Also grade functional status by NYHA class (I–IV).",
+        "All women with cardiac disease should be told they're at increased risk of obstetric complications (preterm birth, hypertensive disease, PPH) — fetal complications occur in up to 30% of cases and correlate with maternal disease severity.",
+        "Serial growth scans (~4-weekly from 28 weeks) for all stenotic valvular disease and symptomatic regurgitant disease — FGR risk up to 30%.",
+      ]},
+
+      { type: "subheading", value: "Mitral stenosis" },
+      { type: "table",
+        headers: ["Severity", "Valve area", "Heart failure risk in pregnancy"],
+        rows: [
+          ["Mild", ">1.5 cm²", "Usually well tolerated"],
+          ["Moderate", "1.0–1.5 cm²", "~1 in 3"],
+          ["Severe", "<1.0 cm²", "~1 in 2"],
+        ],
+      },
+      { type: "list", items: [
+        "Even asymptomatic severe mitral stenosis warrants counselling against pregnancy, effective contraception (typically LARC), and optimisation with prepregnancy balloon valvotomy or valve replacement.",
+        "Predictors of complications: NYHA ≥II, systolic pulmonary artery pressure >30mmHg, severe stenosis, advanced maternal age. Mortality is low (0–3%) in developed nations if managed well.",
+        "Fetal risk: prematurity 20–30%, FGR up to 30%.",
+        "Antenatal: review frequency by severity (each trimester if mild/asymptomatic; at least monthly if severe/symptomatic). Anticoagulate (LMWH) if moderate-severe stenosis (AF risk), left atrial enlargement ≥60mL/m², prior embolism/LA thrombus, or CCF.",
+        "Surgery in pregnancy reserved for NYHA III/IV or PA pressure ≥50mmHg despite medical therapy — percutaneous balloon mitral valvuloplasty is the intervention of choice.",
+      ]},
+
+      { type: "subheading", value: "Aortic stenosis" },
+      { type: "list", items: [
+        "Defined as an antegrade valve velocity ≥2.0 m/s. Asymptomatic pre-pregnancy → heart failure risk <10% (vs 25% if symptomatic).",
+        "A physiological increase in the echo gradient during pregnancy is normal — its absence (or a fall) should raise concern for a failing left ventricle, not reassure.",
+        "Even severe AS with normal pre-pregnancy exercise tolerance and preserved LV function can be expected to tolerate pregnancy reasonably; a Bruce protocol exercise test and NT-proBNP pre-conception both help risk-stratify.",
+        "Symptomatic/severe disease, reduced exercise tolerance or impaired LV function → counsel against pregnancy, offer contraception and surgical treatment.",
+        "Antenatal review monthly-to-bimonthly if severe. Medical: reduce activity, beta-blockers/diuretics for incipient failure. Surgical: percutaneous valvuloplasty for severe symptoms despite maximal medical therapy; if not feasible with life-threatening symptoms, consider termination or early delivery followed by valve surgery.",
+        "Preterm birth and FGR occur in 20–25% with moderate/severe AS; offer fetal echocardiography (~10% risk of congenital cardiac defects with LVOT pathology).",
+      ]},
+
+      { type: "subheading", value: "Regurgitant lesions (mitral/aortic)" },
+      { type: "list", items: [
+        "Mild disease usually well tolerated (peripheral vasodilatation reduces afterload). Moderate-severe, symptomatic, or impaired LV function → higher heart failure risk (20–25%); FGR in 5–10%.",
+        "Medical: diuretics for fluid overload. Surgical: repair ideally pre-pregnancy; acute severe regurgitation refractory to medical therapy may need surgery in pregnancy, though delivery should ideally precede this.",
+      ]},
+
+      { type: "subheading", value: "Valve replacement — bioprosthetic vs mechanical" },
+      { type: "list", items: [
+        "Bioprosthetic: no anticoagulation needed in pregnancy if haemodynamically stable and low complication risk absent dysfunction — but up to a third fail within 10–15 years, so repeat surgery is often needed eventually.",
+        "Mechanical: durable but needs lifelong anticoagulation. ROPAC registry data: 58% 'event-free' pregnancy with a mechanical valve vs 79% with a bioprosthesis.",
+      ]},
+
+      { type: "subheading", value: "Anticoagulation for mechanical valves" },
+      { type: "alert", value: "Vitamin K antagonists (warfarin) are the most effective at preventing valve thrombosis but are teratogenic; LMWH doesn't cross the placenta but carries a higher maternal thromboembolic risk (~10%). There is no anticoagulation strategy that eliminates risk to both mother and fetus." },
+      { type: "list", items: [
+        "Warfarin embryopathy (nasal hypoplasia, short long bones/digits, stippled epiphyses) is most associated with exposure at 6–12 weeks; overall fetal anomaly rate ~5–6% with first-trimester warfarin exposure, correlating with total dose. Risk rises markedly above a warfarin dose of 5mg/day.",
+        "Direct oral anticoagulants (e.g. rivaroxaban) are contraindicated with mechanical valves, pregnant or not.",
+      ]},
+      { type: "table",
+        headers: ["Strategy", "Approach"],
+        rows: [
+          ["VKA throughout", "Warfarin continued; switch to twice-daily LMWH ~2 weeks before delivery"],
+          ["LMWH 1st trimester, VKA 2nd/3rd", "Switch to LMWH before 6 weeks; restart warfarin after 12 weeks; switch back to LMWH before delivery"],
+          ["LMWH throughout", "Switch to LMWH after a positive pregnancy test; continued until delivery"],
+        ],
+      },
+      { type: "text", value: "LMWH for a prosthetic valve needs twice-daily dosing with regular peak/trough anti-Xa levels (peak target 0.8–1.2 IU/mL) — doses required are >50% higher than standard weight-based VTE treatment doses. Factor in maternal preference, valve thrombogenicity, compliance, and monitoring availability — this is a genuinely shared decision." },
+
+      { type: "subheading", value: "Anaesthetic considerations" },
+      { type: "list", items: [
+        "Stenotic lesions: fixed cardiac output tolerates regional-anaesthesia hypotension poorly — consider invasive BP monitoring and a carefully titrated low-dose combined spinal-epidural. Maintain a slower heart rate (preserves diastolic coronary filling) and preload.",
+        "Regurgitant lesions: usually tolerate regional anaesthesia well (falling SVR reduces regurgitant flow).",
+        "Anticoagulation and neuraxial anaesthesia: allow 24 hours between the last LMWH dose and neuraxial block; INR should be <1.5 before neuraxial anaesthesia in women on warfarin.",
+      ]},
+
+      { type: "subheading", value: "Intrapartum & postpartum" },
+      { type: "list", items: [
+        "Mode of delivery is individualised; mild/moderate dysfunction not on anticoagulation can usually have a normal vaginal delivery. Instrumental delivery to shorten the second stage if severe hypertension or a poorly-tolerated Valsalva is anticipated.",
+        "Plan delivery timing to ensure safe peripartum anticoagulation — avoid a prolonged induction in a high thrombosis-risk woman; caesarean can allow more predictable anticoagulation control. Emergency delivery within 2 weeks of warfarin → caesarean preferred (neonatal intracranial bleeding risk).",
+        "Endocarditis prophylaxis is no longer routinely recommended beyond standard caesarean antibiotics, except with a personal history of infective endocarditis.",
+        "Third stage: anticipate large fluid shifts — diuretics may be needed in severe mitral stenosis to prevent autotransfusion-induced pulmonary oedema; avoid volume depletion in aortic stenosis. Avoid ergometrine in arrhythmia or aortic-dissection risk; avoid carboprost in asthma or raised PA pressure.",
+        "Resume anticoagulation as soon as safely possible postpartum to minimise thromboembolic risk; balance this carefully against PPH risk with early haematology involvement.",
+        "Lactation is safe, including on warfarin (present in milk only as an inactive metabolite).",
+      ]},
+
+      { type: "text", value: "Summary of a TOG review (Timmons, Partridge, McKelvey, Lyall, Morosan & Freeman, TOG 2023;25:19–27, accepted 2022). Read the full article for the complete discussion, mWHO/NYHA tables and references; verify all doses and thresholds against local protocol." },
     ],
   },
 ];

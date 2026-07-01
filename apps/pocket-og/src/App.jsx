@@ -99,6 +99,9 @@ const FLOWCHART_LINKS = [
   { id: "TOG_THYROID",           gl: "TOG" },
   { id: "TOG_CHD_PREGNANCY",     gl: "TOG" },
   { id: "TOG_ACQUIRED_CARDIAC",  gl: "TOG" },
+  { id: "TOG_MI_PREGNANCY",      gl: "TOG" },
+  { id: "TOG_ARRHYTHMIAS_PREGNANCY", gl: "TOG" },
+  { id: "TOG_VALVULAR_PREGNANCY",    gl: "TOG" },
 ];
 
 const FLOWCHART_GROUPS = [
