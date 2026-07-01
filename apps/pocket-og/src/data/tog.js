@@ -31,6 +31,7 @@ export const TOG_SECTIONS = [
       doi: "10.1111/tog.12113",
       url: "https://obgyn.onlinelibrary.wiley.com/doi/10.1111/tog.12113",
     },
+    flowchartId: "TOG_POLYHYDRAMNIOS",
     relatedGl: ["GL983", "GTG52", "GTG50", "GTG42"],
     tags: [
       "polyhydramnios", "poly", "increased liquor", "excess amniotic fluid", "high afi",

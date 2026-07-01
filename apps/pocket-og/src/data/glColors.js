@@ -70,7 +70,9 @@ export function sourceFromLabel(label = "") {
   return SOURCE_ORDER.find(s => up.includes(s)) ?? null;
 }
 
-// Colour for a guideline code — resolved through its source.
+// Colour for a guideline code — resolved through its source. Codes that aren't
+// guidelines but ARE a source key (e.g. "TOG") theme by that source directly;
+// anything else falls through to the neutral default.
 export function glColors(gl) {
-  return sourceColors(GUIDELINES[gl]?.source);
+  return sourceColors(GUIDELINES[gl]?.source ?? gl);
 }
