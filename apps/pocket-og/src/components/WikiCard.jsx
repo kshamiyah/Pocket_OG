@@ -16,6 +16,7 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
     page.setting,
     gl?.code,
     gl ? `${gl.version} · ${gl.date}` : null,
+    page.tog?.year ? `TOG ${page.tog.year}` : null,
     page.flowchartId ? "⬡ flowchart" : null,
     isFallback ? "closest match" : null,
   ].filter(Boolean);

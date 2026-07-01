@@ -9,7 +9,9 @@
 //   id, source: "TOG", gl: "TOG"     — drives the TOG colour + filter
 //   condition, setting, title, tags  — same as any searchable card
 //   draft: true                      — shows an "AI-summarised, verify" banner
-//   tog: { article, authors, citation, doi, url }  — provenance + link-out
+//   tog: { article, authors, citation, doi, url, year }  — provenance + link-out;
+//     `year` surfaces in the collapsed card's meta line so it's visible at a
+//     glance how current a review is, without expanding it.
 //   relatedGl: []                    — cross-links to guidelines already in the app
 //   flowchartId (optional)           — cross-link to an interactive pathway
 //   content: []                      — text | alert | subheading | list | table
@@ -30,6 +32,7 @@ export const TOG_SECTIONS = [
       citation: "TOG 2014;16:207–13",
       doi: "10.1111/tog.12113",
       url: "https://obgyn.onlinelibrary.wiley.com/doi/10.1111/tog.12113",
+      year: 2014,
     },
     flowchartId: "TOG_POLYHYDRAMNIOS",
     relatedGl: ["GL983", "GTG52", "GTG50", "GTG42"],
@@ -126,6 +129,7 @@ export const TOG_SECTIONS = [
       citation: "TOG 2026;28:41–50",
       doi: "10.1111/tog.70021",
       url: "https://obgyn.onlinelibrary.wiley.com/doi/10.1111/tog.70021",
+      year: 2026,
     },
     flowchartId: "TOG_OLIGOHYDRAMNIOS",
     relatedGl: ["GL895", "GTG31", "GL861"],
@@ -208,6 +212,7 @@ export const TOG_SECTIONS = [
       citation: "TOG 2008;10:237–243",
       doi: "10.1576/toag.10.4.237.27440",
       url: "https://obgyn.onlinelibrary.wiley.com/doi/10.1576/toag.10.4.237.27440",
+      year: 2008,
     },
     flowchartId: "TOG_THYROID",
     relatedGl: ["GTG69", "GL952"],
