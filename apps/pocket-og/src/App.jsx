@@ -82,6 +82,7 @@ const FLOWCHART_LINKS = [
   { id: "NG73_TREATMENT",        gl: "NG73" },
   { id: "NG229_CTG",             gl: "NG229" },
   { id: "GTG50_CORD",            gl: "GTG50" },
+  { id: "ABDO_TRIAGE",           gl: "ABDO" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -105,6 +106,7 @@ const FLOWCHART_GROUPS = [
   { gl: "NG73",      label: "Endometriosis" },
   { gl: "NG229",     label: "Fetal Monitoring / CTG" },
   { gl: "GTG50",     label: "Cord Prolapse (Emergency)" },
+  { gl: "ABDO",      label: "Abdominal Pain in Pregnancy" },
 ];
 
 export default function App() {
