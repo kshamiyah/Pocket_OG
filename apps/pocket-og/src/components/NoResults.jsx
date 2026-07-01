@@ -24,13 +24,15 @@ export default function NoResults({ query, fallbacks, expanded, onToggle, onOpen
             </div>
           </div>
           <p className="text-xs text-gray-400 uppercase tracking-widest mb-3">Closest matches</p>
-          <div className="space-y-3">
-            {fallbacks.map(page => (
-              <WikiCard key={page.id} page={page} isFallback={true} query={query}
-                isExpanded={!!expanded[page.id]}
-                onToggle={() => onToggle(page.id)}
-                onOpenFlowchart={onOpenFlowchart}
-                onOpenGuideline={onOpenGuideline} />
+          <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+            {fallbacks.map((page, i) => (
+              <div key={page.id} className={i > 0 ? "border-t border-gray-50" : ""}>
+                <WikiCard page={page} isFallback={true} query={query} grouped
+                  isExpanded={!!expanded[page.id]}
+                  onToggle={() => onToggle(page.id)}
+                  onOpenFlowchart={onOpenFlowchart}
+                  onOpenGuideline={onOpenGuideline} />
+              </div>
             ))}
           </div>
         </>

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import SeeAlso from "./SeeAlso";
 import RichText from "./RichText";
+import CTGFeaturePicker from "./CTGFeaturePicker";
 import { FLOWCHART_NODE_CONNECTIONS } from "../data/connections";
 import { glColors } from "../data/glColors";
 
 const NODE_STYLES = {
   action:  { badge: "bg-blue-100 text-blue-700",   icon: "→", bar: "bg-blue-500" },
   decision:{ badge: "bg-violet-100 text-violet-700", icon: "?", bar: "bg-violet-500" },
+  classifier:{ badge: "bg-violet-100 text-violet-700", icon: "≡", bar: "bg-violet-500" },
   alert:   { badge: "bg-amber-100 text-amber-700",  icon: "⚠", bar: "bg-amber-400" },
   end:     { badge: "bg-gray-100 text-gray-600",    icon: "✓", bar: "bg-gray-400" },
 };
@@ -62,7 +64,7 @@ export default function FlowchartPlayer({ flowchart, gl, theme, onClose, pdfUrl,
   const stepNum = history.length + 1;
 
   return (
-    <div className="fixed inset-0 z-50 bg-white flex flex-col" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
+    <div className="fixed inset-0 z-50 bg-white flex flex-col" style={{ fontFamily: "'Geist', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
 
       {/* Header */}
       <div className="shrink-0 border-b border-gray-100 px-4 py-3 flex items-center gap-3">
@@ -186,6 +188,18 @@ export default function FlowchartPlayer({ flowchart, gl, theme, onClose, pdfUrl,
                   </button>
                 );
               })}
+            </div>
+          )}
+
+          {/* Classifier — interactive feature picker that routes by computed category */}
+          {node.type === "classifier" && node.resultMap && (
+            <div className="mt-4">
+              <CTGFeaturePicker
+                onResult={(category, label) => {
+                  const next = node.resultMap[category];
+                  if (next) choose({ label: label ?? category, next });
+                }}
+              />
             </div>
           )}
 

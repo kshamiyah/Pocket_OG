@@ -22,22 +22,18 @@ const ALL_DRUGS = [
   ...CONTRACEPTION.map(d =>        ({ ...d, category: "Contraception" })),
 ].sort((a, b) => a.name.localeCompare(b.name));
 
-const ACCENT = {
-  blue:    "bg-blue-500",
-  purple:  "bg-purple-500",
-  amber:   "bg-amber-400",
-  orange:  "bg-orange-400",
-  teal:    "bg-cyan-500",
-  pink:    "bg-pink-500",
-  green:   "bg-green-500",
-  indigo:  "bg-indigo-500",
-  red:     "bg-red-500",
-  rose:    "bg-rose-500",
-  violet:  "bg-violet-500",
-  lime:    "bg-lime-500",
-  sky:     "bg-sky-500",
-  fuchsia: "bg-fuchsia-500",
-  yellow:  "bg-yellow-400",
+// Rx is colour-coded by drug class (its own zone — drugs aren't tied to one
+// guideline body). Accent bars below match the CATEGORY_COLOR label hues.
+const CATEGORY_ACCENT = {
+  "Antihypertensive": "bg-blue-500",
+  "Uterotonic":       "bg-rose-500",
+  "Antiemetic":       "bg-emerald-500",
+  "Antibiotic":       "bg-lime-500",
+  "Tocolytic":        "bg-sky-500",
+  "Anticoagulant":    "bg-fuchsia-500",
+  "Analgesia":        "bg-yellow-400",
+  "Endometriosis":    "bg-purple-500",
+  "Contraception":    "bg-pink-500",
 };
 
 const CATEGORY_COLOR = {
@@ -103,7 +99,7 @@ function BulletRow({ colorClass, symbol, text, border = true }) {
 }
 
 function DrugDetailView({ drug, onClose }) {
-  const accent = ACCENT[drug.color] ?? "bg-gray-400";
+  const accent = CATEGORY_ACCENT[drug.category] ?? "bg-gray-400";
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col">
       <div className="flex-none px-4 pt-3 pb-3 flex items-center justify-between border-b border-gray-100 bg-white">
@@ -330,7 +326,7 @@ export default function RxPage() {
 
                   <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
                     {drugs.map((drug, i) => {
-                      const accent = ACCENT[drug.color] ?? "bg-gray-400";
+                      const accent = CATEGORY_ACCENT[drug.category] ?? "bg-gray-400";
                       const routeTypes = [...new Set(drug.routes.map(r => r.type))];
                       return (
                         <button

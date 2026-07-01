@@ -2,6 +2,7 @@ import { useState, useMemo, useRef } from "react";
 import SeeAlso from "./SeeAlso";
 import { CALCULATOR_CONNECTIONS } from "../data/connections";
 import AlphabetSidebar from "./AlphabetSidebar";
+import { sourceColors, sourceFromLabel } from "../data/glColors";
 import {
   CALCULATOR_SCENARIOS,
   interpretPUL,
@@ -101,7 +102,7 @@ function ScenarioList({ onSelect }) {
                       onClick={() => onSelect(s.id)}
                       className="flex items-start gap-3 w-full px-4 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left border-t border-gray-50"
                     >
-                      <div className={`w-1 h-12 rounded-full shrink-0 ${s.color.accent}`} />
+                      <div className={`w-1 h-12 rounded-full shrink-0 ${sourceColors(sourceFromLabel(s.source)).accent}`} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-900 leading-snug">{s.title}</p>
                         <p className="text-xs text-gray-400 mt-0.5">{s.subtitle}</p>

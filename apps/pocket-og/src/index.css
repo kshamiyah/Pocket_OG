@@ -24,3 +24,29 @@ body,
 .emergency-shell textarea {
   font-size: 16px;
 }
+
+/* Geist — self-hosted variable font (Latin). System stack as fallback. */
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/Geist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Align numbers in dose/score tables */
+table {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Gentle entrance for the home hero */
+@keyframes enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.animate-enter {
+  animation: enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-enter { animation: none; }
+}

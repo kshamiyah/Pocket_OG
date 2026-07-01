@@ -10,6 +10,7 @@ import {
   GTG42_SECTIONS, GTG52_SECTIONS, GTG69_SECTIONS, NG25_SECTIONS,
   GTG31_SECTIONS, GTG17_SECTIONS, CG192_SECTIONS,
   NG133_SECTIONS,
+  NG229_SECTIONS,
   BASHH_PID_SECTIONS,
   NG73_SECTIONS,
   MBRRACE_SLMC2025_SECTIONS,
@@ -19,6 +20,7 @@ import { GUIDELINE_KEYWORD_LINKS } from "../data/connections";
 import { glColors } from "../data/glColors";
 import ContentBlock from "./ContentBlock";
 import SeeAlso from "./SeeAlso";
+import BottomSheet from "./BottomSheet";
 
 const SECTIONS_MAP = {
   GL861: GL861_SECTIONS,
@@ -47,6 +49,7 @@ const SECTIONS_MAP = {
   GTG17: GTG17_SECTIONS,
   CG192: CG192_SECTIONS,
   NG133: NG133_SECTIONS,
+  NG229: NG229_SECTIONS,
   BASHH_PID: BASHH_PID_SECTIONS,
   NG73: NG73_SECTIONS,
   MBRRACE_SLMC2025: MBRRACE_SLMC2025_SECTIONS,
@@ -101,7 +104,7 @@ export default function GuidelineReader({ gl, onClose, onNavigate, scrollToSecti
     setShowContents(false);
     setTimeout(() => {
       sectionRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 150);
+    }, 400);
   };
 
   useEffect(() => {
@@ -211,46 +214,48 @@ export default function GuidelineReader({ gl, onClose, onNavigate, scrollToSecti
         </div>
       </div>
 
-      {/* Contents sheet */}
-      {showContents && (
-        <>
-          <div className="fixed inset-0 z-50 bg-black/30" onClick={() => setShowContents(false)} />
-          <div className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-3xl shadow-2xl max-w-lg mx-auto">
-            <div className="px-5 pt-5 pb-2 flex items-center justify-between">
-              <p className="text-base font-bold text-gray-900">Contents</p>
-              <button
-                onClick={() => setShowContents(false)}
-                aria-label="Close table of contents"
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-              >
-                <svg className="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="overflow-y-auto max-h-[60vh] pb-8">
-              {sections.map((section, i) => (
-                <button
-                  key={section.id}
-                  onClick={() => jumpTo(section.id)}
-                  className={`w-full flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left ${
-                    i > 0 ? "border-t border-gray-50" : ""
-                  }`}
-                >
-                  <span className={`text-xs font-bold w-5 shrink-0 ${theme.conditionColor}`}>{i + 1}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-[10px] font-semibold uppercase tracking-wide ${theme.conditionColor}`}>{section.condition}</p>
-                    <p className="text-sm font-medium text-gray-900 leading-snug mt-0.5">{shortTitle(section.title)}</p>
-                  </div>
-                  <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
+      <BottomSheet
+        open={showContents}
+        onClose={() => setShowContents(false)}
+        zIndex={60}
+        showHandle
+        sheetClassName="max-h-[min(90dvh,100%)]"
+      >
+        <div className="px-5 pb-2 flex items-center justify-between shrink-0">
+          <p className="text-base font-bold text-gray-900">Contents</p>
+          <button
+            type="button"
+            onClick={() => setShowContents(false)}
+            aria-label="Close table of contents"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+          >
+            <svg className="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain pb-2">
+          {sections.map((section, i) => (
+            <button
+              key={section.id}
+              type="button"
+              onClick={() => jumpTo(section.id)}
+              className={`w-full flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left ${
+                i > 0 ? "border-t border-gray-50" : ""
+              }`}
+            >
+              <span className={`text-xs font-bold w-5 shrink-0 ${theme.conditionColor}`}>{i + 1}</span>
+              <div className="flex-1 min-w-0">
+                <p className={`text-[10px] font-semibold uppercase tracking-wide ${theme.conditionColor}`}>{section.condition}</p>
+                <p className="text-sm font-medium text-gray-900 leading-snug mt-0.5">{shortTitle(section.title)}</p>
+              </div>
+              <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          ))}
+        </div>
+      </BottomSheet>
 
     </div>
   );

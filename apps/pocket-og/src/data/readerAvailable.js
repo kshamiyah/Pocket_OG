@@ -4,6 +4,7 @@ export const READER_AVAILABLE = new Set([
   "NG88", "NHSCSP20",
   "GTG42", "GTG52", "GTG69", "NG25", "GTG31", "GTG17", "CG192",
   "NG133",
+  "NG229",
   "BASHH_PID",
   "NG73",
   "MBRRACE_SLMC2025",

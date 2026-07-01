@@ -1,37 +1,19 @@
-// Inline colors by gl / calc id — hex values avoid Tailwind purge issues
-const INLINE_COLORS = {
-  // flowchart links
-  CG623:                  "#f97316", // orange-500
-  GL891:                  "#6366f1", // indigo-500
-  GL861:                  "#14b8a6", // teal-500
-  // calculator links
-  MTX_SURVEILLANCE:       "#8b5cf6", // violet-500
-  ECTOPIC_DECISION:       "#f43f5e", // rose-500
-  EXPECTANT_SURVEILLANCE: "#14b8a6", // teal-500
-  VTE_RISK:               "#6366f1", // indigo-500
-  // reader (guideline) link targets
-  GL952:  "#3b82f6", // blue-500
-  GL983:  "#ec4899", // pink-500
-  GL880:  "#ca8a04", // yellow-600
-  GL787:  "#10b981", // emerald-500
-  GL895:  "#0ea5e9", // sky-500
-  GL783:  "#f59e0b", // amber-500
-  GTG52:  "#ef4444", // red-500
-  GTG69:  "#f97316", // orange-500
-  NG25:   "#0ea5e9", // sky-500
-  GTG31:  "#22c55e", // green-500
-  GTG17:  "#8b5cf6", // violet-500
-  CG192:  "#a855f7", // purple-500
-  CG565:  "#8b5cf6", // violet-500
-  CG623:  "#f97316", // orange-500 (also flowchart — consistent)
-  NG133:  "#06b6d4", // cyan-500
-};
+// Inline link colours follow the source colour of their target (hex values
+// avoid Tailwind purge issues). Flowchart/reader links carry a `gl`; calculator
+// links carry an `id` mapped to its scenario's source.
+import { GUIDELINES } from "@pocket-og/guidelines";
+import { SOURCE_HEX, sourceFromLabel } from "../data/glColors";
+import { CALCULATOR_SCENARIOS } from "../data/calculator";
+
+const FALLBACK_HEX = "#6b7280"; // gray-500
+const CALC_SOURCE = Object.fromEntries(
+  CALCULATOR_SCENARIOS.map(s => [s.id, sourceFromLabel(s.source)])
+);
 
 function linkColor(link) {
-  if (link.type === "flowchart") return INLINE_COLORS[link.gl] ?? "#6b7280";
-  if (link.type === "calculator") return INLINE_COLORS[link.id] ?? "#6b7280";
-  if (link.type === "reader") return INLINE_COLORS[link.gl] ?? "#6b7280";
-  return "#6b7280";
+  if (link.type === "calculator") return SOURCE_HEX[CALC_SOURCE[link.id]] ?? FALLBACK_HEX;
+  // flowchart + reader links carry a guideline code
+  return SOURCE_HEX[GUIDELINES[link.gl]?.source] ?? FALLBACK_HEX;
 }
 
 // Case-insensitive phrase matching; preserves original casing in output

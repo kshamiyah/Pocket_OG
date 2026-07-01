@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import { SEARCH_INDEX, search } from "./search/engine";
 import { FLOWCHARTS } from "./data/flowcharts";
 import { GUIDELINES } from "@pocket-og/guidelines";
-import { glColors } from "./data/glColors";
+import { glColors, sourceColors } from "./data/glColors";
 import WikiCard from "./components/WikiCard";
 import NoResults from "./components/NoResults";
 import FlowchartPlayer from "./components/FlowchartPlayer";
@@ -14,10 +14,13 @@ import AlphabetSidebar from "./components/AlphabetSidebar";
 import GuidelineReader from "./components/GuidelineReader";
 import RxPage from "./components/RxPage";
 import DisclaimerModal from "./components/DisclaimerModal";
+import AboutModal from "./components/AboutModal";
+import UpdatesModal from "./components/UpdatesModal";
 import InstallBanner from "./components/InstallBanner";
 import EmergencyPage from "./components/EmergencyPage";
 import ShoulderDystociaPage from "./components/ShoulderDystociaPage";
 import CardiacArrestPage from "./components/CardiacArrestPage";
+import { LATEST_VERSION, hasUnseenUpdates, markUpdatesSeen } from "./data/updates";
 
 import { READER_AVAILABLE } from "./data/readerAvailable";
 
@@ -38,6 +41,15 @@ const SUGGESTIONS = [
   "UTI treatment",
   "fitting on ward",
   "gentamicin weight",
+];
+
+const SEARCH_HINTS = [
+  "Ask a clinical question…",
+  "magnesium dose?",
+  "GBS prophylaxis",
+  "cord prolapse",
+  "postnatal blood pressure",
+  "gentamicin dosing",
 ];
 
 const FLOWCHART_LINKS = [
@@ -80,6 +92,9 @@ const FLOWCHART_LINKS = [
   { id: "BASHH_PID_ANTIBIOTICS", gl: "BASHH_PID" },
   { id: "NG73_DIAGNOSIS",        gl: "NG73" },
   { id: "NG73_TREATMENT",        gl: "NG73" },
+  { id: "NG229_CTG",             gl: "NG229" },
+  { id: "GTG50_CORD",            gl: "GTG50" },
+  { id: "ABDO_TRIAGE",           gl: "ABDO" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -101,6 +116,9 @@ const FLOWCHART_GROUPS = [
   { gl: "GTG31",    label: "Small for Gestational Age / FGR" },
   { gl: "BASHH_PID", label: "Pelvic Inflammatory Disease" },
   { gl: "NG73",      label: "Endometriosis" },
+  { gl: "NG229",     label: "Fetal Monitoring / CTG" },
+  { gl: "GTG50",     label: "Cord Prolapse (Emergency)" },
+  { gl: "ABDO",      label: "Abdominal Pain in Pregnancy" },
 ];
 
 export default function App() {
@@ -125,6 +143,10 @@ export default function App() {
   const [emergencyContext, setEmergencyContext] = useState(null); // extra context when one SOS launches another
   const [pphResumeFromCa, setPphResumeFromCa] = useState(false);
   const [showEmergencyPicker, setShowEmergencyPicker] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const [updatesOpen, setUpdatesOpen] = useState(false);
+  const [updatesUnseen, setUpdatesUnseen] = useState(() => hasUnseenUpdates());
+  const [hintIndex, setHintIndex] = useState(0);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
   const glSectionRefs = useRef({});
@@ -200,6 +222,13 @@ export default function App() {
     if (inputRef.current) inputRef.current.focus();
   }, []);
 
+  // Cycle the search placeholder while on the idle home screen
+  useEffect(() => {
+    if (hasQuery) return;
+    const id = setInterval(() => setHintIndex(i => (i + 1) % SEARCH_HINTS.length), 3200);
+    return () => clearInterval(id);
+  }, [hasQuery]);
+
   // When transitioning to results view, blur the home input to dismiss keyboard
   useEffect(() => {
     if (hasQuery && inputRef.current) {
@@ -248,8 +277,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
+    <div className="min-h-screen bg-white" style={{ fontFamily: "'Geist', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
       <DisclaimerModal />
+      <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
+      <UpdatesModal open={updatesOpen} onClose={() => setUpdatesOpen(false)} />
       <style>{`
         * { box-sizing: border-box; }
         html, body { -ms-overflow-style: none; scrollbar-width: none; }
@@ -384,6 +415,21 @@ export default function App() {
         />
       )}
 
+      {/* About — info icon on search tab */}
+      {activeTab === "search" && (
+        <button
+          type="button"
+          onClick={() => setAboutOpen(true)}
+          aria-label="About Pocket O&G"
+          className="fixed right-4 z-30 w-8 h-8 flex items-center justify-center bg-white/95 backdrop-blur border border-gray-200 shadow-sm rounded-full text-gray-400 hover:text-gray-600 hover:shadow-md active:scale-95 transition-all"
+          style={{ top: "max(1rem, env(safe-area-inset-top))" }}
+        >
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+          </svg>
+        </button>
+      )}
+
       {/* IOL Prioritizer overlay */}
       {showIOLPrioritizer && <IOLPrioritizer onClose={() => setShowIOLPrioritizer(false)} />}
 
@@ -418,35 +464,50 @@ export default function App() {
         <>
           {/* Hero / idle state */}
           {!hasQuery && (
-            <div className="flex flex-col items-center justify-start min-h-screen px-5 pt-20 pb-32">
-              <div className="w-full max-w-lg">
+            <div
+              className="flex flex-col items-center justify-center min-h-[100dvh] px-5"
+              style={{
+                paddingTop: "max(3rem, calc(env(safe-area-inset-top) + 2rem))",
+                paddingBottom: "calc(5.5rem + env(safe-area-inset-bottom, 0px))",
+              }}
+            >
+              <div className="w-full max-w-lg animate-enter">
 
                 {/* Hero */}
-                <div className="text-center mb-6">
-                  <h1 className="text-[36px] sm:text-[50px] font-[800] tracking-[0.04em] text-black">Pocket O&G</h1>
-                  <p className="mt-3 text-base leading-relaxed text-gray-400">
-                    Local and national guidelines.<br />Whenever and wherever you need them.
+                <div className="text-center mb-12 sm:mb-14">
+                  <h1 className="text-[42px] sm:text-[56px] font-[800] tracking-[-0.02em] text-black">Pocket O&G</h1>
+                  <p className="mt-3 text-lg leading-relaxed text-gray-400">
+                    Pocket the evidence. Make the call.
                   </p>
-                  <p className="mt-2 text-sm font-medium text-gray-400">Built by Khalid Shamiyah</p>
+                  {updatesUnseen && (
+                    <button
+                      type="button"
+                      onClick={() => { setUpdatesOpen(true); markUpdatesSeen(); setUpdatesUnseen(false); }}
+                      className="mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-xs font-semibold text-blue-600 hover:bg-blue-100 active:scale-95 transition-all"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                      v{LATEST_VERSION} · What&apos;s new
+                    </button>
+                  )}
                 </div>
 
                 {/* Search */}
-                <div className="relative mb-5">
+                <div className="relative mb-10 sm:mb-12">
                   <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
                   </svg>
                   <input
                     ref={inputRef}
                     type="text"
-                    placeholder="Ask a clinical question…"
+                    placeholder={SEARCH_HINTS[hintIndex]}
                     value={inputValue}
                     onChange={e => setInputValue(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && submitSearch()}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-10 pr-12 py-3.5 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                    className="w-full bg-white border border-gray-200 rounded-2xl pl-11 pr-14 py-4 text-[17px] text-gray-900 placeholder-gray-400 shadow-lg shadow-gray-200/60 focus:outline-none focus:border-gray-300 focus:ring-4 focus:ring-gray-900/5 focus:shadow-xl transition-all"
                   />
                   <button
                     onClick={() => submitSearch()}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-xl bg-black hover:bg-gray-800 active:scale-95 transition-all"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-xl bg-black hover:bg-gray-800 active:scale-95 transition-all"
                   >
                     <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
@@ -455,7 +516,7 @@ export default function App() {
                 </div>
 
                 {/* Suggestion chips */}
-                <div className="flex flex-wrap gap-2 mt-3">
+                <div className="flex flex-wrap justify-center gap-2">
                   {SUGGESTIONS.map(s => (
                     <button
                       key={s}
@@ -468,6 +529,26 @@ export default function App() {
                 </div>
 
                 <InstallBanner />
+
+                <p className="mt-8 text-center text-xs text-gray-400">
+                  Built by{" "}
+                  <a
+                    href="https://drshamiyah.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-2 hover:text-gray-600 transition-colors"
+                  >
+                    Khalid Shamiyah
+                  </a>
+                  {" · "}
+                  <button
+                    type="button"
+                    onClick={() => { setUpdatesOpen(true); markUpdatesSeen(); setUpdatesUnseen(false); }}
+                    className="underline underline-offset-2 hover:text-gray-600 transition-colors"
+                  >
+                    v{LATEST_VERSION}
+                  </button>
+                </p>
 
               </div>
             </div>
@@ -534,9 +615,11 @@ export default function App() {
             {showNoResults
               ? <NoResults query={query} fallbacks={fallback} expanded={expanded} onToggle={toggle} onOpenFlowchart={setActiveFlowchartId} onOpenGuideline={openGuidelineFromSearch} />
               : (
-                <div className="space-y-3">
-                  {primary.map(page => (
-                    <WikiCard key={page.id} page={page} query={query} isExpanded={!!expanded[page.id]} onToggle={() => toggle(page.id)} onOpenFlowchart={setActiveFlowchartId} onOpenGuideline={openGuidelineFromSearch} />
+                <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+                  {primary.map((page, i) => (
+                    <div key={page.id} className={i > 0 ? "border-t border-gray-50" : ""}>
+                      <WikiCard page={page} query={query} grouped isExpanded={!!expanded[page.id]} onToggle={() => toggle(page.id)} onOpenFlowchart={setActiveFlowchartId} onOpenGuideline={openGuidelineFromSearch} />
+                    </div>
                   ))}
                 </div>
               )
@@ -544,7 +627,17 @@ export default function App() {
 
             <div className="mt-10 text-center">
               <p className="text-xs text-gray-400">Content summarised from national and local guidelines · For decision support only · Clinical judgement always applies</p>
-              <p className="text-xs text-gray-400 mt-1">Built by Khalid Shamiyah</p>
+              <p className="text-xs text-gray-400 mt-1">
+                Built by{" "}
+                <a
+                  href="https://drshamiyah.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2 hover:text-gray-600 transition-colors"
+                >
+                  Khalid Shamiyah
+                </a>
+              </p>
             </div>
           </div>
         </>
@@ -570,10 +663,11 @@ export default function App() {
                     key={src}
                     onClick={() => setFcSourceFilter(src)}
                     aria-pressed={fcSourceFilter === src}
-                    className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-colors ${
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold transition-colors ${
                       fcSourceFilter === src ? "bg-black text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                     }`}
                   >
+                    {src !== "ALL" && <span className={`w-1.5 h-1.5 rounded-full ${sourceColors(src).accent}`} />}
                     {src}
                   </button>
                 ))}
@@ -714,10 +808,11 @@ export default function App() {
                     key={src}
                     onClick={() => setGlSourceFilter(src)}
                     aria-pressed={glSourceFilter === src}
-                    className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-colors ${
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold transition-colors ${
                       glSourceFilter === src ? "bg-black text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                     }`}
                   >
+                    {src !== "ALL" && <span className={`w-1.5 h-1.5 rounded-full ${sourceColors(src).accent}`} />}
                     {src}
                   </button>
                 ))}

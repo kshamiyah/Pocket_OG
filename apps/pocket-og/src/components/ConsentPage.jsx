@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef } from "react";
 import AlphabetSidebar from "./AlphabetSidebar";
+import { sourceColors, sourceFromLabel } from "../data/glColors";
 import {
   CONSENT_PROCEDURES,
   FREQ,
@@ -104,25 +105,6 @@ const PROCEDURE_CONFIG = {
   },
 };
 
-// ─── shared small components ──────────────────────────────────────────────────
-
-function FreqPill({ freqKey }) {
-  const f = FREQ[freqKey];
-  if (!f) return null;
-  return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${f.bg} ${f.text} ${f.border}`}>
-      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${f.dot}`} />
-      {f.label}
-    </span>
-  );
-}
-
-function SourceTag({ source }) {
-  return (
-    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">{source}</span>
-  );
-}
-
 // ─── Step 0: procedure list ───────────────────────────────────────────────────
 
 function ProcedureList({ onSelect }) {
@@ -202,7 +184,7 @@ function ProcedureList({ onSelect }) {
                       onClick={() => onSelect(proc.id)}
                       className={`flex items-center gap-3 w-full px-4 py-4 min-h-[80px] hover:bg-gray-50 active:bg-gray-100 transition-colors text-left ${i > 0 ? "border-t border-gray-50" : ""}`}
                     >
-                      <div className={`w-1 h-10 rounded-full shrink-0 ${proc.color.accent}`} />
+                      <div className={`w-1 h-10 rounded-full shrink-0 ${sourceColors(sourceFromLabel(proc.source)).accent}`} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-900 leading-snug">{proc.title}</p>
                         <p className="text-xs text-gray-400 mt-0.5">{proc.subtypes}</p>
@@ -353,175 +335,6 @@ function PatientFactors({ procedureId, context, factors, onToggle, onContinue, o
 
 // ─── Step 3: consent summary ──────────────────────────────────────────────────
 
-function _RiskRow_UNUSED({ risk, instrument, showIfConditions, activeFactors }) {
-  const [expanded, setExpanded] = useState(false);
-
-  // For condition-gated risks, only show if any condition active
-  if (risk.conditions && risk.conditions.length > 0) {
-    const anyActive = risk.conditions.some(c => activeFactors.has(c));
-    if (!anyActive) return null;
-  }
-
-  const freqKey = instrument
-    ? (typeof risk.freq === "object" ? risk.freq[instrument] : risk.freq)
-    : risk.freq;
-
-  let displayRate = instrument
-    ? (typeof risk.rate === "object" ? risk.rate[instrument] : risk.rate)
-    : risk.rate;
-
-  let displayFreqKey = freqKey;
-  let extraNote = null;
-
-  // Apply modifiers for CS hysterectomy risk
-  if (risk.modifiers) {
-    if (activeFactors.has("placenta_praevia") && activeFactors.has("prev_cs_1") && risk.modifiers.placenta_praevia_prev_cs) {
-      const m = risk.modifiers.placenta_praevia_prev_cs;
-      displayRate = m.rate;
-      displayFreqKey = m.freq;
-      extraNote = m.note;
-    } else if (activeFactors.has("placenta_praevia") && risk.modifiers.placenta_praevia) {
-      const m = risk.modifiers.placenta_praevia;
-      displayRate = m.rate;
-      displayFreqKey = m.freq;
-      extraNote = m.note;
-    }
-  }
-
-  const f = FREQ[displayFreqKey];
-
-  return (
-    <div className={`border-b border-gray-50 last:border-0 ${expanded ? "bg-gray-50/50" : ""}`}>
-      <button
-        onClick={() => setExpanded(e => !e)}
-        className="w-full flex items-center gap-3 px-4 py-3 text-left"
-      >
-        <span className={`w-2 h-2 rounded-full shrink-0 mt-0.5 ${f?.dot ?? "bg-gray-200"}`} />
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900 leading-snug">{risk.name}</p>
-          {extraNote && <p className="text-[10px] text-orange-600 font-semibold mt-0.5">{extraNote}</p>}
-        </div>
-        <div className="flex flex-col items-end gap-1 shrink-0 ml-2">
-          {displayFreqKey && <FreqPill freqKey={displayFreqKey} />}
-          {displayRate && <span className="text-[10px] text-gray-400 font-mono">{displayRate}</span>}
-        </div>
-        <svg className={`w-3.5 h-3.5 text-gray-300 shrink-0 ml-1 transition-transform ${expanded ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
-      {expanded && risk.plain && (
-        <div className="px-4 pb-3 ml-5">
-          <p className="text-sm text-gray-600 leading-relaxed">{risk.plain}</p>
-          <p className="text-[10px] text-gray-300 mt-1.5 uppercase tracking-wide font-bold">{risk.source}</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function RiskSection({ title, risks, instrument, activeFactors }) {
-  const visibleCount = risks.filter(r => {
-    if (!r.conditions || r.conditions.length === 0) return true;
-    return r.conditions.some(c => activeFactors.has(c));
-  }).length;
-
-  if (visibleCount === 0) return null;
-
-  return (
-    <div className="mb-4">
-      <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2 px-1">{title}</p>
-      <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
-        {risks.map(r => (
-          <RiskRow key={r.id} risk={r} instrument={instrument} activeFactors={activeFactors} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function AlternativesSection({ alternatives }) {
-  const [checked, setChecked] = useState(new Set());
-  const toggle = id => setChecked(prev => {
-    const s = new Set(prev);
-    s.has(id) ? s.delete(id) : s.add(id);
-    return s;
-  });
-
-  return (
-    <div className="mb-4">
-      <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2 px-1">Alternatives discussed</p>
-      <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm divide-y divide-gray-50">
-        {alternatives.map(alt => {
-          const active = checked.has(alt.id);
-          return (
-            <button
-              key={alt.id}
-              onClick={() => toggle(alt.id)}
-              className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors"
-            >
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-                active ? "border-gray-900 bg-gray-900" : "border-gray-300"
-              }`}>
-                {active && (
-                  <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </div>
-              <span className={`text-sm ${active ? "text-gray-900 font-medium" : "text-gray-600"}`}>{alt.label}</span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function DocChecklist() {
-  const items = [
-    { id: "risks",       label: "Risks and benefits explained" },
-    { id: "alts",        label: "Alternatives discussed" },
-    { id: "questions",   label: "Patient questions answered" },
-    { id: "time",        label: "Time given to consider" },
-    { id: "interpreter", label: "Interpreter used" },
-    { id: "form",        label: "Consent form signed" },
-  ];
-  const [checked, setChecked] = useState(new Set(["risks", "alts"]));
-  const toggle = id => setChecked(prev => {
-    const s = new Set(prev);
-    s.has(id) ? s.delete(id) : s.add(id);
-    return s;
-  });
-
-  return (
-    <div className="mb-6">
-      <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2 px-1">Documentation checklist</p>
-      <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm divide-y divide-gray-50">
-        {items.map(item => {
-          const active = checked.has(item.id);
-          return (
-            <button
-              key={item.id}
-              onClick={() => toggle(item.id)}
-              className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors"
-            >
-              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
-                active ? "border-emerald-500 bg-emerald-500" : "border-gray-300"
-              }`}>
-                {active && (
-                  <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </div>
-              <span className={`text-sm ${active ? "text-gray-900 font-medium" : "text-gray-500"}`}>{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 function FAQSection({ faqs }) {
   const [openId, setOpenId] = useState(null);
@@ -1070,7 +883,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
           </button>
 
           <div className="flex-1 flex justify-center gap-1.5">
-            {tabs.map((tab, i) => (
+            {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}

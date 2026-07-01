@@ -1,46 +1,53 @@
 import { GUIDELINES } from "@pocket-og/guidelines";
-import ContentBlock, { highlightText } from "./ContentBlock";
+import ContentBlock from "./ContentBlock";
+import { highlightText } from "../utils/highlight";
 import { glColors } from "../data/glColors";
 import { READER_AVAILABLE } from "../data/readerAvailable";
 
-export default function WikiCard({ page, isExpanded, onToggle, isFallback, query = "", onOpenFlowchart, onOpenGuideline }) {
+export default function WikiCard({ page, isExpanded, onToggle, isFallback, query = "", onOpenFlowchart, onOpenGuideline, grouped = false }) {
   const gl = GUIDELINES[page.gl];
   const highlightTerms = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
   const col = glColors(page.gl);
 
+  const metaParts = [
+    page.setting,
+    gl?.code,
+    gl ? `${gl.version} · ${gl.date}` : null,
+    page.flowchartId ? "⬡ flowchart" : null,
+    isFallback ? "closest match" : null,
+  ].filter(Boolean);
+
   return (
-    <div className={`rounded-3xl overflow-hidden bg-white flex transition-shadow ${
-      isFallback ? "opacity-70 shadow-sm" : "shadow-sm hover:shadow-md"
-    }`}>
+    <div className={`overflow-hidden bg-white flex transition-colors ${
+      grouped ? "" : "rounded-2xl border border-gray-100 shadow-sm"
+    } ${isFallback ? "opacity-70" : ""}`}>
       {/* Colored left accent bar */}
-      <div className={`w-1 shrink-0 ${col.accent}`} />
+      <div className={`w-1 h-10 rounded-full shrink-0 self-center ml-4 ${col.accent}`} />
 
       {/* Card body */}
       <div className="flex-1 min-w-0">
         {/* Tap target */}
         <button
           onClick={onToggle}
-          className="w-full text-left px-3 sm:px-5 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors flex items-center gap-3"
+          className="w-full text-left px-3 pr-4 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors flex items-center gap-3"
         >
           <div className="flex-1 min-w-0">
-            <p className={`text-xs font-semibold mb-1 ${col.conditionColor}`}>
+            <p className={`text-[10px] font-bold uppercase tracking-wide mb-0.5 ${col.conditionColor}`}>
               {page.condition}
             </p>
-            <h3 className="text-gray-900 font-semibold text-base leading-snug">
+            <h3 className="text-sm font-semibold text-gray-900 leading-snug">
               {highlightText(page.title, highlightTerms)}
             </h3>
-            <div className="flex flex-wrap gap-1.5 mt-2">
-              <span className="px-2 py-0.5 rounded-full text-xs text-gray-400 bg-gray-100">{page.setting}</span>
-              {gl && <span className="px-2 py-0.5 rounded-full text-xs text-gray-400 bg-gray-100">{gl.version} · {gl.date}</span>}
-              {isFallback && (
-                <span className="px-2 py-0.5 rounded-full text-xs text-amber-600 bg-amber-50 border border-amber-100">closest match</span>
-              )}
-              {page.flowchartId && (
-                <span className="px-2 py-0.5 rounded-full text-xs text-teal-600 bg-teal-50 border border-teal-100">
-                  ⬡ flowchart
+            <p className="text-xs text-gray-400 mt-0.5 leading-snug">
+              {metaParts.map((part, i) => (
+                <span key={part}>
+                  {i > 0 && <span className="text-gray-300"> · </span>}
+                  <span className={part === "closest match" ? "text-amber-600" : part === "⬡ flowchart" ? "text-teal-600" : undefined}>
+                    {part}
+                  </span>
                 </span>
-              )}
-            </div>
+              ))}
+            </p>
           </div>
           {/* Chevron — rotates on expand */}
           <svg
@@ -53,13 +60,15 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
 
         {/* Expanded content */}
         {isExpanded && (
-          <div className="px-3 sm:px-5 pb-5 border-t border-gray-100 pt-4 overflow-x-hidden">
+          <div className="px-4 pb-4 border-t border-gray-100 pt-4 overflow-x-hidden">
             {page.content.map((block, i) => (
               <ContentBlock key={i} block={block} highlightTerms={highlightTerms} />
             ))}
-            <div className="mt-5 pt-3 border-t border-gray-100">
-              <p className="text-xs text-gray-400">{gl.code} {gl.version} · {gl.label} · {gl.source} · {gl.date}</p>
-            </div>
+            {gl && (
+              <div className="mt-5 pt-3 border-t border-gray-100">
+                <p className="text-xs text-gray-400">{gl.code} {gl.version} · {gl.label} · {gl.source} · {gl.date}</p>
+              </div>
+            )}
 
             <div className="mt-4 space-y-2">
               {READER_AVAILABLE.has(page.gl) && onOpenGuideline && (
