@@ -302,4 +302,174 @@ export const TOG_SECTIONS = [
       { type: "text", value: "Summary of a TOG review (Girling J, TOG 2008;10:237–243). Read the full article for the complete discussion and references; verify all doses and thresholds against local protocol." },
     ],
   },
+
+  {
+    id: "tog-cardiac-congenital",
+    gl: "TOG",
+    source: "TOG",
+    condition: "TOG Review",
+    setting: "Review — Maternal Medicine",
+    title: "Cardiac Disease in Pregnancy — Congenital Heart Disease",
+    draft: false,
+    tog: {
+      article: "Cardiac disease in pregnancy. Part 1: congenital heart disease",
+      authors: "Gelson E, Johnson M, Gatzoulis M, Uebing A",
+      citation: "TOG 2007;9:15–20",
+      doi: "10.1576/toag.9.1.015.27291",
+      url: "https://obgyn.onlinelibrary.wiley.com/doi/10.1576/toag.9.1.015.27291",
+      year: 2007,
+    },
+    flowchartId: "TOG_CHD_PREGNANCY",
+    relatedGl: ["GL952", "MBRRACE_SLMC2025"],
+    tags: [
+      "congenital heart disease pregnancy", "chd pregnancy", "cardiac disease pregnancy",
+      "heart disease pregnancy", "coarctation of the aorta", "tetralogy of fallot",
+      "transposition of the great arteries", "tga", "fontan", "marfan syndrome pregnancy",
+      "pulmonary hypertension pregnancy", "eisenmenger syndrome", "cyanotic heart disease",
+      "nyha class", "cardiac risk pregnancy", "aortic root dilatation", "aortopathy",
+      "prepregnancy cardiac counselling", "cardiac indications caesarean", "cardiac mdt",
+      "tog review",
+    ],
+    content: [
+      { type: "alert", value: "Bottom line: heart disease is now the most common indirect cause of maternal death in the UK. Congenital heart disease now accounts for the majority of cardiac disease in pregnancy (up from 5% to ~80% of cases over two decades) — a direct result of more children surviving corrective surgery into reproductive age. Ideally, pregnancy is planned and managed by a multidisciplinary team (obstetrics, cardiology, anaesthetics, neonatology, midwifery)." },
+
+      { type: "subheading", value: "Why pregnancy is high-risk with heart disease" },
+      { type: "list", items: [
+        "Systemic vascular resistance falls to 30–70% of preconception values by 8 weeks — this drives fluid retention, plasma volume expansion and a falling haematocrit.",
+        "Cardiac output rises (via stroke volume and heart rate), peaking at 20–24 weeks and staying high to term; BP falls until mid-pregnancy, then returns to prepregnancy levels late in the second trimester.",
+        "Labour (especially the second stage) and the immediate postpartum period are the highest-risk points — auto-transfusion during contractions and the return of uterine blood to the circulation after delivery both spike cardiac output further. Cardiac output stays high for 24 hours postpartum, with rapid volume shifts over the first 2 weeks — this is when pulmonary oedema risk peaks.",
+      ]},
+
+      { type: "subheading", value: "Predictors of adverse cardiac events" },
+      { type: "table",
+        headers: ["Predicts a maternal cardiac event", "Predicts an adverse neonatal event"],
+        rows: [
+          ["Prior cardiac event (heart failure, TIA, stroke) or arrhythmia", "NYHA class >II or cyanosis at the baseline antenatal visit"],
+          ["Baseline NYHA class >II or cyanosis", "Maternal left heart obstruction"],
+          ["Left heart obstruction (mitral valve area <2cm², aortic valve area <1.5cm², or peak outflow gradient >30mmHg)", "Maternal smoking"],
+          ["Reduced systemic LV function (ejection fraction <40%)", "Multiple gestation / anticoagulation during pregnancy"],
+        ],
+      },
+
+      { type: "subheading", value: "Management principles" },
+      { type: "list", items: [
+        "Prepregnancy counselling: explain the impact of pregnancy on the specific lesion, the risk to mother and fetus, and the chance of congenital heart disease in the baby.",
+        "Labour/delivery: vaginal delivery with low-dose epidural is the mode of choice; forceps/ventouse can shorten maternal expulsive effort. Left lateral position; monitor preload and BP; minimise blood loss.",
+        "Caesarean is reserved for specific cardiac indications: aortopathy with aortic root >4cm, aortic dissection/aneurysm, or warfarin within the last 2 weeks.",
+        "Antibiotic prophylaxis in labour for everyone except repaired PDA, isolated ostium secundum ASD, or mitral valve prolapse without regurgitation.",
+        "Third stage: avoid oxytocin bolus (causes hypotension) — use a low-dose infusion instead; avoid ergometrine (acute hypertension). Uterine compression sutures are useful for atony at caesarean.",
+        "Postpartum haemodynamic monitoring for 24–72 hours typically, extended to 10–14 days with pulmonary hypertension; multidisciplinary follow-up at 6 weeks.",
+      ]},
+
+      { type: "subheading", value: "Lesion-specific risk — low risk" },
+      { type: "list", items: [
+        "Small left-to-right shunts (ASD/VSD/PDA): well tolerated absent pulmonary hypertension. ASDs carry atrial arrhythmia/paradoxical embolism risk — low threshold for heparin prophylaxis; labour needs careful management as blood loss or regional-anaesthesia vasodilatation can alter shunt direction.",
+        "Repaired coarctation: usually well tolerated. Assess pre-conception for re-coarctation, repair-site aneurysm, bicuspid valve or hypertension. Risk of aortic dissection/rupture in both repaired and native disease — control BP tightly with beta-blockers first-line; monitor fetal growth.",
+        "Repaired tetralogy of Fallot: generally well tolerated, but watch for arrhythmia and RV failure, especially with residual shunts, RVOT obstruction or pulmonary hypertension. Echo before pregnancy; regular cardiac review throughout; some need diuretics or bed rest for pulmonary regurgitation symptoms.",
+      ]},
+
+      { type: "subheading", value: "Lesion-specific risk — moderate risk" },
+      { type: "list", items: [
+        "Transposition of the great arteries post-Mustard/Senning repair (systemic RV): usually tolerated if uncomplicated; poorly tolerated with long-term complications (RV dysfunction, tricuspid regurgitation, arrhythmia). Stop ACE inhibitors before conception (fetal nephrotoxicity/malformation).",
+        "Cyanotic heart disease without pulmonary hypertension: falling SVR and rising cardiac output worsen right-to-left shunting and hypoxia. Maternal risk depends on ventricular function; fetal effects are marked (30–50% preterm/low birthweight risk) — maternal hypoxaemia severity is the strongest predictor of neonatal outcome. Bed rest and oxygen therapy help.",
+        "Fontan circulation: increasing numbers now reach childbearing age. Main concern is the ability to augment cardiac output/heart rate; tendency to poorly-tolerated atrial arrhythmias. Maternal risk is low in NYHA I–II with good ventricular function.",
+      ]},
+
+      { type: "subheading", value: "Lesion-specific risk — high risk" },
+      { type: "list", items: [
+        "Marfan syndrome: aortic dissection/rupture risk depends on aortic root diameter — ~1% maternal mortality if <4cm, up to 25% if >4cm. Postpone pregnancy until aortic arch replacement if the root is dilated; discuss termination for an unplanned pregnancy in this context. Serial echocardiograms, prophylactic beta-blockade if dilatation occurs, and aggressive BP control.",
+        "Pulmonary vascular disease/pulmonary hypertension of any cause: very high risk — fixed pulmonary vascular resistance can't match the rise in cardiac output. Mortality varies by cause: Eisenmenger syndrome 36%, primary pulmonary hypertension 30%, secondary pulmonary hypertension 56%. Offer termination for an unplanned pregnancy; if continuing, close monitoring and bed rest from the third trimester, surveillance to 14 days postpartum. Anticoagulation, oxygen and pulmonary vasodilators may help; only 15–25% of these pregnancies reach term.",
+      ]},
+
+      { type: "subheading", value: "Neonatal outcome and inheritance" },
+      { type: "list", items: [
+        "Neonatal complications (preterm birth, SGA, respiratory distress, IVH, death) are all increased — predicted by obstetric risk factors, multiple gestation, smoking and anticoagulation.",
+        "Offspring inheritance risk of congenital heart disease is 3–5% overall (vs 1% general population) — around 3% for common lesions like tetralogy of Fallot, up to 10% for ASD, coarctation or aortic stenosis. Marfan syndrome is autosomal dominant with a 50% recurrence rate.",
+      ]},
+
+      { type: "text", value: "Part 1 of a two-part TOG review (Gelson, Johnson, Gatzoulis & Uebing, TOG 2007;9:15–20) — see also Part 2: Acquired Heart Disease. Read the full article for the complete discussion and references; verify all thresholds against local protocol." },
+    ],
+  },
+
+  {
+    id: "tog-cardiac-acquired",
+    gl: "TOG",
+    source: "TOG",
+    condition: "TOG Review",
+    setting: "Review — Maternal Medicine",
+    title: "Cardiac Disease in Pregnancy — Acquired Heart Disease & Arrhythmias",
+    draft: false,
+    tog: {
+      article: "Cardiac disease in pregnancy. Part 2: acquired heart disease",
+      authors: "Gelson E, Johnson M, Gatzoulis M, Uebing A",
+      citation: "TOG 2007;9:83–87",
+      doi: "10.1576/toag.9.2.083.27308",
+      url: "https://obgyn.onlinelibrary.wiley.com/doi/10.1576/toag.9.2.083.27308",
+      year: 2007,
+    },
+    flowchartId: "TOG_ACQUIRED_CARDIAC",
+    relatedGl: ["GL891", "MBRRACE_SLMC2025"],
+    tags: [
+      "acquired heart disease pregnancy", "valvular heart disease pregnancy", "mitral stenosis pregnancy",
+      "mitral regurgitation", "mitral valve prolapse", "aortic stenosis pregnancy",
+      "mechanical heart valve pregnancy", "prosthetic valve anticoagulation", "warfarin pregnancy heart valve",
+      "ischaemic heart disease pregnancy", "myocardial infarction pregnancy", "cardiac arrhythmia pregnancy",
+      "svt pregnancy", "supraventricular tachycardia pregnancy", "atrial fibrillation pregnancy",
+      "ventricular tachycardia pregnancy", "dilated cardiomyopathy pregnancy", "hypertrophic cardiomyopathy pregnancy",
+      "peripartum cardiomyopathy", "rheumatic heart disease pregnancy", "amiodarone pregnancy",
+      "tog review",
+    ],
+    content: [
+      { type: "alert", value: "Bottom line: rheumatic and ischaemic heart disease are both expected to rise in the UK because of immigration patterns and increasing maternal age. Regurgitant valve lesions are generally well tolerated in pregnancy; stenotic lesions are not. Mechanical heart valves need careful anticoagulation planning — every available regimen carries a real fetal loss risk (up to 30%)." },
+
+      { type: "subheading", value: "Causes" },
+      { type: "text", value: "Rheumatic valvular disease is declining in the UK-born population but rising with immigration from countries where rheumatic fever remains prevalent — often first recognised in pregnancy when cardiac demand increases. Ischaemic heart disease is rising with maternal age, diabetes, obesity and smoking. Peripartum cardiomyopathy occurs mainly around delivery, associated with multiple pregnancy and pre-eclampsia." },
+
+      { type: "subheading", value: "Valvular heart disease" },
+      { type: "list", items: [
+        "Mitral stenosis (the most common clinically significant valvular lesion in pregnancy): rising heart rate/stroke volume increases the trans-valvular gradient and left atrial pressure — dyspnoea, orthopnoea, PND, pulmonary oedema, and atrial fibrillation risk (persists into the puerperium). NYHA III/IV or valve area <1cm² → delay conception until after correction. Medical therapy: bed rest and diuretics to reduce volume overload, beta-blockade to optimise filling; AF needs prompt DC cardioversion, beta-blockers or digoxin. Balloon mitral valvuloplasty is safe and effective if symptoms are refractory.",
+        "Mitral valve prolapse (the most common cardiac abnormality in pregnant women, 12–17%): without regurgitation, rarely causes complications.",
+        "Mitral regurgitation: usually well tolerated (falling SVR reduces afterload). Asymptomatic — no treatment needed; symptomatic heart failure — nitrates, hydralazine, diuretics, digoxin.",
+        "Aortic stenosis: usually congenital in young women. Symptomatic, severe (peak gradient >80mmHg), or with LV dysfunction → delay conception until after correction. If symptomatic in pregnancy: bed rest, consider valve replacement — avoid cardiopulmonary bypass where possible (1.5–5% maternal mortality, 16–33% fetal mortality regardless of gestation; fetal mortality can drop to 10% by avoiding hypothermia and maintaining perfusion pressure). Aortic balloon valvuloplasty can palliate until after delivery.",
+      ]},
+
+      { type: "subheading", value: "Mechanical prosthetic valves — anticoagulation" },
+      { type: "alert", value: "Bioprosthetic valves carry no increased risk and don't degenerate faster in pregnancy. Mechanical valves carry a 45% thrombotic-episode incidence and 1–4% maternal mortality — anticoagulation strategy is a genuine trade-off, not a solved problem." },
+      { type: "table",
+        headers: ["Regimen", "Maternal thromboembolism", "Fetal abnormality", "Fetal loss"],
+        rows: [
+          ["Warfarin throughout, stop at 38 weeks for elective LSCS", "4%", "6%", "~30%"],
+          ["LMWH weeks 6–12, then warfarin to 38 weeks, then LSCS", "9%", "0%", "~30%"],
+          ["LMWH throughout pregnancy", "25%", "0%", "~30%"],
+        ],
+      },
+      { type: "text", value: "Low-dose aspirin is used as an adjunct to heparin. Monitor LMWH with monthly anti-factor Xa levels, aiming for the high therapeutic range. Whatever regimen is chosen, fetal loss risk is up to 30% — this needs an informed discussion of relative risks and benefits." },
+      { type: "text", value: "Endocarditis prophylaxis: give antibiotics in labour/delivery for all valvular lesions except mitral valve prolapse without regurgitation." },
+
+      { type: "subheading", value: "Ischaemic heart disease" },
+      { type: "list", items: [
+        "Acute MI is rare in pregnancy (1 in 10,000) but carries 37–50% maternal mortality, mostly at the time of infarction. Pregnancy itself isn't an established independent risk factor, though the physiological changes are plausible contributors.",
+        "Treat exactly as outside pregnancy: heparin, beta-blockers, nitrates. Coronary angiography is safe; PCI is first-line. Thrombolysis can cause placental-site bleeding but remains indicated when needed.",
+      ]},
+
+      { type: "subheading", value: "Cardiac arrhythmias" },
+      { type: "list", items: [
+        "Pregnancy increases arrhythmia incidence (hormonal changes, autonomic shifts, haemodynamic demand, mild hypokalaemia) — risk is highest during labour and delivery.",
+        "Atrial/ventricular ectopics are common and benign — no further investigation needed.",
+        "SVT (new or worsening) is more common in pregnancy, including AF/flutter (thromboembolism and fetal risk — treat promptly) and re-entrant tachycardias (WPW, LGL).",
+        "Stable SVT: vagal manoeuvre first; IV adenosine is safe if that fails; second-line digoxin, beta-blockers or calcium-channel blockers.",
+        "VT is uncommon and usually reflects structural disease. Stable: lidocaine or procainamide; beta-blockers/sotalol used prophylactically. Amiodarone is contraindicated (fetal hypothyroidism, growth restriction, prematurity).",
+        "Any haemodynamically unstable tachyarrhythmia: electrical cardioversion is safe in pregnancy — manage the airway (aspiration risk) and avoid the supine position (aortocaval compression).",
+      ]},
+
+      { type: "subheading", value: "Cardiomyopathy" },
+      { type: "list", items: [
+        "Dilated: poorly tolerated — 7% mortality with NYHA III/IV, risk of heart failure, irreversible LV dysfunction and fetal loss. Counsel accordingly; offer termination for an unplanned pregnancy.",
+        "Hypertrophic: usually well tolerated if asymptomatic pre-pregnancy; risk of symptomatic progression, AF, syncope and maternal death if there was pre-existing heart failure or severe symptoms.",
+        "Peripartum cardiomyopathy: LV systolic dysfunction/heart failure presenting in the last month of pregnancy to 5 months postpartum. Rare (~1 in 2,289 live births) and a diagnosis of exclusion — rule out other causes of dilated cardiomyopathy with heart failure first. Treat with beta-blockers, diuretics, hydralazine and digoxin (switch to ACE inhibitors postpartum). ~20% die or need transplantation; the rest recover partially or fully. A future pregnancy carries a higher relapse risk if LV function hasn't fully recovered — and some residual risk even after full recovery. There's no consensus on recommendations for future pregnancies.",
+      ]},
+
+      { type: "text", value: "Part 2 of a two-part TOG review (Gelson, Johnson, Gatzoulis & Uebing, TOG 2007;9:83–87) — see also Part 1: Congenital Heart Disease. Read the full article for the complete discussion and references; verify all doses and thresholds against local protocol." },
+    ],
+  },
 ];

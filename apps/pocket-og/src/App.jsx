@@ -97,6 +97,8 @@ const FLOWCHART_LINKS = [
   { id: "TOG_POLYHYDRAMNIOS",    gl: "TOG" },
   { id: "TOG_OLIGOHYDRAMNIOS",   gl: "TOG" },
   { id: "TOG_THYROID",           gl: "TOG" },
+  { id: "TOG_CHD_PREGNANCY",     gl: "TOG" },
+  { id: "TOG_ACQUIRED_CARDIAC",  gl: "TOG" },
 ];
 
 const FLOWCHART_GROUPS = [
