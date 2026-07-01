@@ -40,6 +40,15 @@ const SUGGESTIONS = [
   "gentamicin weight",
 ];
 
+const SEARCH_HINTS = [
+  "Ask a clinical question…",
+  "magnesium dose?",
+  "GBS prophylaxis",
+  "cord prolapse",
+  "postnatal blood pressure",
+  "gentamicin dosing",
+];
+
 const FLOWCHART_LINKS = [
   { id: "GL861_IOL",        gl: "GL861" },
   { id: "GL861_TIMING",     gl: "GL861" },
@@ -128,6 +137,7 @@ export default function App() {
   const [aboutOpen, setAboutOpen] = useState(false);
   const [updatesOpen, setUpdatesOpen] = useState(false);
   const [updatesUnseen, setUpdatesUnseen] = useState(() => hasUnseenUpdates());
+  const [hintIndex, setHintIndex] = useState(0);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
   const glSectionRefs = useRef({});
@@ -202,6 +212,13 @@ export default function App() {
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
   }, []);
+
+  // Cycle the search placeholder while on the idle home screen
+  useEffect(() => {
+    if (hasQuery) return;
+    const id = setInterval(() => setHintIndex(i => (i + 1) % SEARCH_HINTS.length), 3200);
+    return () => clearInterval(id);
+  }, [hasQuery]);
 
   // When transitioning to results view, blur the home input to dismiss keyboard
   useEffect(() => {
@@ -325,7 +342,7 @@ export default function App() {
                 paddingBottom: "calc(5.5rem + env(safe-area-inset-bottom, 0px))",
               }}
             >
-              <div className="w-full max-w-lg">
+              <div className="w-full max-w-lg animate-enter">
 
                 {/* Hero */}
                 <div className="text-center mb-12 sm:mb-14">
@@ -362,15 +379,15 @@ export default function App() {
                   <input
                     ref={inputRef}
                     type="text"
-                    placeholder="Ask a clinical question…"
+                    placeholder={SEARCH_HINTS[hintIndex]}
                     value={inputValue}
                     onChange={e => setInputValue(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && submitSearch()}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-10 pr-12 py-3.5 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                    className="w-full bg-white border border-gray-200 rounded-2xl pl-11 pr-14 py-4 text-[17px] text-gray-900 placeholder-gray-400 shadow-lg shadow-gray-200/60 focus:outline-none focus:border-gray-300 focus:ring-4 focus:ring-gray-900/5 focus:shadow-xl transition-all"
                   />
                   <button
                     onClick={() => submitSearch()}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-xl bg-black hover:bg-gray-800 active:scale-95 transition-all"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-xl bg-black hover:bg-gray-800 active:scale-95 transition-all"
                   >
                     <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
