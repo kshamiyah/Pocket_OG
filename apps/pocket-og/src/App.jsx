@@ -222,10 +222,6 @@ export default function App() {
 
   const fcActiveLetters = useMemo(() => new Set(Object.keys(fcGroupedByLetter)), [fcGroupedByLetter]);
 
-  // Focus idle input on mount
-  useEffect(() => {
-    if (inputRef.current) inputRef.current.focus();
-  }, []);
 
   // Cycle the search placeholder while on the idle home screen
   useEffect(() => {
