@@ -13,89 +13,91 @@
 //   relatedGl: []                    — cross-links to guidelines already in the app
 //   flowchartId (optional)           — cross-link to an interactive pathway
 //   content: []                      — text | alert | subheading | list | table
-//
-// TRIAL: this is a single demonstration card. The clinical content is a faithful
-// draft aligned with RCOG GTG69 but is NOT yet clinically signed off, and the
-// citation fields are placeholders — fill them from the downloaded article.
 export const TOG_SECTIONS = [
   {
-    id: "tog-nvp-hyperemesis",
+    id: "tog-polyhydramnios",
     gl: "TOG",
     source: "TOG",
     condition: "TOG Review",
-    setting: "Review — Early Pregnancy",
-    title: "Nausea & Vomiting of Pregnancy and Hyperemesis Gravidarum",
-    draft: true,
+    setting: "Review — Fetal / Amniotic Fluid",
+    title: "Polyhydramnios in Singleton Pregnancies",
+    // Summary drawn directly from the source article below. Have a final clinical
+    // read-through, then set draft:false to drop the amber banner.
+    draft: false,
     tog: {
-      article: "Nausea and vomiting of pregnancy and hyperemesis gravidarum",
-      authors: "",                       // TODO: fill from the article
-      citation: "TOG 20XX;XX:XXX–XXX",   // TODO: volume;issue:pages
-      doi: "",                           // TODO: 10.1111/tog.XXXXX
-      url: "",                           // TODO: Wiley/RCOG article URL
+      article: "Polyhydramnios in singleton pregnancies: perinatal outcomes and management",
+      authors: "Karkhanis P, Patni S",
+      citation: "TOG 2014;16:207–13",
+      doi: "10.1111/tog.12113",
+      url: "https://obgyn.onlinelibrary.wiley.com/doi/10.1111/tog.12113",
     },
-    relatedGl: ["GTG69"],
+    relatedGl: ["GL983", "GTG52", "GTG50", "GTG42"],
     tags: [
-      "nausea vomiting pregnancy", "nvp", "hyperemesis", "hyperemesis gravidarum", "hg",
-      "morning sickness", "vomiting pregnancy", "sickness in pregnancy", "puqe", "puqe score",
-      "antiemetic pregnancy", "cyclizine", "prochlorperazine", "promethazine", "ondansetron",
-      "metoclopramide", "xonvea", "doxylamine pyridoxine", "thiamine pregnancy", "wernicke",
-      "ketonuria pregnancy", "iv fluids pregnancy", "dehydration pregnancy", "tog review",
+      "polyhydramnios", "poly", "increased liquor", "excess amniotic fluid", "high afi",
+      "amniotic fluid index", "afi", "deepest vertical pool", "dvp", "deepest vertical pocket",
+      "unexplained polyhydramnios", "idiopathic polyhydramnios", "amnioreduction", "amniodrainage",
+      "therapeutic amniocentesis", "sulindac", "indomethacin", "macrosomia", "unstable lie",
+      "large liquor volume", "raised afi", "fetal anomaly polyhydramnios", "aneuploidy polyhydramnios",
+      "tog review", "amniotic fluid",
     ],
     content: [
-      { type: "alert", value: "Bottom line: most NVP is self-limiting — onset before 9 weeks, peaks ~9–12 weeks, usually settles by 16–20 weeks. Hyperemesis gravidarum (HG) is the severe end: protracted vomiting with dehydration, electrolyte disturbance, ketosis and >5% pre-pregnancy weight loss. New or first onset after 11 weeks is atypical — look for another cause." },
+      { type: "alert", value: "Bottom line: polyhydramnios = amniotic fluid above the 95th centile (AFI ≥25 cm or DVP ≥8 cm). About half the cases have a maternal/fetal cause and half are unexplained. Mild polyhydramnios usually resolves and carries little excess risk; severe or persistent unexplained polyhydramnios carries a 2–5× rise in perinatal morbidity and mortality." },
 
-      { type: "subheading", value: "Assess severity — PUQE score" },
-      { type: "text", value: "The PUQE (Pregnancy-Unique Quantification of Emesis) score grades severity over the last 24 h from nausea duration, number of vomits and number of retches." },
+      { type: "subheading", value: "Definition & classification" },
+      { type: "text", value: "Fluid is assessed on ultrasound by amniotic fluid index (AFI — sum of four cord/limb-free quadrants) or deepest vertical pool (DVP). Neither method is superior. A constant AFI ≥25 cm or DVP ≥8 cm can be used across gestations. Incidence 0.2–3.9%." },
       { type: "table",
-        headers: ["PUQE", "Severity", "Typical action"],
+        headers: ["Severity", "AFI", "Anomaly risk despite a normal scan"],
         rows: [
-          ["≤ 6", "Mild", "Community / oral antiemetics, reassurance, fluids"],
-          ["7–12", "Moderate", "Oral or ambulatory management, review closely"],
-          ["≥ 13", "Severe", "Consider admission / ambulatory day-unit IV fluids"],
-        ],
-      },
-      { type: "list", items: [
-        "Check weight (vs booking), signs of dehydration, urinary ketones and MSU.",
-        "Bloods: U&E (hypokalaemia, hyponatraemia), FBC, and consider TFTs, LFTs, glucose.",
-        "Exclude other causes: UTI, thyroid disease, GI pathology; consider multiple/molar pregnancy on scan.",
-      ]},
-
-      { type: "subheading", value: "Antiemetic ladder" },
-      { type: "alert", value: "No antiemetic is licensed specifically for NVP, but first-line agents have a long reassuring safety record. Do not withhold treatment — undertreated NVP causes real morbidity." },
-      { type: "table",
-        headers: ["Line", "Options", "Notes"],
-        rows: [
-          ["First", "Cyclizine, promethazine, prochlorperazine, or doxylamine–pyridoxine (Xonvea)", "Antihistamine / phenothiazine — well-established safety"],
-          ["Second", "Metoclopramide or domperidone", "Metoclopramide max 5 days (extrapyramidal effects); domperidone — cardiac caution"],
-          ["Second", "Ondansetron", "Counsel re. the small absolute increase in cleft-palate risk with first-trimester use; shared decision"],
-          ["Third", "Corticosteroids (e.g. hydrocortisone IV → oral prednisolone taper)", "For refractory HG under senior/consultant guidance"],
+          ["Mild", "25.0–29.9 cm", "~1%"],
+          ["Moderate", "30.0–34.9 cm", "~2%"],
+          ["Severe", "> 35 cm", "~11%"],
         ],
       },
 
-      { type: "subheading", value: "Supportive care when admitted" },
+      { type: "subheading", value: "Aetiology" },
+      { type: "text", value: "A cause is found in about half of cases; the rest are unexplained (diagnosis of exclusion). Every case needs a systematic search for a cause." },
       { type: "list", items: [
-        "IV rehydration with normal saline + added potassium (guided by U&E). Avoid dextrose-only fluids.",
-        "Give thiamine (oral or IV) to prevent Wernicke's encephalopathy — and give it BEFORE any glucose-containing fluid.",
-        "Thromboprophylaxis: HG + dehydration + admission is a VTE risk — prescribe LMWH and TEDs unless contraindicated.",
-        "Consider H2-receptor antagonist or PPI for associated reflux/oesophagitis.",
-        "Daily weight, fluid balance, U&E and ketone monitoring; step down as PUQE improves.",
+        "Maternal: uncontrolled diabetes (with macrosomia), red-cell isoimmunisation → immune hydrops, lithium (fetal diabetes insipidus).",
+        "Fetal — impaired swallowing/obstruction: oesophageal atresia & tracheo-oesophageal fistula, duodenal atresia, CDH, CCAM; neurological (anencephaly, myotonic dystrophy, arthrogryposis); genetic (Beckwith–Wiedemann); hydrops; tumours (e.g. sacrococcygeal teratoma); congenital infection (toxoplasma, CMV, parvovirus).",
+        "Placental: chorioangioma (polyhydramnios in ~30%).",
+        "Unexplained: 50–60% of all cases — linked with malpresentation, macrosomia and primary caesarean, and a 2–5× rise in perinatal morbidity/mortality.",
+      ]},
+      { type: "text", value: "Aneuploidy is present in ~10% when there is a sonographic anomaly plus polyhydramnios, but only ~1% with a normal scan; persistent polyhydramnios carries a 10–20% aneuploidy risk." },
+
+      { type: "subheading", value: "Assessment & investigations" },
+      { type: "list", items: [
+        "Maternal: random blood sugar / OGTT / HbA1c; red-cell antibodies; TORCH screen (toxoplasma, CMV, parvovirus) if features of fetal infection.",
+        "Detailed fetal ultrasound for structural anomaly — visualise the stomach (abnormal if small/absent after 45 min), assess long bones & thorax (skeletal dysplasia), fetal movements/tone/joints; consider fetal echocardiography.",
+        "Consider karyotyping on an individual-case basis, factoring in nuchal translucency / Down syndrome screening.",
+        "Transvaginal cervical length to quantify preterm-labour risk.",
       ]},
 
-      { type: "subheading", value: "Complications to watch for" },
+      { type: "subheading", value: "Management in pregnancy" },
       { type: "list", items: [
-        "Wernicke's encephalopathy (thiamine deficiency), central pontine myelinolysis (over-rapid Na⁺ correction).",
-        "Mallory–Weiss tears, venous thromboembolism, acute kidney injury.",
-        "Significant psychological impact — screen for low mood; NVP is a recognised contributor to poor wellbeing and, rarely, termination requests.",
+        "Treat the cause — MDT (maternal medicine, diabetology, dietetics) for diabetes; better glycaemic control improves outcomes.",
+        "Refer to maternal–fetal medicine if: suspected fetal anomaly, SGA fetus, concerns about fetal movements, or persistent/worsening polyhydramnios.",
+        "Counsel on risks: preterm birth (consider steroids if cervical shortening), unstable lie (→ caesarean), cord prolapse, placental abruption, and postpartum haemorrhage.",
+        "Therapeutic amnioreduction (amniodrainage) for maternal respiratory compromise or significant cervical shortening — stop when AFI < 25 cm or discomfort relieved; complication rate ~1.5% (preterm labour, PPROM, chorioamnionitis, abruption); high recurrence.",
+        "Prostaglandin synthetase inhibitors (indomethacin; sulindac 200 mg 12-hourly) reduce fluid but risk ductus arteriosus constriction and impaired fetal renal function — specialist supervision only, not for general obstetric practice.",
+        "Serial ultrasound for liquor volume and fetal growth. Mild polyhydramnios often resolves — its only consistent association is a higher incidence of large-for-gestational-age babies.",
       ]},
 
-      { type: "subheading", value: "MRCOG pearls" },
+      { type: "subheading", value: "Management of labour" },
       { type: "list", items: [
-        "HG is a clinical triad: >5% weight loss, dehydration and electrolyte imbalance.",
-        "Ketonuria is a traditional marker but is NOT a reliable measure of HG severity — treat the patient, not the dipstick.",
-        "First onset of vomiting after 11 weeks' gestation should prompt a search for an alternative diagnosis.",
+        "Insufficient evidence to induce for polyhydramnios alone — benefits do not outweigh the risks; induce only for a maternal or fetal indication (e.g. uncontrolled diabetes, prolonged pregnancy, hypertension).",
+        "Anticipate labour dystocia if macrosomic; consider controlled amniotomy in theatre; be prepared for shoulder dystocia and PPH.",
+        "In unexplained polyhydramnios, arrange a thorough neonatal examination including checking upper-GI patency with a nasogastric tube, and raise a neonatal alert.",
       ]},
 
-      { type: "text", value: "Draft summary aligned with RCOG GTG69 — pending clinical sign-off. Always verify doses against the app Rx formulary and your local protocol, and read the full TOG article for the complete discussion." },
+      { type: "subheading", value: "Key points" },
+      { type: "list", items: [
+        "Mild polyhydramnios resolves frequently and is not usually associated with adverse perinatal outcomes (apart from more LGA babies).",
+        "Severe polyhydramnios carries a higher prevalence of aneuploidy (10–20%) and structural anomaly.",
+        "Overall fetal loss is up to ~4%, rising to ~60% where there is a coexistent structural anomaly.",
+        "Unexplained polyhydramnios is a diagnosis of exclusion and warrants strategic surveillance.",
+      ]},
+
+      { type: "text", value: "Summary of a TOG review (Karkhanis & Patni, TOG 2014;16:207–13). Read the full article for the complete discussion, figures and references; verify all doses and thresholds against local protocol." },
     ],
   },
 ];
