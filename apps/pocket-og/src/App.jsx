@@ -94,6 +94,7 @@ const FLOWCHART_LINKS = [
   { id: "NG229_CTG",             gl: "NG229" },
   { id: "GTG50_CORD",            gl: "GTG50" },
   { id: "ABDO_TRIAGE",           gl: "ABDO" },
+  { id: "GTG5_OHSS",             gl: "GTG5" },
   { id: "TOG_POLYHYDRAMNIOS",    gl: "TOG" },
   { id: "TOG_OLIGOHYDRAMNIOS",   gl: "TOG" },
   { id: "TOG_THYROID",           gl: "TOG" },
@@ -126,6 +127,7 @@ const FLOWCHART_GROUPS = [
   { gl: "NG229",     label: "Fetal Monitoring / CTG" },
   { gl: "GTG50",     label: "Cord Prolapse (Emergency)" },
   { gl: "ABDO",      label: "Abdominal Pain in Pregnancy" },
+  { gl: "GTG5",      label: "Ovarian Hyperstimulation Syndrome" },
   { gl: "TOG",       label: "TOG Reviews" },
 ];
 

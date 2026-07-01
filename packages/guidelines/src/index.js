@@ -34,3 +34,4 @@ export { NG229_SECTIONS } from "./NG229.js";
 export { BASHH_PID_SECTIONS } from "./BASHH_PID.js";
 export { NG73_SECTIONS } from "./NG73.js";
 export { MBRRACE_SLMC2025_SECTIONS } from "./MBRRACE_SLMC2025.js";
+export { GTG5_SECTIONS } from "./GTG5.js";
