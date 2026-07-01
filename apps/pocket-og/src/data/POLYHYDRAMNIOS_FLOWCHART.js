@@ -2,23 +2,26 @@
 // Original interactive pathway synthesised from the TOG review
 // (Karkhanis P, Patni S. TOG 2014;16:207–13, DOI 10.1111/tog.12113),
 // combining the article's two management algorithms (Figures 4 & 5).
-// Decision support only — a summary of a review article, not a protocol.
-// Verify against local guidance and read the full article.
+// Classification thresholds, anomaly-risk figures and delivery-timing
+// guidance updated to the newer companion review (Falola, Filby, Timmons &
+// Alleemudder. TOG 2026;28:41–50, DOI 10.1111/tog.70021).
+// Decision support only — a summary of review articles, not a protocol.
+// Verify against local guidance and read the full articles.
 
 export const TOG_POLYHYDRAMNIOS_FLOWCHART = {
   id: "TOG_POLYHYDRAMNIOS",
   title: "Polyhydramnios — Assessment & Management",
-  subtitle: "TOG review (Karkhanis & Patni, 2014) · singleton pregnancy",
+  subtitle: "TOG reviews (Karkhanis & Patni 2014; Falola et al. 2026) · singleton pregnancy",
   startId: "detected",
   nodes: {
 
     "detected": {
       type: "action",
       title: "Polyhydramnios Confirmed on Ultrasound",
-      text: "Amniotic fluid above the 95th centile: AFI ≥25 cm or DVP ≥8 cm (either measure; neither is superior). Incidence 0.2–3.9%. Confirm, then search for a cause — unexplained polyhydramnios is a diagnosis of exclusion.",
+      text: "SDVP >8 cm or AFI >24 cm (either measure; neither is superior). Complicates 1–2% of pregnancies. Confirm, then search for a cause — idiopathic polyhydramnios is a diagnosis of exclusion.",
       items: [
-        "Classify severity by AFI: mild 25.0–29.9 cm · moderate 30.0–34.9 cm · severe >35 cm",
-        "Risk of a major anomaly despite a normal scan rises with severity: ~1% mild, ~2% moderate, ~11% severe",
+        "Classify severity: mild SDVP ≥8–<12 / AFI ≥24–<30 cm · moderate SDVP ≥12–<16 / AFI ≥30–<35 cm · severe SDVP ≥16 / AFI ≥35 cm",
+        "Genomic abnormality risk in isolated cases rises with severity: ~1% mild, ~2% moderate, ~10% severe",
       ],
       next: "workup",
     },
@@ -26,7 +29,7 @@ export const TOG_POLYHYDRAMNIOS_FLOWCHART = {
     "workup": {
       type: "action",
       title: "Investigate for a Cause",
-      text: "A cause is found in about half of cases (maternal, fetal or placental); the rest are unexplained.",
+      text: "Idiopathic (unexplained) polyhydramnios is the most common cause overall — 60–70% of all cases; fetal abnormalities account for over 30% of severe cases.",
       items: [
         "Maternal: random blood sugar / OGTT / HbA1c; red-cell antibodies; TORCH screen (toxoplasma, CMV, parvovirus) if features of fetal infection",
         "Detailed fetal ultrasound: structural survey, stomach bubble (abnormal if small/absent after 45 min), long bones & thorax (skeletal dysplasia), movements/tone/joints; consider fetal echocardiography",
@@ -42,10 +45,10 @@ export const TOG_POLYHYDRAMNIOS_FLOWCHART = {
       text: "Direct management by the underlying cause.",
       options: [
         {
-          label: "Fetal anomaly or suspected aneuploidy",
+          label: "Fetal anomaly or suspected genomic abnormality",
           sublabel: [
             "Structural anomaly on USS",
-            "Aneuploidy risk 10–20% if persistent/severe",
+            "Genomic abnormality risk rises with severity (~1% mild, ~2% moderate, ~10% severe)",
           ],
           next: "anomaly",
         },
@@ -60,8 +63,8 @@ export const TOG_POLYHYDRAMNIOS_FLOWCHART = {
           next: "mfm",
         },
         {
-          label: "No cause found — unexplained",
-          sublabel: "50–60% of cases; diagnosis of exclusion",
+          label: "No cause found — idiopathic",
+          sublabel: "60–70% of cases; diagnosis of exclusion",
           next: "unexplained",
         },
       ],
@@ -102,29 +105,46 @@ export const TOG_POLYHYDRAMNIOS_FLOWCHART = {
 
     "unexplained": {
       type: "decision",
-      title: "Unexplained Polyhydramnios — Severity?",
+      title: "Idiopathic Polyhydramnios — Severity?",
       text: "Manage by severity and watch for progression.",
       options: [
         {
-          label: "Mild (25–29.9) or moderate (30–34.9 cm)",
+          label: "Mild (SDVP 8–<12 / AFI 24–<30 cm)",
           sublabel: "Often resolves; main association is LGA",
-          next: "mild_mod",
+          next: "mild",
         },
         {
-          label: "Severe (>35 cm), persistent or symptomatic",
-          sublabel: "Respiratory compromise / preterm-labour risk",
+          label: "Moderate (SDVP 12–<16 / AFI 30–<35 cm)",
+          sublabel: "Risk rises with severity",
+          next: "moderate",
+        },
+        {
+          label: "Severe (SDVP ≥16 / AFI ≥35 cm), persistent or symptomatic",
+          sublabel: "Significant risk of adverse outcome",
           next: "severe",
         },
       ],
     },
 
-    "mild_mod": {
+    "mild": {
       type: "action",
-      title: "Mild / Moderate — Surveillance",
+      title: "Mild — Surveillance, No Change in Management",
+      text: "Not conclusively linked to adverse outcomes apart from a higher rate of LGA babies.",
       items: [
         "Serial growth scans; transvaginal cervical length",
-        "Consider antenatal steroids if cervical shortening",
-        "No benefit from induction for isolated/unexplained polyhydramnios — induce only for a maternal/fetal indication",
+        "Continuous CTG in labour advised regardless of severity",
+        "No clear benefit of induction for isolated polyhydramnios alone — induce only for a maternal/fetal indication",
+      ],
+      next: "surveillance",
+    },
+
+    "moderate": {
+      type: "action",
+      title: "Moderate — Surveillance, Consider Induction from 40 Weeks",
+      text: "Risk of adverse outcome rises with severity, though the exact threshold for expedited delivery is unclear.",
+      items: [
+        "Serial growth scans; transvaginal cervical length; consider antenatal steroids if cervical shortening",
+        "Induction may be offered from 40 weeks after discussing risks and benefits",
       ],
       next: "surveillance",
     },
@@ -132,10 +152,10 @@ export const TOG_POLYHYDRAMNIOS_FLOWCHART = {
     "severe": {
       type: "action",
       title: "Severe / Persistent — Specialist Management",
-      text: "Refer to fetal medicine.",
+      text: "Refer to fetal medicine. Significant risk of adverse outcome — induction before 40 weeks should be offered; exact timing individualised.",
       items: [
-        "Therapeutic amnioreduction (amniodrainage) if maternal respiratory compromise or significant cervical shortening — stop when AFI <25 cm; complication rate ~1.5% (preterm labour, PPROM, chorioamnionitis, abruption); high recurrence",
-        "Sulindac / indomethacin reduce fluid but risk ductus arteriosus constriction and impaired fetal renal function — specialist supervision only, not for general obstetric practice",
+        "Therapeutic amnioreduction (amniodrainage) if maternal respiratory compromise or significant cervical shortening — stop when AFI/SDVP normalises; complication rate ~1.5% (preterm labour, PPROM, chorioamnionitis, abruption); high recurrence",
+        "Sulindac may be used under specialist supervision only (better safety profile than indomethacin, which is no longer used due to neonatal morbidity) — risk of ductus arteriosus constriction and impaired fetal renal function",
       ],
       next: "surveillance",
     },
@@ -155,7 +175,7 @@ export const TOG_POLYHYDRAMNIOS_FLOWCHART = {
       type: "action",
       title: "Plan for Labour & Birth",
       items: [
-        "Induce only for a maternal or fetal indication — not for polyhydramnios alone",
+        "Timing per the severity-based guidance above, or for a maternal/fetal indication if the cause is treatable (e.g. diabetes)",
         "Anticipate unstable lie, cord prolapse and abruption; consider controlled amniotomy in theatre",
         "If macrosomic: monitor for labour dystocia; anticipate shoulder dystocia and PPH",
       ],

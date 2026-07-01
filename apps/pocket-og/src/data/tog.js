@@ -42,21 +42,22 @@ export const TOG_SECTIONS = [
       "tog review", "amniotic fluid",
     ],
     content: [
-      { type: "alert", value: "Bottom line: polyhydramnios = amniotic fluid above the 95th centile (AFI ≥25 cm or DVP ≥8 cm). About half the cases have a maternal/fetal cause and half are unexplained. Mild polyhydramnios usually resolves and carries little excess risk; severe or persistent unexplained polyhydramnios carries a 2–5× rise in perinatal morbidity and mortality." },
+      { type: "alert", value: "Bottom line: polyhydramnios = SDVP >8 cm or AFI >24 cm. Idiopathic (isolated) polyhydramnios is the most common cause — 60–70% of all cases (~1% of all pregnancies), usually mild-to-moderate and picked up in the third trimester. Mild polyhydramnios usually resolves and carries little excess risk beyond a higher rate of LGA babies; risk rises with severity, and severe polyhydramnios carries meaningfully higher fetal and maternal morbidity." },
 
       { type: "subheading", value: "Definition & classification" },
-      { type: "text", value: "Fluid is assessed on ultrasound by amniotic fluid index (AFI — sum of four cord/limb-free quadrants) or deepest vertical pool (DVP). Neither method is superior. A constant AFI ≥25 cm or DVP ≥8 cm can be used across gestations. Incidence 0.2–3.9%." },
+      { type: "text", value: "Fluid is assessed on ultrasound by single/maximum deepest vertical pocket (SDVP — also called MVP or DVP) or amniotic fluid index (AFI — sum of four cord/limb-free quadrants). There is no single agreed severity classification; the table below (Fetal Medicine Foundation / Pagan et al.) is the most widely used. Polyhydramnios complicates 1–2% of pregnancies (earlier estimates ranged 0.2–3.9%)." },
       { type: "table",
-        headers: ["Severity", "AFI", "Anomaly risk despite a normal scan"],
+        headers: ["Severity", "SDVP", "AFI", "Genomic abnormality risk (isolated cases)"],
         rows: [
-          ["Mild", "25.0–29.9 cm", "~1%"],
-          ["Moderate", "30.0–34.9 cm", "~2%"],
-          ["Severe", "> 35 cm", "~11%"],
+          ["Mild", "≥8–<12 cm", "≥24.0–<30 cm", "~1%"],
+          ["Moderate", "≥12–<16 cm", "≥30.0–<35 cm", "~2%"],
+          ["Severe", "≥16 cm", "≥35.0 cm", "~10%"],
         ],
       },
+      { type: "text", value: "A 2024 meta-analysis found an overall genomic abnormality rate of ~4.5% in apparently isolated polyhydramnios — the most common finding (~21% of abnormal cases) was Bartter syndrome, an autosomal recessive polyuric disorder that can be fatal in the newborn." },
 
       { type: "subheading", value: "Aetiology" },
-      { type: "text", value: "A cause is found in about half of cases; the rest are unexplained (diagnosis of exclusion). Every case needs a systematic search for a cause." },
+      { type: "text", value: "Idiopathic (unexplained) polyhydramnios is the single most common cause overall, and fetal abnormalities account for over 30% of severe cases. Every case needs a systematic search for a cause." },
       { type: "list", items: [
         "Maternal: uncontrolled diabetes (with macrosomia), red-cell isoimmunisation → immune hydrops, lithium (fetal diabetes insipidus).",
         "Fetal — impaired swallowing/obstruction: oesophageal atresia & tracheo-oesophageal fistula, duodenal atresia, CDH, CCAM; neurological (anencephaly, myotonic dystrophy, arthrogryposis); genetic (Beckwith–Wiedemann); hydrops; tumours (e.g. sacrococcygeal teratoma); congenital infection (toxoplasma, CMV, parvovirus).",
@@ -79,13 +80,22 @@ export const TOG_SECTIONS = [
         "Refer to maternal–fetal medicine if: suspected fetal anomaly, SGA fetus, concerns about fetal movements, or persistent/worsening polyhydramnios.",
         "Counsel on risks: preterm birth (consider steroids if cervical shortening), unstable lie (→ caesarean), cord prolapse, placental abruption, and postpartum haemorrhage.",
         "Therapeutic amnioreduction (amniodrainage) for maternal respiratory compromise or significant cervical shortening — stop when AFI < 25 cm or discomfort relieved; complication rate ~1.5% (preterm labour, PPROM, chorioamnionitis, abruption); high recurrence.",
-        "Prostaglandin synthetase inhibitors (indomethacin; sulindac 200 mg 12-hourly) reduce fluid but risk ductus arteriosus constriction and impaired fetal renal function — specialist supervision only, not for general obstetric practice.",
+        "Prostaglandin synthetase inhibitors reduce fluid but risk ductus arteriosus constriction and impaired fetal renal function — indomethacin is no longer used because of neonatal morbidity; sulindac (200 mg 12-hourly) has a better adverse-effect profile but remains specialist-supervision only, not for general obstetric practice.",
         "Serial ultrasound for liquor volume and fetal growth. Mild polyhydramnios often resolves — its only consistent association is a higher incidence of large-for-gestational-age babies.",
       ]},
 
+      { type: "subheading", value: "Timing of delivery — by severity (isolated polyhydramnios)" },
+      { type: "alert", value: "Evidence on induction timing is inconsistent and randomised trials are lacking. Individualise, and weigh against the woman's own risk factors." },
+      { type: "table",
+        headers: ["Severity", "Delivery guidance"],
+        rows: [
+          ["Mild", "No clear benefit of induction; continuous CTG in labour is advised regardless of severity"],
+          ["Moderate", "Induction may be offered from 40 weeks after discussing risks and benefits"],
+          ["Severe", "Significant risk of adverse outcome — induction before 40 weeks should be offered; exact timing individualised"],
+        ],
+      },
       { type: "subheading", value: "Management of labour" },
       { type: "list", items: [
-        "Insufficient evidence to induce for polyhydramnios alone — benefits do not outweigh the risks; induce only for a maternal or fetal indication (e.g. uncontrolled diabetes, prolonged pregnancy, hypertension).",
         "Anticipate labour dystocia if macrosomic; consider controlled amniotomy in theatre; be prepared for shoulder dystocia and PPH.",
         "In unexplained polyhydramnios, arrange a thorough neonatal examination including checking upper-GI patency with a nasogastric tube, and raise a neonatal alert.",
       ]},
@@ -98,7 +108,7 @@ export const TOG_SECTIONS = [
         "Unexplained polyhydramnios is a diagnosis of exclusion and warrants strategic surveillance.",
       ]},
 
-      { type: "text", value: "Summary of a TOG review (Karkhanis & Patni, TOG 2014;16:207–13). Read the full article for the complete discussion, figures and references; verify all doses and thresholds against local protocol." },
+      { type: "text", value: "Base review: Karkhanis & Patni, TOG 2014;16:207–13. Classification thresholds, anomaly-risk figures and delivery-timing guidance updated to the newer companion review — Falola, Filby, Timmons & Alleemudder, TOG 2026;28:41–50 (DOI 10.1111/tog.70021), which covers polyhydramnios and oligohydramnios together. Read both full articles for the complete discussion and references; verify all doses and thresholds against local protocol." },
     ],
   },
 
