@@ -5,23 +5,10 @@
 export const UPDATES = [
   {
     version: "1.0.0",
-    date: "Jul 2026",
+    date: "01/07/2026",
     title: "First release",
     changes: [
-      { tag: "new", text: "Interactive CTG classifier with the NICE NG229 reader & flowchart" },
-      { tag: "new", text: "Cord prolapse emergency pathway (RCOG GTG50)" },
-      { tag: "new", text: "In-app feedback — leave a quick note or a short survey" },
-      { tag: "improved", text: "Colour-coded by source across the app, with a legend" },
-      { tag: "improved", text: "New app typeface (Geist) and a cleaner home screen" },
-    ],
-  },
-  {
-    version: "0.1.0",
-    date: "Jun 2026",
-    title: "Initial release",
-    changes: [
-      { tag: "new", text: "29 guidelines with full-text search and in-app readers" },
-      { tag: "new", text: "Interactive flowcharts, Rx formulary, Consent and Calculators" },
+      { tag: "new", text: "Pocket O&G is live — a fast, offline reference for O&G trainees." },
     ],
   },
 ];
