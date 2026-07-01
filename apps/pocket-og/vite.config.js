@@ -24,6 +24,9 @@ export default defineConfig({
       includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'fonts/Geist-Variable.woff2'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        // Don't serve the SPA shell for real files opened as navigations
+        // (e.g. guideline PDFs in a new tab) — let them hit the actual asset.
+        navigateFallbackDenylist: [/^\/guidelines\//, /\.pdf$/],
       },
       manifest: {
         name: 'Pocket O&G',
