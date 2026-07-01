@@ -268,7 +268,39 @@ function ResultCard({ result }) {
 
 // ─── Scenario 1: PUL ──────────────────────────────────────────────────
 
+const PUL_MODE_KEY = "pocketog_pul_mode";
+function getPulMode() {
+  try { return localStorage.getItem(PUL_MODE_KEY) === "quick" ? "quick" : "guided"; }
+  catch { return "guided"; }
+}
+function setPulModeStored(mode) {
+  try { localStorage.setItem(PUL_MODE_KEY, mode); } catch { /* storage unavailable — ignore */ }
+}
+
+function PulModeToggle({ mode, onChange }) {
+  return (
+    <div className="inline-flex bg-gray-100 rounded-xl p-0.5 text-xs font-semibold mb-6">
+      {[
+        { id: "guided", label: "Guided" },
+        { id: "quick", label: "Quick entry" },
+      ].map(v => (
+        <button
+          key={v.id}
+          onClick={() => onChange(v.id)}
+          aria-pressed={mode === v.id}
+          className={`px-4 py-1.5 rounded-lg transition-colors ${
+            mode === v.id ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
+          }`}
+        >
+          {v.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function PulCalculator({ onBack, pdfs, onNavigate }) {
+  const [mode, setMode] = useState(getPulMode);
   const [haemodynamicInstability, setHaemodynamicInstability] = useState(null);
   const [worseningPain, setWorseningPain] = useState(null);
   const [heavyBleeding, setHeavyBleeding] = useState(null);
@@ -279,6 +311,12 @@ function PulCalculator({ onBack, pdfs, onNavigate }) {
   const [hcg2, setHcg2] = useState("");
   const [hours, setHours] = useState("48");
   const [result, setResult] = useState(null);
+  const [caveatsOpen, setCaveatsOpen] = useState(false);
+
+  const changeMode = (m) => {
+    setMode(m);
+    setPulModeStored(m);
+  };
 
   const symptomsAnswered =
     haemodynamicInstability !== null && worseningPain !== null && heavyBleeding !== null;
@@ -288,11 +326,19 @@ function PulCalculator({ onBack, pdfs, onNavigate }) {
     !haemodynamicInstability && !worseningPain && !heavyBleeding &&
     tvsDone && !iupSeen && !adnexalMassOrFreeFluid;
 
-  const submit = () => {
+  const submitGuided = () => {
     const sym = symptomOverride({ worseningPain, heavyBleeding, haemodynamicInstability });
     if (sym) { setResult(sym); return; }
     const tvs = pulTvsTriage({ tvsDone, iupSeen, adnexalMassOrFreeFluid });
     if (tvs) { setResult(tvs); return; }
+    const a = parseFloat(hcg1);
+    const b = parseFloat(hcg2);
+    const h = parseFloat(hours);
+    if (!a || !b || !h) return;
+    setResult(interpretPUL({ hcg1: a, hcg2: b, hoursBetween: h }));
+  };
+
+  const submitQuick = () => {
     const a = parseFloat(hcg1);
     const b = parseFloat(hcg2);
     const h = parseFloat(hours);
@@ -311,6 +357,7 @@ function PulCalculator({ onBack, pdfs, onNavigate }) {
     setHcg2("");
     setHours("48");
     setResult(null);
+    setCaveatsOpen(false);
   };
 
   return (
@@ -319,7 +366,55 @@ function PulCalculator({ onBack, pdfs, onNavigate }) {
         <StepHeader title="PUL — serial hCG" subtitle="NICE NG126 §1.4.27–1.4.32" onBack={onBack} pdfs={pdfs} />
 
         <div className="px-5 pt-6">
-          {!result && (
+          {!result && <PulModeToggle mode={mode} onChange={changeMode} />}
+
+          {!result && mode === "quick" && (
+            <>
+              <h3 className="text-2xl font-bold text-gray-900 mb-1">Enter both hCG levels</h3>
+              <p className="text-sm text-gray-400 mb-6">Samples must be ≥48 h apart (NG126 §1.4.27).</p>
+
+              <div className="space-y-4">
+                <NumberField label="First hCG" value={hcg1} onChange={setHcg1} suffix="IU/L" autoFocus={false} />
+                <NumberField label="Second hCG" value={hcg2} onChange={setHcg2} suffix="IU/L" />
+                <NumberField label="Hours between samples" value={hours} onChange={setHours} suffix="hours" />
+              </div>
+
+              <button
+                onClick={submitQuick}
+                disabled={!hcg1 || !hcg2 || !hours}
+                className="w-full mt-6 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold py-3.5 rounded-2xl transition-colors"
+              >
+                Calculate
+              </button>
+
+              <button
+                onClick={() => setCaveatsOpen(o => !o)}
+                className="w-full mt-6 flex items-center justify-between rounded-2xl bg-amber-50 border border-amber-100 p-4 text-left"
+              >
+                <span className="text-xs font-bold text-amber-700">Before you rely on this — read first</span>
+                <svg className={`w-4 h-4 text-amber-500 shrink-0 transition-transform ${caveatsOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {caveatsOpen && (
+                <div className="rounded-2xl bg-gray-50 border border-gray-100 p-4 mt-2">
+                  <p className="text-xs text-gray-600 leading-relaxed mb-2">
+                    This assumes you've already excluded red-flag symptoms (haemodynamic instability, worsening pain, heavy bleeding) and that a TVS was performed and non-diagnostic (no IUP, no adnexal mass/free fluid). If not — switch to Guided.
+                  </p>
+                  <ul className="space-y-1.5">
+                    {PUL_CAVEATS.map((c, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs text-gray-600 leading-relaxed">
+                        <span className="text-gray-300 mt-0.5 shrink-0">•</span>
+                        <span>{c}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </>
+          )}
+
+          {!result && mode === "guided" && (
             <>
               <h3 className="text-2xl font-bold text-gray-900 mb-1">Clinical picture first</h3>
               <p className="text-sm text-gray-400 mb-6">NG126 §1.4.25: symptoms outrank biochemistry.</p>
@@ -361,7 +456,7 @@ function PulCalculator({ onBack, pdfs, onNavigate }) {
               )}
 
               <button
-                onClick={submit}
+                onClick={submitGuided}
                 disabled={
                   !symptomsAnswered ||
                   (symptomsAnswered && !haemodynamicInstability && !worseningPain && !heavyBleeding && !tvsAnswered) ||
