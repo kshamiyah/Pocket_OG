@@ -20,6 +20,57 @@ function escapeRe(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+// ─── Forgiving matching helpers ───────────────────────────────────────────────
+
+// Singular/plural (and common -y/-ies) variants of a word, so "antibiotic" and
+// "antibiotics", or "pregnancy" and "pregnancies", match each other.
+function variants(term) {
+  const v = new Set([term]);
+  if (term.length >= 4) {
+    if (term.endsWith("ies")) v.add(term.slice(0, -3) + "y");
+    else if (term.endsWith("es")) v.add(term.slice(0, -2));
+    if (term.endsWith("s") && !term.endsWith("ss")) v.add(term.slice(0, -1));
+  }
+  if (term.length >= 3 && !term.endsWith("s")) {
+    v.add(term + "s");
+    if (/[^aeiou]y$/.test(term)) v.add(term.slice(0, -1) + "ies");
+    else v.add(term + "es");
+  }
+  return [...v];
+}
+
+// Whole-word regex that matches a term or any of its singular/plural variants.
+function termRegex(term) {
+  const alt = variants(term).map(escapeRe).join("|");
+  return new RegExp(`(?<![\\w-])(?:${alt})(?![\\w-])`);
+}
+
+// Bounded Levenshtein — returns the distance, or max+1 as soon as it is exceeded.
+function levWithin(a, b, max) {
+  const la = a.length, lb = b.length;
+  if (Math.abs(la - lb) > max) return max + 1;
+  let prev = Array.from({ length: lb + 1 }, (_, i) => i);
+  for (let i = 1; i <= la; i++) {
+    const cur = [i];
+    let best = i;
+    const ca = a.charCodeAt(i - 1);
+    for (let j = 1; j <= lb; j++) {
+      const cost = ca === b.charCodeAt(j - 1) ? 0 : 1;
+      const val = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+      cur[j] = val;
+      if (val < best) best = val;
+    }
+    if (best > max) return max + 1;
+    prev = cur;
+  }
+  return prev[lb];
+}
+
+const _tokenRe = /[a-z0-9]+/g;
+function tokenize(str) {
+  return str.toLowerCase().match(_tokenRe) ?? [];
+}
+
 // Pre-compute multi-word synonym patterns once at load time
 const _multiWordSynonyms = Object.entries(SYNONYMS)
   .filter(([k]) => k.includes(" "))
@@ -36,7 +87,10 @@ export function expandQuery(q) {
   const terms = normalized.split(/\s+/).filter(Boolean);
   const expanded = new Set(terms);
   for (const term of terms) {
-    if (SYNONYMS[term]) SYNONYMS[term].forEach(v => expanded.add(v));
+    // synonym lookup is plural-insensitive (checks singular/plural variants too)
+    for (const v of variants(term)) {
+      if (SYNONYMS[v]) SYNONYMS[v].forEach(s => expanded.add(s));
+    }
   }
   for (const { pattern, vals } of _multiWordSynonyms) {
     if (pattern.test(normalized)) vals.forEach(v => expanded.add(v));
@@ -63,31 +117,39 @@ const _WIKI = [
   ...NG73_SECTIONS,
 ];
 
-export const SEARCH_INDEX = _WIKI.map(page => ({
-  page,
-  titleLower: page.title.toLowerCase(),
-  settingLower: page.setting.toLowerCase(),
-  conditionLower: page.condition.toLowerCase(),
-  tagsLower: page.tags.map(t => t.toLowerCase()),
-  searchableContent: page.content.flatMap(b => {
+export const SEARCH_INDEX = _WIKI.map(page => {
+  const tagsLower = page.tags.map(t => t.toLowerCase());
+  const searchableContent = page.content.flatMap(b => {
     if (b.type === "text" || b.type === "alert" || b.type === "subheading") return [b.value ?? ""];
     if (b.type === "list") return b.items;
     if (b.type === "table") return [...b.headers, ...b.rows.flat()];
     return [];
-  }).join(" ").toLowerCase(),
-  fallbackText: [page.title, page.condition, page.setting, ...page.tags].join(" ").toLowerCase(),
-}));
+  }).join(" ").toLowerCase();
+  const fallbackText = [page.title, page.condition, page.setting, ...page.tags].join(" ").toLowerCase();
+  return {
+    page,
+    titleLower: page.title.toLowerCase(),
+    settingLower: page.setting.toLowerCase(),
+    conditionLower: page.condition.toLowerCase(),
+    tagsLower,
+    tagsSet: new Set(tagsLower),
+    tagsJoined: tagsLower.join(" · "),
+    searchableContent,
+    fallbackText,
+    // high-signal short tokens for prefix + fuzzy (typo) matching
+    tokens: [...new Set(tokenize([page.title, page.condition, page.setting, ...page.tags].join(" ")))],
+  };
+});
 
-function _scoreEntry(entry, termPatterns) {
+// Exact / plural-tolerant scoring for one term matcher.
+function _scoreExact(entry, m) {
   let score = 0;
-  for (const { term, re } of termPatterns) {
-    if (entry.tagsLower.some(t => t === term)) score += 12;
-    else if (entry.tagsLower.some(t => re.test(t))) score += 7;
-    if (re.test(entry.titleLower)) score += 7;
-    if (re.test(entry.settingLower)) score += 5;
-    if (re.test(entry.conditionLower)) score += 5;
-    if (re.test(entry.searchableContent)) score += 2;
-  }
+  if (m.variants.some(v => entry.tagsSet.has(v))) score += 12;
+  else if (m.re.test(entry.tagsJoined)) score += 7;
+  if (m.re.test(entry.titleLower)) score += 7;
+  if (m.re.test(entry.settingLower)) score += 5;
+  if (m.re.test(entry.conditionLower)) score += 5;
+  if (m.re.test(entry.searchableContent)) score += 2;
   return score;
 }
 
@@ -96,15 +158,33 @@ export function search(query, pool) {
   if (!q) return { primary: [], fallback: [] };
 
   const terms = expandQuery(q);
-  // Build word-boundary regexes once per search, reused across all entries
-  const termPatterns = terms.map(term => ({
-    term,
-    re: new RegExp(`(?<![\\w-])${escapeRe(term)}(?![\\w-])`),
-  }));
+  const matchers = terms.map(term => ({ term, variants: variants(term), re: termRegex(term) }));
+
+  // Raw user words drive the forgiving layer (prefix / fuzzy) — kept small so it stays fast
+  const rawMatchers = q.toLowerCase().split(/\s+/)
+    .filter(t => t.length >= 2)
+    .map(term => ({ term, re: termRegex(term) }));
 
   let hasPrimary = false;
   const scored = pool.map(entry => {
-    const score = _scoreEntry(entry, termPatterns);
+    let score = 0;
+    for (const m of matchers) score += _scoreExact(entry, m);
+
+    // Forgiving layer: only rescue a raw word that wasn't found exactly in this entry
+    for (const rm of rawMatchers) {
+      if (rm.re.test(entry.fallbackText) || rm.re.test(entry.searchableContent)) continue;
+      if (rm.term.length >= 3 && entry.tokens.some(tok => tok.startsWith(rm.term))) {
+        score += 4; // prefix, e.g. "gent" → gentamicin
+        continue;
+      }
+      if (rm.term.length >= 4) {
+        const thr = rm.term.length >= 7 ? 2 : 1;
+        if (entry.tokens.some(tok => levWithin(rm.term, tok, thr) <= thr)) {
+          score += 3; // typo, e.g. "magneisum" → magnesium
+        }
+      }
+    }
+
     if (score > 0) hasPrimary = true;
     return { entry, score };
   });
@@ -119,7 +199,7 @@ export function search(query, pool) {
     };
   }
 
-  // Fallback: prefix match on pre-built fallbackText — single pass, no second scan
+  // Last-resort fallback: loose prefix match on the pre-built fallback text
   const rawTerms = q.toLowerCase().split(/\s+/);
   return {
     primary: [],
@@ -130,7 +210,7 @@ export function search(query, pool) {
       }))
       .filter(s => s.fScore > 0)
       .sort((a, b) => b.fScore - a.fScore)
-      .slice(0, 3)
+      .slice(0, 5)
       .map(s => s.entry.page),
   };
 }
