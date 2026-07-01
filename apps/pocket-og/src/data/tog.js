@@ -193,4 +193,108 @@ export const TOG_SECTIONS = [
       { type: "text", value: "Summary of a TOG review (Falola, Filby, Timmons & Alleemudder, TOG 2026;28:41–50), which also updates polyhydramnios data — read the full article for the complete discussion, figures, tables and references; verify all thresholds against local protocol." },
     ],
   },
+
+  {
+    id: "tog-thyroid-disease-pregnancy",
+    gl: "TOG",
+    source: "TOG",
+    condition: "TOG Review",
+    setting: "Review — Maternal Medicine",
+    title: "Thyroid Disease in Pregnancy",
+    draft: false,
+    tog: {
+      article: "Thyroid disease in pregnancy",
+      authors: "Girling J",
+      citation: "TOG 2008;10:237–243",
+      doi: "10.1576/toag.10.4.237.27440",
+      url: "https://obgyn.onlinelibrary.wiley.com/doi/10.1576/toag.10.4.237.27440",
+    },
+    flowchartId: "TOG_THYROID",
+    relatedGl: ["GTG69", "GL952"],
+    tags: [
+      "thyroid disease pregnancy", "hypothyroidism pregnancy", "hyperthyroidism pregnancy",
+      "graves disease pregnancy", "thyrotoxicosis pregnancy", "thyroid function tests pregnancy",
+      "tft pregnancy", "tsh pregnancy", "free t4", "ft4", "levothyroxine pregnancy",
+      "thyroxine dose pregnancy", "carbimazole", "propylthiouracil", "ptu", "antithyroid drugs",
+      "subclinical hypothyroidism", "hypothyroxinaemia", "thyroid storm", "trab", "tsh receptor antibodies",
+      "fetal goitre", "fetal thyrotoxicosis", "neonatal thyrotoxicosis", "neonatal hypothyroidism",
+      "iodine deficiency pregnancy", "hyperemesis thyroid", "hcg thyroid", "radioactive iodine pregnancy",
+      "thyroid surgery pregnancy", "tog review",
+    ],
+    content: [
+      { type: "alert", value: "Bottom line: interpret thyroid function against trimester-specific reference ranges, not standard ones — pregnancy physiology shifts TSH/fT4 and total hormone levels. Hypothyroidism (~1% of pregnancies) needs euthyroidism ideally before conception — only first-trimester control affects the fetus. Hyperthyroidism (~2 per 1000, usually Graves') is managed with the lowest effective antithyroid dose; many women can reduce or stop treatment in the third trimester." },
+
+      { type: "subheading", value: "Why pregnancy changes the numbers" },
+      { type: "list", items: [
+        "Thyroxine-binding globulin triples by 20 weeks (oestrogen-driven) — total T4/T3 rise and are unreliable; fT4/fT3 are the tests of choice, read against trimester-specific ranges.",
+        "hCG shares a receptor subunit with TSH — a first-trimester 'spillover' can biochemically mimic hyperthyroidism, especially with multiple pregnancy, molar pregnancy or hyperemesis gravidarum.",
+        "Maternal thyroxine (not fT3) crosses the placenta before 12 weeks and matters for fetal brain development; after 12 weeks the fetal thyroid runs independently, provided maternal iodine intake is adequate.",
+      ]},
+      { type: "table",
+        headers: ["Excess thyroid hormone", "Deficient thyroid hormone"],
+        rows: [
+          ["Heat intolerance, increased appetite, sweating, palpitations, tachycardia", "Constipation, tiredness, weight gain, hair thinning"],
+        ],
+      },
+      { type: "text", value: "Both extremes mimic normal pregnancy symptoms — this is exactly why biochemistry (not clinical impression) drives management." },
+
+      { type: "subheading", value: "Hypothyroidism" },
+      { type: "list", items: [
+        "Distinguish: untreated hypothyroidism (low fT4, high TSH, often symptomatic — needs urgent thyroxine); previously diagnosed but suboptimally treated; subclinical hypothyroidism (normal fT4, raised TSH, asymptomatic — treatment debatable); hypothyroxinaemia (low T4, normal TSH).",
+        "Aim for euthyroidism before conception — only first-trimester control has been linked to fetal neurodevelopment in the literature, and the evidence for dose-adjustment improving outcome is not conclusive.",
+        "Hypothyroidism itself does not appear to influence pregnancy outcome once euthyroid — don't base management on preventing obstetric complications.",
+        "If optimally treated at conception: test pre-pregnancy, early first trimester, and again in the second/third trimester — most antenatal care can be midwifery-led.",
+      ]},
+
+      { type: "subheading", value: "Hyperthyroidism (usually Graves' disease)" },
+      { type: "list", items: [
+        "Goal: euthyroidism as early as possible, ideally pre-conception — this minimises maternal and fetal complications.",
+        "Beta-blockade (propranolol) for tachycardia/tremor/anxiety if needed — maternal/fetal benefit outweighs growth-restriction concerns.",
+        "Antithyroid drugs (carbimazole or propylthiouracil) block synthesis and reduce TSH-receptor antibody titre — use the lowest effective dose; both cross the placenta similarly.",
+        "Useful clinical clues: failure to gain weight despite good appetite, tachycardia >100 bpm not slowing with Valsalva, onycholysis. Eye signs and pretibial myxoedema do NOT reflect current disease activity.",
+        "Monitor thyroid function monthly when stable, more often if new/relapsing; titrate against results. Disease activity tends to worsen in the first trimester/puerperium and improve in the 2nd–3rd trimester — around a third of women can stop treatment in pregnancy, reducing fetal hypothyroidism risk. Most need to restart/increase postnatally.",
+        "Both drugs can cause agranulocytosis — tell women to report a sore throat immediately; this is not a reason to switch agents routinely.",
+        "Radioactive iodine is absolutely contraindicated in pregnancy (crosses the placenta, destroys the fetal thyroid). Surgery can be done in pregnancy (usually 2nd trimester) for compression, suspected malignancy or failed medical therapy — needs an experienced thyroid surgeon.",
+        "Breastfeeding: minimal transfer for both agents; carbimazole transfers somewhat more than propylthiouracil — split doses through the day, feed before a dose where possible, monitor neonatal thyroid function.",
+      ]},
+
+      { type: "table",
+        headers: ["Complications of poorly controlled hyperthyroidism", ""],
+        rows: [
+          ["Maternal", "Thyroid storm, congestive cardiac failure, pre-eclampsia"],
+          ["Fetal", "Fetal growth restriction, prematurity, stillbirth"],
+        ],
+      },
+
+      { type: "subheading", value: "Fetal & neonatal thyrotoxicosis" },
+      { type: "list", items: [
+        "TSH-receptor stimulating antibodies (TRAb) cross the placenta — measure them in anyone with active Graves' disease or a past history treated by surgery/radioactive iodine.",
+        "If TRAb positive, monitor for fetal thyrotoxicosis: tachycardia, excessive movements, growth restriction, oligohydramnios, goitre (can cause neck extension/obstructed labour), polyhydramnios (oesophageal pressure), hydrops, or intrauterine death.",
+        "Management: deliver if gestation allows; otherwise high-dose antithyroid drug titrated against fetal heart rate — maternal thyroxine can be added if she becomes clinically hypothyroid (it doesn't cross the placenta).",
+        "Neonatal hypothyroidism (from transplacental antithyroid drugs) is usually self-limiting. Neonatal hyperthyroidism can present 7–10 days postnatally (once maternal antithyroid drug has cleared but TRAb persists) — warn parents to watch for weight loss or poor feeding.",
+      ]},
+
+      { type: "subheading", value: "Hyperemesis gravidarum vs Graves' disease" },
+      { type: "alert", value: "hCG-driven biochemical hyperthyroidism occurs in >60% of severe hyperemesis gravidarum — suppressed TSH, high/very high fT4. It is NOT true thyroid disease and does not need antithyroid medication." },
+      { type: "list", items: [
+        "Favours HG-related thyrotoxicosis: symptoms clearly postdate the pregnancy, no goitre or eye signs, tachycardia responds to IV rehydration, thyroid autoantibodies negative (their absence supports HG, though presence doesn't exclude it).",
+        "Usually resolves by ~19–20 weeks as hCG falls — confirm normalisation as the hyperemesis settles rather than starting antithyroid drugs.",
+        "If genuine doubt about first-trimester Graves' presenting with vomiting: take a detailed history and repeat testing as hyperemesis resolves; antithyroid medication crosses the placenta and risks fetal hypothyroidism, so avoid it unless truly indicated.",
+      ]},
+
+      { type: "subheading", value: "Iodine deficiency — a global perspective" },
+      { type: "text", value: "Worldwide, iodine deficiency is the leading preventable cause of mental handicap (neurological cretinism), affecting millions in deficient regions. Supplementation before conception or up to the second trimester can protect the fetal brain and reduce pregnancy loss — a key ethical/public-health issue even where routine practice locally is unaffected." },
+
+      { type: "subheading", value: "Key points" },
+      { type: "list", items: [
+        "Always use trimester-specific reference ranges — standard non-pregnant ranges will misclassify normal pregnancy physiology as disease.",
+        "Hypothyroidism: get euthyroid before conception; only first-trimester control matters for the fetus.",
+        "Hyperthyroidism: lowest effective antithyroid dose, monthly monitoring, expect to reduce/stop in the third trimester, radioactive iodine is contraindicated.",
+        "Measure TRAb in anyone with active or past Graves' disease — positive results need fetal surveillance for thyrotoxicosis.",
+        "hCG-mediated hyperthyroidism in hyperemesis is not Graves' disease and does not need antithyroid drugs.",
+      ]},
+
+      { type: "text", value: "Summary of a TOG review (Girling J, TOG 2008;10:237–243). Read the full article for the complete discussion and references; verify all doses and thresholds against local protocol." },
+    ],
+  },
 ];

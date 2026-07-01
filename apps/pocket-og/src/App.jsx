@@ -96,6 +96,7 @@ const FLOWCHART_LINKS = [
   { id: "ABDO_TRIAGE",           gl: "ABDO" },
   { id: "TOG_POLYHYDRAMNIOS",    gl: "TOG" },
   { id: "TOG_OLIGOHYDRAMNIOS",   gl: "TOG" },
+  { id: "TOG_THYROID",           gl: "TOG" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -120,7 +121,7 @@ const FLOWCHART_GROUPS = [
   { gl: "NG229",     label: "Fetal Monitoring / CTG" },
   { gl: "GTG50",     label: "Cord Prolapse (Emergency)" },
   { gl: "ABDO",      label: "Abdominal Pain in Pregnancy" },
-  { gl: "TOG",       label: "TOG Reviews — Amniotic Fluid" },
+  { gl: "TOG",       label: "TOG Reviews" },
 ];
 
 export default function App() {
