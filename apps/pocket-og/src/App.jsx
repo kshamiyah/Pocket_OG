@@ -18,6 +18,7 @@ import AboutModal from "./components/AboutModal";
 import UpdatesModal from "./components/UpdatesModal";
 import InstallBanner from "./components/InstallBanner";
 import { LATEST_VERSION, hasUnseenUpdates, markUpdatesSeen } from "./data/updates";
+import { TOG_SECTIONS } from "./data/tog";
 
 import { READER_AVAILABLE } from "./data/readerAvailable";
 
@@ -26,6 +27,7 @@ const FILTER_OPTIONS = [
   { value: "RBH",        label: "RBH guidelines",      pill: "RBH",           filterFn: e => GUIDELINES[e.page.gl]?.source === "RBH",            active: "bg-gray-900 text-white" },
   { value: "RCOG",       label: "RCOG guidelines",     pill: "RCOG",          filterFn: e => GUIDELINES[e.page.gl]?.source === "RCOG",           active: "bg-gray-900 text-white" },
   { value: "NICE",       label: "NICE guidelines",     pill: "NICE",          filterFn: e => GUIDELINES[e.page.gl]?.source === "NICE",           active: "bg-gray-900 text-white" },
+  { value: "TOG",        label: "TOG reviews",         pill: "TOG",           filterFn: e => e.page.source === "TOG",                            active: "bg-gray-900 text-white" },
   { value: "FLOWCHARTS", label: "Pages with flowcharts", pill: "⬡ Flowcharts", filterFn: e => !!e.page.flowchartId,                             active: "bg-teal-100 text-teal-700" },
 ];
 
@@ -92,6 +94,14 @@ const FLOWCHART_LINKS = [
   { id: "NG229_CTG",             gl: "NG229" },
   { id: "GTG50_CORD",            gl: "GTG50" },
   { id: "ABDO_TRIAGE",           gl: "ABDO" },
+  { id: "TOG_POLYHYDRAMNIOS",    gl: "TOG" },
+  { id: "TOG_OLIGOHYDRAMNIOS",   gl: "TOG" },
+  { id: "TOG_THYROID",           gl: "TOG" },
+  { id: "TOG_CHD_PREGNANCY",     gl: "TOG" },
+  { id: "TOG_ACQUIRED_CARDIAC",  gl: "TOG" },
+  { id: "TOG_MI_PREGNANCY",      gl: "TOG" },
+  { id: "TOG_ARRHYTHMIAS_PREGNANCY", gl: "TOG" },
+  { id: "TOG_VALVULAR_PREGNANCY",    gl: "TOG" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -116,6 +126,7 @@ const FLOWCHART_GROUPS = [
   { gl: "NG229",     label: "Fetal Monitoring / CTG" },
   { gl: "GTG50",     label: "Cord Prolapse (Emergency)" },
   { gl: "ABDO",      label: "Abdominal Pain in Pregnancy" },
+  { gl: "TOG",       label: "TOG Reviews" },
 ];
 
 export default function App() {
@@ -124,6 +135,7 @@ export default function App() {
   const [filter, setFilter] = useState("ALL");
   const [expanded, setExpanded] = useState({});
   const [activeFlowchartId, setActiveFlowchartId] = useState(null);
+  const [libraryView, setLibraryView] = useState("guidelines"); // "guidelines" | "articles"
   const [showIOLPrioritizer, setShowIOLPrioritizer] = useState(false);
   const [activeTab, setActiveTab] = useState("search");
   const [glSourceFilter, setGlSourceFilter] = useState("ALL");
@@ -665,10 +677,33 @@ export default function App() {
         <div className="min-h-screen pb-24">
           <div className="max-w-lg mx-auto">
             <div className="px-5 pt-14 pb-1">
-              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Guidelines</h2>
-              <p className="text-xs text-gray-400 mt-0.5">National and local guidelines</p>
+              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Library</h2>
+              <p className="text-xs text-gray-400 mt-0.5">Guidelines and TOG review articles</p>
             </div>
 
+            {/* Guidelines / Articles toggle */}
+            <div className="px-5 pt-2 pb-1">
+              <div className="inline-flex bg-gray-100 rounded-xl p-0.5 text-xs font-semibold">
+                {[
+                  { id: "guidelines", label: "Guidelines" },
+                  { id: "articles", label: `Articles${TOG_SECTIONS.length ? ` · ${TOG_SECTIONS.length}` : ""}` },
+                ].map(v => (
+                  <button
+                    key={v.id}
+                    onClick={() => setLibraryView(v.id)}
+                    aria-pressed={libraryView === v.id}
+                    className={`px-4 py-1.5 rounded-lg transition-colors ${
+                      libraryView === v.id ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
+                    }`}
+                  >
+                    {v.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {libraryView === "guidelines" && (
+            <>
             {/* Sticky: source filter + search */}
             <div className="sticky top-0 z-20 bg-white border-b border-gray-100 pl-4 pr-12 pt-3 pb-3">
               <div className="flex gap-1.5 mb-2.5">
@@ -774,14 +809,46 @@ export default function App() {
                 </div>
               )}
             </div>
+            </>
+            )}
+
+            {libraryView === "articles" && (
+              <div className="px-5 pt-4">
+                {TOG_SECTIONS.length === 0 ? (
+                  <p className="text-sm text-gray-400 text-center py-10">No review articles yet.</p>
+                ) : (
+                  <>
+                    <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+                      {TOG_SECTIONS.map((page, i) => (
+                        <div key={page.id} className={i > 0 ? "border-t border-gray-50" : ""}>
+                          <WikiCard
+                            page={page}
+                            grouped
+                            isExpanded={!!expanded[page.id]}
+                            onToggle={() => toggle(page.id)}
+                            onOpenFlowchart={setActiveFlowchartId}
+                            onOpenGuideline={openGuidelineFromSearch}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[11px] text-gray-400 mt-3 px-1 leading-snug">
+                      Original summaries of <span className="font-medium">The Obstetrician &amp; Gynaecologist</span> (TOG) review articles, each linking to the full paper. Reference only — verify against local guidance.
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
-          <AlphabetSidebar
-            activeLetters={glActiveLetters}
-            onSelect={letter => {
-              glSectionRefs.current[letter]?.scrollIntoView({ behavior: "smooth", block: "start" });
-            }}
-          />
+          {libraryView === "guidelines" && (
+            <AlphabetSidebar
+              activeLetters={glActiveLetters}
+              onSelect={letter => {
+                glSectionRefs.current[letter]?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+            />
+          )}
         </div>
       )}
 
@@ -791,7 +858,7 @@ export default function App() {
         <div className="flex max-w-lg mx-auto">
           {[
             { id: "search",     label: "Search",  icon: <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" /> },
-            { id: "guidelines", label: "Guides",  icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> },
+            { id: "guidelines", label: "Library", icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> },
             { id: "flowcharts", label: "Flow",    icon: <path strokeLinecap="round" strokeLinejoin="round" d="M12 2L22 12L12 22L2 12L12 2Z" /> },
             { id: "consent",    label: "Consent", icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /> },
             { id: "calculator", label: "Calc",    icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m-6 5h6m-6 5h6M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" /> },

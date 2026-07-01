@@ -1,18 +1,22 @@
 import { GUIDELINES } from "@pocket-og/guidelines";
 import ContentBlock from "./ContentBlock";
 import { highlightText } from "../utils/highlight";
-import { glColors } from "../data/glColors";
+import { glColors, sourceColors } from "../data/glColors";
 import { READER_AVAILABLE } from "../data/readerAvailable";
 
 export default function WikiCard({ page, isExpanded, onToggle, isFallback, query = "", onOpenFlowchart, onOpenGuideline, grouped = false }) {
   const gl = GUIDELINES[page.gl];
   const highlightTerms = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
-  const col = glColors(page.gl);
+  // Cards may carry an explicit `source` (e.g. TOG review cards, which aren't in
+  // the guideline registry); fall back to resolving colour from the gl code.
+  const col = page.source ? sourceColors(page.source) : glColors(page.gl);
+  const relatedGl = (page.relatedGl ?? []).map(code => GUIDELINES[code]).filter(Boolean);
 
   const metaParts = [
     page.setting,
     gl?.code,
     gl ? `${gl.version} · ${gl.date}` : null,
+    page.tog?.year ? `TOG ${page.tog.year}` : null,
     page.flowchartId ? "⬡ flowchart" : null,
     isFallback ? "closest match" : null,
   ].filter(Boolean);
@@ -61,6 +65,14 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
         {/* Expanded content */}
         {isExpanded && (
           <div className="px-4 pb-4 border-t border-gray-100 pt-4 overflow-x-hidden">
+            {page.draft && (
+              <div className="mb-4 flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-100 px-3 py-2">
+                <span className="text-amber-500 text-sm leading-none mt-0.5">⚠</span>
+                <p className="text-xs text-amber-700 leading-snug">
+                  AI-summarised draft — pending clinical sign-off. Verify against the source article and local protocol.
+                </p>
+              </div>
+            )}
             {page.content.map((block, i) => (
               <ContentBlock key={i} block={block} highlightTerms={highlightTerms} />
             ))}
@@ -69,8 +81,73 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
                 <p className="text-xs text-gray-400">{gl.code} {gl.version} · {gl.label} · {gl.source} · {gl.date}</p>
               </div>
             )}
+            {page.tog && (
+              <div className="mt-5 pt-3 border-t border-gray-100">
+                <p className="text-xs text-gray-400">
+                  <span className={`font-semibold ${col.text}`}>TOG</span>
+                  {" · "}The Obstetrician &amp; Gynaecologist
+                  {page.tog.citation ? ` · ${page.tog.citation}` : ""}
+                  {page.tog.authors ? ` · ${page.tog.authors}` : ""}
+                </p>
+              </div>
+            )}
 
             <div className="mt-4 space-y-2">
+              {page.tog?.url && (
+                <a
+                  href={page.tog.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl ${col.bg} border ${col.border} hover:brightness-95 active:brightness-90 transition-all group`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <svg className={`w-4 h-4 shrink-0 ${col.icon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    <div className="text-left">
+                      <p className={`text-sm font-semibold ${col.text}`}>Read full article</p>
+                      <p className="text-xs text-gray-500">Opens the TOG article (RCOG members)</p>
+                    </div>
+                  </div>
+                  <span className="text-gray-400 group-hover:text-gray-600 transition-colors">→</span>
+                </a>
+              )}
+              {relatedGl.length > 0 && onOpenGuideline && (
+                <div className="rounded-2xl bg-gray-50 border border-gray-100 px-4 py-3">
+                  <p className="text-xs font-semibold text-gray-500 mb-2">Related in Pocket O&amp;G</p>
+                  <div className="flex flex-wrap gap-2">
+                    {relatedGl.map(rgl => {
+                      const rcol = glColors(rgl.code);
+                      const canRead = READER_AVAILABLE.has(rgl.code);
+                      const label = `${rgl.code} · ${rgl.label}`;
+                      return canRead ? (
+                        <button
+                          key={rgl.code}
+                          type="button"
+                          onClick={() => onOpenGuideline(rgl.code, page.id)}
+                          className={`text-xs font-medium px-2.5 py-1.5 rounded-full ${rcol.badge} border ${rcol.border} hover:brightness-95 active:brightness-90 transition-all`}
+                        >
+                          {label} →
+                        </button>
+                      ) : rgl.pdf ? (
+                        <a
+                          key={rgl.code}
+                          href={rgl.pdfUrl || rgl.pdfPath || `/guidelines/${rgl.code}.pdf`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`text-xs font-medium px-2.5 py-1.5 rounded-full ${rcol.badge} border ${rcol.border} hover:brightness-95 active:brightness-90 transition-all`}
+                        >
+                          {label} →
+                        </a>
+                      ) : (
+                        <span key={rgl.code} className={`text-xs font-medium px-2.5 py-1.5 rounded-full ${rcol.badge} border ${rcol.border}`}>
+                          {label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
               {READER_AVAILABLE.has(page.gl) && onOpenGuideline && (
                 <button
                   type="button"

@@ -22,10 +22,11 @@ export const SOURCE_COLORS = {
   BASHH:    { badge: "bg-fuchsia-50 text-fuchsia-700", border: "border-fuchsia-100", conditionColor: "text-fuchsia-500", icon: "text-fuchsia-500", accent: "bg-fuchsia-500", solid: "bg-fuchsia-600", solidHover: "hover:bg-fuchsia-700", text: "text-fuchsia-700", bg: "bg-fuchsia-50" },
   NHSCSP:   { badge: "bg-slate-100 text-slate-700",    border: "border-slate-200",   conditionColor: "text-slate-500",   icon: "text-slate-500",   accent: "bg-slate-500",   solid: "bg-slate-600",   solidHover: "hover:bg-slate-700",   text: "text-slate-700",   bg: "bg-slate-50" },
   MBRRACE:  { badge: "bg-indigo-50 text-indigo-700",   border: "border-indigo-100",  conditionColor: "text-indigo-500",  icon: "text-indigo-500",  accent: "bg-indigo-500",  solid: "bg-indigo-600",  solidHover: "hover:bg-indigo-700",  text: "text-indigo-700",  bg: "bg-indigo-50" },
+  TOG:      { badge: "bg-pink-50 text-pink-700",       border: "border-pink-100",    conditionColor: "text-pink-500",    icon: "text-pink-500",    accent: "bg-pink-500",    solid: "bg-pink-600",    solidHover: "hover:bg-pink-700",    text: "text-pink-700",    bg: "bg-pink-50" },
 };
 
 // Sources that appear in the app, in legend order.
-export const SOURCE_ORDER = ["RBH", "NICE", "RCOG", "BASHH", "NHSCSP", "MBRRACE"];
+export const SOURCE_ORDER = ["RBH", "NICE", "RCOG", "BASHH", "NHSCSP", "MBRRACE", "TOG"];
 
 export const SOURCE_LABELS = {
   RBH: "RBH — local trust",
@@ -34,6 +35,7 @@ export const SOURCE_LABELS = {
   BASHH: "BASHH",
   NHSCSP: "NHS Cervical Screening",
   MBRRACE: "MBRRACE-UK",
+  TOG: "TOG — RCOG review journal",
 };
 
 // Hex equivalents (the -500 shades) for places that can't use Tailwind classes
@@ -41,6 +43,7 @@ export const SOURCE_LABELS = {
 export const SOURCE_HEX = {
   RBH: "#3b82f6", NICE: "#14b8a6", RCOG: "#8b5cf6",
   BASHH: "#d946ef", NHSCSP: "#64748b", MBRRACE: "#6366f1",
+  TOG: "#ec4899",
 };
 
 export const DEFAULT_GL_COLORS = {
@@ -67,7 +70,9 @@ export function sourceFromLabel(label = "") {
   return SOURCE_ORDER.find(s => up.includes(s)) ?? null;
 }
 
-// Colour for a guideline code — resolved through its source.
+// Colour for a guideline code — resolved through its source. Codes that aren't
+// guidelines but ARE a source key (e.g. "TOG") theme by that source directly;
+// anything else falls through to the neutral default.
 export function glColors(gl) {
-  return sourceColors(GUIDELINES[gl]?.source);
+  return sourceColors(GUIDELINES[gl]?.source ?? gl);
 }

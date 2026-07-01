@@ -4,6 +4,16 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.2.0",
+    date: "01/07/2026",
+    title: "TOG reviews & quicker calculators",
+    changes: [
+      { tag: "new", text: "TOG Reviews — a new Library section with in-depth summaries of RCOG's review journal, each with its own interactive flowchart: polyhydramnios & oligohydramnios, thyroid disease, cardiac disease (congenital, cardiomyopathy, myocardial infarction, arrhythmias, valvular disease)." },
+      { tag: "improved", text: "PUL and post-ectopic hCG calculators now have a Quick entry mode — jump straight to the numbers when you already know the clinical picture." },
+      { tag: "fixed", text: "The keyboard no longer pops open automatically when you launch the app." },
+    ],
+  },
+  {
     version: "1.0.0",
     date: "01/07/2026",
     title: "First release",
