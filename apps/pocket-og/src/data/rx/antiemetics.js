@@ -114,6 +114,38 @@ export const ANTIEMETICS = [
     ],
   },
   {
+    id: "doxylamine-pyridoxine",
+    name: "Doxylamine/Pyridoxine (Xonvea®)",
+    class: "Antihistamine + vitamin B6 combination",
+    color: "pink",
+    iconColor: "#FF375F",
+    routes: [
+      {
+        type: "oral",
+        shortLabel: "Oral",
+        label: "Oral — nausea and vomiting in pregnancy",
+        dose: "2 tablets (10 mg/10 mg each) at bedtime initially",
+        frequency: "titrate up if needed — see notes",
+        maxDose: "4 tablets/day",
+        notes: "Modified-release tablets — swallow whole, do not crush or chew. Titration: start 2 tablets at bedtime; if symptoms persist, add 1 tablet on waking and/or 1 tablet mid-afternoon, to a maximum of 4 tablets/day (1 morning + 1 afternoon + 2 at bedtime).",
+      },
+    ],
+    contraindications: [
+      "Hypersensitivity to antihistamines or pyridoxine",
+      "Concurrent use of MAOIs (prolongs/intensifies antihistamine effects)",
+    ],
+    cautions: [
+      "Sedating — advise about driving and operating machinery",
+      "Anticholinergic effects: dry mouth, blurred vision, urinary retention",
+      "Caution in asthma, narrow-angle glaucoma, and bladder-outflow obstruction",
+      "Modified-release tablet — must be swallowed whole, not crushed or chewed",
+    ],
+    pregnancySafety: "One of the best-established safety records of any antiemetic in pregnancy — decades of use (as Diclectin/Diclegis) with no teratogenic signal. RCOG GTG69 lists it among first-line options for nausea and vomiting of pregnancy; the only product specifically licensed for this indication in the UK.",
+    sources: [
+      { label: "BNF", href: "https://bnf.nice.org.uk/drugs/doxylamine-with-pyridoxine/" },
+    ],
+  },
+  {
     id: "metoclopramide",
     name: "Metoclopramide",
     class: "Dopamine antagonist / prokinetic",

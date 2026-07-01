@@ -26,7 +26,7 @@ function Release({ release, defaultOpen }) {
             const t = TAG[c.tag] ?? TAG.improved;
             return (
               <li key={i} className="flex items-start gap-2.5">
-                <span className={`shrink-0 mt-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${t.cls}`}>{t.label}</span>
+                <span className={`shrink-0 mt-0.5 w-16 text-center text-[10px] font-bold py-0.5 rounded-md border ${t.cls}`}>{t.label}</span>
                 <span className="text-sm text-gray-700 leading-snug">{c.text}</span>
               </li>
             );
