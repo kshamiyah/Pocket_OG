@@ -64,9 +64,11 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
             {page.content.map((block, i) => (
               <ContentBlock key={i} block={block} highlightTerms={highlightTerms} />
             ))}
-            <div className="mt-5 pt-3 border-t border-gray-100">
-              <p className="text-xs text-gray-400">{gl.code} {gl.version} · {gl.label} · {gl.source} · {gl.date}</p>
-            </div>
+            {gl && (
+              <div className="mt-5 pt-3 border-t border-gray-100">
+                <p className="text-xs text-gray-400">{gl.code} {gl.version} · {gl.label} · {gl.source} · {gl.date}</p>
+              </div>
+            )}
 
             <div className="mt-4 space-y-2">
               {READER_AVAILABLE.has(page.gl) && onOpenGuideline && (
