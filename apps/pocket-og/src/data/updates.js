@@ -4,15 +4,15 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
-    version: "0.2.0",
-    date: "30 Jun 2026",
-    title: "CTG tools, emergencies & feedback",
+    version: "1.0.0",
+    date: "Jul 2026",
+    title: "First release",
     changes: [
       { tag: "new", text: "Interactive CTG classifier with the NICE NG229 reader & flowchart" },
       { tag: "new", text: "Cord prolapse emergency pathway (RCOG GTG50)" },
-      { tag: "improved", text: "Feedback: leave a quick note or a short survey, all in-app" },
-      { tag: "improved", text: "Smarter search — added CTG terms and tidied synonyms" },
-      { tag: "fixed", text: "Themed flowchart groups and added a build/version stamp" },
+      { tag: "new", text: "In-app feedback — leave a quick note or a short survey" },
+      { tag: "improved", text: "Colour-coded by source across the app, with a legend" },
+      { tag: "improved", text: "New app typeface (Geist) and a cleaner home screen" },
     ],
   },
   {

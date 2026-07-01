@@ -17,7 +17,7 @@ import DisclaimerModal from "./components/DisclaimerModal";
 import AboutModal from "./components/AboutModal";
 import UpdatesModal from "./components/UpdatesModal";
 import InstallBanner from "./components/InstallBanner";
-import { LATEST_VERSION, LATEST_TITLE, hasUnseenUpdates, markUpdatesSeen } from "./data/updates";
+import { LATEST_VERSION, hasUnseenUpdates, markUpdatesSeen } from "./data/updates";
 
 import { READER_AVAILABLE } from "./data/readerAvailable";
 
@@ -350,25 +350,16 @@ export default function App() {
                   <p className="mt-3 text-lg leading-relaxed text-gray-400">
                     Pocket the evidence. Make the call.
                   </p>
-                  <p className="mt-2 text-sm font-medium italic text-gray-400">
-                    Built by{" "}
-                    <a
-                      href="https://drshamiyah.com/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline underline-offset-2 hover:text-gray-600 transition-colors"
+                  {updatesUnseen && (
+                    <button
+                      type="button"
+                      onClick={() => { setUpdatesOpen(true); markUpdatesSeen(); setUpdatesUnseen(false); }}
+                      className="mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-xs font-semibold text-blue-600 hover:bg-blue-100 active:scale-95 transition-all"
                     >
-                      Khalid Shamiyah
-                    </a>
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => { setUpdatesOpen(true); markUpdatesSeen(); setUpdatesUnseen(false); }}
-                    className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 border border-gray-200 text-xs font-medium text-gray-500 hover:bg-gray-100 active:scale-95 transition-all"
-                  >
-                    {updatesUnseen && <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />}
-                    v{LATEST_VERSION} · What&apos;s new
-                  </button>
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                      v{LATEST_VERSION} · What&apos;s new
+                    </button>
+                  )}
                 </div>
 
                 {/* Search */}
@@ -408,31 +399,27 @@ export default function App() {
                   ))}
                 </div>
 
-                {updatesUnseen && (
-                  <div className="mt-6 relative rounded-2xl border border-blue-100 bg-blue-50/60 px-4 py-3.5">
-                    <button
-                      type="button"
-                      onClick={() => { markUpdatesSeen(); setUpdatesUnseen(false); }}
-                      aria-label="Dismiss"
-                      className="absolute top-2.5 right-2.5 w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-200/70"
-                    >
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                    <p className="text-sm font-semibold text-gray-900 pr-6">What&apos;s new in v{LATEST_VERSION}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{LATEST_TITLE}</p>
-                    <button
-                      type="button"
-                      onClick={() => { setUpdatesOpen(true); markUpdatesSeen(); setUpdatesUnseen(false); }}
-                      className="mt-2 text-xs font-semibold text-blue-600 hover:text-blue-700"
-                    >
-                      See all →
-                    </button>
-                  </div>
-                )}
-
                 <InstallBanner />
+
+                <p className="mt-8 text-center text-xs text-gray-400">
+                  Built by{" "}
+                  <a
+                    href="https://drshamiyah.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-2 hover:text-gray-600 transition-colors"
+                  >
+                    Khalid Shamiyah
+                  </a>
+                  {" · "}
+                  <button
+                    type="button"
+                    onClick={() => { setUpdatesOpen(true); markUpdatesSeen(); setUpdatesUnseen(false); }}
+                    className="underline underline-offset-2 hover:text-gray-600 transition-colors"
+                  >
+                    v{LATEST_VERSION}
+                  </button>
+                </p>
 
               </div>
             </div>
