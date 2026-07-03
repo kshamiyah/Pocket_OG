@@ -35,6 +35,41 @@ export const CALCULATOR_CONNECTIONS = {
 // inlineLinks: { phrase, type, id, gl } — phrases in node.text that become tappable.
 export const FLOWCHART_NODE_CONNECTIONS = {
 
+  // ── Acute HMB in ED (NG88) ──────────────────────────────────────────
+  NG88_ED_ACUTE: {
+    "resus-escalate": {
+      whatsNext: [
+        { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623 — if pregnancy-related bleeding" },
+        { type: "flowchart", id: "CG565_TRIAGE", gl: "CG565", label: "First-trimester miscarriage", sublabel: "CG565 — if pregnancy-related bleeding" },
+      ],
+    },
+    "preg": {
+      whatsNext: [
+        { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623 — step through the pathway" },
+        { type: "flowchart", id: "CG565_TRIAGE", gl: "CG565", label: "First-trimester miscarriage", sublabel: "CG565 — step through the pathway" },
+        { type: "calculator", id: "PUL", gl: "CG623", label: "PUL calculator", sublabel: "Pregnancy of unknown location" },
+      ],
+    },
+    "pmb": {
+      whatsNext: [
+        { type: "flowchart", id: "NG88_ASSESSMENT", gl: "NG88", label: "NG88 — Assessment pathway", sublabel: "Red-flag & referral logic" },
+        { type: "reader", id: "NG88", gl: "NG88", label: "NG88 — HMB guideline", sublabel: "Full guideline text" },
+      ],
+    },
+    "imb": {
+      whatsNext: [
+        { type: "flowchart", id: "NG88_ASSESSMENT", gl: "NG88", label: "NG88 — Assessment pathway", sublabel: "IMB / PCB investigation" },
+        { type: "reader", id: "NG88", gl: "NG88", label: "NG88 — HMB guideline", sublabel: "Full guideline text" },
+      ],
+    },
+    "dispo": {
+      whatsNext: [
+        { type: "flowchart", id: "NG88_ASSESSMENT", gl: "NG88", label: "NG88 — Assessment & primary-care pathway", sublabel: "Definitive workup" },
+        { type: "flowchart", id: "NG88_TREATMENT", gl: "NG88", label: "NG88 — Pharmacological treatment", sublabel: "LNG-IUS, CHC, non-hormonal" },
+      ],
+    },
+  },
+
   // ── Rupture of Membranes triage (GL895 + GL861) ─────────────────────
   GL895_ROM_TRIAGE: {
     "pprom-admit": {

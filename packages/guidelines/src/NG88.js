@@ -390,6 +390,7 @@ export const NG88_SECTIONS = [
     gl: "NG88",
     condition: "Heavy Menstrual Bleeding",
     setting: "Primary Care",
+    flowchartId: "NG88_ED_ACUTE",
     title: "When to Refer & Red Flags",
     tags: [
       "hmb referral", "menorrhagia referral", "gynaecology referral",

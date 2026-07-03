@@ -75,6 +75,7 @@ const FLOWCHART_LINKS = [
   { id: "GTG63_TRIAGE",        gl: "GTG63" },
   { id: "GTG63_DELIVERY",      gl: "GTG63" },
   { id: "GTG63_ANTID",         gl: "GTG63" },
+  { id: "NG88_ED_ACUTE",       gl: "NG88" },
   { id: "NG88_ASSESSMENT",     gl: "NG88" },
   { id: "NG88_TREATMENT",      gl: "NG88" },
   { id: "NG88_SURGICAL",       gl: "NG88" },

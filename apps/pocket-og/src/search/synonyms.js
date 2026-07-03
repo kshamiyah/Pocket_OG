@@ -405,6 +405,10 @@ export const SYNONYMS = {
   // Perimenopause
   "perimenopause": ["perimenopausal","menopause transition","climacteric","irregular periods perimenopause","hmb perimenopause"],
   "perimenopausal hmb": ["perimenopause","menopause transition","irregular periods","endometrial biopsy","lng-ius perimenopause"],
+  // Acute / ED HMB
+  "acute heavy bleeding": ["hmb","menorrhagia","flooding","resuscitation","tranexamic acid","norethisterone","transfusion","ed","emergency"],
+  "heavy bleeding ed": ["hmb","acute menorrhagia","flooding","resuscitation","major haemorrhage","tranexamic acid"],
+  "acute menorrhagia": ["hmb","acute heavy bleeding","norethisterone","tranexamic acid","transfusion"],
   // General period terms
   "period problems": ["hmb","menorrhagia","heavy periods","dysmenorrhoea","amenorrhoea","irregular periods"],
   "irregular periods": ["oligomenorrhoea","anovulation","pcos","perimenopause","amenorrhoea"],
