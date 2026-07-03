@@ -30,6 +30,9 @@ const FILTER_OPTIONS = [
   { value: "NICE",       label: "NICE guidelines",     pill: "NICE",          filterFn: e => GUIDELINES[e.page.gl]?.source === "NICE",           active: "bg-gray-900 text-white" },
   { value: "TOG",        label: "TOG reviews",         pill: "TOG",           filterFn: e => e.page.source === "TOG",                            active: "bg-gray-900 text-white" },
   { value: "FLOWCHARTS", label: "Pages with flowcharts", pill: "⬡ Flowcharts", filterFn: e => !!e.page.flowchartId,                             active: "bg-teal-100 text-teal-700" },
+  { value: "DRUGS",      label: "Medications",         pill: "℞ Meds",        filterFn: e => e.page.kind === "drug",                             active: "bg-cyan-100 text-cyan-700" },
+  { value: "CALCS",      label: "Calculators",         pill: "▦ Calcs",       filterFn: e => e.page.kind === "calculator",                       active: "bg-amber-100 text-amber-700" },
+  { value: "CONSENT",    label: "Consent",             pill: "✓ Consent",     filterFn: e => e.page.kind === "consent",                          active: "bg-rose-100 text-rose-700" },
 ];
 
 const SUGGESTIONS = [
