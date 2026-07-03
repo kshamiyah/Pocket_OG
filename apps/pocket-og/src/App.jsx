@@ -54,6 +54,7 @@ const SEARCH_HINTS = [
 const FLOWCHART_LINKS = [
   { id: "GL861_IOL",        gl: "GL861" },
   { id: "GL861_TIMING",     gl: "GL861" },
+  { id: "GL895_ROM_TRIAGE", gl: "GL895" },
   { id: "GL952_TRIAGE",          gl: "GL952" },
   { id: "GL952_ACUTE",           gl: "GL952" },
   { id: "GL952_SEVERE_LW",       gl: "GL952" },
@@ -108,6 +109,7 @@ const FLOWCHART_LINKS = [
 const FLOWCHART_GROUPS = [
   { gl: "GL952", label: "Pre-Eclampsia / Hypertension" },
   { gl: "GL861", label: "Induction of Labour" },
+  { gl: "GL895", label: "Rupture of Membranes (PROM & PPRoM)" },
   { gl: "CG565", label: "First Trimester Miscarriage" },
   { gl: "CG621", label: "Medical Management of Miscarriage" },
   { gl: "CG623", label: "Ectopic Pregnancy" },
@@ -332,6 +334,7 @@ export default function App() {
         const g = fcGl && GUIDELINES[fcGl];
         return (
           <FlowchartPlayer
+            key={activeFlowchartId}
             flowchart={FLOWCHARTS[activeFlowchartId]}
             gl={fcGl}
             theme={glColors(fcGl)}

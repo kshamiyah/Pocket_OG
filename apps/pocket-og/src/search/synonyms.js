@@ -130,6 +130,8 @@ export const SYNONYMS = {
   "shoulder tip pain": ["ectopic","haemorrhage","rupture","attend ed"],
   // PPRoM
   "pprom": ["pprom","preterm","rupture of membranes","amoxicillin","azithromycin","liquor","amni-sure"],
+  "leaking": ["srom","prom","pprom","rupture of membranes","liquor","amni-sure","waters broken"],
+  "leaking fluid": ["srom","prom","pprom","rupture of membranes","liquor","amni-sure"],
   "membranes": ["pprom","rupture","liquor","preterm"],
   "liquor": ["pprom","amniotic fluid","amni-sure","rupture of membranes","oligohydramnios","deepest vertical pocket","uss rfm"],
   "amni-sure": ["pprom","liquor","rupture of membranes"],

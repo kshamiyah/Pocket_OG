@@ -1,6 +1,7 @@
 export const GL895_SECTIONS = [
   {
     id: "pprom-assessment", gl: "GL895", condition: "PPRoM", setting: "Initial Assessment",
+    flowchartId: "GL895_ROM_TRIAGE",
     title: "PPRoM — Initial Assessment",
     tags: ["pprom","pprom assessment","rupture of membranes","preterm","speculum","amni-sure","liquor","gestational age","ctg","fbc","crp","ultrasound","digital examination","hvs","sterile speculum","meows","urinalysis","dawes redman"],
     content: [
@@ -23,6 +24,7 @@ export const GL895_SECTIONS = [
   },
   {
     id: "pprom-admission", gl: "GL895", condition: "PPRoM", setting: "Admission & Inpatient Care",
+    flowchartId: "GL895_ROM_TRIAGE",
     title: "PPRoM — Admission & Inpatient Monitoring",
     tags: ["pprom","admission","inpatient","48 hours","monitoring","steroids","ctg","mews","in-utero transfer","transfer","level 3 neonatal","27 weeks","28 weeks","multiple pregnancy","singleton","cephalic"],
     content: [

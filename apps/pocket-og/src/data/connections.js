@@ -35,6 +35,70 @@ export const CALCULATOR_CONNECTIONS = {
 // inlineLinks: { phrase, type, id, gl } — phrases in node.text that become tappable.
 export const FLOWCHART_NODE_CONNECTIONS = {
 
+  // ── Rupture of Membranes triage (GL895 + GL861) ─────────────────────
+  GL895_ROM_TRIAGE: {
+    "pprom-admit": {
+      inlineLinks: [
+        { phrase: "Antenatal corticosteroids", type: "consent", id: "ACS", gl: "GL895" },
+      ],
+    },
+    "pprom-transfer": {
+      inlineLinks: [
+        { phrase: "Antenatal corticosteroids", type: "consent", id: "ACS", gl: "GL895" },
+      ],
+      whatsNext: [
+        { type: "consent", id: "ACS", gl: null, label: "Consent — antenatal corticosteroids", sublabel: "Benefits, risks & patient information" },
+        { type: "reader", id: "GL895", gl: "GL895", label: "GL895 — PPRoM guideline", sublabel: "Full guideline text" },
+      ],
+    },
+    "pprom-birth": {
+      whatsNext: [
+        { type: "reader", id: "GL895", gl: "GL895", label: "GL895 — PPRoM guideline", sublabel: "Full guideline text" },
+        { type: "flowchart", id: "GL861_IOL", gl: "GL861", label: "Induction of labour pathway", sublabel: "GL861 — step through the pathway" },
+      ],
+    },
+    "term-immediate": {
+      whatsNext: [
+        { type: "flowchart", id: "GL861_IOL", gl: "GL861", label: "Induction of labour pathway", sublabel: "GL861 — step through the pathway" },
+        { type: "reader", id: "GL861", gl: "GL861", label: "GL861 — IOL & Term PLRoM guideline", sublabel: "Full guideline text" },
+      ],
+    },
+    "term-expectant": {
+      whatsNext: [
+        { type: "reader", id: "GL861", gl: "GL861", label: "GL861 — IOL & Term PLRoM guideline", sublabel: "Full guideline text" },
+      ],
+    },
+    "term-iol": {
+      whatsNext: [
+        { type: "flowchart", id: "GL861_IOL", gl: "GL861", label: "Induction of labour pathway", sublabel: "GL861 — step through the pathway" },
+        { type: "reader", id: "GL861", gl: "GL861", label: "GL861 — IOL & Term PLRoM guideline", sublabel: "Full guideline text" },
+      ],
+    },
+    "cord-emergency": {
+      inlineLinks: [
+        { phrase: "GTG50 cord prolapse pathway", type: "flowchart", id: "GTG50_CORD", gl: "GTG50" },
+      ],
+      whatsNext: [
+        { type: "flowchart", id: "GTG50_CORD", gl: "GTG50", label: "Cord prolapse — emergency pathway", sublabel: "GTG50 — step through the pathway" },
+      ],
+    },
+    "sepsis": {
+      inlineLinks: [
+        { phrase: "GL787", type: "reader", id: "GL787", gl: "GL787" },
+      ],
+      whatsNext: [
+        { type: "reader", id: "GL787", gl: "GL787", label: "GL787 — Obstetric antibiotics", sublabel: "Empirical sepsis treatment" },
+        { type: "reader", id: "GL895", gl: "GL895", label: "GL895 — PPRoM guideline", sublabel: "Full guideline text" },
+      ],
+    },
+    "not-confirmed": {
+      whatsNext: [
+        { type: "reader", id: "GL895", gl: "GL895", label: "GL895 — PPRoM guideline", sublabel: "Full guideline text" },
+        { type: "reader", id: "GL861", gl: "GL861", label: "GL861 — IOL & Term PLRoM guideline", sublabel: "Full guideline text" },
+      ],
+    },
+  },
+
   // ── PPH (GTG52) ─────────────────────────────────────────────────────
   GTG52_PPH: {
     "normal": {

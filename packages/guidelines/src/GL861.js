@@ -187,6 +187,7 @@ export const GL861_SECTIONS = [
   },
   {
     id: "gl861-prom-assessment", gl: "GL861", condition: "Term PLRoM", setting: "Assessment",
+    flowchartId: "GL895_ROM_TRIAGE",
     title: "Term PLRoM — Assessment & Expectant Management",
     tags: ["prom","plrom","term prom","rupture of membranes","srom","prelabour","waters breaking","amniotic fluid","amnisure","amni-sure","speculum","cord prolapse","limb prolapse","meows","ctg","fetal movements","expectant management","48 hours","meconium","gbs","pyrexia","37 weeks","delivery","term"],
     content: [
