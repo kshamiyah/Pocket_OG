@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef } from "react";
 import SeeAlso from "./SeeAlso";
+import ShareButton from "./ShareButton";
 import { CALCULATOR_CONNECTIONS } from "../data/connections";
 import AlphabetSidebar from "./AlphabetSidebar";
 import { sourceColors, sourceFromLabel } from "../data/glColors";
@@ -178,7 +179,7 @@ function StepHeader({ title, subtitle, onBack, pdfs }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
       </button>
-      <div>
+      <div className="flex-1 min-w-0">
         <p className="text-xs text-gray-400 font-medium">{title}</p>
         {subtitle && <p className="text-[10px] text-gray-300 font-medium mt-0.5">{subtitle}</p>}
         {pdfs?.length > 0 && (
@@ -200,6 +201,12 @@ function StepHeader({ title, subtitle, onBack, pdfs }) {
           </div>
         )}
       </div>
+      <ShareButton
+        title={title}
+        text={`${title}${subtitle ? ` (${subtitle})` : ""} — calculator via Pocket O&G`}
+        label="Share calculator"
+        dark
+      />
     </div>
   );
 }

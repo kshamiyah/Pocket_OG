@@ -4,6 +4,7 @@ import RichText from "./RichText";
 import CTGFeaturePicker from "./CTGFeaturePicker";
 import { FLOWCHART_NODE_CONNECTIONS } from "../data/connections";
 import { glColors } from "../data/glColors";
+import ShareButton from "./ShareButton";
 
 const NODE_STYLES = {
   action:  { badge: "bg-blue-100 text-blue-700",   icon: "→", bar: "bg-blue-500" },
@@ -90,6 +91,13 @@ export default function FlowchartPlayer({ flowchart, gl, theme, onClose, pdfUrl,
             PDF
           </a>
         )}
+        <ShareButton
+          title={flowchart.title}
+          text={`${flowchart.title}${flowchart.subtitle ? ` (${flowchart.subtitle})` : ""} — flowchart via Pocket O&G`}
+          url={pdfUrl}
+          label="Share flowchart"
+          dark
+        />
         <button
           onClick={onClose}
           aria-label="Close flowchart"

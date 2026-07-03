@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef } from "react";
 import AlphabetSidebar from "./AlphabetSidebar";
+import ShareButton from "./ShareButton";
 import { sourceColors, sourceFromLabel } from "../data/glColors";
 import {
   CONSENT_PROCEDURES,
@@ -821,6 +822,12 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
                   ))}
                 </div>
               </div>
+              <ShareButton
+                title={proc?.title ?? "Consent"}
+                text={`${proc?.title ?? "Consent"}${contextLabel ? ` — ${contextLabel}` : ""} consent information${source ? ` (${source})` : ""} — via Pocket O&G`}
+                label="Share consent"
+                dark
+              />
             </div>
 
             {/* Active factors chips */}

@@ -23,6 +23,7 @@ import { glColors } from "../data/glColors";
 import ContentBlock from "./ContentBlock";
 import SeeAlso from "./SeeAlso";
 import BottomSheet from "./BottomSheet";
+import ShareButton from "./ShareButton";
 
 const SECTIONS_MAP = {
   GL861: GL861_SECTIONS,
@@ -93,22 +94,10 @@ export default function GuidelineReader({ gl, onClose, onNavigate, scrollToSecti
   const scrollRef = useRef(null);
   const sectionRefs = useRef({});
   const [showContents, setShowContents] = useState(false);
-  const [copied, setCopied] = useState(false);
 
-  const shareGuideline = async () => {
-    const title = `${gl} — ${guideline?.label ?? "Pocket O&G"}`.trim();
-    const url = guideline?.pdfUrl || guideline?.pdfPath || (typeof window !== "undefined" ? window.location.href : "");
-    const text = `${title}${guideline?.source ? ` (${guideline.source})` : ""} — via Pocket O&G`;
-    try {
-      if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({ title, text, url });
-      } else if (typeof navigator !== "undefined" && navigator.clipboard) {
-        await navigator.clipboard.writeText(url ? `${text}\n${url}` : text);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1800);
-      }
-    } catch { /* user dismissed the share sheet — ignore */ }
-  };
+  const shareTitle = `${gl} — ${guideline?.label ?? "Pocket O&G"}`.trim();
+  const shareUrl = guideline?.pdfUrl || guideline?.pdfPath || (typeof window !== "undefined" ? window.location.href : "");
+  const shareText = `${shareTitle}${guideline?.source ? ` (${guideline.source})` : ""} — via Pocket O&G`;
 
   const keywordLinks = GUIDELINE_KEYWORD_LINKS[gl] ?? [];
   const blockLinksMap = useMemo(() => {
@@ -135,13 +124,6 @@ export default function GuidelineReader({ gl, onClose, onNavigate, scrollToSecti
   return (
     <div className="fixed inset-0 z-40 bg-white flex flex-col">
 
-      {/* Copied-to-clipboard toast (share fallback) */}
-      {copied && (
-        <div className="absolute top-14 left-1/2 -translate-x-1/2 z-50 px-3 py-1.5 rounded-full bg-gray-900 text-white text-xs font-medium shadow-lg">
-          Link copied
-        </div>
-      )}
-
       {/* Main header */}
       <div className="shrink-0 bg-white border-b border-gray-100">
         <div className="max-w-lg mx-auto px-4 pt-12 pb-4 flex items-center gap-3">
@@ -158,15 +140,7 @@ export default function GuidelineReader({ gl, onClose, onNavigate, scrollToSecti
             <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${theme.badge}`}>{gl}</span>
             <p className="text-sm font-bold text-gray-900 mt-0.5 leading-snug">{guideline?.label}</p>
           </div>
-          <button
-            onClick={shareGuideline}
-            aria-label="Share this guideline"
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors shrink-0"
-          >
-            <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.368-2.684 3 3 0 00-5.368 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-            </svg>
-          </button>
+          <ShareButton title={shareTitle} text={shareText} url={shareUrl} label="Share this guideline" />
           <button
             onClick={() => setShowContents(true)}
             aria-label="Show table of contents"
