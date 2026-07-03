@@ -1,0 +1,201 @@
+// Joint BASHH/RCOG guideline for the management of herpes simplex virus (HSV)
+// in pregnancy and the neonate (2024 update).
+// Source: Clarke et al. Int J STD AIDS 2024. doi:10.1177/09564624241280734
+// https://www.bashh.org/resources/24/updated_guideline_herpes_in_pregnancy_2024/
+//
+// All doses and gestational timings are taken verbatim from the 2024 guideline.
+
+export const BASHH_HSV_SECTIONS = [
+  {
+    id: "bashh-hsv-overview",
+    gl: "BASHH_HSV",
+    condition: "Genital Herpes in Pregnancy",
+    setting: "Overview & Diagnosis",
+    title: "Genital Herpes in Pregnancy — Overview & Diagnosis",
+    tags: ["genital herpes", "HSV", "herpes simplex virus", "HSV-1", "HSV-2", "pregnancy", "neonatal herpes", "primary", "non-primary", "recurrent", "PCR", "type-specific serology", "GUM", "vertical transmission", "cold sore"],
+    flowchartId: "BASHH_HSV_PREGNANCY",
+    content: [
+      { type: "subheading", value: "Why it matters" },
+      { type: "text", value: "Neonatal herpes is rare but serious, with a mortality of around 24% (higher in preterm infants). Risk of vertical transmission is highest when the pregnant person acquires a FIRST episode of genital herpes in the third trimester — up to 41% if shedding at delivery — because there is insufficient time to transfer protective maternal antibody. Recurrent genital herpes carries a very low risk (0–3%)." },
+      { type: "subheading", value: "Classify the episode — this drives everything" },
+      { type: "list", items: [
+        "First (initial) episode — primary (no pre-existing HSV antibody) or non-primary (new type in someone with prior other-type antibody). Highest risk near term.",
+        "Recurrent episode — reactivation of a previously acquired type. Low neonatal risk.",
+        "A clinically 'first' episode may actually be a recurrence, and a clinically 'recurrent' episode may be an acquisition of the other type — type-specific serology helps clarify.",
+      ]},
+      { type: "subheading", value: "Diagnosis" },
+      { type: "list", items: [
+        "Refer to a genitourinary medicine (GUM) physician to confirm the diagnosis and arrange a full STI screen",
+        "PCR from ulcers — type-specific HSV, varicella zoster virus (VZV) and Treponema pallidum (syphilis); consider enterovirus, and MPOX / LGV depending on risk",
+        "HSV type-specific serology — especially in the third trimester, to distinguish a genuine first episode from a recurrence",
+        "Full STI screen: chlamydia, gonorrhoea, syphilis, HIV, and hepatitis B/C depending on risk",
+        "Take a careful history for previous herpetic symptoms (per NICE guidance)",
+      ]},
+      { type: "alert", value: "Do not delay treatment while awaiting test results. Inform the neonatal team early and document a delivery and postnatal management plan with GUM, obstetrics and neonatology (MDT)." },
+    ],
+  },
+  {
+    id: "bashh-hsv-antivirals",
+    gl: "BASHH_HSV",
+    condition: "Genital Herpes in Pregnancy",
+    setting: "Antiviral Regimens",
+    title: "Genital Herpes in Pregnancy — Antiviral Regimens",
+    tags: ["aciclovir", "valaciclovir", "famciclovir", "suppression", "suppressive therapy", "32 weeks", "22 weeks", "treatment dose", "disseminated HSV", "intravenous aciclovir", "intrapartum", "dose", "preterm risk"],
+    content: [
+      { type: "subheading", value: "Episode treatment (first episode or recurrence needing treatment)" },
+      { type: "table", headers: ["Scenario", "Regimen"], rows: [
+        ["Standard episode treatment", "Aciclovir 400 mg three times daily OR valaciclovir 500 mg twice daily, usually 5 days"],
+        ["Disseminated HSV", "IV aciclovir 10 mg/kg three times daily (ideal body weight)"],
+        ["Famciclovir", "Not recommended in pregnancy — lack of safety data"],
+      ]},
+      { type: "text", value: "Most recurrences are short-lived (resolve within 7–10 days) and may need only supportive treatment (saline bathing, topical lidocaine 2% gel/5% ointment, paracetamol)." },
+      { type: "subheading", value: "Suppressive therapy" },
+      { type: "table", headers: ["Group", "Regimen"], rows: [
+        ["All (first episode or known genital herpes)", "Aciclovir 400 mg three times daily OR valaciclovir 500 mg twice daily from 32 weeks"],
+        ["High risk of premature delivery", "Aciclovir 400 mg twice daily OR valaciclovir 500 mg once daily from 22 weeks, stepping up to the standard dose from 32 weeks"],
+        ["Third-trimester acquisition", "May simply continue the treatment dose until delivery"],
+      ]},
+      { type: "text", value: "Suppression is recommended for ALL people with known genital herpes, regardless of whether recurrences occur during pregnancy. It reduces asymptomatic shedding and lesions at term and may reduce premature delivery." },
+      { type: "subheading", value: "Intrapartum / peripartum" },
+      { type: "list", items: [
+        "Active lesions at delivery and vaginal birth chosen (or caesarean after membrane rupture): IV aciclovir 5 mg/kg every 8 hours to the mother/birthing parent",
+        "Neonate: IV aciclovir 20 mg/kg every 8 hours",
+      ]},
+      { type: "alert", value: "Aciclovir and valaciclovir are not licensed in pregnancy but are considered safe and are not associated with increased birth defects. Famciclovir should be avoided." },
+    ],
+  },
+  {
+    id: "bashh-hsv-first-episode",
+    gl: "BASHH_HSV",
+    condition: "Genital Herpes in Pregnancy",
+    setting: "First Episode by Trimester",
+    title: "Genital Herpes — First Episode by Trimester",
+    tags: ["first episode", "primary", "non-primary", "first trimester", "second trimester", "third trimester", "27+6", "28 weeks", "6 weeks", "caesarean", "vaginal delivery", "41%", "serology"],
+    content: [
+      { type: "subheading", value: "First or second trimester (until 27+6 weeks)" },
+      { type: "list", items: [
+        "Treat the primary episode with standard-dose aciclovir/valaciclovir",
+        "Perform HSV type-specific serology if not known to carry both HSV-1 and HSV-2",
+        "Recommend suppressive antivirals from 32 weeks (or from 22 weeks if high risk of premature delivery)",
+        "Vaginal delivery should be anticipated in the absence of other obstetric indications",
+        "Discuss avoiding sex (including condoms/oral sex) in the third trimester to remove uncertainty about later lesions",
+      ]},
+      { type: "alert", value: "Exception: second-trimester acquisition where delivery ensues within 6 weeks of acquisition should be managed like a third-trimester first episode — recommend caesarean section, as shedding may continue for up to 6 weeks." },
+      { type: "subheading", value: "Third trimester (from 28 weeks)" },
+      { type: "list", items: [
+        "Treat the primary episode with standard-dose aciclovir/valaciclovir — it may be convenient to continue the treatment dose until delivery",
+        "Perform HSV serology (helps distinguish a true first episode from a recurrence)",
+        "Caesarean section is the recommended mode of delivery for all developing a first primary/non-primary episode in the third trimester — particularly within 6 weeks of expected delivery",
+        "Risk of neonatal transmission is very high (41%) when primary HSV is acquired in the third trimester and shedding at delivery",
+        "The baby should be managed as a highest-risk neonatal case",
+      ]},
+    ],
+  },
+  {
+    id: "bashh-hsv-recurrent",
+    gl: "BASHH_HSV",
+    condition: "Genital Herpes in Pregnancy",
+    setting: "Recurrent Genital Herpes",
+    title: "Genital Herpes — Recurrent & Known Before Pregnancy",
+    tags: ["recurrent", "known genital herpes", "suppression", "32 weeks", "vaginal delivery", "low risk", "0-3%", "aciclovir 400", "valaciclovir 500", "birth plan"],
+    content: [
+      { type: "subheading", value: "Antenatal management" },
+      { type: "list", items: [
+        "Refer to GUM; ensure the neonatal team is informed and a delivery/postnatal plan documented",
+        "Treat symptomatic recurrences only if needed (often supportive care suffices)",
+        "Recommend suppressive antivirals for ALL known genital herpes — aciclovir 400 mg three times daily or valaciclovir 500 mg twice daily from 32 weeks (from 22 weeks if high risk of premature delivery)",
+        "If suppression is needed before 32 weeks for symptom control: aciclovir 400 mg twice daily or valaciclovir 500 mg once daily, then step up from 32 weeks",
+      ]},
+      { type: "subheading", value: "Mode of delivery" },
+      { type: "list", items: [
+        "Risk to the baby from recurrent lesions at delivery is low (0–3% for vaginal delivery)",
+        "Vaginal delivery should be offered where there is confidence the lesions are recurrent rather than a first episode",
+        "Caesarean section for the purpose of reducing HSV transmission should NOT be recommended — the risk is very low",
+        "The final choice rests with the pregnant woman or person, weighing the very low transmission risk against caesarean risks (per NICE intrapartum guidance)",
+      ]},
+      { type: "alert", value: "Where someone with only one known HSV type has remained sexually active in the third trimester, risk-assess whether a lesion could be a primary episode of the other type — serology may help." },
+    ],
+  },
+  {
+    id: "bashh-hsv-delivery",
+    gl: "BASHH_HSV",
+    condition: "Genital Herpes in Pregnancy",
+    setting: "Lesions at Onset of Labour",
+    title: "Genital Herpes — Lesions at Onset of Labour",
+    tags: ["labour", "onset of labour", "mode of delivery", "caesarean", "vaginal delivery", "4 hours", "membrane rupture", "intravenous aciclovir", "5 mg/kg", "primary lesions", "recurrent lesions"],
+    content: [
+      { type: "subheading", value: "Primary / non-primary lesions at delivery" },
+      { type: "list", items: [
+        "Recommend caesarean section to reduce fetal exposure to HSV in genital secretions",
+        "Benefit of caesarean reduces once membranes have been ruptured >4 hours — but still expedite caesarean to deliver within 4 hours where possible",
+        "If caesarean is declined and vaginal birth proceeds: IV aciclovir 5 mg/kg every 8 hours to the mother/parent, and IV aciclovir 20 mg/kg every 8 hours to the neonate",
+        "First episode or disseminated HSV up to 4 weeks after birth → manage the baby as highest-risk neonatal case",
+      ]},
+      { type: "subheading", value: "Recurrent lesions at delivery" },
+      { type: "list", items: [
+        "Where infection was acquired before the third trimester (or >6 weeks before delivery), neonatal risk is low (0–3%)",
+        "Offer vaginal delivery — a conservative approach has not increased neonatal HSV cases",
+        "Caesarean section should not be recommended solely to reduce HSV transmission",
+        "At term SROM there is no evidence to guide management, but many clinicians expedite delivery to limit fetal exposure",
+      ]},
+    ],
+  },
+  {
+    id: "bashh-hsv-pprom",
+    gl: "BASHH_HSV",
+    condition: "Genital Herpes in Pregnancy",
+    setting: "PPROM & Preterm",
+    title: "Genital Herpes — PPROM / Preterm (<37 weeks)",
+    tags: ["PPROM", "preterm", "prelabour rupture of membranes", "34 weeks", "6 weeks", "corticosteroids", "intravenous aciclovir", "expectant management", "MDT", "highest risk neonate", "GL895"],
+    content: [
+      { type: "alert", value: "The premature neonate is at high risk of neonatal HSV in either scenario — manage as a highest-risk neonatal case. Management is MDT (obstetrics, neonatology, GUM) and depends on the gestation at which PPROM occurred; document a delivery and postnatal plan." },
+      { type: "subheading", value: "Primary / non-primary HSV with PPROM" },
+      { type: "list", items: [
+        "Limited evidence — decide immediate delivery vs conservative management by MDT",
+        "If immediate delivery: the anticipated benefit of caesarean section in reducing neonatal herpes remains",
+        "If conservative management: give IV aciclovir 5 mg/kg every 8 hours until delivery",
+        "Consider antenatal corticosteroids per NICE to reduce preterm morbidity",
+        "If delivery is indicated within 6 weeks of the primary infection, caesarean may still offer some benefit despite prolonged membrane rupture",
+      ]},
+      { type: "subheading", value: "Recurrent HSV with PPROM" },
+      { type: "list", items: [
+        "Start suppressive antivirals — aciclovir 400 mg three times daily or valaciclovir 500 mg twice daily — continued until delivery",
+        "PPROM before 34 weeks: expectant management is appropriate",
+        "At or after 34 weeks: manage in line with the RCOG/local PPROM guideline",
+        "Consider antenatal corticosteroids; outcomes are not materially influenced by the presence of recurrent genital herpes lesions",
+      ]},
+    ],
+  },
+  {
+    id: "bashh-hsv-neonate",
+    gl: "BASHH_HSV",
+    condition: "Genital Herpes in Pregnancy",
+    setting: "Neonatal Management",
+    title: "Genital Herpes — Neonatal Management & Postnatal Prevention",
+    tags: ["neonatal herpes", "neonate", "paediatric infectious diseases", "SEM", "CNS", "disseminated", "red flags", "cold sore", "breastfeeding", "hand hygiene", "aciclovir 20 mg/kg", "postnatal"],
+    content: [
+      { type: "subheading", value: "Recognition & escalation" },
+      { type: "list", items: [
+        "Discuss all cases of possible neonatal HSV urgently with the regional Paediatric Infectious Diseases team",
+        "Any positive HSV test in an infant is managed as highest risk",
+        "Send superficial swabs (skin lesions, conjunctiva, mouth, anus), blood (EDTA) and — where appropriate — CSF for urgent HSV PCR",
+      ]},
+      { type: "subheading", value: "Red-flag symptoms in the first 6 weeks" },
+      { type: "list", items: [
+        "Skin, eye or mucous membrane (SEM) lesions/vesicles",
+        "Lethargy or irritability",
+        "Poor feeding",
+        "Fever; seizures; changes in consciousness",
+      ]},
+      { type: "text", value: "Parents must be told to inform any treating doctor that there was genital herpes in pregnancy, so a symptomatic baby is tested and treated for HSV unless another diagnosis is made." },
+      { type: "subheading", value: "Preventing postnatal transmission (first 4–6 weeks)" },
+      { type: "list", items: [
+        "Everyone washes hands before touching the baby",
+        "People with active cold sores must never kiss the baby; those with a history of cold sores should avoid kissing the baby",
+        "People with active herpes lesions at any site should avoid contact unless close family/carers practising good hand hygiene",
+        "Healthcare staff with active lesions, cold sores or herpetic whitlows working with neonates should agree a risk-reduction plan with Occupational Health",
+      ]},
+      { type: "alert", value: "Breastfeeding is encouraged unless there is a herpetic lesion on the breast. People on suppressive aciclovir/valaciclovir may continue while breastfeeding." },
+    ],
+  },
+];

@@ -128,6 +128,14 @@ export const SYNONYMS = {
   "beta hcg": ["bhcg","ectopic","monitoring"],
   "tubal": ["ectopic","tubal pregnancy","fallopian","mtx"],
   "shoulder tip pain": ["ectopic","haemorrhage","rupture","attend ed"],
+  // Genital herpes in pregnancy (BASHH/RCOG 2024)
+  "herpes": ["genital herpes","hsv","herpes simplex","aciclovir","valaciclovir","neonatal herpes","suppression","bashh hsv"],
+  "genital herpes": ["hsv","herpes simplex virus","aciclovir","valaciclovir","caesarean","suppression","neonatal herpes"],
+  "hsv": ["genital herpes","herpes simplex virus","aciclovir","valaciclovir","neonatal herpes"],
+  "cold sore": ["herpes","hsv","neonatal herpes","cold sores","postnatal transmission"],
+  "aciclovir": ["genital herpes","hsv","valaciclovir","suppression","antiviral"],
+  "valaciclovir": ["genital herpes","hsv","aciclovir","suppression","antiviral"],
+  "neonatal herpes": ["hsv","genital herpes","sem","paediatric infectious diseases","highest risk neonate"],
   // PPRoM
   "pprom": ["pprom","preterm","rupture of membranes","amoxicillin","azithromycin","liquor","amni-sure"],
   "leaking": ["srom","prom","pprom","rupture of membranes","liquor","amni-sure","waters broken"],

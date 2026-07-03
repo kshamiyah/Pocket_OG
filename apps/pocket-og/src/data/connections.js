@@ -35,6 +35,40 @@ export const CALCULATOR_CONNECTIONS = {
 // inlineLinks: { phrase, type, id, gl } — phrases in node.text that become tappable.
 export const FLOWCHART_NODE_CONNECTIONS = {
 
+  // ── Genital Herpes in Pregnancy (BASHH/RCOG 2024) ───────────────────
+  BASHH_HSV_PREGNANCY: {
+    "pprom-primary": {
+      whatsNext: [
+        { type: "flowchart", id: "GL895_ROM_TRIAGE", gl: "GL895", label: "Rupture of Membranes pathway", sublabel: "GL895 — PPROM triage & management" },
+        { type: "reader", id: "BASHH_HSV", gl: "BASHH_HSV", label: "Genital Herpes in Pregnancy — guideline", sublabel: "PPROM & neonatal sections" },
+      ],
+    },
+    "pprom-recurrent": {
+      inlineLinks: [
+        { phrase: "Rupture of Membranes pathway", type: "flowchart", id: "GL895_ROM_TRIAGE", gl: "GL895" },
+      ],
+      whatsNext: [
+        { type: "flowchart", id: "GL895_ROM_TRIAGE", gl: "GL895", label: "Rupture of Membranes pathway", sublabel: "GL895 — PPROM triage & management" },
+        { type: "reader", id: "BASHH_HSV", gl: "BASHH_HSV", label: "Genital Herpes in Pregnancy — guideline", sublabel: "PPROM & neonatal sections" },
+      ],
+    },
+    "cs": {
+      whatsNext: [
+        { type: "reader", id: "BASHH_HSV", gl: "BASHH_HSV", label: "Genital Herpes in Pregnancy — guideline", sublabel: "Neonatal management section" },
+      ],
+    },
+    "vaginal": {
+      whatsNext: [
+        { type: "reader", id: "BASHH_HSV", gl: "BASHH_HSV", label: "Genital Herpes in Pregnancy — guideline", sublabel: "Neonatal management section" },
+      ],
+    },
+    "no-lesions": {
+      whatsNext: [
+        { type: "reader", id: "BASHH_HSV", gl: "BASHH_HSV", label: "Genital Herpes in Pregnancy — guideline", sublabel: "Full guideline text" },
+      ],
+    },
+  },
+
   // ── Acute HMB in ED (NG88) ──────────────────────────────────────────
   NG88_ED_ACUTE: {
     "resus-escalate": {

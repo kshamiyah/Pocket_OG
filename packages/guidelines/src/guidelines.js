@@ -27,6 +27,7 @@ export const GUIDELINES = {
   NG133: { code: "NG133", label: "Hypertension in Pregnancy",             version: "NG133", date: "June 2019 (updated 2023)",     color: "cyan",   pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng133/resources/hypertension-in-pregnancy-diagnosis-and-management-pdf-66141782348997" },
   NG229: { code: "NG229", label: "Fetal Monitoring in Labour",            version: "NG229", date: "December 2022 (updated 2026)", color: "red",    pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng229/resources/fetal-monitoring-in-labour-pdf-66143844065221" },
   BASHH_PID: { code: "BASHH_PID", label: "Pelvic Inflammatory Disease", version: "2019", date: "2018 (updated 2019)", color: "fuchsia", pdf: true, source: "BASHH", pdfUrl: "https://www.bashh.org/resources/6/pid_2019/" },
+  BASHH_HSV: { code: "BASHH_HSV", label: "Genital Herpes in Pregnancy", version: "2024", date: "2024", color: "fuchsia", pdf: true, source: "BASHH", pdfUrl: "https://www.bashh.org/resources/24/updated_guideline_herpes_in_pregnancy_2024/" },
   NG73: { code: "NG73", label: "Endometriosis", version: "NG73", date: "September 2017 (updated 2024)", color: "purple", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng73/resources/endometriosis-diagnosis-and-management-pdf-1837632548293" },
   MBRRACE_SLMC2025: { code: "MBRRACE_SLMC2025", label: "MBRRACE 2025", version: "2021–23 data", date: "September 2025", color: "rose", pdf: true, source: "MBRRACE", pdfUrl: "https://www.npeu.ox.ac.uk/assets/downloads/mbrrace-uk/reports/maternal-report-2025/MBRRACE-UK%20Maternal%20Report%202025%20-%20Main%20v1.2.pdf" },
   GTG5: { code: "GTG5", label: "Ovarian Hyperstimulation Syndrome", version: "GTG5", date: "February 2026", color: "amber", pdf: true, source: "RCOG", pdfUrl: "https://obgyn.onlinelibrary.wiley.com/doi/10.1111/1471-0528.70195" },
@@ -61,6 +62,7 @@ export const GL_COLORS = {
   NG133: { badge: "bg-cyan-900/50 text-cyan-300 border-cyan-600/40",       dot: "bg-cyan-400" },
   NG229: { badge: "bg-red-900/50 text-red-300 border-red-600/40",           dot: "bg-red-400" },
   BASHH_PID: { badge: "bg-fuchsia-900/50 text-fuchsia-300 border-fuchsia-600/40", dot: "bg-fuchsia-400" },
+  BASHH_HSV: { badge: "bg-fuchsia-900/50 text-fuchsia-300 border-fuchsia-600/40", dot: "bg-fuchsia-400" },
   NG73: { badge: "bg-purple-900/50 text-purple-300 border-purple-600/40", dot: "bg-purple-400" },
   GTG5: { badge: "bg-amber-900/50 text-amber-300 border-amber-600/40", dot: "bg-amber-400" },
 };
