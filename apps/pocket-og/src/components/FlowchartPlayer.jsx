@@ -5,6 +5,7 @@ import CTGFeaturePicker from "./CTGFeaturePicker";
 import { FLOWCHART_NODE_CONNECTIONS } from "../data/connections";
 import { glColors } from "../data/glColors";
 import ShareButton from "./ShareButton";
+import { shareUrl as deepLinkUrl } from "../utils/deepLink";
 
 const NODE_STYLES = {
   action:  { badge: "bg-blue-100 text-blue-700",   icon: "→", bar: "bg-blue-500" },
@@ -94,7 +95,7 @@ export default function FlowchartPlayer({ flowchart, gl, theme, onClose, pdfUrl,
         <ShareButton
           title={flowchart.title}
           text={`${flowchart.title}${flowchart.subtitle ? ` (${flowchart.subtitle})` : ""} — flowchart via Pocket O&G`}
-          url={pdfUrl}
+          url={deepLinkUrl("flowchart", flowchart.id)}
           label="Share flowchart"
           dark
         />

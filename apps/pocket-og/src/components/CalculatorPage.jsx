@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from "react";
 import SeeAlso from "./SeeAlso";
 import ShareButton from "./ShareButton";
+import { shareUrl as deepLinkUrl } from "../utils/deepLink";
 import { CALCULATOR_CONNECTIONS } from "../data/connections";
 import AlphabetSidebar from "./AlphabetSidebar";
 import { sourceColors, sourceFromLabel } from "../data/glColors";
@@ -171,7 +172,7 @@ function ScenarioList({ onSelect, onOpenIOLPrioritizer }) {
 
 // ─── Shared chrome ────────────────────────────────────────────────────
 
-function StepHeader({ title, subtitle, onBack, pdfs }) {
+function StepHeader({ title, subtitle, onBack, pdfs, shareId }) {
   return (
     <div className="px-5 pt-14 pb-2 flex items-start gap-3">
       <button onClick={onBack} className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors shrink-0 mt-0.5">
@@ -204,6 +205,7 @@ function StepHeader({ title, subtitle, onBack, pdfs }) {
       <ShareButton
         title={title}
         text={`${title}${subtitle ? ` (${subtitle})` : ""} — calculator via Pocket O&G`}
+        url={shareId ? deepLinkUrl("calculator", shareId) : undefined}
         label="Share calculator"
         dark
       />
@@ -426,7 +428,7 @@ function PulCalculator({ onBack, pdfs, onNavigate }) {
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <StepHeader title="PUL — serial hCG" subtitle="NICE NG126 §1.4.27–1.4.32" onBack={onBack} pdfs={pdfs} />
+        <StepHeader title="PUL — serial hCG" subtitle="NICE NG126 §1.4.27–1.4.32" onBack={onBack} pdfs={pdfs} shareId="PUL" />
 
         <div className="px-5 pt-6">
           {!result && <ModeToggle mode={mode} onChange={changeMode} />}
@@ -587,7 +589,7 @@ function EctopicDecisionCalculator({ onBack, pdfs, onNavigate }) {
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <StepHeader title="Tubal ectopic — initial management" subtitle="NICE NG126 §1.6.3–1.6.10 · RCOG GTG21 §5.1" onBack={onBack} pdfs={pdfs} />
+        <StepHeader title="Tubal ectopic — initial management" subtitle="NICE NG126 §1.6.3–1.6.10 · RCOG GTG21 §5.1" onBack={onBack} pdfs={pdfs} shareId="ECTOPIC_DECISION" />
 
         <div className="px-5 pt-6">
           {!result && (
@@ -702,7 +704,7 @@ function ExpectantSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <StepHeader title="Expectant management surveillance" subtitle="NICE NG126 §1.6.5" onBack={onBack} pdfs={pdfs} />
+        <StepHeader title="Expectant management surveillance" subtitle="NICE NG126 §1.6.5" onBack={onBack} pdfs={pdfs} shareId="EXPECTANT_SURVEILLANCE" />
 
         <div className="px-5 pt-6">
           <ModeToggle mode={mode} onChange={changeMode} />
@@ -810,7 +812,7 @@ function MtxSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <StepHeader title="Post-methotrexate surveillance" subtitle="NICE NG126 §1.6.11 · RCOG GTG21 App II" onBack={onBack} pdfs={pdfs} />
+        <StepHeader title="Post-methotrexate surveillance" subtitle="NICE NG126 §1.6.11 · RCOG GTG21 App II" onBack={onBack} pdfs={pdfs} shareId="MTX_SURVEILLANCE" />
 
         <div className="px-5 pt-6">
           <ModeToggle mode={mode} onChange={changeMode} />
@@ -890,7 +892,7 @@ function VteRiskCalculator({ onBack, pdfs, onNavigate }) {
     return (
       <div className="min-h-screen pb-24">
         <div className="max-w-lg mx-auto">
-          <StepHeader title="VTE risk score" subtitle="RCOG GTG37a Appendix III" onBack={onBack} pdfs={pdfs} />
+          <StepHeader title="VTE risk score" subtitle="RCOG GTG37a Appendix III" onBack={onBack} pdfs={pdfs} shareId="VTE_RISK" />
           <div className="px-5 pt-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-1">When are you assessing?</h3>
             <p className="text-sm text-gray-400 mb-6">GTG37a uses different thresholds for antenatal and postnatal assessment.</p>
@@ -1156,7 +1158,7 @@ function PuqeCalculator({ onBack, pdfs }) {
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
-      <StepHeader title="PUQE Score" subtitle="GTG69 · Nausea & Vomiting of Pregnancy" onBack={onBack} pdfs={pdfs} />
+      <StepHeader title="PUQE Score" subtitle="GTG69 · Nausea & Vomiting of Pregnancy" onBack={onBack} pdfs={pdfs} shareId="PUQE" />
       <div className="flex-1 overflow-y-auto pb-10">
         <div className="px-4 space-y-6 pt-4">
 

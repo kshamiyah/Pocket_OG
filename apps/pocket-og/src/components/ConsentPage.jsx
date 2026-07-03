@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from "react";
 import AlphabetSidebar from "./AlphabetSidebar";
 import ShareButton from "./ShareButton";
+import { shareUrl as deepLinkUrl } from "../utils/deepLink";
 import { sourceColors, sourceFromLabel } from "../data/glColors";
 import {
   CONSENT_PROCEDURES,
@@ -825,6 +826,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
               <ShareButton
                 title={proc?.title ?? "Consent"}
                 text={`${proc?.title ?? "Consent"}${contextLabel ? ` — ${contextLabel}` : ""} consent information${source ? ` (${source})` : ""} — via Pocket O&G`}
+                url={deepLinkUrl("consent", proc?.id)}
                 label="Share consent"
                 dark
               />

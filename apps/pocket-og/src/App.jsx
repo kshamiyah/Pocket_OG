@@ -22,6 +22,7 @@ import { LATEST_VERSION, hasUnseenUpdates, markUpdatesSeen } from "./data/update
 import { TOG_SECTIONS } from "./data/tog";
 
 import { READER_AVAILABLE } from "./data/readerAvailable";
+import { readDeepLink, clearDeepLinkParam } from "./utils/deepLink";
 
 const FILTER_OPTIONS = [
   { value: "ALL",        label: "All guidelines",      pill: "All",           filterFn: null,                                                    active: "bg-gray-900 text-white" },
@@ -198,6 +199,15 @@ export default function App() {
       setActiveGuidelineGl(id);
     }
   };
+
+  // Open shared deep links (?g= / ?fc= / ?calc= / ?consent=) on first load.
+  useEffect(() => {
+    const link = readDeepLink();
+    if (!link) return;
+    clearDeepLinkParam();
+    const t = setTimeout(() => handleNavigate(link), 0);
+    return () => clearTimeout(t);
+  }, []);
   const hasQuery = query.trim().length > 0;
 
   const filteredGuidelines = useMemo(() => {

@@ -24,6 +24,7 @@ import ContentBlock from "./ContentBlock";
 import SeeAlso from "./SeeAlso";
 import BottomSheet from "./BottomSheet";
 import ShareButton from "./ShareButton";
+import { shareUrl as deepLinkUrl } from "../utils/deepLink";
 
 const SECTIONS_MAP = {
   GL861: GL861_SECTIONS,
@@ -96,7 +97,7 @@ export default function GuidelineReader({ gl, onClose, onNavigate, scrollToSecti
   const [showContents, setShowContents] = useState(false);
 
   const shareTitle = `${gl} — ${guideline?.label ?? "Pocket O&G"}`.trim();
-  const shareUrl = guideline?.pdfUrl || guideline?.pdfPath || (typeof window !== "undefined" ? window.location.href : "");
+  const shareLink = deepLinkUrl("reader", gl);
   const shareText = `${shareTitle}${guideline?.source ? ` (${guideline.source})` : ""} — via Pocket O&G`;
 
   const keywordLinks = GUIDELINE_KEYWORD_LINKS[gl] ?? [];
@@ -140,7 +141,7 @@ export default function GuidelineReader({ gl, onClose, onNavigate, scrollToSecti
             <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${theme.badge}`}>{gl}</span>
             <p className="text-sm font-bold text-gray-900 mt-0.5 leading-snug">{guideline?.label}</p>
           </div>
-          <ShareButton title={shareTitle} text={shareText} url={shareUrl} label="Share this guideline" />
+          <ShareButton title={shareTitle} text={shareText} url={shareLink} label="Share this guideline" />
           <button
             onClick={() => setShowContents(true)}
             aria-label="Show table of contents"
