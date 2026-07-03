@@ -20,6 +20,7 @@ import {
 import { QUICKREF_SECTIONS } from "../data/quickref";
 import { APPROACH_SECTIONS } from "../data/approaches";
 import { TOG_SECTIONS } from "../data/tog";
+import { EXTRA_SEARCH_SECTIONS } from "./extraIndex";
 
 function escapeRe(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -125,6 +126,7 @@ const _WIKI = [
   ...QUICKREF_SECTIONS,
   ...APPROACH_SECTIONS,
   ...TOG_SECTIONS,
+  ...EXTRA_SEARCH_SECTIONS,
 ];
 
 export const SEARCH_INDEX = _WIKI.map(page => {

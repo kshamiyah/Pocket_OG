@@ -212,8 +212,10 @@ const CATEGORIES = [
   "Antihypertensive", "Antiviral", "Contraception", "Endometriosis", "Tocolytic", "Uterotonic",
 ];
 
-export default function RxPage() {
-  const [selectedDrug, setSelectedDrug] = useState(null);
+export default function RxPage({ initialDrugId = null }) {
+  const [selectedDrug, setSelectedDrug] = useState(
+    initialDrugId ? ALL_DRUGS.find(d => d.id === initialDrugId) ?? null : null
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState(null);
   const sectionRefs = useRef({});

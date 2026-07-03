@@ -25,7 +25,7 @@ import {
 
 // ─── Step 0: scenario picker ──────────────────────────────────────────
 
-function ScenarioList({ onSelect }) {
+function ScenarioList({ onSelect, onOpenIOLPrioritizer }) {
   const [searchQuery, setSearchQuery] = useState("");
   const sectionRefs = useRef({});
 
@@ -83,6 +83,22 @@ function ScenarioList({ onSelect }) {
         </div>
 
         <div className="px-5 pt-3">
+          {onOpenIOLPrioritizer && (
+            <button
+              onClick={onOpenIOLPrioritizer}
+              className="flex items-start gap-3 w-full px-4 py-4 mb-3 rounded-2xl bg-white border border-gray-100 shadow-sm hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
+            >
+              <div className={`w-1 h-12 rounded-full shrink-0 ${sourceColors("RBH").accent}`} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-900 leading-snug">IOL Priority List</p>
+                <p className="text-xs text-gray-400 mt-0.5">Rank and queue patients for induction of labour</p>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mt-1.5">GL861 · Tool</p>
+              </div>
+              <svg className="w-4 h-4 text-gray-300 shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          )}
           {filtered.length === 0 ? (
             <p className="text-sm text-gray-400 text-center py-10">No calculators match &ldquo;{searchQuery}&rdquo;</p>
           ) : (
@@ -1193,10 +1209,10 @@ function PuqeCalculator({ onBack, pdfs }) {
 
 // ─── Entry point ──────────────────────────────────────────────────────
 
-export default function CalculatorPage({ initialScenario, onNavigate }) {
+export default function CalculatorPage({ initialScenario, onNavigate, onOpenIOLPrioritizer }) {
   const [scenarioId, setScenarioId] = useState(initialScenario ?? null);
 
-  if (!scenarioId) return <ScenarioList onSelect={setScenarioId} />;
+  if (!scenarioId) return <ScenarioList onSelect={setScenarioId} onOpenIOLPrioritizer={onOpenIOLPrioritizer} />;
 
   const back = () => setScenarioId(null);
   const pdfs = CALCULATOR_SCENARIOS.find(s => s.id === scenarioId)?.pdfs ?? [];
@@ -1208,5 +1224,5 @@ export default function CalculatorPage({ initialScenario, onNavigate }) {
   if (scenarioId === "VTE_RISK") return <VteRiskCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
   if (scenarioId === "PUQE") return <PuqeCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
 
-  return <ScenarioList onSelect={setScenarioId} />;
+  return <ScenarioList onSelect={setScenarioId} onOpenIOLPrioritizer={onOpenIOLPrioritizer} />;
 }

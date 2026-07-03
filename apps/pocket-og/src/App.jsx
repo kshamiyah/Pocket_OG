@@ -159,6 +159,8 @@ export default function App() {
   const [calcNavKey, setCalcNavKey] = useState(0);
   const [activeConsentProcedure, setActiveConsentProcedure] = useState(null);
   const [consentNavKey, setConsentNavKey] = useState(0);
+  const [activeRxDrug, setActiveRxDrug] = useState(null);
+  const [rxNavKey, setRxNavKey] = useState(0);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [updatesOpen, setUpdatesOpen] = useState(false);
   const [updatesUnseen, setUpdatesUnseen] = useState(() => hasUnseenUpdates());
@@ -181,6 +183,11 @@ export default function App() {
       setActiveConsentProcedure(id);
       setConsentNavKey(k => k + 1);
       setActiveTab("consent");
+    } else if (type === "drug") {
+      setActiveFlowchartId(null);
+      setActiveRxDrug(id);
+      setRxNavKey(k => k + 1);
+      setActiveTab("rx");
     } else if (type === "iol-prioritizer") {
       setShowIOLPrioritizer(true);
     } else if (type === "reader") {
@@ -506,12 +513,12 @@ export default function App() {
             )}
 
             {showNoResults
-              ? <NoResults query={query} fallbacks={fallback} expanded={expanded} onToggle={toggle} onOpenFlowchart={setActiveFlowchartId} onOpenGuideline={openGuidelineFromSearch} />
+              ? <NoResults query={query} fallbacks={fallback} expanded={expanded} onToggle={toggle} onOpenFlowchart={setActiveFlowchartId} onOpenGuideline={openGuidelineFromSearch} onNavigate={handleNavigate} />
               : (
                 <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
                   {primary.map((page, i) => (
                     <div key={page.id} className={i > 0 ? "border-t border-gray-50" : ""}>
-                      <WikiCard page={page} query={query} grouped isExpanded={!!expanded[page.id]} onToggle={() => toggle(page.id)} onOpenFlowchart={setActiveFlowchartId} onOpenGuideline={openGuidelineFromSearch} />
+                      <WikiCard page={page} query={query} grouped isExpanded={!!expanded[page.id]} onToggle={() => toggle(page.id)} onOpenFlowchart={setActiveFlowchartId} onOpenGuideline={openGuidelineFromSearch} onNavigate={handleNavigate} />
                     </div>
                   ))}
                 </div>
@@ -632,18 +639,6 @@ export default function App() {
                               </button>
                             );
                           })}
-                          {group.gl === "GL861" && (
-                            <button
-                              onClick={() => setShowIOLPrioritizer(true)}
-                              className="flex items-center gap-3 w-full px-4 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left border-t border-gray-50"
-                            >
-                              <div className={`w-1 h-8 rounded-full shrink-0 ${col.accent}`} />
-                              <p className="flex-1 text-sm font-medium text-gray-900">IOL Priority List</p>
-                              <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                              </svg>
-                            </button>
-                          )}
                         </div>
                       </div>
                     );
@@ -678,11 +673,12 @@ export default function App() {
           key={calcNavKey}
           initialScenario={activeCalcScenario}
           onNavigate={handleNavigate}
+          onOpenIOLPrioritizer={() => setShowIOLPrioritizer(true)}
         />
       )}
 
       {/* Rx tab */}
-      {activeTab === "rx" && <RxPage />}
+      {activeTab === "rx" && <RxPage key={rxNavKey} initialDrugId={activeRxDrug} />}
 
       {/* Guidelines tab */}
       {activeTab === "guidelines" && (

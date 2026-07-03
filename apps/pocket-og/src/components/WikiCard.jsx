@@ -4,7 +4,13 @@ import { highlightText } from "../utils/highlight";
 import { glColors, sourceColors } from "../data/glColors";
 import { READER_AVAILABLE } from "../data/readerAvailable";
 
-export default function WikiCard({ page, isExpanded, onToggle, isFallback, query = "", onOpenFlowchart, onOpenGuideline, grouped = false }) {
+const KIND_CTA = {
+  calculator: { label: "Open calculator", sub: "Decision-support tool" },
+  drug: { label: "Open in Rx", sub: "Doses & prescribing" },
+  consent: { label: "Open consent", sub: "Risks & patient information" },
+};
+
+export default function WikiCard({ page, isExpanded, onToggle, isFallback, query = "", onOpenFlowchart, onOpenGuideline, onNavigate, grouped = false }) {
   const gl = GUIDELINES[page.gl];
   const highlightTerms = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
   // Cards may carry an explicit `source` (e.g. TOG review cards, which aren't in
@@ -93,6 +99,24 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
             )}
 
             <div className="mt-4 space-y-2">
+              {page.kind && onNavigate && KIND_CTA[page.kind] && (
+                <button
+                  type="button"
+                  onClick={() => onNavigate({ type: page.kind, id: page.navId })}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-gray-50 border border-gray-100 hover:bg-gray-100 active:bg-gray-200 transition-colors group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <svg className="w-4 h-4 text-gray-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                    <div className="text-left">
+                      <p className="text-sm font-semibold text-gray-900">{KIND_CTA[page.kind].label}</p>
+                      <p className="text-xs text-gray-500">{KIND_CTA[page.kind].sub}</p>
+                    </div>
+                  </div>
+                  <span className="text-gray-400 group-hover:text-gray-600 transition-colors">→</span>
+                </button>
+              )}
               {page.tog?.url && (
                 <a
                   href={page.tog.url}
