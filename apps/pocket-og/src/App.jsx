@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from "react";
-import { SEARCH_INDEX, search } from "./search/engine";
+import { SEARCH_INDEX } from "./search/engine";
+import { searchV2 as search } from "./search/rankV2";
 import { FLOWCHARTS } from "./data/flowcharts";
 import { GUIDELINES } from "@pocket-og/guidelines";
 import { glColors, sourceColors } from "./data/glColors";
