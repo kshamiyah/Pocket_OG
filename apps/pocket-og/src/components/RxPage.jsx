@@ -3,6 +3,7 @@ import { ANTIHYPERTENSIVES } from "../data/rx/antihypertensives";
 import { UTEROTONICS } from "../data/rx/uterotonics";
 import { ANTIEMETICS } from "../data/rx/antiemetics";
 import { ANTIBIOTICS } from "../data/rx/antibiotics";
+import { ANTIVIRALS } from "../data/rx/antivirals";
 import { TOCOLYTICS } from "../data/rx/tocolytics";
 import { ANTICOAGULANTS } from "../data/rx/anticoagulants";
 import { ANALGESIA } from "../data/rx/analgesia";
@@ -15,6 +16,7 @@ const ALL_DRUGS = [
   ...UTEROTONICS.map(d =>          ({ ...d, category: "Uterotonic" })),
   ...ANTIEMETICS.map(d =>          ({ ...d, category: "Antiemetic" })),
   ...ANTIBIOTICS.map(d =>          ({ ...d, category: "Antibiotic" })),
+  ...ANTIVIRALS.map(d =>           ({ ...d, category: "Antiviral" })),
   ...TOCOLYTICS.map(d =>           ({ ...d, category: "Tocolytic" })),
   ...ANTICOAGULANTS.map(d =>       ({ ...d, category: "Anticoagulant" })),
   ...ANALGESIA.map(d =>            ({ ...d, category: "Analgesia" })),
@@ -29,6 +31,7 @@ const CATEGORY_ACCENT = {
   "Uterotonic":       "bg-rose-500",
   "Antiemetic":       "bg-emerald-500",
   "Antibiotic":       "bg-lime-500",
+  "Antiviral":        "bg-cyan-500",
   "Tocolytic":        "bg-sky-500",
   "Anticoagulant":    "bg-fuchsia-500",
   "Analgesia":        "bg-yellow-400",
@@ -41,6 +44,7 @@ const CATEGORY_COLOR = {
   "Uterotonic":       "text-rose-400",
   "Antiemetic":       "text-emerald-500",
   "Antibiotic":       "text-lime-600",
+  "Antiviral":        "text-cyan-600",
   "Tocolytic":        "text-sky-500",
   "Anticoagulant":    "text-fuchsia-500",
   "Analgesia":        "text-yellow-600",
@@ -48,10 +52,11 @@ const CATEGORY_COLOR = {
   "Contraception":    "text-pink-500",
 };
 
-const ROUTE_LABEL = { oral: "Oral", iv: "IV", im: "IM", sc: "SC", sl: "SL", vag: "Vaginal", rectal: "Rectal", patch: "Patch", implant: "Implant", iud: "IUD/IUS" };
+const ROUTE_LABEL = { oral: "Oral", iv: "IV", im: "IM", sc: "SC", sl: "SL", vag: "Vaginal", rectal: "Rectal", patch: "Patch", implant: "Implant", iud: "IUD/IUS", topical: "Topical" };
 const ROUTE_COLOR = {
   oral:    "text-emerald-600",
   iv:      "text-amber-600",
+  topical: "text-rose-500",
   im:      "text-orange-500",
   sc:      "text-indigo-500",
   sl:      "text-blue-600",
@@ -204,7 +209,7 @@ function DrugDetailView({ drug, onClose }) {
 
 const CATEGORIES = [
   "Analgesia", "Antibiotic", "Anticoagulant", "Antiemetic",
-  "Antihypertensive", "Contraception", "Endometriosis", "Tocolytic", "Uterotonic",
+  "Antihypertensive", "Antiviral", "Contraception", "Endometriosis", "Tocolytic", "Uterotonic",
 ];
 
 export default function RxPage() {

@@ -216,4 +216,31 @@ export const ANALGESIA = [
       { label: "BNF", href: "https://bnf.nice.org.uk/drugs/paracetamol/" },
     ],
   },
+  {
+    id: "lidocaine-topical",
+    name: "Lidocaine (topical)",
+    class: "Local anaesthetic",
+    color: "yellow",
+    routes: [
+      {
+        type: "topical",
+        shortLabel: "Topical — genital lesions",
+        label: "Topical — symptomatic relief of genital herpes lesions",
+        dose: "2% gel or 5% ointment",
+        frequency: "Apply to affected area as needed",
+        maxDose: "Avoid extensive/occluded application (systemic absorption)",
+        notes: "Supportive symptom relief for painful genital herpes lesions in pregnancy, alongside saline bathing and paracetamol. No evidence of harm in standard topical doses in pregnancy (BASHH/RCOG 2024). Can sting on application to broken skin.",
+      },
+    ],
+    contraindications: ["Known hypersensitivity to local anaesthetics"],
+    cautions: [
+      "Avoid application to large or broken areas under occlusion — risk of systemic absorption",
+      "For symptom relief only — not an antiviral",
+    ],
+    pregnancySafety: "No evidence of harm in standard topical doses in pregnancy (BASHH/RCOG 2024). Used for symptomatic relief of genital herpes lesions.",
+    sources: [
+      { label: "BNF", href: "https://bnf.nice.org.uk/drugs/lidocaine-hydrochloride/" },
+      { label: "BASHH/RCOG HSV in Pregnancy 2024", href: "https://www.bashh.org/resources/24/updated_guideline_herpes_in_pregnancy_2024/" },
+    ],
+  },
 ];

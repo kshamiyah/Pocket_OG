@@ -124,7 +124,7 @@ export const CG623_MTX_FLOWCHART = {
         "Advise: avoid alcohol, folic acid supplements, sexual intercourse, sunlight, heavy lifting",
         "Avoid pregnancy for 3 months (use barrier contraception)",
         "Expect pain days 3–7 (tubal miscarriage) — attend ED if severe / dizziness / shoulder-tip pain",
-        "Ensure patient has EPU follow-up arrangements and contact number",
+        "Ensure patient has EPU follow-up for Day 4 and Day 7 βhCG monitoring, and a contact number",
       ],
       next: "day4",
     },
