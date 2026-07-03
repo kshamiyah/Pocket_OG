@@ -5,10 +5,16 @@
 export const UPDATES = [
   {
     version: "1.2.0",
-    date: "01/07/2026",
-    title: "TOG reviews & quicker calculators",
+    date: "03/07/2026",
+    title: "New guides, triage flowcharts & app-wide search",
     changes: [
-      { tag: "new", text: "TOG Reviews — a new Library section with in-depth summaries of RCOG's review journal, each with its own interactive flowchart: polyhydramnios & oligohydramnios, thyroid disease, cardiac disease (congenital, cardiomyopathy, myocardial infarction, arrhythmias, valvular disease)." },
+      { tag: "new", text: "Genital Herpes in Pregnancy — a new BASHH/RCOG 2024 guide with an interactive management flowchart: first episode by trimester, suppressive therapy, mode of delivery, PPROM and neonatal care." },
+      { tag: "new", text: "Two new triage flowcharts — Rupture of Membranes (PROM/PPRoM), and Acute Heavy Menstrual Bleeding in ED." },
+      { tag: "new", text: "Antivirals added to Rx — aciclovir, valaciclovir and famciclovir — each with dosing and BNF links." },
+      { tag: "improved", text: "Search now covers the whole app — medications, calculators and consent pages appear in results, with new Meds, Calcs and Consent filters and smarter ranking." },
+      { tag: "improved", text: "IOL Priority List moved to the Calculator tab." },
+      { tag: "fixed", text: "Fixed several broken links between flowcharts, calculators and guidelines, and the Genital Herpes guide now opens correctly." },
+      { tag: "new", text: "TOG Reviews — a Library section with in-depth summaries of RCOG's review journal, each with its own interactive flowchart: polyhydramnios & oligohydramnios, thyroid disease, cardiac disease (congenital, cardiomyopathy, myocardial infarction, arrhythmias, valvular disease)." },
       { tag: "improved", text: "PUL and post-ectopic hCG calculators now have a Quick entry mode — jump straight to the numbers when you already know the clinical picture." },
       { tag: "fixed", text: "The keyboard no longer pops open automatically when you launch the app." },
     ],
