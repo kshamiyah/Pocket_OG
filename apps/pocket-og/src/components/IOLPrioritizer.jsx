@@ -219,6 +219,8 @@ export default function IOLPrioritizer({ onClose }) {
   const [gestExtraDays, setGestExtraDays] = useState("");
   const [daysWaiting, setDaysWaiting] = useState("");
   const [indication, setIndication] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [showKey, setShowKey] = useState(false);
   const [vpTop, setVpTop] = useState(0);
   const [vpHeight, setVpHeight] = useState(() =>
     (typeof window !== "undefined" && window.visualViewport?.height) || window.innerHeight
@@ -242,22 +244,38 @@ export default function IOLPrioritizer({ onClose }) {
     setLabel(""); setGestWeeks(""); setGestExtraDays(""); setDaysWaiting(""); setIndication("");
   };
 
-  const addPatient = () => {
+  const savePatient = () => {
     if (!indication) return;
     const ind = IOL_INDICATIONS.find(i => i.key === indication);
     if (!ind) return;
-    setPatients(prev => [...prev, {
-      id: uid(),
-      label: label.trim() || String(prev.length + 1),
+    const fields = {
       ind,
       gestDays: gestDaysTotal,
       daysWaiting: Math.max(0, parseInt(daysWaiting) || 0),
-    }]);
+    };
+    if (editingId != null) {
+      setPatients(prev => prev.map(x =>
+        x.id === editingId ? { ...x, ...fields, label: label.trim() || x.label } : x
+      ));
+    } else {
+      setPatients(prev => [...prev, { id: uid(), label: label.trim() || String(prev.length + 1), ...fields }]);
+    }
     resetForm();
     setShowForm(false);
+    setEditingId(null);
   };
 
-  const cancelForm = () => { resetForm(); setShowForm(false); };
+  const startEdit = (p) => {
+    setEditingId(p.id);
+    setLabel(p.label);
+    setGestWeeks(p.gestDays != null ? String(Math.floor(p.gestDays / 7)) : "");
+    setGestExtraDays(p.gestDays != null ? String(p.gestDays % 7) : "");
+    setDaysWaiting(String(p.daysWaiting));
+    setIndication(p.ind.key);
+    setShowForm(true);
+  };
+
+  const cancelForm = () => { resetForm(); setShowForm(false); setEditingId(null); };
 
   const sorted = [...patients].sort((a, b) => {
     const ta = getEffectiveTier(a);
@@ -288,10 +306,53 @@ export default function IOLPrioritizer({ onClose }) {
           <p className="text-xs text-gray-400">GL861 · NICE NG207 · Ranked by urgency, gestation &amp; wait</p>
         </div>
         <button
+          onClick={() => setShowKey(v => !v)}
+          aria-pressed={showKey}
+          aria-label="Priority key"
+          className={`h-8 px-2.5 flex items-center gap-1 rounded-xl text-xs font-semibold transition-colors shrink-0 ${showKey ? "bg-teal-100 text-teal-700" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"}`}
+        >
+          <span className="text-sm leading-none">ⓘ</span> Key
+        </button>
+        <button
           onClick={onClose}
           className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors text-lg leading-none shrink-0"
         >×</button>
       </div>
+
+      {/* Priority key */}
+      {showKey && (
+        <div className="shrink-0 border-b border-gray-100 bg-gray-50 px-4 py-3 overflow-y-auto max-h-[45%]">
+          <div className="max-w-lg mx-auto space-y-2.5 text-xs text-gray-600 leading-relaxed">
+            <p className="text-gray-500">Patients are ranked by clinical <b>priority band</b>, then by how far past their target gestation, then by time on the list.</p>
+            <div className="space-y-1.5">
+              <div className="flex gap-2">
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 shrink-0 h-fit">P1</span>
+                <span><b>Highest priority</b> — pre-eclampsia, APH, IUGR/FGR, pre-existing diabetes, therapeutic anticoagulation. Deliver first.</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 shrink-0 h-fit">P2</span>
+                <span><b>Medium priority</b> — GDM, maternal age ≥40, obstetric cholestasis, reduced fetal movements, raised PCR, non-proteinuric hypertension.</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700 shrink-0 h-fit">Routine</span>
+                <span><b>Post-dates</b> baseline, before any escalation.</span>
+              </div>
+            </div>
+            <p>The <b>letter</b> (a–e) ranks patients within a band — <b>a</b> is the most urgent, e.g. <b>P1a</b> (pre-eclampsia) is seen before <b>P1c</b> (diabetes).</p>
+            <div className="space-y-1.5 pt-1 border-t border-gray-100">
+              <div className="flex gap-2 items-start pt-1.5">
+                <span className="px-1.5 py-0.5 rounded-full text-xs font-semibold bg-red-500 text-white shrink-0 h-fit">Overdue</span>
+                <span>Past the recommended induction window for that indication.</span>
+              </div>
+              <div className="flex gap-2 items-start">
+                <span className="px-1.5 py-0.5 rounded-full text-xs font-semibold bg-orange-500 text-white shrink-0 h-fit">Escalated</span>
+                <span>Priority automatically raised — e.g. post-dates at ≥42+0 becomes <b>P2b</b> (and ≥43+0 becomes <b>P1c</b>) because stillbirth risk rises sharply, per NICE NG207.</span>
+              </div>
+            </div>
+            <p className="text-gray-400 pt-1">Decision support only — the clinical team makes the final call.</p>
+          </div>
+        </div>
+      )}
 
       {/* Ranking narrative strip */}
       {sorted.length > 0 && (
@@ -300,7 +361,7 @@ export default function IOLPrioritizer({ onClose }) {
             onClick={() => setShowNarrative(v => !v)}
             className="w-full flex items-center justify-between px-4 py-2.5 text-left"
           >
-            <span className="text-xs font-semibold text-teal-700">Ranking justification</span>
+            <span className="text-xs font-semibold text-teal-700">Why this order?</span>
             <span className="text-xs text-teal-500 shrink-0 ml-2">{showNarrative ? "▲ hide" : "▼ show"}</span>
           </button>
           {showNarrative && (
@@ -323,7 +384,8 @@ export default function IOLPrioritizer({ onClose }) {
             <div className="text-center py-12 text-gray-400">
               <p className="text-3xl mb-3">📋</p>
               <p className="text-sm font-medium text-gray-500">No patients added yet</p>
-              <p className="text-xs text-gray-400 mt-1">Tap + Add patient below to get started</p>
+              <p className="text-xs text-gray-400 mt-1">Tap <b>+ Add patient</b> below to build the list.</p>
+              <button onClick={() => setShowKey(true)} className="text-xs text-teal-600 hover:text-teal-700 mt-2 font-medium">ⓘ How the priorities work</button>
             </div>
           )}
           {sorted.map((p, i) => {
@@ -332,28 +394,41 @@ export default function IOLPrioritizer({ onClose }) {
             const badgeColor = PRIORITY_BADGE_COLORS[tier.priority];
             const badgeLabel = tierBadgeLabel(tier.subtier, tier.priority);
             const explanation = explainRank(p);
+            const isEditing = editingId === p.id;
             return (
-              <div key={p.id} className="px-4 py-3 rounded-2xl border border-gray-100 bg-gray-50">
+              <div key={p.id} className={`px-3.5 py-3 rounded-2xl border bg-white ${isEditing ? "border-teal-400 ring-2 ring-teal-400/20" : "border-gray-100 shadow-sm"}`}>
                 <div className="flex items-start gap-3">
-                  <span className="text-xs font-semibold text-gray-400 w-4 pt-0.5 shrink-0">{i + 1}</span>
+                  <span className="w-6 h-6 rounded-full bg-gray-100 text-gray-500 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold shrink-0 ${badgeColor}`}>{badgeLabel}</span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <p className="text-[15px] font-semibold text-gray-900 leading-tight">Patient {p.label}</p>
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold shrink-0 ${badgeColor}`}>{badgeLabel}</span>
                       {overdue && (
-                        <span className="px-1.5 py-0.5 rounded-full text-xs font-semibold bg-red-500 text-white shrink-0">Overdue</span>
+                        <span className="px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-red-500 text-white shrink-0">Overdue</span>
                       )}
                       {tier.escalated && (
-                        <span className="px-1.5 py-0.5 rounded-full text-xs font-semibold bg-orange-500 text-white shrink-0">Escalated</span>
+                        <span className="px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-orange-500 text-white shrink-0">Escalated</span>
                       )}
-                      <p className="text-sm font-semibold text-gray-800">Patient {p.label}</p>
                     </div>
-                    <p className="text-xs text-gray-500 leading-snug">{p.ind.label}</p>
+                    <p className="text-xs font-medium text-gray-600 mt-1 leading-snug">{p.ind.label}</p>
                     <p className="text-xs text-gray-400 mt-0.5 leading-snug">{explanation}</p>
                   </div>
-                  <button
-                    onClick={() => setPatients(prev => prev.filter(x => x.id !== p.id))}
-                    className="text-gray-300 hover:text-red-400 text-lg leading-none shrink-0 transition-colors mt-0.5"
-                  >×</button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={() => startEdit(p)}
+                      aria-label={`Edit patient ${p.label}`}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => { if (editingId === p.id) cancelForm(); setPatients(prev => prev.filter(x => x.id !== p.id)); }}
+                      aria-label={`Remove patient ${p.label}`}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 text-lg leading-none transition-colors"
+                    >×</button>
+                  </div>
                 </div>
               </div>
             );
@@ -383,7 +458,7 @@ export default function IOLPrioritizer({ onClose }) {
           ) : (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-gray-700">New patient</p>
+                <p className="text-sm font-semibold text-gray-700">{editingId != null ? `Edit patient ${label || ""}`.trim() : "New patient"}</p>
                 <button onClick={cancelForm} className="text-sm text-gray-400 hover:text-gray-600 transition-colors">Cancel</button>
               </div>
 
@@ -466,11 +541,11 @@ export default function IOLPrioritizer({ onClose }) {
               </select>
 
               <button
-                onClick={addPatient}
+                onClick={savePatient}
                 disabled={!indication}
                 className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold text-sm py-3 rounded-xl transition-colors"
               >
-                Add
+                {editingId != null ? "Save changes" : "Add"}
               </button>
             </div>
           )}
