@@ -1,229 +1,36 @@
 import { useState, useEffect } from "react";
-
-const IOL_INDICATIONS = [
-  { key: "pet",        label: "Pre-eclampsia / PET (inpatient)",             priority: 1,         gestation: "ASAP ≥37 wks" },
-  { key: "iugr",       label: "IUGR / SGA / FGR",                           priority: 1,         gestation: "Individual (consultant)" },
-  { key: "dm-t1t2",    label: "Pre-existing diabetes (T1/T2)",               priority: 1,         gestation: "37+0–38+6" },
-  { key: "anticoag",   label: "Therapeutic anticoagulation",                 priority: 1,         gestation: "39+0" },
-  { key: "aph",        label: "APH (inpatient)",                             priority: 1,         gestation: "Individual" },
-  { key: "gdm-low",    label: "GDM — low risk",                              priority: 2,         gestation: "40+3–40+6" },
-  { key: "gdm-macro",  label: "GDM — macrosomia / complications",            priority: 2,         gestation: "37–40" },
-  { key: "age-40-44",  label: "Maternal age 40–44",                          priority: 2,         gestation: "40+0" },
-  { key: "age-45",     label: "Maternal age ≥45",                            priority: 2,         gestation: "38+0" },
-  { key: "htn-op",     label: "Hypertension — non-proteinuric (outpatient)", priority: 2,         gestation: "40–40+6" },
-  { key: "icp",        label: "Obstetric cholestasis (BA >100)",             priority: 2,         gestation: "37+0–39+6" },
-  { key: "pcr",        label: "Raised PCR ≥30 with hypertension",           priority: 2,         gestation: "39–40+6" },
-  { key: "rfm",        label: "Reduced fetal movements",                     priority: 2,         gestation: "From 38+6" },
-  { key: "post-dates", label: "Post-dates",                                  priority: "Routine", gestation: "40+7" },
-];
-
-const SUBTIER = {
-  "pet": "1a", "aph": "1a",
-  "iugr": "1b",
-  "dm-t1t2": "1c", "anticoag": "1c",
-  "icp": "2a", "gdm-macro": "2a",
-  "age-45": "2b", "rfm": "2b",
-  "pcr": "2c",
-  "age-40-44": "2d", "htn-op": "2d",
-  "gdm-low": "2e",
-  "post-dates": "R",
-};
-
-const SUBTIER_ORDER = {
-  "1a": 0, "1b": 1, "1c": 2,
-  "2a": 0, "2b": 1, "2c": 2, "2d": 3, "2e": 4,
-  "R": 0,
-};
-
-const PRIORITY_ORDER = { 1: 0, 2: 1, Routine: 2 };
-
-const WINDOWS = {
-  "pet":       { type: "asap" },
-  "aph":       { type: "asap" },
-  "iugr":      { type: "individual" },
-  "dm-t1t2":   { start: 37 * 7,     end: 38 * 7 + 6 },
-  "anticoag":  { start: 39 * 7,     end: 39 * 7     },
-  "icp":       { start: 37 * 7,     end: 39 * 7 + 6 },
-  "gdm-macro": { start: 37 * 7,     end: 40 * 7     },
-  "age-45":    { start: 38 * 7,     end: 38 * 7     },
-  "rfm":       { start: 38 * 7 + 6, end: null       },
-  "pcr":       { start: 39 * 7,     end: 40 * 7 + 6 },
-  "htn-op":    { start: 40 * 7,     end: 40 * 7 + 6 },
-  "age-40-44": { start: 40 * 7,     end: 40 * 7     },
-  "gdm-low":   { start: 40 * 7 + 3, end: 40 * 7 + 6 },
-  "post-dates":{ start: 40 * 7 + 7, end: null       },
-};
-
-// NICE NG207: post-dates stillbirth risk escalates sharply at 42+0 (3/1000) and 43+0 (7/1000).
-// Escalate priority accordingly rather than leaving all post-dates as Routine.
-function getEffectiveTier(p) {
-  if (p.ind.key === "post-dates" && p.gestDays !== null) {
-    if (p.gestDays >= 43 * 7) return { priority: 1, subtier: "1c", escalated: "≥43+0" };
-    if (p.gestDays >= 42 * 7) return { priority: 2, subtier: "2b", escalated: "≥42+0" };
-  }
-  return { priority: p.ind.priority, subtier: SUBTIER[p.ind.key] ?? null, escalated: null };
-}
-
-function fmtGest(days) {
-  return `${Math.floor(days / 7)}+${days % 7}`;
-}
-
-function gestUrgencyScore(key, gestDays) {
-  const w = WINDOWS[key];
-  if (!w || w.type === "asap") return -Infinity;
-  if (w.type === "individual" || gestDays === null) return 0;
-  return -(gestDays - w.start);
-}
-
-function isOverdue(key, gestDays) {
-  const w = WINDOWS[key];
-  if (!w || !gestDays || w.type === "asap" || w.type === "individual") return false;
-  if (key === "post-dates" && gestDays >= 42 * 7) return true;
-  return w.end !== null && gestDays > w.end;
-}
-
-function gestStatus(p) {
-  const w = WINDOWS[p.ind.key];
-  if (!w || w.type === "asap" || w.type === "individual") return null;
-  if (p.gestDays === null) return null;
-  const overEnd = w.end !== null ? p.gestDays - w.end : null;
-  const fromStart = p.gestDays - w.start;
-  if (overEnd !== null && overEnd > 0) return `${fmtGest(p.gestDays)}, ${overEnd}d past target window (${p.ind.gestation})`;
-  if (fromStart > 0 && w.end === null)  return `${fmtGest(p.gestDays)}, ${fromStart}d past target (${p.ind.gestation})`;
-  if (fromStart >= 0)                   return `${fmtGest(p.gestDays)}, in window (${p.ind.gestation})`;
-  return `${fmtGest(p.gestDays)}, window opens in ${-fromStart}d (${p.ind.gestation})`;
-}
-
-function tierBadgeLabel(subtier, priority) {
-  if (!subtier) return priority === "Routine" ? "Routine" : `P${priority}`;
-  if (subtier === "R") return "Routine";
-  return `P${subtier}`;
-}
-
-function explainRank(p) {
-  const tier = getEffectiveTier(p);
-  const w = WINDOWS[p.ind.key];
-  const waitTxt = p.daysWaiting > 0 ? `${p.daysWaiting}d on list` : "added today";
-  if (w?.type === "asap") return "Inpatient — immediate delivery indicated";
-  if (w?.type === "individual") {
-    return p.gestDays !== null
-      ? `${fmtGest(p.gestDays)} — consultant-directed · ${waitTxt}`
-      : `Consultant-directed · ${waitTxt}`;
-  }
-  if (tier.escalated) {
-    const dPast = p.gestDays - w.start;
-    return `${fmtGest(p.gestDays)}, ${dPast}d post-dates — escalated to ${tierBadgeLabel(tier.subtier, tier.priority)} per NICE NG207 · ${waitTxt}`;
-  }
-  if (!w || p.gestDays === null) return `Target ${p.ind.gestation} · ${waitTxt}`;
-  const gs = gestStatus(p);
-  return gs ? `${gs} · ${waitTxt}` : waitTxt;
-}
-
-function briefNote(p) {
-  const tier = getEffectiveTier(p);
-  const w = WINDOWS[p.ind.key];
-  if (w?.type === "asap") return `${p.label} (inpatient — immediate)`;
-  if (w?.type === "individual") {
-    const g = p.gestDays ? ` ${fmtGest(p.gestDays)},` : "";
-    return `${p.label} (${g} consultant-directed${p.daysWaiting > 0 ? `, ${p.daysWaiting}d waiting` : ""})`;
-  }
-  if (!p.gestDays) return `${p.label}${p.daysWaiting > 0 ? ` (${p.daysWaiting}d waiting)` : ""}`;
-  const overEnd = w.end != null ? p.gestDays - w.end : null;
-  const fromStart = p.gestDays - w.start;
-  if (tier.escalated) return `${p.label} (${fmtGest(p.gestDays)}, ${fromStart}d post-dates — escalated to ${tierBadgeLabel(tier.subtier, tier.priority)})`;
-  if (overEnd > 0) return `${p.label} (${fmtGest(p.gestDays)}, ${overEnd}d past target)`;
-  if (fromStart > 0 && w.end === null) return `${p.label} (${fmtGest(p.gestDays)}, ${fromStart}d past target)`;
-  if (fromStart >= 0) return `${p.label} (${fmtGest(p.gestDays)}, in window)`;
-  return `${p.label} (${fmtGest(p.gestDays)}, ${-fromStart}d before window)`;
-}
-
-function tiebreakNote(patients) {
-  if (patients.length < 2) return briefNote(patients[0]);
-  const { subtier, priority } = getEffectiveTier(patients[0]);
-  const badge = tierBadgeLabel(subtier, priority);
-  const w = WINDOWS[patients[0].ind.key];
-
-  if (w?.type === "individual") {
-    const ns = patients.map(p => `${p.label} (${p.daysWaiting}d)`).join(" → ");
-    return `${ns} — same sub-tier (${badge}), ordered by wait time`;
-  }
-
-  if (patients.length === 2) {
-    const [a, b] = patients;
-    if (a.gestDays && b.gestDays) {
-      const oeA = w.end != null ? a.gestDays - w.end : null;
-      const oeB = w.end != null ? b.gestDays - w.end : null;
-      if (oeA > 0 && (!oeB || oeB <= 0)) {
-        return `${a.label} before ${b.label} — both ${badge}, ${fmtGest(a.gestDays)} is ${oeA}d past target vs ${fmtGest(b.gestDays)} still in window`;
-      }
-      if (oeA > 0 && oeB > 0 && oeA !== oeB) {
-        return `${a.label} before ${b.label} — both ${badge}, ${fmtGest(a.gestDays)} (${oeA}d past) vs ${fmtGest(b.gestDays)} (${oeB}d past)`;
-      }
-      const fsA = a.gestDays - w.start;
-      const fsB = b.gestDays - w.start;
-      if (fsA !== fsB) {
-        return `${a.label} before ${b.label} — both ${badge}, ${fmtGest(a.gestDays)} further into window than ${fmtGest(b.gestDays)}`;
-      }
-    }
-    return `${a.label} before ${b.label} — both ${badge}, ${a.daysWaiting}d vs ${b.daysWaiting}d waiting`;
-  }
-
-  const descs = patients.map(p => {
-    if (!p.gestDays) return `${p.label} (${p.daysWaiting}d)`;
-    const oe = w.end != null ? p.gestDays - w.end : null;
-    if (oe > 0) return `${p.label} ${fmtGest(p.gestDays)} (${oe}d OD)`;
-    return `${p.label} ${fmtGest(p.gestDays)}`;
-  });
-  return `${badge}: ${descs.join(" → ")} — ranked by gestation urgency`;
-}
-
-function generateNarrative(sorted) {
-  if (sorted.length === 0) return [];
-
-  // Group consecutive patients only if same effective tier AND same indication
-  // (avoids mixing windows when building tiebreak explanations)
-  const groups = [];
-  for (const p of sorted) {
-    const { subtier, priority } = getEffectiveTier(p);
-    const groupKey = (subtier ?? String(priority)) + "|" + p.ind.key;
-    const last = groups[groups.length - 1];
-    if (last && last.groupKey === groupKey) {
-      last.patients.push(p);
-    } else {
-      groups.push({ groupKey, patients: [p] });
-    }
-  }
-
-  return groups.map(({ patients }) =>
-    patients.length === 1 ? briefNote(patients[0]) : tiebreakNote(patients)
-  );
-}
-
-const PRIORITY_BADGE_COLORS = {
-  1:       "bg-red-100 text-red-700",
-  2:       "bg-amber-100 text-amber-700",
-  Routine: "bg-green-100 text-green-700",
-};
+import {
+  IOL_TIERS, IOL_IND, SROM_KEY, SROM_ESCALATION_HOURS,
+  iolEntryTier, governingIndication, entryReason, hasSrom, isSromEscalated, sortIOLQueue,
+} from "../utils/iolPriority";
 
 const INPUT_CLS = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base text-gray-800 placeholder-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400";
 
 let _uid = 0;
 const uid = () => ++_uid;
 
+const TIER_GROUPS = [0, 1, 2, 3].map(t => ({
+  tier: t,
+  meta: IOL_TIERS[t],
+  items: IOL_IND.filter(i => i.tier === t),
+}));
+
 export default function IOLPrioritizer({ onClose }) {
   const [patients, setPatients] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [showNarrative, setShowNarrative] = useState(true);
+  const [showKey, setShowKey] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+
   const [label, setLabel] = useState("");
   const [gestWeeks, setGestWeeks] = useState("");
   const [gestExtraDays, setGestExtraDays] = useState("");
   const [daysWaiting, setDaysWaiting] = useState("");
-  const [indication, setIndication] = useState("");
-  const [editingId, setEditingId] = useState(null);
-  const [showKey, setShowKey] = useState(false);
+  const [indications, setIndications] = useState([]);
+  const [sromHours, setSromHours] = useState("");
+
   const [vpTop, setVpTop] = useState(0);
   const [vpHeight, setVpHeight] = useState(() =>
-    (typeof window !== "undefined" && window.visualViewport?.height) || window.innerHeight
+    (typeof window !== "undefined" && window.visualViewport?.height) || (typeof window !== "undefined" ? window.innerHeight : 0)
   );
 
   useEffect(() => {
@@ -236,27 +43,28 @@ export default function IOLPrioritizer({ onClose }) {
     return () => { vv.removeEventListener("resize", update); vv.removeEventListener("scroll", update); };
   }, []);
 
-  const gestDaysTotal = gestWeeks !== ""
-    ? parseInt(gestWeeks) * 7 + (gestExtraDays !== "" ? Math.min(6, parseInt(gestExtraDays) || 0) : 0)
-    : null;
+  const gestDaysTotal = gestWeeks !== "" ? parseInt(gestWeeks) : null;
+  const sromSelected = indications.includes(SROM_KEY);
 
   const resetForm = () => {
-    setLabel(""); setGestWeeks(""); setGestExtraDays(""); setDaysWaiting(""); setIndication("");
+    setLabel(""); setGestWeeks(""); setGestExtraDays(""); setDaysWaiting("");
+    setIndications([]); setSromHours("");
   };
 
+  const toggleInd = (key) =>
+    setIndications(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
+
   const savePatient = () => {
-    if (!indication) return;
-    const ind = IOL_INDICATIONS.find(i => i.key === indication);
-    if (!ind) return;
+    if (!indications.length) return;
     const fields = {
-      ind,
-      gestDays: gestDaysTotal,
+      gestWeeks: gestDaysTotal ?? 40,
+      gestDays: gestExtraDays !== "" ? Math.min(6, parseInt(gestExtraDays) || 0) : 0,
+      indications,
+      sromHours: indications.includes(SROM_KEY) && sromHours !== "" ? Math.max(0, parseInt(sromHours) || 0) : null,
       daysWaiting: Math.max(0, parseInt(daysWaiting) || 0),
     };
     if (editingId != null) {
-      setPatients(prev => prev.map(x =>
-        x.id === editingId ? { ...x, ...fields, label: label.trim() || x.label } : x
-      ));
+      setPatients(prev => prev.map(x => x.id === editingId ? { ...x, ...fields, label: label.trim() || x.label } : x));
     } else {
       setPatients(prev => [...prev, { id: uid(), label: label.trim() || String(prev.length + 1), ...fields }]);
     }
@@ -268,28 +76,22 @@ export default function IOLPrioritizer({ onClose }) {
   const startEdit = (p) => {
     setEditingId(p.id);
     setLabel(p.label);
-    setGestWeeks(p.gestDays != null ? String(Math.floor(p.gestDays / 7)) : "");
-    setGestExtraDays(p.gestDays != null ? String(p.gestDays % 7) : "");
+    setGestWeeks(String(p.gestWeeks));
+    setGestExtraDays(p.gestDays ? String(p.gestDays) : "");
     setDaysWaiting(String(p.daysWaiting));
-    setIndication(p.ind.key);
+    setIndications(p.indications);
+    setSromHours(p.sromHours != null ? String(p.sromHours) : "");
     setShowForm(true);
   };
 
   const cancelForm = () => { resetForm(); setShowForm(false); setEditingId(null); };
 
-  const sorted = [...patients].sort((a, b) => {
-    const ta = getEffectiveTier(a);
-    const tb = getEffectiveTier(b);
-    const p = (PRIORITY_ORDER[ta.priority] ?? 3) - (PRIORITY_ORDER[tb.priority] ?? 3);
-    if (p) return p;
-    const s = (SUBTIER_ORDER[ta.subtier] ?? 9) - (SUBTIER_ORDER[tb.subtier] ?? 9);
-    if (s) return s;
-    const g = gestUrgencyScore(a.ind.key, a.gestDays) - gestUrgencyScore(b.ind.key, b.gestDays);
-    if (g) return g;
-    return b.daysWaiting - a.daysWaiting;
-  });
+  const remove = (id) => {
+    if (editingId === id) cancelForm();
+    setPatients(prev => prev.filter(x => x.id !== id));
+  };
 
-  const narrative = generateNarrative(sorted);
+  const sorted = sortIOLQueue(patients);
 
   return (
     <div
@@ -303,7 +105,7 @@ export default function IOLPrioritizer({ onClose }) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-gray-900 leading-tight">IOL Priority List</p>
-          <p className="text-xs text-gray-400">GL861 · NICE NG207 · Ranked by urgency, gestation &amp; wait</p>
+          <p className="text-xs text-gray-400">NICE NG207 · ranked by urgency, gestation &amp; wait</p>
         </div>
         <button
           onClick={() => setShowKey(v => !v)}
@@ -321,59 +123,24 @@ export default function IOLPrioritizer({ onClose }) {
 
       {/* Priority key */}
       {showKey && (
-        <div className="shrink-0 border-b border-gray-100 bg-gray-50 px-4 py-3 overflow-y-auto max-h-[45%]">
+        <div className="shrink-0 border-b border-gray-100 bg-gray-50 px-4 py-3 overflow-y-auto max-h-[48%]">
           <div className="max-w-lg mx-auto space-y-2.5 text-xs text-gray-600 leading-relaxed">
-            <p className="text-gray-500">Patients are ranked by clinical <b>priority band</b>, then by how far past their target gestation, then by time on the list.</p>
-            <div className="space-y-1.5">
-              <div className="flex gap-2">
-                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 shrink-0 h-fit">P1</span>
-                <span><b>Highest priority</b> — pre-eclampsia, APH, IUGR/FGR, pre-existing diabetes, therapeutic anticoagulation. Deliver first.</span>
+            <p className="text-gray-500">Each patient is ranked by her <b>most urgent indication</b> (NICE NG207 tiers), then by gestation and time waiting.</p>
+            {IOL_TIERS.map(t => (
+              <div key={t.key} className="flex gap-2">
+                <span className={`px-2 py-0.5 rounded-full text-xs font-bold shrink-0 h-fit ${t.badge}`}>{t.label}</span>
+                <span>
+                  <b>{t.within}.</b>{" "}
+                  {IOL_IND.filter(i => i.tier === IOL_TIERS.indexOf(t)).map(i => i.label).join(" · ")}
+                </span>
               </div>
-              <div className="flex gap-2">
-                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 shrink-0 h-fit">P2</span>
-                <span><b>Medium priority</b> — GDM, maternal age ≥40, obstetric cholestasis, reduced fetal movements, raised PCR, non-proteinuric hypertension.</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700 shrink-0 h-fit">Routine</span>
-                <span><b>Post-dates</b> baseline, before any escalation.</span>
-              </div>
-            </div>
-            <p>The <b>letter</b> (a–e) ranks patients within a band — <b>a</b> is the most urgent, e.g. <b>P1a</b> (pre-eclampsia) is seen before <b>P1c</b> (diabetes).</p>
-            <div className="space-y-1.5 pt-1 border-t border-gray-100">
-              <div className="flex gap-2 items-start pt-1.5">
-                <span className="px-1.5 py-0.5 rounded-full text-xs font-semibold bg-red-500 text-white shrink-0 h-fit">Overdue</span>
-                <span>Past the recommended induction window for that indication.</span>
-              </div>
-              <div className="flex gap-2 items-start">
-                <span className="px-1.5 py-0.5 rounded-full text-xs font-semibold bg-orange-500 text-white shrink-0 h-fit">Escalated</span>
-                <span>Priority automatically raised — e.g. post-dates at ≥42+0 becomes <b>P2b</b> (and ≥43+0 becomes <b>P1c</b>) because stillbirth risk rises sharply, per NICE NG207.</span>
-              </div>
+            ))}
+            <div className="pt-1.5 border-t border-gray-100 space-y-1.5">
+              <p><b>Multiple indications:</b> a patient takes her single most urgent tier — indications are not added up (e.g. SROM + pre-eclampsia is ranked by the pre-eclampsia).</p>
+              <p><b>Hours since SROM:</b> term PROM/SROM starts at Moderate and <b>escalates to High at ≥ {SROM_ESCALATION_HOURS}h</b> since rupture (NICE NG207 — offer IOL, expectant max ~24h). SROM patients are then ordered by hours since rupture (longest first).</p>
             </div>
             <p className="text-gray-400 pt-1">Decision support only — the clinical team makes the final call.</p>
           </div>
-        </div>
-      )}
-
-      {/* Ranking narrative strip */}
-      {sorted.length > 0 && (
-        <div className="shrink-0 border-b border-teal-100 bg-teal-50">
-          <button
-            onClick={() => setShowNarrative(v => !v)}
-            className="w-full flex items-center justify-between px-4 py-2.5 text-left"
-          >
-            <span className="text-xs font-semibold text-teal-700">Why this order?</span>
-            <span className="text-xs text-teal-500 shrink-0 ml-2">{showNarrative ? "▲ hide" : "▼ show"}</span>
-          </button>
-          {showNarrative && (
-            <ul className="px-4 pb-3 space-y-1">
-              {narrative.map((line, i) => (
-                <li key={i} className="text-xs text-teal-900 leading-relaxed flex gap-1.5">
-                  <span className="text-teal-400 shrink-0 mt-0.5">·</span>
-                  <span>{line}</span>
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
       )}
 
@@ -389,11 +156,10 @@ export default function IOLPrioritizer({ onClose }) {
             </div>
           )}
           {sorted.map((p, i) => {
-            const overdue = isOverdue(p.ind.key, p.gestDays);
-            const tier = getEffectiveTier(p);
-            const badgeColor = PRIORITY_BADGE_COLORS[tier.priority];
-            const badgeLabel = tierBadgeLabel(tier.subtier, tier.priority);
-            const explanation = explainRank(p);
+            const tier = iolEntryTier(p);
+            const meta = IOL_TIERS[tier];
+            const gov = governingIndication(p);
+            const escalated = hasSrom(p) && isSromEscalated(p);
             const isEditing = editingId === p.id;
             return (
               <div key={p.id} className={`px-3.5 py-3 rounded-2xl border bg-white ${isEditing ? "border-teal-400 ring-2 ring-teal-400/20" : "border-gray-100 shadow-sm"}`}>
@@ -402,52 +168,55 @@ export default function IOLPrioritizer({ onClose }) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <p className="text-[15px] font-semibold text-gray-900 leading-tight">Patient {p.label}</p>
-                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold shrink-0 ${badgeColor}`}>{badgeLabel}</span>
-                      {overdue && (
-                        <span className="px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-red-500 text-white shrink-0">Overdue</span>
-                      )}
-                      {tier.escalated && (
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold shrink-0 ${meta.badge}`}>{meta.label}</span>
+                      {escalated && (
                         <span className="px-1.5 py-0.5 rounded-full text-[11px] font-semibold bg-orange-500 text-white shrink-0">Escalated</span>
                       )}
+                      <span className="text-[11px] text-gray-400">{p.gestWeeks}+{p.gestDays ?? 0}</span>
                     </div>
-                    <p className="text-xs font-medium text-gray-600 mt-1 leading-snug">{p.ind.label}</p>
-                    <p className="text-xs text-gray-400 mt-0.5 leading-snug">{explanation}</p>
+                    {/* indication chips */}
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {p.indications.map(k => {
+                        const ind = IOL_IND.find(x => x.key === k);
+                        if (!ind) return null;
+                        const isGov = gov && gov.key === k;
+                        return (
+                          <span key={k} className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${isGov ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-500"}`}>
+                            {ind.label}
+                          </span>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1 leading-snug">
+                      {meta.within} · {entryReason(p)}
+                      {p.daysWaiting > 0 ? ` · ${p.daysWaiting}d on list` : ""}
+                    </p>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      onClick={() => startEdit(p)}
-                      aria-label={`Edit patient ${p.label}`}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition-colors"
-                    >
+                    <button onClick={() => startEdit(p)} aria-label={`Edit patient ${p.label}`}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition-colors">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
                       </svg>
                     </button>
-                    <button
-                      onClick={() => { if (editingId === p.id) cancelForm(); setPatients(prev => prev.filter(x => x.id !== p.id)); }}
-                      aria-label={`Remove patient ${p.label}`}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 text-lg leading-none transition-colors"
-                    >×</button>
+                    <button onClick={() => remove(p.id)} aria-label={`Remove patient ${p.label}`}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 text-lg leading-none transition-colors">×</button>
                   </div>
                 </div>
               </div>
             );
           })}
           {patients.length > 0 && (
-            <button
-              onClick={() => setPatients([])}
-              className="w-full text-xs text-gray-400 hover:text-gray-600 py-2 transition-colors"
-            >
+            <button onClick={() => setPatients([])} className="w-full text-xs text-gray-400 hover:text-gray-600 py-2 transition-colors">
               Clear all
             </button>
           )}
         </div>
       </div>
 
-      {/* Bottom — collapsed or expanded */}
+      {/* Bottom — add / edit form */}
       <div className="shrink-0 border-t border-gray-100 bg-white px-4 pt-3" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
         <div className="max-w-lg mx-auto">
-
           {!showForm ? (
             <button
               onClick={() => setShowForm(true)}
@@ -456,17 +225,15 @@ export default function IOLPrioritizer({ onClose }) {
               <span className="text-base leading-none">+</span> Add patient
             </button>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-[62vh] overflow-y-auto pb-1">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-gray-700">{editingId != null ? `Edit patient ${label || ""}`.trim() : "New patient"}</p>
+                <p className="text-sm font-semibold text-gray-700">{editingId != null ? "Edit patient" : "New patient"}</p>
                 <button onClick={cancelForm} className="text-sm text-gray-400 hover:text-gray-600 transition-colors">Cancel</button>
               </div>
 
               <input
-                type="text"
-                placeholder="Patient label (optional)"
-                value={label}
-                onChange={e => setLabel(e.target.value)}
+                type="text" placeholder="Patient label / initials (optional)"
+                value={label} onChange={e => setLabel(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
                 className={INPUT_CLS}
               />
@@ -474,82 +241,71 @@ export default function IOLPrioritizer({ onClose }) {
               <div>
                 <p className="text-xs text-gray-400 mb-1 pl-1">Gestation</p>
                 <div className="flex gap-2">
-                  <div className="flex-1 min-w-0">
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      placeholder="Weeks (e.g. 38)"
-                      min="20"
-                      max="43"
-                      value={gestWeeks}
-                      onChange={e => setGestWeeks(e.target.value)}
-                      onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
-                      className={INPUT_CLS}
-                    />
-                  </div>
-                  <div className="w-24">
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      placeholder="+Days"
-                      min="0"
-                      max="6"
-                      value={gestExtraDays}
-                      onChange={e => setGestExtraDays(e.target.value)}
-                      onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
-                      className={INPUT_CLS}
-                    />
-                  </div>
+                  <input type="number" inputMode="numeric" placeholder="Weeks (e.g. 39)" min="20" max="43"
+                    value={gestWeeks} onChange={e => setGestWeeks(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }} className={INPUT_CLS + " flex-1 min-w-0"} />
+                  <input type="number" inputMode="numeric" placeholder="+Days" min="0" max="6"
+                    value={gestExtraDays} onChange={e => setGestExtraDays(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }} className={INPUT_CLS + " w-24"} />
                 </div>
               </div>
 
+              {/* Indications — multi-select by tier */}
               <div>
-                <p className="text-xs text-gray-400 mb-1 pl-1">Days on IOL list</p>
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  placeholder="0"
-                  min="0"
-                  value={daysWaiting}
-                  onChange={e => setDaysWaiting(e.target.value)}
-                  onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
-                  className={INPUT_CLS}
-                />
+                <p className="text-xs text-gray-400 mb-1.5 pl-1">Indication — select all that apply</p>
+                <div className="space-y-2">
+                  {TIER_GROUPS.map(({ tier, meta, items }) => (
+                    <div key={tier}>
+                      <p className={`text-[10px] font-bold uppercase tracking-wide mb-1 ${meta.text}`}>{meta.label}</p>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {items.map(ind => {
+                          const on = indications.includes(ind.key);
+                          return (
+                            <button key={ind.key} type="button" onClick={() => toggleInd(ind.key)}
+                              className={`px-2.5 py-1.5 rounded-xl border text-[11px] font-semibold text-left leading-tight transition-colors active:scale-95 ${
+                                on ? "bg-gray-900 border-gray-900 text-white" : "bg-white border-gray-200 text-gray-600"
+                              }`}>
+                              {ind.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <select
-                value={indication}
-                onChange={e => setIndication(e.target.value)}
-                className={INPUT_CLS + " text-gray-700"}
-              >
-                <option value="">Select indication…</option>
-                <optgroup label="Priority 1">
-                  {IOL_INDICATIONS.filter(i => i.priority === 1).map(i => (
-                    <option key={i.key} value={i.key}>{i.label}</option>
-                  ))}
-                </optgroup>
-                <optgroup label="Priority 2">
-                  {IOL_INDICATIONS.filter(i => i.priority === 2).map(i => (
-                    <option key={i.key} value={i.key}>{i.label}</option>
-                  ))}
-                </optgroup>
-                <optgroup label="Routine">
-                  {IOL_INDICATIONS.filter(i => i.priority === "Routine").map(i => (
-                    <option key={i.key} value={i.key}>{i.label}</option>
-                  ))}
-                </optgroup>
-              </select>
+              {/* Hours since SROM — only when the SROM indication is selected */}
+              {sromSelected && (
+                <div className="rounded-xl bg-teal-50 border border-teal-100 px-3 py-2.5">
+                  <p className="text-xs font-semibold text-teal-700 mb-1">Hours since SROM</p>
+                  <input type="number" inputMode="numeric" placeholder="e.g. 18" min="0"
+                    value={sromHours} onChange={e => setSromHours(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }} className={INPUT_CLS} />
+                  <p className="text-[11px] text-teal-600 mt-1">
+                    {sromHours !== "" && parseInt(sromHours) >= SROM_ESCALATION_HOURS
+                      ? `≥ ${SROM_ESCALATION_HOURS}h — escalates to High priority`
+                      : `Escalates to High at ≥ ${SROM_ESCALATION_HOURS}h since rupture`}
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <p className="text-xs text-gray-400 mb-1 pl-1">Days on IOL list</p>
+                <input type="number" inputMode="numeric" placeholder="0" min="0"
+                  value={daysWaiting} onChange={e => setDaysWaiting(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }} className={INPUT_CLS} />
+              </div>
 
               <button
                 onClick={savePatient}
-                disabled={!indication}
+                disabled={!indications.length}
                 className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold text-sm py-3 rounded-xl transition-colors"
               >
                 {editingId != null ? "Save changes" : "Add"}
               </button>
             </div>
           )}
-
         </div>
       </div>
     </div>
