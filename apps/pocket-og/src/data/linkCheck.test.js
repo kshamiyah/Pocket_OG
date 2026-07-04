@@ -9,6 +9,7 @@ import * as GL from "@pocket-og/guidelines";
 import { CALCULATOR_SCENARIOS } from "./calculator";
 import { CONSENT_PROCEDURES } from "./consent";
 import { PEARLS, pearlLinks } from "./pearls";
+import { TRIAL_SECTIONS } from "./trials";
 import { ANTIHYPERTENSIVES } from "./rx/antihypertensives";
 import { UTEROTONICS } from "./rx/uterotonics";
 import { ANTIEMETICS } from "./rx/antiemetics";
@@ -94,6 +95,21 @@ test("every Pearl of the Day links to real content", () => {
     }
   }
   if (errors.length) console.log("\nBROKEN pearl links:\n" + errors.join("\n") + "\n");
+  expect(errors).toEqual([]);
+});
+
+test("every Landmark Trial card links to real content", () => {
+  const errors = [];
+  const ids = new Set();
+  for (const t of TRIAL_SECTIONS) {
+    if (ids.has(t.id)) errors.push(`duplicate trial id "${t.id}"`);
+    ids.add(t.id);
+    if (t.flowchartId && !flowchartIds.has(t.flowchartId)) errors.push(`trial:${t.id}: flowchartId "${t.flowchartId}" not registered`);
+    for (const code of t.relatedGl ?? []) {
+      if (!guidelineCodes.has(code)) errors.push(`trial:${t.id}: relatedGl "${code}" is not a guideline`);
+    }
+  }
+  if (errors.length) console.log("\nBROKEN trial links:\n" + errors.join("\n") + "\n");
   expect(errors).toEqual([]);
 });
 
