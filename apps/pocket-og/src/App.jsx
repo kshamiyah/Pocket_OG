@@ -9,6 +9,8 @@ import NoResults from "./components/NoResults";
 import FlowchartPlayer from "./components/FlowchartPlayer";
 import IOLPrioritizer from "./components/IOLPrioritizer";
 import OnCallSim from "./components/OnCallSim";
+import DailyPearl from "./components/DailyPearl";
+import { pearlForDate, hasUnseenPearl, markPearlSeen } from "./data/pearls";
 import FeedbackButton from "./components/FeedbackButton";
 import ConsentPage from "./components/ConsentPage";
 import CalculatorPage from "./components/CalculatorPage";
@@ -154,6 +156,8 @@ export default function App() {
   const [libraryView, setLibraryView] = useState("guidelines"); // "guidelines" | "articles"
   const [showIOLPrioritizer, setShowIOLPrioritizer] = useState(false);
   const [showOnCallSim, setShowOnCallSim] = useState(false);
+  const [pearlUnseen, setPearlUnseen] = useState(() => hasUnseenPearl());
+  const todaysPearl = useMemo(() => pearlForDate(), []);
   const [activeTab, setActiveTab] = useState("search");
   const [glSourceFilter, setGlSourceFilter] = useState("ALL");
   const [fcSourceFilter, setFcSourceFilter] = useState("ALL");
@@ -444,6 +448,16 @@ export default function App() {
                       {s}
                     </button>
                   ))}
+                </div>
+
+                {/* Pearl of the day — auto-surfacing card */}
+                <div className="mt-8">
+                  <DailyPearl
+                    pearl={todaysPearl}
+                    unseen={pearlUnseen}
+                    onSeen={() => { markPearlSeen(); setPearlUnseen(false); }}
+                    onNavigate={handleNavigate}
+                  />
                 </div>
 
                 {/* On-Call Simulator — featured (prototype) */}
