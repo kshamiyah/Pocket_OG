@@ -357,4 +357,231 @@ export const TRIAL_SECTIONS = [
       ] },
     ],
   },
+
+  {
+    id: "trial-woman",
+    gl: "TRIAL",
+    source: "TRIAL",
+    condition: "Landmark Trial",
+    setting: "Obstetrics · Postpartum haemorrhage",
+    title: "WOMAN: tranexamic acid for postpartum haemorrhage",
+    draft: true,
+    trial: {
+      acronym: "WOMAN",
+      name: "Early tranexamic acid for postpartum haemorrhage",
+      group: "WOMAN Trial Collaborators (Shakur H et al.)",
+      citation: "Lancet 2017;389:2105–16",
+      doi: "10.1016/S0140-6736(17)30638-4",
+      url: "https://doi.org/10.1016/S0140-6736(17)30638-4",
+      year: 2017,
+      n: "20,060 women",
+      design: "International double-blind placebo-controlled RCT",
+    },
+    flowchartId: "GTG52_PPH",
+    relatedGl: ["GTG52"],
+    tags: [
+      "woman trial", "tranexamic acid", "txa", "postpartum haemorrhage", "pph", "obstetric bleeding",
+      "shakur", "death from bleeding", "antifibrinolytic", "landmark trial", "obstetric trial",
+    ],
+    content: [
+      { type: "alert", value: "Bottom line: giving tranexamic acid early reduced death due to bleeding in postpartum haemorrhage, with the benefit only when given within 3 hours." },
+
+      { type: "subheading", value: "Clinical question" },
+      { type: "text", value: "In women with postpartum haemorrhage, does tranexamic acid reduce death and hysterectomy compared with placebo?" },
+
+      { type: "subheading", value: "Design & population" },
+      { type: "list", items: [
+        "International double-blind placebo-controlled RCT across 21 countries.",
+        "20,060 women with clinically diagnosed postpartum haemorrhage after vaginal or caesarean birth.",
+        "Tranexamic acid 1 g IV (repeated if bleeding continued) versus placebo, alongside standard care.",
+      ] },
+
+      { type: "subheading", value: "Key result" },
+      { type: "list", items: [
+        "Death due to bleeding: 1.5% tranexamic acid vs 1.9% placebo (RR 0.81, 95% CI 0.65–1.00).",
+        "Greater benefit when given within 3 hours of birth (RR about 0.69); little benefit after 3 hours.",
+        "No reduction in hysterectomy, and no increase in thromboembolic events.",
+      ] },
+
+      { type: "subheading", value: "What it changed" },
+      { type: "text", value: "WHO now recommends tranexamic acid within 3 hours for postpartum haemorrhage, and it is embedded in RCOG and local PPH protocols as an early step." },
+
+      { type: "subheading", value: "Caveats" },
+      { type: "list", items: [
+        "The benefit depends on giving it early; after 3 hours there was little effect.",
+        "Hysterectomy was often decided at randomisation, so the trial could not show an effect on it.",
+        "Absolute benefit was largest in settings with high PPH mortality.",
+      ] },
+    ],
+  },
+
+  {
+    id: "trial-oracle",
+    gl: "TRIAL",
+    source: "TRIAL",
+    condition: "Landmark Trial",
+    setting: "Obstetrics · Preterm birth & PPROM",
+    title: "ORACLE I & II: antibiotics in PPROM and in preterm labour",
+    draft: true,
+    trial: {
+      acronym: "ORACLE I & II",
+      name: "Broad-spectrum antibiotics for preterm prelabour rupture of membranes (I) and for spontaneous preterm labour (II)",
+      group: "Kenyon SL et al.",
+      citation: "Lancet 2001;357:979–88 & 989–94",
+      doi: "10.1016/S0140-6736(00)04233-1",
+      url: "https://doi.org/10.1016/S0140-6736(00)04233-1",
+      year: 2001,
+      n: "ORACLE I 4,826; ORACLE II 6,295",
+      design: "Two factorial RCTs, with 7-year follow-up",
+    },
+    flowchartId: "GL895_ROM_TRIAGE",
+    relatedGl: ["GL895", "NG25"],
+    tags: [
+      "oracle", "oracle i", "oracle ii", "erythromycin pprom", "co-amoxiclav", "coamoxiclav",
+      "pprom antibiotics", "preterm labour antibiotics", "necrotising enterocolitis", "nec",
+      "kenyon", "prelabour rupture of membranes", "landmark trial", "obstetric trial",
+    ],
+    content: [
+      { type: "alert", value: "Bottom line: for PPROM, erythromycin helps and co-amoxiclav harms (necrotising enterocolitis). For preterm labour with intact membranes, antibiotics do not help and may harm, so are not given." },
+
+      { type: "subheading", value: "Clinical question" },
+      { type: "text", value: "Do broad-spectrum antibiotics improve neonatal outcomes in preterm prelabour rupture of membranes (ORACLE I), and in spontaneous preterm labour with intact membranes (ORACLE II)?" },
+
+      { type: "subheading", value: "Design & population" },
+      { type: "list", items: [
+        "Two large factorial randomised trials (erythromycin, co-amoxiclav, both, or placebo).",
+        "ORACLE I: 4,826 women with PPROM. ORACLE II: 6,295 women in preterm labour with intact membranes.",
+        "Long-term outcomes assessed in the ORACLE Children Study at 7 years.",
+      ] },
+
+      { type: "subheading", value: "Key result" },
+      { type: "list", items: [
+        "PPROM (ORACLE I): erythromycin prolonged pregnancy and reduced neonatal morbidity; co-amoxiclav increased necrotising enterocolitis.",
+        "Preterm labour, intact membranes (ORACLE II): neither antibiotic improved outcomes.",
+        "At 7 years, antibiotics in the intact-membranes group were linked to a small excess of functional impairment and cerebral palsy.",
+      ] },
+
+      { type: "subheading", value: "What it changed" },
+      { type: "text", value: "Made erythromycin the antibiotic for PPROM, made co-amoxiclav one to avoid, and established that antibiotics are not given for preterm labour with intact membranes in the absence of infection. This is reflected in NICE NG25." },
+
+      { type: "subheading", value: "Caveats" },
+      { type: "list", items: [
+        "The harm signal for antibiotics in preterm labour came mainly from the long-term follow-up.",
+        "The findings assume no clinical infection; suspected chorioamnionitis is treated on its own merits.",
+      ] },
+    ],
+  },
+
+  {
+    id: "trial-eclipse",
+    gl: "TRIAL",
+    source: "TRIAL",
+    condition: "Landmark Trial",
+    setting: "Gynaecology · Heavy menstrual bleeding",
+    title: "ECLIPSE: LNG-IUS vs medical therapy for heavy menstrual bleeding",
+    draft: true,
+    trial: {
+      acronym: "ECLIPSE",
+      name: "Levonorgestrel intrauterine system versus usual medical treatment for menorrhagia",
+      group: "Gupta J et al., ECLIPSE Trial Collaborative Group",
+      citation: "N Engl J Med 2013;368:128–37",
+      doi: "10.1056/NEJMoa1204724",
+      url: "https://doi.org/10.1056/NEJMoa1204724",
+      year: 2013,
+      n: "571 women",
+      design: "Pragmatic multicentre RCT (UK primary care)",
+    },
+    flowchartId: "NG88_TREATMENT",
+    relatedGl: ["NG88"],
+    tags: [
+      "eclipse", "lng-ius", "mirena", "levonorgestrel intrauterine system", "heavy menstrual bleeding",
+      "menorrhagia", "hmb medical treatment", "gupta", "first line hmb", "landmark trial", "gynaecology trial",
+    ],
+    content: [
+      { type: "alert", value: "Bottom line: the LNG-IUS improved quality of life more than usual medical treatment for heavy menstrual bleeding, and made it the first-line option." },
+
+      { type: "subheading", value: "Clinical question" },
+      { type: "text", value: "In women with heavy menstrual bleeding in primary care, does the LNG-IUS improve quality of life more than usual medical treatment?" },
+
+      { type: "subheading", value: "Design & population" },
+      { type: "list", items: [
+        "Pragmatic multicentre randomised trial in UK primary care.",
+        "571 women presenting with heavy menstrual bleeding.",
+        "LNG-IUS versus usual medical treatment (tranexamic or mefenamic acid, combined pill, or oral progestogen).",
+      ] },
+
+      { type: "subheading", value: "Key result" },
+      { type: "list", items: [
+        "The LNG-IUS gave a greater improvement in the Menorrhagia Multi-Attribute Scale (quality of life) at 2 years.",
+        "More women continued the LNG-IUS than usual medical treatment.",
+        "Both groups improved, but the LNG-IUS improved more.",
+      ] },
+
+      { type: "subheading", value: "What it changed" },
+      { type: "text", value: "Established the LNG-IUS as the first-line pharmacological treatment for heavy menstrual bleeding without structural or histological cause, as in NICE NG88." },
+
+      { type: "subheading", value: "Caveats" },
+      { type: "list", items: [
+        "The outcome was patient-reported quality of life, not a measured blood-loss reduction.",
+        "The trial was open-label, and it addresses HMB without structural pathology.",
+      ] },
+    ],
+  },
+
+  {
+    id: "trial-prism",
+    gl: "TRIAL",
+    source: "TRIAL",
+    condition: "Landmark Trial",
+    setting: "Gynaecology · Early pregnancy bleeding",
+    title: "PRISM: progesterone for bleeding in early pregnancy",
+    draft: true,
+    trial: {
+      acronym: "PRISM",
+      name: "Progesterone in women with bleeding in early pregnancy",
+      group: "Coomarasamy A et al.",
+      citation: "N Engl J Med 2019;380:1815–24",
+      doi: "10.1056/NEJMoa1813730",
+      url: "https://doi.org/10.1056/NEJMoa1813730",
+      year: 2019,
+      n: "4,153 women",
+      design: "Multicentre double-blind placebo-controlled RCT",
+    },
+    flowchartId: "CG565_TRIAGE",
+    relatedGl: ["CG565", "CG621"],
+    tags: [
+      "prism", "progesterone", "threatened miscarriage", "early pregnancy bleeding", "vaginal progesterone",
+      "micronised progesterone", "coomarasamy", "previous miscarriage", "miscarriage prevention",
+      "landmark trial", "gynaecology trial", "early pregnancy trial",
+    ],
+    content: [
+      { type: "alert", value: "Bottom line: vaginal progesterone did not raise live births overall for early pregnancy bleeding, but helped women who had also had previous miscarriages, and the benefit grew with the number of prior losses." },
+
+      { type: "subheading", value: "Clinical question" },
+      { type: "text", value: "In women with bleeding in early pregnancy (threatened miscarriage), does vaginal progesterone increase the chance of a live birth?" },
+
+      { type: "subheading", value: "Design & population" },
+      { type: "list", items: [
+        "Multicentre double-blind placebo-controlled randomised trial (UK).",
+        "4,153 women with bleeding in early pregnancy and a viable intrauterine pregnancy.",
+        "Vaginal micronised progesterone 400 mg twice daily versus placebo, until 16 weeks.",
+      ] },
+
+      { type: "subheading", value: "Key result" },
+      { type: "list", items: [
+        "Live birth after at least 34 weeks overall: 75% progesterone vs 72% placebo, not statistically significant.",
+        "In women with previous miscarriages, benefit increased with the number of prior losses.",
+        "With three or more previous miscarriages, live birth was 72% vs 57%, a meaningful benefit.",
+      ] },
+
+      { type: "subheading", value: "What it changed" },
+      { type: "text", value: "NICE NG126 (updated 2021) recommends offering vaginal micronised progesterone to women with early pregnancy bleeding and a previous miscarriage." },
+
+      { type: "subheading", value: "Caveats" },
+      { type: "list", items: [
+        "There was no benefit overall or in women with no previous miscarriage.",
+        "The guideline recommendation targets the bleeding-plus-previous-miscarriage group, based on a pre-specified subgroup.",
+      ] },
+    ],
+  },
 ];
