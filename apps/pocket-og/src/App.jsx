@@ -8,6 +8,7 @@ import WikiCard from "./components/WikiCard";
 import NoResults from "./components/NoResults";
 import FlowchartPlayer from "./components/FlowchartPlayer";
 import IOLPrioritizer from "./components/IOLPrioritizer";
+import OnCallSim from "./components/OnCallSim";
 import FeedbackButton from "./components/FeedbackButton";
 import ConsentPage from "./components/ConsentPage";
 import CalculatorPage from "./components/CalculatorPage";
@@ -152,6 +153,7 @@ export default function App() {
   const [activeFlowchartId, setActiveFlowchartId] = useState(null);
   const [libraryView, setLibraryView] = useState("guidelines"); // "guidelines" | "articles"
   const [showIOLPrioritizer, setShowIOLPrioritizer] = useState(false);
+  const [showOnCallSim, setShowOnCallSim] = useState(false);
   const [activeTab, setActiveTab] = useState("search");
   const [glSourceFilter, setGlSourceFilter] = useState("ALL");
   const [fcSourceFilter, setFcSourceFilter] = useState("ALL");
@@ -345,6 +347,9 @@ export default function App() {
       {/* IOL Prioritizer overlay */}
       {showIOLPrioritizer && <IOLPrioritizer onClose={() => setShowIOLPrioritizer(false)} />}
 
+      {/* On-Call Simulator overlay (prototype) */}
+      {showOnCallSim && <OnCallSim onClose={() => setShowOnCallSim(false)} />}
+
       {/* Guideline reader overlay */}
       {activeGuidelineGl && (
         <GuidelineReader
@@ -440,6 +445,25 @@ export default function App() {
                     </button>
                   ))}
                 </div>
+
+                {/* On-Call Simulator — featured (prototype) */}
+                <button
+                  type="button"
+                  onClick={() => setShowOnCallSim(true)}
+                  className="mt-8 w-full text-left rounded-2xl p-4 bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/20 hover:shadow-xl active:scale-[0.99] transition-all flex items-center gap-3"
+                >
+                  <span className="text-2xl shrink-0">🌙</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-bold">On-Call Simulator</p>
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-white/20">BETA</span>
+                    </div>
+                    <p className="text-xs text-violet-100 mt-0.5">Run a night shift. Prioritise under pressure.</p>
+                  </div>
+                  <svg className="w-4 h-4 text-violet-200 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
 
                 <InstallBanner />
 
