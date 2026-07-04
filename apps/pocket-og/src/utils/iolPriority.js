@@ -106,30 +106,42 @@ export function entryReason(entry) {
   return gov.label;
 }
 
-// Sort the queue by clinical urgency:
+// Compare two entries by clinical urgency:
 //   1. tier (most urgent first)
 //   2. if BOTH governed by SROM → longer since rupture first
 //   3. gestation (more advanced first)
 //   4. hours since SROM (longer first; 0 for non-SROM)
 //   5. longer on the list first
-export function sortIOLQueue(queue) {
-  return [...queue].sort((a, b) => {
-    const ta = iolEntryTier(a), tb = iolEntryTier(b);
-    if (ta !== tb) return ta - tb;
+export function compareEntries(a, b) {
+  const ta = iolEntryTier(a), tb = iolEntryTier(b);
+  if (ta !== tb) return ta - tb;
 
-    const aSrom = hasSrom(a), bSrom = hasSrom(b);
-    if (aSrom && bSrom) {
-      const sa = Number(a.sromHours) || 0, sb = Number(b.sromHours) || 0;
-      if (sa !== sb) return sb - sa;
-    }
-
-    const ga = gestTotalDays(a), gb = gestTotalDays(b);
-    if (ga !== gb) return gb - ga;
-
-    const sa = aSrom ? (Number(a.sromHours) || 0) : 0;
-    const sb = bSrom ? (Number(b.sromHours) || 0) : 0;
+  const aSrom = hasSrom(a), bSrom = hasSrom(b);
+  if (aSrom && bSrom) {
+    const sa = Number(a.sromHours) || 0, sb = Number(b.sromHours) || 0;
     if (sa !== sb) return sb - sa;
+  }
 
-    return (b.daysWaiting || 0) - (a.daysWaiting || 0);
-  });
+  const ga = gestTotalDays(a), gb = gestTotalDays(b);
+  if (ga !== gb) return gb - ga;
+
+  const sa = aSrom ? (Number(a.sromHours) || 0) : 0;
+  const sb = bSrom ? (Number(b.sromHours) || 0) : 0;
+  if (sa !== sb) return sb - sa;
+
+  return (b.daysWaiting || 0) - (a.daysWaiting || 0);
+}
+
+export function sortIOLQueue(queue) {
+  return [...queue].sort(compareEntries);
+}
+
+// Insert an entry into an already-ordered list at its auto position, preserving
+// the existing (possibly manually-reordered) order of the other entries.
+export function insertOrdered(list, entry) {
+  const arr = [...list];
+  let i = 0;
+  while (i < arr.length && compareEntries(arr[i], entry) <= 0) i++;
+  arr.splice(i, 0, entry);
+  return arr;
 }
