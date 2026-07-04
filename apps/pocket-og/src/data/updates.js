@@ -4,6 +4,15 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.4.0",
+    date: "04/07/2026",
+    title: "Landmark Trials in the Library",
+    changes: [
+      { tag: "new", text: "Landmark Trials: a new section under Library, Articles, collecting the guideline-changing studies behind O&G practice. Each card gives the clinical question, design, key result and what it changed, with a link to the paper and to the guideline it underpins." },
+      { tag: "new", text: "Ten trials to start: ARRIVE, Magpie, the Term Breech Trial, antenatal corticosteroids, magnesium for neuroprotection, ASPRE, WOMAN, ORACLE I & II, ECLIPSE and PRISM. Find them via the Trials filter in Library or in search." },
+    ],
+  },
+  {
     version: "1.3.0",
     date: "04/07/2026",
     title: "Pearl of the Day, sharing & a rebuilt IOL prioritiser",
