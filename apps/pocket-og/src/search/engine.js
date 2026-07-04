@@ -20,6 +20,7 @@ import {
 import { QUICKREF_SECTIONS } from "../data/quickref";
 import { APPROACH_SECTIONS } from "../data/approaches";
 import { TOG_SECTIONS } from "../data/tog";
+import { TRIAL_SECTIONS } from "../data/trials";
 import { EXTRA_SEARCH_SECTIONS } from "./extraIndex";
 
 function escapeRe(s) {
@@ -126,6 +127,7 @@ const _WIKI = [
   ...QUICKREF_SECTIONS,
   ...APPROACH_SECTIONS,
   ...TOG_SECTIONS,
+  ...TRIAL_SECTIONS,
   ...EXTRA_SEARCH_SECTIONS,
 ];
 

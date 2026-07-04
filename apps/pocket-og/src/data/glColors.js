@@ -23,10 +23,11 @@ export const SOURCE_COLORS = {
   NHSCSP:   { badge: "bg-slate-100 text-slate-700",    border: "border-slate-200",   conditionColor: "text-slate-500",   icon: "text-slate-500",   accent: "bg-slate-500",   solid: "bg-slate-600",   solidHover: "hover:bg-slate-700",   text: "text-slate-700",   bg: "bg-slate-50" },
   MBRRACE:  { badge: "bg-indigo-50 text-indigo-700",   border: "border-indigo-100",  conditionColor: "text-indigo-500",  icon: "text-indigo-500",  accent: "bg-indigo-500",  solid: "bg-indigo-600",  solidHover: "hover:bg-indigo-700",  text: "text-indigo-700",  bg: "bg-indigo-50" },
   TOG:      { badge: "bg-pink-50 text-pink-700",       border: "border-pink-100",    conditionColor: "text-pink-500",    icon: "text-pink-500",    accent: "bg-pink-500",    solid: "bg-pink-600",    solidHover: "hover:bg-pink-700",    text: "text-pink-700",    bg: "bg-pink-50" },
+  TRIAL:    { badge: "bg-cyan-50 text-cyan-700",       border: "border-cyan-100",    conditionColor: "text-cyan-600",    icon: "text-cyan-500",    accent: "bg-cyan-500",    solid: "bg-cyan-600",    solidHover: "hover:bg-cyan-700",    text: "text-cyan-700",    bg: "bg-cyan-50" },
 };
 
 // Sources that appear in the app, in legend order.
-export const SOURCE_ORDER = ["RBH", "NICE", "RCOG", "BASHH", "NHSCSP", "MBRRACE", "TOG"];
+export const SOURCE_ORDER = ["RBH", "NICE", "RCOG", "BASHH", "NHSCSP", "MBRRACE", "TOG", "TRIAL"];
 
 export const SOURCE_LABELS = {
   RBH: "RBH — local trust",
@@ -36,6 +37,7 @@ export const SOURCE_LABELS = {
   NHSCSP: "NHS Cervical Screening",
   MBRRACE: "MBRRACE-UK",
   TOG: "TOG — RCOG review journal",
+  TRIAL: "Landmark trial",
 };
 
 // Hex equivalents (the -500 shades) for places that can't use Tailwind classes
@@ -43,7 +45,7 @@ export const SOURCE_LABELS = {
 export const SOURCE_HEX = {
   RBH: "#3b82f6", NICE: "#14b8a6", RCOG: "#8b5cf6",
   BASHH: "#d946ef", NHSCSP: "#64748b", MBRRACE: "#6366f1",
-  TOG: "#ec4899",
+  TOG: "#ec4899", TRIAL: "#06b6d4",
 };
 
 export const DEFAULT_GL_COLORS = {

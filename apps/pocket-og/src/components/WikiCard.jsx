@@ -23,6 +23,7 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
     gl?.code,
     gl ? `${gl.version} · ${gl.date}` : null,
     page.tog?.year ? `TOG ${page.tog.year}` : null,
+    page.trial ? `${page.trial.design}${page.trial.n ? ` · ${page.trial.n}` : ""}` : null,
     page.flowchartId ? "⬡ flowchart" : null,
     isFallback ? "closest match" : null,
   ].filter(Boolean);
@@ -75,7 +76,7 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
               <div className="mb-4 flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-100 px-3 py-2">
                 <span className="text-amber-500 text-sm leading-none mt-0.5">⚠</span>
                 <p className="text-xs text-amber-700 leading-snug">
-                  AI-summarised draft — pending clinical sign-off. Verify against the source article and local protocol.
+                  AI-summarised draft, pending clinical sign-off. Verify against the source article and local protocol.
                 </p>
               </div>
             )}
@@ -94,6 +95,16 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
                   {" · "}The Obstetrician &amp; Gynaecologist
                   {page.tog.citation ? ` · ${page.tog.citation}` : ""}
                   {page.tog.authors ? ` · ${page.tog.authors}` : ""}
+                </p>
+              </div>
+            )}
+            {page.trial && (
+              <div className="mt-5 pt-3 border-t border-gray-100">
+                <p className="text-xs text-gray-400">
+                  <span className={`font-semibold ${col.text}`}>{page.trial.acronym}</span>
+                  {page.trial.name ? ` · ${page.trial.name}` : ""}
+                  {page.trial.group ? ` · ${page.trial.group}` : ""}
+                  {page.trial.citation ? ` · ${page.trial.citation}` : ""}
                 </p>
               </div>
             )}
@@ -131,6 +142,25 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
                     <div className="text-left">
                       <p className={`text-sm font-semibold ${col.text}`}>Read full article</p>
                       <p className="text-xs text-gray-500">Opens the TOG article (RCOG members)</p>
+                    </div>
+                  </div>
+                  <span className="text-gray-400 group-hover:text-gray-600 transition-colors">→</span>
+                </a>
+              )}
+              {page.trial?.url && (
+                <a
+                  href={page.trial.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl ${col.bg} border ${col.border} hover:brightness-95 active:brightness-90 transition-all group`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <svg className={`w-4 h-4 shrink-0 ${col.icon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    <div className="text-left">
+                      <p className={`text-sm font-semibold ${col.text}`}>Read the paper</p>
+                      <p className="text-xs text-gray-500">Opens the trial{page.trial.doi ? ` · doi ${page.trial.doi}` : ""}</p>
                     </div>
                   </div>
                   <span className="text-gray-400 group-hover:text-gray-600 transition-colors">→</span>

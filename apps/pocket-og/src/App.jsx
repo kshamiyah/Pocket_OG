@@ -22,6 +22,7 @@ import UpdatesModal from "./components/UpdatesModal";
 import InstallBanner from "./components/InstallBanner";
 import { LATEST_VERSION, hasUnseenUpdates, markUpdatesSeen } from "./data/updates";
 import { TOG_SECTIONS } from "./data/tog";
+import { TRIAL_SECTIONS } from "./data/trials";
 
 import { READER_AVAILABLE } from "./data/readerAvailable";
 import { readDeepLink, clearDeepLinkParam } from "./utils/deepLink";
@@ -32,6 +33,7 @@ const FILTER_OPTIONS = [
   { value: "RCOG",       label: "RCOG guidelines",     pill: "RCOG",          filterFn: e => GUIDELINES[e.page.gl]?.source === "RCOG",           active: "bg-gray-900 text-white" },
   { value: "NICE",       label: "NICE guidelines",     pill: "NICE",          filterFn: e => GUIDELINES[e.page.gl]?.source === "NICE",           active: "bg-gray-900 text-white" },
   { value: "TOG",        label: "TOG reviews",         pill: "TOG",           filterFn: e => e.page.source === "TOG",                            active: "bg-gray-900 text-white" },
+  { value: "TRIALS",     label: "Landmark trials",     pill: "Trials",        filterFn: e => e.page.source === "TRIAL",                          active: "bg-gray-900 text-white" },
   { value: "FLOWCHARTS", label: "Pages with flowcharts", pill: "⬡ Flowcharts", filterFn: e => !!e.page.flowchartId,                             active: "bg-teal-100 text-teal-700" },
   { value: "DRUGS",      label: "Medications",         pill: "℞ Meds",        filterFn: e => e.page.kind === "drug",                             active: "bg-cyan-100 text-cyan-700" },
   { value: "CALCS",      label: "Calculators",         pill: "▦ Calcs",       filterFn: e => e.page.kind === "calculator",                       active: "bg-amber-100 text-amber-700" },
@@ -153,6 +155,7 @@ export default function App() {
   const [expanded, setExpanded] = useState({});
   const [activeFlowchartId, setActiveFlowchartId] = useState(null);
   const [libraryView, setLibraryView] = useState("guidelines"); // "guidelines" | "articles"
+  const [articleView, setArticleView] = useState("tog"); // "tog" | "trials"
   const [showIOLPrioritizer, setShowIOLPrioritizer] = useState(false);
   const [pearlUnseen, setPearlUnseen] = useState(() => hasUnseenPearl());
   const [pearlDismissed, setPearlDismissed] = useState(() => isPearlDismissed());
@@ -725,7 +728,7 @@ export default function App() {
               <div className="inline-flex bg-gray-100 rounded-xl p-0.5 text-xs font-semibold">
                 {[
                   { id: "guidelines", label: "Guidelines" },
-                  { id: "articles", label: `Articles${TOG_SECTIONS.length ? ` · ${TOG_SECTIONS.length}` : ""}` },
+                  { id: "articles", label: `Articles${TOG_SECTIONS.length + TRIAL_SECTIONS.length ? ` · ${TOG_SECTIONS.length + TRIAL_SECTIONS.length}` : ""}` },
                 ].map(v => (
                   <button
                     key={v.id}
@@ -851,33 +854,58 @@ export default function App() {
             </>
             )}
 
-            {libraryView === "articles" && (
-              <div className="px-5 pt-4">
-                {TOG_SECTIONS.length === 0 ? (
-                  <p className="text-sm text-gray-400 text-center py-10">No review articles yet.</p>
-                ) : (
-                  <>
-                    <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
-                      {TOG_SECTIONS.map((page, i) => (
-                        <div key={page.id} className={i > 0 ? "border-t border-gray-50" : ""}>
-                          <WikiCard
-                            page={page}
-                            grouped
-                            isExpanded={!!expanded[page.id]}
-                            onToggle={() => toggle(page.id)}
-                            onOpenFlowchart={setActiveFlowchartId}
-                            onOpenGuideline={openGuidelineFromSearch}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    <p className="text-[11px] text-gray-400 mt-3 px-1 leading-snug">
-                      Original summaries of <span className="font-medium">The Obstetrician &amp; Gynaecologist</span> (TOG) review articles, each linking to the full paper. Reference only — verify against local guidance.
-                    </p>
-                  </>
-                )}
-              </div>
-            )}
+            {libraryView === "articles" && (() => {
+              const articleTabs = [
+                { id: "tog", label: `TOG reviews${TOG_SECTIONS.length ? ` · ${TOG_SECTIONS.length}` : ""}`, list: TOG_SECTIONS },
+                { id: "trials", label: `Trials${TRIAL_SECTIONS.length ? ` · ${TRIAL_SECTIONS.length}` : ""}`, list: TRIAL_SECTIONS },
+              ];
+              const activeArticles = articleTabs.find(t => t.id === articleView) ?? articleTabs[0];
+              return (
+                <div className="px-5 pt-4">
+                  {/* TOG / Trials sub-filter */}
+                  <div className="flex gap-2 mb-4">
+                    {articleTabs.map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => setArticleView(t.id)}
+                        aria-pressed={articleView === t.id}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                          articleView === t.id ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {activeArticles.list.length === 0 ? (
+                    <p className="text-sm text-gray-400 text-center py-10">Nothing here yet.</p>
+                  ) : (
+                    <>
+                      <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm">
+                        {activeArticles.list.map((page, i) => (
+                          <div key={page.id} className={i > 0 ? "border-t border-gray-50" : ""}>
+                            <WikiCard
+                              page={page}
+                              grouped
+                              isExpanded={!!expanded[page.id]}
+                              onToggle={() => toggle(page.id)}
+                              onOpenFlowchart={setActiveFlowchartId}
+                              onOpenGuideline={openGuidelineFromSearch}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-[11px] text-gray-400 mt-3 px-1 leading-snug">
+                        {articleView === "tog"
+                          ? <>Original summaries of <span className="font-medium">The Obstetrician &amp; Gynaecologist</span> (TOG) review articles, each linking to the full paper. Reference only, verify against local guidance.</>
+                          : <>Original summaries of the landmark trials behind O&amp;G practice, each linking to the paper and the guideline it underpins. Reference only, verify against local guidance.</>}
+                      </p>
+                    </>
+                  )}
+                </div>
+              );
+            })()}
           </div>
 
           {libraryView === "guidelines" && (
