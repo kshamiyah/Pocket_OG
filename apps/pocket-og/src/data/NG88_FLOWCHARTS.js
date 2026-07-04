@@ -7,8 +7,8 @@
 
 export const NG88_ASSESSMENT_FLOWCHART = {
   id: "NG88_ASSESSMENT",
-  title: "HMB — Initial Assessment & Primary Care Pathway",
-  subtitle: "NG88 — Heavy Menstrual Bleeding",
+  title: "HMB: Initial Assessment & Primary Care Pathway",
+  subtitle: "NG88: Heavy Menstrual Bleeding",
   startId: "present",
   nodes: {
 
@@ -31,8 +31,8 @@ export const NG88_ASSESSMENT_FLOWCHART = {
       text: "Screen for features that require urgent referral or investigation before routine management.",
       options: [
         { label: "Postmenopausal bleeding (any bleeding >12 months after last period)", sublabel: "Urgent suspected cancer (2WW) referral required", next: "urgent-referral" },
-        { label: "Persistent intermenstrual or postcoital bleeding (any age)", sublabel: "Requires investigation — refer or investigate", next: "investigate-imb" },
-        { label: "HMB only — no red flag features", sublabel: "Proceed to standard assessment", next: "examination" },
+        { label: "Persistent intermenstrual or postcoital bleeding (any age)", sublabel: "Requires investigation, refer or investigate", next: "investigate-imb" },
+        { label: "HMB only, no red flag features", sublabel: "Proceed to standard assessment", next: "examination" },
       ],
     },
 
@@ -62,7 +62,7 @@ export const NG88_ASSESSMENT_FLOWCHART = {
 
     "investigate-imb": {
       type: "action",
-      title: "Persistent IMB / PCB — Investigate Before Treating",
+      title: "Persistent IMB / PCB: Investigate Before Treating",
       text: "Intermenstrual bleeding (IMB) and postcoital bleeding (PCB) may indicate endometrial or cervical pathology and should not be treated empirically without investigation.",
       items: [
         "Speculum examination: assess cervix, check for erosion, polyps, contact bleeding",
@@ -99,14 +99,14 @@ export const NG88_ASSESSMENT_FLOWCHART = {
       title: "Is structural pathology suspected or confirmed?",
       text: "Clinical features suggesting structural pathology: palpable uterus, bulk symptoms (urinary frequency, pressure), severe dysmenorrhoea, treatment failure. Check pelvic USS findings if available.",
       options: [
-        { label: "Yes — uterus palpable, structural pathology suspected, or USS abnormal", sublabel: "USS if not done; refer to gynaecology if structural pathology confirmed", next: "structural-path" },
-        { label: "No — no structural pathology suspected; HMB without identifiable cause", sublabel: "Proceed to pharmacological treatment in primary care", next: "primary-care-tx" },
+        { label: "Yes, uterus palpable, structural pathology suspected, or USS abnormal", sublabel: "USS if not done; refer to gynaecology if structural pathology confirmed", next: "structural-path" },
+        { label: "No, no structural pathology suspected; HMB without identifiable cause", sublabel: "Proceed to pharmacological treatment in primary care", next: "primary-care-tx" },
       ],
     },
 
     "structural-path": {
       type: "action",
-      title: "Structural Pathology — USS and Consider Referral",
+      title: "Structural Pathology: USS and Consider Referral",
       text: "Pelvic USS (transvaginal preferred) to characterise pathology. Management depends on findings.",
       items: [
         "Fibroids <3 cm, not distorting cavity: may be managed in primary care with LNG-IUS or pharmacological options",
@@ -148,14 +148,14 @@ export const NG88_ASSESSMENT_FLOWCHART = {
       title: "Response to Primary Care Treatment?",
       text: "Assess after 3–6 months of appropriate treatment.",
       options: [
-        { label: "Satisfactory response — symptoms controlled, QoL improved", sublabel: "Continue treatment; annual review", next: "continue-tx" },
+        { label: "Satisfactory response, symptoms controlled, QoL improved", sublabel: "Continue treatment; annual review", next: "continue-tx" },
         { label: "Inadequate response after ≥2 pharmacological options tried", sublabel: "Refer to gynaecology", next: "refer-failed-tx" },
       ],
     },
 
     "continue-tx": {
       type: "end",
-      title: "Continue Treatment — Annual Review",
+      title: "Continue Treatment: Annual Review",
       text: "Continue effective treatment. Recheck FBC if anaemia was present. Annual review or sooner if symptoms change.",
       items: [
         "LNG-IUS: effective for up to 5 years (check position at annual smear if applicable)",
@@ -166,7 +166,7 @@ export const NG88_ASSESSMENT_FLOWCHART = {
 
     "refer-failed-tx": {
       type: "end",
-      title: "Refer to Gynaecology — Treatment Failure",
+      title: "Refer to Gynaecology: Treatment Failure",
       text: "Refer to secondary care with details of treatments tried, duration, compliance, and investigations performed.",
       items: [
         "Include: FBC results, USS if performed, treatments tried and for how long",
@@ -181,14 +181,14 @@ export const NG88_ASSESSMENT_FLOWCHART = {
 
 export const NG88_TREATMENT_FLOWCHART = {
   id: "NG88_TREATMENT",
-  title: "HMB — Pharmacological Treatment Selection",
-  subtitle: "NG88 — No structural pathology / Fibroids <3 cm",
+  title: "HMB: Pharmacological Treatment Selection",
+  subtitle: "NG88: No structural pathology / Fibroids <3 cm",
   startId: "start",
   nodes: {
 
     "start": {
       type: "action",
-      title: "HMB — No Structural Pathology Identified",
+      title: "HMB: No Structural Pathology Identified",
       text: "No uterine cavity distortion, no significant structural abnormality. Offer pharmacological treatment in the following sequence.",
       items: [
         "Confirm: future fertility desires?",
@@ -204,14 +204,14 @@ export const NG88_TREATMENT_FLOWCHART = {
       title: "Is LNG-IUS acceptable and suitable?",
       text: "LNG-IUS (e.g. Mirena 52 mg) is the most effective pharmacological treatment for HMB. Offer as first-line unless contraindicated or declined.",
       options: [
-        { label: "Yes — woman accepts LNG-IUS; no contraindications", sublabel: "Offer LNG-IUS as first-line", next: "offer-lng-ius" },
-        { label: "No — woman declines, or contraindicated (current breast cancer, distorted cavity, active PID)", sublabel: "Offer non-LNG-IUS options", next: "non-lng" },
+        { label: "Yes, woman accepts LNG-IUS; no contraindications", sublabel: "Offer LNG-IUS as first-line", next: "offer-lng-ius" },
+        { label: "No, woman declines, or contraindicated (current breast cancer, distorted cavity, active PID)", sublabel: "Offer non-LNG-IUS options", next: "non-lng" },
       ],
     },
 
     "offer-lng-ius": {
       type: "action",
-      title: "LNG-IUS (Mirena 52 mg) — First-Line",
+      title: "LNG-IUS (Mirena 52 mg): First-Line",
       text: "Levonorgestrel intrauterine system. Reduces blood loss by 71–95%. Approximately 50% of users achieve amenorrhoea within 12 months.",
       items: [
         "Insert at any time in menstrual cycle; can be inserted immediately post-partum or post-abortion",
@@ -229,8 +229,8 @@ export const NG88_TREATMENT_FLOWCHART = {
       title: "LNG-IUS response at 3–6 months?",
       text: "Irregular spotting is expected and usually settles. Assess HMB improvement.",
       options: [
-        { label: "Good response — HMB improved; spotting reducing or settled", sublabel: "Continue; review at 12 months", next: "lng-continue" },
-        { label: "Inadequate response — HMB persists; or LNG-IUS expelled / not tolerated", sublabel: "Consider additional pharmacological options or refer", next: "lng-failed" },
+        { label: "Good response: HMB improved; spotting reducing or settled", sublabel: "Continue; review at 12 months", next: "lng-continue" },
+        { label: "Inadequate response: HMB persists; or LNG-IUS expelled / not tolerated", sublabel: "Consider additional pharmacological options or refer", next: "lng-failed" },
       ],
     },
 
@@ -242,7 +242,7 @@ export const NG88_TREATMENT_FLOWCHART = {
 
     "lng-failed": {
       type: "end",
-      title: "LNG-IUS Not Effective — Consider Referral",
+      title: "LNG-IUS Not Effective: Consider Referral",
       text: "If LNG-IUS fails: add tranexamic acid or NSAID during menstruation, or refer to gynaecology if symptoms remain uncontrolled.",
     },
 
@@ -251,8 +251,8 @@ export const NG88_TREATMENT_FLOWCHART = {
       title: "Does woman want contraception?",
       text: "Choice of non-IUS pharmacological agent depends on contraceptive need and hormone acceptability.",
       options: [
-        { label: "Yes — wants contraception", sublabel: "Hormonal options with contraceptive benefit", next: "hormonal-contraception" },
-        { label: "No — no contraception needed / prefers non-hormonal", sublabel: "Non-hormonal first; hormonal if needed", next: "non-hormonal" },
+        { label: "Yes, wants contraception", sublabel: "Hormonal options with contraceptive benefit", next: "hormonal-contraception" },
+        { label: "No, no contraception needed / prefers non-hormonal", sublabel: "Non-hormonal first; hormonal if needed", next: "non-hormonal" },
       ],
     },
 
@@ -289,8 +289,8 @@ export const NG88_TREATMENT_FLOWCHART = {
       type: "decision",
       title: "Response to treatment at 3–6 months?",
       options: [
-        { label: "Satisfactory — symptoms adequately controlled", sublabel: "Continue; annual review", next: "tx-continue" },
-        { label: "Inadequate — symptoms persist after ≥2 options tried", sublabel: "Consider referral to gynaecology", next: "tx-refer" },
+        { label: "Satisfactory, symptoms adequately controlled", sublabel: "Continue; annual review", next: "tx-continue" },
+        { label: "Inadequate, symptoms persist after ≥2 options tried", sublabel: "Consider referral to gynaecology", next: "tx-refer" },
       ],
     },
 
@@ -311,8 +311,8 @@ export const NG88_TREATMENT_FLOWCHART = {
 
 export const NG88_SURGICAL_FLOWCHART = {
   id: "NG88_SURGICAL",
-  title: "HMB — Surgical Treatment Decision",
-  subtitle: "NG88 — Pharmacological treatment failed or declined",
+  title: "HMB: Surgical Treatment Decision",
+  subtitle: "NG88: Pharmacological treatment failed or declined",
   startId: "start",
   nodes: {
 
@@ -333,8 +333,8 @@ export const NG88_SURGICAL_FLOWCHART = {
       type: "decision",
       title: "Does the woman wish to preserve fertility?",
       options: [
-        { label: "Yes — wants future pregnancy / fertility preservation", sublabel: "Avoid ablation and hysterectomy", next: "fertility-preserve" },
-        { label: "No — family complete or fertility not desired", sublabel: "All surgical options available", next: "structural-check" },
+        { label: "Yes, wants future pregnancy / fertility preservation", sublabel: "Avoid ablation and hysterectomy", next: "fertility-preserve" },
+        { label: "No, family complete or fertility not desired", sublabel: "All surgical options available", next: "structural-check" },
       ],
     },
 
@@ -385,7 +385,7 @@ export const NG88_SURGICAL_FLOWCHART = {
       type: "decision",
       title: "Fibroid characteristics?",
       options: [
-        { label: "Submucosal (type 0–2) — distorting cavity", sublabel: "Hysteroscopic myomectomy", next: "hyst-myomectomy" },
+        { label: "Submucosal (type 0–2), distorting cavity", sublabel: "Hysteroscopic myomectomy", next: "hyst-myomectomy" },
         { label: "Intramural / subserosal / multiple / large (>6 cm)", sublabel: "UAE, myomectomy, or hysterectomy", next: "fibroid-options" },
       ],
     },
@@ -407,14 +407,14 @@ export const NG88_SURGICAL_FLOWCHART = {
       type: "decision",
       title: "Preferred approach for intramural/larger fibroids?",
       options: [
-        { label: "Uterine preservation preferred — UAE or myomectomy", sublabel: "Discuss both options; inform about limitations", next: "uae-vs-myomectomy" },
-        { label: "Hysterectomy preferred — definitive treatment", sublabel: "Counselling, pre-operative work-up", next: "hysterectomy" },
+        { label: "Uterine preservation preferred: UAE or myomectomy", sublabel: "Discuss both options; inform about limitations", next: "uae-vs-myomectomy" },
+        { label: "Hysterectomy preferred, definitive treatment", sublabel: "Counselling, pre-operative work-up", next: "hysterectomy" },
       ],
     },
 
     "uae-vs-myomectomy": {
       type: "action",
-      title: "UAE vs Myomectomy — Shared Decision",
+      title: "UAE vs Myomectomy: Shared Decision",
       text: "Both are effective uterine-preserving options. Discuss pros and cons of each.",
       items: [
         "UAE: radiological procedure; no surgery; effective for most fibroid types; shorter recovery than open myomectomy",
@@ -437,8 +437,8 @@ export const NG88_SURGICAL_FLOWCHART = {
       title: "Ablation or Hysterectomy?",
       text: "For women with no significant structural pathology and family complete. Discuss both options fully.",
       options: [
-        { label: "Endometrial ablation — prefers uterine preservation / quicker recovery", sublabel: "Second-generation device preferred", next: "ablation" },
-        { label: "Hysterectomy — prefers definitive treatment / ablation failed", sublabel: "Discuss route and timing", next: "hysterectomy" },
+        { label: "Endometrial ablation, prefers uterine preservation / quicker recovery", sublabel: "Second-generation device preferred", next: "ablation" },
+        { label: "Hysterectomy, prefers definitive treatment / ablation failed", sublabel: "Discuss route and timing", next: "hysterectomy" },
       ],
     },
 
@@ -462,8 +462,8 @@ export const NG88_SURGICAL_FLOWCHART = {
       type: "decision",
       title: "Response to ablation at 3–6 months?",
       options: [
-        { label: "Symptoms controlled — HMB improved, amenorrhoea or minimal bleeding", sublabel: "Continue; no further treatment needed", next: "ablation-success" },
-        { label: "Treatment failure — HMB persists or recurs", sublabel: "Consider hysterectomy", next: "hysterectomy" },
+        { label: "Symptoms controlled: HMB improved, amenorrhoea or minimal bleeding", sublabel: "Continue; no further treatment needed", next: "ablation-success" },
+        { label: "Treatment failure: HMB persists or recurs", sublabel: "Consider hysterectomy", next: "hysterectomy" },
       ],
     },
 
@@ -490,7 +490,7 @@ export const NG88_SURGICAL_FLOWCHART = {
 
     "hysterectomy-end": {
       type: "end",
-      title: "Hysterectomy — Planned & Consented",
+      title: "Hysterectomy: Planned & Consented",
       text: "Pre-operative optimisation, consent, and scheduling. Post-operative follow-up at 6–8 weeks. Return to GP thereafter.",
       items: [
         "Correct Hb pre-operatively (target ≥100 g/L)",
@@ -506,13 +506,13 @@ export const NG88_SURGICAL_FLOWCHART = {
 export const NG88_FIBROID_FLOWCHART = {
   id: "NG88_FIBROID",
   title: "Uterine Fibroid Management",
-  subtitle: "NG88 — HMB with Fibroids",
+  subtitle: "NG88: HMB with Fibroids",
   startId: "start",
   nodes: {
 
     "start": {
       type: "action",
-      title: "Uterine Fibroids — Initial Assessment",
+      title: "Uterine Fibroids: Initial Assessment",
       text: "Uterine fibroids are the most common cause of HMB with structural pathology. Management depends on fibroid size, FIGO type, symptoms, and fertility wishes.",
       items: [
         "Characterise fibroids: USS (transvaginal) — size, number, FIGO type (0–7), cavity involvement",
@@ -528,8 +528,8 @@ export const NG88_FIBROID_FLOWCHART = {
       type: "decision",
       title: "Primary symptom?",
       options: [
-        { label: "HMB (heavy menstrual bleeding) — main concern", sublabel: "Focus on HMB management", next: "hmb-fibroid" },
-        { label: "Bulk symptoms — pressure, urinary, size (minimal or no HMB)", sublabel: "Focus on fibroid reduction/removal", next: "bulk-symptoms" },
+        { label: "HMB (heavy menstrual bleeding), main concern", sublabel: "Focus on HMB management", next: "hmb-fibroid" },
+        { label: "Bulk symptoms, pressure, urinary, size (minimal or no HMB)", sublabel: "Focus on fibroid reduction/removal", next: "bulk-symptoms" },
         { label: "Both HMB and bulk symptoms", sublabel: "Treatment must address both", next: "both-symptoms" },
       ],
     },
@@ -539,14 +539,14 @@ export const NG88_FIBROID_FLOWCHART = {
       title: "Fibroid size and cavity distortion?",
       options: [
         { label: "Fibroids <3 cm, no distortion of uterine cavity", sublabel: "Medical management as per no-structural-pathology pathway", next: "small-fibroid-tx" },
-        { label: "Submucosal fibroid (FIGO type 0–2) / cavity distorted", sublabel: "Medical or surgical — depends on fertility and preference", next: "submucosal-tx" },
+        { label: "Submucosal fibroid (FIGO type 0–2) / cavity distorted", sublabel: "Medical or surgical, depends on fertility and preference", next: "submucosal-tx" },
         { label: "Intramural/multiple fibroids ≥3 cm", sublabel: "Secondary care management required", next: "large-fibroid-tx" },
       ],
     },
 
     "small-fibroid-tx": {
       type: "end",
-      title: "Small Fibroids — Medical Management",
+      title: "Small Fibroids: Medical Management",
       text: "Manage as per NG88 pharmacological pathway. LNG-IUS is first-line if cavity not distorted.",
       items: [
         "LNG-IUS: effective if fibroid <3 cm and cavity not distorted",
@@ -607,9 +607,9 @@ export const NG88_FIBROID_FLOWCHART = {
       type: "decision",
       title: "UAE vs Myomectomy vs Hysterectomy?",
       options: [
-        { label: "UAE — prefers non-surgical, uterine preservation", sublabel: "MRI required; not if fertility desired", next: "uae" },
-        { label: "Myomectomy — prefers surgical fibroid removal, keep uterus", sublabel: "Laparoscopic or open", next: "myomectomy-def" },
-        { label: "Hysterectomy — definitive treatment", sublabel: "Discuss route and ovarian conservation", next: "hysterectomy" },
+        { label: "UAE, prefers non-surgical, uterine preservation", sublabel: "MRI required; not if fertility desired", next: "uae" },
+        { label: "Myomectomy, prefers surgical fibroid removal, keep uterus", sublabel: "Laparoscopic or open", next: "myomectomy-def" },
+        { label: "Hysterectomy, definitive treatment", sublabel: "Discuss route and ovarian conservation", next: "hysterectomy" },
       ],
     },
 
@@ -645,7 +645,7 @@ export const NG88_FIBROID_FLOWCHART = {
 
     "bulk-symptoms": {
       type: "end",
-      title: "Bulk Symptoms — Fibroid Reduction",
+      title: "Bulk Symptoms: Fibroid Reduction",
       text: "Bulk symptoms (urinary frequency, pressure, distension) are best addressed by fibroid reduction/removal. Medical options provide temporary relief.",
       items: [
         "GnRH analogue: temporary fibroid shrinkage; symptoms recur after stopping",
@@ -658,7 +658,7 @@ export const NG88_FIBROID_FLOWCHART = {
 
     "both-symptoms": {
       type: "end",
-      title: "HMB + Bulk Symptoms — Combined Approach",
+      title: "HMB + Bulk Symptoms: Combined Approach",
       text: "Requires treatment addressing both. Medical bridging then surgical/interventional management usually needed.",
       items: [
         "GnRH analogue or Relugolix: medical bridge while awaiting or planning surgery",
@@ -674,8 +674,8 @@ export const NG88_FIBROID_FLOWCHART = {
 
 export const NG88_SECONDARY_FLOWCHART = {
   id: "NG88_SECONDARY",
-  title: "HMB — Secondary Care Assessment Pathway",
-  subtitle: "NG88 — Gynaecology Outpatient",
+  title: "HMB: Secondary Care Assessment Pathway",
+  subtitle: "NG88: Gynaecology Outpatient",
   startId: "referral",
   nodes: {
 
@@ -696,8 +696,8 @@ export const NG88_SECONDARY_FLOWCHART = {
       type: "decision",
       title: "Is a pelvic USS already available?",
       options: [
-        { label: "Yes — USS performed in primary care", sublabel: "Review results; perform further imaging if needed", next: "uss-findings" },
-        { label: "No — no USS yet", sublabel: "Arrange pelvic USS (transvaginal preferred)", next: "arrange-uss" },
+        { label: "Yes: USS performed in primary care", sublabel: "Review results; perform further imaging if needed", next: "uss-findings" },
+        { label: "No, no USS yet", sublabel: "Arrange pelvic USS (transvaginal preferred)", next: "arrange-uss" },
       ],
     },
 
@@ -726,7 +726,7 @@ export const NG88_SECONDARY_FLOWCHART = {
 
     "hysteroscopy": {
       type: "action",
-      title: "Hysteroscopy — Diagnostic ± Therapeutic",
+      title: "Hysteroscopy: Diagnostic ± Therapeutic",
       text: "Gold standard for intrauterine pathology. Outpatient hysteroscopy preferred (no-touch technique, ±LA).",
       items: [
         "Polypectomy at time of diagnostic hysteroscopy if polyp found",
@@ -742,7 +742,7 @@ export const NG88_SECONDARY_FLOWCHART = {
       type: "decision",
       title: "Hysteroscopy findings?",
       options: [
-        { label: "Polyp removed — no other pathology", sublabel: "Review at 6–8 weeks; most resolve", next: "end-polyp" },
+        { label: "Polyp removed, no other pathology", sublabel: "Review at 6–8 weeks; most resolve", next: "end-polyp" },
         { label: "Submucosal fibroid identified", sublabel: "Plan hysteroscopic myomectomy", next: "end-submucosal" },
         { label: "Endometrial abnormality / cancer suspected", sublabel: "Urgent histology; MDT referral if malignant", next: "end-malignancy" },
         { label: "Normal cavity", sublabel: "Consider ablation or pharmacological treatment", next: "normal-cavity" },
@@ -751,7 +751,7 @@ export const NG88_SECONDARY_FLOWCHART = {
 
     "end-polyp": {
       type: "end",
-      title: "Polypectomy Done — Follow-Up",
+      title: "Polypectomy Done: Follow-Up",
       text: "Review symptoms at 6–8 weeks. Most women have significant improvement. If symptoms recur: repeat hysteroscopy, LNG-IUS, or ablation.",
     },
 
@@ -769,13 +769,13 @@ export const NG88_SECONDARY_FLOWCHART = {
 
     "normal-cavity": {
       type: "end",
-      title: "Normal Cavity — Discuss Treatment Options",
+      title: "Normal Cavity: Discuss Treatment Options",
       text: "Normal hysteroscopy. Discuss: LNG-IUS, pharmacological treatment, or endometrial ablation (if family complete).",
     },
 
     "fibroid-secondary": {
       type: "end",
-      title: "Complex Fibroids — Multi-Disciplinary / Specialist",
+      title: "Complex Fibroids: Multi-Disciplinary / Specialist",
       text: "Arrange MRI pelvis. Discuss options: UAE, myomectomy (laparoscopic or open), GnRH analogue bridging, hysterectomy. Refer to fibroid clinic or interventional radiology as appropriate.",
     },
 
@@ -804,13 +804,13 @@ export const NG88_SECONDARY_FLOWCHART = {
 
     "normal-biopsy": {
       type: "end",
-      title: "Normal Biopsy — Treat HMB",
+      title: "Normal Biopsy: Treat HMB",
       text: "Normal histology. Manage HMB with appropriate pharmacological or surgical treatment. Annual review.",
     },
 
     "hyperplasia": {
       type: "end",
-      title: "Hyperplasia Without Atypia — LNG-IUS",
+      title: "Hyperplasia Without Atypia: LNG-IUS",
       text: "LNG-IUS is first-line treatment. Regression expected in >90% at 6 months. Follow-up biopsy at 6 months.",
       items: [
         "LNG-IUS: regression rate >90% at 6 months; maintain for at least 12 months post-regression",
@@ -836,13 +836,13 @@ export const NG88_SECONDARY_FLOWCHART = {
 
     "end-aeh": {
       type: "end",
-      title: "MDT/Oncology Referral — AEH/EIN",
+      title: "MDT/Oncology Referral: AEH/EIN",
       text: "Urgent referral to gynaecological oncology MDT. Shared decision making about hysterectomy vs fertility-sparing management.",
     },
 
     "normal-uss": {
       type: "end",
-      title: "Normal USS — Review and Treat",
+      title: "Normal USS: Review and Treat",
       text: "No structural pathology identified. Consider: trial of LNG-IUS if not already tried, endometrial biopsy if risk factors, outpatient hysteroscopy to exclude focal pathology. Discuss surgical options if pharmacological treatment has failed.",
     },
   },

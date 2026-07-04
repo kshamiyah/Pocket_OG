@@ -10,7 +10,7 @@ export const GL983_DKA_FLOWCHART = {
 
     "suspect": {
       type: "alert",
-      title: "Suspect DKA — Medical Emergency",
+      title: "Suspect DKA: Medical Emergency",
       text: "Any woman known to have diabetes who feels unwell should be invited in for assessment at whatever gestation. DKA may present with normal or only modestly raised glucose — do NOT rely on glucose alone.",
       items: [
         "Stillbirth rate 160 per 1000 births; maternal mortality 5–10% in T1D",
@@ -26,14 +26,14 @@ export const GL983_DKA_FLOWCHART = {
       title: "DKA diagnostic criteria met?",
       text: "Known diabetes (any type) PLUS ketones AND acidosis (use venous gas).",
       options: [
-        { label: "Yes — criteria met", sublabel: "Ketones ≥ 2+ urine or > 3.0 mmol/L blood (high risk > 1.5) · pH < 7.3 and/or bicarbonate < 15 mmol/L", next: "escalate" },
-        { label: "No — criteria not met", sublabel: "Not DKA — treat underlying cause, monitor", next: "not-dka" },
+        { label: "Yes, criteria met", sublabel: "Ketones ≥ 2+ urine or > 3.0 mmol/L blood (high risk > 1.5) · pH < 7.3 and/or bicarbonate < 15 mmol/L", next: "escalate" },
+        { label: "No, criteria not met", sublabel: "Not DKA, treat underlying cause, monitor", next: "not-dka" },
       ],
     },
 
     "not-dka": {
       type: "end",
-      title: "Not DKA — Treat Cause & Monitor",
+      title: "Not DKA: Treat Cause & Monitor",
       text: "Investigate and treat the precipitant; keep diabetes team involved.",
       items: [
         "Repeat ketones/gas if clinical picture worsens",
@@ -100,8 +100,8 @@ export const GL983_DKA_FLOWCHART = {
       title: "DKA resolved?",
       text: "First 6 hours: BG and ketones at least hourly; blood gas at 1, 2, 4, 6, 8 hours.",
       options: [
-        { label: "Yes — blood ketones < 0.3 AND pH > 7.3", sublabel: "Resolution criteria met", next: "resolved" },
-        { label: "No — not yet resolved", sublabel: "Continue FRII and monitoring", next: "continue" },
+        { label: "Yes, blood ketones < 0.3 AND pH > 7.3", sublabel: "Resolution criteria met", next: "resolved" },
+        { label: "No, not yet resolved", sublabel: "Continue FRII and monitoring", next: "continue" },
       ],
     },
 
@@ -120,7 +120,7 @@ export const GL983_DKA_FLOWCHART = {
 
     "resolved": {
       type: "end",
-      title: "Resolved — Convert Insulin",
+      title: "Resolved: Convert Insulin",
       text: "Blood ketones < 0.3 mmol/L AND pH > 7.3.",
       items: [
         "If eating and drinking: convert to subcutaneous insulin (give short-acting before stopping FRII)",

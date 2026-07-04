@@ -10,7 +10,7 @@
 
 export const TOG_POLYHYDRAMNIOS_FLOWCHART = {
   id: "TOG_POLYHYDRAMNIOS",
-  title: "Polyhydramnios — Assessment & Management",
+  title: "Polyhydramnios: Assessment & Management",
   subtitle: "TOG reviews (Karkhanis & Patni 2014; Falola et al. 2026) · singleton pregnancy",
   startId: "detected",
   nodes: {
@@ -63,7 +63,7 @@ export const TOG_POLYHYDRAMNIOS_FLOWCHART = {
           next: "mfm",
         },
         {
-          label: "No cause found — idiopathic",
+          label: "No cause found, idiopathic",
           sublabel: "60–70% of cases; diagnosis of exclusion",
           next: "unexplained",
         },
@@ -105,7 +105,7 @@ export const TOG_POLYHYDRAMNIOS_FLOWCHART = {
 
     "unexplained": {
       type: "decision",
-      title: "Idiopathic Polyhydramnios — Severity?",
+      title: "Idiopathic Polyhydramnios: Severity?",
       text: "Manage by severity and watch for progression.",
       options: [
         {
@@ -128,7 +128,7 @@ export const TOG_POLYHYDRAMNIOS_FLOWCHART = {
 
     "mild": {
       type: "action",
-      title: "Mild — Surveillance, No Change in Management",
+      title: "Mild: Surveillance, No Change in Management",
       text: "Not conclusively linked to adverse outcomes apart from a higher rate of LGA babies.",
       items: [
         "Serial growth scans; transvaginal cervical length",
@@ -140,7 +140,7 @@ export const TOG_POLYHYDRAMNIOS_FLOWCHART = {
 
     "moderate": {
       type: "action",
-      title: "Moderate — Surveillance, Consider Induction from 40 Weeks",
+      title: "Moderate: Surveillance, Consider Induction from 40 Weeks",
       text: "Risk of adverse outcome rises with severity, though the exact threshold for expedited delivery is unclear.",
       items: [
         "Serial growth scans; transvaginal cervical length; consider antenatal steroids if cervical shortening",
@@ -151,7 +151,7 @@ export const TOG_POLYHYDRAMNIOS_FLOWCHART = {
 
     "severe": {
       type: "action",
-      title: "Severe / Persistent — Specialist Management",
+      title: "Severe / Persistent: Specialist Management",
       text: "Refer to fetal medicine. Significant risk of adverse outcome — induction before 40 weeks should be offered; exact timing individualised.",
       items: [
         "Therapeutic amnioreduction (amniodrainage) if maternal respiratory compromise or significant cervical shortening — stop when AFI/SDVP normalises; complication rate ~1.5% (preterm labour, PPROM, chorioamnionitis, abruption); high recurrence",

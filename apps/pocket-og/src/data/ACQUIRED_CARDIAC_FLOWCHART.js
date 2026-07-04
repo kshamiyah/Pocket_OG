@@ -22,7 +22,7 @@ export const TOG_ACQUIRED_CARDIAC_FLOWCHART = {
       options: [
         { label: "Dilated cardiomyopathy", next: "dilated" },
         { label: "Hypertrophic cardiomyopathy", next: "hypertrophic" },
-        { label: "New — last month of pregnancy or postpartum", next: "peripartum" },
+        { label: "New, last month of pregnancy or postpartum", next: "peripartum" },
       ],
     },
 

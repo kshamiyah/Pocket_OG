@@ -36,7 +36,7 @@ export const GL952_TRIAGE_FLOWCHART = {
       title: "Significant proteinuria?",
       text: "Check urine PCR and/or dipstick.",
       options: [
-        { label: "Yes — PCR >30 mg/mmol or ≥2+ dipstick", sublabel: "Significant proteinuria present", next: "pet-features" },
+        { label: "Yes: PCR >30 mg/mmol or ≥2+ dipstick", sublabel: "Significant proteinuria present", next: "pet-features" },
         { label: "No proteinuria", sublabel: "Dipstick negative or trace", next: "gest-htn" },
       ],
     },
@@ -46,7 +46,7 @@ export const GL952_TRIAGE_FLOWCHART = {
       title: "Additional PET features?",
       text: "Check for end-organ involvement beyond proteinuria.",
       options: [
-        { label: "Yes — any of the following:", sublabel: "Severe headache, visual changes, epigastric pain, platelets <100, ALT >40, creatinine ≥90, FGR, eclampsia", next: "severe-pet" },
+        { label: "Yes, any of the following:", sublabel: "Severe headache, visual changes, epigastric pain, platelets <100, ALT >40, creatinine ≥90, FGR, eclampsia", next: "severe-pet" },
         { label: "No additional features", sublabel: "Proteinuria + HTN only", next: "mild-pet" },
       ],
     },
@@ -122,8 +122,8 @@ export const GL952_ACUTE_FLOWCHART = {
       title: "BP after 15 minutes",
       text: "Is BP still ≥140/90 mmHg on repeat measurement?",
       options: [
-        { label: "Yes — still elevated", sublabel: "≥140 systolic or ≥90 diastolic", next: "sho-review" },
-        { label: "No — normalised", sublabel: "Both readings now <140/90", next: "end-monitor" },
+        { label: "Yes, still elevated", sublabel: "≥140 systolic or ≥90 diastolic", next: "sho-review" },
+        { label: "No, normalised", sublabel: "Both readings now <140/90", next: "end-monitor" },
       ],
     },
 
@@ -158,8 +158,8 @@ export const GL952_ACUTE_FLOWCHART = {
       title: "Already on antihypertensives?",
       text: "Is the patient currently prescribed antihypertensive medication?",
       options: [
-        { label: "Yes — on treatment", sublabel: "Increase current dose or add agent", next: "increase-current" },
-        { label: "No — not on treatment", sublabel: "Start new antihypertensive", next: "asthma-check" },
+        { label: "Yes, on treatment", sublabel: "Increase current dose or add agent", next: "increase-current" },
+        { label: "No, not on treatment", sublabel: "Start new antihypertensive", next: "asthma-check" },
       ],
     },
 
@@ -182,7 +182,7 @@ export const GL952_ACUTE_FLOWCHART = {
       text: "Is there a history of asthma or bronchospasm?",
       options: [
         { label: "No asthma", sublabel: "Labetalol is safe", next: "start-labetalol" },
-        { label: "Yes — asthmatic", sublabel: "Avoid beta-blockers", next: "start-nifedipine" },
+        { label: "Yes, asthmatic", sublabel: "Avoid beta-blockers", next: "start-nifedipine" },
       ],
     },
 
@@ -217,8 +217,8 @@ export const GL952_ACUTE_FLOWCHART = {
       title: "BP after 1 hour",
       text: "Is BP still ≥140/90 mmHg 1 hour after starting / increasing treatment?",
       options: [
-        { label: "No — controlled", sublabel: "BP now <140/90", next: "end-controlled" },
-        { label: "Yes — still elevated", sublabel: "Further escalation needed", next: "registrar" },
+        { label: "No, controlled", sublabel: "BP now <140/90", next: "end-controlled" },
+        { label: "Yes, still elevated", sublabel: "Further escalation needed", next: "registrar" },
       ],
     },
 
@@ -253,8 +253,8 @@ export const GL952_ACUTE_FLOWCHART = {
       title: "BP after 2 further hours",
       text: "Is BP ≥150/100 mmHg despite two doses of oral antihypertensive?",
       options: [
-        { label: "No — now controlled", sublabel: "Continue LW monitoring", next: "end-lw-monitor" },
-        { label: "Yes — still ≥150/100", sublabel: "Parenteral therapy needed", next: "iv-alert" },
+        { label: "No, now controlled", sublabel: "Continue LW monitoring", next: "end-lw-monitor" },
+        { label: "Yes, still ≥150/100", sublabel: "Parenteral therapy needed", next: "iv-alert" },
       ],
     },
 
@@ -272,7 +272,7 @@ export const GL952_ACUTE_FLOWCHART = {
 
     "iv-alert": {
       type: "alert",
-      title: "CONSULTANT — Consider IV therapy",
+      title: "CONSULTANT: Consider IV therapy",
       text: "BP remains uncontrolled after two oral doses. Consultant involvement mandatory.",
       items: [
         "IV Labetalol 50mg over 5 minutes — repeat 40–80mg every 10 minutes (max 200mg)",
@@ -291,14 +291,14 @@ export const GL952_ACUTE_FLOWCHART = {
 
 export const GL952_SEVERE_LW_FLOWCHART = {
   id: "GL952_SEVERE_LW",
-  title: "Severe PET — Labour Ward",
+  title: "Severe PET: Labour Ward",
   subtitle: "GL952 · MgSO4 & IV Antihypertensives",
   startId: "lw-admission",
   nodes: {
 
     "lw-admission": {
       type: "alert",
-      title: "Labour Ward Admission — Severe PET",
+      title: "Labour Ward Admission: Severe PET",
       text: "Call LW co-ordinator, Obs registrar, Anaesthetic registrar, Consultant obstetrician and Consultant anaesthetist.",
       items: [
         "IV access (wide-bore); blood: FBC, U+E, LFTs, coagulation, G&S",
@@ -318,9 +318,9 @@ export const GL952_SEVERE_LW_FLOWCHART = {
       title: "BP level on Labour Ward",
       text: "What is the current BP?",
       options: [
-        { label: "BP ≥160/110 mmHg", sublabel: "Severe hypertension — treat immediately", next: "iv-antihyp" },
-        { label: "BP 150–159/100–109 mmHg", sublabel: "Moderate–severe — escalate if persistent", next: "moderate-action" },
-        { label: "BP <150/100 mmHg", sublabel: "Controlled — continue oral agents", next: "end-controlled-lw" },
+        { label: "BP ≥160/110 mmHg", sublabel: "Severe hypertension, treat immediately", next: "iv-antihyp" },
+        { label: "BP 150–159/100–109 mmHg", sublabel: "Moderate–severe, escalate if persistent", next: "moderate-action" },
+        { label: "BP <150/100 mmHg", sublabel: "Controlled, continue oral agents", next: "end-controlled-lw" },
       ],
     },
 
@@ -338,7 +338,7 @@ export const GL952_SEVERE_LW_FLOWCHART = {
 
     "moderate-action": {
       type: "action",
-      title: "Moderate HTN — Escalate",
+      title: "Moderate HTN: Escalate",
       text: "BP 150–159/100–109 × 3 readings: escalate to registrar.",
       items: [
         "Registrar review if BP >150/100 on three consecutive readings",
@@ -392,8 +392,8 @@ export const GL952_SEVERE_LW_FLOWCHART = {
       title: "MgSO4 criteria met?",
       text: "Is there any of the following (in the context of severe HTN)?",
       options: [
-        { label: "Yes — one or more criteria:", sublabel: "Severe headache · Visual disturbance · Epigastric pain · Papilloedema · Clonus >3 beats · HELLP · Platelets <100 · ALT >70", next: "mgso4-loading" },
-        { label: "No criteria — BP management only", sublabel: "Continue antihypertensives; reassess hourly", next: "end-no-mgso4" },
+        { label: "Yes, one or more criteria:", sublabel: "Severe headache · Visual disturbance · Epigastric pain · Papilloedema · Clonus >3 beats · HELLP · Platelets <100 · ALT >70", next: "mgso4-loading" },
+        { label: "No criteria: BP management only", sublabel: "Continue antihypertensives; reassess hourly", next: "end-no-mgso4" },
       ],
     },
 
@@ -458,7 +458,7 @@ export const GL952_SEVERE_LW_FLOWCHART = {
       text: "Has the patient had a further eclamptic seizure after loading dose?",
       options: [
         { label: "No further seizures", sublabel: "Continue maintenance infusion", next: "end-mgso4" },
-        { label: "Yes — further seizure", sublabel: "Extra bolus required", next: "extra-bolus" },
+        { label: "Yes, further seizure", sublabel: "Extra bolus required", next: "extra-bolus" },
       ],
     },
 
@@ -502,7 +502,7 @@ export const GL952_POSTNATAL_FLOWCHART = {
 
     "postnatal-start": {
       type: "action",
-      title: "Post-delivery — initial review",
+      title: "Post-delivery, initial review",
       text: "PET features commonly worsen in the first 24 hours after delivery. Remain vigilant.",
       items: [
         "4-hourly BP monitoring inpatient",
@@ -518,14 +518,14 @@ export const GL952_POSTNATAL_FLOWCHART = {
       title: "Was MgSO4 used?",
       text: "Is the patient coming off an MgSO4 infusion?",
       options: [
-        { label: "Yes — on MgSO4", sublabel: "Extended Labour Ward stay needed", next: "mgso4-postnatal" },
+        { label: "Yes, on MgSO4", sublabel: "Extended Labour Ward stay needed", next: "mgso4-postnatal" },
         { label: "No MgSO4", sublabel: "Transfer to postnatal ward", next: "methyldopa-check" },
       ],
     },
 
     "mgso4-postnatal": {
       type: "action",
-      title: "MgSO4 — Postnatal Stay",
+      title: "MgSO4: Postnatal Stay",
       text: "Remain on Labour Ward until MgSO4 requirements are met.",
       items: [
         "Stay on Labour Ward ≥24 hours after MgSO4 stopped",
@@ -542,7 +542,7 @@ export const GL952_POSTNATAL_FLOWCHART = {
       title: "On Methyldopa?",
       text: "Is the patient currently prescribed Methyldopa?",
       options: [
-        { label: "Yes — on Methyldopa", sublabel: "Must switch promptly", next: "stop-methyldopa" },
+        { label: "Yes, on Methyldopa", sublabel: "Must switch promptly", next: "stop-methyldopa" },
         { label: "No Methyldopa", sublabel: "Proceed to BP target review", next: "severity-check" },
       ],
     },
@@ -576,7 +576,7 @@ export const GL952_POSTNATAL_FLOWCHART = {
 
     "chronic-postnatal": {
       type: "end",
-      title: "Chronic HTN — Postnatal",
+      title: "Chronic HTN: Postnatal",
       text: "Target BP <140/90 mmHg.",
       items: [
         "Target: <140/90 mmHg",
@@ -588,7 +588,7 @@ export const GL952_POSTNATAL_FLOWCHART = {
 
     "gest-postnatal": {
       type: "end",
-      title: "Gestational HTN — Postnatal",
+      title: "Gestational HTN: Postnatal",
       text: "Target ≤149/99 mmHg. Most will come off treatment within weeks.",
       items: [
         "Target: ≤149/99 mmHg",
@@ -601,7 +601,7 @@ export const GL952_POSTNATAL_FLOWCHART = {
 
     "mild-pet-postnatal": {
       type: "action",
-      title: "Mild PET — Postnatal",
+      title: "Mild PET: Postnatal",
       text: "Stay 24–48 hours. Single blood check.",
       items: [
         "Target: 130/80 to <150/100 mmHg",
@@ -614,7 +614,7 @@ export const GL952_POSTNATAL_FLOWCHART = {
 
     "severe-pet-postnatal": {
       type: "action",
-      title: "Moderate / Severe PET — Postnatal",
+      title: "Moderate / Severe PET: Postnatal",
       text: "Stay 3–5 days. Daily bloods until improving.",
       items: [
         "Target: 130/80 to <150/100 mmHg",
@@ -660,7 +660,7 @@ export const GL952_POSTNATAL_FLOWCHART = {
 
 export const GL952_POSTNATAL_WARD_FLOWCHART = {
   id: "GL952_POSTNATAL_WARD",
-  title: "Postnatal Ward — BP Management",
+  title: "Postnatal Ward: BP Management",
   subtitle: "GL952 · Acute BP Decision Tool",
   startId: "bp-reading",
   nodes: {
@@ -681,7 +681,7 @@ export const GL952_POSTNATAL_WARD_FLOWCHART = {
 
     "severe": {
       type: "alert",
-      title: "Severe Hypertension — Act Now",
+      title: "Severe Hypertension: Act Now",
       text: "BP ≥160/110 requires treatment within 30–60 minutes. Call registrar immediately.",
       items: [
         "Call obstetric registrar NOW",
@@ -699,14 +699,14 @@ export const GL952_POSTNATAL_WARD_FLOWCHART = {
       title: "BP after treatment?",
       text: "Recheck BP 30 minutes after first-line treatment.",
       options: [
-        { label: "Controlled — <150/100", sublabel: "Treatment effective", next: "severe-controlled" },
+        { label: "Controlled: <150/100", sublabel: "Treatment effective", next: "severe-controlled" },
         { label: "Still ≥160/110", sublabel: "Not responding", next: "severe-escalate" },
       ],
     },
 
     "severe-controlled": {
       type: "end",
-      title: "Severe HTN — Now Controlled",
+      title: "Severe HTN: Now Controlled",
       text: "Continue close monitoring and review ongoing regimen.",
       items: [
         "BP monitoring every 30 minutes for 2 hours, then hourly",
@@ -719,7 +719,7 @@ export const GL952_POSTNATAL_WARD_FLOWCHART = {
 
     "severe-escalate": {
       type: "alert",
-      title: "Uncontrolled Severe Hypertension — Escalate",
+      title: "Uncontrolled Severe Hypertension: Escalate",
       text: "BP not responding to first-line treatment. Call consultant.",
       items: [
         "Call consultant obstetrician and anaesthetist",
@@ -750,14 +750,14 @@ export const GL952_POSTNATAL_WARD_FLOWCHART = {
       title: "Any symptoms?",
       text: "Ask about: headache, visual disturbance (floaters / flashing lights), epigastric or RUQ pain.",
       options: [
-        { label: "Yes — symptoms present", sublabel: "Call registrar first", next: "symptoms-present" },
+        { label: "Yes, symptoms present", sublabel: "Call registrar first", next: "symptoms-present" },
         { label: "No symptoms", sublabel: "Adjust medication", next: "medication-check" },
       ],
     },
 
     "symptoms-present": {
       type: "alert",
-      title: "Symptoms Present — Call Registrar",
+      title: "Symptoms Present: Call Registrar",
       text: "Do not adjust medication without registrar review. Symptoms may indicate PET deterioration.",
       items: [
         "Call obstetric registrar before any medication change",
@@ -857,8 +857,8 @@ export const GL952_POSTNATAL_WARD_FLOWCHART = {
       title: "Already on maximum labetalol dose?",
       text: "800 mg/day is the maximum dose of labetalol.",
       options: [
-        { label: "No — dose increased", sublabel: "Recheck in 4 hours", next: "recheck-4h" },
-        { label: "Yes — on maximum", sublabel: "Add second agent", next: "add-agent" },
+        { label: "No, dose increased", sublabel: "Recheck in 4 hours", next: "recheck-4h" },
+        { label: "Yes, on maximum", sublabel: "Add second agent", next: "add-agent" },
       ],
     },
 
@@ -867,14 +867,14 @@ export const GL952_POSTNATAL_WARD_FLOWCHART = {
       title: "Already on maximum nifedipine dose?",
       text: "80 mg/day is the maximum dose of nifedipine MR.",
       options: [
-        { label: "No — dose increased", sublabel: "Recheck in 4 hours", next: "recheck-4h" },
-        { label: "Yes — on maximum", sublabel: "Add second agent", next: "add-agent" },
+        { label: "No, dose increased", sublabel: "Recheck in 4 hours", next: "recheck-4h" },
+        { label: "Yes, on maximum", sublabel: "Add second agent", next: "add-agent" },
       ],
     },
 
     "add-agent": {
       type: "end",
-      title: "Maximum Dose — Call Registrar",
+      title: "Maximum Dose: Call Registrar",
       text: "Single agent at maximum dose is insufficient. Registrar review needed to add second agent.",
       items: [
         "Call obstetric registrar",
@@ -919,7 +919,7 @@ export const GL952_POSTNATAL_WARD_FLOWCHART = {
       title: "On antihypertensive treatment?",
       text: "BP <130/80 — assess whether treatment reduction is needed.",
       options: [
-        { label: "Yes — on treatment", sublabel: "Consider dose reduction", next: "reduce-dose" },
+        { label: "Yes, on treatment", sublabel: "Consider dose reduction", next: "reduce-dose" },
         { label: "No treatment", sublabel: "Monitor only", next: "low-no-treatment" },
       ],
     },
@@ -939,7 +939,7 @@ export const GL952_POSTNATAL_WARD_FLOWCHART = {
 
     "low-no-treatment": {
       type: "end",
-      title: "Low BP — No Treatment",
+      title: "Low BP: No Treatment",
       text: "BP <130/80 with no antihypertensives. No action required.",
       items: [
         "Reassure patient",

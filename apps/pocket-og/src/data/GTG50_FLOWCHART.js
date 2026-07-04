@@ -4,14 +4,14 @@
 
 export const GTG50_CORD_FLOWCHART = {
   id: "GTG50_CORD",
-  title: "Cord Prolapse — Emergency",
+  title: "Cord Prolapse: Emergency",
   subtitle: "GTG50 · Umbilical Cord Prolapse",
   startId: "diagnose",
   nodes: {
 
     "diagnose": {
       type: "alert",
-      title: "Cord Prolapse — Call for Help Now",
+      title: "Cord Prolapse: Call for Help Now",
       text: "Cord palpable/visible past the presenting part with ruptured membranes, or fetal bradycardia / abnormal FHR immediately after rupture of membranes. This is an obstetric emergency.",
       items: [
         "Pull the emergency buzzer — summon senior obstetrician, anaesthetist, theatre team and neonatal team",

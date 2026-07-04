@@ -4,7 +4,7 @@
 export const GL891_ANTENATAL_FLOWCHART = {
   id: "GL891_ANTENATAL",
   title: "Antenatal VTE Risk Pathway",
-  subtitle: "GL891 · VTE in Pregnancy — Antenatal Prophylaxis",
+  subtitle: "GL891 · VTE in Pregnancy: Antenatal Prophylaxis",
   startId: "assess",
   nodes: {
 
@@ -25,14 +25,14 @@ export const GL891_ANTENATAL_FLOWCHART = {
       title: "Previous VTE or on anticoagulation?",
       text: "Highest-priority criteria — check these first.",
       options: [
-        { label: "Yes — previous VTE or on long-term oral anticoagulant", sublabel: "Any previous VTE (except single event from major surgery) · already on oral anticoagulation", next: "high-risk" },
+        { label: "Yes, previous VTE or on long-term oral anticoagulant", sublabel: "Any previous VTE (except single event from major surgery) · already on oral anticoagulation", next: "high-risk" },
         { label: "No", sublabel: "Continue to intermediate-risk assessment", next: "intermediate-check" },
       ],
     },
 
     "high-risk": {
       type: "alert",
-      title: "High Risk — LMWH Throughout + 6 Weeks Postnatal",
+      title: "High Risk: LMWH Throughout + 6 Weeks Postnatal",
       text: "Antenatal LMWH for the whole pregnancy and 6 weeks postnatal.",
       items: [
         "Already on long-term oral anticoagulation: switch immediately to therapeutic enoxaparin",
@@ -47,14 +47,14 @@ export const GL891_ANTENATAL_FLOWCHART = {
       title: "Any intermediate-risk factor?",
       text: "ANY one of the following indicates antenatal prophylaxis.",
       options: [
-        { label: "Yes — intermediate factor present:", sublabel: "Hospital admission · single previous VTE from major surgery · high-risk thrombophilia (antithrombin/Protein C/Protein S deficiency, or >1 thrombophilia) · medical comorbidity (cancer, heart failure, active SLE, IBD, nephrotic syndrome, T1DM with nephropathy, sickle cell, IVDU) · any surgical procedure · OHSS (1st trimester)", next: "intermediate-risk" },
+        { label: "Yes, intermediate factor present:", sublabel: "Hospital admission · single previous VTE from major surgery · high-risk thrombophilia (antithrombin/Protein C/Protein S deficiency, or >1 thrombophilia) · medical comorbidity (cancer, heart failure, active SLE, IBD, nephrotic syndrome, T1DM with nephropathy, sickle cell, IVDU) · any surgical procedure · OHSS (1st trimester)", next: "intermediate-risk" },
         { label: "No", sublabel: "Score cumulative risk factors instead", next: "cumulative" },
       ],
     },
 
     "intermediate-risk": {
       type: "action",
-      title: "Intermediate Risk — Consider Antenatal Prophylaxis",
+      title: "Intermediate Risk: Consider Antenatal Prophylaxis",
       text: "Consider antenatal LMWH; seek senior input.",
       items: [
         "Refer to Friday am Haematology-Obstetrics clinic if required",
@@ -127,7 +127,7 @@ export const GL891_ANTENATAL_FLOWCHART = {
 export const GL891_POSTNATAL_FLOWCHART = {
   id: "GL891_POSTNATAL",
   title: "Postnatal VTE Risk Pathway",
-  subtitle: "GL891 · VTE Postnatal — Prophylaxis Duration",
+  subtitle: "GL891 · VTE Postnatal: Prophylaxis Duration",
   startId: "assess",
   nodes: {
 
@@ -148,14 +148,14 @@ export const GL891_POSTNATAL_FLOWCHART = {
       title: "Any high-risk criterion?",
       text: "ANY one indicates ≥ 6 weeks postnatal thromboprophylaxis.",
       options: [
-        { label: "Yes — high-risk criterion:", sublabel: "Any previous VTE · required antenatal LMWH · high-risk thrombophilia (antithrombin/Protein S/Protein C deficiency) · low-risk thrombophilia + family history", next: "high-6wk" },
+        { label: "Yes, high-risk criterion:", sublabel: "Any previous VTE · required antenatal LMWH · high-risk thrombophilia (antithrombin/Protein S/Protein C deficiency) · low-risk thrombophilia + family history", next: "high-6wk" },
         { label: "No", sublabel: "Assess intermediate-risk criteria", next: "intermediate-check" },
       ],
     },
 
     "high-6wk": {
       type: "end",
-      title: "High Risk — ≥ 6 Weeks LMWH",
+      title: "High Risk: ≥ 6 Weeks LMWH",
       text: "At least 6 weeks of postnatal thromboprophylaxis.",
       items: [
         "Prophylactic enoxaparin by weight (same tables as antenatal)",
@@ -169,14 +169,14 @@ export const GL891_POSTNATAL_FLOWCHART = {
       title: "Any intermediate-risk criterion?",
       text: "ANY one — OR 2 or more cumulative risk factors — indicates ≥ 10 days.",
       options: [
-        { label: "Yes — intermediate criterion or ≥ 2 cumulative factors:", sublabel: "CS in labour · BMI > 40 · readmission/prolonged admission (≥3 days) · surgical procedure in puerperium · medical comorbidity (cancer, heart failure, SLE, IBD, nephrotic, T1DM+nephropathy, sickle cell, IVDU) · ≥ 2 cumulative factors", next: "intermediate-10d" },
+        { label: "Yes, intermediate criterion or ≥ 2 cumulative factors:", sublabel: "CS in labour · BMI > 40 · readmission/prolonged admission (≥3 days) · surgical procedure in puerperium · medical comorbidity (cancer, heart failure, SLE, IBD, nephrotic, T1DM+nephropathy, sickle cell, IVDU) · ≥ 2 cumulative factors", next: "intermediate-10d" },
         { label: "No", sublabel: "Early mobilisation and hydration", next: "lowrisk" },
       ],
     },
 
     "intermediate-10d": {
       type: "end",
-      title: "Intermediate Risk — ≥ 10 Days LMWH",
+      title: "Intermediate Risk: ≥ 10 Days LMWH",
       text: "At least 10 days of postnatal thromboprophylaxis.",
       items: [
         "Prophylactic enoxaparin by weight (same tables as antenatal)",
@@ -186,7 +186,7 @@ export const GL891_POSTNATAL_FLOWCHART = {
 
     "lowrisk": {
       type: "end",
-      title: "Low Risk — Mobilisation & Hydration",
+      title: "Low Risk: Mobilisation & Hydration",
       text: "No high/intermediate criteria and < 2 cumulative factors.",
       items: [
         "Encourage early mobilisation",

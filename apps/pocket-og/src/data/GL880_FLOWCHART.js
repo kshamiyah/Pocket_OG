@@ -25,8 +25,8 @@ export const GL880_DELIVERY_FLOWCHART = {
       title: "Bile acids > 19 µmol/L?",
       text: "Non-fasting BA > 19 µmol/L is diagnostic of ICP.",
       options: [
-        { label: "Yes — ICP confirmed", sublabel: "Stratify by peak bile acid level", next: "stratify" },
-        { label: "No — normal BA", sublabel: "If itch persists, repeat BA + LFTs at 1–2 week intervals", next: "not-icp" },
+        { label: "Yes: ICP confirmed", sublabel: "Stratify by peak bile acid level", next: "stratify" },
+        { label: "No, normal BA", sublabel: "If itch persists, repeat BA + LFTs at 1–2 week intervals", next: "not-icp" },
       ],
     },
 
@@ -77,7 +77,7 @@ export const GL880_DELIVERY_FLOWCHART = {
 
     "severe": {
       type: "alert",
-      title: "Severe ICP (BA ≥ 100) — Highest Stillbirth Risk",
+      title: "Severe ICP (BA ≥ 100): Highest Stillbirth Risk",
       text: "Stillbirth risk significantly increased only above 100 µmol/L (≈ 3.5%). Refer specifically to Miss Brooks' ANC.",
       items: [
         "Planned birth at 35–36 weeks — if already past this gestation, arrange IOL imminently",

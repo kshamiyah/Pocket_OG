@@ -34,7 +34,7 @@ export const CG621_OUTPATIENT_FLOWCHART = {
 
     "end-ci": {
       type: "end",
-      title: "Contraindication — Not Suitable",
+      title: "Contraindication: Not Suitable",
       text: "Medical management is not appropriate for this patient.",
       items: [
         "Discuss alternative management options",
@@ -72,8 +72,8 @@ export const CG621_OUTPATIENT_FLOWCHART = {
       title: "Rhesus negative?",
       text: "Check blood group result from G&S.",
       options: [
-        { label: "Yes — Rh negative", sublabel: "Anti-D immunoglobulin required", next: "give-anti-d" },
-        { label: "No — Rh positive", sublabel: "Anti-D not needed", next: "dispense" },
+        { label: "Yes: Rh negative", sublabel: "Anti-D immunoglobulin required", next: "give-anti-d" },
+        { label: "No: Rh positive", sublabel: "Anti-D not needed", next: "dispense" },
       ],
     },
 
@@ -122,8 +122,8 @@ export const CG621_OUTPATIENT_FLOWCHART = {
       title: "History of complete miscarriage?",
       text: "Based on the nursing call — has the patient passed products of conception?",
       options: [
-        { label: "Yes — likely complete", sublabel: "Heavy bleeding that has since reduced significantly", next: "end-complete" },
-        { label: "No — unclear or incomplete", sublabel: "No POC passed or bleeding has not settled", next: "second-dose-choice" },
+        { label: "Yes, likely complete", sublabel: "Heavy bleeding that has since reduced significantly", next: "end-complete" },
+        { label: "No, unclear or incomplete", sublabel: "No POC passed or bleeding has not settled", next: "second-dose-choice" },
       ],
     },
 
@@ -145,7 +145,7 @@ export const CG621_OUTPATIENT_FLOWCHART = {
       title: "Patient's preference",
       text: "No clear history of complete miscarriage. Discuss options with patient.",
       options: [
-        { label: "Repeat Misoprostol", sublabel: "Second dose 800mcg PV — arrange attendance", next: "repeat-miso" },
+        { label: "Repeat Misoprostol", sublabel: "Second dose 800mcg PV, arrange attendance", next: "repeat-miso" },
         { label: "Surgical management", sublabel: "Patient prefers surgical evacuation", next: "end-surgical" },
         { label: "Expectant management", sublabel: "Wait and watch", next: "end-expectant" },
       ],
@@ -257,14 +257,14 @@ export const CG621_INPATIENT_FLOWCHART = {
       title: "Products of conception (POC) after 3 hours?",
       text: "Have products of conception been passed 3 hours after first Misoprostol dose?",
       options: [
-        { label: "Yes — POC passed", sublabel: "Confirm observation stability", next: "poc-passed" },
-        { label: "No — POC not passed", sublabel: "Administer second dose", next: "second-miso" },
+        { label: "Yes: POC passed", sublabel: "Confirm observation stability", next: "poc-passed" },
+        { label: "No: POC not passed", sublabel: "Administer second dose", next: "second-miso" },
       ],
     },
 
     "poc-passed": {
       type: "action",
-      title: "Products Passed — Check Stability",
+      title: "Products Passed: Check Stability",
       text: "Confirm the patient is stable before discharge.",
       items: [
         "MEWS observations: all within normal limits",
@@ -306,8 +306,8 @@ export const CG621_INPATIENT_FLOWCHART = {
       title: "POC passed after second dose?",
       text: "Have products of conception been passed following the second Misoprostol dose?",
       options: [
-        { label: "Yes — POC now passed", sublabel: "Assess for discharge", next: "poc-passed" },
-        { label: "No — POC not passed", sublabel: "Assess symptoms", next: "symptoms-check" },
+        { label: "Yes: POC now passed", sublabel: "Assess for discharge", next: "poc-passed" },
+        { label: "No: POC not passed", sublabel: "Assess symptoms", next: "symptoms-check" },
       ],
     },
 
@@ -316,8 +316,8 @@ export const CG621_INPATIENT_FLOWCHART = {
       title: "Symptoms settled?",
       text: "Has pain and bleeding settled despite no POC?",
       options: [
-        { label: "Yes — pain and bleeding settled", sublabel: "Safe to discharge with USS follow-up", next: "home-with-uss" },
-        { label: "No — ongoing pain/heavy bleeding", sublabel: "Medical management failure", next: "end-surgical-inpatient" },
+        { label: "Yes, pain and bleeding settled", sublabel: "Safe to discharge with USS follow-up", next: "home-with-uss" },
+        { label: "No, ongoing pain/heavy bleeding", sublabel: "Medical management failure", next: "end-surgical-inpatient" },
       ],
     },
 
@@ -358,7 +358,7 @@ export const CG621_INPATIENT_FLOWCHART = {
 
     "end-surgical-inpatient": {
       type: "end",
-      title: "Medical Management Failed — Surgical",
+      title: "Medical Management Failed: Surgical",
       text: "Retained products of conception despite two doses of Misoprostol.",
       items: [
         "Offer surgical management: SMM (suction) or ERPC",

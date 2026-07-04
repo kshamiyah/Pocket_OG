@@ -13,7 +13,7 @@ export const CG565_TRIAGE_FLOWCHART = {
       title: "Ultrasound findings",
       text: "What does the transvaginal ultrasound show?",
       options: [
-        { label: "Viable IUP — heartbeat seen", sublabel: "Threatened miscarriage", next: "viable" },
+        { label: "Viable IUP, heartbeat seen", sublabel: "Threatened miscarriage", next: "viable" },
         { label: "Pregnancy of uncertain viability", sublabel: "Empty sac <25mm OR fetal pole ≤7mm with no heartbeat", next: "uncertain" },
         { label: "Complete miscarriage", sublabel: "Empty uterine cavity, endometrial thickness <15mm", next: "complete-prior-uss" },
         { label: "Incomplete miscarriage", sublabel: "Intrauterine tissue 15–50mm, no sac visible", next: "incomplete-mgmt" },
@@ -25,7 +25,7 @@ export const CG565_TRIAGE_FLOWCHART = {
 
     "viable": {
       type: "end",
-      title: "Threatened Miscarriage — Viable IUP",
+      title: "Threatened Miscarriage: Viable IUP",
       text: "Despite bleeding, 90% of pregnancies at 8 weeks will not miscarry. Reassure the patient.",
       items: [
         "Reassure: 90% will not miscarry at 8 weeks",
@@ -69,14 +69,14 @@ export const CG565_TRIAGE_FLOWCHART = {
       title: "Prior USS showing IUP in this pregnancy?",
       text: "Was an intrauterine pregnancy confirmed on a previous scan in this pregnancy?",
       options: [
-        { label: "Yes — prior IUP confirmed on USS", sublabel: "Complete miscarriage can be confirmed", next: "end-complete" },
+        { label: "Yes, prior IUP confirmed on USS", sublabel: "Complete miscarriage can be confirmed", next: "end-complete" },
         { label: "No prior USS in this pregnancy", sublabel: "Ectopic must be excluded first", next: "bhcg-serial" },
       ],
     },
 
     "bhcg-serial": {
       type: "action",
-      title: "Check serial βhCG — exclude ectopic",
+      title: "Check serial βhCG, exclude ectopic",
       text: "No prior USS means ectopic cannot be excluded on USS alone. Serial βhCG required.",
       items: [
         "Take βhCG today (Day 0)",
@@ -93,13 +93,13 @@ export const CG565_TRIAGE_FLOWCHART = {
       text: "What did the serial βhCG show over 48 hours?",
       options: [
         { label: ">50% fall in 48 hours", sublabel: "Likely confirms complete miscarriage", next: "end-complete" },
-        { label: "<50% fall or a rise", sublabel: "Pregnancy of Unknown Location (PUL) — ectopic not excluded", next: "end-pul" },
+        { label: "<50% fall or a rise", sublabel: "Pregnancy of Unknown Location (PUL), ectopic not excluded", next: "end-pul" },
       ],
     },
 
     "end-complete": {
       type: "end",
-      title: "Complete Miscarriage — Discharge",
+      title: "Complete Miscarriage: Discharge",
       text: "Complete miscarriage confirmed. No further intervention required.",
       items: [
         "Discharge to GP care",
@@ -125,18 +125,18 @@ export const CG565_TRIAGE_FLOWCHART = {
 
     "incomplete-mgmt": {
       type: "decision",
-      title: "Incomplete miscarriage — management approach",
+      title: "Incomplete miscarriage, management approach",
       text: "Tissue 15–50mm present. Three management options. Expectant is recommended first-line.",
       options: [
         { label: "Expectant (recommended)", sublabel: "80% resolve within 3 days", next: "end-expectant-incomplete" },
         { label: "Surgical (SMM)", sublabel: "Patient preference or clinical indication", next: "end-smm" },
-        { label: "Medical (select cases)", sublabel: "Single dose Misoprostol — discuss with consultant", next: "end-medical-incomplete" },
+        { label: "Medical (select cases)", sublabel: "Single dose Misoprostol, discuss with consultant", next: "end-medical-incomplete" },
       ],
     },
 
     "end-expectant-incomplete": {
       type: "end",
-      title: "Expectant — Incomplete Miscarriage",
+      title: "Expectant: Incomplete Miscarriage",
       text: "80% of incomplete miscarriages resolve within 3 days.",
       items: [
         "No immediate intervention required",
@@ -150,7 +150,7 @@ export const CG565_TRIAGE_FLOWCHART = {
 
     "end-medical-incomplete": {
       type: "end",
-      title: "Medical — Incomplete Miscarriage",
+      title: "Medical: Incomplete Miscarriage",
       text: "Medical management can be offered but has no advantage over expectant for incomplete miscarriage.",
       items: [
         "Discuss with consultant on call before proceeding",
@@ -179,7 +179,7 @@ export const CG565_TRIAGE_FLOWCHART = {
 
     "missed-confirm": {
       type: "action",
-      title: "Missed Miscarriage — Offer Confirmatory Scan",
+      title: "Missed Miscarriage: Offer Confirmatory Scan",
       text: "Diagnosis requires confirmation before management is planned.",
       items: [
         "Offer a confirmation scan by a second trained sonographer or doctor",
@@ -202,11 +202,11 @@ export const CG565_TRIAGE_FLOWCHART = {
 
     "missed-mgmt": {
       type: "decision",
-      title: "Missed miscarriage — management approach",
+      title: "Missed miscarriage, management approach",
       text: "Expectant is first-line. All three options should be discussed.",
       options: [
         { label: "Expectant (first-line)", sublabel: "90% resolve within 3 weeks", next: "end-expectant-missed" },
-        { label: "Medical (CG621)", sublabel: "Mifepristone + Misoprostol — fewer emergency admissions", next: "end-medical-missed" },
+        { label: "Medical (CG621)", sublabel: "Mifepristone + Misoprostol, fewer emergency admissions", next: "end-medical-missed" },
         { label: "Surgical (SMM)", sublabel: "Provides certainty; no follow-up needed", next: "end-smm" },
       ],
     },
@@ -223,7 +223,7 @@ export const CG565_TRIAGE_FLOWCHART = {
 
     "end-expectant-missed": {
       type: "end",
-      title: "Expectant — Missed Miscarriage",
+      title: "Expectant: Missed Miscarriage",
       text: "90% will commence naturally within 3 weeks of diagnosis.",
       items: [
         "Timing of commencement is unpredictable — patient must be counselled",
@@ -237,7 +237,7 @@ export const CG565_TRIAGE_FLOWCHART = {
 
     "end-medical-missed": {
       type: "end",
-      title: "Medical — Missed Miscarriage",
+      title: "Medical: Missed Miscarriage",
       text: "Mifepristone + Misoprostol per CG621. 80% success rate.",
       items: [
         "See Medical Management of Miscarriage protocol (CG621)",

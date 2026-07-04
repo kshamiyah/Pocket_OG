@@ -4,7 +4,7 @@
 export const NHSCSP20_SCREENING_FLOWCHART = {
   id: "NHSCSP20_SCREENING",
   title: "HPV Primary Cervical Screening",
-  subtitle: "NHSCSP — HPV primary pathway (England)",
+  subtitle: "NHSCSP: HPV primary pathway (England)",
   startId: "hpv-result",
   nodes: {
 
@@ -21,7 +21,7 @@ export const NHSCSP20_SCREENING_FLOWCHART = {
 
     "hpv-negative-end": {
       type: "end",
-      title: "Routine Recall — 5 Years",
+      title: "Routine Recall: 5 Years",
       text: "hrHPV negative result. No further action required.",
       items: [
         "Recall in 5 years for next routine screening invitation",
@@ -32,7 +32,7 @@ export const NHSCSP20_SCREENING_FLOWCHART = {
 
     "inadequate": {
       type: "action",
-      title: "Inadequate Sample — Repeat in 3 Months",
+      title: "Inadequate Sample: Repeat in 3 Months",
       text: "Sample was inadequate and cannot be assessed. A repeat sample is required.",
       items: [
         "Repeat sample should be taken after 3 months",
@@ -59,14 +59,14 @@ export const NHSCSP20_SCREENING_FLOWCHART = {
       options: [
         { label: "Cytology negative", sublabel: "No cytological abnormality detected", next: "hpv-pos-cyto-neg" },
         { label: "Borderline nuclear changes (BNC) or mild dyskaryosis", sublabel: "Low-grade abnormality", next: "colposcopy-referral" },
-        { label: "Moderate or severe dyskaryosis", sublabel: "High-grade — urgent colposcopy", next: "urgent-colposcopy" },
+        { label: "Moderate or severe dyskaryosis", sublabel: "High-grade, urgent colposcopy", next: "urgent-colposcopy" },
         { label: "?Glandular neoplasia or ?invasive cancer", sublabel: "Highest urgency", next: "same-day-urgent" },
       ],
     },
 
     "hpv-pos-cyto-neg": {
       type: "action",
-      title: "hrHPV positive, cytology negative — Repeat in 12 months",
+      title: "hrHPV positive, cytology negative: Repeat in 12 months",
       text: "HPV infection without cytological change. Monitor with repeat screen in primary care.",
       items: [
         "Invite for repeat hrHPV test in 12 months",
@@ -93,7 +93,7 @@ export const NHSCSP20_SCREENING_FLOWCHART = {
       text: "Result of second surveillance repeat (24 months from original positive).",
       options: [
         { label: "hrHPV negative", sublabel: "HPV cleared at 24 months", next: "hpv-negative-end" },
-        { label: "hrHPV positive (any cytology)", sublabel: "Persistent HPV at 24 months — refer", next: "colposcopy-referral" },
+        { label: "hrHPV positive (any cytology)", sublabel: "Persistent HPV at 24 months, refer", next: "colposcopy-referral" },
       ],
     },
 
@@ -112,7 +112,7 @@ export const NHSCSP20_SCREENING_FLOWCHART = {
 
     "urgent-colposcopy": {
       type: "alert",
-      title: "Urgent Colposcopy — 2-Week Pathway",
+      title: "Urgent Colposcopy: 2-Week Pathway",
       text: "High-grade dyskaryosis (moderate or severe) with hrHPV positive. Urgent referral required.",
       items: [
         "Refer via 2-week urgent colposcopy pathway",
@@ -124,7 +124,7 @@ export const NHSCSP20_SCREENING_FLOWCHART = {
 
     "same-day-urgent": {
       type: "alert",
-      title: "Same-Day Urgent Referral — ?Glandular / ?Invasive",
+      title: "Same-Day Urgent Referral, ?Glandular / ?Invasive",
       text: "Cytology reporting glandular neoplasia or invasive cancer requires immediate action.",
       items: [
         "Contact colposcopy unit or on-call gynaecologist same day",
@@ -151,7 +151,7 @@ export const NHSCSP20_SCREENING_FLOWCHART = {
 export const NHSCSP20_COLPOSCOPY_FLOWCHART = {
   id: "NHSCSP20_COLPOSCOPY",
   title: "Colposcopy & CIN Management",
-  subtitle: "NHSCSP Publication 20 — CIN decision pathway",
+  subtitle: "NHSCSP Publication 20: CIN decision pathway",
   startId: "colposcopy-assessment",
   nodes: {
 
@@ -183,7 +183,7 @@ export const NHSCSP20_COLPOSCOPY_FLOWCHART = {
 
     "cin1-management": {
       type: "action",
-      title: "CIN1 — Surveillance, No Routine Treatment",
+      title: "CIN1: Surveillance, No Routine Treatment",
       text: "CIN1 has high spontaneous regression (~60% within 2 years). Do not treat routinely.",
       items: [
         "Return to primary care for hrHPV test at 12 months",
@@ -197,23 +197,23 @@ export const NHSCSP20_COLPOSCOPY_FLOWCHART = {
 
     "cin1-end": {
       type: "end",
-      title: "CIN1 — Surveillance in Primary Care",
+      title: "CIN1: Surveillance in Primary Care",
       text: "12-month hrHPV recall in primary care. Colposcopy only if HPV persistent or abnormality develops.",
     },
 
     "cin2-decision": {
       type: "decision",
-      title: "CIN2 — Treatment or conservative management?",
+      title: "CIN2: Treatment or conservative management?",
       text: "Treatment is recommended. Conservative management ('watch and wait') is acceptable in selected women.",
       options: [
-        { label: "Proceed to treatment (LLETZ)", sublabel: "Standard approach — all women, or patient preference", next: "lletz" },
+        { label: "Proceed to treatment (LLETZ)", sublabel: "Standard approach, all women, or patient preference", next: "lletz" },
         { label: "Conservative management", sublabel: "Age <30, fertility wishes, minor-grade colposcopy", next: "cin2-conservative" },
       ],
     },
 
     "cin2-conservative": {
       type: "action",
-      title: "CIN2 — Conservative Management (Watch & Wait)",
+      title: "CIN2: Conservative Management (Watch & Wait)",
       text: "Acceptable for up to 2 years if criteria met: age <30, fertility preservation, minor-grade colposcopy.",
       items: [
         "6-monthly colposcopy and hrHPV testing throughout surveillance period",
@@ -228,14 +228,14 @@ export const NHSCSP20_COLPOSCOPY_FLOWCHART = {
       title: "CIN2 review at 6–24 months",
       text: "Outcome of surveillance colposcopy and hrHPV testing.",
       options: [
-        { label: "Regression — hrHPV negative and no CIN on colposcopy/biopsy", sublabel: "Successful conservative management", next: "toc-pathway" },
+        { label: "Regression, hrHPV negative and no CIN on colposcopy/biopsy", sublabel: "Successful conservative management", next: "toc-pathway" },
         { label: "No regression / progression at 24 months, or patient preference for treatment", sublabel: "Proceed to excision", next: "lletz" },
       ],
     },
 
     "cin3-treatment": {
       type: "alert",
-      title: "CIN3 — Treatment Mandatory",
+      title: "CIN3: Treatment Mandatory",
       text: "Conservative management is NOT appropriate for CIN3. LLETZ is the standard first-line treatment.",
       items: [
         "See-and-treat acceptable: referral with high-grade dyskaryosis + major-grade colposcopy",
@@ -266,8 +266,8 @@ export const NHSCSP20_COLPOSCOPY_FLOWCHART = {
       options: [
         { label: "Clear margins (all margins free)", sublabel: "Standard TOC pathway", next: "toc-pathway" },
         { label: "Ectocervical margin involved only", sublabel: "TOC at 6 months acceptable; ~20% residual disease", next: "toc-pathway" },
-        { label: "Endocervical or both margins involved", sublabel: "Higher residual risk — early colposcopy review", next: "early-colposcopy-review" },
-        { label: "CGIN at margins", sublabel: "Re-excision or hysterectomy — MDT", next: "cgin-margins" },
+        { label: "Endocervical or both margins involved", sublabel: "Higher residual risk, early colposcopy review", next: "early-colposcopy-review" },
+        { label: "CGIN at margins", sublabel: "Re-excision or hysterectomy: MDT", next: "cgin-margins" },
       ],
     },
 
@@ -295,7 +295,7 @@ export const NHSCSP20_COLPOSCOPY_FLOWCHART = {
 
     "cgin-management": {
       type: "action",
-      title: "CGIN — CKC (preferred) or Wide LLETZ",
+      title: "CGIN: CKC (preferred) or Wide LLETZ",
       text: "CGIN requires excision with adequate glandular tissue. Ablation is NOT appropriate.",
       items: [
         "Preferred: cold knife cone biopsy (CKC) for better margin assessment",
@@ -309,7 +309,7 @@ export const NHSCSP20_COLPOSCOPY_FLOWCHART = {
 
     "cgin-margins": {
       type: "end",
-      title: "CGIN — MDT Review / Re-excision",
+      title: "CGIN: MDT Review / Re-excision",
       text: "Positive endocervical margins or recurrent CGIN requires gynaecological oncology MDT discussion.",
       items: [
         "Re-excision (repeat cone) or hysterectomy if family complete",
@@ -320,7 +320,7 @@ export const NHSCSP20_COLPOSCOPY_FLOWCHART = {
 
     "invasive-mdt": {
       type: "end",
-      title: "Suspected Invasive Cancer — Immediate MDT Referral",
+      title: "Suspected Invasive Cancer: Immediate MDT Referral",
       text: "Features suspicious for invasive cancer on colposcopy or histology require same-day oncology referral.",
       items: [
         "Do not delay for repeat testing",
@@ -336,7 +336,7 @@ export const NHSCSP20_COLPOSCOPY_FLOWCHART = {
 export const NHSCSP20_TOC_FLOWCHART = {
   id: "NHSCSP20_TOC",
   title: "Test of Cure After CIN Treatment",
-  subtitle: "NHSCSP — Post-treatment HPV test of cure",
+  subtitle: "NHSCSP: Post-treatment HPV test of cure",
   startId: "treatment-done",
   nodes: {
 
@@ -377,7 +377,7 @@ export const NHSCSP20_TOC_FLOWCHART = {
 
     "toc-sample": {
       type: "action",
-      title: "TOC Sample at 6 Months — hrHPV Test",
+      title: "TOC Sample at 6 Months, hrHPV Test",
       text: "Primary care hrHPV test 6 months post-treatment. No cytology unless HPV positive.",
       items: [
         "Taken by GP practice nurse or other trained practitioner",
@@ -399,7 +399,7 @@ export const NHSCSP20_TOC_FLOWCHART = {
 
     "toc-negative": {
       type: "end",
-      title: "TOC Negative — Routine 5-Year Recall",
+      title: "TOC Negative: Routine 5-Year Recall",
       text: "hrHPV negative at TOC. Treatment successful. Re-enter routine cervical screening.",
       items: [
         "Routine recall in 5 years",
@@ -411,7 +411,7 @@ export const NHSCSP20_TOC_FLOWCHART = {
 
     "toc-positive": {
       type: "alert",
-      title: "TOC Positive — Refer to Colposcopy",
+      title: "TOC Positive: Refer to Colposcopy",
       text: "ANY hrHPV positive TOC result requires colposcopy referral. Do not repeat the TOC.",
       items: [
         "Refer to colposcopy regardless of cytology result",
@@ -439,7 +439,7 @@ export const NHSCSP20_TOC_FLOWCHART = {
 export const NHSCSP20_PREGNANCY_FLOWCHART = {
   id: "NHSCSP20_PREGNANCY",
   title: "Cervical Screening & CIN in Pregnancy",
-  subtitle: "NHSCSP — Management during pregnancy",
+  subtitle: "NHSCSP: Management during pregnancy",
   startId: "screening-due",
   nodes: {
 
@@ -449,8 +449,8 @@ export const NHSCSP20_PREGNANCY_FLOWCHART = {
       text: "Cervical screening can be performed in pregnancy, but treatment is deferred postpartum.",
       options: [
         { label: "Routine screening due during pregnancy", sublabel: "Consider timing and whether to screen now or defer", next: "timing-decision" },
-        { label: "Known abnormal result / referred to colposcopy during pregnancy", sublabel: "Assessment only — no treatment", next: "colposcopy-in-pregnancy" },
-        { label: "Clinically suspicious cervix in pregnancy", sublabel: "Urgent referral — do not defer", next: "suspicious-cervix" },
+        { label: "Known abnormal result / referred to colposcopy during pregnancy", sublabel: "Assessment only, no treatment", next: "colposcopy-in-pregnancy" },
+        { label: "Clinically suspicious cervix in pregnancy", sublabel: "Urgent referral, do not defer", next: "suspicious-cervix" },
       ],
     },
 
@@ -459,7 +459,7 @@ export const NHSCSP20_PREGNANCY_FLOWCHART = {
       title: "Gestation at time screening is due?",
       text: "Screening in pregnancy is acceptable. Ideal timing is 10–20 weeks gestation.",
       options: [
-        { label: "10–20 weeks gestation", sublabel: "Optimal window — screen now", next: "screen-in-pregnancy" },
+        { label: "10–20 weeks gestation", sublabel: "Optimal window, screen now", next: "screen-in-pregnancy" },
         { label: "Near term (>28 weeks) or early first trimester (<10 weeks)", sublabel: "Consider deferring to postpartum", next: "defer-postpartum" },
       ],
     },
@@ -501,7 +501,7 @@ export const NHSCSP20_PREGNANCY_FLOWCHART = {
 
     "colposcopy-in-pregnancy": {
       type: "alert",
-      title: "Colposcopy in Pregnancy — Assessment ONLY",
+      title: "Colposcopy in Pregnancy: Assessment ONLY",
       text: "Colposcopy is safe in pregnancy. The purpose is assessment — NO treatment should be given.",
       items: [
         "Assess colposcopic appearance and TZ type",
@@ -518,14 +518,14 @@ export const NHSCSP20_PREGNANCY_FLOWCHART = {
       text: "Grade of disease guides surveillance frequency during pregnancy.",
       options: [
         { label: "CIN1 or CIN2", sublabel: "Low risk of significant progression", next: "cin12-pregnancy" },
-        { label: "CIN3 (or high-grade colposcopic impression)", sublabel: "Higher grade — closer surveillance", next: "cin3-pregnancy" },
-        { label: "?Invasive cancer / features suspicious for invasion", sublabel: "Do NOT defer — immediate MDT", next: "invasive-pregnancy" },
+        { label: "CIN3 (or high-grade colposcopic impression)", sublabel: "Higher grade, closer surveillance", next: "cin3-pregnancy" },
+        { label: "?Invasive cancer / features suspicious for invasion", sublabel: "Do NOT defer, immediate MDT", next: "invasive-pregnancy" },
       ],
     },
 
     "cin12-pregnancy": {
       type: "end",
-      title: "CIN1/2 in Pregnancy — Surveillance",
+      title: "CIN1/2 in Pregnancy: Surveillance",
       text: "Low-to-moderate grade CIN: surveillance during pregnancy, treatment deferred to postpartum.",
       items: [
         "Colposcopy surveillance: 3-monthly during pregnancy is not required for CIN1/2",
@@ -537,7 +537,7 @@ export const NHSCSP20_PREGNANCY_FLOWCHART = {
 
     "cin3-pregnancy": {
       type: "action",
-      title: "CIN3 in Pregnancy — 3-Monthly Colposcopy Surveillance",
+      title: "CIN3 in Pregnancy: 3-Monthly Colposcopy Surveillance",
       text: "High-grade CIN requires closer surveillance in pregnancy but NO treatment until postpartum.",
       items: [
         "3-monthly colposcopy surveillance throughout pregnancy",
@@ -551,7 +551,7 @@ export const NHSCSP20_PREGNANCY_FLOWCHART = {
 
     "cin3-postpartum": {
       type: "end",
-      title: "CIN3 — Treatment ≥12 Weeks Postpartum",
+      title: "CIN3: Treatment ≥12 Weeks Postpartum",
       text: "Defer all treatment to ≥12 weeks after delivery.",
       items: [
         "LLETZ under local anaesthetic in outpatient colposcopy clinic",
@@ -562,7 +562,7 @@ export const NHSCSP20_PREGNANCY_FLOWCHART = {
 
     "suspicious-cervix": {
       type: "end",
-      title: "Clinically Suspicious Cervix — Immediate MDT Referral",
+      title: "Clinically Suspicious Cervix: Immediate MDT Referral",
       text: "Clinical suspicion of invasion during pregnancy requires urgent oncology input. Do NOT defer.",
       items: [
         "Same-day contact with gynaecological oncology team",
@@ -575,7 +575,7 @@ export const NHSCSP20_PREGNANCY_FLOWCHART = {
 
     "invasive-pregnancy": {
       type: "end",
-      title: "?Invasive Cancer in Pregnancy — Immediate MDT",
+      title: "?Invasive Cancer in Pregnancy: Immediate MDT",
       text: "Do not defer investigation or MDT referral in suspected invasive disease.",
       items: [
         "Immediate gynaecological oncology MDT referral",

@@ -8,11 +8,26 @@ import { GUIDELINES } from "@pocket-og/guidelines";
 import * as GL from "@pocket-og/guidelines";
 import { CALCULATOR_SCENARIOS } from "./calculator";
 import { CONSENT_PROCEDURES } from "./consent";
+import { PEARLS, pearlLinks } from "./pearls";
+import { ANTIHYPERTENSIVES } from "./rx/antihypertensives";
+import { UTEROTONICS } from "./rx/uterotonics";
+import { ANTIEMETICS } from "./rx/antiemetics";
+import { ANTIBIOTICS } from "./rx/antibiotics";
+import { ANTIVIRALS } from "./rx/antivirals";
+import { TOCOLYTICS } from "./rx/tocolytics";
+import { ANTICOAGULANTS } from "./rx/anticoagulants";
+import { ANALGESIA } from "./rx/analgesia";
+import { ENDOMETRIOSIS_DRUGS } from "./rx/endometriosis";
+import { CONTRACEPTION } from "./rx/contraception";
 
 const flowchartIds = new Set(Object.keys(FLOWCHARTS));
 const guidelineCodes = new Set(Object.keys(GUIDELINES));
 const calcIds = new Set(CALCULATOR_SCENARIOS.map(s => s.id));
 const consentIds = new Set(CONSENT_PROCEDURES.map(p => p.id));
+const drugIds = new Set([
+  ...ANTIHYPERTENSIVES, ...UTEROTONICS, ...ANTIEMETICS, ...ANTIBIOTICS, ...ANTIVIRALS,
+  ...TOCOLYTICS, ...ANTICOAGULANTS, ...ANALGESIA, ...ENDOMETRIOSIS_DRUGS, ...CONTRACEPTION,
+].map(d => d.id));
 
 // Resolve a single { type, id, gl } link to an error string, or null if OK.
 function checkLink(link, where) {
@@ -25,6 +40,8 @@ function checkLink(link, where) {
     if (!calcIds.has(id)) return `${where}: calculator link → missing scenario "${id}"`;
   } else if (type === "consent") {
     if (!consentIds.has(id)) return `${where}: consent link → missing procedure "${id}"`;
+  } else if (type === "drug") {
+    if (!drugIds.has(id)) return `${where}: drug link → missing drug "${id}"`;
   } else if (type === "iol-prioritizer") {
     /* app-level target, always available */
   } else {
@@ -60,6 +77,23 @@ test("all flowchart node connections resolve to real targets", () => {
     for (const l of links) { const e = checkLink(l, `calc:${calcId}`); if (e) errors.push(e); }
   }
   if (errors.length) console.log("\nBROKEN LINKS:\n" + errors.join("\n") + "\n");
+  expect(errors).toEqual([]);
+});
+
+test("every Pearl of the Day links to real content", () => {
+  const errors = [];
+  const ids = new Set();
+  for (const pearl of PEARLS) {
+    if (ids.has(pearl.id)) errors.push(`duplicate pearl id "${pearl.id}"`);
+    ids.add(pearl.id);
+    if (!guidelineCodes.has(pearl.gl)) errors.push(`pearl:${pearl.id}: gl "${pearl.gl}" is not a guideline`);
+    const links = pearlLinks(pearl);
+    if (links.length === 0) errors.push(`pearl:${pearl.id}: has no resolvable links`);
+    for (const l of links) {
+      const e = checkLink(l, `pearl:${pearl.id}`); if (e) errors.push(e);
+    }
+  }
+  if (errors.length) console.log("\nBROKEN pearl links:\n" + errors.join("\n") + "\n");
   expect(errors).toEqual([]);
 });
 

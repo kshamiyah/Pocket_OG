@@ -14,7 +14,7 @@ export const TOG_VALVULAR_PREGNANCY_FLOWCHART = {
 
     "start": {
       type: "action",
-      title: "Known Valvular Heart Disease — Pre-Conception Assessment",
+      title: "Known Valvular Heart Disease: Pre-Conception Assessment",
       text: "As a rule, regurgitant lesions are better tolerated than stenotic lesions, and right-sided lesions better than left-sided.",
       items: [
         "Assess with the modified WHO (mWHO) classification (I–IV) and NYHA functional class",
@@ -83,14 +83,14 @@ export const TOG_VALVULAR_PREGNANCY_FLOWCHART = {
       type: "decision",
       title: "On a Mechanical Prosthetic Valve?",
       options: [
-        { label: "Yes — mechanical valve", next: "mechanical_valve" },
-        { label: "No — native valve or bioprosthesis", next: "delivery_plan" },
+        { label: "Yes, mechanical valve", next: "mechanical_valve" },
+        { label: "No, native valve or bioprosthesis", next: "delivery_plan" },
       ],
     },
 
     "mechanical_valve": {
       type: "alert",
-      title: "Anticoagulation Strategy — Individualised MDT Decision",
+      title: "Anticoagulation Strategy: Individualised MDT Decision",
       text: "Warfarin is most effective at preventing valve thrombosis but is teratogenic; LMWH doesn't cross the placenta but carries a higher maternal thromboembolic risk (~10%). No strategy eliminates risk to both mother and fetus.",
       items: [
         "VKA throughout: continue warfarin; switch to twice-daily LMWH ~2 weeks before delivery",

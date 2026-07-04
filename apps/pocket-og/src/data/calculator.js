@@ -24,7 +24,7 @@ export const CALCULATOR_SCENARIOS = [
   },
   {
     id: "ECTOPIC_DECISION",
-    title: "Tubal ectopic — initial management",
+    title: "Tubal ectopic, initial management",
     subtitle: "Decide expectant / methotrexate / surgery",
     source: "NICE NG126 §1.6.3–1.6.10 · RCOG GTG21 §5.1",
     color: { accent: "bg-rose-500", text: "text-rose-700", bg: "bg-rose-50", border: "border-rose-200" },
@@ -36,7 +36,7 @@ export const CALCULATOR_SCENARIOS = [
   },
   {
     id: "EXPECTANT_SURVEILLANCE",
-    title: "Expectant management — surveillance",
+    title: "Expectant management, surveillance",
     subtitle: "Serial hCG on days 2, 4 and 7",
     source: "NICE NG126 §1.6.5",
     color: { accent: "bg-teal-500", text: "text-teal-700", bg: "bg-teal-50", border: "border-teal-200" },
@@ -145,7 +145,7 @@ export function pulTvsTriage({ tvsDone, iupSeen, adnexalMassOrFreeFluid }) {
   if (iupSeen) {
     return {
       category: "IUP_CONFIRMED",
-      title: "Intrauterine pregnancy seen — not a PUL",
+      title: "Intrauterine pregnancy seen, not a PUL",
       color: "text-emerald-700",
       bg: "bg-emerald-50",
       border: "border-emerald-200",
@@ -161,7 +161,7 @@ export function pulTvsTriage({ tvsDone, iupSeen, adnexalMassOrFreeFluid }) {
   if (adnexalMassOrFreeFluid) {
     return {
       category: "SUSPECTED_ECTOPIC",
-      title: "Adnexal mass or free fluid — suspected ectopic",
+      title: "Adnexal mass or free fluid, suspected ectopic",
       color: "text-rose-700",
       bg: "bg-rose-50",
       border: "border-rose-200",
@@ -301,7 +301,7 @@ export function interpretEctopicDecision({
       pathways: [
         {
           id: "SURGERY",
-          title: "Surgery — first-line",
+          title: "Surgery, first-line",
           color: "text-rose-700",
           bg: "bg-rose-50",
           border: "border-rose-300",
@@ -352,7 +352,7 @@ export function interpretEctopicDecision({
       pathways: [
         {
           id: "EXPECTANT_OFFER",
-          title: "Expectant management — offer",
+          title: "Expectant management, offer",
           color: "text-teal-700",
           bg: "bg-teal-50",
           border: "border-teal-300",
@@ -373,7 +373,7 @@ export function interpretEctopicDecision({
         },
         {
           id: "MTX_ALSO_OPTION",
-          title: "Methotrexate — also an option",
+          title: "Methotrexate, also an option",
           color: "text-violet-700",
           bg: "bg-violet-50",
           border: "border-violet-300",
@@ -402,7 +402,7 @@ export function interpretEctopicDecision({
       pathways: [
         {
           id: "EXPECTANT_CONSIDER",
-          title: "Expectant management — consider",
+          title: "Expectant management, consider",
           color: "text-teal-700",
           bg: "bg-teal-50",
           border: "border-teal-300",
@@ -423,7 +423,7 @@ export function interpretEctopicDecision({
         },
         {
           id: "MTX_OFFER",
-          title: "Methotrexate — offer",
+          title: "Methotrexate, offer",
           color: "text-violet-700",
           bg: "bg-violet-50",
           border: "border-violet-300",
@@ -451,7 +451,7 @@ export function interpretEctopicDecision({
     pathways: [
       {
         id: "MTX_CHOICE",
-        title: "Methotrexate or surgery — woman's choice",
+        title: "Methotrexate or surgery, woman's choice",
         color: "text-violet-700",
         bg: "bg-violet-50",
         border: "border-violet-300",
@@ -516,7 +516,7 @@ export function interpretExpectantStep({ previous, current, dayLabel }) {
   if (drop >= 15) {
     return {
       category: "FALLING_OK",
-      title: "Falling appropriately — continue",
+      title: "Falling appropriately, continue",
       color: "text-teal-700",
       bg: "bg-teal-50",
       border: "border-teal-300",
@@ -570,7 +570,7 @@ export function interpretMtxStep({ day1, day4, day7 }) {
   if (drop > 15) {
     return {
       category: "DROP_OK",
-      title: "Falling appropriately — continue weekly",
+      title: "Falling appropriately, continue weekly",
       color: "text-teal-700",
       bg: "bg-teal-50",
       border: "border-teal-300",
@@ -584,7 +584,7 @@ export function interpretMtxStep({ day1, day4, day7 }) {
   if (pctChange >= 0) {
     return {
       category: "PLATEAU_RISE",
-      title: "Plateau or rise — reassess",
+      title: "Plateau or rise, reassess",
       color: "text-rose-700",
       bg: "bg-rose-50",
       border: "border-rose-300",
@@ -598,7 +598,7 @@ export function interpretMtxStep({ day1, day4, day7 }) {
   // Drop ≤15%
   return {
     category: "INADEQUATE_DROP",
-    title: "Inadequate fall — consider second dose",
+    title: "Inadequate fall, consider second dose",
     color: "text-amber-700",
     bg: "bg-amber-50",
     border: "border-amber-300",
@@ -682,7 +682,7 @@ export const VTE_RISK_FACTORS = [
   {
     group: "Pre-existing",
     id: "bmi_30_to_39",
-    label: "Obesity — BMI ≥ 30 kg/m² (below 40)",
+    label: "Obesity: BMI ≥ 30 kg/m² (below 40)",
     note: "Based on booking weight. BMI ≥ 30 scores 1; BMI ≥ 40 scores 2 (only tick one).",
     score: 1,
     phases: ["antenatal", "postnatal"],
@@ -691,7 +691,7 @@ export const VTE_RISK_FACTORS = [
   {
     group: "Pre-existing",
     id: "bmi_40_plus",
-    label: "Obesity — BMI ≥ 40 kg/m²",
+    label: "Obesity: BMI ≥ 40 kg/m²",
     note: "Based on booking weight.",
     score: 2,
     phases: ["antenatal", "postnatal"],
@@ -880,7 +880,7 @@ export function interpretVteAntenatal(total) {
   }
   return {
     category: "LOW",
-    title: "Lower risk — mobilisation and avoidance of dehydration",
+    title: "Lower risk, mobilisation and avoidance of dehydration",
     color: "text-teal-700",
     bg: "bg-teal-50",
     border: "border-teal-300",
@@ -935,7 +935,7 @@ export function interpretVtePostnatal(total) {
   }
   return {
     category: "LOW",
-    title: "Lower risk — early mobilisation and avoidance of dehydration",
+    title: "Lower risk, early mobilisation and avoidance of dehydration",
     color: "text-teal-700",
     bg: "bg-teal-50",
     border: "border-teal-300",

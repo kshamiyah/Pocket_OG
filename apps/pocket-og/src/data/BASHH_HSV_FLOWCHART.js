@@ -7,7 +7,7 @@
 
 export const BASHH_HSV_PREGNANCY_FLOWCHART = {
   id: "BASHH_HSV_PREGNANCY",
-  title: "Genital Herpes in Pregnancy — Management",
+  title: "Genital Herpes in Pregnancy: Management",
   subtitle: "BASHH/RCOG 2024 · HSV in pregnancy",
   startId: "start",
   nodes: {
@@ -47,7 +47,7 @@ export const BASHH_HSV_PREGNANCY_FLOWCHART = {
 
     "first-early": {
       type: "action",
-      title: "First Episode — 1st / 2nd Trimester",
+      title: "First Episode: 1st / 2nd Trimester",
       text: "Treat the episode and plan suppression; vaginal delivery is anticipated.",
       items: [
         "Treat: aciclovir 400 mg three times daily OR valaciclovir 500 mg twice daily (usually 5 days)",
@@ -60,7 +60,7 @@ export const BASHH_HSV_PREGNANCY_FLOWCHART = {
 
     "first-third": {
       type: "alert",
-      title: "First Episode — 3rd Trimester (High Risk)",
+      title: "First Episode: 3rd Trimester (High Risk)",
       text: "Neonatal transmission risk is very high (up to 41%) if shedding at delivery — insufficient time to transfer protective antibody.",
       items: [
         "Treat: aciclovir 400 mg three times daily OR valaciclovir 500 mg twice daily — may continue the treatment dose until delivery",
@@ -74,7 +74,7 @@ export const BASHH_HSV_PREGNANCY_FLOWCHART = {
     // ── RECURRENT / KNOWN ─────────────────────────────────────────────
     "recurrent-ante": {
       type: "action",
-      title: "Recurrent / Known Genital Herpes — Antenatal",
+      title: "Recurrent / Known Genital Herpes: Antenatal",
       text: "Suppression for all known genital herpes; vaginal delivery anticipated.",
       items: [
         "Treat symptomatic recurrences only if needed — supportive care often suffices (most resolve in 7–10 days)",
@@ -88,7 +88,7 @@ export const BASHH_HSV_PREGNANCY_FLOWCHART = {
     // ── LABOUR / DELIVERY ─────────────────────────────────────────────
     "labour": {
       type: "decision",
-      title: "At onset of labour — what is the situation?",
+      title: "At onset of labour, what is the situation?",
       text: "Mode of delivery depends on episode type and whether membranes have ruptured preterm.",
       options: [
         { label: "First-episode lesions, or acquired within 6 weeks", sublabel: "High risk", next: "cs" },
@@ -133,7 +133,7 @@ export const BASHH_HSV_PREGNANCY_FLOWCHART = {
 
     "pprom": {
       type: "decision",
-      title: "PPROM — primary or recurrent HSV?",
+      title: "PPROM, primary or recurrent HSV?",
       text: "The premature neonate is high-risk in either case. Management is MDT and depends on gestation.",
       options: [
         { label: "Primary / non-primary HSV with PPROM", next: "pprom-primary" },

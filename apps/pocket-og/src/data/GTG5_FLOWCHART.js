@@ -11,7 +11,7 @@ export const GTG5_OHSS_FLOWCHART = {
 
     "start": {
       type: "action",
-      title: "Suspected OHSS — Fertility Treatment or Recent hCG Trigger",
+      title: "Suspected OHSS: Fertility Treatment or Recent hCG Trigger",
       text: "No specific diagnostic test exists — diagnosis is clinical, supported by exam, bloods and imaging. Elevated haematocrit with low serum osmolality/sodium is characteristic.",
       items: [
         "Early OHSS: within 7 days of hCG trigger — usually excessive ovarian response",
@@ -26,11 +26,11 @@ export const GTG5_OHSS_FLOWCHART = {
       text: "OHSS itself rarely causes these — actively exclude other causes first.",
       options: [
         {
-          label: "Yes — one or more present",
+          label: "Yes, one or more present",
           sublabel: "Pelvic infection/abscess, appendicitis, ovarian torsion/cyst rupture, bowel perforation, ectopic pregnancy",
           next: "exclude_alt",
         },
-        { label: "No — findings consistent with OHSS alone", next: "classify" },
+        { label: "No, findings consistent with OHSS alone", next: "classify" },
       ],
     },
 
@@ -70,16 +70,16 @@ export const GTG5_OHSS_FLOWCHART = {
 
     "severity_severe": {
       type: "decision",
-      title: "Severe OHSS — Suitable for Outpatient Care?",
+      title: "Severe OHSS: Suitable for Outpatient Care?",
       text: "Outpatient care is appropriate in selected severe cases with clear criteria and access to admission if needed.",
       options: [
         {
-          label: "Yes — selected, stable",
+          label: "Yes, selected, stable",
           sublabel: "Able to attend follow-up, pain controlled, tolerating oral intake",
           next: "outpatient",
         },
         {
-          label: "No — admit",
+          label: "No, admit",
           sublabel: [
             "Unable to attend regular follow-up",
             "Unable to achieve satisfactory pain control",
@@ -93,7 +93,7 @@ export const GTG5_OHSS_FLOWCHART = {
 
     "critical": {
       type: "alert",
-      title: "Critical OHSS — Multidisciplinary / Consider ICU",
+      title: "Critical OHSS: Multidisciplinary / Consider ICU",
       text: "Seek anaesthetic/ITU/renal/respiratory/haematology input. Features of critical OHSS should prompt consideration of intensive care.",
       next: "inpatient",
     },
@@ -126,7 +126,7 @@ export const GTG5_OHSS_FLOWCHART = {
           ],
           next: "inpatient",
         },
-        { label: "No — continue outpatient monitoring", next: "resolution" },
+        { label: "No, continue outpatient monitoring", next: "resolution" },
       ],
     },
 

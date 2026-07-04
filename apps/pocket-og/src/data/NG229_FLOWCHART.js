@@ -36,7 +36,7 @@ export const NG229_CTG_FLOWCHART = {
 
     "suspicious": {
       type: "action",
-      title: "Suspicious — Conservative Measures",
+      title: "Suspicious: Conservative Measures",
       text: "Start conservative (intrauterine resuscitation) measures, correct reversible causes, inform the coordinating midwife and obstetric team, and reassess within 30 minutes.",
       items: [
         "Reposition (left lateral); avoid supine",
@@ -52,14 +52,14 @@ export const NG229_CTG_FLOWCHART = {
       title: "Reassess Within 30 Minutes",
       text: "After conservative measures, has the trace improved?",
       options: [
-        { label: "Improved — now all reassuring", sublabel: "Return to normal pathway", next: "normal" },
+        { label: "Improved, now all reassuring", sublabel: "Return to normal pathway", next: "normal" },
         { label: "Persists or worsens", sublabel: "Treat as pathological", next: "pathological" },
       ],
     },
 
     "pathological": {
       type: "alert",
-      title: "Pathological — Immediate Senior Review",
+      title: "Pathological: Immediate Senior Review",
       text: "Continue conservative measures and obtain immediate review by an obstetrician (senior/consultant). Offer digital fetal scalp stimulation.",
       items: [
         "≥2 non-reassuring features, or ≥1 abnormal feature",
@@ -74,7 +74,7 @@ export const NG229_CTG_FLOWCHART = {
       title: "Fetal Scalp Stimulation Response?",
       text: "Is there an acceleration in response to digital fetal scalp stimulation?",
       options: [
-        { label: "Acceleration — reassuring", sublabel: "Continue close monitoring", next: "fss-ok" },
+        { label: "Acceleration, reassuring", sublabel: "Continue close monitoring", next: "fss-ok" },
         { label: "No response", sublabel: "FBS or expedite birth", next: "expedite" },
       ],
     },
@@ -101,7 +101,7 @@ export const NG229_CTG_FLOWCHART = {
 
     "urgent": {
       type: "alert",
-      title: "Urgent — Acute Bradycardia / Prolonged Deceleration",
+      title: "Urgent: Acute Bradycardia / Prolonged Deceleration",
       text: "A single prolonged deceleration ≥3 minutes is an obstetric emergency. Call for help immediately and start conservative measures.",
       items: [
         "Pull the emergency call bell; summon senior obstetric and neonatal teams",

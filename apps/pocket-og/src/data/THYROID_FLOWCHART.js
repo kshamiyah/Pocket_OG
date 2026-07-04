@@ -44,7 +44,7 @@ export const TOG_THYROID_FLOWCHART = {
 
     "hypo": {
       type: "action",
-      title: "Hypothyroidism — Classify and Treat",
+      title: "Hypothyroidism: Classify and Treat",
       text: "Distinguish the category — it determines urgency.",
       items: [
         "Untreated hypothyroidism (often symptomatic) → initiate thyroxine urgently",
@@ -57,7 +57,7 @@ export const TOG_THYROID_FLOWCHART = {
 
     "hypo_goal": {
       type: "end",
-      title: "Hypothyroidism — Ongoing Management",
+      title: "Hypothyroidism: Ongoing Management",
       text: "Only first-trimester control has been linked to fetal wellbeing in the literature — hypothyroidism itself does not appear to influence pregnancy outcome once euthyroid.",
       items: [
         "Aim for euthyroidism before conception where possible",

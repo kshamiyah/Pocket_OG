@@ -6,7 +6,7 @@
 export const GTG63_TRIAGE_FLOWCHART = {
   id: "GTG63_TRIAGE",
   title: "APH Initial Triage & Assessment",
-  subtitle: "GTG63 — Antepartum Haemorrhage",
+  subtitle: "GTG63: Antepartum Haemorrhage",
   startId: "present",
   nodes: {
 
@@ -24,24 +24,24 @@ export const GTG63_TRIAGE_FLOWCHART = {
 
     "severity-check": {
       type: "decision",
-      title: "Initial severity — is there maternal compromise?",
+      title: "Initial severity, is there maternal compromise?",
       text: "Assess immediately for haemodynamic compromise and clinical shock.",
       options: [
         { label: "Massive / Major persisting / Clinical shock / Unable to give history", sublabel: "Activate major haemorrhage protocol immediately", next: "immediate-resus" },
-        { label: "No maternal compromise — spotting or minor, bleeding settled", sublabel: "Proceed to full history and examination", next: "full-history" },
+        { label: "No maternal compromise, spotting or minor, bleeding settled", sublabel: "Proceed to full history and examination", next: "full-history" },
       ],
     },
 
     "immediate-resus": {
       type: "alert",
-      title: "IMMEDIATE RESUSCITATION — Major Haemorrhage Protocol",
+      title: "IMMEDIATE RESUSCITATION: Major Haemorrhage Protocol",
       text: "Four pillars: Communication — Resuscitation — Monitoring and Investigation — Arrest Bleeding by Delivery.\n\n• A + B: Airway + O₂ 10–15 L/min via non-rebreather facemask\n• C: 2× 14G IV access; take 20 ml blood (FBC, coag screen, crossmatch ×4, U&E, LFTs; Kleihauer if RhD-neg)\n• Call: consultant obstetrician + consultant anaesthetist + haematologist + blood bank\n• Catheterise; monitor urine output ≥30 ml/hour\n• Mother is always the priority — stabilise before assessing fetus",
       next: "fh-check",
     },
 
     "fh-check": {
       type: "decision",
-      title: "Fetal heart assessment — once resuscitation commenced",
+      title: "Fetal heart assessment, once resuscitation commenced",
       text: "Assess fetal wellbeing as part of D (Disability) of ABCD.",
       options: [
         { label: "Fetal heart absent on auscultation", sublabel: "Urgent USS to confirm/exclude IUFD", next: "iufd-path" },
@@ -52,7 +52,7 @@ export const GTG63_TRIAGE_FLOWCHART = {
 
     "iufd-path": {
       type: "alert",
-      title: "Fetal Heart Absent — Confirm with USS",
+      title: "Fetal Heart Absent: Confirm with USS",
       text: "Perform USS immediately to confirm or exclude IUFD. Do not leave the woman alone while awaiting scan.\n\nIf IUFD confirmed: manage per GTG55 Late Intrauterine Fetal Death & Stillbirth. Vaginal birth recommended for most women (CS if specific maternal indication).",
       next: "stabilise-iufd",
     },
@@ -70,7 +70,7 @@ export const GTG63_TRIAGE_FLOWCHART = {
 
     "emergency-delivery": {
       type: "alert",
-      title: "Fetal Compromise with APH — Obstetric Emergency",
+      title: "Fetal Compromise with APH: Obstetric Emergency",
       text: "Arrange immediate caesarean section with concurrent maternal resuscitation. Do not delay delivery to achieve full maternal stabilisation if the fetus is compromised.",
       next: "delivery-end",
     },
@@ -89,7 +89,7 @@ export const GTG63_TRIAGE_FLOWCHART = {
 
     "stabilise": {
       type: "end",
-      title: "Stabilise — Continue Monitoring",
+      title: "Stabilise: Continue Monitoring",
       text: "CTG monitoring ongoing. Investigations underway. See Delivery Decision flowchart for timing and mode of birth.",
       items: [
         "Continuous EFM in major APH",
@@ -154,14 +154,14 @@ export const GTG63_TRIAGE_FLOWCHART = {
 
     "abruption": {
       type: "alert",
-      title: "Placental Abruption — Clinical Diagnosis",
+      title: "Placental Abruption: Clinical Diagnosis",
       text: "Placental abruption is a CLINICAL DIAGNOSIS. Ultrasound sensitivity is only 24% — a normal USS does NOT exclude abruption.\n\nConcealed abruption (no visible bleeding) can be the most dangerous: uterus may be tense, fetal heart absent, and coagulopathy already established.",
       next: "abruption-investigations",
     },
 
     "abruption-investigations": {
       type: "action",
-      title: "Abruption — Investigations & Monitoring",
+      title: "Abruption: Investigations & Monitoring",
       text: "Investigations proportionate to severity.",
       items: [
         "FBC + coagulation screen + crossmatch 4 units (even minor abruption can evolve rapidly)",
@@ -203,14 +203,14 @@ export const GTG63_TRIAGE_FLOWCHART = {
 
 export const GTG63_DELIVERY_FLOWCHART = {
   id: "GTG63_DELIVERY",
-  title: "APH — Delivery Decision",
-  subtitle: "GTG63 — Antepartum Haemorrhage",
+  title: "APH: Delivery Decision",
+  subtitle: "GTG63: Antepartum Haemorrhage",
   startId: "start",
   nodes: {
 
     "start": {
       type: "action",
-      title: "APH — Determine Timing and Mode of Delivery",
+      title: "APH: Determine Timing and Mode of Delivery",
       text: "Senior obstetrician must be involved in all delivery decisions following APH. Consider: gestation, fetal condition, maternal condition, cause of APH, and placental site.",
       items: [
         "Confirm fetal viability with auscultation or CTG",
@@ -225,14 +225,14 @@ export const GTG63_DELIVERY_FLOWCHART = {
       title: "Fetal death confirmed (IUFD)?",
       text: "Fetal death changes the priorities of management — maternal stabilisation becomes the primary goal.",
       options: [
-        { label: "Yes — IUFD confirmed on USS", sublabel: "Vaginal birth usually recommended", next: "vaginal-birth" },
-        { label: "No — fetus alive", sublabel: "Proceed to assess maternal/fetal compromise", next: "compromise-check" },
+        { label: "Yes: IUFD confirmed on USS", sublabel: "Vaginal birth usually recommended", next: "vaginal-birth" },
+        { label: "No, fetus alive", sublabel: "Proceed to assess maternal/fetal compromise", next: "compromise-check" },
       ],
     },
 
     "vaginal-birth": {
       type: "end",
-      title: "IUFD — Vaginal Birth Recommended",
+      title: "IUFD: Vaginal Birth Recommended",
       text: "Vaginal birth is the recommended mode of delivery for most women with IUFD, provided maternal condition is satisfactory.",
       items: [
         "CS should be considered where there is a specific maternal indication",
@@ -247,14 +247,14 @@ export const GTG63_DELIVERY_FLOWCHART = {
       title: "Is there maternal and/or fetal compromise?",
       text: "Assess maternal haemodynamics and fetal wellbeing on CTG.",
       options: [
-        { label: "Yes — maternal shock OR fetal compromise (abnormal CTG)", sublabel: "Obstetric emergency — immediate CS", next: "immediate-cs" },
-        { label: "No — mother and fetus stable", sublabel: "Consider gestation and clinical picture", next: "gestation-check" },
+        { label: "Yes, maternal shock OR fetal compromise (abnormal CTG)", sublabel: "Obstetric emergency, immediate CS", next: "immediate-cs" },
+        { label: "No, mother and fetus stable", sublabel: "Consider gestation and clinical picture", next: "gestation-check" },
       ],
     },
 
     "immediate-cs": {
       type: "alert",
-      title: "APH with Compromise — Obstetric Emergency",
+      title: "APH with Compromise: Obstetric Emergency",
       text: "Immediate caesarean section with concurrent maternal resuscitation.\n\nDo not delay delivery to achieve full maternal stabilisation if the fetus is compromised.\n\n• Consultant obstetrician + consultant anaesthetist immediately\n• Neonatal team to be present at delivery\n• Regional anaesthesia if stable; general anaesthesia if unstable or rapid delivery required",
       next: "cs-end",
     },
@@ -276,9 +276,9 @@ export const GTG63_DELIVERY_FLOWCHART = {
       title: "Gestation and clinical picture?",
       text: "Stable mother and fetus — determine timing of delivery based on gestation and APH severity.",
       options: [
-        { label: "<37+0 weeks — bleeding settled, no compromise", sublabel: "Conservative expectant management", next: "conservative" },
-        { label: "≥37+0 weeks — spotting or blood-streaked show only", sublabel: "Likely blood-stained show; assess carefully", next: "show-assessment" },
-        { label: "≥37+0 weeks — minor or major APH (not just spotting)", sublabel: "Consider IOL for vaginal delivery", next: "iol-consider" },
+        { label: "<37+0 weeks, bleeding settled, no compromise", sublabel: "Conservative expectant management", next: "conservative" },
+        { label: "≥37+0 weeks, spotting or blood-streaked show only", sublabel: "Likely blood-stained show; assess carefully", next: "show-assessment" },
+        { label: "≥37+0 weeks, minor or major APH (not just spotting)", sublabel: "Consider IOL for vaginal delivery", next: "iol-consider" },
       ],
     },
 
@@ -329,7 +329,7 @@ export const GTG63_DELIVERY_FLOWCHART = {
 export const GTG63_ANTID_FLOWCHART = {
   id: "GTG63_ANTID",
   title: "Anti-D Ig in RhD-Negative Women with APH",
-  subtitle: "GTG63 — Antepartum Haemorrhage",
+  subtitle: "GTG63: Antepartum Haemorrhage",
   startId: "start",
   nodes: {
 
@@ -369,11 +369,11 @@ export const GTG63_ANTID_FLOWCHART = {
 
     "fmh-result": {
       type: "decision",
-      title: "Kleihauer result — FMH quantification",
+      title: "Kleihauer result: FMH quantification",
       text: "Interpret Kleihauer result to determine if additional anti-D Ig is required.",
       options: [
         { label: "FMH ≤4 ml red blood cells", sublabel: "500 iu anti-D Ig is sufficient", next: "standard-done" },
-        { label: "FMH >4 ml red blood cells", sublabel: "Additional anti-D Ig required — calculate dose", next: "extra-antid" },
+        { label: "FMH >4 ml red blood cells", sublabel: "Additional anti-D Ig required, calculate dose", next: "extra-antid" },
       ],
     },
 
@@ -382,14 +382,14 @@ export const GTG63_ANTID_FLOWCHART = {
       title: "Is this recurrent APH after 20+0 weeks?",
       text: "Recurrent bleeding requires repeat anti-D Ig at regular intervals.",
       options: [
-        { label: "Yes — recurrent vaginal bleeding episodes", sublabel: "Repeat anti-D Ig at minimum 6-weekly intervals", next: "repeat-antid" },
-        { label: "No — first or isolated episode", sublabel: "Document and continue routine prophylaxis schedule", next: "done" },
+        { label: "Yes, recurrent vaginal bleeding episodes", sublabel: "Repeat anti-D Ig at minimum 6-weekly intervals", next: "repeat-antid" },
+        { label: "No, first or isolated episode", sublabel: "Document and continue routine prophylaxis schedule", next: "done" },
       ],
     },
 
     "extra-antid": {
       type: "action",
-      title: "FMH >4 ml — Additional Anti-D Ig Required",
+      title: "FMH >4 ml: Additional Anti-D Ig Required",
       text: "Liaise with haematology/transfusion laboratory to calculate the exact additional dose of anti-D Ig required.",
       items: [
         "Additional anti-D Ig dose is calculated from Kleihauer result",
@@ -405,14 +405,14 @@ export const GTG63_ANTID_FLOWCHART = {
       title: "Is this recurrent APH after 20+0 weeks?",
       text: "Recurrent bleeding requires repeat prophylaxis at minimum 6-weekly intervals.",
       options: [
-        { label: "Yes — recurrent episodes of vaginal bleeding", next: "repeat-antid" },
-        { label: "No — first or isolated episode", next: "done" },
+        { label: "Yes, recurrent episodes of vaginal bleeding", next: "repeat-antid" },
+        { label: "No, first or isolated episode", next: "done" },
       ],
     },
 
     "repeat-antid": {
       type: "end",
-      title: "Recurrent APH — Repeat Anti-D Ig at 6-Weekly Intervals",
+      title: "Recurrent APH: Repeat Anti-D Ig at 6-Weekly Intervals",
       text: "Each episode of vaginal bleeding after 20+0 weeks requires anti-D Ig + Kleihauer at a minimum of 6-weekly intervals.",
       items: [
         "Repeat ≥500 iu anti-D Ig with each further episode of APH",
@@ -425,7 +425,7 @@ export const GTG63_ANTID_FLOWCHART = {
 
     "done": {
       type: "end",
-      title: "Anti-D Ig Given — Episode Complete",
+      title: "Anti-D Ig Given: Episode Complete",
       text: "Anti-D Ig administered. FMH quantified with Kleihauer. Documentation complete.",
       items: [
         "Continue routine antenatal anti-D prophylaxis schedule as planned",

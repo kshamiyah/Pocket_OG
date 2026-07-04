@@ -4,8 +4,8 @@
 
 export const GTG67_MANAGEMENT_FLOWCHART = {
   id: "GTG67_MANAGEMENT",
-  title: "Endometrial Hyperplasia — Management Pathway",
-  subtitle: "GTG67 — RCOG/BSGE Endometrial Hyperplasia",
+  title: "Endometrial Hyperplasia: Management Pathway",
+  subtitle: "GTG67: RCOG/BSGE Endometrial Hyperplasia",
   startId: "presentation",
   nodes: {
 
@@ -48,13 +48,13 @@ export const GTG67_MANAGEMENT_FLOWCHART = {
 
     "normal": {
       type: "end",
-      title: "Normal Histology — Treat Underlying HMB",
+      title: "Normal Histology: Treat Underlying HMB",
       text: "No hyperplasia. Manage abnormal uterine bleeding per NICE NG88 HMB pathway. Address modifiable risk factors (weight, tamoxifen, HRT).",
     },
 
     "cancer": {
       type: "alert",
-      title: "Endometrial Carcinoma — Urgent MDT Referral",
+      title: "Endometrial Carcinoma: Urgent MDT Referral",
       text: "Refer urgently to gynaecological oncology MDT. Staging investigations: MRI pelvis ± CT chest/abdomen/pelvis. Management per NICE endometrial cancer guideline.",
       items: [
         "Do not delay referral to oncology MDT",
@@ -72,7 +72,7 @@ export const GTG67_MANAGEMENT_FLOWCHART = {
 
     "without-atypia": {
       type: "action",
-      title: "Hyperplasia Without Atypia — First Steps",
+      title: "Hyperplasia Without Atypia: First Steps",
       text: "Address risk factors AND offer progestogen treatment. Observation alone is only acceptable if reversible risk factors are fully corrected.",
       items: [
         "Counsel on risk factors: weight reduction, tamoxifen switch, HRT optimisation",
@@ -85,17 +85,17 @@ export const GTG67_MANAGEMENT_FLOWCHART = {
 
     "treat-without-atypia": {
       type: "decision",
-      title: "Treatment choice — hyperplasia without atypia",
+      title: "Treatment choice, hyperplasia without atypia",
       options: [
-        { label: "LNG-IUS 52 mg (Mirena) — first-line", sublabel: ">90% regression at 6 months; preferred", next: "lng-ius" },
-        { label: "Oral progestogen — LNG-IUS declined/unsuitable", sublabel: "MPA 10–20 mg/day or norethisterone 10–15 mg/day", next: "oral-progestogen" },
-        { label: "Observation — reversible cause fully addressed", sublabel: "Only with close 6-monthly biopsy surveillance", next: "observation" },
+        { label: "LNG-IUS 52 mg (Mirena), first-line", sublabel: ">90% regression at 6 months; preferred", next: "lng-ius" },
+        { label: "Oral progestogen: LNG-IUS declined/unsuitable", sublabel: "MPA 10–20 mg/day or norethisterone 10–15 mg/day", next: "oral-progestogen" },
+        { label: "Observation, reversible cause fully addressed", sublabel: "Only with close 6-monthly biopsy surveillance", next: "observation" },
       ],
     },
 
     "lng-ius": {
       type: "action",
-      title: "LNG-IUS 52 mg — First-Line Treatment",
+      title: "LNG-IUS 52 mg: First-Line Treatment",
       text: "Levonorgestrel IUS provides local progestogen with minimal systemic effects. Achieves >90% regression at 6 months.",
       items: [
         "Insert at any time in cycle; can be done at time of hysteroscopy",
@@ -108,7 +108,7 @@ export const GTG67_MANAGEMENT_FLOWCHART = {
 
     "oral-progestogen": {
       type: "action",
-      title: "Oral Progestogen — Alternative Treatment",
+      title: "Oral Progestogen: Alternative Treatment",
       text: "Continuous oral progestogen: MPA 10–20 mg/day or norethisterone 10–15 mg/day.",
       items: [
         "Regression rate ~66–80% at 6 months (lower than LNG-IUS)",
@@ -121,7 +121,7 @@ export const GTG67_MANAGEMENT_FLOWCHART = {
 
     "observation": {
       type: "action",
-      title: "Observation — Surveillance Only",
+      title: "Observation: Surveillance Only",
       text: "Only if reversible risk factors are fully and verifiably addressed. Spontaneous regression rate ~75% at 24 months but no treatment means slower resolution.",
       items: [
         "6-monthly endometrial biopsy mandatory",
@@ -134,7 +134,7 @@ export const GTG67_MANAGEMENT_FLOWCHART = {
 
     "surveillance": {
       type: "action",
-      title: "Surveillance — 6-Monthly Endometrial Biopsy",
+      title: "Surveillance: 6-Monthly Endometrial Biopsy",
       text: "Repeat endometrial sampling at 6-monthly intervals throughout treatment.",
       items: [
         "Biopsy method: Pipelle or hysteroscopy + directed biopsy",
@@ -149,7 +149,7 @@ export const GTG67_MANAGEMENT_FLOWCHART = {
       type: "decision",
       title: "Response to treatment at 6 and 12 months?",
       options: [
-        { label: "Regression — normal endometrium on two consecutive biopsies", sublabel: "Treatment successful; plan discharge or ongoing LNG-IUS", next: "regression" },
+        { label: "Regression, normal endometrium on two consecutive biopsies", sublabel: "Treatment successful; plan discharge or ongoing LNG-IUS", next: "regression" },
         { label: "No regression / persistence after 12 months of adequate treatment", sublabel: "Review, escalate, or consider hysterectomy", next: "no-regression" },
         { label: "Progression to atypia (AEH/EIN) at any point", sublabel: "Escalate to AEH management pathway", next: "aeh" },
       ],
@@ -157,7 +157,7 @@ export const GTG67_MANAGEMENT_FLOWCHART = {
 
     "regression": {
       type: "end",
-      title: "Regression Confirmed — Discharge / Retained LNG-IUS",
+      title: "Regression Confirmed: Discharge / Retained LNG-IUS",
       text: "Two consecutive negative biopsies confirmed. Discharge from active surveillance. Recommend retaining LNG-IUS for up to 5 years to reduce relapse risk.",
       items: [
         "Address modifiable risk factors: ongoing weight management, review HRT/tamoxifen",
@@ -169,10 +169,10 @@ export const GTG67_MANAGEMENT_FLOWCHART = {
 
     "no-regression": {
       type: "decision",
-      title: "No regression after 12 months — options?",
+      title: "No regression after 12 months, options?",
       options: [
-        { label: "Switch treatment — change from oral progestogen to LNG-IUS, or vice versa", sublabel: "Reassess after further 6 months", next: "switch-tx" },
-        { label: "Hysterectomy — preferred if family complete or patient preference", sublabel: "Definitive; no further surveillance needed", next: "hysterectomy-no-atypia" },
+        { label: "Switch treatment, change from oral progestogen to LNG-IUS, or vice versa", sublabel: "Reassess after further 6 months", next: "switch-tx" },
+        { label: "Hysterectomy, preferred if family complete or patient preference", sublabel: "Definitive; no further surveillance needed", next: "hysterectomy-no-atypia" },
       ],
     },
 
@@ -184,13 +184,13 @@ export const GTG67_MANAGEMENT_FLOWCHART = {
 
     "hysterectomy-no-atypia": {
       type: "end",
-      title: "Total Hysterectomy — Treatment Failure / Patient Choice",
+      title: "Total Hysterectomy: Treatment Failure / Patient Choice",
       text: "Total hysterectomy is appropriate for hyperplasia without atypia that fails to respond to progestogen treatment, or at patient request after full counselling. Ovarian conservation appropriate in most premenopausal women.",
     },
 
     "aeh": {
       type: "alert",
-      title: "Atypical Hyperplasia (AEH/EIN) — Specialist Assessment Required",
+      title: "Atypical Hyperplasia (AEH/EIN): Specialist Assessment Required",
       text: "AEH/EIN has ~8% concurrent endometrial cancer risk. Requires specialist management. MDT discussion recommended.",
       items: [
         "Pre-treatment MRI pelvis: to assess for myometrial invasion and exclude concurrent cancer",
@@ -203,10 +203,10 @@ export const GTG67_MANAGEMENT_FLOWCHART = {
 
     "aeh-fertility": {
       type: "decision",
-      title: "AEH/EIN — Fertility wishes?",
+      title: "AEH/EIN: Fertility wishes?",
       options: [
-        { label: "Family complete / no fertility desired — hysterectomy", sublabel: "Standard treatment; definitive", next: "aeh-hysterectomy" },
-        { label: "Fertility desired — conservative management at specialist centre only", sublabel: "Requires full counselling; high relapse risk; 3-monthly surveillance", next: "aeh-conservative" },
+        { label: "Family complete / no fertility desired, hysterectomy", sublabel: "Standard treatment; definitive", next: "aeh-hysterectomy" },
+        { label: "Fertility desired, conservative management at specialist centre only", sublabel: "Requires full counselling; high relapse risk; 3-monthly surveillance", next: "aeh-conservative" },
       ],
     },
 
@@ -224,7 +224,7 @@ export const GTG67_MANAGEMENT_FLOWCHART = {
 
     "aeh-conservative": {
       type: "end",
-      title: "Fertility-Sparing Management — AEH/EIN (Specialist Centres Only)",
+      title: "Fertility-Sparing Management: AEH/EIN (Specialist Centres Only)",
       text: "Only at a centre with expertise. Full counselling of risks required. LNG-IUS ± high-dose oral progestogen. 3-monthly hysteroscopy + biopsy.",
       items: [
         "LNG-IUS 52 mg first-line; add high-dose MPA (400–600 mg/day) or megestrol (160 mg/day) if desired",
@@ -242,8 +242,8 @@ export const GTG67_MANAGEMENT_FLOWCHART = {
 
 export const GTG67_AEH_FLOWCHART = {
   id: "GTG67_AEH",
-  title: "Atypical Hyperplasia (AEH/EIN) — Detailed Pathway",
-  subtitle: "GTG67 — RCOG/BSGE",
+  title: "Atypical Hyperplasia (AEH/EIN): Detailed Pathway",
+  subtitle: "GTG67: RCOG/BSGE",
   startId: "diagnosis",
   nodes: {
 
@@ -262,7 +262,7 @@ export const GTG67_AEH_FLOWCHART = {
 
     "mri": {
       type: "action",
-      title: "MRI Pelvis — Urgent",
+      title: "MRI Pelvis: Urgent",
       text: "MRI pelvis is recommended before any conservative management to exclude myometrial invasion or concurrent cancer.",
       items: [
         "If MRI shows myometrial invasion or features suspicious for cancer: do NOT attempt conservative treatment — proceed to hysterectomy",
@@ -277,7 +277,7 @@ export const GTG67_AEH_FLOWCHART = {
       title: "MRI pelvis result?",
       options: [
         { label: "Myometrial invasion / features suspicious for concurrent endometrial cancer", sublabel: "Proceed to hysterectomy; do not trial conservative treatment", next: "hysterectomy" },
-        { label: "Normal MRI — no invasion seen", sublabel: "Can offer conservative management if fertility desired", next: "fertility-decision" },
+        { label: "Normal MRI, no invasion seen", sublabel: "Can offer conservative management if fertility desired", next: "fertility-decision" },
       ],
     },
 
@@ -286,7 +286,7 @@ export const GTG67_AEH_FLOWCHART = {
       title: "Fertility wishes?",
       options: [
         { label: "No desire for fertility / Family complete", sublabel: "Hysterectomy recommended", next: "hysterectomy" },
-        { label: "Strongly desires fertility / Unfit for surgery — conservative management", sublabel: "Specialist centre; full informed consent required", next: "conservative" },
+        { label: "Strongly desires fertility / Unfit for surgery, conservative management", sublabel: "Specialist centre; full informed consent required", next: "conservative" },
       ],
     },
 
@@ -306,28 +306,28 @@ export const GTG67_AEH_FLOWCHART = {
 
     "post-op": {
       type: "decision",
-      title: "Post-operative histology — concurrent endometrial cancer?",
+      title: "Post-operative histology, concurrent endometrial cancer?",
       options: [
-        { label: "AEH only — no concurrent carcinoma", sublabel: "No further oncological treatment; routine follow-up", next: "no-cancer" },
+        { label: "AEH only, no concurrent carcinoma", sublabel: "No further oncological treatment; routine follow-up", next: "no-cancer" },
         { label: "Concurrent endometrial carcinoma identified", sublabel: "Urgent oncology MDT; staging investigations", next: "concurrent-cancer" },
       ],
     },
 
     "no-cancer": {
       type: "end",
-      title: "AEH Only at Hysterectomy — Discharge",
+      title: "AEH Only at Hysterectomy: Discharge",
       text: "No endometrial cancer at hysterectomy. Routine post-operative follow-up. No further gynaecological cancer surveillance required. Address modifiable risk factors.",
     },
 
     "concurrent-cancer": {
       type: "end",
-      title: "Concurrent Endometrial Cancer — Oncology MDT",
+      title: "Concurrent Endometrial Cancer: Oncology MDT",
       text: "Refer to gynaecological oncology MDT urgently. Staging MRI ± CT. Adjuvant treatment (radiotherapy, chemotherapy) per FIGO stage and MDT recommendation.",
     },
 
     "conservative": {
       type: "action",
-      title: "Conservative (Fertility-Sparing) Treatment — Specialist Centre Only",
+      title: "Conservative (Fertility-Sparing) Treatment: Specialist Centre Only",
       text: "Only at centres with expertise in conservative management of AEH. Full informed consent including cancer risk. Multi-disciplinary approach with reproductive medicine.",
       items: [
         "LNG-IUS 52 mg: insert at start of treatment; leave in situ throughout",
@@ -342,15 +342,15 @@ export const GTG67_AEH_FLOWCHART = {
       type: "decision",
       title: "Response at 3-monthly hysteroscopy + biopsy?",
       options: [
-        { label: "Complete remission — normal endometrium on two consecutive biopsies", sublabel: "Attempt conception without delay", next: "remission" },
-        { label: "Partial response — hyperplasia reduced but not resolved", sublabel: "Continue treatment; review regimen; re-biopsy at 3 months", next: "partial" },
+        { label: "Complete remission, normal endometrium on two consecutive biopsies", sublabel: "Attempt conception without delay", next: "remission" },
+        { label: "Partial response, hyperplasia reduced but not resolved", sublabel: "Continue treatment; review regimen; re-biopsy at 3 months", next: "partial" },
         { label: "No response / progression to carcinoma", sublabel: "Hysterectomy required; stop conservative management", next: "failed-conservative" },
       ],
     },
 
     "remission": {
       type: "action",
-      title: "Complete Remission — Attempt Conception",
+      title: "Complete Remission: Attempt Conception",
       text: "Two consecutive normal biopsies achieved. Attempt conception without delay — relapse risk increases with time.",
       items: [
         "Refer to reproductive medicine for fertility treatment as appropriate",
@@ -366,20 +366,20 @@ export const GTG67_AEH_FLOWCHART = {
       type: "decision",
       title: "Conception achieved?",
       options: [
-        { label: "Pregnancy achieved — deliver safely", sublabel: "Return to gynaecology after childbearing for hysterectomy discussion", next: "post-pregnancy" },
+        { label: "Pregnancy achieved, deliver safely", sublabel: "Return to gynaecology after childbearing for hysterectomy discussion", next: "post-pregnancy" },
         { label: "No pregnancy after 2 years / Relapse on surveillance", sublabel: "Reassess; hysterectomy recommended", next: "relapse" },
       ],
     },
 
     "post-pregnancy": {
       type: "end",
-      title: "Post-Childbearing — Hysterectomy Recommended",
+      title: "Post-Childbearing: Hysterectomy Recommended",
       text: "Strongly recommend hysterectomy after childbearing is complete. High relapse rate of AEH after conservative treatment. Full counselling regarding ongoing cancer risk if surgery declined.",
     },
 
     "partial": {
       type: "action",
-      title: "Partial Response — Review and Continue",
+      title: "Partial Response: Review and Continue",
       text: "Hyperplasia present but improving. Review treatment compliance. Consider increasing dose or changing progestogen. Continue 3-monthly surveillance.",
       items: [
         "Check compliance with oral progestogen if used",
@@ -393,7 +393,7 @@ export const GTG67_AEH_FLOWCHART = {
 
     "failed-conservative": {
       type: "end",
-      title: "Conservative Treatment Failed — Hysterectomy Required",
+      title: "Conservative Treatment Failed: Hysterectomy Required",
       text: "No response, persistence of AEH, or progression to carcinoma. Hysterectomy is now required. Discuss with oncology MDT if carcinoma confirmed.",
       items: [
         "Counsel woman sensitively about treatment failure",
@@ -404,7 +404,7 @@ export const GTG67_AEH_FLOWCHART = {
 
     "relapse": {
       type: "end",
-      title: "Relapse / No Pregnancy — Hysterectomy Recommended",
+      title: "Relapse / No Pregnancy: Hysterectomy Recommended",
       text: "Relapse of AEH after remission, or no pregnancy after 2 years. Hysterectomy is strongly recommended. If woman declines, restart progestogen treatment with intensified surveillance.",
     },
   },

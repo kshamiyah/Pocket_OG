@@ -9,7 +9,7 @@
 
 export const TOG_OLIGOHYDRAMNIOS_FLOWCHART = {
   id: "TOG_OLIGOHYDRAMNIOS",
-  title: "Oligohydramnios — Assessment & Management",
+  title: "Oligohydramnios: Assessment & Management",
   subtitle: "TOG review (Falola et al., 2026) · isolated oligohydramnios",
   startId: "detected",
   nodes: {
@@ -132,7 +132,7 @@ export const TOG_OLIGOHYDRAMNIOS_FLOWCHART = {
 
     "delivery": {
       type: "alert",
-      title: "Timing of Delivery — No Professional Consensus",
+      title: "Timing of Delivery: No Professional Consensus",
       text: "ACOG, FIGO, NICE and RCOG do not agree on timing of delivery for isolated oligohydramnios.",
       items: [
         "Induction (especially prostaglandin E2 with an unfavourable cervix) is linked to more emergency caesareans and non-reassuring CTG",

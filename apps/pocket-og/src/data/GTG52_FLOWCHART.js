@@ -10,7 +10,7 @@ export const GTG52_PPH_FLOWCHART = {
 
     "assess": {
       type: "action",
-      title: "Post-Delivery — Assess Blood Loss",
+      title: "Post-Delivery: Assess Blood Loss",
       text: "Estimate and document blood loss immediately after delivery. Active management of third stage should already have been given (oxytocin 10 IU IM). Rub up a contraction if uterus is atonic.",
       items: [
         "Visually estimate blood loss — weigh swabs where possible",
@@ -26,15 +26,15 @@ export const GTG52_PPH_FLOWCHART = {
       title: "Estimated Blood Loss?",
       text: "Classify the haemorrhage to guide escalation. Do not wait for symptoms — haemodynamic compromise is a late sign.",
       options: [
-        { label: "< 500 ml — normal", sublabel: "Routine third-stage management complete", next: "normal" },
-        { label: "500–1000 ml — Minor PPH", sublabel: "Initiate measures; escalation if no response", next: "minor" },
-        { label: "> 1000 ml — Major PPH", sublabel: "Activate major PPH response immediately", next: "major" },
+        { label: "< 500 ml, normal", sublabel: "Routine third-stage management complete", next: "normal" },
+        { label: "500–1000 ml: Minor PPH", sublabel: "Initiate measures; escalation if no response", next: "minor" },
+        { label: "> 1000 ml: Major PPH", sublabel: "Activate major PPH response immediately", next: "major" },
       ],
     },
 
     "normal": {
       type: "end",
-      title: "Normal Blood Loss — Active Management Complete",
+      title: "Normal Blood Loss: Active Management Complete",
       text: "Blood loss within expected range. Ensure active management of third stage is documented.",
       items: [
         "Confirm placenta complete and uterus well-contracted",
@@ -46,7 +46,7 @@ export const GTG52_PPH_FLOWCHART = {
 
     "minor": {
       type: "action",
-      title: "Minor PPH — 500–1000 ml",
+      title: "Minor PPH: 500–1000 ml",
       text: "Call for help. Begin treatment immediately. Do not delay for results.",
       items: [
         "Inform midwife in charge and on-call obstetrician",
@@ -66,14 +66,14 @@ export const GTG52_PPH_FLOWCHART = {
       title: "Response to Treatment?",
       text: "Reassess after initial measures. Escalate if loss approaches 1000 ml or haemodynamic compromise develops.",
       options: [
-        { label: "Controlled — bleeding settled", sublabel: "Continue monitoring; ensure cause addressed", next: "minor_resolved" },
+        { label: "Controlled, bleeding settled", sublabel: "Continue monitoring; ensure cause addressed", next: "minor_resolved" },
         { label: "Not controlled / approaching 1000 ml", sublabel: "Escalate to Major PPH protocol", next: "major" },
       ],
     },
 
     "minor_resolved": {
       type: "end",
-      title: "Minor PPH — Resolved",
+      title: "Minor PPH: Resolved",
       text: "Bleeding controlled with initial measures.",
       items: [
         "Continue oxytocin infusion for at least 4 hours",
@@ -86,7 +86,7 @@ export const GTG52_PPH_FLOWCHART = {
 
     "major": {
       type: "alert",
-      title: "Major PPH — > 1000 ml — ESCALATE NOW",
+      title: "Major PPH: > 1000 ml: ESCALATE NOW",
       text: "Major haemorrhage response: do not delay awaiting laboratory results. Every minute matters.",
       items: [
         "Call senior midwife, senior obstetrician, and anaesthetist",
@@ -132,14 +132,14 @@ export const GTG52_PPH_FLOWCHART = {
       title: "Bleeding Controlled?",
       text: "Reassess after blood products and pharmacological measures.",
       options: [
-        { label: "Yes — haemostasis achieved", sublabel: "Monitor closely; arrange HDU/ITU", next: "major_resolved" },
-        { label: "No — ongoing / > 2000 ml", sublabel: "Activate Massive Haemorrhage Protocol", next: "massive" },
+        { label: "Yes, haemostasis achieved", sublabel: "Monitor closely; arrange HDU/ITU", next: "major_resolved" },
+        { label: "No, ongoing / > 2000 ml", sublabel: "Activate Massive Haemorrhage Protocol", next: "massive" },
       ],
     },
 
     "major_resolved": {
       type: "end",
-      title: "Major PPH — Controlled",
+      title: "Major PPH: Controlled",
       text: "Haemostasis achieved.",
       items: [
         "HDU or ITU admission for ongoing monitoring",
@@ -152,7 +152,7 @@ export const GTG52_PPH_FLOWCHART = {
 
     "massive": {
       type: "alert",
-      title: "Massive PPH — > 2000 ml — ACTIVATE MHP",
+      title: "Massive PPH: > 2000 ml: ACTIVATE MHP",
       text: "Hospital Massive Haemorrhage Protocol. Contact haematologist and blood bank immediately.",
       items: [
         "Call consultant obstetrician, consultant anaesthetist, haematologist",
@@ -180,7 +180,7 @@ export const GTG52_PPH_FLOWCHART = {
 
     "end_massive": {
       type: "end",
-      title: "Post-Massive PPH — Critical Care",
+      title: "Post-Massive PPH: Critical Care",
       text: "Intensive monitoring and critical care mandatory after massive haemorrhage.",
       items: [
         "HDU or ITU admission",

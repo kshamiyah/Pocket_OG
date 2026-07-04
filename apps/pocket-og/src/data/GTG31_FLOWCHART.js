@@ -27,37 +27,37 @@ export const GTG31_SURVEILLANCE_FLOWCHART = {
       title: "What centile is the AC / EFW?",
       text: "Centile determines the baseline surveillance intensity before Doppler findings.",
       options: [
-        { label: "5th–10th centile", sublabel: "Minor SGA — assess UA Doppler", next: "ua_minor" },
-        { label: "< 5th centile", sublabel: "Major SGA — heightened surveillance", next: "ua_major" },
+        { label: "5th–10th centile", sublabel: "Minor SGA, assess UA Doppler", next: "ua_minor" },
+        { label: "< 5th centile", sublabel: "Major SGA, heightened surveillance", next: "ua_major" },
       ],
     },
 
     "ua_minor": {
       type: "decision",
-      title: "UA Doppler — Minor SGA (5th–10th centile)",
+      title: "UA Doppler: Minor SGA (5th–10th centile)",
       text: "Umbilical artery pulsatility index (PI) measured at free loop of cord.",
       options: [
         { label: "Normal PI (< 95th centile)", sublabel: "Routine fortnightly surveillance", next: "minor_normal" },
         { label: "Raised PI (> 95th centile)", sublabel: "Increase surveillance intensity", next: "raised_pi" },
-        { label: "AEDF / REDF", sublabel: "Absent or reversed end diastolic flow — escalate", next: "aedf" },
+        { label: "AEDF / REDF", sublabel: "Absent or reversed end diastolic flow, escalate", next: "aedf" },
       ],
     },
 
     "ua_major": {
       type: "decision",
-      title: "UA Doppler — Major SGA (< 5th centile)",
+      title: "UA Doppler: Major SGA (< 5th centile)",
       text: "Umbilical artery pulsatility index (PI) measured at free loop of cord.",
       options: [
         { label: "Normal PI (< 95th centile)", sublabel: "Fortnightly surveillance with MCA from 34 weeks", next: "major_normal" },
         { label: "Raised PI (> 95th centile)", sublabel: "Weekly surveillance; consider admission", next: "raised_pi" },
-        { label: "AEDF", sublabel: "Absent end diastolic flow — admit", next: "aedf" },
-        { label: "REDF", sublabel: "Reversed end diastolic flow — urgent delivery", next: "redf" },
+        { label: "AEDF", sublabel: "Absent end diastolic flow, admit", next: "aedf" },
+        { label: "REDF", sublabel: "Reversed end diastolic flow, urgent delivery", next: "redf" },
       ],
     },
 
     "minor_normal": {
       type: "end",
-      title: "Minor SGA — Normal Doppler",
+      title: "Minor SGA: Normal Doppler",
       text: "Lowest risk category. Fortnightly surveillance is appropriate.",
       items: [
         "Growth scan (AC + EFW) every 2 weeks",
@@ -70,7 +70,7 @@ export const GTG31_SURVEILLANCE_FLOWCHART = {
 
     "major_normal": {
       type: "end",
-      title: "Major SGA — Normal Doppler",
+      title: "Major SGA: Normal Doppler",
       text: "Higher baseline risk despite normal Dopplers — closer surveillance than minor SGA.",
       items: [
         "Growth scan (AC + EFW) every 2 weeks",
@@ -107,7 +107,7 @@ export const GTG31_SURVEILLANCE_FLOWCHART = {
 
     "raised_preterm": {
       type: "end",
-      title: "Raised PI — Preterm (< 34 weeks)",
+      title: "Raised PI: Preterm (< 34 weeks)",
       text: "Aim to continue pregnancy with close monitoring. Deliver if deterioration.",
       items: [
         "Antenatal corticosteroids if delivery anticipated before 34+6 weeks (betamethasone 12 mg IM × 2)",
@@ -120,7 +120,7 @@ export const GTG31_SURVEILLANCE_FLOWCHART = {
 
     "raised_term": {
       type: "end",
-      title: "Raised PI — Term (≥ 34 weeks)",
+      title: "Raised PI: Term (≥ 34 weeks)",
       text: "Low CPR or brain sparing at term — consider delivery.",
       items: [
         "CPR (MCA PI / UA PI) < 1.0: associated with adverse outcome at term — discuss delivery",
@@ -133,7 +133,7 @@ export const GTG31_SURVEILLANCE_FLOWCHART = {
 
     "aedf": {
       type: "alert",
-      title: "Absent End Diastolic Flow (AEDF) — Escalate",
+      title: "Absent End Diastolic Flow (AEDF): Escalate",
       text: "AEDF indicates severely impaired placental function. Inpatient management or very frequent outpatient attendance.",
       items: [
         "Admit or arrange review every 2–3 days minimum",
@@ -159,7 +159,7 @@ export const GTG31_SURVEILLANCE_FLOWCHART = {
 
     "redf": {
       type: "alert",
-      title: "Reversed End Diastolic Flow (REDF) — Urgent",
+      title: "Reversed End Diastolic Flow (REDF): Urgent",
       text: "REDF represents critical placental failure. Admit immediately.",
       items: [
         "Admit immediately; daily CTG and DV Doppler",
@@ -209,7 +209,7 @@ export const GTG31_SURVEILLANCE_FLOWCHART = {
 
     "deliver_now": {
       type: "end",
-      title: "Expedite Delivery — Abnormal DV",
+      title: "Expedite Delivery: Abnormal DV",
       text: "Deteriorating DV Doppler indicates impending cardiac decompensation.",
       items: [
         "Senior obstetrician decision — weigh gestation against risk of intrauterine death",
@@ -222,7 +222,7 @@ export const GTG31_SURVEILLANCE_FLOWCHART = {
 
     "emergency": {
       type: "end",
-      title: "Emergency Delivery — Absent / Reversed DV 'a' Wave",
+      title: "Emergency Delivery: Absent / Reversed DV 'a' Wave",
       text: "Absent or reversed 'a' wave in DV indicates impending fetal death. Deliver without delay.",
       items: [
         "Consultant obstetrician and neonatologist immediately",

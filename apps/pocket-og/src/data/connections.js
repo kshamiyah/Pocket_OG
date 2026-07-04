@@ -3,30 +3,30 @@
 
 export const CALCULATOR_CONNECTIONS = {
   PUL: [
-    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623 — step through the pathway" },
-    { type: "calculator", id: "ECTOPIC_DECISION", gl: "CG623", label: "Tubal ectopic — initial management", sublabel: "Calculator — expectant / MTX / surgery" },
+    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623, step through the pathway" },
+    { type: "calculator", id: "ECTOPIC_DECISION", gl: "CG623", label: "Tubal ectopic, initial management", sublabel: "Calculator, expectant / MTX / surgery" },
   ],
   ECTOPIC_DECISION: [
-    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623 — step through the pathway" },
-    { type: "calculator", id: "MTX_SURVEILLANCE", gl: "CG623", label: "Post-methotrexate surveillance", sublabel: "Calculator — day 4 & day 7 hCG" },
-    { type: "calculator", id: "EXPECTANT_SURVEILLANCE", gl: "CG623", label: "Expectant management — surveillance", sublabel: "Calculator — serial hCG days 2, 4, 7" },
+    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623, step through the pathway" },
+    { type: "calculator", id: "MTX_SURVEILLANCE", gl: "CG623", label: "Post-methotrexate surveillance", sublabel: "Calculator, day 4 & day 7 hCG" },
+    { type: "calculator", id: "EXPECTANT_SURVEILLANCE", gl: "CG623", label: "Expectant management, surveillance", sublabel: "Calculator, serial hCG days 2, 4, 7" },
   ],
   EXPECTANT_SURVEILLANCE: [
-    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623 — step through the pathway" },
-    { type: "calculator", id: "ECTOPIC_DECISION", gl: "CG623", label: "Tubal ectopic — initial management", sublabel: "Calculator — expectant / MTX / surgery" },
-    { type: "calculator", id: "MTX_SURVEILLANCE", gl: "CG623", label: "Post-methotrexate surveillance", sublabel: "Calculator — day 4 & day 7 hCG" },
+    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623, step through the pathway" },
+    { type: "calculator", id: "ECTOPIC_DECISION", gl: "CG623", label: "Tubal ectopic, initial management", sublabel: "Calculator, expectant / MTX / surgery" },
+    { type: "calculator", id: "MTX_SURVEILLANCE", gl: "CG623", label: "Post-methotrexate surveillance", sublabel: "Calculator, day 4 & day 7 hCG" },
   ],
   MTX_SURVEILLANCE: [
-    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623 — step through the pathway" },
-    { type: "calculator", id: "ECTOPIC_DECISION", gl: "CG623", label: "Tubal ectopic — initial management", sublabel: "Calculator — expectant / MTX / surgery" },
-    { type: "calculator", id: "EXPECTANT_SURVEILLANCE", gl: "CG623", label: "Expectant management — surveillance", sublabel: "Calculator — serial hCG days 2, 4, 7" },
+    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623, step through the pathway" },
+    { type: "calculator", id: "ECTOPIC_DECISION", gl: "CG623", label: "Tubal ectopic, initial management", sublabel: "Calculator, expectant / MTX / surgery" },
+    { type: "calculator", id: "EXPECTANT_SURVEILLANCE", gl: "CG623", label: "Expectant management, surveillance", sublabel: "Calculator, serial hCG days 2, 4, 7" },
   ],
   VTE_RISK: [
-    { type: "flowchart", id: "GL891_ANTENATAL", gl: "GL891", label: "Antenatal VTE pathway", sublabel: "GL891 — risk assessment & prophylaxis" },
-    { type: "flowchart", id: "GL891_POSTNATAL", gl: "GL891", label: "Postnatal VTE pathway", sublabel: "GL891 — risk assessment & prophylaxis" },
+    { type: "flowchart", id: "GL891_ANTENATAL", gl: "GL891", label: "Antenatal VTE pathway", sublabel: "GL891, risk assessment & prophylaxis" },
+    { type: "flowchart", id: "GL891_POSTNATAL", gl: "GL891", label: "Postnatal VTE pathway", sublabel: "GL891, risk assessment & prophylaxis" },
   ],
   PUQE: [
-    { type: "reader", id: "GTG69", gl: "GTG69", label: "GTG69 — NVP & HG guideline", sublabel: "Full guideline text" },
+    { type: "reader", id: "GTG69", gl: "GTG69", label: "GTG69: NVP & HG guideline", sublabel: "Full guideline text" },
   ],
 };
 
@@ -39,8 +39,8 @@ export const FLOWCHART_NODE_CONNECTIONS = {
   BASHH_HSV_PREGNANCY: {
     "pprom-primary": {
       whatsNext: [
-        { type: "flowchart", id: "GL895_ROM_TRIAGE", gl: "GL895", label: "Rupture of Membranes pathway", sublabel: "GL895 — PPROM triage & management" },
-        { type: "reader", id: "BASHH_HSV", gl: "BASHH_HSV", label: "Genital Herpes in Pregnancy — guideline", sublabel: "PPROM & neonatal sections" },
+        { type: "flowchart", id: "GL895_ROM_TRIAGE", gl: "GL895", label: "Rupture of Membranes pathway", sublabel: "GL895: PPROM triage & management" },
+        { type: "reader", id: "BASHH_HSV", gl: "BASHH_HSV", label: "Genital Herpes in Pregnancy, guideline", sublabel: "PPROM & neonatal sections" },
       ],
     },
     "pprom-recurrent": {
@@ -48,23 +48,23 @@ export const FLOWCHART_NODE_CONNECTIONS = {
         { phrase: "Rupture of Membranes pathway", type: "flowchart", id: "GL895_ROM_TRIAGE", gl: "GL895" },
       ],
       whatsNext: [
-        { type: "flowchart", id: "GL895_ROM_TRIAGE", gl: "GL895", label: "Rupture of Membranes pathway", sublabel: "GL895 — PPROM triage & management" },
-        { type: "reader", id: "BASHH_HSV", gl: "BASHH_HSV", label: "Genital Herpes in Pregnancy — guideline", sublabel: "PPROM & neonatal sections" },
+        { type: "flowchart", id: "GL895_ROM_TRIAGE", gl: "GL895", label: "Rupture of Membranes pathway", sublabel: "GL895: PPROM triage & management" },
+        { type: "reader", id: "BASHH_HSV", gl: "BASHH_HSV", label: "Genital Herpes in Pregnancy, guideline", sublabel: "PPROM & neonatal sections" },
       ],
     },
     "cs": {
       whatsNext: [
-        { type: "reader", id: "BASHH_HSV", gl: "BASHH_HSV", label: "Genital Herpes in Pregnancy — guideline", sublabel: "Neonatal management section" },
+        { type: "reader", id: "BASHH_HSV", gl: "BASHH_HSV", label: "Genital Herpes in Pregnancy, guideline", sublabel: "Neonatal management section" },
       ],
     },
     "vaginal": {
       whatsNext: [
-        { type: "reader", id: "BASHH_HSV", gl: "BASHH_HSV", label: "Genital Herpes in Pregnancy — guideline", sublabel: "Neonatal management section" },
+        { type: "reader", id: "BASHH_HSV", gl: "BASHH_HSV", label: "Genital Herpes in Pregnancy, guideline", sublabel: "Neonatal management section" },
       ],
     },
     "no-lesions": {
       whatsNext: [
-        { type: "reader", id: "BASHH_HSV", gl: "BASHH_HSV", label: "Genital Herpes in Pregnancy — guideline", sublabel: "Full guideline text" },
+        { type: "reader", id: "BASHH_HSV", gl: "BASHH_HSV", label: "Genital Herpes in Pregnancy, guideline", sublabel: "Full guideline text" },
       ],
     },
   },
@@ -73,33 +73,33 @@ export const FLOWCHART_NODE_CONNECTIONS = {
   NG88_ED_ACUTE: {
     "resus-escalate": {
       whatsNext: [
-        { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623 — if pregnancy-related bleeding" },
-        { type: "flowchart", id: "CG565_TRIAGE", gl: "CG565", label: "First-trimester miscarriage", sublabel: "CG565 — if pregnancy-related bleeding" },
+        { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623, if pregnancy-related bleeding" },
+        { type: "flowchart", id: "CG565_TRIAGE", gl: "CG565", label: "First-trimester miscarriage", sublabel: "CG565, if pregnancy-related bleeding" },
       ],
     },
     "preg": {
       whatsNext: [
-        { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623 — step through the pathway" },
-        { type: "flowchart", id: "CG565_TRIAGE", gl: "CG565", label: "First-trimester miscarriage", sublabel: "CG565 — step through the pathway" },
+        { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623, step through the pathway" },
+        { type: "flowchart", id: "CG565_TRIAGE", gl: "CG565", label: "First-trimester miscarriage", sublabel: "CG565, step through the pathway" },
         { type: "calculator", id: "PUL", gl: "CG623", label: "PUL calculator", sublabel: "Pregnancy of unknown location" },
       ],
     },
     "pmb": {
       whatsNext: [
-        { type: "flowchart", id: "NG88_ASSESSMENT", gl: "NG88", label: "NG88 — Assessment pathway", sublabel: "Red-flag & referral logic" },
-        { type: "reader", id: "NG88", gl: "NG88", label: "NG88 — HMB guideline", sublabel: "Full guideline text" },
+        { type: "flowchart", id: "NG88_ASSESSMENT", gl: "NG88", label: "NG88: Assessment pathway", sublabel: "Red-flag & referral logic" },
+        { type: "reader", id: "NG88", gl: "NG88", label: "NG88: HMB guideline", sublabel: "Full guideline text" },
       ],
     },
     "imb": {
       whatsNext: [
-        { type: "flowchart", id: "NG88_ASSESSMENT", gl: "NG88", label: "NG88 — Assessment pathway", sublabel: "IMB / PCB investigation" },
-        { type: "reader", id: "NG88", gl: "NG88", label: "NG88 — HMB guideline", sublabel: "Full guideline text" },
+        { type: "flowchart", id: "NG88_ASSESSMENT", gl: "NG88", label: "NG88: Assessment pathway", sublabel: "IMB / PCB investigation" },
+        { type: "reader", id: "NG88", gl: "NG88", label: "NG88: HMB guideline", sublabel: "Full guideline text" },
       ],
     },
     "dispo": {
       whatsNext: [
-        { type: "flowchart", id: "NG88_ASSESSMENT", gl: "NG88", label: "NG88 — Assessment & primary-care pathway", sublabel: "Definitive workup" },
-        { type: "flowchart", id: "NG88_TREATMENT", gl: "NG88", label: "NG88 — Pharmacological treatment", sublabel: "LNG-IUS, CHC, non-hormonal" },
+        { type: "flowchart", id: "NG88_ASSESSMENT", gl: "NG88", label: "NG88: Assessment & primary-care pathway", sublabel: "Definitive workup" },
+        { type: "flowchart", id: "NG88_TREATMENT", gl: "NG88", label: "NG88: Pharmacological treatment", sublabel: "LNG-IUS, CHC, non-hormonal" },
       ],
     },
   },
@@ -116,31 +116,31 @@ export const FLOWCHART_NODE_CONNECTIONS = {
         { phrase: "Antenatal corticosteroids", type: "consent", id: "ACS", gl: "GL895" },
       ],
       whatsNext: [
-        { type: "consent", id: "ACS", gl: null, label: "Consent — antenatal corticosteroids", sublabel: "Benefits, risks & patient information" },
-        { type: "reader", id: "GL895", gl: "GL895", label: "GL895 — PPRoM guideline", sublabel: "Full guideline text" },
+        { type: "consent", id: "ACS", gl: null, label: "Consent, antenatal corticosteroids", sublabel: "Benefits, risks & patient information" },
+        { type: "reader", id: "GL895", gl: "GL895", label: "GL895: PPRoM guideline", sublabel: "Full guideline text" },
       ],
     },
     "pprom-birth": {
       whatsNext: [
-        { type: "reader", id: "GL895", gl: "GL895", label: "GL895 — PPRoM guideline", sublabel: "Full guideline text" },
-        { type: "flowchart", id: "GL861_IOL", gl: "GL861", label: "Induction of labour pathway", sublabel: "GL861 — step through the pathway" },
+        { type: "reader", id: "GL895", gl: "GL895", label: "GL895: PPRoM guideline", sublabel: "Full guideline text" },
+        { type: "flowchart", id: "GL861_IOL", gl: "GL861", label: "Induction of labour pathway", sublabel: "GL861, step through the pathway" },
       ],
     },
     "term-immediate": {
       whatsNext: [
-        { type: "flowchart", id: "GL861_IOL", gl: "GL861", label: "Induction of labour pathway", sublabel: "GL861 — step through the pathway" },
-        { type: "reader", id: "GL861", gl: "GL861", label: "GL861 — IOL & Term PLRoM guideline", sublabel: "Full guideline text" },
+        { type: "flowchart", id: "GL861_IOL", gl: "GL861", label: "Induction of labour pathway", sublabel: "GL861, step through the pathway" },
+        { type: "reader", id: "GL861", gl: "GL861", label: "GL861: IOL & Term PLRoM guideline", sublabel: "Full guideline text" },
       ],
     },
     "term-expectant": {
       whatsNext: [
-        { type: "reader", id: "GL861", gl: "GL861", label: "GL861 — IOL & Term PLRoM guideline", sublabel: "Full guideline text" },
+        { type: "reader", id: "GL861", gl: "GL861", label: "GL861: IOL & Term PLRoM guideline", sublabel: "Full guideline text" },
       ],
     },
     "term-iol": {
       whatsNext: [
-        { type: "flowchart", id: "GL861_IOL", gl: "GL861", label: "Induction of labour pathway", sublabel: "GL861 — step through the pathway" },
-        { type: "reader", id: "GL861", gl: "GL861", label: "GL861 — IOL & Term PLRoM guideline", sublabel: "Full guideline text" },
+        { type: "flowchart", id: "GL861_IOL", gl: "GL861", label: "Induction of labour pathway", sublabel: "GL861, step through the pathway" },
+        { type: "reader", id: "GL861", gl: "GL861", label: "GL861: IOL & Term PLRoM guideline", sublabel: "Full guideline text" },
       ],
     },
     "cord-emergency": {
@@ -148,7 +148,7 @@ export const FLOWCHART_NODE_CONNECTIONS = {
         { phrase: "GTG50 cord prolapse pathway", type: "flowchart", id: "GTG50_CORD", gl: "GTG50" },
       ],
       whatsNext: [
-        { type: "flowchart", id: "GTG50_CORD", gl: "GTG50", label: "Cord prolapse — emergency pathway", sublabel: "GTG50 — step through the pathway" },
+        { type: "flowchart", id: "GTG50_CORD", gl: "GTG50", label: "Cord prolapse, emergency pathway", sublabel: "GTG50, step through the pathway" },
       ],
     },
     "sepsis": {
@@ -156,14 +156,14 @@ export const FLOWCHART_NODE_CONNECTIONS = {
         { phrase: "GL787", type: "reader", id: "GL787", gl: "GL787" },
       ],
       whatsNext: [
-        { type: "reader", id: "GL787", gl: "GL787", label: "GL787 — Obstetric antibiotics", sublabel: "Empirical sepsis treatment" },
-        { type: "reader", id: "GL895", gl: "GL895", label: "GL895 — PPRoM guideline", sublabel: "Full guideline text" },
+        { type: "reader", id: "GL787", gl: "GL787", label: "GL787: Obstetric antibiotics", sublabel: "Empirical sepsis treatment" },
+        { type: "reader", id: "GL895", gl: "GL895", label: "GL895: PPRoM guideline", sublabel: "Full guideline text" },
       ],
     },
     "not-confirmed": {
       whatsNext: [
-        { type: "reader", id: "GL895", gl: "GL895", label: "GL895 — PPRoM guideline", sublabel: "Full guideline text" },
-        { type: "reader", id: "GL861", gl: "GL861", label: "GL861 — IOL & Term PLRoM guideline", sublabel: "Full guideline text" },
+        { type: "reader", id: "GL895", gl: "GL895", label: "GL895: PPRoM guideline", sublabel: "Full guideline text" },
+        { type: "reader", id: "GL861", gl: "GL861", label: "GL861: IOL & Term PLRoM guideline", sublabel: "Full guideline text" },
       ],
     },
   },
@@ -172,22 +172,22 @@ export const FLOWCHART_NODE_CONNECTIONS = {
   GTG52_PPH: {
     "normal": {
       whatsNext: [
-        { type: "reader", id: "GTG52", gl: "GTG52", label: "GTG52 — PPH guideline", sublabel: "Full guideline text" },
+        { type: "reader", id: "GTG52", gl: "GTG52", label: "GTG52: PPH guideline", sublabel: "Full guideline text" },
       ],
     },
     "minor_resolved": {
       whatsNext: [
-        { type: "reader", id: "GTG52", gl: "GTG52", label: "GTG52 — PPH guideline", sublabel: "Full guideline text" },
+        { type: "reader", id: "GTG52", gl: "GTG52", label: "GTG52: PPH guideline", sublabel: "Full guideline text" },
       ],
     },
     "major_resolved": {
       whatsNext: [
-        { type: "reader", id: "GTG52", gl: "GTG52", label: "GTG52 — PPH guideline", sublabel: "Full guideline text" },
+        { type: "reader", id: "GTG52", gl: "GTG52", label: "GTG52: PPH guideline", sublabel: "Full guideline text" },
       ],
     },
     "end_massive": {
       whatsNext: [
-        { type: "reader", id: "GTG52", gl: "GTG52", label: "GTG52 — PPH guideline", sublabel: "Full guideline text" },
+        { type: "reader", id: "GTG52", gl: "GTG52", label: "GTG52: PPH guideline", sublabel: "Full guideline text" },
       ],
     },
   },
@@ -196,34 +196,34 @@ export const FLOWCHART_NODE_CONNECTIONS = {
   GTG31_SURVEILLANCE: {
     "minor_normal": {
       whatsNext: [
-        { type: "reader", id: "GTG31", gl: "GTG31", label: "GTG31 — SGA guideline", sublabel: "Full guideline text" },
+        { type: "reader", id: "GTG31", gl: "GTG31", label: "GTG31: SGA guideline", sublabel: "Full guideline text" },
       ],
     },
     "major_normal": {
       whatsNext: [
-        { type: "reader", id: "GTG31", gl: "GTG31", label: "GTG31 — SGA guideline", sublabel: "Full guideline text" },
+        { type: "reader", id: "GTG31", gl: "GTG31", label: "GTG31: SGA guideline", sublabel: "Full guideline text" },
       ],
     },
     "deliver_34": {
       whatsNext: [
-        { type: "reader", id: "GTG31", gl: "GTG31", label: "GTG31 — SGA guideline", sublabel: "Full guideline text" },
-        { type: "reader", id: "NG25",  gl: "NG25",  label: "NG25 — Preterm Labour & Birth", sublabel: "Corticosteroids, MgSO₄, tocolysis" },
+        { type: "reader", id: "GTG31", gl: "GTG31", label: "GTG31: SGA guideline", sublabel: "Full guideline text" },
+        { type: "reader", id: "NG25",  gl: "NG25",  label: "NG25: Preterm Labour & Birth", sublabel: "Corticosteroids, MgSO₄, tocolysis" },
       ],
     },
     "deliver_32": {
       whatsNext: [
-        { type: "reader", id: "GTG31", gl: "GTG31", label: "GTG31 — SGA guideline", sublabel: "Full guideline text" },
-        { type: "reader", id: "NG25",  gl: "NG25",  label: "NG25 — Preterm Labour & Birth", sublabel: "Corticosteroids, MgSO₄, tocolysis" },
+        { type: "reader", id: "GTG31", gl: "GTG31", label: "GTG31: SGA guideline", sublabel: "Full guideline text" },
+        { type: "reader", id: "NG25",  gl: "NG25",  label: "NG25: Preterm Labour & Birth", sublabel: "Corticosteroids, MgSO₄, tocolysis" },
       ],
     },
     "deliver_now": {
       whatsNext: [
-        { type: "reader", id: "NG25",  gl: "NG25",  label: "NG25 — Preterm Labour & Birth", sublabel: "Corticosteroids, MgSO₄" },
+        { type: "reader", id: "NG25",  gl: "NG25",  label: "NG25: Preterm Labour & Birth", sublabel: "Corticosteroids, MgSO₄" },
       ],
     },
     "emergency": {
       whatsNext: [
-        { type: "reader", id: "NG25",  gl: "NG25",  label: "NG25 — Preterm Labour & Birth", sublabel: "Corticosteroids, MgSO₄" },
+        { type: "reader", id: "NG25",  gl: "NG25",  label: "NG25: Preterm Labour & Birth", sublabel: "Corticosteroids, MgSO₄" },
       ],
     },
   },
@@ -240,7 +240,7 @@ export const FLOWCHART_NODE_CONNECTIONS = {
     },
     "end-surgery": {
       whatsNext: [
-        { type: "consent", id: "LAPAROSCOPY", gl: null, label: "Consent — laparoscopy", sublabel: "Risks, benefits & patient information" },
+        { type: "consent", id: "LAPAROSCOPY", gl: null, label: "Consent, laparoscopy", sublabel: "Risks, benefits & patient information" },
       ],
     },
     "mtx-admin": {
@@ -254,29 +254,29 @@ export const FLOWCHART_NODE_CONNECTIONS = {
   GL891_ANTENATAL: {
     "dosing": {
       whatsNext: [
-        { type: "calculator", id: "VTE_RISK", gl: "GL891", label: "VTE risk score calculator", sublabel: "Formal scoring — RCOG GTG37a" },
+        { type: "calculator", id: "VTE_RISK", gl: "GL891", label: "VTE risk score calculator", sublabel: "Formal scoring: RCOG GTG37a" },
       ],
     },
     "mobilise": {
       whatsNext: [
-        { type: "calculator", id: "VTE_RISK", gl: "GL891", label: "VTE risk score calculator", sublabel: "Formal scoring — RCOG GTG37a" },
+        { type: "calculator", id: "VTE_RISK", gl: "GL891", label: "VTE risk score calculator", sublabel: "Formal scoring: RCOG GTG37a" },
       ],
     },
   },
   GL891_POSTNATAL: {
     "high-6wk": {
       whatsNext: [
-        { type: "calculator", id: "VTE_RISK", gl: "GL891", label: "VTE risk score calculator", sublabel: "Formal scoring — RCOG GTG37a" },
+        { type: "calculator", id: "VTE_RISK", gl: "GL891", label: "VTE risk score calculator", sublabel: "Formal scoring: RCOG GTG37a" },
       ],
     },
     "intermediate-10d": {
       whatsNext: [
-        { type: "calculator", id: "VTE_RISK", gl: "GL891", label: "VTE risk score calculator", sublabel: "Formal scoring — RCOG GTG37a" },
+        { type: "calculator", id: "VTE_RISK", gl: "GL891", label: "VTE risk score calculator", sublabel: "Formal scoring: RCOG GTG37a" },
       ],
     },
     "lowrisk": {
       whatsNext: [
-        { type: "calculator", id: "VTE_RISK", gl: "GL891", label: "VTE risk score calculator", sublabel: "Formal scoring — RCOG GTG37a" },
+        { type: "calculator", id: "VTE_RISK", gl: "GL891", label: "VTE risk score calculator", sublabel: "Formal scoring: RCOG GTG37a" },
       ],
     },
   },
@@ -301,32 +301,32 @@ export const FLOWCHART_NODE_CONNECTIONS = {
   CG565_TRIAGE: {
     "end-smm": {
       whatsNext: [
-        { type: "consent", id: "SURG_MISC", gl: null, label: "Consent — surgical miscarriage", sublabel: "EVA / MVA — risks & patient information" },
+        { type: "consent", id: "SURG_MISC", gl: null, label: "Consent, surgical miscarriage", sublabel: "EVA / MVA, risks & patient information" },
       ],
     },
     "end-medical-incomplete": {
       whatsNext: [
-        { type: "consent", id: "MED_MISC", gl: null, label: "Consent — medical miscarriage", sublabel: "Misoprostol — risks & patient information" },
+        { type: "consent", id: "MED_MISC", gl: null, label: "Consent, medical miscarriage", sublabel: "Misoprostol, risks & patient information" },
       ],
     },
     "end-medical-missed": {
       whatsNext: [
-        { type: "consent", id: "MED_MISC", gl: null, label: "Consent — medical miscarriage", sublabel: "Mifepristone + Misoprostol" },
-        { type: "flowchart", id: "CG621_OUTPATIENT", gl: "CG621", label: "Medical management — outpatient", sublabel: "CG621 — step through the pathway" },
+        { type: "consent", id: "MED_MISC", gl: null, label: "Consent, medical miscarriage", sublabel: "Mifepristone + Misoprostol" },
+        { type: "flowchart", id: "CG621_OUTPATIENT", gl: "CG621", label: "Medical management, outpatient", sublabel: "CG621, step through the pathway" },
       ],
     },
   },
   CG621_OUTPATIENT: {
     "end-surgical": {
       whatsNext: [
-        { type: "consent", id: "SURG_MISC", gl: null, label: "Consent — surgical miscarriage", sublabel: "EVA / MVA — risks & patient information" },
+        { type: "consent", id: "SURG_MISC", gl: null, label: "Consent, surgical miscarriage", sublabel: "EVA / MVA, risks & patient information" },
       ],
     },
   },
   CG621_INPATIENT: {
     "end-surgical-inpatient": {
       whatsNext: [
-        { type: "consent", id: "SURG_MISC", gl: null, label: "Consent — surgical miscarriage", sublabel: "EVA / MVA — risks & patient information" },
+        { type: "consent", id: "SURG_MISC", gl: null, label: "Consent, surgical miscarriage", sublabel: "EVA / MVA, risks & patient information" },
       ],
     },
   },
@@ -335,59 +335,59 @@ export const FLOWCHART_NODE_CONNECTIONS = {
   GL952_TRIAGE: {
     "chronic-htn": {
       whatsNext: [
-        { type: "flowchart", id: "GL952_ACUTE", gl: "GL952", label: "Acute BP management", sublabel: "GL952 — manage an acute BP episode" },
+        { type: "flowchart", id: "GL952_ACUTE", gl: "GL952", label: "Acute BP management", sublabel: "GL952, manage an acute BP episode" },
       ],
     },
     "gest-htn": {
       whatsNext: [
-        { type: "flowchart", id: "GL952_ACUTE", gl: "GL952", label: "Acute BP management", sublabel: "GL952 — manage an acute BP episode" },
+        { type: "flowchart", id: "GL952_ACUTE", gl: "GL952", label: "Acute BP management", sublabel: "GL952, manage an acute BP episode" },
       ],
     },
     "mild-pet": {
       whatsNext: [
-        { type: "flowchart", id: "GL952_ACUTE", gl: "GL952", label: "Acute BP management", sublabel: "GL952 — manage an acute BP episode" },
+        { type: "flowchart", id: "GL952_ACUTE", gl: "GL952", label: "Acute BP management", sublabel: "GL952, manage an acute BP episode" },
       ],
     },
     "severe-pet": {
       whatsNext: [
-        { type: "flowchart", id: "GL952_ACUTE", gl: "GL952", label: "Acute BP management", sublabel: "GL952 — manage an acute BP episode" },
-        { type: "flowchart", id: "GL952_SEVERE_LW", gl: "GL952", label: "Severe PET — labour ward", sublabel: "GL952 — MgSO4 & escalation pathway" },
+        { type: "flowchart", id: "GL952_ACUTE", gl: "GL952", label: "Acute BP management", sublabel: "GL952, manage an acute BP episode" },
+        { type: "flowchart", id: "GL952_SEVERE_LW", gl: "GL952", label: "Severe PET, labour ward", sublabel: "GL952: MgSO4 & escalation pathway" },
       ],
     },
   },
   GL952_ACUTE: {
     "end-monitor": {
       whatsNext: [
-        { type: "flowchart", id: "GL952_TRIAGE", gl: "GL952", label: "Hypertension classification", sublabel: "GL952 — re-classify if BP recurs" },
+        { type: "flowchart", id: "GL952_TRIAGE", gl: "GL952", label: "Hypertension classification", sublabel: "GL952, re-classify if BP recurs" },
       ],
     },
     "end-controlled": {
       whatsNext: [
-        { type: "flowchart", id: "GL952_SEVERE_LW", gl: "GL952", label: "Severe PET — labour ward", sublabel: "GL952 — if escalation is needed" },
-        { type: "flowchart", id: "GL952_POSTNATAL", gl: "GL952", label: "Postnatal BP management", sublabel: "GL952 — after delivery" },
+        { type: "flowchart", id: "GL952_SEVERE_LW", gl: "GL952", label: "Severe PET, labour ward", sublabel: "GL952, if escalation is needed" },
+        { type: "flowchart", id: "GL952_POSTNATAL", gl: "GL952", label: "Postnatal BP management", sublabel: "GL952, after delivery" },
       ],
     },
     "end-lw-monitor": {
       whatsNext: [
-        { type: "flowchart", id: "GL952_SEVERE_LW", gl: "GL952", label: "Severe PET — labour ward", sublabel: "GL952 — MgSO4 & escalation pathway" },
-        { type: "flowchart", id: "GL952_POSTNATAL", gl: "GL952", label: "Postnatal BP management", sublabel: "GL952 — after delivery" },
+        { type: "flowchart", id: "GL952_SEVERE_LW", gl: "GL952", label: "Severe PET, labour ward", sublabel: "GL952: MgSO4 & escalation pathway" },
+        { type: "flowchart", id: "GL952_POSTNATAL", gl: "GL952", label: "Postnatal BP management", sublabel: "GL952, after delivery" },
       ],
     },
   },
   GL952_SEVERE_LW: {
     "end-controlled-lw": {
       whatsNext: [
-        { type: "flowchart", id: "GL952_POSTNATAL", gl: "GL952", label: "Postnatal BP management", sublabel: "GL952 — after delivery" },
+        { type: "flowchart", id: "GL952_POSTNATAL", gl: "GL952", label: "Postnatal BP management", sublabel: "GL952, after delivery" },
       ],
     },
     "end-no-mgso4": {
       whatsNext: [
-        { type: "flowchart", id: "GL952_POSTNATAL", gl: "GL952", label: "Postnatal BP management", sublabel: "GL952 — after delivery" },
+        { type: "flowchart", id: "GL952_POSTNATAL", gl: "GL952", label: "Postnatal BP management", sublabel: "GL952, after delivery" },
       ],
     },
     "end-mgso4": {
       whatsNext: [
-        { type: "flowchart", id: "GL952_POSTNATAL", gl: "GL952", label: "Postnatal BP management", sublabel: "GL952 — after delivery" },
+        { type: "flowchart", id: "GL952_POSTNATAL", gl: "GL952", label: "Postnatal BP management", sublabel: "GL952, after delivery" },
       ],
     },
   },

@@ -40,7 +40,7 @@ export const NG73_DIAGNOSIS_FLOWCHART = {
 
     "tvus": {
       type: "action",
-      title: "Offer Transvaginal Ultrasound (TVUS) — NG73 Nov 2024",
+      title: "Offer Transvaginal Ultrasound (TVUS): NG73 Nov 2024",
       text: "GPs should now OFFER TVUS to all people with suspected endometriosis at first point of contact. This is the key 2024 change — TVUS is no longer restricted to secondary care.",
       items: [
         "TVUS can detect: ovarian endometrioma (ground-glass cyst), deep infiltrating endometriosis (rectovaginal, uterosacral, bladder)",
@@ -56,9 +56,9 @@ export const NG73_DIAGNOSIS_FLOWCHART = {
       title: "TVUS Result and Symptom Severity",
       text: "Use TVUS findings alongside symptoms to determine next steps.",
       options: [
-        { label: "TVUS positive — endometrioma or DIE features", sublabel: "Refer to gynaecology; MRI if DIE suspected", next: "refer_urgent" },
-        { label: "TVUS negative — but symptoms persist", sublabel: "Refer to gynaecology; normal USS does not exclude endo", next: "empirical" },
-        { label: "Mild symptoms — adequate response to simple treatment", sublabel: "Trial of COCP or progestogen; review if not improving", next: "empirical_treatment" },
+        { label: "TVUS positive, endometrioma or DIE features", sublabel: "Refer to gynaecology; MRI if DIE suspected", next: "refer_urgent" },
+        { label: "TVUS negative, but symptoms persist", sublabel: "Refer to gynaecology; normal USS does not exclude endo", next: "empirical" },
+        { label: "Mild symptoms, adequate response to simple treatment", sublabel: "Trial of COCP or progestogen; review if not improving", next: "empirical_treatment" },
       ],
     },
 
@@ -77,7 +77,7 @@ export const NG73_DIAGNOSIS_FLOWCHART = {
 
     "empirical": {
       type: "action",
-      title: "Refer to Gynaecology — Negative TVUS",
+      title: "Refer to Gynaecology: Negative TVUS",
       text: "A normal TVUS does not exclude endometriosis. Refer if symptoms persist despite adequate primary care management.",
       items: [
         "Endometriosis is a clinical diagnosis — negative imaging does not exclude it",
@@ -103,11 +103,11 @@ export const NG73_DIAGNOSIS_FLOWCHART = {
 
     "review": {
       type: "decision",
-      title: "Review at 3 Months — Adequate Response?",
+      title: "Review at 3 Months: Adequate Response?",
       text: "Reassess symptom control on empirical treatment.",
       options: [
-        { label: "Adequate response — continue", sublabel: "Review annually; refer if symptoms recur or worsen", next: "managed" },
-        { label: "Inadequate response — refer", sublabel: "Refer to gynaecology for further assessment", next: "secondary_care" },
+        { label: "Adequate response, continue", sublabel: "Review annually; refer if symptoms recur or worsen", next: "managed" },
+        { label: "Inadequate response, refer", sublabel: "Refer to gynaecology for further assessment", next: "secondary_care" },
       ],
     },
 
@@ -141,8 +141,8 @@ export const NG73_DIAGNOSIS_FLOWCHART = {
       title: "Laparoscopy Indicated?",
       text: "Laparoscopy is the only definitive diagnostic test. Not always required — medical management can be started on clinical grounds.",
       options: [
-        { label: "Yes — proceed to diagnostic ± therapeutic laparoscopy", sublabel: "Symptoms uncontrolled; patient wants definitive diagnosis; fertility concern", next: "laparoscopy" },
-        { label: "No — continue or intensify medical treatment", sublabel: "Adequate symptom control; patient declines surgery; fertility not immediate concern", next: "medical_management" },
+        { label: "Yes, proceed to diagnostic ± therapeutic laparoscopy", sublabel: "Symptoms uncontrolled; patient wants definitive diagnosis; fertility concern", next: "laparoscopy" },
+        { label: "No, continue or intensify medical treatment", sublabel: "Adequate symptom control; patient declines surgery; fertility not immediate concern", next: "medical_management" },
       ],
     },
 
@@ -175,7 +175,7 @@ export const NG73_DIAGNOSIS_FLOWCHART = {
 
     "diagnosis_end": {
       type: "end",
-      title: "Endometriosis Confirmed — Plan Treatment",
+      title: "Endometriosis Confirmed: Plan Treatment",
       text: "Endometriosis confirmed at laparoscopy. Initiate or continue treatment based on patient priorities.",
       items: [
         "Post-surgical hormonal treatment to reduce recurrence: COCP, progestogen, or LNG-IUS",
@@ -201,8 +201,8 @@ export const NG73_TREATMENT_FLOWCHART = {
       title: "Treatment Priority",
       text: "Treatment approach depends on the patient's main priority. Discuss both options if appropriate.",
       options: [
-        { label: "Pain relief — fertility not immediate concern", sublabel: "Medical or surgical treatment for symptom control", next: "pain_first_line" },
-        { label: "Fertility — trying to conceive", sublabel: "Medical treatment does NOT improve fertility — surgical or ART route", next: "fertility_route" },
+        { label: "Pain relief, fertility not immediate concern", sublabel: "Medical or surgical treatment for symptom control", next: "pain_first_line" },
+        { label: "Fertility, trying to conceive", sublabel: "Medical treatment does NOT improve fertility, surgical or ART route", next: "fertility_route" },
       ],
     },
 
@@ -225,8 +225,8 @@ export const NG73_TREATMENT_FLOWCHART = {
       title: "Response to First-Line Treatment?",
       text: "Reassess after 3–6 months of treatment.",
       options: [
-        { label: "Adequate — continue", sublabel: "Annual review; continue long-term", next: "long_term_medical" },
-        { label: "Inadequate — escalate", sublabel: "Try alternative first-line or escalate to GnRH agonist or surgery", next: "escalate" },
+        { label: "Adequate, continue", sublabel: "Annual review; continue long-term", next: "long_term_medical" },
+        { label: "Inadequate, escalate", sublabel: "Try alternative first-line or escalate to GnRH agonist or surgery", next: "escalate" },
       ],
     },
 
@@ -263,7 +263,7 @@ export const NG73_TREATMENT_FLOWCHART = {
       text: "Discuss both options with patient — consider fertility wishes, symptom severity, and patient preference.",
       options: [
         { label: "GnRH agonist + add-back", sublabel: "Goserelin or leuprorelin; add-back HRT from start; max 6 months without", next: "gnrh_treatment" },
-        { label: "Surgical — laparoscopic excision", sublabel: "Diagnostic ± therapeutic laparoscopy; preferred if surgery not yet done", next: "surgery_local" },
+        { label: "Surgical, laparoscopic excision", sublabel: "Diagnostic ± therapeutic laparoscopy; preferred if surgery not yet done", next: "surgery_local" },
       ],
     },
 
@@ -286,8 +286,8 @@ export const NG73_TREATMENT_FLOWCHART = {
       title: "Response to GnRH Agonist?",
       text: "Review after 3–6 months.",
       options: [
-        { label: "Good response — plan maintenance", sublabel: "Switch to long-term COCP, progestogen, or LNG-IUS", next: "long_term_medical" },
-        { label: "Poor response — consider surgery", sublabel: "Persistent severe symptoms despite medical treatment", next: "surgery_local" },
+        { label: "Good response, plan maintenance", sublabel: "Switch to long-term COCP, progestogen, or LNG-IUS", next: "long_term_medical" },
+        { label: "Poor response, consider surgery", sublabel: "Persistent severe symptoms despite medical treatment", next: "surgery_local" },
       ],
     },
 
@@ -310,7 +310,7 @@ export const NG73_TREATMENT_FLOWCHART = {
       title: "Deep Infiltrating Endometriosis (DIE)?",
       text: "Assess whether disease involves bowel, bladder, ureters, or other deep structures.",
       options: [
-        { label: "No DIE — manage locally", sublabel: "Superficial peritoneal or ovarian endometriosis only", next: "post_surgical" },
+        { label: "No DIE, manage locally", sublabel: "Superficial peritoneal or ovarian endometriosis only", next: "post_surgical" },
         { label: "DIE confirmed or suspected", sublabel: "Bowel, bladder, ureteric, or rectovaginal involvement", next: "bsge_referral" },
       ],
     },
@@ -360,7 +360,7 @@ export const NG73_TREATMENT_FLOWCHART = {
       title: "Disease Severity and Fertility Plan",
       text: "Management depends on extent of endometriosis and ovarian reserve.",
       options: [
-        { label: "Minimal–mild (stage I–II) — surgery may help", sublabel: "Laparoscopic excision improves spontaneous pregnancy rates", next: "fertility_surgery" },
+        { label: "Minimal–mild (stage I–II), surgery may help", sublabel: "Laparoscopic excision improves spontaneous pregnancy rates", next: "fertility_surgery" },
         { label: "Moderate–severe (stage III–IV) or endometrioma", sublabel: "IVF often first-line; surgery if endometrioma >3 cm", next: "fertility_ivf" },
       ],
     },

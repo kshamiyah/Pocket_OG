@@ -5,8 +5,8 @@
 
 export const GTG57_CARE_PATHWAY_FLOWCHART = {
   id: "GTG57_CARE_PATHWAY",
-  title: "RFM Care Pathway — ≥28 Weeks",
-  subtitle: "GTG57 · RCOG — Reduced Fetal Movements",
+  title: "RFM Care Pathway: ≥28 Weeks",
+  subtitle: "GTG57 · RCOG: Reduced Fetal Movements",
   startId: "present",
   nodes: {
 
@@ -29,14 +29,14 @@ export const GTG57_CARE_PATHWAY_FLOWCHART = {
       title: "Does history confirm RFM?",
       text: "Assess whether the woman truly has reduced fetal movements or whether an alternative explanation is likely (e.g. distraction, change in position, anterior placenta — though these should not falsely reassure).",
       options: [
-        { label: "Yes — history confirms RFM", sublabel: "Proceed to auscultation", next: "auscultate" },
-        { label: "Not confirmed — uncertain", sublabel: "Offer auscultation + routine assessment", next: "not-confirmed" },
+        { label: "Yes, history confirms RFM", sublabel: "Proceed to auscultation", next: "auscultate" },
+        { label: "Not confirmed, uncertain", sublabel: "Offer auscultation + routine assessment", next: "not-confirmed" },
       ],
     },
 
     "not-confirmed": {
       type: "end",
-      title: "RFM Not Confirmed — Offer Auscultation",
+      title: "RFM Not Confirmed: Offer Auscultation",
       text: "If history does not clearly confirm RFM, offer auscultation of the fetal heart and routine antenatal assessment.",
       items: [
         "Offer to auscultate fetal heart with handheld Doppler",
@@ -71,7 +71,7 @@ export const GTG57_CARE_PATHWAY_FLOWCHART = {
 
     "iufd-suspected": {
       type: "alert",
-      title: "Fetal Heart Not Detected — Immediate USS",
+      title: "Fetal Heart Not Detected: Immediate USS",
       text: "Immediate ultrasound scan is required to confirm or exclude intrauterine fetal death (IUFD). Do not delay.",
       items: [
         "Arrange immediate USS to assess fetal cardiac activity",
@@ -83,7 +83,7 @@ export const GTG57_CARE_PATHWAY_FLOWCHART = {
 
     "ctg": {
       type: "action",
-      title: "Computerised CTG — Exclude Acute Fetal Compromise",
+      title: "Computerised CTG: Exclude Acute Fetal Compromise",
       text: "Perform computerised CTG (cCTG) for at least 20 minutes. A reactive CTG with FHR accelerations coinciding with fetal movements indicates an intact fetal autonomic nervous system.",
       items: [
         "Computerised CTG preferred over visual interpretation — reduces inter-observer variation",
@@ -100,14 +100,14 @@ export const GTG57_CARE_PATHWAY_FLOWCHART = {
       text: "Interpret CTG result and assess whether RFM has resolved.",
       options: [
         { label: "Suspicious or pathological CTG", sublabel: "Senior obstetrician review required", next: "abnormal-ctg" },
-        { label: "Normal CTG — RFM resolved, no risk factors", sublabel: "Reassure and discharge with advice", next: "reassure" },
-        { label: "Normal CTG — RFM persists OR risk factors present", sublabel: "Proceed to USS", next: "uss-indicated" },
+        { label: "Normal CTG: RFM resolved, no risk factors", sublabel: "Reassure and discharge with advice", next: "reassure" },
+        { label: "Normal CTG: RFM persists OR risk factors present", sublabel: "Proceed to USS", next: "uss-indicated" },
       ],
     },
 
     "abnormal-ctg": {
       type: "alert",
-      title: "Suspicious or Pathological CTG — Senior Review",
+      title: "Suspicious or Pathological CTG: Senior Review",
       text: "Discuss with senior obstetrician immediately. Decisions about birth should consider gestation and degree of CTG anomaly.",
       items: [
         "Involve senior obstetrician (ST6+ or consultant) urgently",
@@ -120,7 +120,7 @@ export const GTG57_CARE_PATHWAY_FLOWCHART = {
 
     "reassure": {
       type: "end",
-      title: "Normal CTG — Reassure and Discharge",
+      title: "Normal CTG: Reassure and Discharge",
       text: "Where RFM has resolved and investigations are normal with no risk factors, women can be reassured. There is no indication to expedite birth.",
       items: [
         "Reassure that investigations are normal",
@@ -133,7 +133,7 @@ export const GTG57_CARE_PATHWAY_FLOWCHART = {
 
     "uss-indicated": {
       type: "action",
-      title: "USS — EFW, Amniotic Fluid Volume, Umbilical Artery Doppler",
+      title: "USS: EFW, Amniotic Fluid Volume, Umbilical Artery Doppler",
       text: "Perform USS if: RFM persists despite normal CTG, OR any risk factors for FGR/stillbirth are present, OR no USS in the preceding 2 weeks.",
       items: [
         "Estimated fetal weight (EFW) and abdominal circumference — to detect SGA (<10th centile)",
@@ -151,14 +151,14 @@ export const GTG57_CARE_PATHWAY_FLOWCHART = {
       title: "USS findings?",
       text: "Interpret USS findings to guide management.",
       options: [
-        { label: "Normal — EFW ≥10th centile, normal fluid, normal Doppler", sublabel: "Reassure + advice", next: "normal-uss" },
+        { label: "Normal: EFW ≥10th centile, normal fluid, normal Doppler", sublabel: "Reassure + advice", next: "normal-uss" },
         { label: "SGA, oligohydramnios, or abnormal Doppler", sublabel: "Manage per GTG31 SGA guideline", next: "sga-pathway" },
       ],
     },
 
     "normal-uss": {
       type: "end",
-      title: "Normal USS — Reassure",
+      title: "Normal USS: Reassure",
       text: "Normal USS following normal CTG — reassure. No indication for expediting birth with all investigations normal.",
       items: [
         "Reassure that all investigations are normal",
@@ -171,7 +171,7 @@ export const GTG57_CARE_PATHWAY_FLOWCHART = {
 
     "sga-pathway": {
       type: "end",
-      title: "SGA / Oligohydramnios / Abnormal Doppler — Manage per GTG31",
+      title: "SGA / Oligohydramnios / Abnormal Doppler: Manage per GTG31",
       text: "When SGA is identified or USS shows oligohydramnios or abnormal umbilical artery Doppler, manage in accordance with RCOG GTG31 (SGA and Growth Restricted Fetus).",
       items: [
         "SGA (EFW <10th centile): manage per RCOG Green-Top Guideline No. 31",
@@ -189,8 +189,8 @@ export const GTG57_CARE_PATHWAY_FLOWCHART = {
 
 export const GTG57_GESTATION_FLOWCHART = {
   id: "GTG57_GESTATION",
-  title: "RFM — Initial Assessment by Gestation",
-  subtitle: "GTG57 · RCOG — Reduced Fetal Movements",
+  title: "RFM: Initial Assessment by Gestation",
+  subtitle: "GTG57 · RCOG: Reduced Fetal Movements",
   startId: "gestation",
   nodes: {
 
@@ -208,7 +208,7 @@ export const GTG57_GESTATION_FLOWCHART = {
 
     "pre-24": {
       type: "action",
-      title: "RFM Before 24+0 Weeks — Confirm Fetal Heartbeat",
+      title: "RFM Before 24+0 Weeks: Confirm Fetal Heartbeat",
       text: "There are no studies on outcomes of RFM before 24 weeks. Placental insufficiency rarely presents this early. Confirm fetal viability.",
       items: [
         "Auscultate fetal heart with handheld Doppler — to exclude IUFD",
@@ -223,14 +223,14 @@ export const GTG57_GESTATION_FLOWCHART = {
       title: "Has movement ever been felt?",
       text: "Women who have never perceived any fetal movement by 24 weeks may have a fetus with an underlying neuromuscular or structural condition.",
       options: [
-        { label: "Yes — previously felt movement", sublabel: "Normal variation likely; reassure", next: "pre24-reassure" },
-        { label: "Never — no movement felt at all", sublabel: "Arrange anomaly scan + consider fetal medicine", next: "pre24-anomaly" },
+        { label: "Yes, previously felt movement", sublabel: "Normal variation likely; reassure", next: "pre24-reassure" },
+        { label: "Never, no movement felt at all", sublabel: "Arrange anomaly scan + consider fetal medicine", next: "pre24-anomaly" },
       ],
     },
 
     "pre24-reassure": {
       type: "end",
-      title: "Reassure — Normal at This Gestation",
+      title: "Reassure: Normal at This Gestation",
       text: "Fetal heartbeat confirmed. Movement perception is variable before 24 weeks. Reassure and advise.",
       items: [
         "Women feel movements from 16–24 weeks — significant variation is normal",
@@ -242,7 +242,7 @@ export const GTG57_GESTATION_FLOWCHART = {
 
     "pre24-anomaly": {
       type: "alert",
-      title: "No Movement Ever Felt — Arrange Anomaly Scan",
+      title: "No Movement Ever Felt: Arrange Anomaly Scan",
       text: "Absent fetal movement by 24 weeks is associated with neurological and musculoskeletal anomalies. Investigate further.",
       items: [
         "Arrange anomaly USS if not already performed",
@@ -254,7 +254,7 @@ export const GTG57_GESTATION_FLOWCHART = {
 
     "24-to-26": {
       type: "action",
-      title: "RFM 24+0 to 25+6 Weeks — Confirm FH + Risk History",
+      title: "RFM 24+0 to 25+6 Weeks: Confirm FH + Risk History",
       text: "Confirm fetal viability and take a comprehensive stillbirth risk assessment. No evidence to recommend routine CTG at this gestation.",
       items: [
         "Auscultate fetal heart with handheld Doppler — to exclude IUFD",
@@ -271,8 +271,8 @@ export const GTG57_GESTATION_FLOWCHART = {
       title: "Risk factors for FGR or stillbirth present?",
       text: "Clinical suspicion of FGR or significant risk factors prompt USS assessment even at this gestation.",
       options: [
-        { label: "Yes — risk factors or clinical concern", sublabel: "Consider USS for fetal size", next: "24-uss" },
-        { label: "No — low risk, FH confirmed", sublabel: "Reassure and advise", next: "24-end" },
+        { label: "Yes, risk factors or clinical concern", sublabel: "Consider USS for fetal size", next: "24-uss" },
+        { label: "No, low risk, FH confirmed", sublabel: "Reassure and advise", next: "24-end" },
       ],
     },
 
@@ -291,7 +291,7 @@ export const GTG57_GESTATION_FLOWCHART = {
 
     "24-end": {
       type: "end",
-      title: "Reassure — FH Confirmed, No Risk Factors",
+      title: "Reassure: FH Confirmed, No Risk Factors",
       text: "Fetal heartbeat confirmed. Low-risk presentation. Reassure and give clear advice.",
       items: [
         "Fetal heartbeat confirmed — reassure",
@@ -303,7 +303,7 @@ export const GTG57_GESTATION_FLOWCHART = {
 
     "26-to-28": {
       type: "action",
-      title: "RFM 26+0 to 27+6 Weeks — Confirm FH + Assess",
+      title: "RFM 26+0 to 27+6 Weeks: Confirm FH + Assess",
       text: "Confirm fetal viability. Consider CTG if clinical suspicion of fetal compromise. CTG can be offered from 26 weeks if viability is confirmed.",
       items: [
         "Auscultate fetal heart with handheld Doppler",
@@ -319,8 +319,8 @@ export const GTG57_GESTATION_FLOWCHART = {
       title: "Clinical suspicion of compromise or significant risk factors?",
       text: "Decide whether CTG and USS assessment are needed at this borderline gestation.",
       options: [
-        { label: "Yes — clinical concern or risk factors", sublabel: "CTG ± USS assessment", next: "26-ctg" },
-        { label: "No — FH confirmed, low risk", sublabel: "Reassure + advice", next: "26-end" },
+        { label: "Yes, clinical concern or risk factors", sublabel: "CTG ± USS assessment", next: "26-ctg" },
+        { label: "No: FH confirmed, low risk", sublabel: "Reassure + advice", next: "26-end" },
       ],
     },
 
@@ -339,7 +339,7 @@ export const GTG57_GESTATION_FLOWCHART = {
 
     "26-end": {
       type: "end",
-      title: "Reassure — FH Confirmed, No Concern",
+      title: "Reassure: FH Confirmed, No Concern",
       text: "Fetal heartbeat confirmed. Low-risk presentation at 26–28 weeks. Reassure and advise.",
       items: [
         "Fetal heartbeat confirmed — reassure",
@@ -351,7 +351,7 @@ export const GTG57_GESTATION_FLOWCHART = {
 
     "over-28": {
       type: "end",
-      title: "≥28+0 Weeks — Use Full RFM Care Pathway",
+      title: "≥28+0 Weeks: Use Full RFM Care Pathway",
       text: "At 28 weeks or later, proceed with the full RFM care pathway including CTG and USS assessment as indicated.",
       items: [
         "Take detailed history including risk factors for stillbirth and FGR",
@@ -370,7 +370,7 @@ export const GTG57_GESTATION_FLOWCHART = {
 export const GTG57_RECURRENT_FLOWCHART = {
   id: "GTG57_RECURRENT",
   title: "Recurrent RFM Pathway",
-  subtitle: "GTG57 · RCOG — Reduced Fetal Movements",
+  subtitle: "GTG57 · RCOG: Reduced Fetal Movements",
   startId: "define",
   nodes: {
 
@@ -423,7 +423,7 @@ export const GTG57_RECURRENT_FLOWCHART = {
       title: "Investigation findings?",
       text: "Interpret full investigation results to guide further management.",
       options: [
-        { label: "Abnormal — SGA, oligohydramnios, or abnormal Doppler", sublabel: "Manage per GTG31; senior review", next: "abnormal-recurrent" },
+        { label: "Abnormal: SGA, oligohydramnios, or abnormal Doppler", sublabel: "Manage per GTG31; senior review", next: "abnormal-recurrent" },
         { label: "Abnormal CTG", sublabel: "Senior obstetrician review urgently", next: "abnormal-ctg-recurrent" },
         { label: "All investigations normal", sublabel: "Assess gestation for IOL decision", next: "gestation-decision" },
       ],
@@ -431,7 +431,7 @@ export const GTG57_RECURRENT_FLOWCHART = {
 
     "abnormal-recurrent": {
       type: "alert",
-      title: "Abnormal USS — SGA / Oligohydramnios / Abnormal Doppler",
+      title: "Abnormal USS: SGA / Oligohydramnios / Abnormal Doppler",
       text: "USS abnormality in context of recurrent RFM is a high-risk finding. Manage in accordance with RCOG GTG31.",
       items: [
         "Refer to or manage per RCOG GTG31 (SGA and Growth Restricted Fetus)",
@@ -444,7 +444,7 @@ export const GTG57_RECURRENT_FLOWCHART = {
 
     "abnormal-ctg-recurrent": {
       type: "alert",
-      title: "Abnormal CTG — Senior Obstetrician Review",
+      title: "Abnormal CTG: Senior Obstetrician Review",
       text: "Abnormal CTG in recurrent RFM significantly increases risk. Discuss with senior obstetrician urgently.",
       items: [
         "Involve senior obstetrician immediately",
@@ -457,17 +457,17 @@ export const GTG57_RECURRENT_FLOWCHART = {
 
     "gestation-decision": {
       type: "decision",
-      title: "Gestation — guide IOL decision",
+      title: "Gestation, guide IOL decision",
       text: "Where all investigations are normal in a woman with recurrent RFM, the decision to offer induction of labour must be individualised. Gestation is the key factor.",
       options: [
-        { label: "Before 39+0 weeks", sublabel: "No routine IOL — individualised senior decision", next: "pre-39" },
-        { label: "39+0 weeks or later", sublabel: "IOL can be offered — not associated with increased risk", next: "post-39" },
+        { label: "Before 39+0 weeks", sublabel: "No routine IOL, individualised senior decision", next: "pre-39" },
+        { label: "39+0 weeks or later", sublabel: "IOL can be offered, not associated with increased risk", next: "post-39" },
       ],
     },
 
     "pre-39": {
       type: "end",
-      title: "Recurrent RFM <39 Weeks — No Routine IOL",
+      title: "Recurrent RFM <39 Weeks: No Routine IOL",
       text: "There is no evidence that IOL before 39 weeks for recurrent RFM with normal investigations improves perinatal outcomes. The decision must be individualised.",
       items: [
         "No routine IOL before 39 weeks for RFM alone with normal investigations (Grade A)",
@@ -481,7 +481,7 @@ export const GTG57_RECURRENT_FLOWCHART = {
 
     "post-39": {
       type: "end",
-      title: "Recurrent RFM ≥39 Weeks — IOL Can Be Offered",
+      title: "Recurrent RFM ≥39 Weeks: IOL Can Be Offered",
       text: "Induction of labour at or after 39 weeks of gestation is not associated with increased caesarean rate or adverse maternal or fetal outcomes. It can be offered.",
       items: [
         "IOL at ≥39 weeks: not associated with increased caesarean rate (Grade A)",

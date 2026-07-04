@@ -4,13 +4,13 @@
 export const QS22_APPOINTMENTS_FLOWCHART = {
   id: "QS22_APPOINTMENTS",
   title: "Antenatal Appointment Schedule by Parity",
-  subtitle: "QS22 · NICE — Antenatal Care",
+  subtitle: "QS22 · NICE: Antenatal Care",
   startId: "booking",
   nodes: {
 
     "booking": {
       type: "action",
-      title: "Booking Appointment — by 10 Weeks",
+      title: "Booking Appointment, by 10 Weeks",
       text: "All women should have a booking appointment by 10 weeks gestation. Late presenters should still be offered booking and all relevant care.",
       items: [
         "Complete risk assessment: VTE, GDM, pre-eclampsia, FGR, mental health, domestic abuse, consanguinity",
@@ -28,14 +28,14 @@ export const QS22_APPOINTMENTS_FLOWCHART = {
       title: "Parity?",
       text: "The number of appointments differs by parity. Nulliparous women have 10 appointments; multiparous women have 7.",
       options: [
-        { label: "Nulliparous", sublabel: "First pregnancy — 10 appointments", next: "nulliparous-schedule" },
-        { label: "Multiparous", sublabel: "Previous birth — 7 appointments", next: "multiparous-schedule" },
+        { label: "Nulliparous", sublabel: "First pregnancy: 10 appointments", next: "nulliparous-schedule" },
+        { label: "Multiparous", sublabel: "Previous birth: 7 appointments", next: "multiparous-schedule" },
       ],
     },
 
     "nulliparous-schedule": {
       type: "action",
-      title: "Nulliparous — 10 Appointments",
+      title: "Nulliparous: 10 Appointments",
       text: "Recommended antenatal appointment schedule for women in their first pregnancy.",
       items: [
         "Booking (by 10 weeks) — risk assessment, booking bloods, history",
@@ -55,7 +55,7 @@ export const QS22_APPOINTMENTS_FLOWCHART = {
 
     "multiparous-schedule": {
       type: "action",
-      title: "Multiparous — 7 Appointments",
+      title: "Multiparous: 7 Appointments",
       text: "Recommended antenatal appointment schedule for women who have had a previous birth.",
       items: [
         "Booking (by 10 weeks) — risk assessment, booking bloods, history",
@@ -75,8 +75,8 @@ export const QS22_APPOINTMENTS_FLOWCHART = {
       title: "Any risk factors or complications identified?",
       text: "Additional appointments are scheduled if risk factors or complications are identified at any point.",
       options: [
-        { label: "Yes — risk factors identified", sublabel: "Increase frequency per risk", next: "additional-care" },
-        { label: "No — low risk, routine care", sublabel: "Continue standard schedule", next: "routine-end" },
+        { label: "Yes, risk factors identified", sublabel: "Increase frequency per risk", next: "additional-care" },
+        { label: "No, low risk, routine care", sublabel: "Continue standard schedule", next: "routine-end" },
       ],
     },
 

@@ -31,7 +31,7 @@ export const TOG_CHD_PREGNANCY_FLOWCHART = {
       text: "Any of these raise the risk of a maternal cardiac event or an adverse neonatal event.",
       options: [
         {
-          label: "Yes — one or more present",
+          label: "Yes, one or more present",
           sublabel: [
             "Prior cardiac event/arrhythmia; NYHA class >II or cyanosis",
             "Left heart obstruction (mitral valve area <2cm², aortic valve area <1.5cm², or gradient >30mmHg)",

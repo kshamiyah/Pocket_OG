@@ -3,7 +3,7 @@ export const GUIDELINES = {
   GL787: { code: "GL787", label: "Obstetric Antibiotics", version: "V6.0", date: "July 2024", color: "emerald", pdf: true, source: "RBH" },
   CG565: { code: "CG565", label: "First Trimester Miscarriage", version: "V6", date: "September 2024", color: "violet", pdf: true, source: "RBH" },
   CG621: { code: "CG621", label: "Medical Management of Miscarriage", version: "V6", date: "May 2024", color: "rose", pdf: true, source: "RBH" },
-  CG623: { code: "CG623", label: "Ectopic Pregnancy — Medical Management", version: "V5", date: "June 2025", color: "orange", pdf: true, source: "RBH" },
+  CG623: { code: "CG623", label: "Ectopic Pregnancy: Medical Management", version: "V5", date: "June 2025", color: "orange", pdf: true, source: "RBH" },
   GL895: { code: "GL895", label: "PPRoM", version: "V7", date: "November 2023", color: "sky", pdf: true, source: "RBH" },
   GL861: { code: "GL861", label: "Induction of Labour & Term PLRoM", version: "V6.10", date: "May 2026", color: "teal", pdf: true, source: "RBH" },
   GL783: { code: "GL783", label: "Iron Deficiency Anaemia", version: "V5", date: "January 2024", color: "amber", pdf: true, source: "RBH" },

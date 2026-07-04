@@ -4,7 +4,7 @@
 
 export const GL895_ROM_TRIAGE_FLOWCHART = {
   id: "GL895_ROM_TRIAGE",
-  title: "Rupture of Membranes — PROM / PPRoM Triage",
+  title: "Rupture of Membranes: PROM / PPRoM Triage",
   subtitle: "GL895 PPRoM · GL861 Term PLRoM",
   startId: "start",
   nodes: {
@@ -27,8 +27,8 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
       title: "How many weeks is she?",
       text: "Gestation classifies the presentation and selects the pathway.",
       options: [
-        { label: "≥ 37+0 weeks — Term PLRoM", sublabel: "GL861 pathway · assessment, expectant management or IOL", next: "term-assess" },
-        { label: "< 37+0 weeks — PPRoM", sublabel: "GL895 pathway · admission, antibiotics, steroids or transfer", next: "pprom-assess" },
+        { label: "≥ 37+0 weeks: Term PLRoM", sublabel: "GL861 pathway · assessment, expectant management or IOL", next: "term-assess" },
+        { label: "< 37+0 weeks: PPRoM", sublabel: "GL895 pathway · admission, antibiotics, steroids or transfer", next: "pprom-assess" },
       ],
     },
 
@@ -36,7 +36,7 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
 
     "term-assess": {
       type: "action",
-      title: "Term PLRoM — Assessment",
+      title: "Term PLRoM: Assessment",
       text: "Confirm rupture and exclude cord or limb presentation.",
       items: [
         "Auscultate fetal heart in low-risk mothers; CTG for consultant-care patients or any concern",
@@ -53,8 +53,8 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
       title: "Is SROM confirmed?",
       text: "Liquor seen (pooling on speculum) or positive AmniSure confirms rupture of membranes.",
       options: [
-        { label: "Yes — liquor seen or AmniSure positive", next: "term-cord" },
-        { label: "No — speculum dry and AmniSure negative", sublabel: "Consider other causes of leaking", next: "not-confirmed" },
+        { label: "Yes, liquor seen or AmniSure positive", next: "term-cord" },
+        { label: "No, speculum dry and AmniSure negative", sublabel: "Consider other causes of leaking", next: "not-confirmed" },
       ],
     },
 
@@ -62,7 +62,7 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
       type: "decision",
       title: "Cord or limb presentation on speculum?",
       options: [
-        { label: "No — cord and limb excluded", next: "term-sepsis" },
+        { label: "No, cord and limb excluded", next: "term-sepsis" },
         { label: "Cord prolapse", sublabel: "Obstetric emergency", next: "cord-emergency" },
       ],
     },
@@ -72,8 +72,8 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
       title: "Signs of maternal sepsis or chorioamnionitis?",
       text: "Prompts: pyrexia, maternal tachycardia, uterine tenderness, offensive liquor, fetal tachycardia.",
       options: [
-        { label: "No — well, no signs of infection", next: "term-flags" },
-        { label: "Yes — clinical features of sepsis", sublabel: "IV antibiotics within 1 hour", next: "sepsis" },
+        { label: "No, well, no signs of infection", next: "term-flags" },
+        { label: "Yes, clinical features of sepsis", sublabel: "IV antibiotics within 1 hour", next: "sepsis" },
       ],
     },
 
@@ -82,14 +82,14 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
       title: "Meconium, known GBS carrier, or pyrexia ≥ 37.2°C?",
       text: "Any of these means expectant management is not appropriate — offer immediate induction.",
       options: [
-        { label: "No — clear liquor, GBS negative/unknown, apyrexial", next: "term-choice" },
-        { label: "Yes — meconium, GBS carrier or pyrexia ≥ 37.2°C", sublabel: "Offer immediate induction", next: "term-immediate" },
+        { label: "No, clear liquor, GBS negative/unknown, apyrexial", next: "term-choice" },
+        { label: "Yes, meconium, GBS carrier or pyrexia ≥ 37.2°C", sublabel: "Offer immediate induction", next: "term-immediate" },
       ],
     },
 
     "term-immediate": {
       type: "end",
-      title: "Term PLRoM — Immediate Induction",
+      title: "Term PLRoM: Immediate Induction",
       text: "Offer immediate induction — discuss with the senior obstetrician and delivery suite coordinator.",
       items: [
         "Known GBS carrier: IV antibiotics from the moment SROM is diagnosed — advise immediate induction",
@@ -102,7 +102,7 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
 
     "term-choice": {
       type: "decision",
-      title: "Woman's choice — expectant management or immediate IOL?",
+      title: "Woman's choice, expectant management or immediate IOL?",
       text: "Offer expectant management for 18–24 hours or immediate induction. Aim: baby born within 48 hours of SROM.",
       options: [
         { label: "Expectant management (18–24 hours)", sublabel: "May wait at home · return advice given", next: "term-expectant" },
@@ -112,7 +112,7 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
 
     "term-expectant": {
       type: "end",
-      title: "Term PLRoM — Expectant Management",
+      title: "Term PLRoM: Expectant Management",
       text: "Aim for the baby to be born within 48 hours of SROM. The woman may wait at home.",
       items: [
         "Do NOT perform VE for Bishop score at initial assessment — only when she returns to hospital",
@@ -126,7 +126,7 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
 
     "term-iol": {
       type: "end",
-      title: "Term PLRoM — Induction of Labour",
+      title: "Term PLRoM: Induction of Labour",
       text: "Arrange induction via IOL suite or DAU.",
       items: [
         "Cervix unfavourable (Bishop ≤ 6): consider Propess or Prostin gel after discussion with obstetrician",
@@ -142,7 +142,7 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
 
     "pprom-assess": {
       type: "action",
-      title: "PPRoM — Assessment",
+      title: "PPRoM: Assessment",
       text: "Confirm rupture, screen for infection and establish fetal baseline. Note: normal amniotic fluid on ultrasound does NOT exclude rupture of membranes.",
       items: [
         "Sterile speculum examination with HVS — avoid digital examination",
@@ -160,8 +160,8 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
       title: "Is PPRoM confirmed?",
       text: "Liquor seen (pooling on speculum) or positive AmniSure confirms rupture of membranes.",
       options: [
-        { label: "Yes — liquor seen or AmniSure positive", next: "pprom-cord" },
-        { label: "No — speculum dry and AmniSure negative", sublabel: "Consider other causes of leaking", next: "not-confirmed" },
+        { label: "Yes, liquor seen or AmniSure positive", next: "pprom-cord" },
+        { label: "No, speculum dry and AmniSure negative", sublabel: "Consider other causes of leaking", next: "not-confirmed" },
       ],
     },
 
@@ -169,7 +169,7 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
       type: "decision",
       title: "Cord or limb presentation on speculum?",
       options: [
-        { label: "No — cord and limb excluded", next: "pprom-sepsis" },
+        { label: "No, cord and limb excluded", next: "pprom-sepsis" },
         { label: "Cord prolapse", sublabel: "Obstetric emergency", next: "cord-emergency" },
       ],
     },
@@ -179,8 +179,8 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
       title: "Signs of maternal sepsis or chorioamnionitis?",
       text: "Prompts: pyrexia, maternal tachycardia, uterine tenderness, offensive liquor, fetal tachycardia.",
       options: [
-        { label: "No — well, no signs of infection", next: "pprom-gestation" },
-        { label: "Yes — clinical features of sepsis", sublabel: "IV antibiotics within 1 hour", next: "sepsis" },
+        { label: "No, well, no signs of infection", next: "pprom-gestation" },
+        { label: "Yes, clinical features of sepsis", sublabel: "IV antibiotics within 1 hour", next: "sepsis" },
       ],
     },
 
@@ -196,7 +196,7 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
 
     "pprom-admit": {
       type: "action",
-      title: "PPRoM — Admit for 48–72 Hours",
+      title: "PPRoM: Admit for 48–72 Hours",
       text: "Admit for observation, antibiotics and antenatal corticosteroids.",
       items: [
         "4-hourly maternal pulse, temperature and respiratory rate with MEOWS (in-patient observation chart)",
@@ -214,14 +214,14 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
       title: "After 48–72 hours: normal growth scan, no chorioamnionitis, cephalic presentation?",
       text: "Women meeting all three criteria may be suitable for outpatient monitoring until delivery.",
       options: [
-        { label: "Yes — all three criteria met", sublabel: "Suitable for outpatient monitoring", next: "pprom-outpatient" },
-        { label: "No — any criterion not met", sublabel: "Remain inpatient", next: "pprom-inpatient" },
+        { label: "Yes, all three criteria met", sublabel: "Suitable for outpatient monitoring", next: "pprom-outpatient" },
+        { label: "No, any criterion not met", sublabel: "Remain inpatient", next: "pprom-inpatient" },
       ],
     },
 
     "pprom-outpatient": {
       type: "action",
-      title: "PPRoM — Outpatient Management",
+      title: "PPRoM: Outpatient Management",
       text: "Discharge with clear self-monitoring advice and a structured review schedule.",
       items: [
         "Monitor vaginal loss — self-refer if any change in colour or odour",
@@ -237,7 +237,7 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
 
     "pprom-inpatient": {
       type: "action",
-      title: "PPRoM — Continue Inpatient Care",
+      title: "PPRoM: Continue Inpatient Care",
       text: "Criteria for outpatient monitoring not met — remain inpatient with senior obstetric review.",
       items: [
         "Continue 4-hourly observations with MEOWS and daily observation of liquor",
@@ -249,7 +249,7 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
 
     "pprom-birth": {
       type: "end",
-      title: "PPRoM — Planning Birth & GBS",
+      title: "PPRoM: Planning Birth & GBS",
       text: "Appointment at consultant obstetric clinic at 34 weeks to plan birth.",
       items: [
         "Offer delivery at 37 weeks' gestation (no history of GBS colonisation)",
@@ -264,7 +264,7 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
 
     "pprom-transfer": {
       type: "end",
-      title: "In-Utero Transfer — Level-3 Neonatal Unit",
+      title: "In-Utero Transfer: Level-3 Neonatal Unit",
       text: "PPRoM below 27+0 weeks (singleton) or 28+0 weeks (multiple pregnancy): advise transfer to a maternity unit able to provide Level-3 neonatal care, organised in accordance with the in-utero transfer protocol (CG508).",
       items: [
         "Loading dose before transfer: IV Benzylpenicillin 3g + Magnesium sulphate 4g slow IV over 10–15 minutes",
@@ -291,7 +291,7 @@ export const GL895_ROM_TRIAGE_FLOWCHART = {
 
     "cord-emergency": {
       type: "end",
-      title: "Cord Prolapse — Obstetric Emergency",
+      title: "Cord Prolapse: Obstetric Emergency",
       text: "Summon help immediately and follow the GTG50 cord prolapse pathway for step-by-step management.",
     },
 

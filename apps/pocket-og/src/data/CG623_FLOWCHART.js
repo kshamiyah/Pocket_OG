@@ -27,8 +27,8 @@ export const CG623_MTX_FLOWCHART = {
       title: "Selection criteria met?",
       text: "ALL of the following must be present for MTX to be considered.",
       options: [
-        { label: "Yes — all criteria met:", sublabel: "No significant pain · No IUP · Unruptured ectopic <35mm · No FH · Haemodynamically stable · Normal FBC/LFTs/U&Es · Able to comply with follow-up", next: "exclusion-criteria" },
-        { label: "No — criteria not met", sublabel: "Pain present, unstable, IUP found, or non-compliant", next: "end-surgery" },
+        { label: "Yes, all criteria met:", sublabel: "No significant pain · No IUP · Unruptured ectopic <35mm · No FH · Haemodynamically stable · Normal FBC/LFTs/U&Es · Able to comply with follow-up", next: "exclusion-criteria" },
+        { label: "No, criteria not met", sublabel: "Pain present, unstable, IUP found, or non-compliant", next: "end-surgery" },
       ],
     },
 
@@ -71,8 +71,8 @@ export const CG623_MTX_FLOWCHART = {
       title: "βhCG declining on conservative management?",
       text: "Monitor βhCG response over 1–2 weeks.",
       options: [
-        { label: "Yes — consistent decline", sublabel: "Continue monitoring to resolution", next: "end-monitoring" },
-        { label: "No — plateau or rise", sublabel: "Conservative failed — proceed to MTX", next: "pre-mtx" },
+        { label: "Yes, consistent decline", sublabel: "Continue monitoring to resolution", next: "end-monitoring" },
+        { label: "No, plateau or rise", sublabel: "Conservative failed, proceed to MTX", next: "pre-mtx" },
       ],
     },
 
@@ -88,7 +88,7 @@ export const CG623_MTX_FLOWCHART = {
 
     "high-bhcg": {
       type: "alert",
-      title: "βhCG >5000 IU/L — Surgery Recommended",
+      title: "βhCG >5000 IU/L: Surgery Recommended",
       text: "High βhCG is associated with lower MTX success and higher rupture risk.",
       items: [
         "Surgery is the preferred primary management at this level",
@@ -131,7 +131,7 @@ export const CG623_MTX_FLOWCHART = {
 
     "day4": {
       type: "action",
-      title: "Day 4 — βhCG + FBC",
+      title: "Day 4, βhCG + FBC",
       text: "βhCG may RISE initially — this is expected in up to 86% of patients.",
       items: [
         "Check βhCG + FBC",
@@ -145,17 +145,17 @@ export const CG623_MTX_FLOWCHART = {
 
     "day7-result": {
       type: "decision",
-      title: "Day 7 — βhCG decline from Day 4?",
+      title: "Day 7, βhCG decline from Day 4?",
       text: "Compare Day 7 βhCG to Day 4 value.",
       options: [
-        { label: "≥15% decline from Day 4", sublabel: "Treatment responding — continue monitoring", next: "end-monitoring" },
-        { label: "<15% decline or plateau/rise", sublabel: "Suboptimal response — reassess", next: "day7-tvs" },
+        { label: "≥15% decline from Day 4", sublabel: "Treatment responding, continue monitoring", next: "end-monitoring" },
+        { label: "<15% decline or plateau/rise", sublabel: "Suboptimal response, reassess", next: "day7-tvs" },
       ],
     },
 
     "day7-tvs": {
       type: "action",
-      title: "Day 7 — Repeat TVS + Consultant",
+      title: "Day 7: Repeat TVS + Consultant",
       text: "Suboptimal βhCG decline requires re-evaluation before second dose decision.",
       items: [
         "Perform repeat TVS on Day 7 (only indicated for suboptimal decline or if symptomatic)",

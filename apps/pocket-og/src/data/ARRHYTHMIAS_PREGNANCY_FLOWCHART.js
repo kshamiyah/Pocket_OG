@@ -112,7 +112,7 @@ export const TOG_ARRHYTHMIAS_PREGNANCY_FLOWCHART = {
 
     "benign": {
       type: "end",
-      title: "Benign — Reassure",
+      title: "Benign: Reassure",
       text: "Sinus tachycardia and ectopic beats are common and benign; treatment is not usually required. Consider inappropriate sinus tachycardia or POTS as alternative diagnoses if persistent.",
     },
 

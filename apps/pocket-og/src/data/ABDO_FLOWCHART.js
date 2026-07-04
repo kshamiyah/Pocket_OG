@@ -27,7 +27,7 @@ export const ABDO_TRIAGE_FLOWCHART = {
       text: "Any one of these → treat as an obstetric emergency.",
       options: [
         {
-          label: "Yes — one or more present",
+          label: "Yes, one or more present",
           sublabel: [
             "Shock / collapse / heavy PV bleeding",
             "Constant pain + tense, tender 'woody' uterus (abruption)",
@@ -37,13 +37,13 @@ export const ABDO_TRIAGE_FLOWCHART = {
           ],
           next: "emergency",
         },
-        { label: "No — haemodynamically stable", sublabel: "Stratify by gestation", next: "gestation" },
+        { label: "No, haemodynamically stable", sublabel: "Stratify by gestation", next: "gestation" },
       ],
     },
 
     "emergency": {
       type: "alert",
-      title: "Obstetric Emergency — Escalate Now",
+      title: "Obstetric Emergency: Escalate Now",
       text: "Call for senior obstetric help immediately. Resuscitate and treat the likely cause; continuous fetal monitoring if viable.",
       items: [
         "ABC, two large-bore cannulae, bloods incl. group & crossmatch",
@@ -67,7 +67,7 @@ export const ABDO_TRIAGE_FLOWCHART = {
 
     "early": {
       type: "end",
-      title: "< 12 weeks — Exclude Ectopic First",
+      title: "< 12 weeks: Exclude Ectopic First",
       text: "In any woman with a positive pregnancy test and abdominal pain, exclude ectopic pregnancy.",
       items: [
         "Causes: ectopic, miscarriage, ovarian cyst / torsion, UTI, appendicitis, constipation",
@@ -80,7 +80,7 @@ export const ABDO_TRIAGE_FLOWCHART = {
 
     "mid": {
       type: "end",
-      title: "12–24 weeks — Mid-trimester",
+      title: "12–24 weeks: Mid-trimester",
       text: "Consider obstetric, gynae and surgical causes. Appendicitis is the commonest non-obstetric surgical emergency and may present atypically in pregnancy.",
       items: [
         "Causes: appendicitis, ovarian torsion, UTI / pyelonephritis, fibroid degeneration, round-ligament pain, late miscarriage / threatened preterm labour",
@@ -93,7 +93,7 @@ export const ABDO_TRIAGE_FLOWCHART = {
 
     "late": {
       type: "end",
-      title: "≥ 24 weeks — Viable / Third Trimester",
+      title: "≥ 24 weeks: Viable / Third Trimester",
       text: "Prioritise obstetric emergencies, monitor the fetus, and still consider non-obstetric causes.",
       items: [
         "Obstetric: labour / preterm labour, abruption, pre-eclampsia / HELLP, uterine rupture (esp. previous scar)",

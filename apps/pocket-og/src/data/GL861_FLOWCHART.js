@@ -26,8 +26,8 @@ export const GL861_IOL_FLOWCHART = {
       title: "Bishop score",
       text: "What is the Bishop score?",
       options: [
-        { label: "BS ≥ 6", sublabel: "Favourable — ARM likely possible", next: "arm-head" },
-        { label: "BS < 6", sublabel: "Unfavourable — cervical ripening needed", next: "crb-check" },
+        { label: "BS ≥ 6", sublabel: "Favourable: ARM likely possible", next: "arm-head" },
+        { label: "BS < 6", sublabel: "Unfavourable, cervical ripening needed", next: "crb-check" },
       ],
     },
 
@@ -38,14 +38,14 @@ export const GL861_IOL_FLOWCHART = {
       title: "Head position",
       text: "Is the presenting part well applied to the cervix? (Head engaged / not high)",
       options: [
-        { label: "Yes — head well applied", next: "arm-do" },
-        { label: "No — head is high", next: "arm-high-head" },
+        { label: "Yes, head well applied", next: "arm-do" },
+        { label: "No, head is high", next: "arm-high-head" },
       ],
     },
 
     "arm-high-head": {
       type: "alert",
-      title: "High head — escalate first",
+      title: "High head, escalate first",
       text: "Escalate to MW in charge and on-call obstetric team before proceeding.",
       items: [
         "Registrar: bleep 555",
@@ -73,7 +73,7 @@ export const GL861_IOL_FLOWCHART = {
       text: "Where should the woman labour?",
       options: [
         { label: "Delivery Suite", sublabel: "Consultant care, oxytocin infusion, or higher risk", next: "end-ds" },
-        { label: "Rushey MLU", sublabel: "Low-risk multip or primip who laboured after CRB/Propess/ARM — full CTG before transfer", next: "end-mlu" },
+        { label: "Rushey MLU", sublabel: "Low-risk multip or primip who laboured after CRB/Propess/ARM, full CTG before transfer", next: "end-mlu" },
       ],
     },
 
@@ -106,8 +106,8 @@ export const GL861_IOL_FLOWCHART = {
       title: "CRB appropriate?",
       text: "Is the Cervical Ripening Balloon (CRB) appropriate and acceptable?\n\nExclusions: ruptured membranes (SROM), unstable presenting part not in pelvis, placenta praevia or vasa praevia.",
       options: [
-        { label: "Yes — first line", sublabel: "No exclusions, woman accepts", next: "crb-setting" },
-        { label: "No — contraindicated or declined", next: "propess-check" },
+        { label: "Yes, first line", sublabel: "No exclusions, woman accepts", next: "crb-setting" },
+        { label: "No, contraindicated or declined", next: "propess-check" },
       ],
     },
 
@@ -116,14 +116,14 @@ export const GL861_IOL_FLOWCHART = {
       title: "Inpatient or outpatient?",
       text: "Does the woman meet outpatient IOL criteria?\n\n✓ ≥37 weeks, low risk, singleton, no SROM\n✓ Cephalic with non-ballotable head, unscarred uterus\n✓ Responsible adult at home, understands advice, has transport to return",
       options: [
-        { label: "Yes — outpatient IOL", next: "crb-op" },
-        { label: "No — inpatient IOL", next: "crb-ip" },
+        { label: "Yes, outpatient IOL", next: "crb-op" },
+        { label: "No, inpatient IOL", next: "crb-ip" },
       ],
     },
 
     "crb-op": {
       type: "action",
-      title: "CRB — outpatient",
+      title: "CRB, outpatient",
       text: "Insert CRB (double balloon, max 60 ml saline per balloon).",
       items: [
         "Encourage to pass urine before insertion",
@@ -135,7 +135,7 @@ export const GL861_IOL_FLOWCHART = {
 
     "crb-ip": {
       type: "action",
-      title: "CRB — inpatient",
+      title: "CRB, inpatient",
       text: "Insert CRB on IOL suite (double balloon, max 60 ml saline per balloon).",
       items: [
         "Encourage to pass urine before insertion",
@@ -152,8 +152,8 @@ export const GL861_IOL_FLOWCHART = {
       title: "Reassess after CRB",
       text: "After CRB removal — perform VE and reassess.\n\nIs ARM now possible? (Cervix favourable / Bishop score ≥ 6)",
       options: [
-        { label: "Yes — ARM possible", next: "arm-head" },
-        { label: "No — cervix still unfavourable", next: "crb-fail" },
+        { label: "Yes: ARM possible", next: "arm-head" },
+        { label: "No, cervix still unfavourable", next: "crb-fail" },
       ],
     },
 
@@ -162,8 +162,8 @@ export const GL861_IOL_FLOWCHART = {
       title: "After unsuccessful CRB",
       text: "CRB has not achieved a favourable cervix. Discuss plan with woman and obstetrician.\n\nIs there a history of previous caesarean section?",
       options: [
-        { label: "No previous CS — Propess appropriate", next: "propess-insert" },
-        { label: "Previous CS — senior review required", next: "propess-cs" },
+        { label: "No previous CS: Propess appropriate", next: "propess-insert" },
+        { label: "Previous CS, senior review required", next: "propess-cs" },
         { label: "Propess declined / not appropriate", next: "prostin-discuss" },
       ],
     },
@@ -175,7 +175,7 @@ export const GL861_IOL_FLOWCHART = {
       title: "Propess appropriate?",
       text: "Is Propess (Dinoprostone 10 mg) appropriate?\n\nNote: do NOT give if contractions are already present or CTG is abnormal.",
       options: [
-        { label: "Yes — no previous CS, normal CTG", next: "propess-insert" },
+        { label: "Yes, no previous CS, normal CTG", next: "propess-insert" },
         { label: "Previous caesarean section", next: "propess-cs" },
         { label: "Contractions present or abnormal CTG", next: "propess-ci" },
       ],
@@ -183,7 +183,7 @@ export const GL861_IOL_FLOWCHART = {
 
     "propess-cs": {
       type: "alert",
-      title: "Previous CS — stop",
+      title: "Previous CS, stop",
       text: "Propess (Dinoprostone) must NOT be used in women with a history of caesarean section without senior obstetrician review.",
       items: [
         "Discuss with senior obstetrician before prescribing",
@@ -224,20 +224,20 @@ export const GL861_IOL_FLOWCHART = {
       title: "Reassess after Propess",
       text: "After Propess removal / 24 hours — perform VE and reassess.\n\nIs ARM now possible?",
       options: [
-        { label: "Yes — ARM possible", next: "arm-head" },
-        { label: "No — cervix still unfavourable", next: "propess-fail" },
+        { label: "Yes: ARM possible", next: "arm-head" },
+        { label: "No, cervix still unfavourable", next: "propess-fail" },
       ],
     },
 
     "propess-fail": {
       type: "decision",
-      title: "Unsuccessful Propess — options",
+      title: "Unsuccessful Propess, options",
       text: "Cervix remains unfavourable. Discuss options with woman and obstetrician.",
       options: [
         { label: "Second Propess (after senior discussion)", next: "propess-insert" },
         { label: "CRB (if not yet tried)", next: "crb-ip" },
         { label: "Prostin gel (consultant review required)", next: "prostin-discuss" },
-        { label: "Unsuccessful IOL — senior review", next: "end-unsuccessful" },
+        { label: "Unsuccessful IOL, senior review", next: "end-unsuccessful" },
       ],
     },
 
@@ -245,7 +245,7 @@ export const GL861_IOL_FLOWCHART = {
 
     "prostin-discuss": {
       type: "alert",
-      title: "Prostin — consultant review",
+      title: "Prostin, consultant review",
       text: "Discuss with consultant before Prostin administration.",
       items: [
         "Exception: term PROM, low risk — midwife may administer per Prostin PGD100",
@@ -285,7 +285,7 @@ export const GL861_IOL_FLOWCHART = {
 
 export const GL861_TIMING_FLOWCHART = {
   id: "GL861_TIMING",
-  title: "When to Induce — IOL Timing by Indication",
+  title: "When to Induce: IOL Timing by Indication",
   subtitle: "GL861 · Induction of Labour",
   startId: "priority-key",
   nodes: {
@@ -307,13 +307,13 @@ export const GL861_TIMING_FLOWCHART = {
         { label: "Maternal age 40–44",                        next: "age-40-44" },
         { label: "Maternal age ≥45",                          next: "age-45" },
         { label: "Pre-existing diabetes (Type 1 or 2)",       next: "dm-preexisting" },
-        { label: "GDM — low risk",                            next: "gdm-low" },
-        { label: "GDM — macrosomia or complications",         next: "gdm-macro" },
+        { label: "GDM, low risk",                            next: "gdm-low" },
+        { label: "GDM, macrosomia or complications",         next: "gdm-macro" },
         { label: "Hypertension / Pre-eclampsia (PET)",        next: "pet" },
-        { label: "Hypertension — non-proteinuric, outpatient",next: "htn-op" },
+        { label: "Hypertension, non-proteinuric, outpatient",next: "htn-op" },
         { label: "Obstetric cholestasis (bile acids >100)",   next: "icp" },
         { label: "Raised PCR ≥30 with hypertension symptoms", next: "pcr" },
-        { label: "IUGR / SGA — fetal growth restriction",    next: "iugr" },
+        { label: "IUGR / SGA, fetal growth restriction",    next: "iugr" },
         { label: "Full therapeutic anticoagulation",          next: "anticoag" },
         { label: "APH (inpatient)",                           next: "aph" },
       ],
@@ -369,7 +369,7 @@ export const GL861_TIMING_FLOWCHART = {
 
     "gdm-low": {
       type: "action",
-      title: "GDM — Low Risk",
+      title: "GDM: Low Risk",
       text: "Offer IOL at 40+3 to 40+6 weeks.",
       items: [
         "Low risk = stable glucose levels, normal growth scan",
@@ -381,7 +381,7 @@ export const GL861_TIMING_FLOWCHART = {
 
     "gdm-macro": {
       type: "action",
-      title: "GDM — Macrosomia or Complications",
+      title: "GDM: Macrosomia or Complications",
       text: "Offer IOL between 37+0 and 40+0 weeks.",
       items: [
         "Macrosomia = EFW ≥90th centile or AC ≥90th centile",
@@ -405,7 +405,7 @@ export const GL861_TIMING_FLOWCHART = {
 
     "htn-op": {
       type: "action",
-      title: "Hypertension — Non-proteinuric (Outpatient)",
+      title: "Hypertension: Non-proteinuric (Outpatient)",
       text: "Offer IOL at 40+0 to 40+6 weeks.",
       items: [
         "Priority: 2",
@@ -441,7 +441,7 @@ export const GL861_TIMING_FLOWCHART = {
 
     "iugr": {
       type: "alert",
-      title: "IUGR / SGA — Fetal Growth Restriction",
+      title: "IUGR / SGA: Fetal Growth Restriction",
       text: "Timing is individual — consultant fetal medicine decision only.",
       items: [
         "Priority: 1 — do NOT book without explicit consultant agreement",

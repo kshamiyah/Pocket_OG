@@ -9,14 +9,14 @@
 
 export const NG88_ED_ACUTE_FLOWCHART = {
   id: "NG88_ED_ACUTE",
-  title: "Acute HMB in ED — Triage & Treat",
+  title: "Acute HMB in ED: Triage & Treat",
   subtitle: "NG88 · acute presentation",
   startId: "start",
   nodes: {
 
     "start": {
       type: "action",
-      title: "Acute Heavy Menstrual Bleeding — Immediate Assessment (A–E)",
+      title: "Acute Heavy Menstrual Bleeding: Immediate Assessment (A–E)",
       text: "Resuscitate first, diagnose second. Assess and stabilise before working through the cause.",
       items: [
         "ABCDE; pulse, blood pressure, shock index (HR ÷ SBP); estimate ongoing loss (pads, clots, flooding)",
@@ -32,14 +32,14 @@ export const NG88_ED_ACUTE_FLOWCHART = {
       title: "Haemodynamically stable?",
       text: "Shock index > 0.9, hypotension, or ongoing heavy loss indicates instability.",
       options: [
-        { label: "Unstable — shock or ongoing heavy loss", sublabel: "Resuscitate now", next: "resus" },
+        { label: "Unstable, shock or ongoing heavy loss", sublabel: "Resuscitate now", next: "resus" },
         { label: "Stable", sublabel: "Proceed to assess cause", next: "pregnancy" },
       ],
     },
 
     "resus": {
       type: "alert",
-      title: "Resuscitate — Major Haemorrhage",
+      title: "Resuscitate: Major Haemorrhage",
       text: "Not covered by NG88 — follow your local major-haemorrhage protocol. Do not wait for a diagnosis to resuscitate.",
       items: [
         "Activate the major-haemorrhage protocol; give O-negative or crossmatched blood per local transfusion trigger (verify against local protocol)",
@@ -52,7 +52,7 @@ export const NG88_ED_ACUTE_FLOWCHART = {
 
     "resus-escalate": {
       type: "end",
-      title: "Escalated — Senior & Theatre",
+      title: "Escalated: Senior & Theatre",
       text: "Ongoing resuscitation with senior obstetric/gynaecology and anaesthetic input.",
       items: [
         "If βhCG positive: treat as an ectopic or miscarriage emergency — divert to the relevant pathway",
@@ -66,14 +66,14 @@ export const NG88_ED_ACUTE_FLOWCHART = {
       title: "Could she be pregnant? (βhCG)",
       text: "The most important branch — a bleeding early pregnancy is a different emergency, and NG88 assumes a non-pregnant woman.",
       options: [
-        { label: "βhCG positive / possible pregnancy", sublabel: "Not primary HMB — pregnancy pathway", next: "preg" },
-        { label: "βhCG negative — not pregnant", sublabel: "True HMB pathway", next: "redflags" },
+        { label: "βhCG positive / possible pregnancy", sublabel: "Not primary HMB, pregnancy pathway", next: "preg" },
+        { label: "βhCG negative, not pregnant", sublabel: "True HMB pathway", next: "redflags" },
       ],
     },
 
     "preg": {
       type: "end",
-      title: "Pregnancy-Related Bleeding — Not Primary HMB",
+      title: "Pregnancy-Related Bleeding: Not Primary HMB",
       text: "This ED-HMB pathway does not apply. Divert to the relevant early-pregnancy pathway.",
       items: [
         "Exclude ectopic pregnancy before assuming miscarriage",
@@ -86,15 +86,15 @@ export const NG88_ED_ACUTE_FLOWCHART = {
       title: "Red flag features? (NG88)",
       text: "Screen before routine management — the same red-flag branch as the NG88 assessment pathway.",
       options: [
-        { label: "Postmenopausal bleeding", sublabel: "Any bleeding >12 months after last period — 2-week-wait referral", next: "pmb" },
+        { label: "Postmenopausal bleeding", sublabel: "Any bleeding >12 months after last period: 2-week-wait referral", next: "pmb" },
         { label: "Persistent intermenstrual or postcoital bleeding", sublabel: "Investigate before treating", next: "imb" },
-        { label: "None — heavy menstrual bleeding only", sublabel: "Assess cause", next: "cause" },
+        { label: "None, heavy menstrual bleeding only", sublabel: "Assess cause", next: "cause" },
       ],
     },
 
     "pmb": {
       type: "end",
-      title: "Postmenopausal Bleeding — Urgent 2-Week-Wait Referral",
+      title: "Postmenopausal Bleeding: Urgent 2-Week-Wait Referral",
       text: "Postmenopausal bleeding requires a 2WW gynaecology referral to exclude endometrial and cervical cancer. Do not delay referral to trial treatment.",
       items: [
         "Refer under 2-week wait for unexplained bleeding after menopause",
@@ -105,7 +105,7 @@ export const NG88_ED_ACUTE_FLOWCHART = {
 
     "imb": {
       type: "end",
-      title: "IMB / PCB — Investigate Before Treating",
+      title: "IMB / PCB: Investigate Before Treating",
       text: "Intermenstrual and postcoital bleeding may indicate endometrial or cervical pathology and should not be treated empirically.",
       items: [
         "Speculum examination; ensure cervical smear is up to date; colposcopy if the cervix is suspicious or the smear abnormal",
@@ -116,7 +116,7 @@ export const NG88_ED_ACUTE_FLOWCHART = {
 
     "cause": {
       type: "action",
-      title: "Assess Cause — Structural vs Non-Structural (NG88)",
+      title: "Assess Cause: Structural vs Non-Structural (NG88)",
       text: "History and examination to characterise the bleeding and identify any underlying structural pathology.",
       items: [
         "Structural pathology (refer if suspected): palpable / enlarged uterus, bulk symptoms (urinary frequency, pressure), fibroids, endometrial thickening or polyp, adenomyosis",
@@ -129,7 +129,7 @@ export const NG88_ED_ACUTE_FLOWCHART = {
 
     "acute": {
       type: "action",
-      title: "Acute Medical Management — Control the Bleeding",
+      title: "Acute Medical Management: Control the Bleeding",
       text: "Control acute loss now; definitive management follows via the NG88 pathway. Doses below are common UK defaults — verify against local protocol.",
       items: [
         "Tranexamic acid 1 g (IV if severe, then oral) — non-hormonal, does not affect fertility (verify against local protocol)",

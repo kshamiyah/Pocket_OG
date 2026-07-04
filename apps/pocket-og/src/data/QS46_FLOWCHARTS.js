@@ -4,14 +4,14 @@
 
 export const QS46_CARE_PATHWAY_FLOWCHART = {
   id: "QS46_CARE_PATHWAY",
-  title: "Multiple Pregnancy — Care Pathway by Chorionicity",
-  subtitle: "QS46 · NICE — Twin & Triplet Pregnancies",
+  title: "Multiple Pregnancy: Care Pathway by Chorionicity",
+  subtitle: "QS46 · NICE: Twin & Triplet Pregnancies",
   startId: "scan",
   nodes: {
 
     "scan": {
       type: "action",
-      title: "Dating Scan — 11+2 to 14+1 Weeks",
+      title: "Dating Scan: 11+2 to 14+1 Weeks",
       text: "All multiple pregnancies must have chorionicity and amnionicity determined by ultrasound and documented between 11+2 and 14+1 weeks.",
       items: [
         "Assess number of placental masses, Lambda or T-sign, membrane presence and thickness",
@@ -39,23 +39,23 @@ export const QS46_CARE_PATHWAY_FLOWCHART = {
       text: "Monochorionic twins share a placenta and carry higher risks.",
       options: [
         { label: "Monochorionic (MC)", sublabel: "One shared placenta", next: "twin-mc-amnio" },
-        { label: "Dichorionic (DC)", sublabel: "Two placentas — DCDA", next: "dcda" },
+        { label: "Dichorionic (DC)", sublabel: "Two placentas: DCDA", next: "dcda" },
       ],
     },
 
     "twin-mc-amnio": {
       type: "decision",
-      title: "Monochorionic twin — amnionicity?",
+      title: "Monochorionic twin, amnionicity?",
       text: "Monoamniotic twins share an amniotic sac — highest risk category.",
       options: [
-        { label: "Monoamniotic (MCMA)", sublabel: "One shared sac — highest risk", next: "mcma" },
-        { label: "Diamniotic (MCDA)", sublabel: "Separate sacs — commoner MC type", next: "mcda" },
+        { label: "Monoamniotic (MCMA)", sublabel: "One shared sac, highest risk", next: "mcma" },
+        { label: "Diamniotic (MCDA)", sublabel: "Separate sacs, commoner MC type", next: "mcda" },
       ],
     },
 
     "mcma": {
       type: "alert",
-      title: "MCMA Twins — Higher-Risk",
+      title: "MCMA Twins: Higher-Risk",
       text: "Monochorionic monoamniotic twins are higher-risk. Involve a tertiary fetal medicine centre consultant.",
       items: [
         "Refer to / seek opinion from tertiary level fetal medicine centre",
@@ -68,7 +68,7 @@ export const QS46_CARE_PATHWAY_FLOWCHART = {
 
     "mcda": {
       type: "action",
-      title: "MCDA Twins — Intensive Monitoring",
+      title: "MCDA Twins: Intensive Monitoring",
       text: "Monochorionic diamniotic twins are at risk of TTTS and fetal growth restriction.",
       items: [
         "Fortnightly ultrasound from 16 weeks for TTTS (feto-fetal transfusion syndrome) surveillance",
@@ -86,8 +86,8 @@ export const QS46_CARE_PATHWAY_FLOWCHART = {
       title: "Any complications on surveillance?",
       text: "Check for signs of TTTS or significant fetal weight discordance at each scan.",
       options: [
-        { label: "Yes — complication identified", sublabel: "TTTS, discordance ≥25%, fetal anomaly etc.", next: "tertiary" },
-        { label: "No — ongoing surveillance", sublabel: "Continue fortnightly scans", next: "ongoing-mc" },
+        { label: "Yes, complication identified", sublabel: "TTTS, discordance ≥25%, fetal anomaly etc.", next: "tertiary" },
+        { label: "No, ongoing surveillance", sublabel: "Continue fortnightly scans", next: "ongoing-mc" },
       ],
     },
 
@@ -105,7 +105,7 @@ export const QS46_CARE_PATHWAY_FLOWCHART = {
 
     "dcda": {
       type: "action",
-      title: "DCDA Twins — Standard Multiple Pregnancy Pathway",
+      title: "DCDA Twins: Standard Multiple Pregnancy Pathway",
       text: "Dichorionic diamniotic twins have lower risk than monochorionic but require specialist MDT care.",
       items: [
         "MDT core team care throughout",
@@ -122,8 +122,8 @@ export const QS46_CARE_PATHWAY_FLOWCHART = {
       title: "Any complications on surveillance?",
       text: "Check for fetal weight discordance or other complications.",
       options: [
-        { label: "Yes — complication identified", sublabel: "Discordance ≥25%, fetal anomaly etc.", next: "tertiary" },
-        { label: "No — ongoing surveillance", sublabel: "Continue monitoring per schedule", next: "ongoing-dc" },
+        { label: "Yes, complication identified", sublabel: "Discordance ≥25%, fetal anomaly etc.", next: "tertiary" },
+        { label: "No, ongoing surveillance", sublabel: "Continue monitoring per schedule", next: "ongoing-dc" },
       ],
     },
 
@@ -146,8 +146,8 @@ export const QS46_CARE_PATHWAY_FLOWCHART = {
       text: "Triplet pregnancies are always higher risk. Chorionicity determines the specific risk level.",
       options: [
         { label: "Trichorionic (TCTA)", sublabel: "Three separate placentas", next: "tcta" },
-        { label: "Dichorionic (DCTA)", sublabel: "Two placentas — highest-risk triplet category", next: "dcta-triplet" },
-        { label: "Monochorionic (MCDA/MCMA)", sublabel: "Shared placenta — higher-risk", next: "mc-triplet" },
+        { label: "Dichorionic (DCTA)", sublabel: "Two placentas, highest-risk triplet category", next: "dcta-triplet" },
+        { label: "Monochorionic (MCDA/MCMA)", sublabel: "Shared placenta, higher-risk", next: "mc-triplet" },
       ],
     },
 
@@ -167,7 +167,7 @@ export const QS46_CARE_PATHWAY_FLOWCHART = {
 
     "dcta-triplet": {
       type: "alert",
-      title: "Dichorionic Triamniotic Triplets — Higher-Risk",
+      title: "Dichorionic Triamniotic Triplets: Higher-Risk",
       text: "DCTA triplets are a higher-risk category requiring tertiary FMC involvement.",
       items: [
         "Involve tertiary fetal medicine centre consultant",
@@ -180,7 +180,7 @@ export const QS46_CARE_PATHWAY_FLOWCHART = {
 
     "mc-triplet": {
       type: "alert",
-      title: "Monochorionic Triplets — Higher-Risk",
+      title: "Monochorionic Triplets: Higher-Risk",
       text: "Monochorionic diamniotic or monoamniotic triplets are higher-risk and require tertiary FMC involvement.",
       items: [
         "Involve tertiary fetal medicine centre consultant",
@@ -213,7 +213,7 @@ export const QS46_CARE_PATHWAY_FLOWCHART = {
 export const QS46_TERTIARY_FLOWCHART = {
   id: "QS46_TERTIARY",
   title: "When to Involve Tertiary Fetal Medicine Centre",
-  subtitle: "QS46 · NICE — Twin & Triplet Pregnancies",
+  subtitle: "QS46 · NICE: Twin & Triplet Pregnancies",
   startId: "assess",
   nodes: {
 
@@ -259,7 +259,7 @@ export const QS46_TERTIARY_FLOWCHART = {
 
     "watch": {
       type: "end",
-      title: "Continue Surveillance — Escalate if Needed",
+      title: "Continue Surveillance: Escalate if Needed",
       text: "Standard-risk multiple pregnancies continue on the routine MDT care pathway. Escalate to tertiary FMC if any complication develops.",
       items: [
         "DCDA twins: biometry + fluid from 24 weeks",

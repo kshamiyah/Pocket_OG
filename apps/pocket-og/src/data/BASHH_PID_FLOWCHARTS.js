@@ -28,8 +28,8 @@ export const BASHH_PID_TRIAGE_FLOWCHART = {
       title: "Minimum Diagnostic Criteria Met?",
       text: "BASHH minimum criteria: lower abdominal/pelvic pain AND at least one of uterine tenderness, adnexal tenderness, or cervical motion tenderness on bimanual examination.",
       options: [
-        { label: "Yes — criteria met", sublabel: "Proceed to severity assessment and treatment", next: "investigations" },
-        { label: "No — criteria not met", sublabel: "Consider alternative diagnoses", next: "alt_dx" },
+        { label: "Yes, criteria met", sublabel: "Proceed to severity assessment and treatment", next: "investigations" },
+        { label: "No, criteria not met", sublabel: "Consider alternative diagnoses", next: "alt_dx" },
       ],
     },
 
@@ -65,11 +65,11 @@ export const BASHH_PID_TRIAGE_FLOWCHART = {
 
     "severity": {
       type: "decision",
-      title: "Severity Assessment — Features of Severe PID?",
+      title: "Severity Assessment: Features of Severe PID?",
       text: "Assess for features that require inpatient management. Most PID is mild to moderate and can be treated as an outpatient.",
       options: [
-        { label: "Mild to moderate — outpatient suitable", sublabel: "No severe features; tolerating orals; reliable follow-up", next: "outpatient" },
-        { label: "Severe features — admit", sublabel: "Any one of: high fever, vomiting, TOA, peritonism, surgical emergency not excluded", next: "inpatient_criteria" },
+        { label: "Mild to moderate, outpatient suitable", sublabel: "No severe features; tolerating orals; reliable follow-up", next: "outpatient" },
+        { label: "Severe features, admit", sublabel: "Any one of: high fever, vomiting, TOA, peritonism, surgical emergency not excluded", next: "inpatient_criteria" },
       ],
     },
 
@@ -136,8 +136,8 @@ export const BASHH_PID_ANTIBIOTICS_FLOWCHART = {
       title: "Treatment Setting",
       text: "Select antibiotic regimen based on clinical severity and whether inpatient or outpatient treatment is appropriate.",
       options: [
-        { label: "Outpatient — mild to moderate PID", sublabel: "Tolerating orals; no severe features; reliable follow-up", next: "outpatient_regimen" },
-        { label: "Inpatient — severe PID", sublabel: "Fever, vomiting, TOA, peritonism, or failed outpatient treatment", next: "inpatient_regimen" },
+        { label: "Outpatient, mild to moderate PID", sublabel: "Tolerating orals; no severe features; reliable follow-up", next: "outpatient_regimen" },
+        { label: "Inpatient, severe PID", sublabel: "Fever, vomiting, TOA, peritonism, or failed outpatient treatment", next: "inpatient_regimen" },
       ],
     },
 
@@ -162,13 +162,13 @@ export const BASHH_PID_ANTIBIOTICS_FLOWCHART = {
       text: "An IUD or IUS in situ does not mandate immediate removal. However, removal may improve outcomes if there is no clinical improvement within 72 hours.",
       options: [
         { label: "No IUD / IUS", sublabel: "Proceed to 72-hour review", next: "review_72h" },
-        { label: "Yes — IUD / IUS present", sublabel: "Discuss removal; advise on contraception if removed", next: "iud_decision" },
+        { label: "Yes: IUD / IUS present", sublabel: "Discuss removal; advise on contraception if removed", next: "iud_decision" },
       ],
     },
 
     "iud_decision": {
       type: "action",
-      title: "IUD — Discuss and Document Decision",
+      title: "IUD: Discuss and Document Decision",
       text: "Evidence for routine IUD removal is limited. Removal may improve short-term symptoms.",
       items: [
         "Discuss risks and benefits of IUD removal with patient",
@@ -182,7 +182,7 @@ export const BASHH_PID_ANTIBIOTICS_FLOWCHART = {
 
     "review_72h": {
       type: "action",
-      title: "72-Hour Review — MANDATORY",
+      title: "72-Hour Review: MANDATORY",
       text: "All outpatients MUST be reviewed at 72 hours. This is a clinical safety requirement.",
       items: [
         "Reassess symptoms: pain, fever, vaginal discharge",
@@ -199,7 +199,7 @@ export const BASHH_PID_ANTIBIOTICS_FLOWCHART = {
       title: "Clinical Improvement at 72 Hours?",
       text: "Assess response to outpatient treatment. Failure to improve requires reassessment and possible admission.",
       options: [
-        { label: "Improving — continue orals", sublabel: "Pain improving; tolerating antibiotics; afebrile", next: "outpatient_end" },
+        { label: "Improving, continue orals", sublabel: "Pain improving; tolerating antibiotics; afebrile", next: "outpatient_end" },
         { label: "Not improving / worsening", sublabel: "Reassess diagnosis; consider admission and IV treatment", next: "admit" },
       ],
     },
@@ -220,7 +220,7 @@ export const BASHH_PID_ANTIBIOTICS_FLOWCHART = {
 
     "admit": {
       type: "alert",
-      title: "Admit — Escalate to Inpatient IV Treatment",
+      title: "Admit: Escalate to Inpatient IV Treatment",
       text: "Failure to improve on outpatient treatment requires inpatient admission and reassessment.",
       items: [
         "Admit to gynaecology ward",
