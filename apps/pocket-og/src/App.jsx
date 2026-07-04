@@ -9,7 +9,7 @@ import NoResults from "./components/NoResults";
 import FlowchartPlayer from "./components/FlowchartPlayer";
 import IOLPrioritizer from "./components/IOLPrioritizer";
 import DailyPearl from "./components/DailyPearl";
-import { pearlForDate, hasUnseenPearl, markPearlSeen } from "./data/pearls";
+import { pearlForDate, hasUnseenPearl, markPearlSeen, isPearlDismissed, dismissPearl } from "./data/pearls";
 import FeedbackButton from "./components/FeedbackButton";
 import ConsentPage from "./components/ConsentPage";
 import CalculatorPage from "./components/CalculatorPage";
@@ -155,6 +155,7 @@ export default function App() {
   const [libraryView, setLibraryView] = useState("guidelines"); // "guidelines" | "articles"
   const [showIOLPrioritizer, setShowIOLPrioritizer] = useState(false);
   const [pearlUnseen, setPearlUnseen] = useState(() => hasUnseenPearl());
+  const [pearlDismissed, setPearlDismissed] = useState(() => isPearlDismissed());
   const todaysPearl = useMemo(() => pearlForDate(), []);
   const [activeTab, setActiveTab] = useState("search");
   const [glSourceFilter, setGlSourceFilter] = useState("ALL");
@@ -445,15 +446,18 @@ export default function App() {
                   ))}
                 </div>
 
-                {/* Pearl of the day — auto-surfacing card */}
-                <div className="mt-8">
-                  <DailyPearl
-                    pearl={todaysPearl}
-                    unseen={pearlUnseen}
-                    onSeen={() => { markPearlSeen(); setPearlUnseen(false); }}
-                    onNavigate={handleNavigate}
-                  />
-                </div>
+                {/* Pearl of the day, auto-surfacing card */}
+                {!pearlDismissed && (
+                  <div className="mt-8">
+                    <DailyPearl
+                      pearl={todaysPearl}
+                      unseen={pearlUnseen}
+                      onSeen={() => { markPearlSeen(); setPearlUnseen(false); }}
+                      onDismiss={() => { dismissPearl(); setPearlDismissed(true); }}
+                      onNavigate={handleNavigate}
+                    />
+                  </div>
+                )}
 
                 <InstallBanner />
 

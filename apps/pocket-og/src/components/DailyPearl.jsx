@@ -1,49 +1,64 @@
 import { useState } from "react";
 import { GUIDELINES } from "@pocket-og/guidelines";
 import { glColors } from "../data/glColors";
+import { pearlLinks } from "../data/pearls";
 import ShareButton from "./ShareButton";
 
-// Pearl of the Day — a quiet, auto-surfacing card on the landing screen. It shows
+// Pearl of the Day. A quiet, auto-surfacing card on the landing screen. It shows
 // a "New" accent until opened; opening marks it seen for the day and reveals the
-// full teaching point with a one-tap link into the source content.
+// full teaching point with one-tap links into the source content (flowchart and
+// full guideline where both exist). A dismiss control hides it until tomorrow.
 
-export default function DailyPearl({ pearl, unseen, onSeen, onNavigate }) {
+const KIND_VERB = { flowchart: "Open", calc: "Open", drug: "Open", tool: "Open", guide: "Read" };
+
+export default function DailyPearl({ pearl, unseen, onSeen, onDismiss, onNavigate }) {
   const [open, setOpen] = useState(false);
   if (!pearl) return null;
 
   const theme = glColors(pearl.gl);
   const gl = GUIDELINES[pearl.gl];
+  const links = pearlLinks(pearl);
 
   const openModal = () => { setOpen(true); onSeen?.(); };
   const closeModal = () => setOpen(false);
 
-  const goToSource = () => {
+  const dismiss = (e) => { e.stopPropagation(); onDismiss?.(); };
+
+  const goTo = (link) => {
     closeModal();
-    onNavigate?.(pearl.link);
+    onNavigate?.({ type: link.type, id: link.id });
   };
 
   return (
     <>
       {/* Landing-screen card */}
-      <button
-        type="button"
-        onClick={openModal}
-        className={`w-full text-left rounded-2xl border ${theme.border} ${theme.bg} p-4 flex items-start gap-3 hover:shadow-md active:scale-[0.99] transition-all`}
-      >
-        <span className="text-xl shrink-0 leading-none mt-0.5">💡</span>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className={`text-[10px] font-bold uppercase tracking-wide ${theme.text}`}>Pearl of the day</p>
-            {unseen && (
-              <span className="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-white/70 text-gray-500">
-                <span className={`w-1.5 h-1.5 rounded-full ${theme.accent}`} />NEW
-              </span>
-            )}
+      <div className={`relative rounded-2xl border ${theme.border} ${theme.bg}`}>
+        <button
+          type="button"
+          onClick={openModal}
+          className="w-full text-left p-4 pr-10 flex items-start gap-3 rounded-2xl hover:shadow-md active:scale-[0.99] transition-all"
+        >
+          <span className="text-xl shrink-0 leading-none mt-0.5">💡</span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p className={`text-[10px] font-bold uppercase tracking-wide ${theme.text}`}>Pearl of the day</p>
+              {unseen && (
+                <span className="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-white/70 text-gray-500">
+                  <span className={`w-1.5 h-1.5 rounded-full ${theme.accent}`} />NEW
+                </span>
+              )}
+            </div>
+            <p className="text-sm font-semibold text-gray-900 leading-snug mt-1">{pearl.pearl}</p>
+            <p className="text-[11px] text-gray-400 mt-1">{pearl.topic} · tap to read</p>
           </div>
-          <p className="text-sm font-semibold text-gray-900 leading-snug mt-1">{pearl.pearl}</p>
-          <p className="text-[11px] text-gray-400 mt-1">{pearl.topic} · tap to read</p>
-        </div>
-      </button>
+        </button>
+        <button
+          type="button"
+          onClick={dismiss}
+          aria-label="Dismiss pearl for today"
+          className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-white/70 transition-colors text-base leading-none"
+        >×</button>
+      </div>
 
       {/* Expanded modal */}
       {open && (
@@ -82,17 +97,26 @@ export default function DailyPearl({ pearl, unseen, onSeen, onNavigate }) {
                 </div>
               )}
 
-              <button
-                onClick={goToSource}
-                className={`w-full py-3.5 rounded-2xl text-sm font-semibold text-white ${theme.solid} ${theme.solidHover} transition-colors flex items-center justify-center gap-2`}
-              >
-                Open {pearl.link.label} →
-              </button>
+              <div className="space-y-2.5">
+                {links.map((link, i) => (
+                  <button
+                    key={`${link.type}-${link.id ?? "tool"}`}
+                    onClick={() => goTo(link)}
+                    className={
+                      i === 0
+                        ? `w-full py-3.5 rounded-2xl text-sm font-semibold text-white ${theme.solid} ${theme.solidHover} transition-colors flex items-center justify-center gap-2`
+                        : `w-full py-3.5 rounded-2xl text-sm font-semibold ${theme.text} border ${theme.border} hover:bg-gray-50 transition-colors flex items-center justify-center gap-2`
+                    }
+                  >
+                    {(KIND_VERB[link.kind] ?? "Open")} {link.label} →
+                  </button>
+                ))}
+              </div>
 
               <div className="flex justify-center mt-3">
                 <ShareButton
                   title={`Pearl: ${pearl.topic}`}
-                  text={`${pearl.pearl} — Pocket O&G pearl of the day`}
+                  text={`${pearl.pearl} (Pocket O&G pearl of the day)`}
                   label="Share pearl"
                 />
               </div>
