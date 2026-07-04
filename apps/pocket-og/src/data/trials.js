@@ -21,7 +21,7 @@ export const TRIAL_SECTIONS = [
     condition: "Landmark Trial",
     setting: "Obstetrics · Induction of labour",
     title: "ARRIVE: elective induction at 39 weeks in low-risk nulliparas",
-    draft: true,
+    draft: false,
     trial: {
       acronym: "ARRIVE",
       name: "A Randomized Trial of Induction Versus Expectant Management",
@@ -81,7 +81,7 @@ export const TRIAL_SECTIONS = [
     condition: "Landmark Trial",
     setting: "Obstetrics · Pre-eclampsia & eclampsia",
     title: "Magpie: magnesium sulfate to prevent eclampsia",
-    draft: true,
+    draft: false,
     trial: {
       acronym: "Magpie",
       name: "Magnesium sulphate for women with pre-eclampsia",
@@ -139,7 +139,7 @@ export const TRIAL_SECTIONS = [
     condition: "Landmark Trial",
     setting: "Obstetrics · Breech at term",
     title: "Term Breech Trial: planned caesarean vs vaginal breech birth",
-    draft: true,
+    draft: false,
     trial: {
       acronym: "Term Breech Trial",
       name: "Planned caesarean section versus planned vaginal birth for breech presentation at term",
@@ -195,7 +195,7 @@ export const TRIAL_SECTIONS = [
     condition: "Landmark Trial",
     setting: "Obstetrics · Preterm birth",
     title: "Antenatal corticosteroids for fetal lung maturation",
-    draft: true,
+    draft: false,
     trial: {
       acronym: "Liggins & Howie",
       name: "Antepartum glucocorticoids to prevent respiratory distress syndrome; confirmed by later meta-analysis",
@@ -252,7 +252,7 @@ export const TRIAL_SECTIONS = [
     condition: "Landmark Trial",
     setting: "Obstetrics · Preterm neuroprotection",
     title: "Magnesium sulfate for fetal neuroprotection before preterm birth",
-    draft: true,
+    draft: false,
     trial: {
       acronym: "Mg neuroprotection",
       name: "Magnesium sulphate before preterm birth for neuroprotection of the fetus",
@@ -309,7 +309,7 @@ export const TRIAL_SECTIONS = [
     condition: "Landmark Trial",
     setting: "Obstetrics · Pre-eclampsia prevention",
     title: "ASPRE: aspirin to prevent preterm pre-eclampsia",
-    draft: true,
+    draft: false,
     trial: {
       acronym: "ASPRE",
       name: "Aspirin versus placebo in pregnancies at high risk for preterm pre-eclampsia",
