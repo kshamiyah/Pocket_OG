@@ -33,10 +33,21 @@ function ScenarioList({ onSelect, onOpenIOLPrioritizer }) {
 
   const filtered = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
-    return [...CALCULATOR_SCENARIOS]
+    const scenarios = [...CALCULATOR_SCENARIOS];
+    if (onOpenIOLPrioritizer) {
+      scenarios.push({
+        id: "__iol__",
+        iol: true,
+        title: "IOL Priority List",
+        subtitle: "Rank & queue patients for induction of labour",
+        source: "NICE NG207",
+        pdfs: [{ label: "NICE NG207", url: "https://www.nice.org.uk/guidance/ng207" }],
+      });
+    }
+    return scenarios
       .filter(s => !q || s.title.toLowerCase().includes(q) || s.subtitle?.toLowerCase().includes(q))
       .sort((a, b) => a.title.localeCompare(b.title));
-  }, [searchQuery]);
+  }, [searchQuery, onOpenIOLPrioritizer]);
 
   const groupedByLetter = useMemo(() => {
     const groups = {};
@@ -85,22 +96,6 @@ function ScenarioList({ onSelect, onOpenIOLPrioritizer }) {
         </div>
 
         <div className="px-5 pt-3">
-          {onOpenIOLPrioritizer && (
-            <button
-              onClick={onOpenIOLPrioritizer}
-              className="flex items-start gap-3 w-full px-4 py-4 mb-3 rounded-2xl bg-white border border-gray-100 shadow-sm hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
-            >
-              <div className={`w-1 h-12 rounded-full shrink-0 ${sourceColors("RBH").accent}`} />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900 leading-snug">IOL Priority List</p>
-                <p className="text-xs text-gray-400 mt-0.5">Rank and queue patients for induction of labour</p>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mt-1.5">GL861 · Tool</p>
-              </div>
-              <svg className="w-4 h-4 text-gray-300 shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          )}
           {filtered.length === 0 ? (
             <p className="text-sm text-gray-400 text-center py-10">No calculators match &ldquo;{searchQuery}&rdquo;</p>
           ) : (
@@ -117,7 +112,7 @@ function ScenarioList({ onSelect, onOpenIOLPrioritizer }) {
                   {items.map(s => (
                     <button
                       key={s.id}
-                      onClick={() => onSelect(s.id)}
+                      onClick={() => (s.iol ? onOpenIOLPrioritizer() : onSelect(s.id))}
                       className="flex items-start gap-3 w-full px-4 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left border-t border-gray-50"
                     >
                       <div className={`w-1 h-12 rounded-full shrink-0 ${sourceColors(sourceFromLabel(s.source)).accent}`} />
