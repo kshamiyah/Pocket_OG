@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import {
   IOL_TIERS, IOL_IND, SROM_KEY, SROM_ESCALATION_HOURS,
   iolEntryTier, governingIndication, entryReason, hasSrom, isSromEscalated,
-  effectiveIndications, isValidEntry, insertOrdered,
+  effectiveIndications, isValidEntry, insertOrdered, sortIOLQueue,
 } from "../utils/iolPriority";
 
 const INPUT_CLS = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-base text-gray-800 placeholder-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-teal-400/30 focus:border-teal-400";
@@ -112,6 +112,7 @@ export default function IOLPrioritizer({ onClose }) {
   const remove = (id) => { if (editingId === id) cancelForm(); setPatients(prev => prev.filter(x => x.id !== id)); };
 
   const toggleTier = (key) => setCollapsed(prev => { const n = new Set(prev); n.has(key) ? n.delete(key) : n.add(key); return n; });
+  const resetOrder = () => setPatients(prev => sortIOLQueue(prev));
 
   // ── move a patient up/down within her tier ──
   const moveInTier = (p, dir) => {
@@ -358,7 +359,15 @@ export default function IOLPrioritizer({ onClose }) {
                       </div>
                     );
                   })}
-                  <button onClick={() => setPatients([])} className="w-full text-xs text-gray-400 hover:text-gray-600 py-2 transition-colors">Clear all</button>
+                  <div className="flex items-center justify-center gap-4 pt-1">
+                    {patients.length > 1 && (
+                      <button onClick={resetOrder} className="flex items-center gap-1 text-xs text-gray-400 hover:text-teal-600 py-2 transition-colors">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        Reset to recommended order
+                      </button>
+                    )}
+                    <button onClick={() => setPatients([])} className="text-xs text-gray-400 hover:text-red-500 py-2 transition-colors">Clear all</button>
+                  </div>
                 </div>
               )}
             </div>
