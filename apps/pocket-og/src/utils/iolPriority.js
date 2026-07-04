@@ -1,10 +1,12 @@
 // IOL priority — NICE NG207 four-tier model with multi-indication support.
-// Ported from the ward-manager engine; adds hours-since-SROM escalation & ordering.
+// Ported from the ward-manager engine; adds hours-since-SROM escalation & ordering,
+// and derives post-dates priority automatically from the entered gestation.
 //
 // A patient may carry several indications; her tier is the MOST urgent of them
-// (lowest tier number). Term PROM / SROM is time-driven: it escalates from
-// Moderate to High once ≥24h have elapsed since rupture (NICE NG207 — offer IOL,
-// expectant max ~24h), and SROM patients are ordered by hours since rupture.
+// (lowest tier number). Two indications are time/gestation-driven:
+//   • Term PROM / SROM — starts Moderate, escalates to High at >=24h since rupture.
+//   • Post-dates — applied automatically from gestation: 41+0..41+6 = Moderate,
+//     >=42+0 = High (stillbirth risk rises past 42 weeks, NICE NG207).
 
 export const IOL_TIERS = [
   { key: "urgent",   label: "Urgent",   badge: "bg-red-500 text-white",     dot: "bg-red-500",    text: "text-red-700",    within: "induce within 24h" },
@@ -14,19 +16,16 @@ export const IOL_TIERS = [
 ];
 
 export const SROM_ESCALATION_HOURS = 24;
-
-// key of the SROM/term-PROM indication (its tier is computed from hours).
 export const SROM_KEY = "term-prom";
 
+// Selectable indications (post-dates is NOT here — it is derived from gestation).
 export const IOL_IND = [
   { key: "severe-pet",   label: "Severe pre-eclampsia",        tier: 0, cite: "NG207 §1.2" },
   { key: "pprom-chorio", label: "PPROM + chorioamnionitis",    tier: 0, cite: "NG207 §1.2" },
   { key: "fgr-aedf",     label: "FGR — absent/reversed EDF",   tier: 0, cite: "NG207 §1.2" },
   { key: "pet",          label: "Pre-eclampsia",               tier: 1, cite: "NG207 §1.2" },
-  { key: "postdates-42", label: "Post-dates 42+0",             tier: 1, cite: "NG207 §1.1" },
   { key: "rfm",          label: "RFM + concerns",              tier: 1, cite: "NG207 §1.2" },
   { key: SROM_KEY,       label: "Term PROM / SROM",            tier: 2, cite: "NG207 §1.3", srom: true },
-  { key: "postdates-41", label: "Post-dates 41+",              tier: 2, cite: "NG207 §1.1" },
   { key: "gdm",          label: "GDM",                         tier: 2, cite: "NG207 §1.2" },
   { key: "icp",          label: "Obstetric cholestasis (ICP)", tier: 2, cite: "NG207 §1.2" },
   { key: "prev-sb",      label: "Previous stillbirth",         tier: 2, cite: "NG207 §1.2" },
@@ -36,15 +35,16 @@ export const IOL_IND = [
 ];
 
 const BY_KEY = Object.fromEntries(IOL_IND.map(i => [i.key, i]));
-
 export const indByKey = (key) => BY_KEY[key] ?? null;
+
+const gestTotalDays = (entry) => (entry?.gestWeeks || 0) * 7 + (entry?.gestDays || 0);
 
 export function isSromEscalated(entry) {
   const h = Number(entry?.sromHours);
   return Number.isFinite(h) && h >= SROM_ESCALATION_HOURS;
 }
 
-// Tier for one indication on a given entry (SROM escalates by hours since rupture).
+// Tier for one selectable indication on a given entry (SROM escalates by hours).
 export function indicationTier(key, entry) {
   const ind = BY_KEY[key];
   if (!ind) return 3;
@@ -52,31 +52,52 @@ export function indicationTier(key, entry) {
   return ind.tier;
 }
 
+// Derived post-dates indication from gestation (or null if <41+0).
+export function postDatesInd(entry) {
+  const d = gestTotalDays(entry);
+  if (d >= 42 * 7) return { key: "postdates", label: "Post-dates 42+0", tier: 1, cite: "NG207 §1.1", auto: true };
+  if (d >= 41 * 7) return { key: "postdates", label: `Post-dates ${entry.gestWeeks}+${entry.gestDays || 0}`, tier: 2, cite: "NG207 §1.1", auto: true };
+  return null;
+}
+
+// All indications that count towards this patient — selected + derived post-dates.
+export function effectiveIndications(entry) {
+  const list = (entry?.indications ?? [])
+    .map(k => BY_KEY[k])
+    .filter(Boolean)
+    .map(ind => ({ ...ind, tier: indicationTier(ind.key, entry) }));
+  const pd = postDatesInd(entry);
+  if (pd) list.push(pd);
+  return list;
+}
+
 // 0 = Urgent, 1 = High, 2 = Moderate, 3 = Routine
 export function iolEntryTier(entry) {
-  const keys = entry?.indications ?? [];
-  if (!keys.length) return 3;
-  return Math.min(...keys.map(k => indicationTier(k, entry)));
+  const eff = effectiveIndications(entry);
+  if (!eff.length) return 3;
+  return Math.min(...eff.map(i => i.tier));
 }
 
 export function hasSrom(entry) {
   return (entry?.indications ?? []).some(k => BY_KEY[k]?.srom);
 }
 
-// The indication that sets the tier (for display of "why this priority").
+// True if this patient qualifies for the list at all (an indication or post-dates).
+export function isValidEntry(entry) {
+  return (entry?.indications?.length ?? 0) > 0 || postDatesInd(entry) != null;
+}
+
+// The indication that sets the tier (for "why this priority").
 export function governingIndication(entry) {
-  const keys = entry?.indications ?? [];
+  const eff = effectiveIndications(entry);
   let best = null, bestTier = 4;
-  for (const k of keys) {
-    const t = indicationTier(k, entry);
-    if (t < bestTier) { bestTier = t; best = k; }
-  }
-  return BY_KEY[best] ?? null;
+  for (const i of eff) { if (i.tier < bestTier) { bestTier = i.tier; best = i; } }
+  return best;
 }
 
 export function entryReason(entry) {
   const gov = governingIndication(entry);
-  if (!gov) return "No indication selected";
+  if (!gov) return "No indication";
   if (gov.srom) {
     const h = Number(entry?.sromHours);
     const hrs = Number.isFinite(h) ? `${h}h since SROM` : "term PROM/SROM";
@@ -87,7 +108,7 @@ export function entryReason(entry) {
 
 // Sort the queue by clinical urgency:
 //   1. tier (most urgent first)
-//   2. if BOTH governed by SROM → longer since rupture first (infection clock)
+//   2. if BOTH governed by SROM → longer since rupture first
 //   3. gestation (more advanced first)
 //   4. hours since SROM (longer first; 0 for non-SROM)
 //   5. longer on the list first
@@ -102,8 +123,7 @@ export function sortIOLQueue(queue) {
       if (sa !== sb) return sb - sa;
     }
 
-    const ga = a.gestWeeks * 7 + (a.gestDays ?? 0);
-    const gb = b.gestWeeks * 7 + (b.gestDays ?? 0);
+    const ga = gestTotalDays(a), gb = gestTotalDays(b);
     if (ga !== gb) return gb - ga;
 
     const sa = aSrom ? (Number(a.sromHours) || 0) : 0;
