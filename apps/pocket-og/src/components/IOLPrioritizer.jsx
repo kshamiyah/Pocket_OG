@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   IOL_TIERS, IOL_IND, SROM_KEY, SROM_ESCALATION_HOURS,
   iolEntryTier, governingIndication, entryReason, hasSrom, isSromEscalated,
@@ -30,9 +30,6 @@ export default function IOLPrioritizer({ onClose }) {
   const [showKey, setShowKey] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [collapsed, setCollapsed] = useState(() => new Set());
-  const [drag, setDrag] = useState(null);       // { id, tier }
-  const [dragOrder, setDragOrder] = useState([]); // ids for the tier being dragged
-  const cardRefs = useRef({});
 
   const [label, setLabel] = useState("");
   const [gestWeeks, setGestWeeks] = useState(40);
@@ -116,37 +113,19 @@ export default function IOLPrioritizer({ onClose }) {
 
   const toggleTier = (key) => setCollapsed(prev => { const n = new Set(prev); n.has(key) ? n.delete(key) : n.add(key); return n; });
 
-  // ── drag reorder within a tier ──
-  const onDragStart = (e, p) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
+  // ── move a patient up/down within her tier ──
+  const moveInTier = (p, dir) => {
     const key = tierKeyOf(p);
-    const ids = patients.filter(x => tierKeyOf(x) === key).map(x => x.id);
-    setDrag({ id: p.id, tier: key });
-    setDragOrder(ids);
-  };
-  const onDragMove = (e) => {
-    if (!drag) return;
-    e.preventDefault();
-    const els = dragOrder.map(id => cardRefs.current[id]).filter(Boolean);
-    let idx = dragOrder.length - 1;
-    for (let k = 0; k < els.length; k++) {
-      const r = els[k].getBoundingClientRect();
-      if (e.clientY < r.top + r.height / 2) { idx = k; break; }
-    }
-    const cur = dragOrder.filter(id => id !== drag.id);
-    cur.splice(Math.min(idx, cur.length), 0, drag.id);
-    if (cur.join() !== dragOrder.join()) setDragOrder(cur);
-  };
-  const onDragEnd = () => {
-    if (!drag) return;
-    const key = drag.tier, order = [...dragOrder];
     setPatients(prev => {
-      const byId = Object.fromEntries(prev.map(p => [p.id, p]));
-      const others = prev.filter(p => tierKeyOf(p) !== key);
-      const tierP = order.map(id => byId[id]).filter(Boolean);
-      return [...others, ...tierP];
+      const tierItems = prev.filter(x => tierKeyOf(x) === key);
+      const idx = tierItems.findIndex(x => x.id === p.id);
+      const j = idx + dir;
+      if (j < 0 || j >= tierItems.length) return prev;
+      const reordered = [...tierItems];
+      [reordered[idx], reordered[j]] = [reordered[j], reordered[idx]];
+      const others = prev.filter(x => tierKeyOf(x) !== key);
+      return [...others, ...reordered];
     });
-    setDrag(null); setDragOrder([]);
   };
 
   const groups = IOL_TIERS
@@ -192,7 +171,7 @@ export default function IOLPrioritizer({ onClose }) {
               <p><b>Multiple indications:</b> a patient takes her single most urgent tier — not added up.</p>
               <p><b>Post-dates</b> is applied automatically from gestation — <b>41+ → Moderate</b>, <b>≥ 42+0 → High</b>.</p>
               <p><b>Hours since SROM:</b> term PROM/SROM escalates to High at ≥ {SROM_ESCALATION_HOURS}h since rupture.</p>
-              <p><b>Reorder:</b> drag the grip handle to reorder within a tier; tap a tier header to collapse it. The list is saved on this device.</p>
+              <p><b>Reorder:</b> use the ▲▼ arrows on a card to move it within its tier; tap a tier header to collapse it. The list is saved on this device.</p>
             </div>
             <p className="text-gray-400 pt-1">Decision support only — the clinical team makes the final call.</p>
           </div>
@@ -310,9 +289,6 @@ export default function IOLPrioritizer({ onClose }) {
                   <p className="text-xs text-gray-400">{patients.length} patient{patients.length !== 1 ? "s" : ""} · list saved on this device</p>
                   {groups.map(({ meta, items }) => {
                     const isCollapsed = collapsed.has(meta.key);
-                    const ordered = (drag && drag.tier === meta.key)
-                      ? dragOrder.map(id => items.find(x => x.id === id)).filter(Boolean)
-                      : items;
                     return (
                       <div key={meta.key} className="space-y-1.5">
                         <button onClick={() => toggleTier(meta.key)} className="w-full flex items-center gap-2 px-0.5 py-0.5">
@@ -324,30 +300,29 @@ export default function IOLPrioritizer({ onClose }) {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                           </svg>
                         </button>
-                        {!isCollapsed && ordered.map(p => {
+                        {!isCollapsed && items.map((p, ii) => {
                           const gov = governingIndication(p);
                           const escalated = hasSrom(p) && isSromEscalated(p);
                           const isEditing = editingId === p.id;
-                          const isDragging = drag?.id === p.id;
                           const chips = effectiveIndications(p);
+                          const isFirst = ii === 0, isLast = ii === items.length - 1;
                           return (
-                            <div key={p.id} ref={el => { if (el) cardRefs.current[p.id] = el; else delete cardRefs.current[p.id]; }}
-                              className={`rounded-2xl border bg-white overflow-hidden flex transition-shadow ${isEditing ? "border-teal-400 ring-2 ring-teal-400/20" : "border-gray-100 shadow-sm"} ${isDragging ? "shadow-lg ring-2 ring-gray-900/10 opacity-90" : ""}`}>
+                            <div key={p.id}
+                              className={`rounded-2xl border bg-white overflow-hidden flex ${isEditing ? "border-teal-400 ring-2 ring-teal-400/20" : "border-gray-100 shadow-sm"}`}>
                               <div className={`w-1 shrink-0 ${meta.dot}`} />
-                              <button
-                                onPointerDown={e => onDragStart(e, p)}
-                                onPointerMove={onDragMove}
-                                onPointerUp={onDragEnd}
-                                onPointerCancel={onDragEnd}
-                                aria-label={`Reorder patient ${p.label}`}
-                                className="px-1.5 flex items-center text-gray-300 hover:text-gray-500 touch-none cursor-grab active:cursor-grabbing self-stretch">
-                                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                                  <circle cx="9" cy="6" r="1.4" /><circle cx="15" cy="6" r="1.4" />
-                                  <circle cx="9" cy="12" r="1.4" /><circle cx="15" cy="12" r="1.4" />
-                                  <circle cx="9" cy="18" r="1.4" /><circle cx="15" cy="18" r="1.4" />
-                                </svg>
-                              </button>
-                              <div className="flex-1 min-w-0 pr-2 py-2.5">
+                              {items.length > 1 && (
+                                <div className="flex flex-col justify-center gap-1 pl-1.5 pr-0.5">
+                                  <button onClick={() => moveInTier(p, -1)} disabled={isFirst} aria-label={`Move patient ${p.label} up`}
+                                    className="w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-20 disabled:hover:bg-transparent transition-colors">
+                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
+                                  </button>
+                                  <button onClick={() => moveInTier(p, 1)} disabled={isLast} aria-label={`Move patient ${p.label} down`}
+                                    className="w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-20 disabled:hover:bg-transparent transition-colors">
+                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                                  </button>
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0 pl-2 pr-2 py-2.5">
                                 <div className="flex items-start gap-2">
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1.5 flex-wrap">
