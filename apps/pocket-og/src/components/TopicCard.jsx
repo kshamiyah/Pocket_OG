@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { glColors } from "../data/glColors";
 import { GUIDELINES } from "@pocket-og/guidelines";
 
@@ -37,8 +38,14 @@ function RowIcon({ type, className }) {
 }
 
 export default function TopicCard({ topic, onNavigate, onOpenGuideline }) {
+  // First section open by default so the card starts compact but not empty.
+  const [openSections, setOpenSections] = useState(() =>
+    topic ? { [topic.sections[0]?.heading]: true } : {}
+  );
   if (!topic) return null;
   const col = glColors(topic.gl);
+  const toggleSection = (heading) =>
+    setOpenSections(prev => ({ ...prev, [heading]: !prev[heading] }));
 
   const open = (entry) => {
     if (entry.type === "reader") {
@@ -61,10 +68,26 @@ export default function TopicCard({ topic, onNavigate, onOpenGuideline }) {
         {topic.subtitle && <p className="text-xs text-gray-400 mt-0.5">{topic.subtitle}</p>}
       </div>
 
-      {topic.sections.map(section => (
-        <div key={section.heading}>
-          <p className="px-4 pt-3 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">{section.heading}</p>
-          <div>
+      {topic.sections.map(section => {
+        const isOpen = !!openSections[section.heading];
+        return (
+        <div key={section.heading} className="border-b border-gray-50 last:border-b-0">
+          <button
+            onClick={() => toggleSection(section.heading)}
+            aria-expanded={isOpen}
+            className="w-full flex items-center gap-2 px-4 py-3 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
+          >
+            <span className="flex-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">{section.heading}</span>
+            <span className="text-[10px] font-semibold text-gray-300">{section.entries.length}</span>
+            <svg
+              className={`w-3.5 h-3.5 text-gray-300 transition-transform ${isOpen ? "rotate-180" : ""}`}
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {isOpen && (
+          <div className="pb-1">
             {section.entries.map((entry, i) => {
               const ecol = glColors(entry.gl ?? topic.gl);
               const badgeLabel = GUIDELINES[entry.gl]?.code ?? entry.gl;
@@ -89,10 +112,12 @@ export default function TopicCard({ topic, onNavigate, onOpenGuideline }) {
               );
             })}
           </div>
+          )}
         </div>
-      ))}
+        );
+      })}
 
-      <p className="px-4 py-2.5 mt-1 border-t border-gray-50 text-[10px] text-gray-400 leading-snug">
+      <p className="px-4 py-2.5 border-t border-gray-50 text-[10px] text-gray-400 leading-snug">
         Curated links into cited guides, pathways and drug pages. Decision aid only; clinical responsibility remains with the treating clinician.
       </p>
     </div>

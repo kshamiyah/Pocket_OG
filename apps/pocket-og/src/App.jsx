@@ -547,7 +547,7 @@ export default function App() {
           {/* Results */}
           <div className="max-w-lg mx-auto px-4 py-5 pb-24">
             {filter === "ALL" && (
-              <TopicCard topic={activeTopic} onNavigate={handleNavigate} onOpenGuideline={openGuidelineFromSearch} />
+              <TopicCard key={activeTopic?.id ?? "none"} topic={activeTopic} onNavigate={handleNavigate} onOpenGuideline={openGuidelineFromSearch} />
             )}
             {!showNoResults && (
               <p className="text-sm text-gray-500 mb-6">
