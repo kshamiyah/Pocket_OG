@@ -4,6 +4,14 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.5.0",
+    date: "05/07/2026",
+    title: "Topic cards in search",
+    changes: [
+      { tag: "new", text: "Topic cards: searching a big topic now shows a curated card above the results with everything the app holds on it in one place, organised as guides, pathways, drugs, evidence and don't-miss items. First topic: pre-eclampsia. Try searching \"PET\"." },
+    ],
+  },
+  {
     version: "1.4.0",
     date: "04/07/2026",
     title: "Landmark Trials in the Library",

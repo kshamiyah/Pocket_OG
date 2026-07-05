@@ -6,6 +6,8 @@ import { GUIDELINES } from "@pocket-og/guidelines";
 import { glColors, sourceColors } from "./data/glColors";
 import WikiCard from "./components/WikiCard";
 import NoResults from "./components/NoResults";
+import TopicCard from "./components/TopicCard";
+import { topicForQuery } from "./data/topics";
 import FlowchartPlayer from "./components/FlowchartPlayer";
 import IOLPrioritizer from "./components/IOLPrioritizer";
 import DailyPearl from "./components/DailyPearl";
@@ -205,6 +207,12 @@ export default function App() {
     } else if (type === "reader") {
       setGuidelineScrollTo(null);
       setActiveGuidelineGl(id);
+    } else if (type === "trial") {
+      setActiveFlowchartId(null);
+      setLibraryView("articles");
+      setArticleView("trials");
+      setExpanded(prev => ({ ...prev, [id]: true }));
+      setActiveTab("guidelines");
     }
   };
 
@@ -300,6 +308,7 @@ export default function App() {
 
   const toggle = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
   const showNoResults = hasQuery && primary.length === 0;
+  const activeTopic = useMemo(() => topicForQuery(query), [query]);
 
   const openGuidelineFromSearch = (gl, sectionId) => {
     setGuidelineScrollTo(sectionId);
@@ -537,6 +546,9 @@ export default function App() {
 
           {/* Results */}
           <div className="max-w-lg mx-auto px-4 py-5 pb-24">
+            {filter === "ALL" && (
+              <TopicCard topic={activeTopic} onNavigate={handleNavigate} onOpenGuideline={openGuidelineFromSearch} />
+            )}
             {!showNoResults && (
               <p className="text-sm text-gray-500 mb-6">
                 <span className="font-semibold text-gray-900">{primary.length}</span>{" "}
