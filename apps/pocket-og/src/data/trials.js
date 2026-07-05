@@ -365,7 +365,7 @@ export const TRIAL_SECTIONS = [
     condition: "Landmark Trial",
     setting: "Obstetrics · Postpartum haemorrhage",
     title: "WOMAN: tranexamic acid for postpartum haemorrhage",
-    draft: true,
+    draft: false,
     trial: {
       acronym: "WOMAN",
       name: "Early tranexamic acid for postpartum haemorrhage",
@@ -422,7 +422,7 @@ export const TRIAL_SECTIONS = [
     condition: "Landmark Trial",
     setting: "Obstetrics · Preterm birth & PPROM",
     title: "ORACLE I & II: antibiotics in PPROM and in preterm labour",
-    draft: true,
+    draft: false,
     trial: {
       acronym: "ORACLE I & II",
       name: "Broad-spectrum antibiotics for preterm prelabour rupture of membranes (I) and for spontaneous preterm labour (II)",
@@ -479,7 +479,7 @@ export const TRIAL_SECTIONS = [
     condition: "Landmark Trial",
     setting: "Gynaecology · Heavy menstrual bleeding",
     title: "ECLIPSE: LNG-IUS vs medical therapy for heavy menstrual bleeding",
-    draft: true,
+    draft: false,
     trial: {
       acronym: "ECLIPSE",
       name: "Levonorgestrel intrauterine system versus usual medical treatment for menorrhagia",
@@ -535,7 +535,7 @@ export const TRIAL_SECTIONS = [
     condition: "Landmark Trial",
     setting: "Gynaecology · Early pregnancy bleeding",
     title: "PRISM: progesterone for bleeding in early pregnancy",
-    draft: true,
+    draft: false,
     trial: {
       acronym: "PRISM",
       name: "Progesterone in women with bleeding in early pregnancy",
@@ -592,7 +592,7 @@ export const TRIAL_SECTIONS = [
     condition: "Landmark Trial",
     setting: "Obstetrics · Suspected large-for-dates",
     title: "Big Baby Trial: induction at 38 weeks for a suspected large baby",
-    draft: true,
+    draft: false,
     trial: {
       acronym: "Big Baby Trial",
       name: "Induction of labour versus standard care to prevent shoulder dystocia in suspected large-for-gestational-age fetuses",
