@@ -4,6 +4,14 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.6.0",
+    date: "05/07/2026",
+    title: "Six more topic cards",
+    changes: [
+      { tag: "new", text: "Topic cards added for postpartum haemorrhage, induction of labour, ectopic pregnancy, hyperemesis gravidarum, PPROM & preterm labour, and heavy menstrual bleeding. Search any of these (e.g. \"PPH\", \"IOL\", \"HMB\") to see guides, pathways, drugs, calculators, evidence and don't-miss items in one place." },
+    ],
+  },
+  {
     version: "1.5.0",
     date: "05/07/2026",
     title: "Topic cards in search",
