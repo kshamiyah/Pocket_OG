@@ -5,9 +5,12 @@
 // beyond the labels.
 //
 // Shape:
-//   terms    — normalised queries that trigger the card (lower-case)
-//   gl       — owning guideline code, drives the accent colour via glColors
-//   sections — groups of link rows. Entry types:
+//   terms       — normalised queries that trigger the card (lower-case)
+//   gl          — owning guideline code, drives the accent colour via glColors
+//   description — one sentence, paraphrased from the anchor guideline's own
+//                 overview/definition section (already-cited content, not new
+//                 clinical prose), purely for orientation.
+//   sections    — groups of link rows. Entry types:
 //     reader (id = gl code, optional sectionId to scroll to)
 //     flowchart / calculator / drug / consent (id = navId)
 //     trial (id = trials.js page id, opens Library > Articles > Trials)
@@ -17,6 +20,7 @@ export const TOPICS = {
     id: "pre-eclampsia",
     title: "Pre-eclampsia",
     subtitle: "Hypertensive disorders of pregnancy",
+    description: "New hypertension after 20 weeks with proteinuria or other organ involvement, renal, liver, neurological, haematological, or uteroplacental (GL952).",
     gl: "GL952",
     terms: [
       "pet", "pe", "pih", "pre-eclampsia", "preeclampsia", "pre eclampsia",
@@ -73,6 +77,7 @@ export const TOPICS = {
     id: "pph",
     title: "Postpartum haemorrhage",
     subtitle: "PPH: the 4 Ts, minor to massive",
+    description: "Blood loss ≥500 mL from the genital tract within 24 hours of birth; severity runs minor → major → massive, which activates the MHP (GTG52).",
     gl: "GTG52",
     terms: [
       "pph", "postpartum haemorrhage", "post partum haemorrhage",
@@ -122,6 +127,7 @@ export const TOPICS = {
     id: "iol",
     title: "Induction of labour",
     subtitle: "Indications, methods & timing",
+    description: "Starting labour artificially, most often for post-maturity, reduced fetal movements, or a maternal or fetal indication that outweighs the risk of continuing (GL861).",
     gl: "GL861",
     terms: [
       "iol", "induction", "induction of labour", "induction of labor",
@@ -177,6 +183,7 @@ export const TOPICS = {
     id: "ectopic",
     title: "Ectopic pregnancy",
     subtitle: "Expectant, medical & surgical management",
+    description: "A pregnancy outside the uterine cavity, usually tubal; MTX eligibility depends on BHCG level, mass size and haemodynamic stability (CG623).",
     gl: "CG623",
     terms: [
       "ectopic", "ectopic pregnancy", "tubal ectopic", "methotrexate pregnancy",
@@ -225,6 +232,7 @@ export const TOPICS = {
     id: "hyperemesis",
     title: "Hyperemesis gravidarum",
     subtitle: "Nausea & vomiting of pregnancy",
+    description: "NVP affects up to 90% of pregnancies; HG is the severe end of the spectrum (0.3–3.6%) and a leading cause of first-trimester admission (GTG69).",
     gl: "GTG69",
     terms: [
       "hg", "hyperemesis", "hyperemesis gravidarum", "nvp",
@@ -267,6 +275,7 @@ export const TOPICS = {
     id: "pprom",
     title: "PPROM & preterm labour",
     subtitle: "Preterm prelabour rupture of membranes",
+    description: "Rupture of membranes before 37 weeks and before labour starts; management balances infection risk against the risks of prematurity (GL895, NG25).",
     gl: "GL895",
     terms: [
       "pprom", "preterm prom", "preterm rupture of membranes",
@@ -326,6 +335,7 @@ export const TOPICS = {
     id: "hmb",
     title: "Heavy menstrual bleeding",
     subtitle: "Assessment & management",
+    description: "A clinical diagnosis: her own assessment of the impact on quality of life matters more than measured blood loss (NG88).",
     gl: "NG88",
     terms: [
       "hmb", "heavy menstrual bleeding", "menorrhagia",

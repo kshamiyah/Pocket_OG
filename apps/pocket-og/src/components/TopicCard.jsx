@@ -67,6 +67,7 @@ export default function TopicCard({ topic, onNavigate, onOpenGuideline }) {
         </div>
         <h3 className="mt-1.5 text-lg font-bold text-gray-900 tracking-tight">{topic.title}</h3>
         {topic.subtitle && <p className="text-xs text-gray-400 mt-0.5">{topic.subtitle}</p>}
+        {topic.description && <p className="text-xs text-gray-500 mt-2 leading-relaxed">{topic.description}</p>}
       </div>
 
       {topic.sections.map(section => {
