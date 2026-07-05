@@ -9,6 +9,7 @@ export const UPDATES = [
     title: "Six more topic cards",
     changes: [
       { tag: "new", text: "Topic cards added for postpartum haemorrhage, induction of labour, ectopic pregnancy, hyperemesis gravidarum, PPROM & preterm labour, and heavy menstrual bleeding. Search any of these (e.g. \"PPH\", \"IOL\", \"HMB\") to see guides, pathways, drugs, calculators, evidence and don't-miss items in one place." },
+      { tag: "new", text: "Methotrexate added to Rx (dose, contraindications, monitoring schedule for ectopic pregnancy), linked from the Ectopic pregnancy topic card." },
     ],
   },
   {

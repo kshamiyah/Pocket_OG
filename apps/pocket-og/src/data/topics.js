@@ -207,6 +207,12 @@ export const TOPICS = {
         ],
       },
       {
+        heading: "Drugs",
+        entries: [
+          { type: "drug", id: "methotrexate", gl: "CG623", label: "Methotrexate", sublabel: "Rx: dose, contraindications, monitoring" },
+        ],
+      },
+      {
         heading: "Don't miss",
         entries: [
           { type: "reader", id: "CG623", sectionId: "ep-patientinfo", gl: "CG623", label: "Patient information for MTX", sublabel: "CG623: what to tell her before treatment" },

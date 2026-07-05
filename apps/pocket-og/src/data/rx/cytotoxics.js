@@ -1,0 +1,45 @@
+export const CYTOTOXICS = [
+  {
+    id: "methotrexate",
+    name: "Methotrexate",
+    class: "Antimetabolite — medical management of ectopic pregnancy",
+    color: "orange",
+    routes: [
+      {
+        type: "im",
+        shortLabel: "IM — ectopic pregnancy",
+        label: "IM — ectopic pregnancy (single dose)",
+        dose: "50 mg/m² body surface area",
+        frequency: "single dose; repeat once at day 4–7 if BHCG falls <15% (CG623)",
+        maxDose: "2 doses per treatment course; surgical management if response still inadequate after the 2nd dose (CG623)",
+        notes: "CG623: given by appropriately trained staff per Trust cytotoxic drug policy. Patient rests up to 1 hour post-administration; check no local reaction before discharge. Off-label use, consent must state this explicitly.",
+      },
+    ],
+    contraindications: [
+      "Cardiac activity in the ectopic (live ectopic)",
+      "Adnexal mass ≥35 mm diameter",
+      "Evidence of intra-peritoneal haemorrhage (clinical or on TVS)",
+      "Active pulmonary disease",
+      "Active infection or immunosuppressed state, including steroid use",
+      "Peptic ulcer disease or ulcerative colitis",
+      "Hepatic dysfunction, thrombocytopenia (platelets <100), blood dyscrasia (WCC <2), or severe anaemia",
+      "Breastfeeding",
+      "Patient unsure of choice of treatment",
+      "Difficulty or unwillingness to commit to prolonged follow-up (average 35 days)",
+    ],
+    cautions: [
+      "BHCG 1,500–5,000 IU/L: CG623 offers MTX or surgery, haemodynamically stable, not an absolute cut-off either way",
+      "Do NOT give anti-D for medical management of ectopic pregnancy (NICE 2019)",
+      "Avoid alcohol and folic acid-containing vitamins during treatment, both reduce efficacy",
+      "Avoid sexual intercourse, sunlight exposure and heavy lifting until resolution",
+      "Up to 75% of patients get worsening abdominal pain on days 3–7 (tubal miscarriage); attend ED if severe, or with dizziness or shoulder tip pain",
+      "BHCG may rise between days 1–4, this does not by itself indicate failure",
+      "Requires BHCG monitoring on days 1, 4 and 7, then weekly until <20 IU/L, mean time to resolution 35 days",
+    ],
+    pregnancySafety: "Teratogenic. Avoid pregnancy for 3 months after treatment; use barrier contraception (RCOG). Contraindicated in breastfeeding.",
+    sources: [
+      { label: "RBH CG623", href: "/guidelines/CG623.pdf" },
+      { label: "NICE NG126", href: "https://www.nice.org.uk/guidance/ng126" },
+    ],
+  },
+];

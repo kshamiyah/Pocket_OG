@@ -17,6 +17,7 @@ import { ANTICOAGULANTS } from "../data/rx/anticoagulants";
 import { ANALGESIA } from "../data/rx/analgesia";
 import { ENDOMETRIOSIS_DRUGS } from "../data/rx/endometriosis";
 import { CONTRACEPTION } from "../data/rx/contraception";
+import { CYTOTOXICS } from "../data/rx/cytotoxics";
 
 const words = (s) => (s ? s.toLowerCase().match(/[a-z0-9]+/g) ?? [] : []);
 const uniq = (arr) => [...new Set(arr.filter(Boolean))];
@@ -50,6 +51,7 @@ const DRUG_GROUPS = [
   [ANALGESIA, "Analgesia"],
   [ENDOMETRIOSIS_DRUGS, "Endometriosis"],
   [CONTRACEPTION, "Contraception"],
+  [CYTOTOXICS, "Cytotoxic"],
 ];
 
 export const DRUG_SECTIONS = DRUG_GROUPS.flatMap(([drugs, category]) =>
