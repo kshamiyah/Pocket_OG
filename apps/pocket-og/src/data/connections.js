@@ -331,6 +331,40 @@ export const FLOWCHART_NODE_CONNECTIONS = {
     },
   },
 
+  // ── PID (BASHH_PID) ─────────────────────────────────────────────────
+  BASHH_PID_TRIAGE: {
+    "outpatient": {
+      whatsNext: [
+        { type: "flowchart", id: "BASHH_PID_ANTIBIOTICS", gl: "BASHH_PID", label: "PID antibiotic regimen", sublabel: "BASHH 2019 — outpatient & inpatient regimens" },
+        { type: "reader",    id: "BASHH_PID",             gl: "BASHH_PID", label: "BASHH PID guideline",     sublabel: "Full guideline text" },
+      ],
+    },
+    "inpatient": {
+      whatsNext: [
+        { type: "flowchart", id: "BASHH_PID_ANTIBIOTICS", gl: "BASHH_PID", label: "PID antibiotic regimen", sublabel: "BASHH 2019 — inpatient IV regimens" },
+        { type: "reader",    id: "BASHH_PID",             gl: "BASHH_PID", label: "BASHH PID guideline",     sublabel: "Full guideline text" },
+      ],
+    },
+    "alt_dx": {
+      whatsNext: [
+        { type: "reader", id: "BASHH_PID", gl: "BASHH_PID", label: "BASHH PID guideline", sublabel: "Full guideline text" },
+      ],
+    },
+  },
+
+  BASHH_PID_ANTIBIOTICS: {
+    "outpatient_end": {
+      whatsNext: [
+        { type: "reader", id: "BASHH_PID", gl: "BASHH_PID", label: "BASHH PID guideline", sublabel: "Follow-up, TOA, and partner notification" },
+      ],
+    },
+    "inpatient_end": {
+      whatsNext: [
+        { type: "reader", id: "BASHH_PID", gl: "BASHH_PID", label: "BASHH PID guideline", sublabel: "Follow-up, TOA, and partner notification" },
+      ],
+    },
+  },
+
   // ── Pre-eclampsia / Hypertension (GL952) ────────────────────────────
   GL952_TRIAGE: {
     "chronic-htn": {
@@ -524,5 +558,13 @@ export const GUIDELINE_KEYWORD_LINKS = {
     { phrase: "antiphospholipid",         type: "reader", id: "GTG17", gl: "GTG17", label: "Recurrent Miscarriage" },
     { phrase: "small for gestational age",type: "reader", id: "GTG31", gl: "GTG31", label: "SGA & Fetal Growth Restriction" },
     { phrase: "postpartum haemorrhage",   type: "reader", id: "GTG52", gl: "GTG52", label: "Postpartum Haemorrhage" },
+  ],
+
+  BASHH_PID: [
+    { phrase: "ectopic",         type: "reader", id: "CG623",   gl: "CG623",   label: "Ectopic Pregnancy" },
+    { phrase: "VTE",             type: "reader", id: "GL891",   gl: "GL891",   label: "VTE in Pregnancy & Postnatal" },
+    { phrase: "preterm",         type: "reader", id: "NG25",    gl: "NG25",    label: "Preterm Labour & Birth" },
+    { phrase: "PPRoM",           type: "reader", id: "GL895",   gl: "GL895",   label: "PPRoM" },
+    { phrase: "anaemia",         type: "reader", id: "GL783",   gl: "GL783",   label: "Iron Deficiency Anaemia" },
   ],
 };

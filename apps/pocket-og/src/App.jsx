@@ -23,6 +23,7 @@ import InstallBanner from "./components/InstallBanner";
 import { LATEST_VERSION, hasUnseenUpdates, markUpdatesSeen } from "./data/updates";
 import { TOG_SECTIONS } from "./data/tog";
 import { TRIAL_SECTIONS } from "./data/trials";
+import Clark from "./components/Clark";
 
 import { READER_AVAILABLE } from "./data/readerAvailable";
 import { readDeepLink, clearDeepLinkParam } from "./utils/deepLink";
@@ -177,6 +178,8 @@ export default function App() {
   const [updatesOpen, setUpdatesOpen] = useState(false);
   const [updatesUnseen, setUpdatesUnseen] = useState(() => hasUnseenUpdates());
   const [hintIndex, setHintIndex] = useState(0);
+  const [showClark, setShowClark] = useState(false);
+  const [guidelineFromClark, setGuidelineFromClark] = useState(false);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
   const glSectionRefs = useRef({});
@@ -350,6 +353,19 @@ export default function App() {
         </button>
       )}
 
+      {/* CLARK overlay (feature branch only — compiler renderer in progress) */}
+      {showClark && (
+        <Clark
+          onClose={() => setShowClark(false)}
+          onOpenGuideline={(gl) => {
+            if (READER_AVAILABLE.has(gl)) {
+              setActiveGuidelineGl(gl);
+              setGuidelineFromClark(true);
+            }
+          }}
+        />
+      )}
+
       {/* IOL Prioritizer overlay */}
       {showIOLPrioritizer && <IOLPrioritizer onClose={() => setShowIOLPrioritizer(false)} />}
 
@@ -358,8 +374,13 @@ export default function App() {
         <GuidelineReader
           gl={activeGuidelineGl}
           scrollToSectionId={guidelineScrollTo}
-          onClose={() => { setActiveGuidelineGl(null); setGuidelineScrollTo(null); }}
+          onClose={() => {
+            setActiveGuidelineGl(null);
+            setGuidelineScrollTo(null);
+            setGuidelineFromClark(false);
+          }}
           onNavigate={handleNavigate}
+          zClassName={guidelineFromClark ? "z-[60]" : "z-40"}
         />
       )}
 

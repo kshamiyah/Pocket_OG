@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compiled Protocol Preview</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      background: #3f3f46;
+      color: white;
+      padding: 20px;
+      line-height: 1.5;
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      background: #52525b;
+      border-bottom: 1px solid #52525b;
+      padding: 16px 20px;
+      border-radius: 16px 16px 0 0;
+      margin-bottom: 2px;
+    }
+    
+    .header-top {
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      color: #34d399;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    
+    .header-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 4px;
+    }
+    
+    .header-subtitle {
+      font-size: 12px;
+      color: #a1a1aa;
+    }
+    
+    .node {
+      background: #3f3f46;
+      padding: 24px 20px;
+      margin-bottom: 2px;
+    }
+    
+    .node:last-child {
+      border-radius: 0 0 16px 16px;
+    }
+    
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    
+    .badge-checklist { background: #dbeafe; color: #1e40af; }
+    .badge-question { background: #ccfbf1; color: #115e59; }
+    .badge-escalation { background: #fef3c7; color: #92400e; }
+    .badge-treatment { background: #d1fae5; color: #065f46; }
+    .badge-end { background: #e5e7eb; color: #374151; }
+    
+    .node-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #f4f4f5;
+      margin-bottom: 4px;
+    }
+    
+    .node-subtitle {
+      font-size: 13px;
+      color: #a1a1aa;
+      margin-bottom: 16px;
+    }
+    
+    .alert {
+      background: rgba(220, 38, 38, 0.1);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .alert-icon {
+      color: #fca5a5;
+      font-weight: 600;
+    }
+    
+    .alert-text {
+      font-size: 13px;
+      color: #fca5a5;
+      font-weight: 500;
+    }
+    
+    .checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    
+    .checklist-item {
+      display: flex;
+      gap: 10px;
+      font-size: 14px;
+      color: #e4e4e7;
+    }
+    
+    .checklist-bullet {
+      color: #34d399;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .option-button {
+      background: rgba(82, 82, 91, 0.6);
+      border: 1px solid #71717a;
+      border-radius: 16px;
+      padding: 16px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .option-button:hover {
+      background: rgba(113, 113, 122, 0.8);
+      border-color: #a1a1aa;
+    }
+    
+    .option-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      display: block;
+      margin-bottom: 2px;
+    }
+    
+    .option-sublabel {
+      font-size: 12px;
+      color: #a1a1aa;
+    }
+    
+    .section {
+      background: rgba(82, 82, 91, 0.4);
+      border: 1px solid #52525b;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    
+    .section-header {
+      background: #52525b;
+      border-bottom: 1px solid #71717a;
+      padding: 10px 16px;
+    }
+    
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #e4e4e7;
+    }
+    
+    .section-note {
+      font-size: 11px;
+      color: #a1a1aa;
+      margin-top: 2px;
+    }
+    
+    .section-content {
+      padding: 12px 16px;
+    }
+    
+    .drug-item {
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(82, 82, 91, 0.5);
+    }
+    
+    .drug-item:last-child {
+      border-bottom: none;
+    }
+    
+    .drug-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #f4f4f5;
+      margin-right: 8px;
+    }
+    
+    .drug-dose {
+      font-size: 14px;
+      color: #d4d4d8;
+    }
+    
+    .drug-note {
+      font-size: 12px;
+      color: #a1a1aa;
+      margin-top: 2px;
+    }
+    
+    .source {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(82, 82, 91, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .source-icon {
+      width: 12px;
+      height: 12px;
+      color: #71717a;
+    }
+    
+    .source-text {
+      font-size: 10px;
+      color: #a1a1aa;
+    }
+    
+    .source-gl {
+      font-weight: 700;
+      color: #71717a;
+    }
+    
+    .step-badge {
+      font-size: 11px;
+      color: #71717a;
+      margin-left: 8px;
+    }
+    
+    .action-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid;
+      margin-bottom: 4px;
+    }
+    
+    .action-badge-amber {
+      background: #fef3c7;
+      color: #92400e;
+      border-color: #fde68a;
+    }
+    
+    .action-badge-red {
+      background: #fee2e2;
+      color: #991b1b;
+      border-color: #fca5a5;
+    }
+    
+    .numbered-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .numbered-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    
+    .number-circle {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #52525b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    
+    .number {
+      font-size: 10px;
+      font-weight: 700;
+      color: #d4d4d8;
+    }
+    
+    .item-text {
+      font-size: 14px;
+      color: #e4e4e7;
+    }
+    
+    .intro {
+      background: #27272a;
+      padding: 24px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .intro h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: #34d399;
+    }
+    
+    .intro p {
+      color: #a1a1aa;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    .intro strong {
+      color: #f4f4f5;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="container">
+    
+    <div class="intro">
+      <h1>📋 Compiled Protocol Preview</h1>
+      <p>This is what the compiler would generate for:<br>
+      <strong>32+2 weeks, twins, BP 165/105, previous DVT</strong></p>
+      <p style="margin-top: 12px; font-size: 13px;">
+        This protocol was <strong>dynamically assembled</strong> from your connection graph,
+        not hand-authored. It synthesizes GL952 + QS46 + GL891 automatically.
+      </p>
+    </div>
+    
+    <!-- Protocol starts here -->
+    <div class="header">
+      <div class="header-top">COMPILED PATHWAY</div>
+      <div class="header-title">Severe Pre-eclampsia + Twin Pregnancy at 32+2</div>
+      <div class="header-subtitle">Multi-condition synthesis</div>
+    </div>
+    
+    <!-- Node 1: Immediate Actions -->
+    <div class="node">
+      <div class="badge badge-checklist">
+        <span>→</span>
+        <span>Checklist</span>
+      </div>
+      <span class="step-badge">Step 1</span>
+      
+      <h2 class="node-title">Immediate Actions</h2>
+      <p class="node-subtitle">Next 30 minutes - critical interventions</p>
+      
+      <div class="alert">
+        <span class="alert-icon">⚠</span>
+        <p class="alert-text">Multiple high-risk conditions require coordinated management</p>
+      </div>
+      
+      <ul class="checklist">
+        <li class="checklist-item">
+          <span class="checklist-bullet">›</span>
+          <span>Blood pressure control: Labetalol 200mg PO or IV pathway</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-bullet">›</span>
+          <span>Seizure prophylaxis assessment: MgSO4 bolus + infusion if indicated ⚠ Check renal function first - adjust dose if eGFR &lt;30</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-bullet">›</span>
+          <span>Fetal monitoring: CTG for both twins</span>
+        </li>
+      </ul>
+      
+      <div class="source">
+        <svg class="source-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <span class="source-text">
+          <span class="source-gl">Multiple</span> — Compiled from GL952, QS46
+        </span>
+      </div>
+    </div>
+    
+    <!-- Node 2: Investigations -->
+    <div class="node">
+      <div class="badge badge-checklist">
+        <span>→</span>
+        <span>Checklist</span>
+      </div>
+      <span class="step-badge">Step 2</span>
+      
+      <h2 class="node-title">Investigations</h2>
+      <p class="node-subtitle">Required workup for this clinical scenario</p>
+      
+      <ul class="checklist">
+        <li class="checklist-item">
+          <span class="checklist-bullet">›</span>
+          <span>FBC (raised haematocrit suggests haemoconcentration)</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-bullet">›</span>
+          <span>U&E (for renal function and MgSO4 dosing)</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-bullet">›</span>
+          <span>LFT (transaminase elevation common in PET)</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-bullet">›</span>
+          <span>eGFR (essential for MgSO4 dosing adjustment)</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-bullet">›</span>
+          <span>USS: growth, AFI, dopplers for both twins</span>
+        </li>
+      </ul>
+      
+      <div class="source">
+        <svg class="source-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <span class="source-text">
+          <span class="source-gl">Multiple</span> — Compiled investigation panel
+        </span>
+      </div>
+    </div>
+    
+    <!-- Node 3: VTE Question -->
+    <div class="node">
+      <div class="badge badge-question">
+        <span>?</span>
+        <span>Question</span>
+      </div>
+      <span class="step-badge">Step 3</span>
+      
+      <h2 class="node-title">Does this patient have a previous VTE?</h2>
+      <p class="node-subtitle">Previous VTE + severe PET requires therapeutic anticoagulation</p>
+      
+      <div class="options">
+        <button class="option-button">
+          <span class="option-label">No previous VTE</span>
+          <span class="option-sublabel">Standard prophylaxis</span>
+        </button>
+        <button class="option-button">
+          <span class="option-label">Yes - previous DVT or PE</span>
+          <span class="option-sublabel">Requires escalation</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Node 4: VTE Escalation -->
+    <div class="node">
+      <div class="badge badge-escalation">
+        <span>⚠</span>
+        <span>Escalation</span>
+      </div>
+      <span class="step-badge">Step 4</span>
+      
+      <span class="action-badge action-badge-red">Very High Risk</span>
+      
+      <h2 class="node-title">VTE Risk Escalation Required</h2>
+      <p class="node-subtitle">Previous VTE + severe PET = very high risk</p>
+      
+      <div class="alert">
+        <span class="alert-icon">⚠</span>
+        <p class="alert-text">This patient requires therapeutic anticoagulation, not prophylactic</p>
+      </div>
+      
+      <ul class="checklist">
+        <li class="checklist-item">
+          <span class="checklist-bullet" style="color: #fbbf24;">›</span>
+          <span>Escalate to therapeutic LMWH (not prophylactic dose)</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-bullet" style="color: #fbbf24;">›</span>
+          <span>Enoxaparin 1mg/kg SC BD (weight-based dosing)</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-bullet" style="color: #fbbf24;">›</span>
+          <span>Inform anaesthetics early: 12hr gap needed before neuraxial</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-bullet" style="color: #fbbf24;">›</span>
+          <span>Check platelets before procedures (PET + LMWH both affect platelets)</span>
+        </li>
+      </ul>
+      
+      <div class="source">
+        <svg class="source-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <span class="source-text">
+          <span class="source-gl">GL891</span> — VTE risk stratification & management
+        </span>
+      </div>
+    </div>
+    
+    <!-- Node 5: Management Plan -->
+    <div class="node">
+      <div class="badge badge-treatment">
+        <span>•</span>
+        <span>Treatment</span>
+      </div>
+      <span class="step-badge">Step 5</span>
+      
+      <span class="action-badge action-badge-amber">Multi-Guideline Synthesis</span>
+      
+      <h2 class="node-title">Management Plan</h2>
+      
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">BLOOD PRESSURE MANAGEMENT</div>
+          <div class="section-note">Target &lt;140/90 mmHg</div>
+        </div>
+        <div class="section-content">
+          <div class="drug-item">
+            <div>
+              <span class="drug-name">Labetalol</span>
+              <span class="drug-dose">200mg PO BD-TDS</span>
+            </div>
+            <div class="drug-note">First line</div>
+          </div>
+          <div class="drug-item">
+            <div>
+              <span class="drug-name">Nifedipine MR</span>
+              <span class="drug-dose">20mg PO BD</span>
+            </div>
+            <div class="drug-note">If labetalol contraindicated</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">DELIVERY TIMING</div>
+          <div class="section-note">Synthesized from multiple guidelines</div>
+        </div>
+        <div class="section-content">
+          <ul class="checklist" style="margin: 0;">
+            <li class="checklist-item">
+              <span class="checklist-bullet">›</span>
+              <span>QS46: Uncomplicated twins deliver 36-37 weeks</span>
+            </li>
+            <li class="checklist-item">
+              <span class="checklist-bullet">›</span>
+              <span>GL952: Severe PET deliver by 34 weeks if uncontrolled</span>
+            </li>
+            <li class="checklist-item">
+              <span class="checklist-bullet">›</span>
+              <span>Your patient: 32+2 with severe PET + twins</span>
+            </li>
+            <li class="checklist-item">
+              <span class="checklist-bullet" style="color: #fbbf24;">→</span>
+              <span><strong>Aim for 34 weeks IF BP controlled on treatment</strong></span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="source">
+        <svg class="source-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <span class="source-text">
+          <span class="source-gl">Multiple</span> — Compiled from GL952 + QS46 + GL891
+        </span>
+      </div>
+    </div>
+    
+    <!-- Node 6: Safety Checklist -->
+    <div class="node">
+      <div class="badge badge-checklist">
+        <span>✓</span>
+        <span>Safety</span>
+      </div>
+      <span class="step-badge">Step 6</span>
+      
+      <h2 class="node-title">What You Might Forget</h2>
+      <p class="node-subtitle">Common omissions for this clinical scenario</p>
+      
+      <ul class="checklist">
+        <li class="checklist-item">
+          <span class="checklist-bullet">›</span>
+          <span>Antenatal corticosteroids — Indicated &lt;34+6 weeks (NG25)</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-bullet">›</span>
+          <span>Anti-D if Rh negative — Sensitising event (QS22)</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-bullet">›</span>
+          <span>Inform neonatal team — Preterm admission needed (NG25)</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-bullet">›</span>
+          <span>Inform anaesthetics — May need epidural, LMWH timing matters (GL952)</span>
+        </li>
+        <li class="checklist-item">
+          <span class="checklist-bullet">›</span>
+          <span>Postnatal BP plan — Follow GL952 postnatal pathway (GL952)</span>
+        </li>
+      </ul>
+      
+      <div class="source">
+        <svg class="source-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <span class="source-text">
+          <span class="source-gl">Multiple</span> — Safety synthesis
+        </span>
+      </div>
+    </div>
+    
+    <!-- Node 7: End -->
+    <div class="node">
+      <div class="badge badge-end">
+        <span>✓</span>
+        <span>Complete</span>
+      </div>
+      
+      <h2 class="node-title">Pathway Complete</h2>
+      <p class="node-subtitle">Review plan with consultant</p>
+      
+      <ul class="numbered-list">
+        <li class="numbered-item">
+          <div class="number-circle">
+            <span class="number">1</span>
+          </div>
+          <span class="item-text">Document all risk factors and management decisions in notes</span>
+        </li>
+        <li class="numbered-item">
+          <div class="number-circle">
+            <span class="number">2</span>
+          </div>
+          <span class="item-text">Complete VTE risk assessment form</span>
+        </li>
+        <li class="numbered-item">
+          <div class="number-circle">
+            <span class="number">3</span>
+          </div>
+          <span class="item-text">Book consultant review within 24 hours</span>
+        </li>
+        <li class="numbered-item">
+          <div class="number-circle">
+            <span class="number">4</span>
+          </div>
+          <span class="item-text">Arrange appropriate follow-up (growth scans, BP monitoring)</span>
+        </li>
+      </ul>
+      
+      <div class="source">
+        <svg class="source-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <span class="source-text">
+          <span class="source-gl">Multiple</span> — Clinical governance
+        </span>
+      </div>
+    </div>
+    
+  </div>
+  
+</body>
+</html>
