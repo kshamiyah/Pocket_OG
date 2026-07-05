@@ -584,4 +584,63 @@ export const TRIAL_SECTIONS = [
       ] },
     ],
   },
+
+  {
+    id: "trial-big-baby",
+    gl: "TRIAL",
+    source: "TRIAL",
+    condition: "Landmark Trial",
+    setting: "Obstetrics · Suspected large-for-dates",
+    title: "Big Baby Trial: induction at 38 weeks for a suspected large baby",
+    draft: true,
+    trial: {
+      acronym: "Big Baby Trial",
+      name: "Induction of labour versus standard care to prevent shoulder dystocia in suspected large-for-gestational-age fetuses",
+      group: "Gardosi J et al., Warwick Clinical Trials Unit",
+      citation: "Lancet 2025;405:1743–56",
+      doi: "10.1016/S0140-6736(25)00162-X",
+      url: "https://doi.org/10.1016/S0140-6736(25)00162-X",
+      year: 2025,
+      n: "2,893 women",
+      design: "Multicentre open-label RCT",
+    },
+    flowchartId: "GL861_TIMING",
+    relatedGl: ["GL861"],
+    tags: [
+      "big baby trial", "macrosomia", "large for gestational age", "lga", "suspected big baby",
+      "induction for macrosomia", "shoulder dystocia prevention", "estimated fetal weight",
+      "gardosi", "quenby", "iol 38 weeks", "large for dates", "landmark trial", "obstetric trial",
+    ],
+    content: [
+      { type: "alert", value: "Bottom line: for a fetus suspected to be large for gestational age, inducing at 38 weeks did not significantly reduce shoulder dystocia in the main analysis. A per-protocol analysis did show a reduction, so it informs shared decisions rather than mandating early induction." },
+
+      { type: "subheading", value: "Clinical question" },
+      { type: "text", value: "In pregnancies with a fetus suspected to be large for gestational age, does induction of labour at 38 weeks reduce shoulder dystocia compared with standard care?" },
+
+      { type: "subheading", value: "Design & population" },
+      { type: "list", items: [
+        "Multicentre open-label randomised trial across 106 UK hospitals.",
+        "2,893 women with a suspected large-for-gestational-age fetus (estimated fetal weight above the 90th customised percentile), identified between 35 and 38 weeks; drug-treated diabetes and gestational diabetes were excluded.",
+        "Induction at 38+0 to 38+4 weeks versus standard care. The trial stopped early because shoulder dystocia in the standard-care group was lower than expected.",
+      ] },
+
+      { type: "subheading", value: "Key result" },
+      { type: "list", items: [
+        "Shoulder dystocia (intention-to-treat): 2.3% induction vs 3.1% standard care (RR 0.75, 95% CI 0.51–1.09), not statistically significant.",
+        "Per-protocol analysis: 2.3% vs 3.7% (RR 0.62, 95% CI 0.41–0.92), a significant reduction.",
+        "Induction lowered mean birthweight by about 164 g; around a quarter of the standard-care group had already given birth by 38 weeks, which narrowed the difference between the groups.",
+      ] },
+
+      { type: "subheading", value: "What it changed" },
+      { type: "text", value: "It has not rewritten a guideline. Instead it gives women with a suspected large baby and their clinicians clearer information for shared decisions about the timing and mode of birth. Meta-analyses that pool this and earlier trials find that induction around 38 weeks reduces caesarean birth and macrosomia, supporting it as one reasonable option." },
+
+      { type: "subheading", value: "Caveats" },
+      { type: "list", items: [
+        "The primary intention-to-treat outcome was not statistically significant; the significant result came from the per-protocol analysis.",
+        "The trial stopped early and did not reach its recruitment target, so it was underpowered.",
+        "Suspected large-for-gestational-age is an ultrasound estimate that is often inaccurate, and diabetic pregnancies were excluded.",
+        "A health-economic analysis found early induction raised neonatal costs and was not cost-effective in maternal quality-of-life terms.",
+      ] },
+    ],
+  },
 ];
