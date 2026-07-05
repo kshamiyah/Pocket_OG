@@ -56,15 +56,14 @@ export default function TopicCard({ topic, onNavigate, onOpenGuideline }) {
   };
 
   return (
-    <div className="mb-6 rounded-2xl overflow-hidden bg-white border border-violet-100 shadow-sm">
-      {/* Gradient = cross-source: RBH blue, RCOG violet, NICE teal. A topic
-          card spans sources, so it gets its own treatment rather than any
-          single body's colour. */}
-      <div className="h-1.5 bg-gradient-to-r from-blue-500 via-violet-500 to-teal-500" />
-      <div className="px-4 pt-3.5 pb-3 border-b border-gray-50">
+    <div className="mb-6 rounded-2xl overflow-hidden bg-white border border-orange-200 shadow-sm">
+      {/* Orange is the dedicated topic-card colour: no source body owns it,
+          and it stands out against the app's cool source palette. */}
+      <div className="h-1.5 bg-orange-500" />
+      <div className="px-4 pt-3.5 pb-3 border-b border-orange-100 bg-orange-50/50">
         <div className="flex items-center gap-2">
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase text-white bg-gradient-to-r from-blue-500 via-violet-500 to-teal-500">Topic</span>
-          <span className="text-[10px] text-gray-400 font-medium">Everything in the app on this</span>
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase text-white bg-orange-500">Topic</span>
+          <span className="text-[10px] text-orange-700/70 font-medium">Everything in the app on this</span>
         </div>
         <h3 className="mt-1.5 text-lg font-bold text-gray-900 tracking-tight">{topic.title}</h3>
         {topic.subtitle && <p className="text-xs text-gray-400 mt-0.5">{topic.subtitle}</p>}
