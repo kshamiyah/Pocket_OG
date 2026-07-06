@@ -1,7 +1,8 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { PRIORITY, SORT_MODE, NO_WARD_LABEL, SHIFT_TYPES } from "../utils/constants";
-import { createJob, nextId, sortByUrgency, groupByWard, summarize } from "../utils/jobs";
-import { pushMRU } from "../utils/storage";
+import { sortByUrgency, groupByWard, summarize } from "../utils/jobs";
+import { pushMRU, roleLabel } from "../utils/portfolios";
+import JobCapture from "./JobCapture";
 
 const WARD_CHIP = "shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors";
 const WARD_CHIP_ON = "bg-amber-600 text-white border-amber-600";
@@ -36,7 +37,12 @@ function JobCard({ job, editing, onToggleDone, onToggleEdit, onSetWard, onSetPri
                 {job.ward}
               </button>
             )}
-            {!job.ward && (
+            {job.bed && (
+              <span className="text-[10px] font-bold tabular-nums text-gray-600 dark:text-gray-400 bg-gray-200/80 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                Bed {job.bed}
+              </span>
+            )}
+            {!job.ward && !job.bed && (
               <button
                 onClick={() => onToggleEdit(job.id)}
                 className="text-[10px] font-semibold text-gray-400 dark:text-gray-600 px-1.5 py-0.5 rounded border border-dashed border-gray-300 dark:border-gray-700"
@@ -91,27 +97,13 @@ function JobCard({ job, editing, onToggleDone, onToggleEdit, onSetWard, onSetPri
   );
 }
 
-export default function JobList({ jobs, setJobs, shiftType, recentWards, setRecentWards, onHandover, onScan }) {
+export default function JobList({ portfolio, jobs, setJobs, recentWards, setRecentWards, recentPhrases, setRecentPhrases, wardTasks, setWardTasks, wardLayouts, setWardLayouts, recentBeds, setRecentBeds, captureMode, setCaptureMode, onHandover, onScan, onPortfolios, onEndShift }) {
   const [sortMode, setSortMode] = useState(SORT_MODE.URGENCY);
   const [editingId, setEditingId] = useState(null);
-  const [stickyWard, setStickyWard] = useState(recentWards[0] || "");
-  const [urgentDraft, setUrgentDraft] = useState(false);
-  const [text, setText] = useState("");
-  const inputRef = useRef(null);
 
   const summary = useMemo(() => summarize(jobs), [jobs]);
-  const shiftLabel = SHIFT_TYPES.find((s) => s.key === shiftType)?.label ?? "Shift";
-
-  const addJob = () => {
-    const trimmed = text.trim();
-    if (!trimmed) return;
-    const job = createJob({ id: nextId(jobs), text: trimmed, ward: stickyWard, priority: urgentDraft ? PRIORITY.URGENT : PRIORITY.ROUTINE });
-    setJobs([...jobs, job]);
-    if (stickyWard) setRecentWards(pushMRU(recentWards, stickyWard));
-    setText("");
-    setUrgentDraft(false);
-    inputRef.current?.focus();
-  };
+  const shiftLabel = SHIFT_TYPES.find((s) => s.key === portfolio.shift?.type)?.label ?? "Shift";
+  const role = roleLabel(portfolio.role);
 
   const toggleDone = (id) => setJobs(jobs.map((j) => (j.id === id ? { ...j, done: !j.done } : j)));
   const toggleEdit = (id) => setEditingId((cur) => (cur === id ? null : id));
@@ -142,19 +134,28 @@ export default function JobList({ jobs, setJobs, shiftType, recentWards, setRece
         className="px-5 flex items-baseline justify-between border-b border-gray-200 dark:border-gray-800"
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)", paddingBottom: "0.9rem" }}
       >
-        <div className="font-extrabold text-lg text-gray-900 dark:text-white">
-          Handover<span className="text-amber-600">.</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="font-mono text-[11px] tracking-wide text-gray-400 dark:text-gray-500 uppercase">
-            {shiftLabel}
+        <button onClick={onPortfolios} className="text-left min-w-0">
+          <div className="font-extrabold text-lg text-gray-900 dark:text-white truncate">
+            {portfolio.name}
           </div>
+          <div className="font-mono text-[10px] tracking-wide text-gray-400 dark:text-gray-500 uppercase truncate">
+            {shiftLabel}{role ? ` · ${role}` : ""}
+          </div>
+        </button>
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={onScan}
             aria-label="Receive a handover"
             className="text-[11px] font-bold text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900 rounded-md px-2 py-1"
           >
             Receive
+          </button>
+          <button
+            onClick={onEndShift}
+            aria-label="End shift"
+            className="text-[11px] font-bold text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800 rounded-md px-2 py-1"
+          >
+            End
           </button>
         </div>
       </div>
@@ -211,62 +212,22 @@ export default function JobList({ jobs, setJobs, shiftType, recentWards, setRece
         </div>
       )}
 
-      <div
-        className="border-t border-gray-200 dark:border-gray-800 px-5 pt-2.5 bg-white dark:bg-gray-950"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
-      >
-        {recentWards.length > 0 && (
-          <div className="flex gap-1.5 overflow-x-auto mb-2 pb-0.5">
-            {recentWards.map((w) => (
-              <button
-                key={w}
-                onClick={() => setStickyWard(w)}
-                className={`${WARD_CHIP} ${stickyWard === w ? WARD_CHIP_ON : WARD_CHIP_OFF}`}
-              >
-                {w}
-              </button>
-            ))}
-            {stickyWard && (
-              <button onClick={() => setStickyWard("")} className={`${WARD_CHIP} ${WARD_CHIP_OFF}`}>
-                Clear
-              </button>
-            )}
-          </div>
-        )}
-
-        <div className="flex items-center gap-2">
-          <input
-            ref={inputRef}
-            type="text"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addJob()}
-            enterKeyHint="done"
-            placeholder={stickyWard ? `Job for ${stickyWard}…` : "Add a job…"}
-            className="flex-1 min-w-0 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
-          />
-          <button
-            onClick={() => setUrgentDraft((v) => !v)}
-            aria-label="Toggle urgent"
-            className={`shrink-0 w-10 h-10 rounded-xl border flex items-center justify-center text-xs font-bold transition-colors ${
-              urgentDraft ? "bg-red-600 text-white border-red-600" : "bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-800"
-            }`}
-          >
-            !
-          </button>
-          <button
-            onClick={addJob}
-            disabled={!text.trim()}
-            aria-label="Add job"
-            className="shrink-0 w-10 h-10 rounded-xl bg-amber-600 disabled:bg-gray-200 dark:disabled:bg-gray-800 text-white disabled:text-gray-400 flex items-center justify-center font-bold active:scale-95 transition-all"
-          >
-            +
-          </button>
-        </div>
-        <p className="text-[10px] text-gray-400 dark:text-gray-600 mt-1.5">
-          No names, initials or bed numbers, just enough to jog your memory.
-        </p>
-      </div>
+      <JobCapture
+        jobs={jobs}
+        setJobs={setJobs}
+        captureMode={captureMode}
+        setCaptureMode={setCaptureMode}
+        recentWards={recentWards}
+        setRecentWards={setRecentWards}
+        recentPhrases={recentPhrases}
+        setRecentPhrases={setRecentPhrases}
+        wardTasks={wardTasks}
+        setWardTasks={setWardTasks}
+        wardLayouts={wardLayouts}
+        setWardLayouts={setWardLayouts}
+        recentBeds={recentBeds}
+        setRecentBeds={setRecentBeds}
+      />
     </div>
   );
 }

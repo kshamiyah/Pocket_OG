@@ -1,8 +1,9 @@
-// Handover payload: a compact, versioned, checksummed encoding of the open
-// job list, carried either as a QR code or a plain shareable link (?ho=...).
-// No server involved — the code itself is the entire message.
+// Handover payload: versioned, checksummed job list in a QR code or ?ho= link.
+// v2 adds bed numbers; task text is auto-stripped on encode.
 
-const VERSION = 1;
+import { stripHandover } from "./stripHandover";
+
+const VERSION = 2;
 
 function toBase64Url(str) {
   const bytes = new TextEncoder().encode(str);
@@ -19,7 +20,6 @@ function fromBase64Url(b64url) {
   return new TextDecoder().decode(bytes);
 }
 
-// Not cryptographic — just enough to catch a botched scan or a truncated paste.
 function checksum(str) {
   let sum = 0;
   for (let i = 0; i < str.length; i++) sum = (sum + str.charCodeAt(i) * (i + 1)) % 1679616;
@@ -28,14 +28,33 @@ function checksum(str) {
 
 export class HandoverPayloadError extends Error {}
 
+function encodeJob(job) {
+  const bed = String(job.bed || "").trim();
+  const row = {
+    w: job.ward || "",
+    t: stripHandover(job.text, { bed }),
+    p: job.priority === "urgent" ? "u" : "r",
+  };
+  if (bed) row.b = bed;
+  return row;
+}
+
+function decodeJob(job, i) {
+  return {
+    id: `incoming-${Date.now()}-${i}`,
+    ward: job.w || "",
+    bed: job.b || "",
+    text: job.t || "",
+    priority: job.p === "u" ? "urgent" : "routine",
+    done: false,
+    createdAt: new Date().toISOString(),
+  };
+}
+
 export function encodeHandoverPayload(jobs) {
   const compact = {
     v: VERSION,
-    j: jobs.map((job) => ({
-      w: job.ward || "",
-      t: job.text,
-      p: job.priority === "urgent" ? "u" : "r",
-    })),
+    j: jobs.map(encodeJob),
   };
   const body = toBase64Url(JSON.stringify(compact));
   return `${body}.${checksum(body)}`;
@@ -56,17 +75,10 @@ export function decodeHandoverPayload(code) {
   } catch {
     throw new HandoverPayloadError("That code didn't come through cleanly. Try scanning it again.");
   }
-  if (!compact || compact.v !== VERSION || !Array.isArray(compact.j)) {
+  if (!compact || !Array.isArray(compact.j) || (compact.v !== 1 && compact.v !== 2)) {
     throw new HandoverPayloadError("This code is from a different version of Handover.");
   }
-  return compact.j.map((job, i) => ({
-    id: `incoming-${Date.now()}-${i}`,
-    ward: job.w || "",
-    text: job.t || "",
-    priority: job.p === "u" ? "urgent" : "routine",
-    done: false,
-    createdAt: new Date().toISOString(),
-  }));
+  return compact.j.map(decodeJob);
 }
 
 export function buildHandoverUrl(jobs) {

@@ -16,4 +16,21 @@ export const PRIORITY = { ROUTINE: "routine", URGENT: "urgent" };
 
 export const SORT_MODE = { URGENCY: "urgency", WARD: "ward" };
 
+export const CAPTURE_MODE = { ROUND: "round", QUICK: "quick" };
+
+export const WARD_LAYOUT_KIND = {
+  NUMBERED: "numbered",
+  NAMED: "named",
+  NONE: "none",
+};
+
 export const NO_WARD_LABEL = "No ward";
+
+export const STARTER_PHRASES = [
+  "Review CTG",
+  "Chase bloods",
+  "KVI to complete",
+  "Review scan",
+  "Speak to registrar",
+  "Handover note",
+];

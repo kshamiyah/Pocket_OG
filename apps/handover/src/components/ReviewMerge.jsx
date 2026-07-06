@@ -54,6 +54,11 @@ export default function ReviewMerge({ incomingJobs, onMerge, onDiscard }) {
                         {job.ward}
                       </span>
                     )}
+                    {job.bed && (
+                      <span className="text-[10px] font-bold tabular-nums text-gray-600 dark:text-gray-400 bg-gray-200/80 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                        Bed {job.bed}
+                      </span>
+                    )}
                     {urgent && (
                       <span className="text-[10px] font-bold uppercase tracking-wide text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 rounded">
                         Urgent

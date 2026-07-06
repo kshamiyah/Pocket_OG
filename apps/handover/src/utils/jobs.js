@@ -5,28 +5,33 @@ export function nextId(existingJobs) {
   return max + 1;
 }
 
-export function createJob({ id, text, ward, priority }) {
+export function createJob({ id, text, ward, bed, priority }) {
   return {
     id,
     text: text.trim(),
     ward: (ward || "").trim(),
+    bed: String(bed ?? "").trim(),
     priority: priority === PRIORITY.URGENT ? PRIORITY.URGENT : PRIORITY.ROUTINE,
     done: false,
     createdAt: new Date().toISOString(),
   };
 }
 
-// Open jobs first (urgent before routine, oldest first within a tier), done jobs last.
+function bedSortKey(bed) {
+  const match = String(bed || "").match(/^(\d+)/);
+  return match ? Number(match[1]) : Number.MAX_SAFE_INTEGER;
+}
+
 export function sortByUrgency(jobs) {
   return [...jobs].sort((a, b) => {
     if (a.done !== b.done) return a.done ? 1 : -1;
     if (a.priority !== b.priority) return a.priority === PRIORITY.URGENT ? -1 : 1;
+    const bedDiff = bedSortKey(a.bed) - bedSortKey(b.bed);
+    if (bedDiff !== 0) return bedDiff;
     return new Date(a.createdAt) - new Date(b.createdAt);
   });
 }
 
-// Jobs grouped into ward sections (alphabetical, unlabelled jobs last), each
-// section internally sorted by urgency.
 export function groupByWard(jobs) {
   const groups = new Map();
   for (const job of jobs) {
@@ -50,4 +55,11 @@ export function summarize(jobs) {
     urgent: open.filter((j) => j.priority === PRIORITY.URGENT).length,
     done: jobs.length - open.length,
   };
+}
+
+export function formatJobLocation(job) {
+  const parts = [];
+  if (job.ward) parts.push(job.ward);
+  if (job.bed) parts.push(`Bed ${job.bed}`);
+  return parts.join(" · ");
 }
