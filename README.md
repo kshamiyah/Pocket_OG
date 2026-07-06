@@ -8,6 +8,9 @@ Clinical tools for RBH Maternity, built with React + Vite + Tailwind CSS.
 |-----|------|-------------|
 | **Pocket O&G** | `apps/pocket-og` | Guideline reference — full-text search across trust protocols and NICE guidelines, with interactive decision flowcharts |
 | **Ward Manager** | `apps/ward-manager` | Labour ward board — real-time patient tracking, clinical alert engine (NICE NG235 + NG229), VE/CTG/obs logging |
+| **Handover** | `apps/handover` | Shift job list — ward/bed/task capture, QR and link handover between phones; standalone PWA, no server |
+
+Each app is a separate Vercel project with its own URL. They are not linked inside one another.
 
 ## Repo structure
 
@@ -15,6 +18,9 @@ Clinical tools for RBH Maternity, built with React + Vite + Tailwind CSS.
 apps/
   pocket-og/        # Guideline reference app
   ward-manager/     # Labour ward manager app
+  handover/         # Shift job-list handover app
+packages/
+  guidelines/       # Shared guideline content (@pocket-og/guidelines)
 package.json        # npm workspaces root
 ```
 
@@ -30,8 +36,14 @@ npm run dev -w apps/pocket-og
 # Run the ward manager
 npm run dev -w apps/ward-manager
 
+# Run handover
+npm run dev -w apps/handover
+
 # Run ward manager clinical rule tests
 npm test -w apps/ward-manager
+
+# Run handover unit tests
+npx vitest run apps/handover/src/utils/*.test.js
 ```
 
 ## Tech stack
