@@ -16,6 +16,7 @@ import {
   NG73_SECTIONS,
   MBRRACE_SLMC2025_SECTIONS,
   GTG5_SECTIONS,
+  GTG73_SECTIONS,
 } from "@pocket-og/guidelines";
 import { FLOWCHARTS } from "../data/flowcharts";
 import { GUIDELINE_KEYWORD_LINKS } from "../data/connections";
@@ -58,6 +59,7 @@ const SECTIONS_MAP = {
   NG73: NG73_SECTIONS,
   MBRRACE_SLMC2025: MBRRACE_SLMC2025_SECTIONS,
   GTG5: GTG5_SECTIONS,
+  GTG73: GTG73_SECTIONS,
 };
 
 
@@ -88,7 +90,7 @@ function computeSectionBlockLinks(section, allLinks) {
   });
 }
 
-export default function GuidelineReader({ gl, onClose, onNavigate, scrollToSectionId }) {
+export default function GuidelineReader({ gl, onClose, onNavigate, scrollToSectionId, zClassName = "z-40" }) {
   const sections = SECTIONS_MAP[gl] ?? [];
   const guideline = GUIDELINES[gl];
   const theme = glColors(gl);
@@ -123,7 +125,7 @@ export default function GuidelineReader({ gl, onClose, onNavigate, scrollToSecti
   }, [gl, scrollToSectionId]);
 
   return (
-    <div className="fixed inset-0 z-40 bg-white flex flex-col">
+    <div className={`fixed inset-0 ${zClassName} bg-white flex flex-col`}>
 
       {/* Main header */}
       <div className="shrink-0 bg-white border-b border-gray-100">
