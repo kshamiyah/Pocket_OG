@@ -10,6 +10,7 @@ import { ANALGESIA } from "../data/rx/analgesia";
 import { ENDOMETRIOSIS_DRUGS } from "../data/rx/endometriosis";
 import { CONTRACEPTION } from "../data/rx/contraception";
 import { CYTOTOXICS } from "../data/rx/cytotoxics";
+import { RESUSCITATION_DRUGS } from "../data/rx/resuscitation";
 import AlphabetSidebar from "./AlphabetSidebar";
 
 const ALL_DRUGS = [
@@ -24,6 +25,7 @@ const ALL_DRUGS = [
   ...ENDOMETRIOSIS_DRUGS.map(d =>  ({ ...d, category: "Endometriosis" })),
   ...CONTRACEPTION.map(d =>        ({ ...d, category: "Contraception" })),
   ...CYTOTOXICS.map(d =>           ({ ...d, category: "Cytotoxic" })),
+  ...RESUSCITATION_DRUGS.map(d =>  ({ ...d, category: "Resuscitation" })),
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 // Rx is colour-coded by drug class (its own zone — drugs aren't tied to one
@@ -40,6 +42,7 @@ const CATEGORY_ACCENT = {
   "Endometriosis":    "bg-purple-500",
   "Contraception":    "bg-pink-500",
   "Cytotoxic":        "bg-orange-500",
+  "Resuscitation":    "bg-red-500",
 };
 
 const CATEGORY_COLOR = {
@@ -54,6 +57,7 @@ const CATEGORY_COLOR = {
   "Endometriosis":    "text-purple-500",
   "Contraception":    "text-pink-500",
   "Cytotoxic":        "text-orange-500",
+  "Resuscitation":    "text-red-500",
 };
 
 const ROUTE_LABEL = { oral: "Oral", iv: "IV", im: "IM", sc: "SC", sl: "SL", vag: "Vaginal", rectal: "Rectal", patch: "Patch", implant: "Implant", iud: "IUD/IUS", topical: "Topical" };

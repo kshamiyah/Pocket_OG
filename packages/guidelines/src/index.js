@@ -36,3 +36,4 @@ export { BASHH_HSV_SECTIONS } from "./BASHH_HSV.js";
 export { NG73_SECTIONS } from "./NG73.js";
 export { MBRRACE_SLMC2025_SECTIONS } from "./MBRRACE_SLMC2025.js";
 export { GTG5_SECTIONS } from "./GTG5.js";
+export { GTG56_SECTIONS } from "./GTG56.js";

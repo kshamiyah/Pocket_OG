@@ -119,6 +119,7 @@ const FLOWCHART_LINKS = [
   { id: "TOG_MI_PREGNANCY",      gl: "TOG" },
   { id: "TOG_ARRHYTHMIAS_PREGNANCY", gl: "TOG" },
   { id: "TOG_VALVULAR_PREGNANCY",    gl: "TOG" },
+  { id: "MATERNAL_COLLAPSE_ARREST",  gl: "GTG56" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -148,6 +149,7 @@ const FLOWCHART_GROUPS = [
   { gl: "ABDO",      label: "Abdominal Pain in Pregnancy" },
   { gl: "GTG5",      label: "Ovarian Hyperstimulation Syndrome" },
   { gl: "TOG",       label: "TOG Reviews" },
+  { gl: "GTG56",     label: "Maternal Collapse & Cardiac Arrest" },
 ];
 
 export default function App() {

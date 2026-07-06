@@ -4,6 +4,17 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.7.0",
+    date: "06/07/2026",
+    title: "Maternal collapse & cardiac arrest",
+    changes: [
+      { tag: "new", text: "Maternal Collapse (RCOG GTG56) added to Library: causes, why resuscitation differs in pregnancy, ABCDE management, perimortem caesarean section, cause-specific management (AFE, sepsis, toxicity, anaphylaxis), and team/governance." },
+      { tag: "new", text: "New Obstetric Cardiac Arrest flowchart, based on the OAA/Resuscitation Council UK Maternal Cardiac Arrest QRH, step through aortocaval relief, rhythm check, drugs and the PMCS decision." },
+      { tag: "new", text: "Six resuscitation drugs added to Rx: adrenaline, amiodarone, atropine, calcium gluconate, calcium chloride and Intralipid 20%." },
+      { tag: "new", text: "New topic card: search \"cardiac arrest\", \"maternal collapse\" or \"PMCS\" to see the guide, flowchart, drugs and evidence together." },
+    ],
+  },
+  {
     version: "1.6.0",
     date: "05/07/2026",
     title: "Six more topic cards",

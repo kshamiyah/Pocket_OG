@@ -380,6 +380,62 @@ export const TOPICS = {
       },
     ],
   },
+
+  "maternal-collapse": {
+    id: "maternal-collapse",
+    title: "Maternal collapse & cardiac arrest",
+    subtitle: "ABCDE, aortocaval compression, perimortem caesarean",
+    description: "An acute cardiorespiratory or CNS event causing reduced or absent consciousness, at any stage of pregnancy up to 6 weeks postpartum; from 20 weeks it can progress to cardiac arrest unless aortocaval compression is relieved (GTG56).",
+    gl: "GTG56",
+    terms: [
+      "maternal collapse", "cardiac arrest", "obstetric cardiac arrest",
+      "cardiac arrest pregnancy", "collapse in pregnancy", "cpr pregnancy",
+      "pmcs", "perimortem caesarean", "perimortem caesarean section",
+      "emergency hysterotomy", "resuscitative hysterotomy",
+    ],
+    sections: [
+      {
+        heading: "Guides",
+        entries: [
+          { type: "reader", id: "GTG56", gl: "GTG56", label: "Maternal collapse (RCOG)", sublabel: "GTG56: full guideline" },
+          { type: "reader", id: "GTG56", sectionId: "collapse-resuscitation", gl: "GTG56", label: "Initial resuscitation (ABCDE)", sublabel: "GTG56: aortocaval relief, airway, drugs" },
+          { type: "reader", id: "GTG56", sectionId: "collapse-pmcs", gl: "GTG56", label: "Perimortem caesarean section", sublabel: "GTG56: the 4-minute / 5-minute rule" },
+          { type: "reader", id: "GTG56", sectionId: "collapse-cause-specific", gl: "GTG56", label: "Cause-specific management", sublabel: "GTG56: AFE, sepsis, LA and Mg toxicity, anaphylaxis" },
+        ],
+      },
+      {
+        heading: "Pathways",
+        entries: [
+          { type: "flowchart", id: "MATERNAL_COLLAPSE_ARREST", gl: "GTG56", label: "Obstetric cardiac arrest", sublabel: "GTG56 flowchart, step through the algorithm" },
+        ],
+      },
+      {
+        heading: "Drugs",
+        entries: [
+          { type: "drug", id: "adrenaline", gl: "GTG56", label: "Adrenaline", sublabel: "Rx: cardiac arrest & anaphylaxis doses" },
+          { type: "drug", id: "amiodarone", gl: "GTG56", label: "Amiodarone", sublabel: "Rx: shockable rhythm" },
+          { type: "drug", id: "atropine", gl: "GTG56", label: "Atropine", sublabel: "Rx: vagal-mediated arrest" },
+          { type: "drug", id: "calcium_gluconate", gl: "GTG56", label: "Calcium gluconate", sublabel: "Rx: magnesium toxicity antidote" },
+          { type: "drug", id: "intralipid", gl: "GTG56", label: "Intralipid 20%", sublabel: "Rx: local anaesthetic toxicity" },
+          { type: "drug", id: "tranexamic_acid", gl: "GTG56", label: "Tranexamic acid", sublabel: "Rx: if haemorrhage is the cause" },
+          { type: "drug", id: "magnesium_sulphate", gl: "GTG56", label: "Magnesium sulphate", sublabel: "Rx: eclampsia dose during arrest" },
+        ],
+      },
+      {
+        heading: "Evidence",
+        entries: [
+          { type: "trial", id: "trial-woman", gl: "GTG56", label: "WOMAN", sublabel: "Tranexamic acid reduces PPH mortality" },
+        ],
+      },
+      {
+        heading: "Don't miss",
+        entries: [
+          { type: "reader", id: "GTG56", sectionId: "collapse-team-governance", gl: "GTG56", label: "Team, documentation & MBRRACE-UK reporting", sublabel: "GTG56: who to call, what to record" },
+          { type: "reader", id: "GTG56", sectionId: "collapse-physiology", gl: "GTG56", label: "Why resuscitation differs in pregnancy", sublabel: "GTG56: aortocaval compression, airway, aspiration risk" },
+        ],
+      },
+    ],
+  },
 };
 
 const normalise = (q) =>
