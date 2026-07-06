@@ -203,6 +203,7 @@ export const SYNONYMS = {
   "blood sugar": ["glucose","diabetes","gdm","dka","insulin","cbg"],
   "type 1 diabetes": ["type 1","diabetes","insulin","dka","vrii","cgm","hba1c"],
   "type 2 diabetes": ["type 2","diabetes","metformin","insulin","gdm","hba1c"],
+  "metformin": ["diabetes","gdm","type 2 diabetes","insulin","glucose"],
   // Multiple pregnancy / twins / triplets
   "twins": ["twin pregnancy","multiple pregnancy","monochorionic","dichorionic","mcda","dcda","mcma"],
   "twin": ["twin pregnancy","multiple pregnancy","monochorionic","dichorionic"],
@@ -506,4 +507,17 @@ export const SYNONYMS = {
   "adrenaline": ["epinephrine","anaphylaxis treatment","cardiac arrest drug","1 in 1000","1 in 10000"],
   "anaphylaxis": ["adrenaline","anaphylactic reaction","mast cell tryptase","allergic collapse"],
   "maternal sepsis": ["septic shock pregnancy","surviving sepsis","sepsis six","sepsis in pregnancy"],
+
+  "perinatal mental health": ["postnatal depression","antenatal depression","epds","mental health pregnancy","postpartum psychosis"],
+  "postnatal depression": ["perinatal mental health","epds","postpartum depression","antidepressants pregnancy","sertraline"],
+  "antenatal depression": ["perinatal mental health","epds","depression pregnancy","antidepressants pregnancy"],
+  "epds": ["edinburgh postnatal depression scale","perinatal mental health","postnatal depression score"],
+  "postpartum psychosis": ["perinatal mental health","puerperal psychosis","postnatal psychosis","lithium"],
+  "antidepressants pregnancy": ["sertraline","fluoxetine","ssri pregnancy","perinatal mental health"],
+  "ssri pregnancy": ["sertraline","fluoxetine","antidepressants pregnancy","perinatal mental health"],
+  "sertraline": ["ssri","antidepressant","perinatal mental health","postnatal depression"],
+  "fluoxetine": ["ssri","antidepressant","perinatal mental health","postnatal depression"],
+  "lithium": ["mood stabiliser","bipolar pregnancy","perinatal mental health","postpartum psychosis"],
+  "bipolar pregnancy": ["lithium","mood stabiliser","perinatal mental health","sodium valproate"],
+  "sodium valproate": ["valproate contraindicated","teratogenic","bipolar pregnancy","lamotrigine"],
 };

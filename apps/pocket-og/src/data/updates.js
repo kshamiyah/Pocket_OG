@@ -4,6 +4,15 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.8.0",
+    date: "06/07/2026",
+    title: "Diabetes, anaemia & mental health drugs",
+    changes: [
+      { tag: "new", text: "Rx now covers three guides that had no drug pages before: insulin (VRII) and metformin for diabetes in pregnancy, oral iron and Ferinject for iron deficiency anaemia, and sertraline, fluoxetine and lithium for perinatal mental health." },
+      { tag: "new", text: "Three new topic cards: search \"diabetes\", \"anaemia\" or \"perinatal mental health\" to see the guide, drugs (and DKA pathway, for diabetes) together." },
+    ],
+  },
+  {
     version: "1.7.0",
     date: "06/07/2026",
     title: "Maternal collapse & cardiac arrest",

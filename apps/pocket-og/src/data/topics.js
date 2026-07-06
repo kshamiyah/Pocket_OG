@@ -436,6 +436,123 @@ export const TOPICS = {
       },
     ],
   },
+
+  "diabetes-in-pregnancy": {
+    id: "diabetes-in-pregnancy",
+    title: "Diabetes in pregnancy",
+    subtitle: "Pre-existing, GDM, VRII & DKA",
+    description: "Type 1, type 2 and gestational diabetes all raise the risk of macrosomia, stillbirth and neonatal hypoglycaemia; management centres on glucose targets, insulin titration and DKA vigilance (GL983).",
+    gl: "GL983",
+    terms: [
+      "diabetes", "diabetes in pregnancy", "gdm", "gestational diabetes",
+      "type 1 diabetes", "type 2 diabetes", "vrii", "sliding scale",
+      "dka", "diabetic ketoacidosis", "insulin pregnancy",
+    ],
+    sections: [
+      {
+        heading: "Guides",
+        entries: [
+          { type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in pregnancy (local guideline)", sublabel: "GL983: full guideline" },
+          { type: "reader", id: "GL983", sectionId: "dm-gdm", gl: "GL983", label: "GDM: screening, diagnosis & management", sublabel: "GL983: gestational diabetes" },
+          { type: "reader", id: "GL983", sectionId: "dm-vrii", gl: "GL983", label: "Variable rate insulin infusion (VRII)", sublabel: "GL983: full algorithm table" },
+          { type: "reader", id: "GL983", sectionId: "dm-dka", gl: "GL983", label: "Diabetic ketoacidosis (DKA)", sublabel: "GL983: diagnosis & treatment" },
+        ],
+      },
+      {
+        heading: "Pathways",
+        entries: [
+          { type: "flowchart", id: "GL983_DKA", gl: "GL983", label: "DKA in pregnancy", sublabel: "GL983 flowchart" },
+        ],
+      },
+      {
+        heading: "Drugs",
+        entries: [
+          { type: "drug", id: "insulin_vrii", gl: "GL983", label: "Insulin (VRII)", sublabel: "Rx: variable rate infusion" },
+          { type: "drug", id: "metformin", gl: "GL983", label: "Metformin", sublabel: "Rx: dose & pregnancy management" },
+        ],
+      },
+      {
+        heading: "Don't miss",
+        entries: [
+          { type: "reader", id: "GL983", sectionId: "dm-steroid", gl: "GL983", label: "Steroid prophylaxis and hyperglycaemia", sublabel: "GL983: insulin adjustment & DKA risk after steroids" },
+        ],
+      },
+    ],
+  },
+
+  "anaemia-in-pregnancy": {
+    id: "anaemia-in-pregnancy",
+    title: "Anaemia in pregnancy",
+    subtitle: "Iron deficiency: diagnosis & treatment",
+    description: "Haemoglobin below 110 g/L in the first trimester or 105 g/L thereafter defines anaemia in pregnancy; treatment escalates from oral iron to IV iron to transfusion depending on severity and response (GL783).",
+    gl: "GL783",
+    terms: [
+      "anaemia", "anemia", "ida", "iron deficiency", "iron deficiency anaemia",
+      "low haemoglobin", "low hb", "ferinject", "iv iron",
+    ],
+    sections: [
+      {
+        heading: "Guides",
+        entries: [
+          { type: "reader", id: "GL783", gl: "GL783", label: "Iron deficiency anaemia (local guideline)", sublabel: "GL783: full guideline" },
+          { type: "reader", id: "GL783", sectionId: "ida-diagnosis", gl: "GL783", label: "Diagnostic thresholds & monitoring", sublabel: "GL783: Hb, ferritin, MCV/MCH thresholds" },
+          { type: "reader", id: "GL783", sectionId: "ida-screening", gl: "GL783", label: "Who to screen with ferritin at booking", sublabel: "GL783: at-risk groups" },
+        ],
+      },
+      {
+        heading: "Drugs",
+        entries: [
+          { type: "drug", id: "oral_iron", gl: "GL783", label: "Oral iron", sublabel: "Rx: ferrous fumarate, sulphate, gluconate" },
+          { type: "drug", id: "ferric_carboxymaltose", gl: "GL783", label: "Ferric carboxymaltose (Ferinject)", sublabel: "Rx: IV iron, Ganzoni dose calculation" },
+        ],
+      },
+      {
+        heading: "Don't miss",
+        entries: [
+          { type: "reader", id: "GL783", sectionId: "ida-diagnosis", gl: "GL783", label: "Thalassaemia / sickle cell: never give routine iron", sublabel: "GL783: refer to haematology instead" },
+        ],
+      },
+    ],
+  },
+
+  "perinatal-mental-health": {
+    id: "perinatal-mental-health",
+    title: "Perinatal mental health",
+    subtitle: "Screening, EPDS & medication in pregnancy",
+    description: "Perinatal mental illness affects 10-20% of women antenatally or in the first postnatal year; suicide is the leading cause of direct maternal death in the first postnatal year, so screening and continuity of specialist care matter (CG192).",
+    gl: "CG192",
+    terms: [
+      "perinatal mental health", "postnatal depression", "antenatal depression",
+      "epds", "postpartum psychosis", "antidepressants pregnancy",
+      "ssri pregnancy", "mental health pregnancy",
+    ],
+    sections: [
+      {
+        heading: "Guides",
+        entries: [
+          { type: "reader", id: "CG192", gl: "CG192", label: "Perinatal mental health (NICE)", sublabel: "CG192: full guideline" },
+          { type: "reader", id: "CG192", sectionId: "cg192-overview", gl: "CG192", label: "Overview & risk identification", sublabel: "CG192: screening & risk factors" },
+          { type: "reader", id: "CG192", sectionId: "cg192-epds", gl: "CG192", label: "EPDS scoring", sublabel: "CG192: Edinburgh Postnatal Depression Scale" },
+          { type: "reader", id: "CG192", sectionId: "cg192-medications", gl: "CG192", label: "Medications in pregnancy & breastfeeding", sublabel: "CG192: SSRIs, mood stabilisers, antipsychotics" },
+        ],
+      },
+      {
+        heading: "Drugs",
+        entries: [
+          { type: "drug", id: "sertraline", gl: "CG192", label: "Sertraline", sublabel: "Rx: first-line SSRI" },
+          { type: "drug", id: "fluoxetine", gl: "CG192", label: "Fluoxetine", sublabel: "Rx: second-choice SSRI" },
+          { type: "drug", id: "lithium", gl: "CG192", label: "Lithium", sublabel: "Rx: mood stabiliser, specialist-guided" },
+        ],
+      },
+      {
+        heading: "Don't miss",
+        entries: [
+          { type: "reader", id: "CG192", sectionId: "cg192-medications", gl: "CG192", label: "Sodium valproate is contraindicated", sublabel: "CG192: MHRA Pregnancy Prevention Programme" },
+          { type: "reader", id: "CG192", sectionId: "cg192-postnatal", gl: "CG192", label: "Postnatal care & future pregnancy planning", sublabel: "CG192: relapse prevention" },
+        ],
+      },
+    ],
+  },
 };
 
 const normalise = (q) =>

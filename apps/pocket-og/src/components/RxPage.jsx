@@ -11,6 +11,9 @@ import { ENDOMETRIOSIS_DRUGS } from "../data/rx/endometriosis";
 import { CONTRACEPTION } from "../data/rx/contraception";
 import { CYTOTOXICS } from "../data/rx/cytotoxics";
 import { RESUSCITATION_DRUGS } from "../data/rx/resuscitation";
+import { DIABETES_DRUGS } from "../data/rx/diabetes";
+import { ANAEMIA_DRUGS } from "../data/rx/anaemia";
+import { MENTAL_HEALTH_DRUGS } from "../data/rx/mentalHealth";
 import AlphabetSidebar from "./AlphabetSidebar";
 
 const ALL_DRUGS = [
@@ -26,6 +29,9 @@ const ALL_DRUGS = [
   ...CONTRACEPTION.map(d =>        ({ ...d, category: "Contraception" })),
   ...CYTOTOXICS.map(d =>           ({ ...d, category: "Cytotoxic" })),
   ...RESUSCITATION_DRUGS.map(d =>  ({ ...d, category: "Resuscitation" })),
+  ...DIABETES_DRUGS.map(d =>       ({ ...d, category: "Diabetes" })),
+  ...ANAEMIA_DRUGS.map(d =>        ({ ...d, category: "Anaemia" })),
+  ...MENTAL_HEALTH_DRUGS.map(d =>  ({ ...d, category: "Mental Health" })),
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 // Rx is colour-coded by drug class (its own zone — drugs aren't tied to one
@@ -43,6 +49,9 @@ const CATEGORY_ACCENT = {
   "Contraception":    "bg-pink-500",
   "Cytotoxic":        "bg-orange-500",
   "Resuscitation":    "bg-red-500",
+  "Diabetes":         "bg-pink-500",
+  "Anaemia":          "bg-amber-500",
+  "Mental Health":    "bg-purple-500",
 };
 
 const CATEGORY_COLOR = {
@@ -58,6 +67,9 @@ const CATEGORY_COLOR = {
   "Contraception":    "text-pink-500",
   "Cytotoxic":        "text-orange-500",
   "Resuscitation":    "text-red-500",
+  "Diabetes":         "text-pink-500",
+  "Anaemia":          "text-amber-500",
+  "Mental Health":    "text-purple-500",
 };
 
 const ROUTE_LABEL = { oral: "Oral", iv: "IV", im: "IM", sc: "SC", sl: "SL", vag: "Vaginal", rectal: "Rectal", patch: "Patch", implant: "Implant", iud: "IUD/IUS", topical: "Topical" };

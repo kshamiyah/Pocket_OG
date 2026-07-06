@@ -19,6 +19,9 @@ import { ENDOMETRIOSIS_DRUGS } from "../data/rx/endometriosis";
 import { CONTRACEPTION } from "../data/rx/contraception";
 import { CYTOTOXICS } from "../data/rx/cytotoxics";
 import { RESUSCITATION_DRUGS } from "../data/rx/resuscitation";
+import { DIABETES_DRUGS } from "../data/rx/diabetes";
+import { ANAEMIA_DRUGS } from "../data/rx/anaemia";
+import { MENTAL_HEALTH_DRUGS } from "../data/rx/mentalHealth";
 
 const words = (s) => (s ? s.toLowerCase().match(/[a-z0-9]+/g) ?? [] : []);
 const uniq = (arr) => [...new Set(arr.filter(Boolean))];
@@ -54,6 +57,9 @@ const DRUG_GROUPS = [
   [CONTRACEPTION, "Contraception"],
   [CYTOTOXICS, "Cytotoxic"],
   [RESUSCITATION_DRUGS, "Resuscitation"],
+  [DIABETES_DRUGS, "Diabetes"],
+  [ANAEMIA_DRUGS, "Anaemia"],
+  [MENTAL_HEALTH_DRUGS, "Mental Health"],
 ];
 
 export const DRUG_SECTIONS = DRUG_GROUPS.flatMap(([drugs, category]) =>
