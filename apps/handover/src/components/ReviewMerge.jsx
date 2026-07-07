@@ -13,10 +13,8 @@ export default function ReviewMerge({ incomingJobs, onMerge, onDiscard }) {
   const chosen = incomingJobs.filter((j) => selected.has(j.id));
 
   return (
-    <div
-      className="min-h-screen bg-white dark:bg-gray-950 flex flex-col px-5"
-      style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)", paddingBottom: "calc(env(safe-area-inset-bottom) + 1.5rem)" }}
-    >
+    <div className="h-screen flex flex-col bg-white dark:bg-gray-950 px-5">
+      <div className="shrink-0" style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}>
       <div className="mb-2">
         <span className="text-[11px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-1 rounded-md">
           {incomingJobs.length} job{incomingJobs.length === 1 ? "" : "s"} received
@@ -26,8 +24,9 @@ export default function ReviewMerge({ incomingJobs, onMerge, onDiscard }) {
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
         Uncheck anything you don't want on your list.
       </p>
+      </div>
 
-      <div className="flex-1 overflow-y-auto flex flex-col gap-2 mb-4">
+      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2 mb-4">
         {incomingJobs.map((job) => {
           const on = selected.has(job.id);
           const urgent = job.priority === "urgent";
@@ -55,8 +54,8 @@ export default function ReviewMerge({ incomingJobs, onMerge, onDiscard }) {
                       </span>
                     )}
                     {job.bed && (
-                      <span className="text-[10px] font-bold tabular-nums text-gray-600 dark:text-gray-400 bg-gray-200/80 dark:bg-gray-800 px-1.5 py-0.5 rounded">
-                        Bed {job.bed}
+                      <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                        {job.bed}
                       </span>
                     )}
                     {urgent && (
@@ -73,16 +72,18 @@ export default function ReviewMerge({ incomingJobs, onMerge, onDiscard }) {
         })}
       </div>
 
-      <button
-        onClick={() => onMerge(chosen)}
-        disabled={chosen.length === 0}
-        className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white disabled:bg-gray-200 dark:disabled:bg-gray-800 text-white dark:text-gray-950 disabled:text-gray-400 text-base font-bold mb-2.5 active:scale-95 transition-all"
-      >
-        Add {chosen.length || ""} to my list
-      </button>
-      <button onClick={onDiscard} className="w-full py-3 text-sm font-medium text-gray-500 dark:text-gray-400">
-        Discard
-      </button>
+      <div className="shrink-0" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1.5rem)" }}>
+        <button
+          onClick={() => onMerge(chosen)}
+          disabled={chosen.length === 0}
+          className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white disabled:bg-gray-200 dark:disabled:bg-gray-800 text-white dark:text-gray-950 disabled:text-gray-400 text-base font-bold mb-2.5 active:scale-95 transition-all"
+        >
+          Add {chosen.length || ""} to my list
+        </button>
+        <button onClick={onDiscard} className="w-full py-3 text-sm font-medium text-gray-500 dark:text-gray-400">
+          Discard
+        </button>
+      </div>
     </div>
   );
 }

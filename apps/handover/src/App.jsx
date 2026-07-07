@@ -1,16 +1,15 @@
-import { useCallback, useState } from "react";
-import Onboarding from "./components/Onboarding";
-import PortfolioScreen from "./components/PortfolioScreen";
-import JobList from "./components/JobList";
+import { useState } from "react";
+import PortfolioSetup from "./components/PortfolioSetup";
+import IntroScreen from "./components/IntroScreen";
+import WardsIntroScreen from "./components/WardsIntroScreen";
+import ShiftPicker from "./components/ShiftPicker";
+import Home from "./components/Home";
 import HandoverScreen from "./components/HandoverScreen";
 import ScanScreen from "./components/ScanScreen";
 import ReviewMerge from "./components/ReviewMerge";
-import {
-  getActivePortfolio,
-  activatePortfolio,
-  persistActivePortfolio,
-  listPortfolios,
-} from "./utils/portfolios";
+import WardManager from "./components/WardManager";
+import WardSetup from "./components/WardSetup";
+import { Storage } from "./utils/storage";
 import { nextId } from "./utils/jobs";
 import { decodeHandoverPayload, extractHandoverCode } from "./utils/payload";
 
@@ -25,101 +24,56 @@ function incomingFromUrl() {
   }
 }
 
-function initialView(incoming, portfolio) {
-  if (incoming) return "review";
-  if (!portfolio) return listPortfolios().length > 0 ? "portfolios" : "portfolios-create";
-  if (!portfolio.shift) return "onboarding";
-  return "list";
-}
-
 export default function App() {
-  const [portfolio, setPortfolioState] = useState(getActivePortfolio);
-  const [jobs, setJobsState] = useState(() => getActivePortfolio()?.jobs ?? []);
-  const [recentWards, setRecentWardsState] = useState(() => getActivePortfolio()?.recentWards ?? []);
-  const [recentPhrases, setRecentPhrasesState] = useState(() => getActivePortfolio()?.recentPhrases ?? []);
-  const [wardTasks, setWardTasksState] = useState(() => getActivePortfolio()?.wardTasks ?? {});
-  const [wardLayouts, setWardLayoutsState] = useState(() => getActivePortfolio()?.wardLayouts ?? {});
-  const [recentBeds, setRecentBedsState] = useState(() => getActivePortfolio()?.recentBeds ?? {});
-  const [captureMode, setCaptureModeState] = useState(() => getActivePortfolio()?.captureMode ?? "round");
+  const [profile, setProfileState] = useState(Storage.getProfile);
+  const [shift, setShiftState] = useState(Storage.getShift);
+  const [jobs, setJobsState] = useState(Storage.getJobs);
+  const [recentWards, setRecentWardsState] = useState(Storage.getRecentWards);
+  const [recentBeds, setRecentBedsState] = useState(Storage.getRecentBeds);
+  const [wardLayouts, setWardLayoutsState] = useState(Storage.getWardLayouts);
   const [incomingJobs, setIncomingJobs] = useState(incomingFromUrl);
-  const [view, setView] = useState(() => initialView(incomingFromUrl(), getActivePortfolio()));
+  const [wardSetupTarget, setWardSetupTarget] = useState(null);
+  const [wardSetupReturn, setWardSetupReturn] = useState("list");
+  // Rounds/Walk focus lives here, not inside Home's children, so it survives
+  // switching tabs and even leaving Home entirely (Handover, Scan, Bed setup)
+  // and coming back.
+  const [selectedWard, setSelectedWard] = useState(null);
+  const [selectedBed, setSelectedBed] = useState(null);
+  const [bedSelected, setBedSelected] = useState(false);
+  const [view, setView] = useState(() =>
+    incomingJobs ? "review" : !profile ? "portfolio" : !shift ? "shift" : "list"
+  );
 
-  const loadPortfolio = useCallback((next) => {
-    activatePortfolio(next.id);
-    setPortfolioState(next);
-    setJobsState(next.jobs ?? []);
-    setRecentWardsState(next.recentWards ?? []);
-    setRecentPhrasesState(next.recentPhrases ?? []);
-    setWardTasksState(next.wardTasks ?? {});
-    setWardLayoutsState(next.wardLayouts ?? {});
-    setRecentBedsState(next.recentBeds ?? {});
-    setCaptureModeState(next.captureMode ?? "round");
-    return next;
-  }, []);
+  const setJobs = (next) => { setJobsState(next); Storage.setJobs(next); };
+  const setRecentWards = (next) => { setRecentWardsState(next); Storage.setRecentWards(next); };
+  const setRecentBeds = (next) => { setRecentBedsState(next); Storage.setRecentBeds(next); };
+  const setWardLayouts = (next) => { setWardLayoutsState(next); Storage.setWardLayouts(next); };
 
-  const setJobs = (next) => {
-    setJobsState(next);
-    persistActivePortfolio({ jobs: next });
+  const gateView = () => (!profile ? "portfolio" : !shift ? "shift" : "list");
+
+  const completePortfolio = ({ role }) => {
+    const nextProfile = { role };
+    Storage.setProfile(nextProfile);
+    setProfileState(nextProfile);
+    // First-ever launch only — completePortfolio only runs once, when
+    // profile was previously unset, so this chain can't resurface later.
+    setView("intro");
   };
 
-  const setRecentWards = (next) => {
-    setRecentWardsState(next);
-    persistActivePortfolio({ recentWards: next });
-  };
-
-  const setRecentPhrases = (next) => {
-    setRecentPhrasesState(next);
-    persistActivePortfolio({ recentPhrases: next });
-  };
-
-  const setWardTasks = (next) => {
-    setWardTasksState(next);
-    persistActivePortfolio({ wardTasks: next });
-  };
-
-  const setWardLayouts = (next) => {
-    setWardLayoutsState(next);
-    persistActivePortfolio({ wardLayouts: next });
-  };
-
-  const setRecentBeds = (next) => {
-    setRecentBedsState(next);
-    persistActivePortfolio({ recentBeds: next });
-  };
-
-  const setCaptureMode = (next) => {
-    setCaptureModeState(next);
-    persistActivePortfolio({ captureMode: next });
-  };
-
-  const selectPortfolio = (next) => {
-    const loaded = loadPortfolio(next);
-    setView(loaded.shift ? "list" : "onboarding");
-  };
-
-  const completeOnboarding = ({ shiftType }) => {
-    const shift = { type: shiftType, startedAt: new Date().toISOString() };
-    const updated = persistActivePortfolio({ shift });
-    if (updated) setPortfolioState(updated);
+  const completeShift = ({ shiftType }) => {
+    const nextShift = { type: shiftType, startedAt: new Date().toISOString() };
+    Storage.setShift(nextShift);
+    setShiftState(nextShift);
     setView("list");
   };
 
-  const endShift = () => {
-    const updated = persistActivePortfolio({ shift: null });
-    if (updated) setPortfolioState(updated);
-    setView("onboarding");
-  };
-
+  // Ending a handover ends the shift — the next time this device is opened
+  // it asks what's starting next, the "clocking out" half of the ritual.
   const finishHandover = ({ clear }) => {
     if (clear) setJobs([]);
-    setView("list");
-  };
-
-  const afterIncoming = () => {
-    const active = getActivePortfolio();
-    if (active?.shift) return "list";
-    if (active) return "onboarding";
-    return listPortfolios().length > 0 ? "portfolios" : "portfolios-create";
+    Storage.clearShift();
+    setShiftState(null);
+    setView("shift");
   };
 
   const mergeIncoming = (chosen) => {
@@ -129,33 +83,50 @@ export default function App() {
     running = [...running, ...withIds];
     setJobs(running);
     setIncomingJobs(null);
-    setView(afterIncoming());
+    setView(gateView());
   };
 
   const discardIncoming = () => {
     setIncomingJobs(null);
-    setView(afterIncoming());
+    setView(gateView());
   };
 
-  if (view === "portfolios" || view === "portfolios-create") {
+  const openWardSetup = (wardName, returnTo = "list") => {
+    setWardSetupTarget(wardName);
+    setWardSetupReturn(returnTo);
+    setView("wardSetup");
+  };
+  const saveWardLayout = (layout) => {
+    setWardLayouts({ ...wardLayouts, [wardSetupTarget]: layout });
+    setView(wardSetupReturn);
+  };
+
+  const wardNames = [...new Set([
+    ...Object.keys(wardLayouts),
+    ...recentWards,
+    ...jobs.map((j) => j.ward).filter(Boolean),
+  ])].sort((a, b) => a.localeCompare(b));
+
+  if (view === "portfolio") {
+    return <PortfolioSetup initialRole={profile?.role} onComplete={completePortfolio} />;
+  }
+
+  if (view === "intro") {
+    return <IntroScreen onComplete={() => setView("wardsIntro")} />;
+  }
+
+  if (view === "wardsIntro") {
     return (
-      <PortfolioScreen
-        mode={view === "portfolios-create" ? "create" : "pick"}
-        activeId={portfolio?.id}
-        onSelect={selectPortfolio}
-        onBack={portfolio && view === "portfolios" ? () => setView(portfolio.shift ? "list" : "onboarding") : undefined}
+      <WardsIntroScreen
+        wardLayouts={wardLayouts}
+        onAddWard={(ward) => openWardSetup(ward, "wardsIntro")}
+        onComplete={() => setView("shift")}
       />
     );
   }
 
-  if (view === "onboarding" && portfolio) {
-    return (
-      <Onboarding
-        portfolio={portfolio}
-        onComplete={completeOnboarding}
-        onSwitchPortfolio={() => setView("portfolios")}
-      />
-    );
+  if (view === "shift") {
+    return <ShiftPicker onComplete={completeShift} />;
   }
 
   if (view === "review" && incomingJobs) {
@@ -175,37 +146,48 @@ export default function App() {
     );
   }
 
-  if (!portfolio) {
+  if (view === "wards") {
     return (
-      <PortfolioScreen
-        mode="create"
-        activeId={null}
-        onSelect={selectPortfolio}
+      <WardManager
+        wardNames={wardNames}
+        wardLayouts={wardLayouts}
+        onEditWard={(ward) => openWardSetup(ward, "wards")}
+        onBack={() => setView("list")}
+      />
+    );
+  }
+
+  if (view === "wardSetup") {
+    return (
+      <WardSetup
+        wardName={wardSetupTarget}
+        existingLayout={wardLayouts[wardSetupTarget]}
+        onSave={saveWardLayout}
+        onCancel={() => setView(wardSetupReturn)}
       />
     );
   }
 
   return (
-    <JobList
-      portfolio={portfolio}
+    <Home
       jobs={jobs}
       setJobs={setJobs}
+      shiftType={shift?.type}
       recentWards={recentWards}
       setRecentWards={setRecentWards}
-      recentPhrases={recentPhrases}
-      setRecentPhrases={setRecentPhrases}
-      wardTasks={wardTasks}
-      setWardTasks={setWardTasks}
-      wardLayouts={wardLayouts}
-      setWardLayouts={setWardLayouts}
       recentBeds={recentBeds}
       setRecentBeds={setRecentBeds}
-      captureMode={captureMode}
-      setCaptureMode={setCaptureMode}
+      wardLayouts={wardLayouts}
       onHandover={() => setView("handover")}
       onScan={() => setView("scan")}
-      onPortfolios={() => setView("portfolios")}
-      onEndShift={endShift}
+      onSetupWard={(ward) => openWardSetup(ward, "list")}
+      onManageWards={() => setView("wards")}
+      selectedWard={selectedWard}
+      setSelectedWard={setSelectedWard}
+      selectedBed={selectedBed}
+      setSelectedBed={setSelectedBed}
+      bedSelected={bedSelected}
+      setBedSelected={setBedSelected}
     />
   );
 }

@@ -41,9 +41,6 @@ npm run dev -w apps/handover
 
 # Run ward manager clinical rule tests
 npm test -w apps/ward-manager
-
-# Run handover unit tests
-npx vitest run apps/handover/src/utils/*.test.js
 ```
 
 ## Tech stack
