@@ -85,16 +85,16 @@ export default function AddJobForm({
       <div className="flex-1 min-h-0 overflow-y-auto px-6" style={{ paddingTop: "calc(env(safe-area-inset-top) + 2rem)" }}>
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Add a job</h1>
-          <button onClick={onClose} className="text-xs font-bold text-gray-400 dark:text-gray-600">Done</button>
+          <button onClick={onClose} className="text-sm font-bold text-gray-400 dark:text-gray-600 px-3 py-2 active:scale-95 transition-all min-h-[36px]">Done</button>
         </div>
 
         <p className={LABEL}>Ward</p>
         <div className="flex flex-wrap gap-2 mb-6">
           {wardChips.map((w) => (
-            <button key={w} onClick={() => chooseWard(w)} className={`${CHIP} ${stickyWard === w ? CHIP_ON : CHIP_OFF}`}>{w}</button>
+            <button key={w} onClick={() => chooseWard(w)} className={`${CHIP} ${stickyWard === w ? CHIP_ON : CHIP_OFF} active:scale-95 transition-all`}>{w}</button>
           ))}
           <NewChipEntry placeholder="Ward name" onCommit={chooseWard} />
-          {stickyWard && <button onClick={() => chooseWard("")} className={`${CHIP} ${CHIP_OFF}`}>No ward</button>}
+          {stickyWard && <button onClick={() => chooseWard("")} className={`${CHIP} ${CHIP_OFF} active:scale-95 transition-all`}>No ward</button>}
         </div>
 
         {stickyWard && (
@@ -102,12 +102,12 @@ export default function AddJobForm({
             <p className={LABEL}>Bed</p>
             <div className="flex flex-wrap gap-2 mb-2">
               {bedChips.map((b) => (
-                <button key={b} onClick={() => chooseBed(b)} className={`${CHIP} ${stickyBed === b ? CHIP_ON : CHIP_OFF}`}>{b}</button>
+                <button key={b} onClick={() => chooseBed(b)} className={`${CHIP} ${stickyBed === b ? CHIP_ON : CHIP_OFF} active:scale-95 transition-all`}>{b}</button>
               ))}
               <NewChipEntry placeholder="Bed / room" onCommit={chooseBed} />
-              {stickyBed && <button onClick={() => chooseBed("")} className={`${CHIP} ${CHIP_OFF}`}>No bed</button>}
+              {stickyBed && <button onClick={() => chooseBed("")} className={`${CHIP} ${CHIP_OFF} active:scale-95 transition-all`}>No bed</button>}
             </div>
-            <button onClick={() => onSetupWard(stickyWard)} className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-6">
+            <button onClick={() => onSetupWard(stickyWard)} className="text-sm font-bold text-amber-700 dark:text-amber-400 mb-6 px-2 py-1.5 active:scale-95 transition-all">
               {wardConfigured ? "Edit beds for this ward" : "Set up beds for this ward"}
             </button>
           </>
@@ -148,7 +148,7 @@ export default function AddJobForm({
         <button
           onClick={save}
           disabled={!text.trim()}
-          className="w-full py-4 rounded-2xl bg-amber-600 disabled:bg-gray-200 dark:disabled:bg-gray-800 text-white disabled:text-gray-400 text-base font-bold active:scale-95 transition-all"
+          className="w-full py-4 rounded-2xl bg-amber-600 disabled:bg-gray-200 dark:disabled:bg-gray-800 text-white disabled:text-gray-400 text-base font-bold active:scale-95 transition-all min-h-[52px]"
         >
           Add job
         </button>

@@ -70,7 +70,7 @@ export default function ScanScreen({ onBack, onScanned }) {
       style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)", paddingBottom: "calc(env(safe-area-inset-bottom) + 1.5rem)" }}
     >
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={onBack} className="text-sm font-bold text-gray-500 dark:text-gray-400" aria-label="Back to home">← Home</button>
+        <button onClick={onBack} className="text-sm font-bold text-gray-500 dark:text-gray-400 px-2 py-1.5 active:scale-95 transition-all" aria-label="Back to home">← Home</button>
         <div className="font-extrabold text-lg text-gray-900 dark:text-white">
           Handover<span className="text-amber-600">.</span>
         </div>
@@ -100,12 +100,12 @@ export default function ScanScreen({ onBack, onScanned }) {
           value={pastedLink}
           onChange={(e) => setPastedLink(e.target.value)}
           placeholder="Or paste the handover link"
-          className="flex-1 min-w-0 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-3.5 py-2.5 text-base text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+          className="flex-1 min-w-0 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-3.5 py-3 text-base text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
         />
         <button
           onClick={() => pastedLink.trim() && handleCode(pastedLink.trim())}
           disabled={!pastedLink.trim()}
-          className="shrink-0 px-4 py-2.5 rounded-xl bg-amber-600 disabled:bg-gray-200 dark:disabled:bg-gray-800 text-white disabled:text-gray-400 text-sm font-bold active:scale-95 transition-all"
+          className="shrink-0 px-5 py-3 rounded-xl bg-amber-600 disabled:bg-gray-200 dark:disabled:bg-gray-800 text-white disabled:text-gray-400 text-base font-bold active:scale-95 transition-all min-h-[48px]"
         >
           Go
         </button>
