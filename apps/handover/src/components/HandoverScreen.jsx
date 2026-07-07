@@ -58,12 +58,10 @@ export default function HandoverScreen({ jobs, onBack, onFinish }) {
   const finish = () => onFinish({ clear: !keepCopy });
 
   return (
-    <div
-      className="min-h-screen bg-white dark:bg-gray-950 flex flex-col px-5"
-      style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)", paddingBottom: "calc(env(safe-area-inset-bottom) + 1.5rem)" }}
-    >
+    <div className="h-screen flex flex-col bg-white dark:bg-gray-950 px-5">
+      <div className="flex-1 min-h-0 overflow-y-auto" style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}>
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={onBack} className="text-gray-500 text-xl leading-none">←</button>
+        <button onClick={onBack} className="text-sm font-bold text-gray-500 dark:text-gray-400" aria-label="Back to home">← Home</button>
         <div className="font-extrabold text-lg text-gray-900 dark:text-white">
           Handover<span className="text-amber-600">.</span>
         </div>
@@ -117,8 +115,9 @@ export default function HandoverScreen({ jobs, onBack, onFinish }) {
         </div>
         <Toggle on={keepCopy} onClick={() => setKeepCopy((v) => !v)} />
       </div>
+      </div>
 
-      <div className="mt-auto">
+      <div className="shrink-0 pt-4" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1.5rem)" }}>
         <button
           onClick={finish}
           className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all"
