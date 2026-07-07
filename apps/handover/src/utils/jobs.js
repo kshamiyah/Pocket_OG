@@ -1,5 +1,5 @@
 import { PRIORITY, NO_WARD_LABEL } from "./constants";
-import { bedsForWard } from "./wardLayouts";
+import { bedsForWard, compareBedLabels } from "./wardLayouts";
 
 export const GENERAL_BED = null;
 
@@ -86,9 +86,9 @@ export function buildHierarchy(jobs, { wardNames = [], wardLayouts = {}, recentB
     const beds = [...bedMap.entries()]
       .map(([bed, list]) => ({ bed, jobs: sortByUrgency(list), ...counts(list) }))
       .sort((a, b) => {
-        if (a.bed === GENERAL_BED) return 1;
-        if (b.bed === GENERAL_BED) return -1;
-        return a.bed.localeCompare(b.bed, undefined, { numeric: true });
+        if (a.bed === GENERAL_BED) return -1;
+        if (b.bed === GENERAL_BED) return 1;
+        return compareBedLabels(a.bed, b.bed);
       });
     const allJobs = beds.flatMap((b) => b.jobs);
     return { ward, beds, ...counts(allJobs) };
@@ -104,4 +104,10 @@ export function summarize(jobs) {
     urgent: open.filter((j) => j.priority === PRIORITY.URGENT).length,
     done: jobs.length - open.length,
   };
+}
+
+export function shiftSummary(jobs) {
+  const wards = [...new Set(jobs.map((j) => j.ward).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const { open, urgent, done } = summarize(jobs);
+  return { total: jobs.length, wards, wardCount: wards.length, open, urgent, done };
 }

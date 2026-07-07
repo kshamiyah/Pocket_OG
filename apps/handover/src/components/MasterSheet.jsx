@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { buildHierarchy } from "../utils/jobs";
+import { NO_WARD_LABEL } from "../utils/constants";
+import { groupBedsBySection } from "../utils/wardLayouts";
 import JobCard from "./JobCard";
 import QuickAddRow from "./QuickAddRow";
+import { bedRowTone, sectionCounts } from "../utils/bedDisplay";
 
 const NO_WARD_KEY = "__noward__";
 
@@ -15,16 +18,26 @@ function Chevron({ open }) {
 export default function MasterSheet({
   jobs, wardNames, wardLayouts, recentWards, recentBeds,
   editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onDelete,
-  onAddJob,
+  onAddJob, listBottomPad,
 }) {
   const [openWards, setOpenWards] = useState(new Set());
   const [openBeds, setOpenBeds] = useState(new Set());
+  const [collapsedSections, setCollapsedSections] = useState(new Set());
 
   const { wards, noWard } = buildHierarchy(jobs, { wardNames, wardLayouts, recentBeds });
 
   const toggleWard = (key) => setOpenWards((s) => { const n = new Set(s); n.has(key) ? n.delete(key) : n.add(key); return n; });
   const bedKey = (ward, bed) => `${ward}::${bed}`;
   const toggleBed = (ward, bed) => setOpenBeds((s) => { const k = bedKey(ward, bed); const n = new Set(s); n.has(k) ? n.delete(k) : n.add(k); return n; });
+  const sectionKey = (ward, groupKey) => `${ward}::${groupKey}`;
+  const isSectionOpen = (ward, groupKey) => !collapsedSections.has(sectionKey(ward, groupKey));
+  const toggleSection = (ward, groupKey) => setCollapsedSections((s) => {
+    const k = sectionKey(ward, groupKey);
+    const n = new Set(s);
+    if (n.has(k)) n.delete(k);
+    else n.add(k);
+    return n;
+  });
 
   const cardProps = { editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onDelete, recentWards, recentBeds };
   const renderCard = (job, hideLocation) => (
@@ -32,7 +45,10 @@ export default function MasterSheet({
   );
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto px-5 py-3 flex flex-col gap-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 6rem)" }}>
+    <div
+      className="flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden px-5 py-3 flex flex-col gap-2 touch-pan-y"
+      style={{ paddingBottom: listBottomPad ?? "calc(env(safe-area-inset-bottom) + 6rem)" }}
+    >
       {wards.length === 0 && noWard.jobs.length === 0 && (
         <p className="text-sm text-gray-400 dark:text-gray-600 text-center mt-10">No jobs yet.</p>
       )}
@@ -40,8 +56,8 @@ export default function MasterSheet({
       {wards.map((w) => {
         const wardOpen = openWards.has(w.ward);
         return (
-          <div key={w.ward} className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-            <button onClick={() => toggleWard(w.ward)} className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-900/60">
+          <div key={w.ward} className="rounded-xl border border-gray-200 dark:border-gray-800">
+            <button onClick={() => toggleWard(w.ward)} className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-900/60 rounded-t-xl">
               <span className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
                 <Chevron open={wardOpen} /> {w.ward}
               </span>
@@ -51,30 +67,71 @@ export default function MasterSheet({
               </span>
             </button>
             {wardOpen && (
-              <div className="px-3 pb-3 flex flex-col gap-1.5 pt-1">
-                {w.beds.map((b) => {
-                  const key = bedKey(w.ward, b.bed);
-                  const bOpen = openBeds.has(key);
-                  const label = b.bed === null ? "General" : b.bed;
+              <div className="px-3 pb-3 flex flex-col gap-3 pt-1">
+                {groupBedsBySection(w.beds, { layout: wardLayouts[w.ward] }).map((group) => {
+                  const sectionOpen = group.kind === "general" || isSectionOpen(w.ward, group.key);
+                  const counts = sectionCounts(group.beds);
                   return (
-                    <div key={key} className="rounded-lg border border-gray-100 dark:border-gray-800/60">
-                      <button onClick={() => toggleBed(w.ward, b.bed)} className="w-full flex items-center justify-between px-3 py-2">
-                        <span className="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                          <Chevron open={bOpen} /> {label}
+                  <div key={group.key} className="flex flex-col gap-1">
+                    {group.kind !== "general" ? (
+                      <button
+                        type="button"
+                        onClick={() => toggleSection(w.ward, group.key)}
+                        className="w-full flex items-center justify-between gap-2 px-1 pt-1"
+                      >
+                        <span className="flex items-center gap-1 min-w-0">
+                          <Chevron open={sectionOpen} />
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 truncate">
+                            {group.title}
+                          </span>
                         </span>
-                        <span className="flex items-center gap-1.5">
-                          {b.urgent > 0 && <span className="w-1.5 h-1.5 rounded-full bg-red-500" aria-label="Has urgent jobs" />}
-                          <span className="text-xs font-semibold text-gray-400 dark:text-gray-600">{b.open}</span>
-                        </span>
+                        {counts.open > 0 && (
+                          <span className="flex items-center gap-1.5 shrink-0">
+                            {counts.urgent > 0 && <span className="w-1.5 h-1.5 rounded-full bg-red-500" aria-label="Has urgent jobs" />}
+                            <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{counts.open}</span>
+                          </span>
+                        )}
                       </button>
-                      {bOpen && (
-                        <div className="px-3 pb-3 flex flex-col gap-2">
-                          <QuickAddRow ward={w.ward} bed={b.bed || ""} jobs={jobs} onAddJob={onAddJob} />
-                          {b.jobs.length === 0 && <p className="text-xs text-gray-400 dark:text-gray-600">No jobs here yet.</p>}
-                          {b.jobs.map((job) => renderCard(job, true))}
-                        </div>
-                      )}
+                    ) : null}
+                    {sectionOpen && (
+                    <div className={group.grid ? "grid grid-cols-2 gap-1.5" : "flex flex-col gap-1.5"}>
+                      {group.beds.map((b) => {
+                        const key = bedKey(w.ward, b.bed);
+                        const bOpen = openBeds.has(key);
+                        const label = b.bed === null ? "General" : b.bed;
+                        const tone = bedRowTone({ open: b.open, urgent: b.urgent });
+                        return (
+                          <div
+                            key={key}
+                            className={`rounded-lg border overflow-hidden ${tone.shell}`}
+                          >
+                            <button
+                              onClick={() => toggleBed(w.ward, b.bed)}
+                              className="w-full flex items-center justify-between px-3 py-2"
+                            >
+                              <span className={`${tone.labelSm} flex items-center gap-1.5`}>
+                                <Chevron open={bOpen} /> {label}
+                              </span>
+                              {!tone.empty && (
+                                <span className="flex items-center gap-1.5">
+                                  {b.urgent > 0 && <span className="w-1.5 h-1.5 rounded-full bg-red-500" aria-label="Has urgent jobs" />}
+                                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{b.open}</span>
+                                </span>
+                              )}
+                            </button>
+                            {bOpen && (
+                              <div className="px-3 pb-3 flex flex-col gap-2 border-t border-gray-100 dark:border-gray-800/60">
+                                <QuickAddRow ward={w.ward} bed={b.bed || ""} jobs={jobs} onAddJob={onAddJob} />
+                                {b.jobs.length === 0 && <p className="text-xs text-gray-400 dark:text-gray-600">No jobs here yet.</p>}
+                                {b.jobs.map((job) => renderCard(job, true))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
+                    )}
+                  </div>
                   );
                 })}
               </div>
@@ -84,10 +141,10 @@ export default function MasterSheet({
       })}
 
       {noWard.jobs.length > 0 && (
-        <div className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-          <button onClick={() => toggleWard(NO_WARD_KEY)} className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-900/60">
+        <div className="rounded-xl border border-gray-200 dark:border-gray-800">
+          <button onClick={() => toggleWard(NO_WARD_KEY)} className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-900/60 rounded-xl">
             <span className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
-              <Chevron open={openWards.has(NO_WARD_KEY)} /> No ward
+              <Chevron open={openWards.has(NO_WARD_KEY)} /> {NO_WARD_LABEL}
             </span>
             <span className="flex items-center gap-1.5">
               {noWard.urgent > 0 && <span className="w-2 h-2 rounded-full bg-red-500" aria-label="Has urgent jobs" />}

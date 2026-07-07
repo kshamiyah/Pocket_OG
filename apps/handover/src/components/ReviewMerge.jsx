@@ -17,7 +17,7 @@ export default function ReviewMerge({ incomingJobs, onMerge, onDiscard }) {
       <div className="shrink-0" style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}>
       <div className="mb-2">
         <span className="text-[11px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-1 rounded-md">
-          {incomingJobs.length} job{incomingJobs.length === 1 ? "" : "s"} received
+          {incomingJobs.length} job{incomingJobs.length === 1 ? "" : "s"} to take over
         </span>
       </div>
       <h1 className="text-gray-900 dark:text-white text-2xl font-bold mb-1">Review before it lands</h1>
@@ -41,7 +41,7 @@ export default function ReviewMerge({ incomingJobs, onMerge, onDiscard }) {
               <div className="flex items-start gap-2.5">
                 <span
                   className={`mt-0.5 w-5 h-5 rounded-md border-2 shrink-0 flex items-center justify-center ${
-                    on ? "bg-amber-600 border-amber-600" : "border-gray-400 dark:border-gray-600"
+                    on ? "bg-claude-600 border-claude-600" : "border-gray-400 dark:border-gray-600"
                   }`}
                 >
                   {on && <span className="text-white text-[10px]">✓</span>}
@@ -49,7 +49,7 @@ export default function ReviewMerge({ incomingJobs, onMerge, onDiscard }) {
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
                     {job.ward && (
-                      <span className="text-[10px] font-bold uppercase tracking-wide text-amber-800 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] font-bold uppercase tracking-wide text-claude-800 dark:text-claude-400 bg-claude-100 dark:bg-claude-900/30 px-1.5 py-0.5 rounded">
                         {job.ward}
                       </span>
                     )}

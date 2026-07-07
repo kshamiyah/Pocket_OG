@@ -6,6 +6,8 @@ const KEYS = {
   recentPhrases: "handover_recent_phrases_v1",
   wardLayouts: "handover_ward_layouts_v1",
   recentBeds: "handover_recent_beds_v1",
+  coachDone: "handover_coach_done_v1",
+  theme: "handover_theme_v1",
 };
 
 function read(key, fallback) {
@@ -49,7 +51,29 @@ export const Storage = {
   // { [wardName]: [bed, ...] } — most-recently-used beds, per ward
   getRecentBeds: () => read(KEYS.recentBeds, {}),
   setRecentBeds: (beds) => write(KEYS.recentBeds, beds),
+
+  getCoachDone: () => read(KEYS.coachDone, false),
+  setCoachDone: (done) => write(KEYS.coachDone, done),
+
+  getTheme: () => {
+    try {
+      return localStorage.getItem(KEYS.theme) === "dark" ? "dark" : "light";
+    } catch {
+      return "light";
+    }
+  },
+  setTheme: (theme) => {
+    try {
+      localStorage.setItem(KEYS.theme, theme === "dark" ? "dark" : "light");
+    } catch {
+      /* storage unavailable */
+    }
+  },
 };
+
+export function profileIsComplete(profile) {
+  return Boolean(profile?.name?.trim() && profile?.role);
+}
 
 // Most-recently-used, de-duplicated, capped list — used for both ward chips
 // and job-text suggestion chips.

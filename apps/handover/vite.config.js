@@ -7,6 +7,9 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      devOptions: {
+        enabled: false,
+      },
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
@@ -15,8 +18,8 @@ export default defineConfig({
         name: 'Handover',
         short_name: 'Handover',
         description: 'A shift job list that hands over with a scan — no names, no beds, no server.',
-        theme_color: '#fffaf3',
-        background_color: '#fffaf3',
+        theme_color: '#fbe9e7',
+        background_color: '#fbe9e7',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',

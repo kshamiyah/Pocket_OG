@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
-import { PRIORITY } from "../utils/constants";
+import { PRIORITY, NO_WARD_LABEL } from "../utils/constants";
+import { bedsForWard } from "../utils/wardLayouts";
 
 const CHIP = "shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors";
-const CHIP_ON = "bg-amber-600 text-white border-amber-600";
+const CHIP_ON = "bg-claude-600 text-white border-claude-600";
 const CHIP_OFF = "bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-800";
 const REVEAL_WIDTH = 76;
 
@@ -13,10 +14,10 @@ const REVEAL_WIDTH = 76;
 export default function JobCard({
   job, editing, hideLocation = false,
   onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onDelete,
-  recentWards, recentBeds,
+  recentWards, recentBeds, wardLayouts = {},
 }) {
   const urgent = job.priority === PRIORITY.URGENT;
-  const jobBeds = recentBeds[job.ward] || [];
+  const jobBeds = job.ward ? bedsForWard(job.ward, wardLayouts, recentBeds) : [];
 
   // Swipe-left-to-reveal-delete, pointer events (not touch-only) so it
   // works with a mouse too. Marking done already has a fast single tap;
@@ -97,7 +98,7 @@ export default function JobCard({
                 <button
                   onClick={() => onToggleEdit(job.id)}
                   className={job.ward
-                    ? "text-[10px] font-bold uppercase tracking-wide text-amber-800 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-1.5 py-0.5 rounded"
+                    ? "text-[10px] font-bold uppercase tracking-wide text-claude-800 dark:text-claude-400 bg-claude-100 dark:bg-claude-900/30 px-1.5 py-0.5 rounded"
                     : "text-[10px] font-semibold text-gray-400 dark:text-gray-600 px-1.5 py-0.5 rounded border border-dashed border-gray-300 dark:border-gray-700"}
                 >
                   {job.ward || "+ ward"}
@@ -130,7 +131,7 @@ export default function JobCard({
                 value={job.text}
                 onChange={(e) => onSetText(job.id, e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-                className="w-full bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+                className="w-full bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-claude-500/30 focus:border-claude-500"
               />
             ) : (
               <p className={`text-sm leading-snug ${job.done ? "text-gray-400 dark:text-gray-600 line-through" : "text-gray-900 dark:text-gray-100"}`}>
@@ -146,7 +147,7 @@ export default function JobCard({
                       {w}
                     </button>
                   ))}
-                  <button onClick={() => onSetWard(job.id, "")} className={`${CHIP} ${CHIP_OFF}`}>No ward</button>
+                  <button onClick={() => onSetWard(job.id, "")} className={`${CHIP} ${CHIP_OFF}`}>{NO_WARD_LABEL}</button>
                   <button
                     onClick={() => onSetPriority(job.id, urgent ? PRIORITY.ROUTINE : PRIORITY.URGENT)}
                     className={`${CHIP} ${urgent ? "bg-red-600 text-white border-red-600" : CHIP_OFF}`}

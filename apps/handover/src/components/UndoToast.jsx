@@ -9,7 +9,7 @@ export default function UndoToast({ message, onUndo }) {
       style={{ bottom: "calc(env(safe-area-inset-bottom) + 5.5rem)" }}
     >
       {message}
-      <button onClick={onUndo} className="text-amber-400 dark:text-amber-600 font-bold px-2.5 py-1 rounded-full">
+      <button onClick={onUndo} className="text-claude-400 dark:text-claude-600 font-bold px-2.5 py-1 rounded-full">
         Undo
       </button>
     </div>

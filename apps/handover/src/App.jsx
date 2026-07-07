@@ -1,15 +1,18 @@
 import { useState } from "react";
+import WelcomeScreen from "./components/WelcomeScreen";
 import PortfolioSetup from "./components/PortfolioSetup";
-import IntroScreen from "./components/IntroScreen";
 import WardsIntroScreen from "./components/WardsIntroScreen";
 import ShiftPicker from "./components/ShiftPicker";
+import HomeHub from "./components/HomeHub";
 import Home from "./components/Home";
 import HandoverScreen from "./components/HandoverScreen";
+import EndShiftSummary from "./components/EndShiftSummary";
 import ScanScreen from "./components/ScanScreen";
 import ReviewMerge from "./components/ReviewMerge";
 import WardManager from "./components/WardManager";
 import WardSetup from "./components/WardSetup";
-import { Storage } from "./utils/storage";
+import CoachMarks from "./components/CoachMarks";
+import { Storage, profileIsComplete } from "./utils/storage";
 import { nextId } from "./utils/jobs";
 import { decodeHandoverPayload, extractHandoverCode } from "./utils/payload";
 
@@ -24,6 +27,12 @@ function incomingFromUrl() {
   }
 }
 
+function gateView(profile, shift) {
+  if (!profileIsComplete(profile)) return profile ? "setup" : "welcome";
+  if (!shift) return "hub";
+  return "list";
+}
+
 export default function App() {
   const [profile, setProfileState] = useState(Storage.getProfile);
   const [shift, setShiftState] = useState(Storage.getShift);
@@ -34,14 +43,16 @@ export default function App() {
   const [incomingJobs, setIncomingJobs] = useState(incomingFromUrl);
   const [wardSetupTarget, setWardSetupTarget] = useState(null);
   const [wardSetupReturn, setWardSetupReturn] = useState("list");
-  // Rounds/Walk focus lives here, not inside Home's children, so it survives
-  // switching tabs and even leaving Home entirely (Handover, Scan, Bed setup)
-  // and coming back.
+  const [coachPending, setCoachPending] = useState(false);
   const [selectedWard, setSelectedWard] = useState(null);
   const [selectedBed, setSelectedBed] = useState(null);
   const [bedSelected, setBedSelected] = useState(false);
+  const [handoverReturn, setHandoverReturn] = useState("list");
+  const [scanReturn, setScanReturn] = useState("hub");
+  const [wardsReturn, setWardsReturn] = useState("hub");
+  const [profileReturn, setProfileReturn] = useState("hub");
   const [view, setView] = useState(() =>
-    incomingJobs ? "review" : !profile ? "portfolio" : !shift ? "shift" : "list"
+    incomingFromUrl() ? "review" : gateView(Storage.getProfile(), Storage.getShift())
   );
 
   const setJobs = (next) => { setJobsState(next); Storage.setJobs(next); };
@@ -49,31 +60,59 @@ export default function App() {
   const setRecentBeds = (next) => { setRecentBedsState(next); Storage.setRecentBeds(next); };
   const setWardLayouts = (next) => { setWardLayoutsState(next); Storage.setWardLayouts(next); };
 
-  const gateView = () => (!profile ? "portfolio" : !shift ? "shift" : "list");
+  const startCoachIfNeeded = () => {
+    if (!Storage.getCoachDone()) setCoachPending(true);
+  };
 
-  const completePortfolio = ({ role }) => {
-    const nextProfile = { role };
+  const saveProfile = (nextProfile) => {
     Storage.setProfile(nextProfile);
     setProfileState(nextProfile);
-    // First-ever launch only — completePortfolio only runs once, when
-    // profile was previously unset, so this chain can't resurface later.
-    setView("intro");
   };
 
   const completeShift = ({ shiftType }) => {
     const nextShift = { type: shiftType, startedAt: new Date().toISOString() };
     Storage.setShift(nextShift);
     setShiftState(nextShift);
-    setView("list");
+    if (Object.keys(wardLayouts).length === 0) {
+      setView("wardsIntro");
+    } else {
+      setView("list");
+      startCoachIfNeeded();
+    }
   };
 
-  // Ending a handover ends the shift — the next time this device is opened
-  // it asks what's starting next, the "clocking out" half of the ritual.
   const finishHandover = ({ clear }) => {
     if (clear) setJobs([]);
     Storage.clearShift();
     setShiftState(null);
-    setView("shift");
+    setView("hub");
+  };
+
+  const confirmEndShift = () => {
+    setJobs([]);
+    Storage.clearShift();
+    setShiftState(null);
+    setView("hub");
+  };
+
+  const openHandover = (returnTo = "list") => {
+    setHandoverReturn(returnTo);
+    setView("handover");
+  };
+
+  const openScan = (returnTo = "hub") => {
+    setScanReturn(returnTo);
+    setView("scan");
+  };
+
+  const openWards = (returnTo = "hub") => {
+    setWardsReturn(returnTo);
+    setView("wards");
+  };
+
+  const openProfileEdit = (returnTo = "hub") => {
+    setProfileReturn(returnTo);
+    setView("profileEdit");
   };
 
   const mergeIncoming = (chosen) => {
@@ -83,12 +122,12 @@ export default function App() {
     running = [...running, ...withIds];
     setJobs(running);
     setIncomingJobs(null);
-    setView(gateView());
+    setView(gateView(profile, shift));
   };
 
   const discardIncoming = () => {
     setIncomingJobs(null);
-    setView(gateView());
+    setView(gateView(profile, shift));
   };
 
   const openWardSetup = (wardName, returnTo = "list") => {
@@ -96,8 +135,15 @@ export default function App() {
     setWardSetupReturn(returnTo);
     setView("wardSetup");
   };
+
   const saveWardLayout = (layout) => {
-    setWardLayouts({ ...wardLayouts, [wardSetupTarget]: layout });
+    const ward = wardSetupTarget;
+    setWardLayouts({ ...wardLayouts, [ward]: layout });
+    if (!layout.sections?.length && recentBeds[ward]) {
+      const next = { ...recentBeds };
+      delete next[ward];
+      setRecentBeds(next);
+    }
     setView(wardSetupReturn);
   };
 
@@ -107,12 +153,22 @@ export default function App() {
     ...jobs.map((j) => j.ward).filter(Boolean),
   ])].sort((a, b) => a.localeCompare(b));
 
-  if (view === "portfolio") {
-    return <PortfolioSetup initialRole={profile?.role} onComplete={completePortfolio} />;
+  if (view === "welcome") {
+    return <WelcomeScreen onComplete={() => setView("setup")} />;
   }
 
-  if (view === "intro") {
-    return <IntroScreen onComplete={() => setView("wardsIntro")} />;
+  if (view === "setup" || view === "profileEdit") {
+    return (
+      <PortfolioSetup
+        initialProfile={profile}
+        editMode={view === "profileEdit"}
+        onComplete={(next) => {
+          saveProfile(next);
+          setView(view === "profileEdit" ? profileReturn : "hub");
+        }}
+        onCancel={view === "profileEdit" ? () => setView(profileReturn) : undefined}
+      />
+    );
   }
 
   if (view === "wardsIntro") {
@@ -120,27 +176,54 @@ export default function App() {
       <WardsIntroScreen
         wardLayouts={wardLayouts}
         onAddWard={(ward) => openWardSetup(ward, "wardsIntro")}
-        onComplete={() => setView("shift")}
+        onComplete={() => {
+          setView("list");
+          startCoachIfNeeded();
+        }}
+      />
+    );
+  }
+
+  if (view === "hub") {
+    return (
+      <HomeHub
+        profile={profile}
+        onTakeover={() => openScan("hub")}
+        onStartShift={() => setView("shift")}
+        onManageWards={() => openWards("hub")}
+        onEditProfile={() => openProfileEdit("hub")}
       />
     );
   }
 
   if (view === "shift") {
-    return <ShiftPicker onComplete={completeShift} />;
+    return <ShiftPicker profile={profile} onComplete={completeShift} onBack={() => setView("hub")} />;
   }
 
   if (view === "review" && incomingJobs) {
     return <ReviewMerge incomingJobs={incomingJobs} onMerge={mergeIncoming} onDiscard={discardIncoming} />;
   }
 
+  if (view === "endShift") {
+    return (
+      <EndShiftSummary
+        jobs={jobs}
+        shiftType={shift?.type}
+        onBack={() => setView("list")}
+        onHandover={() => openHandover("endShift")}
+        onConfirmEnd={confirmEndShift}
+      />
+    );
+  }
+
   if (view === "handover") {
-    return <HandoverScreen jobs={jobs} onBack={() => setView("list")} onFinish={finishHandover} />;
+    return <HandoverScreen jobs={jobs} onBack={() => setView(handoverReturn)} onFinish={finishHandover} />;
   }
 
   if (view === "scan") {
     return (
       <ScanScreen
-        onBack={() => setView("list")}
+        onBack={() => setView(scanReturn)}
         onScanned={(scannedJobs) => { setIncomingJobs(scannedJobs); setView("review"); }}
       />
     );
@@ -152,7 +235,7 @@ export default function App() {
         wardNames={wardNames}
         wardLayouts={wardLayouts}
         onEditWard={(ward) => openWardSetup(ward, "wards")}
-        onBack={() => setView("list")}
+        onBack={() => setView(wardsReturn)}
       />
     );
   }
@@ -169,25 +252,37 @@ export default function App() {
   }
 
   return (
-    <Home
-      jobs={jobs}
-      setJobs={setJobs}
-      shiftType={shift?.type}
-      recentWards={recentWards}
-      setRecentWards={setRecentWards}
-      recentBeds={recentBeds}
-      setRecentBeds={setRecentBeds}
-      wardLayouts={wardLayouts}
-      onHandover={() => setView("handover")}
-      onScan={() => setView("scan")}
-      onSetupWard={(ward) => openWardSetup(ward, "list")}
-      onManageWards={() => setView("wards")}
-      selectedWard={selectedWard}
-      setSelectedWard={setSelectedWard}
-      selectedBed={selectedBed}
-      setSelectedBed={setSelectedBed}
-      bedSelected={bedSelected}
-      setBedSelected={setBedSelected}
-    />
+    <>
+      <Home
+        jobs={jobs}
+        setJobs={setJobs}
+        shiftType={shift?.type}
+        recentWards={recentWards}
+        setRecentWards={setRecentWards}
+        recentBeds={recentBeds}
+        setRecentBeds={setRecentBeds}
+        wardLayouts={wardLayouts}
+        onHandover={() => openHandover("list")}
+        onScan={() => openScan("list")}
+        onSetupWard={(ward) => openWardSetup(ward, "list")}
+        onManageWards={() => openWards("list")}
+        onEditProfile={() => openProfileEdit("list")}
+        onEndShift={() => setView("endShift")}
+        selectedWard={selectedWard}
+        setSelectedWard={setSelectedWard}
+        selectedBed={selectedBed}
+        setSelectedBed={setSelectedBed}
+        bedSelected={bedSelected}
+        setBedSelected={setBedSelected}
+      />
+      {coachPending && (
+        <CoachMarks
+          onComplete={() => {
+            Storage.setCoachDone(true);
+            setCoachPending(false);
+          }}
+        />
+      )}
+    </>
   );
 }

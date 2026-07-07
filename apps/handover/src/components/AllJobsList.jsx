@@ -9,6 +9,7 @@ import JobCard from "./JobCard";
 export default function AllJobsList({
   jobs, recentWards, recentBeds,
   editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onDelete,
+  listBottomPad,
 }) {
   const [sortMode, setSortMode] = useState(SORT_MODE.URGENCY);
   const summary = useMemo(() => summarize(jobs), [jobs]);
@@ -17,8 +18,8 @@ export default function AllJobsList({
   const renderCard = (job) => <JobCard key={job.id} job={job} editing={editingId === job.id} {...cardProps} />;
 
   return (
-    <>
-      <div className="px-5 pt-3 flex items-center justify-between">
+    <div className="flex flex-col flex-1 min-h-0">
+      <div className="shrink-0 px-5 pt-3 flex items-center justify-between">
         <div className="font-mono text-[11px] tabular-nums tracking-wide text-gray-500 dark:text-gray-400">
           {summary.open} OPEN · {summary.urgent} URGENT · {summary.done} DONE
         </div>
@@ -32,7 +33,10 @@ export default function AllJobsList({
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-5 py-3 flex flex-col gap-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 6rem)" }}>
+      <div
+        className="flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden px-5 py-3 flex flex-col gap-2 touch-pan-y"
+        style={{ paddingBottom: listBottomPad ?? "calc(env(safe-area-inset-bottom) + 6rem)" }}
+      >
         {jobs.length === 0 && (
           <p className="text-sm text-gray-400 dark:text-gray-600 text-center mt-10">
             No jobs yet. Tap + to add your first one.
@@ -52,6 +56,6 @@ export default function AllJobsList({
             </div>
           ))}
       </div>
-    </>
+    </div>
   );
 }

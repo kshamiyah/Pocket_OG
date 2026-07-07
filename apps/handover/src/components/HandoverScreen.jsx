@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
+import HandoverMark from "./HandoverMark";
 import { buildHandoverUrl } from "../utils/payload";
 
 function Toggle({ on, onClick }) {
@@ -7,7 +8,7 @@ function Toggle({ on, onClick }) {
     <button
       onClick={onClick}
       aria-pressed={on}
-      className={`w-10 h-6 rounded-full relative shrink-0 transition-colors ${on ? "bg-amber-600" : "bg-gray-300 dark:bg-gray-700"}`}
+      className={`w-10 h-6 rounded-full relative shrink-0 transition-colors ${on ? "bg-claude-600" : "bg-gray-300 dark:bg-gray-700"}`}
     >
       <span
         className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${on ? "left-[18px]" : "left-0.5"}`}
@@ -62,9 +63,7 @@ export default function HandoverScreen({ jobs, onBack, onFinish }) {
       <div className="flex-1 min-h-0 overflow-y-auto" style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}>
       <div className="flex items-center gap-3 mb-6">
         <button onClick={onBack} className="text-sm font-bold text-gray-500 dark:text-gray-400" aria-label="Back to home">← Home</button>
-        <div className="font-extrabold text-lg text-gray-900 dark:text-white">
-          Handover<span className="text-amber-600">.</span>
-        </div>
+        <HandoverMark className="font-extrabold text-lg text-gray-900 dark:text-white" />
       </div>
 
       <div className="text-center mb-4">

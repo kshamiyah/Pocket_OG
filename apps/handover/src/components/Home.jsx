@@ -7,15 +7,20 @@ import WardDrill from "./WardDrill";
 import MasterSheet from "./MasterSheet";
 import AllJobsList from "./AllJobsList";
 import UndoToast from "./UndoToast";
+import HomeMenu from "./HomeMenu";
+import HandoverMark from "./HandoverMark";
 
 const DENSITIES = [
   { key: "walk", label: "Walk" },
   { key: "expand", label: "Expand" },
 ];
 
+const ICON_BTN = "w-9 h-9 rounded-full border flex items-center justify-center active:scale-95 transition-all";
+const LIST_BOTTOM_PAD = "calc(env(safe-area-inset-bottom) + 6rem)";
+
 export default function Home({
   jobs, setJobs, shiftType, recentWards, setRecentWards, recentBeds, setRecentBeds,
-  wardLayouts, onHandover, onScan, onSetupWard, onManageWards,
+  wardLayouts, onHandover, onScan, onSetupWard, onManageWards, onEditProfile, onEndShift,
   selectedWard, setSelectedWard, selectedBed, setSelectedBed, bedSelected, setBedSelected,
 }) {
   const [mode, setMode] = useState("byward");
@@ -24,6 +29,8 @@ export default function Home({
   const [stickyWard, setStickyWard] = useState(recentWards[0] || "");
   const [stickyBed, setStickyBed] = useState("");
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuSession, setMenuSession] = useState(0);
   const [undo, setUndo] = useState(null);
   const undoTimer = useRef(null);
 
@@ -78,8 +85,6 @@ export default function Home({
     onSetWard: setWard, onSetBed: setBed, onSetPriority: setPriority, onSetText: setText, onDelete: deleteJob,
   };
 
-  // A bed's own task list already has a QuickAddRow in view — the FAB there
-  // would just be a second, disconnected way to do the same thing.
   const inBedFocus = mode === "byward" && density === "walk" && selectedWard && bedSelected;
 
   const openWizard = () => {
@@ -90,30 +95,56 @@ export default function Home({
     setWizardOpen(true);
   };
 
+  const handleExchange = () => {
+    if (summary.open > 0) onHandover();
+    else onScan();
+  };
+
+  const exchangeLabel = summary.open > 0 ? "Hand over jobs" : "Take over";
+
   return (
-    <div className="h-screen bg-white dark:bg-gray-950 flex flex-col">
+    <div className="fixed inset-0 bg-white dark:bg-gray-950 flex flex-col overflow-hidden">
       <div
-        className="px-5 flex items-baseline justify-between border-b border-gray-200 dark:border-gray-800"
-        style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)", paddingBottom: "0.9rem" }}
+        className="shrink-0 px-5 flex items-center justify-between border-b border-gray-200 dark:border-gray-800"
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)", paddingBottom: "0.75rem" }}
       >
-        <div className="font-extrabold text-lg text-gray-900 dark:text-white">
-          Handover<span className="text-amber-600">.</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="font-mono text-[11px] tracking-wide text-gray-400 dark:text-gray-500 uppercase">
+        <div>
+          <HandoverMark className="font-extrabold text-lg text-gray-900 dark:text-white leading-none" />
+          <div className="font-mono text-[10px] tracking-wide text-gray-400 dark:text-gray-500 uppercase mt-1">
             {shiftLabel}
           </div>
-          <button onClick={onManageWards} aria-label="Manage bed setup" className="text-[11px] font-bold text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800 rounded-md px-2 py-1">
-            Bed setup
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleExchange}
+            data-coach="exchange-btn"
+            aria-label={exchangeLabel}
+            className={`${ICON_BTN} border-claude-200 dark:border-claude-900 text-claude-700 dark:text-claude-400`}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M7 7h10l-3-3" />
+              <path d="M17 17H7l3 3" />
+            </svg>
           </button>
-          <button onClick={onScan} aria-label="Receive a handover" className="text-[11px] font-bold text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900 rounded-md px-2 py-1">
-            Receive
+          <button
+            type="button"
+            onClick={() => { setMenuSession((n) => n + 1); setMenuOpen(true); }}
+            data-coach="menu-btn"
+            aria-label="More options"
+            className={`${ICON_BTN} border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-300`}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <circle cx="5" cy="12" r="1.8" />
+              <circle cx="12" cy="12" r="1.8" />
+              <circle cx="19" cy="12" r="1.8" />
+            </svg>
           </button>
         </div>
       </div>
 
-      <div className="px-5 pt-3 flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
+      <div className="shrink-0 px-5 pt-3 flex items-center justify-between">
+        <div className="flex items-center gap-1.5" data-coach="mode-tabs">
           <button
             onClick={() => setMode("byward")}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
@@ -137,7 +168,7 @@ export default function Home({
         </div>
 
         {mode === "byward" && (
-          <div className="flex rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden text-[11px] font-bold">
+          <div className="flex rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden text-[11px] font-bold" data-coach="density-tabs">
             {DENSITIES.map((d) => (
               <button
                 key={d.key}
@@ -151,30 +182,37 @@ export default function Home({
         )}
       </div>
 
+      {summary.open > 0 && (
+        <button
+          type="button"
+          onClick={onHandover}
+          data-coach="handover-btn"
+          className="shrink-0 mx-5 mt-2 mb-1 px-4 py-2.5 rounded-xl bg-claude-50 dark:bg-claude-950/30 border border-claude-200 dark:border-claude-900 flex items-center justify-between active:scale-[0.99] transition-all"
+        >
+          <span className="text-sm font-bold text-claude-900 dark:text-claude-200">
+            {summary.open} open{summary.urgent > 0 ? ` · ${summary.urgent} urgent` : ""}
+          </span>
+          <span className="text-sm font-bold text-claude-700 dark:text-claude-400">Hand over →</span>
+        </button>
+      )}
+
+      <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
       {mode === "byward" && density === "walk" && (
-        <WardDrill
-          wardNames={wardNames} onAddJob={addJob} onSetupWard={onSetupWard}
-          selectedWard={selectedWard} setSelectedWard={setSelectedWard}
-          selectedBed={selectedBed} setSelectedBed={setSelectedBed}
-          bedSelected={bedSelected} setBedSelected={setBedSelected}
-          {...sharedProps}
-        />
+          <WardDrill
+            listBottomPad={LIST_BOTTOM_PAD}
+            wardNames={wardNames} onAddJob={addJob} onSetupWard={onSetupWard}
+            selectedWard={selectedWard} setSelectedWard={setSelectedWard}
+            selectedBed={selectedBed} setSelectedBed={setSelectedBed}
+            bedSelected={bedSelected} setBedSelected={setBedSelected}
+            {...sharedProps}
+          />
       )}
       {mode === "byward" && density === "expand" && (
-        <MasterSheet wardNames={wardNames} onAddJob={addJob} {...sharedProps} />
+          <MasterSheet listBottomPad={LIST_BOTTOM_PAD} wardNames={wardNames} onAddJob={addJob} {...sharedProps} />
       )}
-      {mode === "all" && <AllJobsList {...sharedProps} />}
-
-      <div
-        className="fixed inset-x-0 bottom-0 z-20 px-5 pt-2 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
-      >
-        <button
-          onClick={onHandover}
-          className="w-full py-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold active:scale-[0.98] transition-all"
-        >
-          {summary.open > 0 ? "Handover →" : "End shift"}
-        </button>
+      {mode === "all" && (
+          <AllJobsList listBottomPad={LIST_BOTTOM_PAD} {...sharedProps} />
+      )}
       </div>
 
       <UndoToast message={undo?.message} onUndo={undoAction} />
@@ -182,9 +220,10 @@ export default function Home({
       {!inBedFocus && (
         <button
           onClick={openWizard}
+          data-coach="fab"
           aria-label="Add job"
-          className="fixed right-5 z-30 w-14 h-14 rounded-full bg-amber-600 text-white text-2xl font-bold shadow-lg flex items-center justify-center active:scale-95 transition-all"
-          style={{ bottom: "calc(env(safe-area-inset-bottom) + 5.5rem)" }}
+          className="fixed right-5 z-30 w-14 h-14 rounded-full bg-claude-600 text-white text-2xl font-bold shadow-lg flex items-center justify-center active:scale-95 transition-all"
+          style={{ bottom: "calc(env(safe-area-inset-bottom) + 1.25rem)" }}
         >
           +
         </button>
@@ -207,6 +246,16 @@ export default function Home({
           onSetupWard={onSetupWard}
         />
       )}
+
+      <HomeMenu
+        key={menuSession}
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        shiftLabel={shiftLabel}
+        onManageWards={onManageWards}
+        onEditProfile={onEditProfile}
+        onEndShift={onEndShift}
+      />
     </div>
   );
 }

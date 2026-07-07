@@ -14,7 +14,18 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Handover" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="theme-color" content="#fffaf3" />
+    <meta name="theme-color" content="#fbe9e7" />
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("handover_theme_v1") === "dark") {
+            document.documentElement.classList.add("dark");
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute("content", "#030712");
+          }
+        } catch (e) { /* ignore */ }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
