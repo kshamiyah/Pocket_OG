@@ -92,13 +92,13 @@ export default function JobCard({
           </button>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+            <div className="flex items-center gap-1.5 flex-wrap mb-1">
               {!hideLocation && (
                 <button
                   onClick={() => onToggleEdit(job.id)}
                   className={job.ward
-                    ? "text-[10px] font-bold uppercase tracking-wide text-amber-800 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-1.5 py-0.5 rounded"
-                    : "text-[10px] font-semibold text-gray-400 dark:text-gray-600 px-1.5 py-0.5 rounded border border-dashed border-gray-300 dark:border-gray-700"}
+                    ? "text-[11px] font-bold uppercase tracking-wide text-amber-800 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded min-h-[22px]"
+                    : "text-[11px] font-semibold text-gray-400 dark:text-gray-600 px-2 py-1 rounded border border-dashed border-gray-300 dark:border-gray-700 min-h-[22px]"}
                 >
                   {job.ward || "+ ward"}
                 </button>
@@ -107,19 +107,19 @@ export default function JobCard({
                 <button
                   onClick={() => onToggleEdit(job.id)}
                   className={job.bed
-                    ? "text-[10px] font-bold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-800 px-1.5 py-0.5 rounded"
-                    : "text-[10px] font-semibold text-gray-400 dark:text-gray-600 px-1.5 py-0.5 rounded border border-dashed border-gray-300 dark:border-gray-700"}
+                    ? "text-[11px] font-bold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded min-h-[22px]"
+                    : "text-[11px] font-semibold text-gray-400 dark:text-gray-600 px-2 py-1 rounded border border-dashed border-gray-300 dark:border-gray-700 min-h-[22px]"}
                 >
                   {job.bed || "+ bed"}
                 </button>
               )}
               {urgent && !job.done && (
-                <span className="text-[10px] font-bold uppercase tracking-wide text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 rounded">
+                <span className="text-[11px] font-bold uppercase tracking-wide text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded">
                   Urgent
                 </span>
               )}
               {hideLocation && (
-                <button onClick={() => onToggleEdit(job.id)} className="ml-auto text-[10px] font-bold text-gray-400 dark:text-gray-600">
+                <button onClick={() => onToggleEdit(job.id)} className="ml-auto text-xs font-bold text-gray-400 dark:text-gray-600 px-2 py-1 min-h-[28px]">
                   Edit
                 </button>
               )}
@@ -130,41 +130,41 @@ export default function JobCard({
                 value={job.text}
                 onChange={(e) => onSetText(job.id, e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-                className="w-full bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+                className="w-full bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
               />
             ) : (
-              <p className={`text-sm leading-snug ${job.done ? "text-gray-400 dark:text-gray-600 line-through" : "text-gray-900 dark:text-gray-100"}`}>
+              <p className={`text-[15px] leading-snug ${job.done ? "text-gray-400 dark:text-gray-600 line-through" : "text-gray-900 dark:text-gray-100"}`}>
                 {job.text}
               </p>
             )}
 
             {editing && (
-              <div className="mt-2 flex flex-col gap-1.5">
-                <div className="flex flex-wrap items-center gap-1.5">
+              <div className="mt-2.5 flex flex-col gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   {recentWards.map((w) => (
-                    <button key={w} onClick={() => onSetWard(job.id, w)} className={`${CHIP} ${job.ward === w ? CHIP_ON : CHIP_OFF}`}>
+                    <button key={w} onClick={() => onSetWard(job.id, w)} className={`${CHIP} ${job.ward === w ? CHIP_ON : CHIP_OFF} active:scale-95 transition-all`}>
                       {w}
                     </button>
                   ))}
-                  <button onClick={() => onSetWard(job.id, "")} className={`${CHIP} ${CHIP_OFF}`}>No ward</button>
+                  <button onClick={() => onSetWard(job.id, "")} className={`${CHIP} ${CHIP_OFF} active:scale-95 transition-all`}>No ward</button>
                   <button
                     onClick={() => onSetPriority(job.id, urgent ? PRIORITY.ROUTINE : PRIORITY.URGENT)}
-                    className={`${CHIP} ${urgent ? "bg-red-600 text-white border-red-600" : CHIP_OFF}`}
+                    className={`${CHIP} ${urgent ? "bg-red-600 text-white border-red-600" : CHIP_OFF} active:scale-95 transition-all`}
                   >
                     {urgent ? "Urgent ✓" : "Mark urgent"}
                   </button>
-                  <button onClick={() => onDelete(job.id)} className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-red-600 dark:text-red-400">
+                  <button onClick={() => onDelete(job.id)} className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-red-600 dark:text-red-400 active:scale-95 transition-all min-h-[32px]">
                     Delete
                   </button>
                 </div>
                 {job.ward && jobBeds.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-1.5">
+                  <div className="flex flex-wrap items-center gap-2">
                     {jobBeds.map((b) => (
-                      <button key={b} onClick={() => onSetBed(job.id, b)} className={`${CHIP} ${job.bed === b ? CHIP_ON : CHIP_OFF}`}>
+                      <button key={b} onClick={() => onSetBed(job.id, b)} className={`${CHIP} ${job.bed === b ? CHIP_ON : CHIP_OFF} active:scale-95 transition-all`}>
                         {b}
                       </button>
                     ))}
-                    <button onClick={() => onSetBed(job.id, "")} className={`${CHIP} ${CHIP_OFF}`}>No bed</button>
+                    <button onClick={() => onSetBed(job.id, "")} className={`${CHIP} ${CHIP_OFF} active:scale-95 transition-all`}>No bed</button>
                   </div>
                 )}
               </div>

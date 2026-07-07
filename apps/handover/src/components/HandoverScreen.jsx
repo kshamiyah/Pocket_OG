@@ -61,7 +61,7 @@ export default function HandoverScreen({ jobs, onBack, onFinish }) {
     <div className="h-screen flex flex-col bg-white dark:bg-gray-950 px-5">
       <div className="flex-1 min-h-0 overflow-y-auto" style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}>
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={onBack} className="text-sm font-bold text-gray-500 dark:text-gray-400" aria-label="Back to home">← Home</button>
+        <button onClick={onBack} className="text-sm font-bold text-gray-500 dark:text-gray-400 px-2 py-1.5 active:scale-95 transition-all" aria-label="Back to home">← Home</button>
         <div className="font-extrabold text-lg text-gray-900 dark:text-white">
           Handover<span className="text-amber-600">.</span>
         </div>
@@ -95,7 +95,7 @@ export default function HandoverScreen({ jobs, onBack, onFinish }) {
       {jobsToSend.length > 0 && (
         <button
           onClick={share}
-          className="w-full py-3 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-sm font-bold mb-6 active:scale-[0.98] transition-all"
+          className="w-full py-3.5 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-base font-bold mb-6 active:scale-[0.98] transition-all min-h-[50px]"
         >
           {copied ? "Link copied" : navigator.share ? "Share link instead" : "Copy link instead"}
         </button>
@@ -120,7 +120,7 @@ export default function HandoverScreen({ jobs, onBack, onFinish }) {
       <div className="shrink-0 pt-4" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1.5rem)" }}>
         <button
           onClick={finish}
-          className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all"
+          className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all min-h-[52px]"
         >
           Done
         </button>

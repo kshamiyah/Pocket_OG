@@ -30,12 +30,12 @@ export default function QuickAddRow({ ward, bed, jobs, onAddJob }) {
         onKeyDown={(e) => e.key === "Enter" && add()}
         enterKeyHint="done"
         placeholder="Add a job here…"
-        className="flex-1 min-w-0 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-3.5 py-2.5 text-base text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+        className="flex-1 min-w-0 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-3.5 py-3 text-base text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
       />
       <button
         onClick={() => setUrgent((v) => !v)}
         aria-label="Toggle urgent"
-        className={`shrink-0 w-11 h-11 rounded-xl border flex items-center justify-center text-xs font-bold transition-colors ${
+        className={`shrink-0 w-12 h-12 rounded-xl border flex items-center justify-center text-sm font-bold transition-all active:scale-95 ${
           urgent ? "bg-red-600 text-white border-red-600" : "bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-800"
         }`}
       >
@@ -45,7 +45,7 @@ export default function QuickAddRow({ ward, bed, jobs, onAddJob }) {
         onClick={add}
         disabled={!text.trim()}
         aria-label="Add job here"
-        className="shrink-0 w-11 h-11 rounded-xl bg-amber-600 disabled:bg-gray-200 dark:disabled:bg-gray-800 text-white disabled:text-gray-400 flex items-center justify-center font-bold active:scale-95 transition-all"
+        className="shrink-0 w-12 h-12 rounded-xl bg-amber-600 disabled:bg-gray-200 dark:disabled:bg-gray-800 text-white disabled:text-gray-400 flex items-center justify-center text-xl font-bold active:scale-95 transition-all"
       >
         +
       </button>

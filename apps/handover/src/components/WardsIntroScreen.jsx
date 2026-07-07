@@ -23,7 +23,7 @@ export default function WardsIntroScreen({ wardLayouts, onAddWard, onComplete })
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 3rem)" }}
       >
         <h1 className="text-gray-900 dark:text-white text-3xl font-bold leading-tight mb-1">Add your wards</h1>
-        <p className="text-gray-500 text-sm mb-8">
+        <p className="text-gray-500 text-[15px] mb-8">
           Add one at a time and set up its beds. You can always add more later.
         </p>
 
@@ -39,24 +39,24 @@ export default function WardsIntroScreen({ wardLayouts, onAddWard, onComplete })
           <button
             onClick={add}
             disabled={!value.trim()}
-            className="shrink-0 px-4 rounded-xl bg-amber-600 disabled:bg-gray-200 dark:disabled:bg-gray-800 text-white disabled:text-gray-400 text-sm font-bold"
+            className="shrink-0 px-5 py-3 rounded-xl bg-amber-600 disabled:bg-gray-200 dark:disabled:bg-gray-800 text-white disabled:text-gray-400 text-base font-bold active:scale-95 transition-all min-h-[48px]"
           >
             Add
           </button>
         </div>
 
         {wards.length > 0 && (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5">
             {wards.map((w) => {
               const count = totalBeds(wardLayouts[w]);
               return (
                 <button
                   key={w}
                   onClick={() => onAddWard(w)}
-                  className="text-left rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 px-3.5 py-3 flex items-center justify-between"
+                  className="text-left rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 px-4 py-3.5 flex items-center justify-between active:scale-[0.98] transition-all min-h-[56px]"
                 >
-                  <span className="text-sm font-bold text-gray-900 dark:text-white">{w}</span>
-                  <span className="text-xs text-gray-400 dark:text-gray-600">{count > 0 ? `${count} beds` : "No beds"}</span>
+                  <span className="text-[15px] font-bold text-gray-900 dark:text-white">{w}</span>
+                  <span className="text-[13px] text-gray-400 dark:text-gray-600">{count > 0 ? `${count} beds` : "No beds"}</span>
                 </button>
               );
             })}
@@ -67,7 +67,7 @@ export default function WardsIntroScreen({ wardLayouts, onAddWard, onComplete })
       <div className="shrink-0 px-6" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 2rem)" }}>
         <button
           onClick={onComplete}
-          className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all"
+          className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all min-h-[56px]"
         >
           {wards.length > 0 ? "Continue" : "Skip for now"}
         </button>

@@ -22,11 +22,11 @@ export default function IntroScreen({ onComplete }) {
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 3rem)" }}
       >
         <h1 className="text-gray-900 dark:text-white text-3xl font-bold leading-tight mb-8">How Handover works</h1>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-7">
           {STEPS.map((step) => (
             <div key={step.title}>
-              <div className="text-base font-bold text-gray-900 dark:text-white mb-1">{step.title}</div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug">{step.body}</p>
+              <div className="text-lg font-bold text-gray-900 dark:text-white mb-1.5">{step.title}</div>
+              <p className="text-[15px] text-gray-500 dark:text-gray-400 leading-relaxed">{step.body}</p>
             </div>
           ))}
         </div>
@@ -35,7 +35,7 @@ export default function IntroScreen({ onComplete }) {
       <div className="shrink-0 px-6" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 2rem)" }}>
         <button
           onClick={onComplete}
-          className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all"
+          className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all min-h-[56px]"
         >
           Got it
         </button>

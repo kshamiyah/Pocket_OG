@@ -15,13 +15,13 @@ export default function ReviewMerge({ incomingJobs, onMerge, onDiscard }) {
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-gray-950 px-5">
       <div className="shrink-0" style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}>
-      <div className="mb-2">
-        <span className="text-[11px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-1 rounded-md">
+      <div className="mb-3">
+        <span className="text-xs font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-1.5 rounded-md">
           {incomingJobs.length} job{incomingJobs.length === 1 ? "" : "s"} received
         </span>
       </div>
       <h1 className="text-gray-900 dark:text-white text-2xl font-bold mb-1">Review before it lands</h1>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
+      <p className="text-[15px] text-gray-500 dark:text-gray-400 mb-5">
         Uncheck anything you don't want on your list.
       </p>
       </div>
@@ -40,31 +40,31 @@ export default function ReviewMerge({ incomingJobs, onMerge, onDiscard }) {
             >
               <div className="flex items-start gap-2.5">
                 <span
-                  className={`mt-0.5 w-5 h-5 rounded-md border-2 shrink-0 flex items-center justify-center ${
+                  className={`mt-0.5 w-6 h-6 rounded-md border-2 shrink-0 flex items-center justify-center transition-colors ${
                     on ? "bg-amber-600 border-amber-600" : "border-gray-400 dark:border-gray-600"
                   }`}
                 >
-                  {on && <span className="text-white text-[10px]">✓</span>}
+                  {on && <span className="text-white text-xs font-bold">✓</span>}
                 </span>
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                  <div className="flex items-center gap-1.5 flex-wrap mb-1">
                     {job.ward && (
-                      <span className="text-[10px] font-bold uppercase tracking-wide text-amber-800 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-1.5 py-0.5 rounded">
+                      <span className="text-[11px] font-bold uppercase tracking-wide text-amber-800 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded">
                         {job.ward}
                       </span>
                     )}
                     {job.bed && (
-                      <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                      <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">
                         {job.bed}
                       </span>
                     )}
                     {urgent && (
-                      <span className="text-[10px] font-bold uppercase tracking-wide text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 rounded">
+                      <span className="text-[11px] font-bold uppercase tracking-wide text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded">
                         Urgent
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-900 dark:text-gray-100 leading-snug">{job.text}</p>
+                  <p className="text-[15px] text-gray-900 dark:text-gray-100 leading-snug">{job.text}</p>
                 </div>
               </div>
             </button>
@@ -76,11 +76,11 @@ export default function ReviewMerge({ incomingJobs, onMerge, onDiscard }) {
         <button
           onClick={() => onMerge(chosen)}
           disabled={chosen.length === 0}
-          className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white disabled:bg-gray-200 dark:disabled:bg-gray-800 text-white dark:text-gray-950 disabled:text-gray-400 text-base font-bold mb-2.5 active:scale-95 transition-all"
+          className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white disabled:bg-gray-200 dark:disabled:bg-gray-800 text-white dark:text-gray-950 disabled:text-gray-400 text-base font-bold mb-2.5 active:scale-95 transition-all min-h-[52px]"
         >
           Add {chosen.length || ""} to my list
         </button>
-        <button onClick={onDiscard} className="w-full py-3 text-sm font-medium text-gray-500 dark:text-gray-400">
+        <button onClick={onDiscard} className="w-full py-3 text-base font-medium text-gray-500 dark:text-gray-400 active:scale-95 transition-all min-h-[44px]">
           Discard
         </button>
       </div>

@@ -41,13 +41,13 @@ export default function MasterSheet({
         const wardOpen = openWards.has(w.ward);
         return (
           <div key={w.ward} className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-            <button onClick={() => toggleWard(w.ward)} className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-900/60">
-              <span className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+            <button onClick={() => toggleWard(w.ward)} className="w-full flex items-center justify-between px-4 py-3.5 bg-gray-50 dark:bg-gray-900/60 active:bg-gray-100 dark:active:bg-gray-900 transition-colors min-h-[56px]">
+              <span className="text-[15px] font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <Chevron open={wardOpen} /> {w.ward}
               </span>
-              <span className="flex items-center gap-1.5">
-                {w.urgent > 0 && <span className="w-2 h-2 rounded-full bg-red-500" aria-label="Has urgent jobs" />}
-                <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{w.open}</span>
+              <span className="flex items-center gap-2">
+                {w.urgent > 0 && <span className="w-2.5 h-2.5 rounded-full bg-red-500" aria-label="Has urgent jobs" />}
+                <span className="text-sm font-bold text-gray-500 dark:text-gray-400">{w.open}</span>
               </span>
             </button>
             {wardOpen && (
@@ -58,13 +58,13 @@ export default function MasterSheet({
                   const label = b.bed === null ? "General" : b.bed;
                   return (
                     <div key={key} className="rounded-lg border border-gray-100 dark:border-gray-800/60">
-                      <button onClick={() => toggleBed(w.ward, b.bed)} className="w-full flex items-center justify-between px-3 py-2">
-                        <span className="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                      <button onClick={() => toggleBed(w.ward, b.bed)} className="w-full flex items-center justify-between px-3 py-2.5 active:bg-gray-50 dark:active:bg-gray-900/30 transition-colors min-h-[44px]">
+                        <span className="text-[13px] font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
                           <Chevron open={bOpen} /> {label}
                         </span>
                         <span className="flex items-center gap-1.5">
-                          {b.urgent > 0 && <span className="w-1.5 h-1.5 rounded-full bg-red-500" aria-label="Has urgent jobs" />}
-                          <span className="text-xs font-semibold text-gray-400 dark:text-gray-600">{b.open}</span>
+                          {b.urgent > 0 && <span className="w-2 h-2 rounded-full bg-red-500" aria-label="Has urgent jobs" />}
+                          <span className="text-[13px] font-semibold text-gray-400 dark:text-gray-600">{b.open}</span>
                         </span>
                       </button>
                       {bOpen && (
@@ -85,13 +85,13 @@ export default function MasterSheet({
 
       {noWard.jobs.length > 0 && (
         <div className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-          <button onClick={() => toggleWard(NO_WARD_KEY)} className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-900/60">
-            <span className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+          <button onClick={() => toggleWard(NO_WARD_KEY)} className="w-full flex items-center justify-between px-4 py-3.5 bg-gray-50 dark:bg-gray-900/60 active:bg-gray-100 dark:active:bg-gray-900 transition-colors min-h-[56px]">
+            <span className="text-[15px] font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <Chevron open={openWards.has(NO_WARD_KEY)} /> No ward
             </span>
-            <span className="flex items-center gap-1.5">
-              {noWard.urgent > 0 && <span className="w-2 h-2 rounded-full bg-red-500" aria-label="Has urgent jobs" />}
-              <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{noWard.open}</span>
+            <span className="flex items-center gap-2">
+              {noWard.urgent > 0 && <span className="w-2.5 h-2.5 rounded-full bg-red-500" aria-label="Has urgent jobs" />}
+              <span className="text-sm font-bold text-gray-500 dark:text-gray-400">{noWard.open}</span>
             </span>
           </button>
           {openWards.has(NO_WARD_KEY) && (

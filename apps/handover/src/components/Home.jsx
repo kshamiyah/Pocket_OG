@@ -99,14 +99,14 @@ export default function Home({
         <div className="font-extrabold text-lg text-gray-900 dark:text-white">
           Handover<span className="text-amber-600">.</span>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="font-mono text-[11px] tracking-wide text-gray-400 dark:text-gray-500 uppercase">
+        <div className="flex items-center gap-2.5">
+          <div className="font-mono text-xs tracking-wide text-gray-400 dark:text-gray-500 uppercase">
             {shiftLabel}
           </div>
-          <button onClick={onManageWards} aria-label="Manage bed setup" className="text-[11px] font-bold text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800 rounded-md px-2 py-1">
+          <button onClick={onManageWards} aria-label="Manage bed setup" className="text-xs font-bold text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800 rounded-lg px-2.5 py-1.5 active:scale-95 transition-all min-h-[32px]">
             Bed setup
           </button>
-          <button onClick={onScan} aria-label="Receive a handover" className="text-[11px] font-bold text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900 rounded-md px-2 py-1">
+          <button onClick={onScan} aria-label="Receive a handover" className="text-xs font-bold text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900 rounded-lg px-2.5 py-1.5 active:scale-95 transition-all min-h-[32px]">
             Receive
           </button>
         </div>
@@ -137,12 +137,12 @@ export default function Home({
         </div>
 
         {mode === "byward" && (
-          <div className="flex rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden text-[11px] font-bold">
+          <div className="flex rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden text-xs font-bold">
             {DENSITIES.map((d) => (
               <button
                 key={d.key}
                 onClick={() => setDensity(d.key)}
-                className={`px-2.5 py-1 ${density === d.key ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950" : "text-gray-500 dark:text-gray-400"}`}
+                className={`px-3 py-1.5 min-h-[32px] ${density === d.key ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950" : "text-gray-500 dark:text-gray-400"}`}
               >
                 {d.label}
               </button>
@@ -166,12 +166,12 @@ export default function Home({
       {mode === "all" && <AllJobsList {...sharedProps} />}
 
       <div
-        className="fixed inset-x-0 bottom-0 z-20 px-5 pt-2 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800"
+        className="fixed inset-x-0 bottom-0 z-20 px-5 pt-3 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
       >
         <button
           onClick={onHandover}
-          className="w-full py-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold active:scale-[0.98] transition-all"
+          className="w-full py-3.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-base font-bold active:scale-[0.98] transition-all min-h-[50px]"
         >
           {summary.open > 0 ? "Handover →" : "End shift"}
         </button>
@@ -183,8 +183,8 @@ export default function Home({
         <button
           onClick={openWizard}
           aria-label="Add job"
-          className="fixed right-5 z-30 w-14 h-14 rounded-full bg-amber-600 text-white text-2xl font-bold shadow-lg flex items-center justify-center active:scale-95 transition-all"
-          style={{ bottom: "calc(env(safe-area-inset-bottom) + 5.5rem)" }}
+          className="fixed right-5 z-30 w-16 h-16 rounded-full bg-amber-600 text-white text-3xl font-bold shadow-lg flex items-center justify-center active:scale-95 transition-all"
+          style={{ bottom: "calc(env(safe-area-inset-bottom) + 5.75rem)" }}
         >
           +
         </button>

@@ -19,14 +19,14 @@ export default function AllJobsList({
   return (
     <>
       <div className="px-5 pt-3 flex items-center justify-between">
-        <div className="font-mono text-[11px] tabular-nums tracking-wide text-gray-500 dark:text-gray-400">
+        <div className="font-mono text-xs tabular-nums tracking-wide text-gray-500 dark:text-gray-400">
           {summary.open} OPEN · {summary.urgent} URGENT · {summary.done} DONE
         </div>
-        <div className="flex rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden text-[11px] font-bold">
-          <button onClick={() => setSortMode(SORT_MODE.URGENCY)} className={`px-2.5 py-1 ${sortMode === SORT_MODE.URGENCY ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950" : "text-gray-500 dark:text-gray-400"}`}>
+        <div className="flex rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden text-xs font-bold">
+          <button onClick={() => setSortMode(SORT_MODE.URGENCY)} className={`px-3 py-1.5 min-h-[32px] ${sortMode === SORT_MODE.URGENCY ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950" : "text-gray-500 dark:text-gray-400"}`}>
             Urgency
           </button>
-          <button onClick={() => setSortMode(SORT_MODE.WARD)} className={`px-2.5 py-1 ${sortMode === SORT_MODE.WARD ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950" : "text-gray-500 dark:text-gray-400"}`}>
+          <button onClick={() => setSortMode(SORT_MODE.WARD)} className={`px-3 py-1.5 min-h-[32px] ${sortMode === SORT_MODE.WARD ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950" : "text-gray-500 dark:text-gray-400"}`}>
             Ward
           </button>
         </div>
@@ -45,7 +45,7 @@ export default function AllJobsList({
         {jobs.length > 0 && sortMode === SORT_MODE.WARD &&
           groupByWard(jobs).map(([ward, list]) => (
             <div key={ward} className="flex flex-col gap-2">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-600 mt-1">
+              <div className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-600 mt-1">
                 {ward === NO_WARD_LABEL ? NO_WARD_LABEL : ward} · {list.length}
               </div>
               {list.map(renderCard)}
