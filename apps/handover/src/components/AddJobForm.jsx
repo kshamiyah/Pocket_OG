@@ -3,6 +3,7 @@ import { PRIORITY, NO_WARD_LABEL } from "../utils/constants";
 import { createJob, nextId } from "../utils/jobs";
 import { pushMRU } from "../utils/storage";
 import { bedsForWard, hasLayout, mostRecentBed } from "../utils/wardLayouts";
+import { safeBottom } from "../utils/screenLayout";
 
 const CHIP = "shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors";
 const CHIP_ON = "bg-claude-600 text-white border-claude-600";
@@ -115,12 +116,11 @@ export default function AddJobForm({
         }`}
       />
       <div
-        className={`relative z-10 bg-white dark:bg-gray-950 flex flex-col max-h-full rounded-t-3xl shadow-2xl transition-transform duration-300 ease-out ${
+        className={`relative z-10 bg-white dark:bg-gray-950 flex flex-col max-h-[92dvh] rounded-t-3xl shadow-2xl transition-transform duration-300 ease-out ${
           entered && !closing ? "translate-y-0" : "translate-y-full"
         }`}
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
-      <div className="flex-1 min-h-0 overflow-y-auto px-6" style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}>
+      <div className="flex-1 min-h-0 overflow-y-auto px-6 pt-3 pb-2">
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-gray-200 dark:bg-gray-800" aria-hidden="true" />
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Add a job</h1>
@@ -183,7 +183,7 @@ export default function AddJobForm({
         </div>
       </div>
 
-      <div className="shrink-0 px-6 pt-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}>
+      <div className="shrink-0 px-6 pt-2 border-t border-gray-100 dark:border-gray-900" style={safeBottom()}>
         <button
           onClick={save}
           disabled={!text.trim()}

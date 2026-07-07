@@ -3,6 +3,7 @@ import {
   SECTION_TYPE, GRID_KIND, nextSectionId, rangeBeds, gridBeds,
   namedBeds, bedsForSection, parseCustomNums,
 } from "../utils/wardLayouts";
+import { OVERLAY_SCREEN, SCREEN_FOOTER, SCREEN_SCROLL, safeBottom, safeTop } from "../utils/screenLayout";
 
 const CHIP = "px-2.5 py-1.5 rounded-lg text-sm font-bold border";
 const PILL = "px-2.5 py-1.5 rounded-md text-sm font-bold bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300";
@@ -507,10 +508,10 @@ export default function WardSetup({ wardName, existingLayout, onSave, onCancel }
     : sections;
 
   return (
-    <div className="fixed inset-0 z-50 bg-white dark:bg-gray-950 flex flex-col overflow-hidden">
+    <div className={OVERLAY_SCREEN}>
       <div
-        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-5"
-        style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)", paddingBottom: "1rem" }}
+        className={`${SCREEN_SCROLL} px-5 pb-3`}
+        style={safeTop()}
       >
       <div className="flex items-center gap-3 mb-5 min-w-0">
         <button onClick={onCancel} className="text-gray-500 text-xl leading-none shrink-0" aria-label="Cancel">←</button>
@@ -606,7 +607,7 @@ export default function WardSetup({ wardName, existingLayout, onSave, onCancel }
       )}
       </div>
 
-      <div className="shrink-0 px-5 pt-2 border-t border-gray-100 dark:border-gray-900 flex flex-col gap-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1.5rem)" }}>
+      <div className={`${SCREEN_FOOTER} px-5 flex flex-col gap-2`} style={safeBottom()}>
         {sections.length === 0 && (
           <p className="text-sm text-gray-400 dark:text-gray-600 text-center mb-1">
             No sections added, saving now means "no beds on this ward."

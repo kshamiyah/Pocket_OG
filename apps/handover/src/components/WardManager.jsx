@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { totalBeds } from "../utils/wardLayouts";
+import { SCREEN, SCREEN_FOOTER, SCREEN_SCROLL, safeBottom, safeTop } from "../utils/screenLayout";
 
 export default function WardManager({ wardNames, wardLayouts, onEditWard, onBack }) {
   const [newWard, setNewWard] = useState("");
@@ -11,8 +12,8 @@ export default function WardManager({ wardNames, wardLayouts, onEditWard, onBack
   };
 
   return (
-    <div className="h-screen flex flex-col bg-white dark:bg-gray-950 px-5">
-      <div className="shrink-0 flex items-center gap-3 mb-6" style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}>
+    <div className={`${SCREEN} px-5`}>
+      <div className="shrink-0 flex items-center gap-3 mb-4" style={safeTop()}>
         <button onClick={onBack} className="text-sm font-bold text-gray-500 dark:text-gray-400" aria-label="Back to home">← Home</button>
         <div>
           <div className="font-extrabold text-lg text-gray-900 dark:text-white">Bed setup</div>
@@ -20,9 +21,9 @@ export default function WardManager({ wardNames, wardLayouts, onEditWard, onBack
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2 mb-4">
+      <div className={`${SCREEN_SCROLL} flex flex-col gap-2 pb-3`}>
         {wardNames.length === 0 && (
-          <p className="text-sm text-gray-400 dark:text-gray-600 text-center mt-8">
+          <p className="text-sm text-gray-400 dark:text-gray-600 text-center mt-4">
             No wards yet. Add one below, or tag a job with a ward first.
           </p>
         )}
@@ -45,7 +46,7 @@ export default function WardManager({ wardNames, wardLayouts, onEditWard, onBack
         })}
       </div>
 
-      <div className="shrink-0 flex gap-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1.5rem)" }}>
+      <div className={`${SCREEN_FOOTER} flex gap-2`} style={safeBottom()}>
         <input
           value={newWard}
           onChange={(e) => setNewWard(e.target.value)}

@@ -1,5 +1,6 @@
 import HandoverMark from "./HandoverMark";
 import { roleLabel, timeGreeting } from "../utils/constants";
+import { SCREEN, SCREEN_SCROLL, safeBottom, safeTop } from "../utils/screenLayout";
 
 const LINK = "text-sm font-bold text-gray-500 dark:text-gray-400 active:text-gray-700 dark:active:text-gray-200";
 
@@ -8,16 +9,16 @@ export default function HomeHub({ profile, onTakeover, onStartShift, onManageWar
   const label = roleLabel(profile);
 
   return (
-    <div
-      className="h-screen flex flex-col bg-white dark:bg-gray-950 px-6"
-      style={{ paddingTop: "calc(env(safe-area-inset-top) + 3rem)", paddingBottom: "calc(env(safe-area-inset-bottom) + 2rem)" }}
-    >
-      <div className="flex-1 min-h-0 flex flex-col justify-center">
+    <div className={`${SCREEN} px-6`}>
+      <div
+        className={`${SCREEN_SCROLL} flex flex-col justify-center`}
+        style={{ ...safeTop("1.5rem"), ...safeBottom("1rem") }}
+      >
         <HandoverMark className="font-extrabold text-2xl text-gray-900 dark:text-white mb-1" />
-        <p className="text-lg font-bold text-claude-600 dark:text-claude-400 mb-6">
+        <p className="text-lg font-bold text-claude-600 dark:text-claude-400 mb-5">
           From takeover to handover.
         </p>
-        <p className="text-base text-gray-700 dark:text-gray-300 mb-8">
+        <p className="text-base text-gray-700 dark:text-gray-300 mb-6">
           Good {timeGreeting()}
           {name ? (
             <>
@@ -50,7 +51,7 @@ export default function HomeHub({ profile, onTakeover, onStartShift, onManageWar
           </button>
         </div>
 
-        <div className="flex items-center justify-center gap-3 mt-8">
+        <div className="flex items-center justify-center gap-3 mt-6">
           <button type="button" onClick={onManageWards} className={LINK}>
             Manage wards
           </button>

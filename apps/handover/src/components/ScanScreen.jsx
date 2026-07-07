@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import jsQR from "jsqr";
 import HandoverMark from "./HandoverMark";
 import { decodeHandoverPayload, extractHandoverCode } from "../utils/payload";
+import { SCREEN, safeBottom, safeTop } from "../utils/screenLayout";
 
 export default function ScanScreen({ onBack, onScanned }) {
   const videoRef = useRef(null);
@@ -66,34 +67,33 @@ export default function ScanScreen({ onBack, onScanned }) {
   }, []);
 
   return (
-    <div
-      className="h-screen bg-white dark:bg-gray-950 flex flex-col px-5"
-      style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)", paddingBottom: "calc(env(safe-area-inset-bottom) + 1.5rem)" }}
-    >
-      <div className="flex items-center gap-3 mb-6">
-        <button onClick={onBack} className="text-sm font-bold text-gray-500 dark:text-gray-400" aria-label="Back to home">← Home</button>
-        <HandoverMark className="font-extrabold text-lg text-gray-900 dark:text-white" />
+    <div className={`${SCREEN} px-5`}>
+      <div className="shrink-0 px-0" style={safeTop()}>
+        <div className="flex items-center gap-3 mb-4">
+          <button onClick={onBack} className="text-sm font-bold text-gray-500 dark:text-gray-400" aria-label="Back to home">← Home</button>
+          <HandoverMark className="font-extrabold text-lg text-gray-900 dark:text-white" />
+        </div>
       </div>
 
-      <div className="relative flex-1 rounded-2xl overflow-hidden bg-gray-900 mb-5 min-h-[320px] flex items-center justify-center">
+      <div className="relative flex-1 min-h-0 rounded-2xl overflow-hidden bg-gray-900 my-1 flex items-center justify-center">
         <video ref={videoRef} playsInline muted className="absolute inset-0 w-full h-full object-cover" />
         {!cameraReady && !error && (
           <p className="relative text-gray-400 text-sm px-8 text-center">Starting camera…</p>
         )}
         {cameraReady && (
-          <div className="absolute inset-6 border-2 border-claude-400/80 rounded-2xl pointer-events-none" />
+          <div className="absolute inset-4 border-2 border-claude-400/80 rounded-2xl pointer-events-none" />
         )}
       </div>
 
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400 mb-3 text-center">{error}</p>
+        <p className="shrink-0 text-sm text-red-600 dark:text-red-400 my-2 text-center">{error}</p>
       )}
 
-      <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
+      <p className="shrink-0 text-sm text-gray-500 dark:text-gray-400 text-center my-2">
         Point your camera at the outgoing doctor's takeover code
       </p>
 
-      <div className="flex items-center gap-2 mt-auto">
+      <div className="shrink-0 flex items-center gap-2" style={safeBottom()}>
         <input
           type="text"
           value={pastedLink}

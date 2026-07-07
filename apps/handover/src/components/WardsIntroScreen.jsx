@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { totalBeds } from "../utils/wardLayouts";
+import { SCREEN, SCREEN_FOOTER, SCREEN_SCROLL, safeBottom, safeTop } from "../utils/screenLayout";
 
 // Shown once, right after the intro, before the first-ever Shift pick.
-// Each ward goes straight into the real bed-setup screen (same one used
-// everywhere else), then returns here to add the next one or finish —
-// "no beds for this ward" is already a built-in option over there.
 export default function WardsIntroScreen({ wardLayouts, onAddWard, onComplete }) {
   const [value, setValue] = useState("");
   const wards = Object.keys(wardLayouts);
@@ -17,13 +15,10 @@ export default function WardsIntroScreen({ wardLayouts, onAddWard, onComplete })
   };
 
   return (
-    <div className="h-screen flex flex-col bg-white dark:bg-gray-950">
-      <div
-        className="flex-1 min-h-0 overflow-y-auto px-6"
-        style={{ paddingTop: "calc(env(safe-area-inset-top) + 3rem)" }}
-      >
-        <h1 className="text-gray-900 dark:text-white text-3xl font-bold leading-tight mb-1">Add your wards</h1>
-        <p className="text-gray-500 text-sm mb-8">
+    <div className={SCREEN}>
+      <div className={`${SCREEN_SCROLL} px-6 pb-3`} style={safeTop("1.5rem")}>
+        <h1 className="text-gray-900 dark:text-white text-2xl font-bold leading-tight mb-1">Add your wards</h1>
+        <p className="text-gray-500 text-sm mb-5">
           Add one at a time and set up its beds. You can always add more later.
         </p>
 
@@ -64,7 +59,7 @@ export default function WardsIntroScreen({ wardLayouts, onAddWard, onComplete })
         )}
       </div>
 
-      <div className="shrink-0 px-6" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 2rem)" }}>
+      <div className={`${SCREEN_FOOTER} px-6`} style={safeBottom()}>
         <button
           onClick={onComplete}
           className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all"

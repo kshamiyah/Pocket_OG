@@ -9,6 +9,7 @@ import AllJobsList from "./AllJobsList";
 import UndoToast from "./UndoToast";
 import HomeMenu from "./HomeMenu";
 import HandoverMark from "./HandoverMark";
+import { SCREEN } from "../utils/screenLayout";
 
 const DENSITIES = [
   { key: "walk", label: "Walk" },
@@ -103,7 +104,7 @@ export default function Home({
   const exchangeLabel = summary.open > 0 ? "Hand over jobs" : "Take over";
 
   return (
-    <div className="fixed inset-0 bg-white dark:bg-gray-950 flex flex-col overflow-hidden">
+    <div className={`fixed inset-0 z-0 ${SCREEN}`}>
       <div
         className="shrink-0 px-5 flex items-center justify-between border-b border-gray-200 dark:border-gray-800"
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)", paddingBottom: "0.75rem" }}

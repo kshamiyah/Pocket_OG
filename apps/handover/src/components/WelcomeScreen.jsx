@@ -1,4 +1,5 @@
 import HandoverMark from "./HandoverMark";
+import { SCREEN, SCREEN_FOOTER, SCREEN_SCROLL, safeBottom, safeTop } from "../utils/screenLayout";
 
 const BULLETS = [
   "Add jobs as you go — tag a ward and bed if it helps you remember.",
@@ -8,16 +9,13 @@ const BULLETS = [
 
 export default function WelcomeScreen({ onComplete }) {
   return (
-    <div
-      className="h-screen flex flex-col bg-white dark:bg-gray-950 px-6"
-      style={{ paddingTop: "calc(env(safe-area-inset-top) + 3rem)", paddingBottom: "calc(env(safe-area-inset-bottom) + 2rem)" }}
-    >
-      <div className="flex-1 min-h-0 overflow-y-auto">
+    <div className={`${SCREEN} px-6`}>
+      <div className={`${SCREEN_SCROLL} pb-3`} style={safeTop("1.5rem")}>
         <HandoverMark className="font-extrabold text-2xl text-gray-900 dark:text-white mb-2" />
         <h1 className="text-gray-900 dark:text-white text-3xl font-bold leading-tight mb-3">
           Your shift job list, on your phone.
         </h1>
-        <ul className="flex flex-col gap-4 mb-8">
+        <ul className="flex flex-col gap-4">
           {BULLETS.map((text) => (
             <li key={text} className="flex gap-3 text-base text-gray-600 dark:text-gray-400 leading-snug">
               <span className="text-claude-600 font-bold shrink-0">·</span>
@@ -27,12 +25,14 @@ export default function WelcomeScreen({ onComplete }) {
         </ul>
       </div>
 
-      <button
-        onClick={onComplete}
-        className="shrink-0 w-full py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all"
-      >
-        Get started
-      </button>
+      <div className={SCREEN_FOOTER} style={safeBottom()}>
+        <button
+          onClick={onComplete}
+          className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all"
+        >
+          Get started
+        </button>
+      </div>
     </div>
   );
 }

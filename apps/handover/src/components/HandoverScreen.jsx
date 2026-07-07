@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import HandoverMark from "./HandoverMark";
 import { buildHandoverUrl } from "../utils/payload";
+import { SCREEN, SCREEN_FOOTER, SCREEN_SCROLL, safeBottom, safeTop } from "../utils/screenLayout";
 
 function Toggle({ on, onClick }) {
   return (
@@ -59,8 +60,8 @@ export default function HandoverScreen({ jobs, onBack, onFinish }) {
   const finish = () => onFinish({ clear: !keepCopy });
 
   return (
-    <div className="h-screen flex flex-col bg-white dark:bg-gray-950 px-5">
-      <div className="flex-1 min-h-0 overflow-y-auto" style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}>
+    <div className={`${SCREEN} px-5`}>
+      <div className={`${SCREEN_SCROLL} pb-3`} style={safeTop()}>
       <div className="flex items-center gap-3 mb-6">
         <button onClick={onBack} className="text-sm font-bold text-gray-500 dark:text-gray-400" aria-label="Back to home">← Home</button>
         <HandoverMark className="font-extrabold text-lg text-gray-900 dark:text-white" />
@@ -77,7 +78,7 @@ export default function HandoverScreen({ jobs, onBack, onFinish }) {
         </div>
       </div>
 
-      <div className="flex justify-center mb-4 min-h-[280px] items-center">
+      <div className="flex justify-center mb-4 min-h-[200px] items-center">
         {jobsToSend.length === 0 && (
           <p className="text-sm text-gray-400 dark:text-gray-600 text-center px-8">
             Nothing to hand over. Add a job first, or switch on completed jobs below.
@@ -107,7 +108,7 @@ export default function HandoverScreen({ jobs, onBack, onFinish }) {
         </div>
         <Toggle on={includeCompleted} onClick={() => setIncludeCompleted((v) => !v)} />
       </div>
-      <div className="flex items-center justify-between py-3 border-t border-gray-200 dark:border-gray-800 mb-8">
+      <div className="flex items-center justify-between py-3 border-t border-gray-200 dark:border-gray-800 mb-2">
         <div>
           <div className="text-sm font-semibold text-gray-900 dark:text-white">Keep a copy on this phone</div>
           <div className="text-xs text-gray-400 dark:text-gray-600">Off clears your list after handover</div>
@@ -116,7 +117,7 @@ export default function HandoverScreen({ jobs, onBack, onFinish }) {
       </div>
       </div>
 
-      <div className="shrink-0 pt-4" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1.5rem)" }}>
+      <div className={`${SCREEN_FOOTER} pt-3`} style={safeBottom()}>
         <button
           onClick={finish}
           className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all"

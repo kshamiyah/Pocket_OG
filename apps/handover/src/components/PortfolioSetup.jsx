@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { ROLES, ROLE_OTHER_KEY } from "../utils/constants";
+import { SCREEN, SCREEN_FOOTER, SCREEN_SCROLL, safeBottom, safeTop } from "../utils/screenLayout";
 
-const ROLE_BTN = "py-2.5 rounded-xl border text-center text-sm font-bold active:scale-[0.98] transition-all";
+const ROLE_BTN = "py-2 rounded-xl border text-center text-sm font-bold active:scale-[0.98] transition-all";
 const ROLE_ON = "bg-gray-900 dark:bg-white text-white dark:text-gray-950 border-gray-900 dark:border-white";
 const ROLE_OFF = "bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white border-gray-200 dark:border-gray-800";
 const FIELD = "w-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-3.5 py-3 text-base text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-claude-500/30 focus:border-claude-500";
@@ -37,15 +38,12 @@ export default function PortfolioSetup({ initialProfile, editMode = false, onCom
   };
 
   return (
-    <div
-      className="h-screen bg-white dark:bg-gray-950 flex flex-col px-6"
-      style={{ paddingTop: "calc(env(safe-area-inset-top) + 2rem)", paddingBottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}
-    >
-      <div className="flex-1 min-h-0 overflow-y-auto">
+    <div className={`${SCREEN} px-6`}>
+      <div className={`${SCREEN_SCROLL} pb-3`} style={safeTop()}>
         <h1 className="text-gray-900 dark:text-white text-2xl font-bold leading-tight mb-1">
           {editMode ? "Your profile" : "Set up this phone"}
         </h1>
-        <p className="text-gray-500 text-sm mb-5">
+        <p className="text-gray-500 text-sm mb-4">
           {editMode
             ? "Stored on this device only. Use a first name, not a patient identifier."
             : "One-time. This device is yours from here on."}
@@ -60,11 +58,11 @@ export default function PortfolioSetup({ initialProfile, editMode = false, onCom
           onChange={(e) => setName(e.target.value)}
           autoFocus
           placeholder="First name is enough"
-          className={`${FIELD} mb-5`}
+          className={`${FIELD} mb-4`}
         />
 
         <p className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-600 mb-1.5">Your role</p>
-        <div className="grid grid-cols-2 gap-2 mb-2">
+        <div className="grid grid-cols-2 gap-2">
           {ROLES.map((r) => (
             <button
               key={r.key}
@@ -90,12 +88,12 @@ export default function PortfolioSetup({ initialProfile, editMode = false, onCom
             value={roleLabel}
             onChange={(e) => setRoleLabel(e.target.value)}
             placeholder="e.g. ODP, Band 6"
-            className={`${FIELD} mb-2`}
+            className={`${FIELD} mt-2`}
           />
         )}
       </div>
 
-      <div className="shrink-0 pt-3 flex flex-col gap-2">
+      <div className={`${SCREEN_FOOTER} flex flex-col gap-2`} style={safeBottom()}>
         <button
           type="button"
           onClick={submit}
