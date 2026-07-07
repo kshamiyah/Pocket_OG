@@ -91,7 +91,7 @@ export default function Home({
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col">
+    <div className="h-screen bg-white dark:bg-gray-950 flex flex-col">
       <div
         className="px-5 flex items-baseline justify-between border-b border-gray-200 dark:border-gray-800"
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)", paddingBottom: "0.9rem" }}
