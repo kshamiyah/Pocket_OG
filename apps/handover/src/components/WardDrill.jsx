@@ -41,7 +41,7 @@ export default function WardDrill({
 
   if (selectedWard === NO_WARD) {
     return (
-      <div className="flex-1 overflow-y-auto px-5 py-3 flex flex-col gap-3" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 6rem)" }}>
+      <div className="flex-1 min-h-0 overflow-y-auto px-5 py-3 flex flex-col gap-3" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 6rem)" }}>
         <button onClick={() => setSelectedWard(null)} className="text-sm font-bold text-gray-500 dark:text-gray-400 self-start">
           ← Wards
         </button>
@@ -59,7 +59,7 @@ export default function WardDrill({
     const wardData = wards.find((w) => w.ward === selectedWard);
     const bedData = wardData?.beds.find((b) => b.bed === selectedBed) ?? { bed: selectedBed, jobs: [] };
     return (
-      <div className="flex-1 overflow-y-auto px-5 py-3 flex flex-col gap-3" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 6rem)" }}>
+      <div className="flex-1 min-h-0 overflow-y-auto px-5 py-3 flex flex-col gap-3" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 6rem)" }}>
         <button onClick={() => setBedSelected(false)} className="text-sm font-bold text-gray-500 dark:text-gray-400 self-start">
           ← {selectedWard}
         </button>
@@ -78,7 +78,7 @@ export default function WardDrill({
   if (selectedWard) {
     const wardData = wards.find((w) => w.ward === selectedWard) ?? { beds: [] };
     return (
-      <div className="flex-1 overflow-y-auto px-5 py-3 flex flex-col gap-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 6rem)" }}>
+      <div className="flex-1 min-h-0 overflow-y-auto px-5 py-3 flex flex-col gap-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 6rem)" }}>
         <button onClick={() => setSelectedWard(null)} className="text-sm font-bold text-gray-500 dark:text-gray-400 self-start mb-1">
           ← Wards
         </button>
@@ -101,7 +101,7 @@ export default function WardDrill({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-5 py-3 flex flex-col gap-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 6rem)" }}>
+    <div className="flex-1 min-h-0 overflow-y-auto px-5 py-3 flex flex-col gap-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 6rem)" }}>
       {wards.length === 0 && (
         <p className="text-sm text-gray-400 dark:text-gray-600 text-center mt-10">No wards yet, add one below.</p>
       )}
