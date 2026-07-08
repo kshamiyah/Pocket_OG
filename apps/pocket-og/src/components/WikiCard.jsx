@@ -7,7 +7,7 @@ import { READER_AVAILABLE } from "../data/readerAvailable";
 const KIND_CTA = {
   calculator: { label: "Open calculator", sub: "Decision-support tool" },
   drug: { label: "Open in Rx", sub: "Doses & prescribing" },
-  consent: { label: "Open consent", sub: "Risks & patient information" },
+  consent: { label: "Open counsel", sub: "Benefits, risks & alternatives" },
 };
 
 export default function WikiCard({ page, isExpanded, onToggle, isFallback, query = "", onOpenFlowchart, onOpenGuideline, onNavigate, grouped = false }) {

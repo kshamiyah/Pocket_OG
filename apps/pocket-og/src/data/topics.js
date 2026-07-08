@@ -68,6 +68,7 @@ export const TOPICS = {
         heading: "Don't miss",
         entries: [
           { type: "reader", id: "NG133", sectionId: "ng133-prevention", gl: "NG133", label: "Aspirin prophylaxis & risk stratification", sublabel: "NG133: prevention section" },
+          { type: "consent", id: "ASPIRIN", gl: "NG133", label: "Aspirin, counsel", sublabel: "Benefits, practical points & declining" },
           { type: "reader", id: "GL952", sectionId: "pet-postnatal-community", gl: "GL952", label: "Postnatal follow-up after discharge", sublabel: "GL952: community section" },
         ],
       },
@@ -158,9 +159,9 @@ export const TOPICS = {
         ],
       },
       {
-        heading: "Consent",
+        heading: "Counsel",
         entries: [
-          { type: "consent", id: "IOL", gl: "GL861", label: "Induction of labour, consent", sublabel: "Risks by method" },
+          { type: "consent", id: "IOL", gl: "GL861", label: "Induction of labour, counsel", sublabel: "Risks by method" },
         ],
       },
       {
@@ -223,6 +224,7 @@ export const TOPICS = {
         heading: "Don't miss",
         entries: [
           { type: "reader", id: "CG623", sectionId: "ep-patientinfo", gl: "CG623", label: "Patient information for MTX", sublabel: "CG623: what to tell her before treatment" },
+          { type: "consent", id: "ECTOPIC", gl: "CG623", label: "Ectopic pregnancy, counsel", sublabel: "Methotrexate / surgery / expectant: benefits, risks & alternatives" },
         ],
       },
     ],
@@ -309,9 +311,9 @@ export const TOPICS = {
         ],
       },
       {
-        heading: "Consent",
+        heading: "Counsel",
         entries: [
-          { type: "consent", id: "ACS", gl: "NG25", label: "Antenatal corticosteroids, consent", sublabel: "Benefits & harms by gestation band" },
+          { type: "consent", id: "ACS", gl: "NG25", label: "Antenatal corticosteroids, counsel", sublabel: "Benefits & harms by gestation band" },
         ],
       },
       {

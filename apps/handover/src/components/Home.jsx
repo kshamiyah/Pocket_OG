@@ -23,6 +23,7 @@ const LIST_BOTTOM_PAD = "calc(env(safe-area-inset-bottom) + 6rem)";
 
 export default function Home({
   jobs, setJobs, shiftType, recentWards, setRecentWards, recentBeds, setRecentBeds,
+  recentPhrases, setRecentPhrases,
   wardLayouts, onHandover, onScan, onSetupWard, onManageWards, onEditProfile, onEndShift,
   selectedWard, setSelectedWard, selectedBed, setSelectedBed, bedSelected, setBedSelected,
 }) {
@@ -289,6 +290,8 @@ export default function Home({
           setRecentWards={setRecentWards}
           recentBeds={recentBeds}
           setRecentBeds={setRecentBeds}
+          recentPhrases={recentPhrases}
+          setRecentPhrases={setRecentPhrases}
           wardLayouts={wardLayouts}
           onSetupWard={onSetupWard}
         />

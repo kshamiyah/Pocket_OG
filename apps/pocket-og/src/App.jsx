@@ -39,7 +39,7 @@ const FILTER_OPTIONS = [
   { value: "FLOWCHARTS", label: "Pages with flowcharts", pill: "⬡ Flowcharts", filterFn: e => !!e.page.flowchartId,                             active: "bg-teal-100 text-teal-700" },
   { value: "DRUGS",      label: "Medications",         pill: "℞ Meds",        filterFn: e => e.page.kind === "drug",                             active: "bg-cyan-100 text-cyan-700" },
   { value: "CALCS",      label: "Calculators",         pill: "▦ Calcs",       filterFn: e => e.page.kind === "calculator",                       active: "bg-amber-100 text-amber-700" },
-  { value: "CONSENT",    label: "Consent",             pill: "✓ Consent",     filterFn: e => e.page.kind === "consent",                          active: "bg-rose-100 text-rose-700" },
+  { value: "CONSENT",    label: "Counsel",             pill: "✓ Counsel",     filterFn: e => e.page.kind === "consent",                          active: "bg-rose-100 text-rose-700" },
 ];
 
 const SUGGESTIONS = [
@@ -179,6 +179,18 @@ export default function App() {
   const [rxNavKey, setRxNavKey] = useState(0);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [updatesOpen, setUpdatesOpen] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    try { return localStorage.getItem("pocketog_theme_v1") ?? "light"; } catch { return "light"; }
+  });
+
+  // Dark mode: a `dark` class on <html> drives the overrides in index.css,
+  // and the PWA status bar follows via the theme-color meta tag.
+  useEffect(() => {
+    const dark = theme === "dark";
+    document.documentElement.classList.toggle("dark", dark);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", dark ? "#111827" : "#ffffff");
+    try { localStorage.setItem("pocketog_theme_v1", theme); } catch { /* best effort */ }
+  }, [theme]);
   const [updatesUnseen, setUpdatesUnseen] = useState(() => hasUnseenUpdates());
   const [hintIndex, setHintIndex] = useState(0);
   const inputRef = useRef(null);
@@ -338,6 +350,7 @@ export default function App() {
         html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
+        html.dark ::-webkit-scrollbar-thumb { background: #334155; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         :focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; border-radius: 4px; }
@@ -358,6 +371,27 @@ export default function App() {
           <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
           </svg>
+        </button>
+      )}
+
+      {/* Theme toggle — top-left on the search landing screen, mirroring About */}
+      {activeTab === "search" && !hasQuery && (
+        <button
+          type="button"
+          onClick={() => setTheme(t => (t === "dark" ? "light" : "dark"))}
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          className="fixed left-4 z-30 w-8 h-8 flex items-center justify-center bg-white/95 backdrop-blur border border-gray-200 shadow-sm rounded-full text-gray-400 hover:text-gray-600 hover:shadow-md active:scale-95 transition-all"
+          style={{ top: "max(1rem, env(safe-area-inset-top))" }}
+        >
+          {theme === "dark" ? (
+            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1.5M12 19.5V21M4.22 4.22l1.06 1.06M18.72 18.72l1.06 1.06M3 12h1.5M19.5 12H21M4.22 19.78l1.06-1.06M18.72 5.28l1.06-1.06M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+            </svg>
+          ) : (
+            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 15A9.72 9.72 0 0118 15.75c-5.39 0-9.75-4.36-9.75-9.75 0-1.33.27-2.6.75-3.75A9.75 9.75 0 003 11.25C3 16.64 7.36 21 12.75 21a9.75 9.75 0 009-6z" />
+            </svg>
+          )}
         </button>
       )}
 
@@ -941,7 +975,7 @@ export default function App() {
             { id: "search",     label: "Search",  icon: <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" /> },
             { id: "guidelines", label: "Library", icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> },
             { id: "flowcharts", label: "Flow",    icon: <path strokeLinecap="round" strokeLinejoin="round" d="M12 2L22 12L12 22L2 12L12 2Z" /> },
-            { id: "consent",    label: "Consent", icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /> },
+            { id: "consent",    label: "Counsel", icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /> },
             { id: "calculator", label: "Calc",    icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m-6 5h6m-6 5h6M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" /> },
             { id: "rx",         label: "Rx",      icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" /> },
           ].map(tab => (

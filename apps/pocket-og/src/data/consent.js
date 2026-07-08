@@ -409,6 +409,60 @@ export const CS_COMPARISON_SECTIONS = [
   },
 ];
 
+// Benefits of planned CS vs planned vaginal birth — figures verbatim from
+// NICE NG192 Appendix A (2021). Population averages; comparator named per row.
+export const CS_BENEFITS_ELECTIVE = [
+  {
+    id: "pain_during_birth",
+    name: "Far less pain during the birth itself",
+    rate: "Pain score 1.0 vs 7.3",
+    detail: "median, vs vaginal birth",
+    source: "NICE NG192 App A",
+    plain: "Pain during the birth itself is much lower with caesarean under spinal anaesthetic (median pain score 1.0 vs 7.3). However, abdominal wound pain afterwards is common.",
+  },
+  {
+    id: "no_vaginal_tear",
+    name: "No vaginal tears",
+    rate: "0 vs 560 per 100,000",
+    detail: "vs vaginal birth",
+    source: "NICE NG192 App A",
+    plain: "Vaginal tears do not occur with caesarean birth.",
+  },
+  {
+    id: "urinary_incont_benefit",
+    name: "Lower risk of urinary incontinence lasting more than a year",
+    rate: "1 in 5 vs 1 in 2",
+    detail: "vs unassisted vaginal birth",
+    source: "NICE NG192 App A",
+    plain: "Caesarean birth is associated with a lower risk of long-term urinary incontinence: about 19,600 per 100,000 vs 48,700 per 100,000 after unassisted vaginal birth, and about 7,300 vs 19,800 per 100,000 compared with assisted (forceps or ventouse) birth.",
+  },
+  {
+    id: "faecal_incont_benefit",
+    name: "Lower risk of faecal incontinence lasting more than a year",
+    rate: "1 in 13 vs 1 in 7",
+    detail: "vs assisted vaginal birth",
+    source: "NICE NG192 App A",
+    plain: "Compared with assisted (forceps or ventouse) vaginal birth, caesarean carries a lower risk of long-term faecal incontinence: about 7,800 vs 15,100 per 100,000. Compared with unassisted vaginal birth the risk is similar.",
+  },
+];
+
+// Emergency CS benefits are qualitative: the guideline gives no comparative
+// figures for "operate now vs continue labour", so no rates are stated.
+export const CS_BENEFITS_EMERGENCY = [
+  {
+    id: "cs_em_prompt",
+    name: "Delivers your baby promptly when there is concern",
+    source: "NICE NG192",
+    plain: "An emergency caesarean achieves birth quickly when continuing labour is judged to carry significant risk to you or your baby. How quickly depends on the urgency, which the team will explain.",
+  },
+  {
+    id: "cs_em_avoids",
+    name: "Avoids the risks of continuing labour in your situation",
+    source: "NICE NG192",
+    plain: "The operation is recommended because, in your specific situation, waiting or continuing labour is considered more risky than surgical delivery. The team will explain the reason in your case.",
+  },
+];
+
 // RCOG Consent Advice No. 12 — shown when placenta praevia factor active
 export const CS_PP_RISK_SECTIONS = [
   {
@@ -828,15 +882,15 @@ export const CS_PAGES = {
   elective: {
     what: {
       heading: "Elective Caesarean Section",
-      body: "A caesarean section is an operation to deliver your baby through a cut made in your abdomen and womb. It is performed in an operating theatre.\n\nMost planned caesareans are done under a spinal anaesthetic — you are awake but numb from the waist down and will not feel pain. Your birth partner is usually able to be present.\n\nThe operation itself takes around 40–50 minutes. Your baby is usually delivered within the first 10 minutes.",
+      body: "A caesarean section is an operation to deliver your baby through a cut made in your abdomen and womb. It is performed in an operating theatre. A planned caesarean is not usually carried out before 39 weeks, because babies born earlier are more likely to have temporary breathing problems.\n\nBefore the operation\n\n• You will be seen beforehand to confirm the plan, have blood tests and go through the consent form.\n• You will be asked not to eat for several hours before surgery, and given medicine to reduce stomach acid.\n• Most planned caesareans are done under a spinal anaesthetic: you are awake but numb from the chest down. You will feel pressure, pulling and tugging, but not pain. A general anaesthetic is occasionally needed and your anaesthetist will discuss this.\n• A thin tube (catheter) is placed into your bladder to keep it empty and protect it during the operation.\n• Antibiotics are given through a drip before the first cut, to reduce the chance of infection.\n• Your birth partner can usually be with you in theatre, and a screen is placed so you do not see the operation.\n\nThe operation\n\n• The skin cut is almost always horizontal, along the bikini line just above the pubic bone.\n• A second cut is made in the lower part of the womb and your baby is delivered through it, usually within the first 10 minutes.\n• You are given an injection of oxytocin to help the womb contract and reduce bleeding, and the placenta is delivered through the same cut.\n• If all is well, you can usually have skin-to-skin contact with your baby in theatre.\n• The womb and the layers of the tummy are closed with dissolvable stitches; the skin is closed with stitches or clips. The whole operation takes around 40–50 minutes.\n\nAfterwards\n\n• You and your baby are observed closely in a recovery area, and feeding is supported as soon as possible.\n• The bladder catheter is removed once you are up and walking, usually within a day.\n• You will be offered regular pain relief, and assessed for blood-thinning injections to reduce the risk of clots.\n• Most women stay in hospital around 4 days; full recovery usually takes about 6 weeks.",
     },
     why: {
       heading: "Why is this being recommended?",
       body: "A planned caesarean is recommended when vaginal birth is considered to carry a higher risk for you or your baby than surgical delivery. The specific reason will have been discussed with your consultant.\n\nCommon reasons include: placenta praevia, previous caesarean sections, breech presentation, or maternal preference following counselling about the risks and benefits of each mode of delivery.",
     },
-    decline: {
-      heading: "If you decide not to proceed",
-      body: "You have the right to decline a caesarean section. No procedure can be performed without your consent.\n\nIf you decline, your doctor will discuss the alternative options available to you, which may include a planned vaginal birth, induction of labour, or continued monitoring — depending on your clinical situation.\n\nYour doctor will explain the specific risks of not proceeding in your case. Please ask any questions you have before making your decision.",
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "No caesarean can be performed without your consent, and you have the right to decline one even where it has been recommended. Declining does not affect your right to good care.\n\nThe main alternative is a planned vaginal birth. How the two compare depends on why a caesarean has been offered; the Options tab shows the outcomes side by side for an average pregnancy.\n\nDepending on your situation, other options may include:\n\n• Vaginal birth after caesarean (VBAC): many women with a previous caesarean can plan a vaginal birth. Your consultant can discuss your individual chance of success.\n• Turning a breech baby (ECV): if your baby is breech, an attempt to turn the baby by pressing on your abdomen can be offered from around 36 weeks. If it works, vaginal birth becomes possible.\n• Waiting and monitoring: in some situations it is reasonable to continue the pregnancy with closer monitoring and revisit the decision.\n\nYour doctor will explain which of these genuinely apply in your case and what each would mean for you. Take the time you need and ask any questions before deciding.",
     },
   },
   emergency: {
@@ -848,12 +902,29 @@ export const CS_PAGES = {
       heading: "Why is this needed now?",
       body: "An emergency caesarean is recommended when there is a concern that continuing labour carries a significant risk to you or your baby that requires prompt delivery.\n\nYour doctor will explain the specific reason in your case. Common reasons include fetal heart rate concerns, failure to progress in labour, heavy bleeding, or cord prolapse.",
     },
-    decline: {
-      heading: "If you decide not to proceed",
-      body: "You have the right to decline any procedure, including an emergency caesarean, provided you have the capacity to make that decision.\n\nYour doctor will clearly explain what the risks to you and your baby are if delivery does not happen urgently. This is important information for your decision.\n\nIf you have questions or concerns, please say so now — the team will take the time to answer them.",
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "You have the right to decline any procedure, including an emergency caesarean, provided you have the capacity to make that decision.\n\nThe alternatives depend on your situation and how urgent the concern is:\n\n• Continuing labour with close monitoring: possible in some situations, but the team has recommended caesarean because they judge the risk of waiting to be higher in your case.\n• Assisted vaginal birth (forceps or ventouse): sometimes possible instead, if the cervix is fully dilated and the baby is low enough. The team will tell you if this applies.\n\nYour doctor will clearly explain what the risks to you and your baby are if delivery does not happen urgently. If you have questions or concerns, please say so now; the team will take the time to answer them.",
     },
   },
 };
+
+// Qualitative benefits: RCOG GTG26 / CA11 give no comparative success figures
+// suitable for patient-facing rates, so none are stated.
+export const OVD_BENEFITS = [
+  {
+    id: "ovd_sooner",
+    name: "Your baby is born sooner",
+    source: "RCOG GTG26",
+    plain: "An assisted birth is offered when the baby needs to be born more quickly than pushing alone can achieve, for example because of concerns about the heart rate, slow progress, or exhaustion.",
+  },
+  {
+    id: "ovd_avoid_cs",
+    name: "Avoids an emergency caesarean",
+    source: "RCOG GTG26",
+    plain: "When successful, an assisted vaginal birth avoids a caesarean section late in labour, which is a bigger operation with a longer recovery and implications for future births.",
+  },
+];
 
 export const OVD_PAGES = {
   ventouse: {
@@ -865,9 +936,9 @@ export const OVD_PAGES = {
       heading: "Why is this being recommended?",
       body: "A ventouse delivery is recommended when your baby needs to be delivered sooner than pushing alone can achieve — this may be because of concerns about your baby's heart rate, because labour has not been progressing, or because you are too tired to push effectively.\n\nInstrumental delivery, when it is safe to attempt, avoids the risks and longer recovery associated with an emergency caesarean section.",
     },
-    decline: {
-      heading: "If you decide not to proceed",
-      body: "You have the right to decline an instrumental delivery.\n\nYour doctor will explain the alternative options — which may include continuing to push, or proceeding directly to a caesarean section — and the risks associated with each, so you can make an informed decision.\n\nPlease ask any questions you have before deciding.",
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "You have the right to decline an instrumental birth.\n\nThe alternatives depend on your situation:\n\n• Continuing to push: possible when there is no immediate concern for the baby; the team will say whether it is safe to wait.\n• Caesarean birth: possible at any stage, but a caesarean at full dilatation is itself a bigger operation with a longer recovery.\n\nYour doctor will explain the risks of each option in your case so you can make an informed decision. Please ask any questions you have before deciding.",
     },
   },
   forceps: {
@@ -879,9 +950,9 @@ export const OVD_PAGES = {
       heading: "Why is this being recommended?",
       body: "Forceps delivery is recommended when your baby needs to be delivered sooner than pushing alone can achieve — this may be because of concerns about your baby's heart rate, because labour has not been progressing, or because you are too tired to push effectively.\n\nForceps may be preferred over ventouse in certain situations, such as when the baby is in a particular position or when a more controlled delivery is needed.",
     },
-    decline: {
-      heading: "If you decide not to proceed",
-      body: "You have the right to decline an instrumental delivery.\n\nYour doctor will explain the alternative options — which may include continuing to push, or proceeding directly to a caesarean section — and the risks associated with each, so you can make an informed decision.\n\nPlease ask any questions you have before deciding.",
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "You have the right to decline an instrumental birth.\n\nThe alternatives depend on your situation:\n\n• Continuing to push: possible when there is no immediate concern for the baby; the team will say whether it is safe to wait.\n• Caesarean birth: possible at any stage, but a caesarean at full dilatation is itself a bigger operation with a longer recovery.\n\nYour doctor will explain the risks of each option in your case so you can make an informed decision. Please ask any questions you have before deciding.",
     },
   },
 };
@@ -1054,18 +1125,42 @@ export const SURG_MISC_RISK_SECTIONS = [
   },
 ];
 
+// Benefits: success figures as already quoted in this file (RCOG GTG25/CA10).
+export const SURG_MISC_BENEFITS = [
+  {
+    id: "surg_misc_success",
+    name: "Highest chance of completing treatment in one step",
+    rate: "95–99 in 100",
+    detail: "success rate",
+    source: "RCOG GTG25",
+    plain: "Surgical management succeeds in around 95–99 in 100 cases, compared with about 85 in 100 for medical management and 50–80 in 100 for expectant management within 2 weeks.",
+  },
+  {
+    id: "surg_misc_quick",
+    name: "Quick and at a planned time",
+    source: "RCOG CA10",
+    plain: "The procedure typically takes 5–15 minutes and most women go home the same day. It happens at a planned time rather than waiting for the miscarriage to complete on its own.",
+  },
+  {
+    id: "surg_misc_anaes_choice",
+    name: "Choice of anaesthetic",
+    source: "RCOG CA10",
+    plain: "It can be done under general anaesthetic, or awake under local anaesthetic (manual vacuum aspiration), which is safe and effective for most women with early miscarriage.",
+  },
+];
+
 export const SURG_MISC_PAGES = {
   what: {
     heading: "Surgical Management of Miscarriage",
-    body: "Surgical management of miscarriage involves a procedure to remove the pregnancy tissue from the uterus. This is performed using vacuum aspiration — either electric (EVA) or manual (MVA) — under general or local anaesthetic. The procedure typically takes 5–15 minutes.\n\nSharp curettage (scraping) is no longer used routinely. You will usually be able to go home the same day.",
+    body: "Surgical management of miscarriage is a short procedure to remove the pregnancy tissue from the uterus using gentle suction (vacuum aspiration), either electric (EVA) or manual (MVA).\n\nBefore the procedure\n\n• You may be given a tablet (misoprostol) beforehand to soften the cervix, which reduces the chance of injury to the cervix.\n• It can be done under general anaesthetic (fully asleep), or awake under local anaesthetic, which is usual for MVA.\n\nThe procedure\n\n• The cervix is gently opened and a small suction tube is passed into the uterus to remove the tissue.\n• Sharp scraping (curettage) is no longer used routinely.\n• It typically takes 5–15 minutes.\n\nAfterwards\n\n• Most women go home the same day.\n• Some vaginal bleeding for up to 2 weeks is normal and expected.",
   },
   why: {
     heading: "Why is this being recommended?",
     body: "Surgical management may be recommended when:\n\n• There is heavy or persistent bleeding from retained pregnancy tissue\n• The pregnancy has not passed on its own (missed miscarriage)\n• Expectant or medical management has not been successful\n• There are signs of infection with retained tissue\n• You are haemodynamically unstable\n• It is your preference after being counselled about all three options (expectant, medical, and surgical)",
   },
-  decline: {
-    heading: "If you decide not to proceed",
-    body: "You have the right to decline surgical management.\n\nAlternatives include:\n\n• Expectant management — waiting for the tissue to pass naturally (successful in around 50–80% of women within 2 weeks)\n• Medical management — misoprostol tablets to stimulate the uterus to empty (successful in around 85 in 100 women)\n\nIf you decline all treatment, retained products carry ongoing risk of bleeding, infection, and rarely coagulopathy. Your team will explain what to watch for and how to access help.",
+  alternatives: {
+    heading: "Alternatives and your right to decline",
+    body: "You have the right to decline surgical management. The three options for miscarriage care are usually all reasonable, and the choice is yours:\n\n• Expectant management: waiting for the tissue to pass naturally; successful in around 50–80 in 100 women within 2 weeks\n• Medical management: misoprostol tablets to help the uterus empty; successful in around 85 in 100 women\n\nIf you decline all treatment, retained tissue carries an ongoing risk of bleeding and infection, and rarely clotting problems. Your team will explain what to watch for and how to access help, and you can change your mind at any time.",
   },
 };
 
@@ -1191,6 +1286,29 @@ export const MED_MISC_RISK_SECTIONS = [
   },
 ];
 
+export const MED_MISC_BENEFITS = [
+  {
+    id: "med_misc_no_surgery",
+    name: "Avoids an operation and anaesthetic",
+    source: "RCOG GTG25",
+    plain: "Medical management uses tablets rather than a surgical procedure, so it avoids the risks of surgery and of a general anaesthetic.",
+  },
+  {
+    id: "med_misc_home",
+    name: "Can often be managed at home",
+    source: "RCOG GTG25",
+    plain: "In many units the misoprostol can be self-administered at home, with written instructions, emergency contact numbers and clear guidance on when to come to hospital.",
+  },
+  {
+    id: "med_misc_success",
+    name: "Successful for most women",
+    rate: "85 in 100",
+    detail: "success rate",
+    source: "RCOG GTG25",
+    plain: "Around 85 in 100 women pass the pregnancy completely with medical management. Around 15 in 100 need a further dose or a surgical procedure.",
+  },
+];
+
 export const MED_MISC_PAGES = {
   what: {
     heading: "Medical Management of Miscarriage",
@@ -1200,9 +1318,9 @@ export const MED_MISC_PAGES = {
     heading: "Why is this being recommended?",
     body: "Medical management may be recommended when:\n\n• You have a missed miscarriage (the pregnancy has stopped developing but has not passed)\n• You have an incomplete miscarriage and prefer medication to surgery\n• Expectant management has not been successful\n• You wish to avoid a surgical procedure and general anaesthetic\n\nMisoprostol is successful in approximately 85 in 100 women. If treatment is not complete, a further dose of medication or a surgical procedure may be needed.",
   },
-  decline: {
-    heading: "If you decide not to proceed",
-    body: "You have the right to decline medical management.\n\nAlternatives include:\n\n• Expectant management — waiting for the tissue to pass naturally (successful in around 50–80% of women within 2 weeks)\n• Surgical management — vacuum aspiration to remove the tissue under local or general anaesthetic (success rate approximately 95–99%)\n\nIf you decline all treatment, retained products carry ongoing risk of bleeding, infection, and rarely coagulopathy. Your team will advise on what to watch for.",
+  alternatives: {
+    heading: "Alternatives and your right to decline",
+    body: "You have the right to decline medical management. The other options are:\n\n• Expectant management: waiting for the tissue to pass naturally; successful in around 50–80 in 100 women within 2 weeks\n• Surgical management: vacuum aspiration under local or general anaesthetic; successful in around 95–99 in 100 cases\n\nIf you decline all treatment, retained tissue carries an ongoing risk of bleeding and infection, and rarely clotting problems. Your team will advise on what to watch for, and you can change your mind at any time.",
   },
 };
 
@@ -1335,6 +1453,27 @@ export const LAPAROSCOPY_RISK_SECTIONS = [
   },
 ];
 
+export const LAPAROSCOPY_BENEFITS = [
+  {
+    id: "lap_definitive",
+    name: "A definitive look at the pelvis",
+    source: "RCOG CA2",
+    plain: "Laparoscopy allows direct visualisation of the pelvic and abdominal organs and is more accurate than imaging alone for conditions such as endometriosis and adhesions.",
+  },
+  {
+    id: "lap_recovery",
+    name: "Small cuts and a quick recovery",
+    source: "RCOG CA2",
+    plain: "Incisions are usually 5–10 mm. Most women return to light activities within 1–2 days and normal activities within 1–2 weeks.",
+  },
+  {
+    id: "lap_treat_same_time",
+    name: "Treatment may be possible at the same time",
+    source: "RCOG CA2",
+    plain: "If a treatable condition is found, the surgeon may be able to deal with it during the same operation if you have consented to this in advance.",
+  },
+];
+
 export const LAPAROSCOPY_PAGES = {
   what: {
     heading: "Diagnostic Laparoscopy",
@@ -1344,9 +1483,9 @@ export const LAPAROSCOPY_PAGES = {
     heading: "Why is this being recommended?",
     body: "A diagnostic laparoscopy may be recommended to investigate:\n\n• Pelvic pain (acute or chronic)\n• Suspected endometriosis\n• Suspected pelvic inflammatory disease\n• Infertility — including tubal patency testing (dye test)\n• Adnexal (ovarian) masses\n• Suspected ectopic pregnancy\n\nLaparoscopy allows direct visualisation of the pelvis and is more accurate than imaging alone for conditions such as endometriosis and adhesions.",
   },
-  decline: {
-    heading: "If you decide not to proceed",
-    body: "You have the right to decline this procedure.\n\nAlternatives that may provide some information include:\n\n• Transvaginal ultrasound\n• MRI of the pelvis\n• Empirical medical treatment (e.g. for suspected endometriosis)\n• HSG (dye test via X-ray) for tubal assessment\n\nHowever, these cannot replace the direct visualisation that laparoscopy provides. Some conditions — particularly peritoneal endometriosis and pelvic adhesions — can only be reliably diagnosed laparoscopically.",
+  alternatives: {
+    heading: "Alternatives and your right to decline",
+    body: "You have the right to decline this procedure. Alternatives that may provide some information include:\n\n• Transvaginal ultrasound\n• MRI of the pelvis\n• Empirical medical treatment (for example, for suspected endometriosis)\n• HSG (an X-ray dye test) for tubal assessment\n\nThese cannot fully replace the direct view that laparoscopy provides: some conditions, particularly peritoneal endometriosis and pelvic adhesions, can only be reliably diagnosed laparoscopically. Your doctor can discuss how useful each alternative would be in your case.",
   },
 };
 
@@ -1531,6 +1670,43 @@ export const HYSTEROSCOPY_RISK_SECTIONS = [
   },
 ];
 
+export const HYSTEROSCOPY_BENEFITS = {
+  diagnostic: [
+    {
+      id: "hyst_direct_view",
+      name: "Direct view of the inside of the womb",
+      source: "RCOG CA1",
+      plain: "Hysteroscopy allows direct visual inspection of the uterine cavity and is more accurate than ultrasound alone for identifying polyps, fibroids and adhesions.",
+    },
+    {
+      id: "hyst_quick",
+      name: "Quick, with same-day discharge",
+      source: "RCOG CA1",
+      plain: "The procedure itself usually takes 5–10 minutes, as an outpatient without anaesthetic or as a day case under general anaesthetic, and you usually go home the same day.",
+    },
+    {
+      id: "hyst_see_and_treat",
+      name: "Small problems can sometimes be treated at the same visit",
+      source: "RCOG CA1",
+      plain: "If a small polyp is found, it may be possible to remove it during the same procedure if you have consented to this in advance.",
+    },
+  ],
+  operative: [
+    {
+      id: "hyst_op_no_cuts",
+      name: "Treats the problem without any cuts",
+      source: "RCOG CA1 · GTG59",
+      plain: "Operative hysteroscopy treats polyps, fibroids and adhesions through the cervix, avoiding the need for open or keyhole abdominal surgery.",
+    },
+    {
+      id: "hyst_op_daycase",
+      name: "Day-case surgery",
+      source: "RCOG CA1",
+      plain: "The procedure typically takes 20–45 minutes depending on what is being treated, and most women go home the same day.",
+    },
+  ],
+};
+
 export const HYSTEROSCOPY_PAGES = {
   diagnostic: {
     what: {
@@ -1541,9 +1717,9 @@ export const HYSTEROSCOPY_PAGES = {
       heading: "Why is this being recommended?",
       body: "A diagnostic hysteroscopy may be recommended to investigate:\n\n• Abnormal uterine bleeding (heavy, irregular, or postmenopausal)\n• Suspected intrauterine pathology (polyps, fibroids, adhesions)\n• Recurrent miscarriage or infertility\n• Abnormal endometrial thickness seen on ultrasound\n• Assessment before IVF\n\nHysteroscopy allows direct visualisation of the uterine cavity and is more accurate than ultrasound alone for identifying intrauterine conditions.",
     },
-    decline: {
-      heading: "If you decide not to proceed",
-      body: "You have the right to decline this procedure.\n\nAlternatives include:\n\n• Transvaginal ultrasound — useful first-line test but may miss small or flat intrauterine lesions\n• Saline infusion sonography (SIS) — can identify polyps and fibroids\n• Endometrial biopsy (Pipelle) — samples the lining but has a miss rate of up to 30% for focal lesions\n\nIf you decline, intrauterine pathology may go undiagnosed and treatment cannot be tailored to a confirmed diagnosis.",
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "You have the right to decline this procedure.\n\nAlternatives include:\n\n• Transvaginal ultrasound: a useful first-line test, but it may miss small or flat intrauterine lesions\n• Saline infusion sonography (SIS): can identify polyps and fibroids\n• Endometrial biopsy (Pipelle): samples the lining, but has a miss rate of up to 30% for focal lesions\n\nIf you decline, intrauterine pathology may go undiagnosed and treatment cannot be tailored to a confirmed diagnosis. Your doctor can discuss how useful each alternative would be in your case.",
     },
   },
   operative: {
@@ -1555,9 +1731,9 @@ export const HYSTEROSCOPY_PAGES = {
       heading: "Why is this being recommended?",
       body: "Operative hysteroscopy may be recommended to treat:\n\n• Endometrial polyps\n• Submucous fibroids causing symptoms or affecting fertility\n• Intrauterine adhesions (Asherman syndrome)\n• Removal of a lost or displaced intrauterine device\n\nOperative hysteroscopy is a minimally invasive approach to treating intrauterine conditions that avoids the need for open surgery.",
     },
-    decline: {
-      heading: "If you decide not to proceed",
-      body: "You have the right to decline this procedure.\n\nAlternatives depend on your condition:\n\n• Medical management (e.g. hormonal treatment for heavy bleeding)\n• Endometrial ablation (for bleeding, if fertility is not required)\n• Observation — for small polyps that may resolve spontaneously\n• Open or laparoscopic surgery for larger fibroids not accessible hysteroscopically\n\nUntreated intrauterine pathology may continue to cause symptoms and, in some cases, may affect fertility.",
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "You have the right to decline this procedure.\n\nAlternatives depend on your condition:\n\n• Medical management (for example, hormonal treatment for heavy bleeding)\n• Endometrial ablation (for bleeding, if fertility is not required)\n• Observation: small polyps may resolve spontaneously\n• Open or laparoscopic surgery for larger fibroids not accessible hysteroscopically\n\nUntreated intrauterine pathology may continue to cause symptoms and, in some cases, may affect fertility. Your doctor can discuss which of these genuinely apply to you.",
     },
   },
 };
@@ -1810,9 +1986,9 @@ export const ACS_PAGES = {
       heading: "Why are they being offered?",
       body: "Corticosteroids are offered to women between 24⁺⁰ and 34⁺⁶ weeks in whom imminent preterm birth is anticipated (established preterm labour, PPROM, or planned preterm birth). At 22⁺⁰–23⁺⁶ weeks they are discussed in the context of individual circumstances and the wider decision about active care for the baby.\n\nA Cochrane review of 27 studies (11,272 women and 11,925 babies) found high-certainty evidence that they reduce perinatal death, neonatal death and respiratory distress syndrome, with moderate-certainty evidence for reductions in intraventricular haemorrhage and developmental delay.",
     },
-    decline: {
-      heading: "If you decide not to proceed",
-      body: "You have the right to decline antenatal corticosteroids.\n\nIf you decline, the risk of neonatal death, respiratory distress syndrome, intraventricular haemorrhage and developmental delay is higher than it would be with treatment. The size of these risks depends on how preterm your baby is born.\n\nYour obstetric and neonatal team will continue to support you and your baby whatever you decide.",
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "You have the right to decline antenatal corticosteroids. There is no alternative medicine that does the same job; the alternative is expectant care without steroids.\n\nIf you decline, the risk of neonatal death, respiratory distress syndrome, intraventricular haemorrhage and developmental delay is higher than it would be with treatment. The size of these risks depends on how preterm your baby is born.\n\nYour obstetric and neonatal team will continue to support you and your baby whatever you decide.",
     },
   },
   late_preterm: {
@@ -1824,9 +2000,9 @@ export const ACS_PAGES = {
       heading: "Why are they being offered?",
       body: "Between 35⁺⁰ and 36⁺⁶ weeks the benefits and harms are more finely balanced. They may reduce the need for respiratory support, but they also increase the risk of low blood sugar in the newborn. The discussion should cover both — the guideline recommends an individualised, informed decision.",
     },
-    decline: {
-      heading: "If you decide not to proceed",
-      body: "You have the right to decline.\n\nThe risk of needing respiratory support is higher without steroids, but the risk of neonatal hypoglycaemia is lower. Your team will continue routine monitoring of the baby's breathing and blood sugars after birth whatever you decide.",
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "You have the right to decline. The alternative is expectant care without steroids: the risk of the baby needing respiratory support is higher, but the risk of low blood sugar in the newborn is lower. Either choice is reasonable at this gestation; the guideline recommends an individualised decision.\n\nYour team will continue routine monitoring of the baby's breathing and blood sugars after birth whatever you decide.",
     },
   },
   term_cs: {
@@ -1838,9 +2014,9 @@ export const ACS_PAGES = {
       heading: "Why are they being discussed?",
       body: "NICE CG132 recommends planned caesarean birth should not routinely be carried out before 39⁺⁰ weeks. For women undergoing a planned caesarean between 37⁺⁰ and 38⁺⁶ weeks, the guideline recommends an informed discussion about steroids.\n\nThe evidence is uncertain: steroids may reduce neonatal unit admission for respiratory morbidity (5.1% → 2.3%) but it is unclear if they reduce RDS, transient tachypnoea of the newborn or overall NNU admissions, and they may cause harm (hypoglycaemia, possible developmental effects).",
     },
-    decline: {
-      heading: "If you decide not to proceed",
-      body: "You have the right to decline.\n\nThe risk of respiratory morbidity at term is low overall (~5%) and decreases with advancing gestation. Where possible, planning caesarean birth at or after 39⁺⁰ weeks is an alternative way to reduce this risk without using steroids.",
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "You have the right to decline, and here there is a genuine alternative:\n\n• Planning the caesarean at or after 39⁺⁰ weeks, where possible, reduces the chance of breathing problems without using steroids.\n• Declining steroids and keeping the planned date: the risk of respiratory morbidity at term is low overall (around 5 in 100) and decreases with advancing gestation.\n\nEither approach is reasonable; the evidence for steroids at this gestation is uncertain.",
     },
   },
   rescue: {
@@ -1852,9 +2028,9 @@ export const ACS_PAGES = {
       heading: "Why is it being offered?",
       body: "The benefit of a single course of antenatal corticosteroids fades after about 7 days. If preterm birth is again anticipated and the previous course was given more than 7 days ago, a rescue course is likely to reduce the baby's need for respiratory support (395 → 311 per 1,000).",
     },
-    decline: {
-      heading: "If you decide not to proceed",
-      body: "You have the right to decline a rescue course.\n\nWithout a repeat course, the protective effect of the first course is likely to have largely worn off, and the baby's risk of needing respiratory support is higher. Dose effects are seen for harms — every additional course may further reduce birthweight, head circumference, length and neonatal blood pressure.",
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "You have the right to decline a rescue course. The alternative is expectant care: without a repeat course, the protective effect of the first course is likely to have largely worn off, and the baby's risk of needing respiratory support is higher.\n\nIt is also reasonable to weigh repeat dosing carefully. Dose effects are seen for harms: every additional course may further reduce birthweight, head circumference, length and neonatal blood pressure.",
     },
   },
 };
@@ -1947,6 +2123,58 @@ export const IOL_RISK_SECTIONS = [
   },
 ];
 
+// Shared row: why induction is offered at all. Method rows follow NG207.
+const IOL_BENEFIT_PROLONGED = {
+  id: "iol_prolonged",
+  name: "Reduces the risks of prolonged pregnancy",
+  source: "NICE NG207 §1.2",
+  plain: "Beyond 41+0 weeks the risks of stillbirth, neonatal death, neonatal unit admission and caesarean birth increase with time; induction is offered to avoid these risks. If induction has been offered for a different reason, that reason will have been discussed with you.",
+};
+
+export const IOL_BENEFITS = {
+  membrane_sweep: [
+    {
+      id: "iol_sweep_natural",
+      name: "Makes labour more likely to start on its own",
+      source: "NICE NG207 §1.3.1",
+      plain: "A sweep increases the chance that labour starts naturally, which can avoid the need for a formal induction with drugs or a balloon.",
+    },
+    {
+      id: "iol_sweep_simple",
+      name: "Simple and done at a routine visit",
+      source: "NICE NG207 §1.3.2",
+      plain: "It is performed during a vaginal examination at an antenatal appointment, with verbal consent, and can be repeated if labour does not start.",
+    },
+  ],
+  prostaglandin: [
+    IOL_BENEFIT_PROLONGED,
+    {
+      id: "iol_pg_firstline",
+      name: "First-line and effective at preparing the cervix",
+      source: "NICE NG207 §1.3.7",
+      plain: "Prostaglandins soften and open the cervix when it is not yet ready for labour (Bishop score 6 or less), allowing the waters to be broken and labour to be established.",
+    },
+  ],
+  balloon: [
+    IOL_BENEFIT_PROLONGED,
+    {
+      id: "iol_balloon_gentle",
+      name: "Lower chance of hyperstimulation than drug methods",
+      source: "NICE NG207 §1.3.5",
+      plain: "Mechanical methods are less likely than prostaglandins to make the uterus contract too frequently, and are the usual choice after a previous caesarean because prostaglandins are contraindicated with a uterine scar.",
+    },
+  ],
+  arm_oxytocin: [
+    IOL_BENEFIT_PROLONGED,
+    {
+      id: "iol_arm_establish",
+      name: "Establishes labour once the cervix is ready",
+      source: "NICE NG207 §1.3.9",
+      plain: "When the cervix is favourable (Bishop score more than 6), breaking the waters and starting oxytocin is the recommended way to bring on contractions and establish labour.",
+    },
+  ],
+};
+
 export const IOL_PAGES = {
   membrane_sweep: {
     what: {
@@ -1957,9 +2185,9 @@ export const IOL_PAGES = {
       heading: "Why is this being offered?",
       body: "A membrane sweep is offered to try to start labour naturally and reduce the chance that you will need a formal induction with drugs or a balloon.\n\nIt is usually offered from 39+0 weeks onwards in uncomplicated pregnancies, or earlier if there is a clinical reason to expedite labour. (NICE NG207 §1.3.2)",
     },
-    decline: {
-      heading: "If you decide not to proceed",
-      body: "You have the right to decline a membrane sweep, and your decision will be respected.\n\nIf you decline, your usual antenatal care will continue and the options of formal induction or expectant management can be discussed at later appointments. (NICE NG207 §1.1.5)",
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "You have the right to decline a membrane sweep, and your decision will be respected. The options remain open:\n\n• Waiting for labour to start naturally, with the offer of a sweep at a later visit\n• Formal induction of labour, discussed and booked in the usual way\n• Expectant management with additional monitoring if the pregnancy continues past 41+0 weeks\n\nYour usual antenatal care continues whatever you decide. (NICE NG207 §1.1.5)",
     },
   },
   prostaglandin: {
@@ -1971,9 +2199,9 @@ export const IOL_PAGES = {
       heading: "Why is this being recommended?",
       body: "Prostaglandin is recommended as the first-line method of induction for women with a Bishop score of 6 or less and no contraindication to pharmacological induction. (NICE NG207 §1.3.7)\n\nThe reason for offering induction in your case will have been discussed with you separately — common reasons include pregnancy lasting beyond 41+0 weeks, prelabour rupture of the membranes, or other obstetric indications. (NICE NG207 §1.2)",
     },
-    decline: {
-      heading: "If you decide not to proceed",
-      body: "You have the right to decide not to proceed with induction, to delay it, or to stop the process at any stage — even if the healthcare team disagrees with the decision. (NICE NG207 §1.1.5)\n\nThe alternative options — expectant management with additional fetal monitoring, or planned caesarean birth — will be discussed with you. Your decision will be recorded in your notes.",
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "You have the right to decide not to proceed with induction, to delay it, or to stop the process at any stage, even if the healthcare team disagrees with the decision. (NICE NG207 §1.1.5)\n\nThe alternatives will be discussed with you:\n\n• Expectant management: waiting, with additional fetal monitoring; the risks of continuing the pregnancy in your situation will be explained\n• A different method of induction, where one is suitable\n• Planned caesarean birth (NICE NG207 §1.2.18)\n\nYour decision will be respected and recorded in your notes.",
     },
   },
   balloon: {
@@ -1985,9 +2213,9 @@ export const IOL_PAGES = {
       heading: "Why is this being recommended?",
       body: "A mechanical method is offered when pharmacological methods (dinoprostone, misoprostol) are not suitable — for example, if there is a higher risk of hyperstimulation, or in women who have had a previous caesarean birth (because dinoprostone and misoprostol are contraindicated in women with a uterine scar).\n\nIt may also be offered when you choose a mechanical method over a pharmacological one. (NICE NG207 §1.2.17, §1.3.8)",
     },
-    decline: {
-      heading: "If you decide not to proceed",
-      body: "You have the right to decline mechanical induction. The alternatives — expectant management with monitoring, or planned caesarean birth — will be discussed with you. (NICE NG207 §1.1.5, §1.2.18)\n\nYour decision will be recorded in your notes.",
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "You have the right to decline mechanical induction, to delay it, or to stop the process at any stage. (NICE NG207 §1.1.5)\n\nThe alternatives will be discussed with you:\n\n• Expectant management: waiting, with additional fetal monitoring\n• A pharmacological method (dinoprostone or misoprostol), where suitable; not an option with a previous caesarean because of the uterine scar\n• Planned caesarean birth (NICE NG207 §1.2.18)\n\nYour decision will be respected and recorded in your notes.",
     },
   },
   arm_oxytocin: {
@@ -1999,9 +2227,9 @@ export const IOL_PAGES = {
       heading: "Why is this being recommended?",
       body: "ARM and oxytocin is recommended as the method of induction once the cervix is favourable (Bishop score more than 6). (NICE NG207 §1.3.9)",
     },
-    decline: {
-      heading: "If you decide not to proceed",
-      body: "You can choose to have the ARM only and delay or decline the oxytocin infusion. You can also stop the induction process at any stage. (NICE NG207 §1.1.5, §1.3.10)\n\nThe alternative options — expectant management or caesarean birth — will be discussed with you and your decision recorded.",
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "You have the right to decline, and you can stop the induction process at any stage. (NICE NG207 §1.1.5)\n\nThe alternatives will be discussed with you:\n\n• Having the ARM only and delaying or declining the oxytocin infusion, accepting that labour may take longer and there may be an increased risk of infection for the baby (NICE NG207 §1.3.10)\n• Expectant management: waiting, with additional fetal monitoring\n• Planned caesarean birth (NICE NG207 §1.2.18)\n\nYour decision will be respected and recorded in your notes.",
     },
   },
 };
@@ -2030,6 +2258,882 @@ export const IOL_FAQ = [
   {
     q: "Can I change my mind?",
     a: "Yes — at any stage. You can decline induction at the outset, delay it, or stop the process once it has started. Your decision will be respected and recorded in your notes. (NICE NG207 §1.1.5)",
+  },
+];
+
+// ─── BIRTH AFTER CAESAREAN (VBAC vs ERCS) ────────────────────────────────────
+// Source: RCOG Green-top Guideline No. 45 (Birth After Previous Caesarean, 2015)
+// and its patient information. Figures describe women with one previous
+// lower-segment caesarean unless stated.
+
+export const VBAC_PATIENT_FACTORS = [
+  { id: "prev_vaginal_birth", label: "Previous vaginal birth" },
+  { id: "two_plus_cs",        label: "Two or more previous caesareans" },
+  { id: "vbac_iol",           label: "Induction of labour likely" },
+];
+
+export const VBAC_RISK_SECTIONS = [
+  {
+    id: "vbac_maternal",
+    heading: "Risks of planned VBAC",
+    type: "list",
+    risks: [
+      {
+        id: "vbac_em_cs",
+        name: "Emergency caesarean during labour",
+        freq: "VERY_COMMON",
+        rate: "About 1 in 4",
+        source: "RCOG GTG45",
+        plain: "Around 1 in 4 women planning VBAC need an emergency caesarean during labour, most often for slow progress or concerns about the baby's heart rate. This is similar to the rate for a woman labouring for the first time.",
+      },
+      {
+        id: "vbac_rupture",
+        name: "Uterine rupture (scar opening in labour)",
+        freq: "UNCOMMON",
+        rate: "About 1 in 200",
+        source: "RCOG GTG45",
+        plain: "The scar on the womb opens during labour in about 1 in 200 planned VBAC labours. This is an emergency: it is why continuous monitoring and birth in a unit with immediate access to caesarean are recommended.",
+      },
+      {
+        id: "vbac_transfusion",
+        name: "Blood transfusion or uterine infection",
+        freq: "COMMON",
+        rate: "≈1 in 100 extra",
+        source: "RCOG GTG45",
+        plain: "Planned VBAC carries about a 1 in 100 additional risk of needing a blood transfusion or developing infection of the womb, compared with a planned repeat caesarean.",
+      },
+      {
+        id: "vbac_hie",
+        name: "Brain injury from lack of oxygen (HIE)",
+        freq: "RARE",
+        rate: "8 in 10,000",
+        source: "RCOG GTG45",
+        plain: "The risk of the baby developing hypoxic-ischaemic encephalopathy with planned VBAC is about 8 in 10,000, compared with less than 1 in 10,000 for a planned repeat caesarean.",
+      },
+      {
+        id: "vbac_perinatal_death",
+        name: "Delivery-related perinatal death",
+        freq: "RARE",
+        rate: "4 in 10,000",
+        source: "RCOG GTG45",
+        plain: "The risk of the baby dying around the time of birth with planned VBAC is about 4 in 10,000. This is very low, and comparable to the risk for a woman labouring with her first baby.",
+      },
+      {
+        id: "vbac_iol_row",
+        name: "Induced VBAC labour: higher risks",
+        freq: "COMMON",
+        rate: null,
+        note: "Applies if induced",
+        source: "RCOG GTG45",
+        conditions: ["vbac_iol"],
+        plain: "Induction of a VBAC labour increases the risks of emergency caesarean and of uterine rupture compared with waiting for spontaneous labour. Mechanical methods are preferred; the balance of risks should be discussed with a senior obstetrician.",
+      },
+      {
+        id: "vbac_two_plus_row",
+        name: "Two or more previous caesareans",
+        freq: "COMMON",
+        rate: null,
+        note: "Consultant decision",
+        source: "RCOG GTG45",
+        conditions: ["two_plus_cs"],
+        plain: "VBAC after two previous caesareans can be supported after senior review: the success rate is similar, but the uterine rupture risk is uncertain and may be higher. This decision should be made with a consultant.",
+      },
+    ],
+  },
+];
+
+export const VBAC_COMPARISON_SECTIONS = [
+  {
+    id: "vbac_vs_ercs",
+    heading: "Planned VBAC vs planned repeat caesarean",
+    type: "comparison",
+    labels: { a: "VBAC", b: "ERCS" },
+    source: "RCOG GTG45",
+    risks: [
+      {
+        id: "cmp_rupture",
+        name: "Uterine rupture",
+        a: "About 1 in 200",
+        b: "About 1 in 5,000",
+        a_higher: true,
+        plain: "The scar is under strain during labour, so rupture is more likely with planned VBAC. With a planned repeat caesarean before labour it is very rare.",
+      },
+      {
+        id: "cmp_perinatal",
+        name: "Delivery-related perinatal death",
+        a: "About 4 in 10,000",
+        b: "Less than 1 in 10,000",
+        a_higher: true,
+        plain: "Both risks are very small. The planned VBAC figure is comparable to the risk for a woman labouring with her first baby.",
+      },
+      {
+        id: "cmp_hie",
+        name: "Brain injury from lack of oxygen (HIE)",
+        a: "About 8 in 10,000",
+        b: "Less than 1 in 10,000",
+        a_higher: true,
+        plain: "Hypoxic-ischaemic encephalopathy is rare with either plan but more likely with labour.",
+      },
+      {
+        id: "cmp_maternal_death",
+        name: "Maternal death",
+        a: "About 4 in 100,000",
+        b: "About 13 in 100,000",
+        a_higher: false,
+        plain: "Maternal death is very rare with either choice, and slightly more likely with planned repeat caesarean.",
+      },
+      {
+        id: "cmp_recovery",
+        name: "Recovery and hospital stay",
+        a: "Usually shorter",
+        b: "Longer",
+        a_higher: false,
+        plain: "A successful VBAC usually means a shorter hospital stay and quicker recovery. A repeat caesarean is abdominal surgery with the usual surgical recovery.",
+      },
+      {
+        id: "cmp_future",
+        name: "Risks in future pregnancies",
+        a: "Lower",
+        b: "Higher",
+        a_higher: false,
+        plain: "Each additional caesarean increases the risk of placenta praevia and accreta in future pregnancies and makes future surgery more difficult. A successful VBAC makes future vaginal births more likely.",
+      },
+    ],
+  },
+];
+
+export const VBAC_BENEFITS = [
+  {
+    id: "vbac_success",
+    name: "Good chance of a straightforward vaginal birth",
+    rate: "72–75 in 100",
+    detail: "85–90 in 100 if previous vaginal birth",
+    source: "RCOG GTG45",
+    plain: "About 72–75 in 100 planned VBAC labours end in vaginal birth. If you have had a vaginal birth before, the chance rises to about 85–90 in 100.",
+  },
+  {
+    id: "vbac_recovery",
+    name: "Quicker recovery than repeat surgery",
+    source: "RCOG GTG45",
+    plain: "A successful VBAC avoids abdominal surgery, usually meaning a shorter hospital stay, an easier recovery, and an earlier return to normal activities.",
+  },
+  {
+    id: "vbac_future",
+    name: "Better outlook for future pregnancies",
+    source: "RCOG GTG45",
+    plain: "Avoiding another caesarean means the risks of placenta praevia and accreta do not accumulate, and future vaginal births become more likely.",
+  },
+];
+
+export const VBAC_PAGES = {
+  what: {
+    heading: "Birth After Caesarean",
+    body: "After a caesarean, there are usually two good options for the next birth: planning a vaginal birth (VBAC) or planning a repeat caesarean (ERCS). For most women with one previous lower-segment caesarean, both are safe choices, and the decision is yours after counselling.\n\nWhat planned VBAC involves\n\n• Labour in a unit with immediate access to caesarean, with intravenous access considered on admission.\n• Continuous monitoring of the baby's heart rate throughout labour, because a change in the heart pattern is often the first sign of a problem with the scar.\n• The full range of pain relief, including epidural.\n\nWhat planned repeat caesarean involves\n\n• A planned operation, usually from 39 weeks, as described in the Caesarean Section entry.\n\nThe Options tab compares the two side by side.",
+  },
+  why: {
+    heading: "Why is this a choice?",
+    body: "Most women with one previous lower-segment caesarean and no other complications can safely plan either a VBAC or a repeat caesarean, so national guidance recommends offering both and supporting your informed choice.\n\nPlanned VBAC is not advised where vaginal birth itself is contraindicated (for example placenta praevia), after a previous uterine rupture, or after a previous classical (vertical) uterine incision. Your consultant will confirm which options apply to you.",
+  },
+  alternatives: {
+    heading: "The other option: planned repeat caesarean",
+    body: "Choosing a planned repeat caesarean (ERCS) is not declining care; it is one of the two recommended options, and either choice will be supported.\n\n• ERCS is usually planned from 39 weeks. If labour starts before the date, the plan is reviewed: some women choose to labour at that point, others have the caesarean brought forward.\n• ERCS virtually eliminates the risk of scar rupture in labour and carries the lowest risk to the baby around birth, but it is abdominal surgery, with a longer recovery and a small increase in maternal risks, and it adds surgical risk to any future pregnancies.\n\nYou can change your decision in either direction at any point in the pregnancy, and the plan can be revisited with your consultant.",
+  },
+};
+
+export const VBAC_FAQ = [
+  {
+    q: "What are my chances of a successful VBAC?",
+    a: "About 72–75 in 100 overall, rising to 85–90 in 100 if you have had a vaginal birth before. Your consultant can personalise this using your history. (RCOG GTG45)",
+  },
+  {
+    q: "What happens if the scar opens?",
+    a: "Uterine rupture happens in about 1 in 200 planned VBAC labours. It is an emergency: the team performs an immediate caesarean. This is why continuous monitoring and birth in a unit with theatre access are recommended. (RCOG GTG45)",
+  },
+  {
+    q: "Can I have an epidural?",
+    a: "Yes. An epidural is not contraindicated in VBAC labour, and the full range of pain relief is available.",
+  },
+  {
+    q: "Can I have a VBAC after two caesareans?",
+    a: "Sometimes. The success rate is similar, but the uterine rupture risk is uncertain and may be higher, so this decision is made with a consultant. (RCOG GTG45)",
+  },
+  {
+    q: "What if I go into labour before my planned caesarean date?",
+    a: "Around 1 in 10 women labour before 39 weeks. Your plan should cover this: contact the unit as soon as labour starts, and the team will either proceed to caesarean or support labour depending on your wishes and the situation.",
+  },
+  {
+    q: "Can I give birth at home or in a midwife-led unit?",
+    a: "Planned VBAC is recommended to take place in a unit with continuous monitoring and immediate access to caesarean, so home birth and midwife-led settings carry additional risk. Your team will discuss this honestly if you are considering it. (RCOG GTG45)",
+  },
+];
+
+// ─── EXTERNAL CEPHALIC VERSION (ECV) ─────────────────────────────────────────
+// Source: RCOG Green-top Guideline No. 20 (ECV and Breech, 2017) and its
+// patient information.
+
+export const ECV_PATIENT_FACTORS = [
+  { id: "ecv_first_baby", label: "First baby" },
+  { id: "ecv_prev_cs",    label: "Previous caesarean section" },
+];
+
+export const ECV_RISK_SECTIONS = [
+  {
+    id: "ecv_risks",
+    heading: "Risks",
+    type: "list",
+    risks: [
+      {
+        id: "ecv_unsuccessful",
+        name: "Attempt unsuccessful",
+        freq: "VERY_COMMON",
+        rate: "About 50 in 100",
+        source: "RCOG GTG20",
+        plain: "About half of ECV attempts do not turn the baby. If that happens, the options are a planned caesarean or, for some women, a vaginal breech birth; both will be discussed.",
+      },
+      {
+        id: "ecv_discomfort",
+        name: "Discomfort during the procedure",
+        freq: "VERY_COMMON",
+        rate: null,
+        source: "RCOG GTG20",
+        plain: "Firm pressure on the abdomen is uncomfortable for most women. Tell the doctor if it is too much; the attempt can be paused or stopped at any time.",
+      },
+      {
+        id: "ecv_fhr",
+        name: "Temporary changes in the baby's heart rate",
+        freq: "VERY_COMMON",
+        rate: null,
+        source: "RCOG GTG20",
+        plain: "Short-lived changes in the baby's heart rate during or just after the attempt are common and almost always settle. The heart rate is monitored before and after the procedure.",
+      },
+      {
+        id: "ecv_reversion",
+        name: "Baby turns back to breech",
+        freq: "COMMON",
+        rate: "Fewer than 5 in 100",
+        source: "RCOG GTG20",
+        plain: "After a successful ECV, fewer than 5 in 100 babies turn back to breech.",
+      },
+      {
+        id: "ecv_em_cs",
+        name: "Emergency caesarean after the attempt",
+        freq: "UNCOMMON",
+        rate: "About 1 in 200",
+        source: "RCOG GTG20",
+        plain: "About 1 in 200 women need an emergency caesarean shortly after ECV, usually because of bleeding or changes in the baby's heart rate. ECV is therefore performed where a caesarean can be done immediately.",
+      },
+    ],
+  },
+];
+
+export const ECV_BENEFITS = [
+  {
+    id: "ecv_success",
+    name: "About half of babies turn",
+    rate: "50 in 100",
+    detail: "≈40 first babies · ≈60 after previous birth",
+    source: "RCOG GTG20",
+    plain: "ECV is successful in about 50 in 100 attempts overall: around 40 in 100 for first babies and 60 in 100 for women who have given birth before. A medicine to relax the womb (tocolysis) improves the success rate.",
+  },
+  {
+    id: "ecv_vaginal_birth",
+    name: "Makes vaginal birth possible",
+    source: "RCOG GTG20",
+    plain: "If the baby turns head-down, the pregnancy can continue to normal labour, and most women who have a successful ECV go on to have a vaginal birth.",
+  },
+  {
+    id: "ecv_avoids_cs",
+    name: "Avoids a planned caesarean",
+    source: "RCOG GTG20",
+    plain: "Successful ECV avoids the surgical risks and longer recovery of a caesarean, and the implications another caesarean would carry for future pregnancies.",
+  },
+];
+
+export const ECV_PAGES = {
+  what: {
+    heading: "External Cephalic Version (ECV)",
+    body: "ECV is a procedure to turn a breech baby head-down by applying firm pressure on your abdomen. It is offered from around 36 weeks for a first baby and 37 weeks if you have given birth before.\n\nWhat happens\n\n• The baby's heart rate is monitored (CTG) before the attempt, and the position confirmed on ultrasound.\n• You are usually given an injection to relax the womb (a tocolytic); it can make your heart race for a few minutes, which is expected and settles.\n• The obstetrician places their hands on your abdomen and encourages the baby to do a forward or backward roll. An attempt takes a few minutes and can be stopped at any time if you ask.\n• The heart rate is monitored again afterwards, and the scan repeated to confirm the position.\n• If your blood group is RhD negative, anti-D is offered after the procedure.\n\nYou can usually go home the same day, whatever the result.",
+  },
+  why: {
+    heading: "Why is this being offered?",
+    body: "Around 3–4 in 100 babies are breech (bottom-first) at term. A breech baby usually means a planned caesarean or a vaginal breech birth, both of which carry different risks from a head-down birth.\n\nTurning the baby head-down makes a normal labour and vaginal birth possible, which is why national guidance recommends offering ECV to women with a breech baby at term where there is no contraindication (for example bleeding, ruptured membranes, or concerns about the baby). (RCOG GTG20)",
+  },
+  alternatives: {
+    heading: "Alternatives and your right to decline",
+    body: "ECV is entirely optional. If you decline, or if the attempt is unsuccessful, the options are:\n\n• Planned caesarean birth: for a persistent breech baby at term, planned caesarean carries a small reduction in the risk to the baby around birth compared with a planned vaginal breech birth (about 0.5 in 1,000 vs about 2 in 1,000), at the cost of surgical risks to you and implications for future pregnancies.\n• Vaginal breech birth: a reasonable option for some women with an experienced team; your obstetrician will discuss the selection criteria and what would make it safer or less safe in your case.\n\nWhichever you choose, the decision will be respected and the plan documented. (RCOG GTG20)",
+  },
+};
+
+export const ECV_FAQ = [
+  {
+    q: "Does ECV hurt?",
+    a: "It is uncomfortable rather than painful for most women; some do find it painful. The attempt only lasts a few minutes, and you can ask the doctor to stop at any time.",
+  },
+  {
+    q: "Is it safe for the baby?",
+    a: "ECV is generally safe. Short-lived heart rate changes are common and settle; about 1 in 200 women need an emergency caesarean soon after the attempt, which is why it is done where a caesarean can happen immediately. (RCOG GTG20)",
+  },
+  {
+    q: "What is the injection I am given?",
+    a: "A tocolytic, a medicine that relaxes the womb and improves the chance of success. It commonly makes your heart race for a few minutes; this is expected and wears off quickly.",
+  },
+  {
+    q: "What if it doesn't work?",
+    a: "About half of attempts are unsuccessful. A second attempt is sometimes reasonable. Otherwise, the options are a planned caesarean or, for some women, a vaginal breech birth; both will be discussed with you.",
+  },
+  {
+    q: "Can I have ECV after a previous caesarean?",
+    a: "It can be considered after one previous caesarean; the evidence suggests it is reasonably safe, and the decision is made with a senior obstetrician. (RCOG GTG20)",
+  },
+];
+
+// ─── GBS ANTIBIOTICS IN LABOUR ───────────────────────────────────────────────
+// Source: RCOG Green-top Guideline No. 36 (2017) and the RCOG group B
+// Streptococcus patient information.
+
+export const GBS_PATIENT_FACTORS = [
+  { id: "gbs_urine",     label: "GBS found in urine this pregnancy" },
+  { id: "gbs_prev_baby", label: "Previous baby affected by GBS disease" },
+  { id: "gbs_preterm",   label: "Labour before 37 weeks" },
+];
+
+export const GBS_RISK_SECTIONS = [
+  {
+    id: "gbs_risks",
+    heading: "Risks and practical implications",
+    type: "simple",
+    items: [
+      "Severe allergic reaction (anaphylaxis) to penicillin is rare; tell the team about any allergy so an alternative antibiotic can be planned. (RCOG GTG36)",
+      "You will need a cannula (a small plastic tube in the hand or arm) during labour for the antibiotic doses.",
+      "Birth in an obstetric unit is advised so the antibiotics can be given, which may affect plans for home or midwife-led birth. (RCOG GTG36)",
+      "Possible effects of antibiotics on the baby's gut bacteria (microbiome) are uncertain; no long-term harm has been shown. (RCOG GTG36)",
+      "Antibiotics in labour do not prevent late-onset GBS infection (after the first week), which is not related to labour.",
+    ],
+  },
+];
+
+export const GBS_BENEFITS = [
+  {
+    id: "gbs_reduction",
+    name: "Greatly reduces the chance of early GBS infection",
+    rate: "1 in 400 → 1 in 4,000",
+    source: "RCOG GTG36",
+    plain: "If GBS has been found and no antibiotics are given in labour, about 1 in 400 babies develops early-onset GBS infection. With intravenous antibiotics in labour, this falls to about 1 in 4,000.",
+  },
+  {
+    id: "gbs_why_matters",
+    name: "Protects against a serious infection",
+    source: "RCOG GTG36",
+    plain: "Most babies who develop early-onset GBS infection recover fully, but about 1 in 19 affected babies dies and about 1 in 14 of the survivors has a long-term disability. Preventing the infection avoids these outcomes.",
+  },
+];
+
+export const GBS_PAGES = {
+  what: {
+    heading: "Antibiotics in Labour for GBS",
+    body: "Group B Streptococcus (GBS) is a common bacterium carried by roughly 1 in 4 women. Carrying it is harmless to you and usually to the baby, but a small number of babies develop a serious infection around birth (early-onset GBS disease).\n\nIf GBS has been found in this pregnancy, or you have another reason for prophylaxis, you are offered antibiotics through a drip during labour:\n\n• A penicillin drip is started when labour begins or your waters break, and repeated at intervals until the baby is born; the exact drug and doses follow the obstetric antibiotics guideline.\n• Between doses you are not attached to the drip and can usually move around freely.\n• Ideally the first dose is given at least 4 hours before birth, so let the unit know as soon as labour starts.\n\nAfter birth, a well baby who received adequate prophylaxis needs no special tests or treatment.",
+  },
+  why: {
+    heading: "Why is this being offered?",
+    body: "Antibiotics in labour are offered when the chance of early-onset GBS infection is higher than average:\n\n• GBS found on a swab or in urine during this pregnancy\n• A previous baby who had GBS disease\n• Labour before 37 weeks\n\nEarly-onset GBS disease affects about 1 in 1,750 babies overall in the UK. Routine testing of all pregnant women is not currently recommended in the UK; antibiotics are targeted at higher-chance situations instead. (RCOG GTG36)",
+  },
+  alternatives: {
+    heading: "Alternatives and your right to decline",
+    body: "You have the right to decline antibiotics in labour. If you do:\n\n• Your baby will be observed closely for the first 12 hours after birth (at birth, then regularly), watching for early signs of infection so treatment can start promptly if needed. (RCOG GTG36)\n• You should know the warning signs after going home: poor feeding, unusual drowsiness or irritability, fast or noisy breathing, and a temperature that is high or low all need urgent review.\n\nThere is no tablet alternative in labour: antibiotics by mouth are not effective for preventing early-onset GBS disease, and antibiotics before labour do not prevent it either, because carriage returns.",
+  },
+};
+
+export const GBS_FAQ = [
+  {
+    q: "Will I be stuck on a drip through labour?",
+    a: "No. The antibiotic is given as short infusions at intervals; between doses the drip is disconnected and you can move around, use the shower, and labour normally.",
+  },
+  {
+    q: "Can I still have a water birth?",
+    a: "Often yes: the cannula can be capped and covered between doses. Policies vary, so ask your unit.",
+  },
+  {
+    q: "I'm allergic to penicillin, what then?",
+    a: "Tell the team. An alternative antibiotic is used depending on the nature of your allergy. (RCOG GTG36)",
+  },
+  {
+    q: "What if my labour is too quick for the antibiotics?",
+    a: "The first dose ideally runs at least 4 hours before birth, but a shorter interval still gives some protection. If the baby is born very soon after or before the dose, the baby is observed for 12 hours as a precaution.",
+  },
+  {
+    q: "Do I need antibiotics for a planned caesarean?",
+    a: "Not for GBS: if the caesarean happens before labour with the waters intact, the baby's risk of early-onset GBS disease is extremely low. You still receive the routine single dose of antibiotics that accompanies any caesarean. (RCOG GTG36)",
+  },
+  {
+    q: "Will I carry GBS forever?",
+    a: "Carriage comes and goes. Having GBS in this pregnancy makes carriage next time more likely but not certain; testing or antibiotics in a future pregnancy will be discussed at the time.",
+  },
+];
+
+// ─── ECTOPIC PREGNANCY: TREATMENT CHOICE ─────────────────────────────────────
+// Sources: local guideline CG623 (Ectopic Pregnancy: Medical Management, 2025),
+// NICE NG126, RCOG GTG21. Methotrexate figures verbatim from CG623.
+
+export const ECTOPIC_CONTEXT_OPTIONS = [
+  { id: "methotrexate", label: "Methotrexate", description: "Injection, avoids surgery",  color: "text-orange-600",  dot: "bg-orange-500" },
+  { id: "surgery",      label: "Surgery",      description: "Keyhole operation",          color: "text-red-600",     dot: "bg-red-500" },
+  { id: "expectant",    label: "Expectant",    description: "Monitoring, no treatment",   color: "text-emerald-600", dot: "bg-emerald-500" },
+];
+
+export const ECTOPIC_PATIENT_FACTORS = [
+  { id: "ect_prev_ectopic", label: "Previous ectopic pregnancy" },
+  { id: "ect_single_tube",  label: "Only one fallopian tube" },
+  { id: "ect_fertility",    label: "Future fertility a priority" },
+];
+
+export const ECTOPIC_RISK_SECTIONS = {
+  methotrexate: [
+    {
+      id: "ect_mtx_risks",
+      heading: "Risks and what to expect",
+      type: "list",
+      risks: [
+        {
+          id: "ect_mtx_pain",
+          name: "Abdominal pain on days 3–7",
+          freq: "VERY_COMMON",
+          rate: "Up to 75 in 100",
+          source: "CG623",
+          plain: "Worsening abdominal pain on days 3–7 is common and thought to be due to tubal miscarriage; it usually lasts 4–12 hours. Attend the emergency department urgently if pain is severe or comes with dizziness or shoulder-tip pain.",
+        },
+        {
+          id: "ect_mtx_hcg_rise",
+          name: "Hormone level rises at first",
+          freq: "VERY_COMMON",
+          rate: "Up to 86 in 100",
+          source: "CG623",
+          plain: "The pregnancy hormone (bhCG) often rises between days 1 and 4 before falling. This is expected and does not mean the treatment has failed.",
+        },
+        {
+          id: "ect_mtx_bleeding",
+          name: "Vaginal bleeding",
+          freq: "VERY_COMMON",
+          rate: null,
+          source: "CG623",
+          plain: "Bleeding ranging from dark spotting to a heavier red loss can last from days to weeks. Contact the early pregnancy unit if it is heavy or concerning.",
+        },
+        {
+          id: "ect_mtx_second_dose",
+          name: "Second dose of methotrexate needed",
+          freq: "COMMON",
+          rate: "14 in 100",
+          source: "CG623",
+          plain: "About 14 in 100 women need more than one dose, decided from the day 4 and day 7 blood tests.",
+        },
+        {
+          id: "ect_mtx_surgery",
+          name: "Surgery needed after all",
+          freq: "COMMON",
+          rate: "10 in 100",
+          source: "CG623",
+          plain: "About 10 in 100 women go on to need surgery, either because the hormone level does not fall as expected or because the tube ruptures.",
+        },
+        {
+          id: "ect_mtx_rupture",
+          name: "Tubal rupture during follow-up",
+          freq: "COMMON",
+          rate: "7 in 100",
+          source: "CG623",
+          plain: "While any pregnancy hormone remains, the tube can still rupture; the risk is about 7 in 100. Severe pain, dizziness, fainting or shoulder-tip pain need emergency review, day or night.",
+        },
+      ],
+    },
+  ],
+  surgery: [
+    {
+      id: "ect_surg_risks",
+      heading: "Risks",
+      type: "list",
+      risks: [
+        {
+          id: "ect_surg_serious",
+          name: "Serious complications of laparoscopy",
+          freq: "UNCOMMON",
+          rate: "2 in 1,000",
+          source: "RCOG CA2",
+          plain: "Serious complications of keyhole surgery, including damage to bowel, bladder or blood vessels, occur in about 2 in 1,000 procedures.",
+        },
+        {
+          id: "ect_surg_open",
+          name: "Conversion to open surgery",
+          freq: "UNCOMMON",
+          rate: null,
+          source: "RCOG CA2",
+          plain: "Occasionally the operation cannot be completed by keyhole, most often because of bleeding or adhesions, and a larger incision is needed.",
+        },
+        {
+          id: "ect_surg_infection",
+          name: "Wound infection or bruising",
+          freq: "COMMON",
+          rate: null,
+          source: "RCOG CA2",
+          plain: "Bruising and minor infection at the small incisions are common and usually settle with simple treatment.",
+        },
+        {
+          id: "ect_surg_persistent",
+          name: "Further treatment after salpingotomy",
+          freq: "COMMON",
+          rate: "Up to 1 in 5",
+          source: "NICE NG126",
+          conditions: ["ect_single_tube", "ect_fertility"],
+          plain: "If the tube is opened and preserved (salpingotomy) rather than removed, up to 1 in 5 women need further treatment, methotrexate and/or later removal of the tube, because pregnancy tissue persists. Follow-up blood tests are needed.",
+        },
+      ],
+    },
+  ],
+  expectant: [
+    {
+      id: "ect_exp_risks",
+      heading: "Risks and practical implications",
+      type: "simple",
+      items: [
+        "The tube can rupture at any point while pregnancy hormone remains; severe pain, dizziness, fainting or shoulder-tip pain need emergency review. (RCOG GTG21)",
+        "If the hormone level plateaus or rises, treatment with methotrexate or surgery will be needed after all.",
+        "Repeated blood tests over days to weeks are required, and you must be able to return quickly if unwell.",
+        "Success rates vary with the starting hormone level; your team will quote the local figures for your situation.",
+      ],
+    },
+  ],
+};
+
+export const ECTOPIC_BENEFITS = {
+  methotrexate: [
+    {
+      id: "ect_mtx_success",
+      name: "Usually avoids an operation",
+      rate: "65–94 in 100",
+      detail: "success, single dose",
+      source: "CG623",
+      plain: "A single dose resolves the ectopic in 65–94 in 100 cases. About 14 in 100 women need a second dose, and about 10 in 100 need surgery.",
+    },
+    {
+      id: "ect_mtx_no_ga",
+      name: "No surgery or general anaesthetic",
+      source: "CG623",
+      plain: "Treatment is a single injection into a muscle, with observation for up to an hour afterwards, avoiding an operation and anaesthetic.",
+    },
+    {
+      id: "ect_mtx_fertility",
+      name: "Future fertility is preserved",
+      source: "CG623",
+      plain: "The tube is not removed. Tubal patency afterwards is about 80 in 100, and there is no difference in later fertility rates between medical and surgical treatment.",
+    },
+  ],
+  surgery: [
+    {
+      id: "ect_surg_definitive",
+      name: "Definitive, immediate treatment",
+      source: "NICE NG126",
+      plain: "Surgery removes the ectopic pregnancy in one step, without weeks of blood-test follow-up, and is the recommended option when there is significant pain, a larger mass, a heartbeat in the ectopic, or a high hormone level.",
+    },
+    {
+      id: "ect_surg_keyhole",
+      name: "Keyhole surgery with quick recovery",
+      source: "RCOG CA2",
+      plain: "The operation is almost always laparoscopic, through small cuts, and most women go home the same day or the next day, returning to normal activities within 1–2 weeks.",
+    },
+    {
+      id: "ect_surg_fertility",
+      name: "Fertility is usually unaffected",
+      source: "CG623",
+      plain: "Even when a tube is removed, most women conceive naturally afterwards, and there is no difference in later fertility rates between surgical and medical treatment. If the other tube is damaged, opening and preserving the tube (salpingotomy) can be considered.",
+    },
+  ],
+  expectant: [
+    {
+      id: "ect_exp_no_treatment",
+      name: "No medication or surgery",
+      source: "NICE NG126",
+      plain: "For a small, unruptured ectopic with a low and falling hormone level, the body often resolves the pregnancy by itself; watching and waiting avoids the side effects of methotrexate and the risks of surgery.",
+    },
+    {
+      id: "ect_exp_reversible",
+      name: "Other options stay open",
+      source: "NICE NG126",
+      plain: "Expectant management is closely monitored with blood tests; if the hormone does not fall, methotrexate or surgery can still be used.",
+    },
+  ],
+};
+
+export const ECTOPIC_PAGES = {
+  methotrexate: {
+    what: {
+      heading: "Methotrexate for Ectopic Pregnancy",
+      body: "Methotrexate is a medicine that stops the pregnancy tissue growing, allowing the body to absorb it.\n\nWhat happens\n\n• A single injection into a muscle, with the dose calculated from your height and weight.\n• You rest for up to an hour afterwards and are checked before going home.\n• Blood tests on day 4 and day 7 check the pregnancy hormone (bhCG) is falling; if it falls well, weekly tests continue until it is back to normal. The average follow-up is about 35 days.\n• A second dose is needed in about 14 in 100 women.\n\nDuring follow-up\n\n• Avoid alcohol and vitamins containing folic acid, as they interfere with the treatment.\n• Avoid sexual intercourse until the ectopic has resolved, and avoid strong sunlight.\n• Avoid pregnancy for 3 months after the injection because of a possible effect on a new pregnancy; use barrier contraception.",
+    },
+    why: {
+      heading: "Why is this an option for me?",
+      body: "Methotrexate is offered when the ectopic pregnancy is suitable for medical treatment:\n\n• No significant pain and no signs of rupture\n• The mass is smaller than 35 mm with no heartbeat seen\n• The pregnancy hormone is below 5,000 IU/L (below 1,500, watching and waiting may also be possible)\n• Normal blood tests, and you can attend the follow-up appointments\n\nIf these are not met, for example there is significant pain, a heartbeat, or a higher hormone level, surgery is the recommended option instead. (CG623 · NICE NG126)",
+    },
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "The choice between the treatment routes is yours, within what is safe for your situation:\n\n• Surgery: keyhole removal of the ectopic, usually with the tube; definitive and avoids weeks of follow-up. Recommended if you cannot attend follow-up or your results are borderline.\n• Expectant management: if your hormone level is low and falling, watching and waiting with blood tests may be possible.\n\nAn ectopic pregnancy cannot move to the womb or survive, and left entirely untreated it can rupture and become life-threatening, so some form of management and follow-up is always advised. Seek emergency help at any time for severe pain, dizziness, fainting or shoulder-tip pain.",
+    },
+  },
+  surgery: {
+    what: {
+      heading: "Surgery for Ectopic Pregnancy",
+      body: "Surgery removes the ectopic pregnancy through keyhole (laparoscopic) surgery under general anaesthetic.\n\nWhat happens\n\n• Small cuts are made in the abdomen; a camera and instruments are used to find and remove the ectopic pregnancy.\n• Usually the affected tube is removed with the pregnancy (salpingectomy). If your other tube is damaged or absent, the surgeon may instead open the tube, remove the pregnancy, and preserve the tube (salpingotomy).\n• The operation is usually a day case or one-night stay; most women return to normal activities within 1–2 weeks.\n• After salpingotomy, blood tests follow the hormone level down, because up to 1 in 5 women need further treatment.\n\nIf the ectopic has ruptured, the same operation is done urgently and open surgery is sometimes needed.",
+    },
+    why: {
+      heading: "Why is this being recommended?",
+      body: "Surgery is the recommended option when:\n\n• There is significant pain or evidence of bleeding inside the abdomen\n• The mass is 35 mm or larger, or a heartbeat is seen in the ectopic\n• The pregnancy hormone is above 5,000 IU/L\n• Medical treatment has failed, or follow-up attendance would be difficult\n\nIt may also simply be your preference after hearing the options; between 1,500 and 5,000 IU/L, national guidance offers a choice between methotrexate and surgery. (CG623 · NICE NG126)",
+    },
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "Where your results allow, the alternatives are:\n\n• Methotrexate: a single injection, avoiding an operation, suitable when there is no significant pain, the mass is under 35 mm with no heartbeat, and the hormone level is under 5,000 IU/L\n• Expectant management: watching and waiting with blood tests, when the hormone level is low and falling\n\nIf there are signs of rupture or significant bleeding, surgery is the only safe option and is done urgently. An untreated ectopic pregnancy can rupture and become life-threatening, so some form of management is always advised.",
+    },
+  },
+  expectant: {
+    what: {
+      heading: "Expectant Management of Ectopic Pregnancy",
+      body: "Expectant management means close monitoring while the body resolves the ectopic pregnancy by itself, with no medication or surgery.\n\nWhat happens\n\n• Blood tests measure the pregnancy hormone (bhCG) repeatedly, typically every few days at first, then weekly until it returns to normal.\n• You must be able to return quickly if you become unwell, and to attend all the blood tests.\n• If the hormone level plateaus or rises, or symptoms develop, treatment moves to methotrexate or surgery.\n\nSeek emergency help immediately, day or night, for severe abdominal pain, dizziness or fainting, shoulder-tip pain, or heavy bleeding.",
+    },
+    why: {
+      heading: "Why is this an option for me?",
+      body: "Watching and waiting is considered when the ectopic appears to be resolving on its own:\n\n• You are well, with no significant pain\n• The ectopic is small and unruptured\n• The pregnancy hormone is low (below about 1,500 IU/L) and falling on repeat testing\n\nIn this situation many ectopics resolve without treatment, and monitoring simply confirms that is happening. (CG623 · NICE NG126)",
+    },
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "If you would rather not wait, or waiting stops being safe:\n\n• Methotrexate: a single injection to resolve the ectopic, with blood-test follow-up\n• Surgery: keyhole removal, the definitive option and the recommended one if pain develops or the hormone level rises\n\nDeclining monitoring altogether is not recommended: an ectopic pregnancy can rupture while any pregnancy hormone remains, which is life-threatening. Whatever you choose, keep the emergency advice in mind and contact the early pregnancy unit with any concerns.",
+    },
+  },
+};
+
+export const ECTOPIC_FAQ = [
+  {
+    q: "Could the pregnancy still be saved?",
+    a: "No. A pregnancy growing outside the womb can never move to the womb or survive, and it endangers your life as it grows. Treatment is about protecting you and your future fertility. Support is available, and it is normal to grieve this pregnancy.",
+  },
+  {
+    q: "Will this affect my chances of having a baby?",
+    a: "For most women, no. After methotrexate, the tube remains open in about 80 in 100 cases, and fertility rates are the same after medical and surgical treatment. Even after losing one tube, most women conceive naturally. (CG623)",
+  },
+  {
+    q: "What are the chances it happens again?",
+    a: "The risk of another ectopic pregnancy is about 10–20 in 100. In your next pregnancy, contact the early pregnancy unit for an early scan to confirm the pregnancy is in the womb. (CG623)",
+  },
+  {
+    q: "When can we try again?",
+    a: "After methotrexate, avoid pregnancy for 3 months because of a possible effect on a new pregnancy. After surgery or expectant management, your team will advise, often once you feel physically and emotionally ready and any follow-up is complete.",
+  },
+  {
+    q: "Which symptoms are an emergency?",
+    a: "Severe abdominal pain, feeling faint or dizzy, shoulder-tip pain, or heavy bleeding. These can mean the tube has ruptured; go to the emergency department immediately, day or night.",
+  },
+];
+
+// ─── LLETZ (COLPOSCOPY TREATMENT) ────────────────────────────────────────────
+// Source: NHSCSP colposcopy guidance (in-app NHSCSP20 guide). Bleeding and
+// aftercare advice is standard patient information; verify against the local
+// leaflet.
+
+export const LLETZ_PATIENT_FACTORS = [
+  { id: "lletz_future_preg", label: "Planning pregnancy in future" },
+  { id: "lletz_repeat",      label: "Repeat (second) treatment" },
+];
+
+export const LLETZ_RISK_SECTIONS = [
+  {
+    id: "lletz_common",
+    heading: "Common effects",
+    type: "list",
+    risks: [
+      {
+        id: "lletz_bleeding",
+        name: "Bleeding and discharge for a few weeks",
+        freq: "VERY_COMMON",
+        rate: null,
+        source: "Patient info (verify local)",
+        plain: "Light bleeding and a watery, sometimes dark discharge are expected for up to about 4 weeks while the cervix heals. Contact the clinic if bleeding becomes heavier than a period or smells offensive.",
+      },
+      {
+        id: "lletz_pain",
+        name: "Period-like cramping",
+        freq: "VERY_COMMON",
+        rate: null,
+        source: "Patient info (verify local)",
+        plain: "Cramping on the day of treatment is common and usually settles with simple pain relief.",
+      },
+      {
+        id: "lletz_infection",
+        name: "Infection",
+        freq: "COMMON",
+        rate: null,
+        source: "Patient info (verify local)",
+        plain: "Infection of the healing cervix can occur, causing offensive discharge, heavier bleeding or pain, and is treated with antibiotics.",
+      },
+    ],
+  },
+  {
+    id: "lletz_future",
+    heading: "Future pregnancy and follow-up",
+    type: "simple",
+    items: [
+      "LLETZ is associated with an increased risk of preterm birth in future pregnancies; excision deeper than 10 mm roughly triples the risk of spontaneous preterm birth, and repeat excisions multiply the risk further. The colposcopist limits the depth where possible. (NHSCSP20)",
+      "Preconception counselling is advised after deep or repeat excisions. (NHSCSP20)",
+      "Narrowing of the cervix (stenosis) can occasionally occur and make future smears or periods more difficult.",
+      "If the margins of the removed tissue are not clear, options range from the routine test of cure to re-excision, decided with you. (NHSCSP20)",
+      "A test of cure smear is taken 6 months after treatment; if it is normal and HPV negative, you return to routine recall. (NHSCSP20)",
+    ],
+  },
+];
+
+export const LLETZ_BENEFITS = [
+  {
+    id: "lletz_cure",
+    name: "Treats the abnormality in one visit",
+    rate: "≈95 in 100",
+    detail: "cure at first treatment",
+    source: "NHSCSP20",
+    plain: "LLETZ cures CIN2/3 in about 95 in 100 women at the first treatment, removing the abnormal cells before they can ever become a cancer.",
+  },
+  {
+    id: "lletz_quick",
+    name: "Quick, outpatient, awake",
+    source: "NHSCSP20",
+    plain: "The treatment takes a few minutes in the colposcopy clinic under local anaesthetic; most women go straight home and return to work the same or next day.",
+  },
+  {
+    id: "lletz_histology",
+    name: "The tissue is fully examined",
+    source: "NHSCSP20",
+    plain: "Unlike heat-destruction (ablative) treatments, LLETZ removes the tissue intact so the laboratory can confirm the diagnosis and check the abnormality has been completely removed.",
+  },
+];
+
+export const LLETZ_PAGES = {
+  what: {
+    heading: "LLETZ (Large Loop Excision)",
+    body: "LLETZ removes the area of the cervix containing abnormal cells (the transformation zone) using a thin heated wire loop.\n\nWhat happens\n\n• It is usually done in the colposcopy clinic while you are awake. A speculum is passed, as for a smear, and the colposcope (a magnifying camera that stays outside the body) is used to see the cervix.\n• Local anaesthetic is injected into the cervix; this can sting briefly and may make your heart flutter for a moment.\n• The loop removes the abnormal area in a few seconds to minutes. You may notice a warm sensation and hear the equipment, but should not feel pain.\n• The removed tissue is sent to the laboratory; the depth of the excision is kept to what is needed, usually no more than 10–12 mm where possible.\n\nAfterwards\n\n• Expect light bleeding and discharge for a few weeks. To reduce the chance of infection, avoid tampons, swimming and sex for about 4 weeks (follow your local leaflet).\n• Results arrive by letter, and a test of cure smear follows at 6 months.",
+  },
+  why: {
+    heading: "Why is this being recommended?",
+    body: "LLETZ is offered when colposcopy has found high-grade abnormal cells (CIN2 or CIN3) on the cervix. These are not cancer, but without treatment they carry a significant risk of developing into cervical cancer over years. CIN3 should always be treated rather than watched.\n\nRemoving the transformation zone removes the abnormal cells, and the laboratory then confirms the diagnosis and whether the removal is complete. (NHSCSP20)",
+  },
+  alternatives: {
+    heading: "Alternatives and your right to decline",
+    body: "The right option depends on the grade of abnormality:\n\n• For low-grade change (CIN1), surveillance is usually preferred: many CIN1 changes regress on their own, and treatment is discussed only if it persists at 24 months. (NHSCSP20)\n• Ablative treatment (destroying rather than removing the area) is suitable in selected cases, but needs an adequate biopsy first and leaves no tissue for the laboratory. (NHSCSP20)\n• For high-grade change (CIN2/3), declining treatment means accepting a significant risk of progression to cervical cancer over time; if you are considering this, discuss the specific risks in your case with the colposcopist, and keep under close surveillance.\n\nWhatever you decide, you remain in the screening programme and your decision will be respected.",
+  },
+};
+
+export const LLETZ_FAQ = [
+  {
+    q: "Does it hurt?",
+    a: "The local anaesthetic injection stings briefly; after that most women feel pressure or warmth rather than pain, with period-like cramping afterwards. Tell the colposcopist if you are uncomfortable; treatment under general anaesthetic can be arranged if needed.",
+  },
+  {
+    q: "Do I have cancer?",
+    a: "No. CIN is not cancer; it means some cells on the cervix could become cancer over years if untreated. Treating them now is precisely how screening prevents cancer.",
+  },
+  {
+    q: "Can I still have children afterwards?",
+    a: "Yes. LLETZ does not affect fertility. There is an increased risk of preterm birth in future pregnancies, mainly after deep or repeated excisions, so tell your midwife about the treatment when you are pregnant. (NHSCSP20)",
+  },
+  {
+    q: "What should I avoid afterwards?",
+    a: "Tampons, swimming and sex for about 4 weeks, to let the cervix heal and reduce the chance of infection. Follow your local leaflet, and contact the clinic for heavy or offensive bleeding.",
+  },
+  {
+    q: "What happens after the results?",
+    a: "The letter confirms the diagnosis and whether the edges of the removed tissue were clear. Nearly everyone then has a test of cure smear at 6 months; if it is normal and HPV negative, you go back to routine screening. (NHSCSP20)",
+  },
+];
+
+// ─── ASPIRIN FOR PRE-ECLAMPSIA PREVENTION ────────────────────────────────────
+// Source: NICE NG133 (Hypertension in pregnancy). Qualitative benefit framing;
+// NG133 does not give a single patient-facing effect size.
+
+export const ASPIRIN_PATIENT_FACTORS = [
+  { id: "asp_prev_pet",    label: "Previous pre-eclampsia or pregnancy hypertension" },
+  { id: "asp_ckd",         label: "Chronic kidney disease" },
+  { id: "asp_autoimmune",  label: "Autoimmune disease (SLE / antiphospholipid syndrome)" },
+  { id: "asp_diabetes",    label: "Type 1 or type 2 diabetes" },
+  { id: "asp_htn",         label: "Chronic hypertension" },
+  { id: "asp_first_preg",  label: "First pregnancy (moderate factor)" },
+  { id: "asp_age40",       label: "Age 40 or over (moderate factor)" },
+  { id: "asp_interval",    label: "More than 10 years since last pregnancy (moderate factor)" },
+  { id: "asp_bmi35",       label: "BMI 35 or more at booking (moderate factor)" },
+  { id: "asp_fh",          label: "Mother or sister had pre-eclampsia (moderate factor)" },
+  { id: "asp_multiple",    label: "Multiple pregnancy (moderate factor)" },
+];
+
+export const ASPIRIN_RISK_SECTIONS = [
+  {
+    id: "asp_risks",
+    heading: "Risks and practical points",
+    type: "simple",
+    items: [
+      "Low-dose aspirin (75–150 mg) is recommended by NICE in pregnancy for this purpose; it is different from the higher doses used for pain relief, which should be avoided. (NICE NG133)",
+      "Indigestion or heartburn can occur; taking the tablet with food helps.",
+      "Aspirin can slightly increase minor bruising or bleeding. Mention it to any clinician treating you, and to the anaesthetist if you need one.",
+      "Tell the team about asthma triggered by aspirin, previous stomach ulcers, or aspirin allergy; an individual decision is made in those cases.",
+      "Aspirin reduces the chance of pre-eclampsia but does not remove it, so your blood pressure and urine are still checked at every antenatal visit.",
+    ],
+  },
+];
+
+export const ASPIRIN_BENEFITS = [
+  {
+    id: "asp_prevention",
+    name: "Reduces the chance of pre-eclampsia",
+    source: "NICE NG133",
+    plain: "In higher-risk pregnancies, low-dose aspirin started from 12 weeks reduces the likelihood of developing pre-eclampsia, particularly the earlier, more severe form. This is why NICE recommends it for your risk profile.",
+  },
+  {
+    id: "asp_downstream",
+    name: "Protects against pre-eclampsia's complications",
+    source: "NICE NG133",
+    plain: "Preventing pre-eclampsia also prevents what follows from it: severe hypertension, effects on the baby's growth, early induced or caesarean birth, and admission to the neonatal unit.",
+  },
+  {
+    id: "asp_simple",
+    name: "One small tablet a day",
+    source: "NICE NG133",
+    plain: "The treatment is a single low-dose tablet daily from 12 weeks until birth, with no routine extra monitoring needed because of the aspirin itself.",
+  },
+];
+
+export const ASPIRIN_PAGES = {
+  what: {
+    heading: "Aspirin to Prevent Pre-eclampsia",
+    body: "Pre-eclampsia is a condition of the second half of pregnancy involving high blood pressure and effects on organs such as the kidneys, and on the placenta. Low-dose aspirin helps the placenta establish and function better, which is why it is started early.\n\nThe practical details\n\n• The dose is 75–150 mg once daily; your unit will specify which (check your local policy).\n• Start from 12 weeks of pregnancy, and continue every day until the baby is born.\n• Take it at whatever time of day you will remember, with food if it upsets your stomach.\n• It is prescribed for this purpose in pregnancy even though the packet may say otherwise; this is a recommended, evidence-based use. (NICE NG133)",
+  },
+  why: {
+    heading: "Why is this being offered to me?",
+    body: "NICE recommends aspirin for women with any one high-risk factor, or two or more moderate-risk factors:\n\nHigh-risk factors (one is enough)\n\n• Pre-eclampsia or hypertension in a previous pregnancy\n• Chronic kidney disease\n• Autoimmune disease (SLE or antiphospholipid syndrome)\n• Type 1 or type 2 diabetes\n• Chronic hypertension\n\nModerate-risk factors (two or more)\n\n• First pregnancy · age 40 or over · more than 10 years since the last pregnancy · BMI 35 or more at booking · mother or sister had pre-eclampsia · multiple pregnancy\n\n(NICE NG133)",
+  },
+  alternatives: {
+    heading: "Alternatives and your right to decline",
+    body: "You can decline aspirin; it is your decision, and your antenatal care does not change either way.\n\n• There is no alternative medicine recommended for routine prevention. Calcium supplements are suggested only for women with a low dietary calcium intake, and vitamin C and E supplements do not work and are not recommended. (NICE NG133)\n• If you decline, the emphasis falls on surveillance: blood pressure and urine checks at every visit pick up pre-eclampsia early so it can be managed.\n\nKnow the symptoms that need same-day review at any point: severe headache, visual disturbance, pain below the ribs, sudden swelling of the face, hands or feet, or reduced fetal movements.",
+  },
+};
+
+export const ASPIRIN_FAQ = [
+  {
+    q: "Is aspirin safe for my baby?",
+    a: "At this low dose, aspirin is recommended by NICE in pregnancy and is in wide use for this purpose. The doses to avoid in pregnancy are the higher, pain-relief doses. (NICE NG133)",
+  },
+  {
+    q: "What if I forget a dose?",
+    a: "Take the next dose as normal; do not double up. The benefit comes from regular use over months, so a single missed tablet does not undo it.",
+  },
+  {
+    q: "I'm already past 12 weeks, is it too late to start?",
+    a: "No. Start as soon as the recommendation is made; earlier is better, but there is still benefit later in pregnancy. Discuss timing with your midwife or doctor.",
+  },
+  {
+    q: "Does taking aspirin guarantee I won't get pre-eclampsia?",
+    a: "No. It reduces the chance but does not remove it, which is why your blood pressure and urine are still checked at every visit, and why you should report warning symptoms promptly.",
+  },
+  {
+    q: "When do I stop taking it?",
+    a: "NICE advises continuing until the baby is born. If a planned birth is scheduled, your team will confirm the plan for the final doses. (NICE NG133)",
   },
 ];
 
@@ -2115,6 +3219,54 @@ export const CONSENT_PROCEDURES = [
         url: "/guidelines/BJOG - 2022 - Stock - Antenatal corticosteroids to reduce neonatal morbidity and mortality.pdf",
       },
     ],
+  },
+  {
+    id: "VBAC",
+    title: "Birth After Caesarean (VBAC)",
+    subtypes: "Planned VBAC · Repeat caesarean",
+    source: "RCOG GTG45",
+    color: { accent: "bg-emerald-500", text: "text-emerald-700" },
+    pdfs: [],
+  },
+  {
+    id: "ECV",
+    title: "External Cephalic Version (ECV)",
+    subtypes: "Turning a breech baby",
+    source: "RCOG GTG20",
+    color: { accent: "bg-indigo-500", text: "text-indigo-700" },
+    pdfs: [],
+  },
+  {
+    id: "GBS",
+    title: "GBS Antibiotics in Labour",
+    subtypes: "Group B Streptococcus prophylaxis",
+    source: "RCOG GTG36",
+    color: { accent: "bg-green-500", text: "text-green-700" },
+    pdfs: [],
+  },
+  {
+    id: "ECTOPIC",
+    title: "Ectopic Pregnancy",
+    subtypes: "Methotrexate · Surgery · Expectant",
+    source: "CG623 · NICE NG126",
+    color: { accent: "bg-orange-500", text: "text-orange-700" },
+    pdfs: [],
+  },
+  {
+    id: "LLETZ",
+    title: "LLETZ (Cervical Treatment)",
+    subtypes: "Large loop excision",
+    source: "NHSCSP20",
+    color: { accent: "bg-cyan-500", text: "text-cyan-700" },
+    pdfs: [],
+  },
+  {
+    id: "ASPIRIN",
+    title: "Aspirin (Pre-eclampsia Prevention)",
+    subtypes: "75–150 mg from 12 weeks",
+    source: "NICE NG133",
+    color: { accent: "bg-blue-500", text: "text-blue-700" },
+    pdfs: [],
   },
 ];
 

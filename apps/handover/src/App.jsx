@@ -39,6 +39,7 @@ export default function App() {
   const [jobs, setJobsState] = useState(Storage.getJobs);
   const [recentWards, setRecentWardsState] = useState(Storage.getRecentWards);
   const [recentBeds, setRecentBedsState] = useState(Storage.getRecentBeds);
+  const [recentPhrases, setRecentPhrasesState] = useState(Storage.getRecentPhrases);
   const [wardLayouts, setWardLayoutsState] = useState(Storage.getWardLayouts);
   const [incomingJobs, setIncomingJobs] = useState(incomingFromUrl);
   const [wardSetupTarget, setWardSetupTarget] = useState(null);
@@ -58,6 +59,7 @@ export default function App() {
   const setJobs = (next) => { setJobsState(next); Storage.setJobs(next); };
   const setRecentWards = (next) => { setRecentWardsState(next); Storage.setRecentWards(next); };
   const setRecentBeds = (next) => { setRecentBedsState(next); Storage.setRecentBeds(next); };
+  const setRecentPhrases = (next) => { setRecentPhrasesState(next); Storage.setRecentPhrases(next); };
   const setWardLayouts = (next) => { setWardLayoutsState(next); Storage.setWardLayouts(next); };
 
   const startCoachIfNeeded = () => {
@@ -266,6 +268,8 @@ export default function App() {
         setRecentWards={setRecentWards}
         recentBeds={recentBeds}
         setRecentBeds={setRecentBeds}
+        recentPhrases={recentPhrases}
+        setRecentPhrases={setRecentPhrases}
         wardLayouts={wardLayouts}
         onHandover={() => openHandover("list")}
         onScan={() => openScan("list")}

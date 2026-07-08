@@ -14,7 +14,7 @@ const BUILD = typeof __BUILD_INFO__ !== "undefined" ? __BUILD_INFO__ : { version
 
 const ROLES = ["ST1–2", "ST3–5", "ST6–7", "Consultant", "Midwife", "Medical student", "Other"];
 const USE_FREQ = ["Daily", "Weekly", "Occasionally", "No"];
-const SECTIONS = ["Search", "Guidelines", "Flowcharts", "CTG tool", "Rx", "Consent", "Calculators"];
+const SECTIONS = ["Search", "Guidelines", "Flowcharts", "CTG tool", "Rx", "Counsel", "Calculators"];
 const SEARCH_HIT = ["Yes", "Mostly", "No", "Didn't use"];
 
 function Chips({ options, value, onChange, multi = false }) {

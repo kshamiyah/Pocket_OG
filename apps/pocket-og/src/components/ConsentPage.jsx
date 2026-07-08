@@ -8,15 +8,30 @@ import {
   FREQ,
   CS_CONTEXT_OPTIONS, CS_PATIENT_FACTORS, CS_RISK_SECTIONS,
   CS_COMPARISON_SECTIONS, CS_PP_RISK_SECTIONS, CS_FAQ, CS_PAGES,
+  CS_BENEFITS_ELECTIVE, CS_BENEFITS_EMERGENCY,
   OVD_CONTEXT_OPTIONS, OVD_PATIENT_FACTORS, OVD_RISK_SECTIONS, OVD_FAQ, OVD_PAGES,
+  OVD_BENEFITS,
   IOL_CONTEXT_OPTIONS, IOL_PATIENT_FACTORS, IOL_RISK_SECTIONS, IOL_FAQ, IOL_PAGES,
+  IOL_BENEFITS,
   SURG_MISC_PATIENT_FACTORS, SURG_MISC_RISK_SECTIONS, SURG_MISC_FAQ, SURG_MISC_PAGES,
+  SURG_MISC_BENEFITS,
   MED_MISC_PATIENT_FACTORS, MED_MISC_RISK_SECTIONS, MED_MISC_FAQ, MED_MISC_PAGES,
+  MED_MISC_BENEFITS,
   LAPAROSCOPY_PATIENT_FACTORS, LAPAROSCOPY_RISK_SECTIONS, LAPAROSCOPY_FAQ, LAPAROSCOPY_PAGES,
+  LAPAROSCOPY_BENEFITS,
   HYSTEROSCOPY_CONTEXT_OPTIONS, HYSTEROSCOPY_PATIENT_FACTORS,
   HYSTEROSCOPY_RISK_SECTIONS, HYSTEROSCOPY_FAQ, HYSTEROSCOPY_PAGES,
+  HYSTEROSCOPY_BENEFITS,
   ACS_CONTEXT_OPTIONS, ACS_PATIENT_FACTORS,
   ACS_RISK_SECTIONS, ACS_BENEFITS, ACS_FAQ, ACS_PAGES,
+  VBAC_PATIENT_FACTORS, VBAC_RISK_SECTIONS, VBAC_COMPARISON_SECTIONS,
+  VBAC_BENEFITS, VBAC_PAGES, VBAC_FAQ,
+  ECV_PATIENT_FACTORS, ECV_RISK_SECTIONS, ECV_BENEFITS, ECV_PAGES, ECV_FAQ,
+  GBS_PATIENT_FACTORS, GBS_RISK_SECTIONS, GBS_BENEFITS, GBS_PAGES, GBS_FAQ,
+  ECTOPIC_CONTEXT_OPTIONS, ECTOPIC_PATIENT_FACTORS, ECTOPIC_RISK_SECTIONS,
+  ECTOPIC_BENEFITS, ECTOPIC_PAGES, ECTOPIC_FAQ,
+  LLETZ_PATIENT_FACTORS, LLETZ_RISK_SECTIONS, LLETZ_BENEFITS, LLETZ_PAGES, LLETZ_FAQ,
+  ASPIRIN_PATIENT_FACTORS, ASPIRIN_RISK_SECTIONS, ASPIRIN_BENEFITS, ASPIRIN_PAGES, ASPIRIN_FAQ,
   CERTAINTY,
 } from "../data/consent";
 
@@ -28,6 +43,15 @@ const PROCEDURE_CONFIG = {
     getRiskSections: (_ctx, factors) =>
       factors.has("placenta_praevia") ? CS_PP_RISK_SECTIONS : CS_RISK_SECTIONS,
     comparisonSections: CS_COMPARISON_SECTIONS,
+    // Elective CS additionally gets an Options tab: the comparison table moves
+    // out of the Risks footnote into its own tab.
+    getBenefits: (ctx) => (ctx === "elective" ? CS_BENEFITS_ELECTIVE : CS_BENEFITS_EMERGENCY),
+    getOptions: (ctx) => (ctx === "elective" ? CS_COMPARISON_SECTIONS : null),
+    benefitsNote: (ctx) =>
+      ctx === "elective"
+        ? "Population averages for planned caesarean compared with planned vaginal birth, from NICE NG192 Appendix A (2021). Tap any row for the detail."
+        : null,
+    optionsNote: "Planned caesarean compared with planned vaginal birth. Population averages from NICE NG192 Appendix A (2021), not specific to your situation.",
     getPages: (ctx) => CS_PAGES[ctx],
     faq: CS_FAQ,
     getInstrument: () => null,
@@ -37,6 +61,7 @@ const PROCEDURE_CONFIG = {
     contextOptions: OVD_CONTEXT_OPTIONS,
     patientFactors: OVD_PATIENT_FACTORS,
     getRiskSections: () => OVD_RISK_SECTIONS,
+    getBenefits: () => OVD_BENEFITS,
     comparisonSections: null,
     getPages: (ctx) => OVD_PAGES[ctx],
     faq: OVD_FAQ,
@@ -48,6 +73,7 @@ const PROCEDURE_CONFIG = {
     patientFactors: IOL_PATIENT_FACTORS,
     getRiskSections: (_ctx, factors) =>
       IOL_RISK_SECTIONS.filter(s => !s.factorOnly || factors.has(s.factorOnly)),
+    getBenefits: (ctx) => IOL_BENEFITS[ctx] ?? [],
     comparisonSections: null,
     getPages: (ctx) => IOL_PAGES[ctx],
     faq: IOL_FAQ,
@@ -58,6 +84,7 @@ const PROCEDURE_CONFIG = {
     contextOptions: null,
     patientFactors: SURG_MISC_PATIENT_FACTORS,
     getRiskSections: () => SURG_MISC_RISK_SECTIONS,
+    getBenefits: () => SURG_MISC_BENEFITS,
     comparisonSections: null,
     getPages: () => SURG_MISC_PAGES,
     faq: SURG_MISC_FAQ,
@@ -68,6 +95,7 @@ const PROCEDURE_CONFIG = {
     contextOptions: null,
     patientFactors: MED_MISC_PATIENT_FACTORS,
     getRiskSections: () => MED_MISC_RISK_SECTIONS,
+    getBenefits: () => MED_MISC_BENEFITS,
     comparisonSections: null,
     getPages: () => MED_MISC_PAGES,
     faq: MED_MISC_FAQ,
@@ -78,6 +106,7 @@ const PROCEDURE_CONFIG = {
     contextOptions: null,
     patientFactors: LAPAROSCOPY_PATIENT_FACTORS,
     getRiskSections: () => LAPAROSCOPY_RISK_SECTIONS,
+    getBenefits: () => LAPAROSCOPY_BENEFITS,
     comparisonSections: null,
     getPages: () => LAPAROSCOPY_PAGES,
     faq: LAPAROSCOPY_FAQ,
@@ -88,6 +117,7 @@ const PROCEDURE_CONFIG = {
     contextOptions: HYSTEROSCOPY_CONTEXT_OPTIONS,
     patientFactors: HYSTEROSCOPY_PATIENT_FACTORS,
     getRiskSections: () => HYSTEROSCOPY_RISK_SECTIONS,
+    getBenefits: (ctx) => HYSTEROSCOPY_BENEFITS[ctx] ?? [],
     comparisonSections: null,
     getPages: (ctx) => HYSTEROSCOPY_PAGES[ctx],
     faq: HYSTEROSCOPY_FAQ,
@@ -99,11 +129,86 @@ const PROCEDURE_CONFIG = {
     patientFactors: ACS_PATIENT_FACTORS,
     getRiskSections: (ctx) => ACS_RISK_SECTIONS[ctx] ?? [],
     getBenefits: (ctx) => ACS_BENEFITS[ctx] ?? [],
+    benefitsNote: "Certainty ratings follow the GRADE system as used in RCOG GTG (Stock 2022). Tap any row to read the verbatim guideline wording.",
     comparisonSections: null,
     getPages: (ctx) => ACS_PAGES[ctx],
     faq: ACS_FAQ,
     getInstrument: () => null,
     sourceLabel: "RCOG GTG (Stock 2022)",
+  },
+  VBAC: {
+    contextOptions: null,
+    patientFactors: VBAC_PATIENT_FACTORS,
+    getRiskSections: () => VBAC_RISK_SECTIONS,
+    getBenefits: () => VBAC_BENEFITS,
+    getOptions: () => VBAC_COMPARISON_SECTIONS,
+    benefitsNote: "Figures from RCOG GTG45 and its patient information; they describe planned VBAC with one previous lower-segment caesarean.",
+    optionsNote: "Planned VBAC compared with planned repeat caesarean (ERCS). Figures from RCOG GTG45; population averages, not specific to your situation.",
+    comparisonSections: null,
+    getPages: () => VBAC_PAGES,
+    faq: VBAC_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "RCOG GTG45",
+  },
+  ECV: {
+    contextOptions: null,
+    patientFactors: ECV_PATIENT_FACTORS,
+    getRiskSections: () => ECV_RISK_SECTIONS,
+    getBenefits: () => ECV_BENEFITS,
+    benefitsNote: "Figures from RCOG GTG20 and its patient information.",
+    comparisonSections: null,
+    getPages: () => ECV_PAGES,
+    faq: ECV_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "RCOG GTG20",
+  },
+  GBS: {
+    contextOptions: null,
+    patientFactors: GBS_PATIENT_FACTORS,
+    getRiskSections: () => GBS_RISK_SECTIONS,
+    getBenefits: () => GBS_BENEFITS,
+    benefitsNote: "Figures from RCOG GTG36 and the RCOG group B Streptococcus patient information.",
+    comparisonSections: null,
+    getPages: () => GBS_PAGES,
+    faq: GBS_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "RCOG GTG36",
+  },
+  ECTOPIC: {
+    contextOptions: ECTOPIC_CONTEXT_OPTIONS,
+    patientFactors: ECTOPIC_PATIENT_FACTORS,
+    getRiskSections: (ctx) => ECTOPIC_RISK_SECTIONS[ctx] ?? [],
+    getBenefits: (ctx) => ECTOPIC_BENEFITS[ctx] ?? [],
+    benefitsNote: "Methotrexate figures verbatim from CG623; surgical and expectant framing from NICE NG126. Your scan and blood results decide which routes are open.",
+    comparisonSections: null,
+    getPages: (ctx) => ECTOPIC_PAGES[ctx],
+    faq: ECTOPIC_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "CG623 · NICE NG126",
+  },
+  LLETZ: {
+    contextOptions: null,
+    patientFactors: LLETZ_PATIENT_FACTORS,
+    getRiskSections: () => LLETZ_RISK_SECTIONS,
+    getBenefits: () => LLETZ_BENEFITS,
+    benefitsNote: "Figures from NHSCSP colposcopy guidance; see the in-app Cervical Screening & Colposcopy guide.",
+    comparisonSections: null,
+    getPages: () => LLETZ_PAGES,
+    faq: LLETZ_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "NHSCSP20",
+  },
+  ASPIRIN: {
+    contextOptions: null,
+    patientFactors: ASPIRIN_PATIENT_FACTORS,
+    getRiskSections: () => ASPIRIN_RISK_SECTIONS,
+    getBenefits: () => ASPIRIN_BENEFITS,
+    benefitsNote: "NICE NG133 recommends aspirin for these risk profiles; it does not quote a single patient-facing effect size, so the benefits are described without invented numbers.",
+    comparisonSections: null,
+    getPages: () => ASPIRIN_PAGES,
+    faq: ASPIRIN_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "NICE NG133",
   },
 };
 
@@ -136,8 +241,8 @@ function ProcedureList({ onSelect }) {
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
         <div className="px-5 pt-14 pb-1">
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Consent</h2>
-          <p className="text-xs text-gray-400 mt-0.5">Procedure risks — verbatim from RCOG & NICE</p>
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Counsel</h2>
+          <p className="text-xs text-gray-400 mt-0.5">Benefits, risks &amp; alternatives, verbatim from RCOG &amp; NICE</p>
         </div>
 
         {/* Sticky search bar */}
@@ -327,7 +432,7 @@ function PatientFactors({ procedureId, context, factors, onToggle, onContinue, o
             onClick={onContinue}
             className="w-full py-4 rounded-2xl bg-gray-900 text-white text-sm font-bold hover:bg-gray-800 active:scale-[0.99] transition-all"
           >
-            Show consent summary →
+            Start counselling →
           </button>
         </div>
       </div>
@@ -394,21 +499,20 @@ function FreqKey() {
   );
 }
 
-const CONSENT_TABS_BASE = [
-  { id: "what",    label: "What" },
-  { id: "why",     label: "Why" },
-  { id: "risks",   label: "Risks" },
-  { id: "decline", label: "Decline" },
-  { id: "faq",     label: "FAQ" },
-];
-
-function buildTabs(hasBenefits) {
-  if (!hasBenefits) return CONSENT_TABS_BASE;
-  const idx = CONSENT_TABS_BASE.findIndex(t => t.id === "risks");
+// Tab order: What / Why / Options / Benefits / Risks / Alternatives|Decline / FAQ.
+// Options, Benefits and Alternatives only render when the entry has the data;
+// entries without them keep the original consent shape.
+function buildTabs({ hasBenefits, hasOptions, hasAlternatives }) {
   return [
-    ...CONSENT_TABS_BASE.slice(0, idx),
-    { id: "benefits", label: "Benefits" },
-    ...CONSENT_TABS_BASE.slice(idx),
+    { id: "what", label: "What" },
+    { id: "why",  label: "Why" },
+    ...(hasOptions  ? [{ id: "options",  label: "Options" }]  : []),
+    ...(hasBenefits ? [{ id: "benefits", label: "Benefits" }] : []),
+    { id: "risks", label: "Risks" },
+    hasAlternatives
+      ? { id: "alternatives", label: "Alternatives" }
+      : { id: "decline",      label: "Decline" },
+    { id: "faq", label: "FAQ" },
   ];
 }
 
@@ -474,22 +578,58 @@ function CertaintyGroup({ benefits, certaintyKey }) {
   );
 }
 
-function BenefitsPage({ benefits }) {
+function BenefitsPage({ benefits, note }) {
   if (!benefits?.length) return null;
-  const grouped = {};
-  for (const b of benefits) {
-    const key = b.certainty ?? "LOW";
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(b);
+  const graded = benefits.some(b => b.certainty);
+  let body;
+  if (graded) {
+    const grouped = {};
+    for (const b of benefits) {
+      const key = b.certainty ?? "LOW";
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(b);
+    }
+    body = CERTAINTY_ORDER.map(key => (
+      <CertaintyGroup key={key} benefits={grouped[key]} certaintyKey={key} />
+    ));
+  } else {
+    body = (
+      <div className="rounded-xl overflow-hidden bg-white border border-gray-100 mb-6">
+        {benefits.map(b => <BenefitRow key={b.id} benefit={b} />)}
+      </div>
+    );
   }
   return (
     <div className="pb-4">
-      {CERTAINTY_ORDER.map(key => (
-        <CertaintyGroup key={key} benefits={grouped[key]} certaintyKey={key} />
+      {body}
+      {note && (
+        <p className="text-[10px] text-gray-300 text-center mt-2 leading-relaxed">{note}</p>
+      )}
+    </div>
+  );
+}
+
+function OptionsPage({ sections, note }) {
+  if (!sections?.length) return null;
+  return (
+    <div className="pb-4">
+      {note && <p className="text-[11px] text-gray-400 mb-5 leading-snug">{note}</p>}
+      {sections.map(section => (
+        <div key={section.id} className="mb-6">
+          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.1em] mb-2">{section.heading}</p>
+          <div className="rounded-xl overflow-hidden bg-white border border-gray-100">
+            {section.type === "comparison" && section.risks.map(r => (
+              <ComparisonRiskRow key={r.id} risk={r} labels={section.labels} />
+            ))}
+            {section.type === "simple" && section.items.map(item => (
+              <div key={item} className="flex items-center gap-3 py-3 px-4 border-b border-gray-100 last:border-0">
+                <span className="w-2 h-2 rounded-full shrink-0 bg-gray-200" />
+                <p className="text-[14px] text-gray-700 font-medium">{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       ))}
-      <p className="text-[10px] text-gray-300 text-center mt-2 leading-relaxed">
-        Certainty ratings follow the GRADE system as used in RCOG GTG (Stock 2022). Tap any row to read the verbatim guideline wording.
-      </p>
     </div>
   );
 }
@@ -541,6 +681,15 @@ function DeclinePage({ pages }) {
     <div className="space-y-4">
       <h3 className="text-xl font-bold text-gray-900 leading-snug">{pages.decline.heading}</h3>
       <BodyBlock text={pages.decline.body} />
+    </div>
+  );
+}
+
+function AlternativesPage({ pages }) {
+  return (
+    <div className="space-y-4">
+      <h3 className="text-xl font-bold text-gray-900 leading-snug">{pages.alternatives.heading}</h3>
+      <BodyBlock text={pages.alternatives.body} />
     </div>
   );
 }
@@ -631,19 +780,28 @@ function FreqRiskRow({ risk }) {
   );
 }
 
-function ComparisonRiskRow({ risk }) {
+// Two-option comparison row. Rows use either the original CS-vs-vaginal fields
+// (cs / vaginal / cs_higher) or the generic ones (a / b / a_higher); the column
+// labels come from the section's `labels` (default CS / VB).
+function ComparisonRiskRow({ risk, labels }) {
   const [expanded, setExpanded] = useState(false);
+  const aLabel   = labels?.a ?? "CS";
+  const bLabel   = labels?.b ?? "VB";
+  const aValue   = risk.a ?? risk.cs;
+  const bValue   = risk.b ?? risk.vaginal;
+  const aHigher  = risk.a_higher ?? risk.cs_higher;
+  const tidy = (v) => v.replace("About ", "").replace(" on average", "");
   return (
     <div className={`border-b border-gray-100 last:border-0 ${expanded ? "bg-gray-50/40" : ""}`}>
       <button onClick={() => setExpanded(e => !e)} className="w-full flex items-start gap-3 py-3.5 px-4 text-left">
         <span className="w-2 h-2 rounded-full shrink-0 mt-1.5 bg-gray-200" />
         <p className="flex-1 min-w-0 text-[14px] text-gray-900 font-medium leading-snug pr-2">{risk.name}</p>
         <div className="shrink-0 text-right max-w-[110px] space-y-0.5">
-          <p className={`text-[11px] font-bold tabular-nums leading-snug ${risk.cs_higher ? "text-rose-500" : "text-teal-500"}`}>
-            CS {risk.cs.replace("About ", "").replace(" on average", "")}
+          <p className={`text-[11px] font-bold tabular-nums leading-snug ${aHigher ? "text-rose-500" : "text-teal-500"}`}>
+            {aLabel} {tidy(aValue)}
           </p>
-          <p className={`text-[11px] font-semibold tabular-nums leading-snug ${risk.cs_higher ? "text-teal-400" : "text-rose-400"}`}>
-            VB {risk.vaginal.replace("About ", "").replace(" on average", "")}
+          <p className={`text-[11px] font-semibold tabular-nums leading-snug ${aHigher ? "text-teal-400" : "text-rose-400"}`}>
+            {bLabel} {tidy(bValue)}
           </p>
         </div>
       </button>
@@ -778,15 +936,23 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
   const instrument       = cfg.getInstrument?.(context) ?? null;
   const riskSections     = cfg.getRiskSections?.(context, activeFactors) ?? [];
   const benefits         = cfg.getBenefits?.(context, activeFactors) ?? [];
-  const comparisonSections = cfg.comparisonSections ?? null;
+  const optionsSections  = cfg.getOptions?.(context) ?? null;
+  // When the comparison table has its own Options tab, drop it from Risks.
+  const comparisonSections = optionsSections ? null : (cfg.comparisonSections ?? null);
+  const benefitsNote     = typeof cfg.benefitsNote === "function" ? cfg.benefitsNote(context) : cfg.benefitsNote;
 
-  const tabs = buildTabs(benefits.length > 0);
+  const tabs = buildTabs({
+    hasBenefits: benefits.length > 0,
+    hasOptions: (optionsSections?.length ?? 0) > 0,
+    hasAlternatives: Boolean(pages.alternatives),
+  });
   const currentIdx = tabs.findIndex(t => t.id === activeTab);
   const canPrev = currentIdx > 0;
   const canNext = currentIdx < tabs.length - 1;
 
   return (
-    <div className="min-h-screen pb-28">
+    // Bottom padding clears the tab bar + pager bar + iOS safe area.
+    <div className="min-h-screen" style={{ paddingBottom: "calc(9.5rem + env(safe-area-inset-bottom, 0px))" }}>
       <div className="max-w-lg mx-auto">
 
         {/* Sticky header */}
@@ -824,10 +990,10 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
                 </div>
               </div>
               <ShareButton
-                title={proc?.title ?? "Consent"}
-                text={`${proc?.title ?? "Consent"}${contextLabel ? ` — ${contextLabel}` : ""} consent information${source ? ` (${source})` : ""} — via Pocket O&G`}
+                title={proc?.title ?? "Counsel"}
+                text={`${proc?.title ?? "Counsel"}${contextLabel ? ` (${contextLabel})` : ""} counselling information${source ? ` (${source})` : ""}, via Pocket O&G`}
                 url={deepLinkUrl("consent", proc?.id)}
-                label="Share consent"
+                label="Share"
                 dark
               />
             </div>
@@ -866,18 +1032,25 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
 
         {/* Page content */}
         <div className="px-5 pt-6">
-          {activeTab === "what"     && <WhatPage     pages={pages} />}
-          {activeTab === "why"      && <WhyPage      pages={pages} />}
-          {activeTab === "benefits" && <BenefitsPage benefits={benefits} />}
-          {activeTab === "risks"    && <RisksPage    sections={riskSections} comparisonSections={comparisonSections} instrument={instrument ?? context} activeFactors={activeFactors} />}
-          {activeTab === "decline"  && <DeclinePage  pages={pages} />}
-          {activeTab === "faq"      && <FAQSection   faqs={faqs} />}
+          {activeTab === "what"         && <WhatPage         pages={pages} />}
+          {activeTab === "why"          && <WhyPage          pages={pages} />}
+          {activeTab === "options"      && <OptionsPage      sections={optionsSections} note={cfg.optionsNote} />}
+          {activeTab === "benefits"     && <BenefitsPage     benefits={benefits} note={benefitsNote} />}
+          {activeTab === "risks"        && <RisksPage        sections={riskSections} comparisonSections={comparisonSections} instrument={instrument ?? context} activeFactors={activeFactors} />}
+          {activeTab === "alternatives" && <AlternativesPage pages={pages} />}
+          {activeTab === "decline"      && <DeclinePage      pages={pages} />}
+          {activeTab === "faq"          && <FAQSection       faqs={faqs} />}
         </div>
       </div>
 
-      {/* Prev / Next bar */}
-      <div className="fixed bottom-16 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-gray-100">
-        <div className="max-w-lg mx-auto flex items-center gap-3 px-5 py-3">
+      {/* Prev / Next bar. Anchored above the tab bar; on iPhone the tab bar is
+          taller than 4rem because of the home-indicator safe area, so the
+          offset must include it or the nav covers the Next button. */}
+      <div
+        className="fixed inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-gray-100"
+        style={{ bottom: "calc(4rem + env(safe-area-inset-bottom, 0px))" }}
+      >
+        <div className="max-w-lg mx-auto flex items-center gap-3 px-5 py-2.5">
           <button
             onClick={() => canPrev && setActiveTab(tabs[currentIdx - 1].id)}
             disabled={!canPrev}

@@ -4,6 +4,49 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.11.0",
+    date: "08/07/2026",
+    title: "Dark mode",
+    changes: [
+      { tag: "new", text: "Dark mode across the whole app. Tap the moon in the top-left of the home screen to switch; your choice is remembered on this device." },
+    ],
+  },
+  {
+    version: "1.10.1",
+    date: "08/07/2026",
+    title: "Counsel everywhere",
+    changes: [
+      { tag: "improved", text: "The Counsel rename now runs through the whole app: search results, topic cards, cross-links from guides and flowcharts, the About screen and the feedback form all say Counsel instead of Consent. The word consent still appears where it is clinically correct, such as the right to decline and consent forms." },
+    ],
+  },
+  {
+    version: "1.10.0",
+    date: "08/07/2026",
+    title: "Six new Counsel topics",
+    changes: [
+      { tag: "new", text: "Birth after caesarean (VBAC): success rates, uterine rupture and the full side-by-side comparison of planned VBAC vs planned repeat caesarean, from RCOG GTG45." },
+      { tag: "new", text: "Ectopic pregnancy: walk through methotrexate, surgery or expectant management, with the eligibility criteria, success rates and follow-up from CG623 and NICE NG126." },
+      { tag: "new", text: "External cephalic version (ECV): success rates, what the procedure involves, and the breech alternatives if it fails, from RCOG GTG20." },
+      { tag: "new", text: "GBS antibiotics in labour: the 1 in 400 vs 1 in 4,000 numbers, practicalities of the drip, and what declining means, from RCOG GTG36." },
+      { tag: "new", text: "LLETZ: what treatment involves, the ~95% cure rate, and the preterm birth conversation for future pregnancies, from NHSCSP guidance." },
+      { tag: "new", text: "Aspirin for pre-eclampsia prevention: NG133 risk factors as tappable chips, benefits, practical points and alternatives." },
+      { tag: "improved", text: "Ectopic and pre-eclampsia topic cards now link to their Counsel entries." },
+    ],
+  },
+  {
+    version: "1.9.0",
+    date: "08/07/2026",
+    title: "Consent becomes Counsel",
+    changes: [
+      { tag: "new", text: "The Consent tab is now Counsel: a walkthrough for counselling a patient about a procedure or decision, covering what it involves, benefits, risks, alternatives and common questions." },
+      { tag: "new", text: "Elective caesarean gets the fullest treatment: a step-by-step explanation of the operation (before, during and after), a Benefits tab and an Options tab comparing planned caesarean with planned vaginal birth (NICE NG192 Appendix A), and Decline reframed as Alternatives (planned vaginal birth, VBAC, ECV)." },
+      { tag: "new", text: "Every Counsel entry now uses the counselling shape: emergency caesarean, instrumental birth, all four induction methods, surgical and medical miscarriage, laparoscopy, hysteroscopy and antenatal corticosteroids each gain a Benefits tab and an Alternatives tab in place of Decline." },
+      { tag: "improved", text: "Searching \"counsel\" or \"counselling\" now finds these pages; \"consent\" still works." },
+      { tag: "fixed", text: "Pearl of the day no longer opens trapped inside the home column on iPhone: the popup now dims the whole screen, sits as a proper bottom sheet and clears the home indicator." },
+      { tag: "fixed", text: "The Back/Next bar in Counsel walkthroughs no longer hides behind the iPhone tab bar; it now sits fully visible above it and pages leave room for it when scrolled to the bottom." },
+    ],
+  },
+  {
     version: "1.8.0",
     date: "06/07/2026",
     title: "Diabetes, anaemia & mental health drugs",

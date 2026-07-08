@@ -116,7 +116,7 @@ export const FLOWCHART_NODE_CONNECTIONS = {
         { phrase: "Antenatal corticosteroids", type: "consent", id: "ACS", gl: "GL895" },
       ],
       whatsNext: [
-        { type: "consent", id: "ACS", gl: null, label: "Consent, antenatal corticosteroids", sublabel: "Benefits, risks & patient information" },
+        { type: "consent", id: "ACS", gl: null, label: "Counsel, antenatal corticosteroids", sublabel: "Benefits, risks & patient information" },
         { type: "reader", id: "GL895", gl: "GL895", label: "GL895: PPRoM guideline", sublabel: "Full guideline text" },
       ],
     },
@@ -240,7 +240,7 @@ export const FLOWCHART_NODE_CONNECTIONS = {
     },
     "end-surgery": {
       whatsNext: [
-        { type: "consent", id: "LAPAROSCOPY", gl: null, label: "Consent, laparoscopy", sublabel: "Risks, benefits & patient information" },
+        { type: "consent", id: "LAPAROSCOPY", gl: null, label: "Counsel, laparoscopy", sublabel: "Risks, benefits & patient information" },
       ],
     },
     "mtx-admin": {
@@ -301,17 +301,17 @@ export const FLOWCHART_NODE_CONNECTIONS = {
   CG565_TRIAGE: {
     "end-smm": {
       whatsNext: [
-        { type: "consent", id: "SURG_MISC", gl: null, label: "Consent, surgical miscarriage", sublabel: "EVA / MVA, risks & patient information" },
+        { type: "consent", id: "SURG_MISC", gl: null, label: "Counsel, surgical miscarriage", sublabel: "EVA / MVA, risks & patient information" },
       ],
     },
     "end-medical-incomplete": {
       whatsNext: [
-        { type: "consent", id: "MED_MISC", gl: null, label: "Consent, medical miscarriage", sublabel: "Misoprostol, risks & patient information" },
+        { type: "consent", id: "MED_MISC", gl: null, label: "Counsel, medical miscarriage", sublabel: "Misoprostol, risks & patient information" },
       ],
     },
     "end-medical-missed": {
       whatsNext: [
-        { type: "consent", id: "MED_MISC", gl: null, label: "Consent, medical miscarriage", sublabel: "Mifepristone + Misoprostol" },
+        { type: "consent", id: "MED_MISC", gl: null, label: "Counsel, medical miscarriage", sublabel: "Mifepristone + Misoprostol" },
         { type: "flowchart", id: "CG621_OUTPATIENT", gl: "CG621", label: "Medical management, outpatient", sublabel: "CG621, step through the pathway" },
       ],
     },
@@ -319,14 +319,14 @@ export const FLOWCHART_NODE_CONNECTIONS = {
   CG621_OUTPATIENT: {
     "end-surgical": {
       whatsNext: [
-        { type: "consent", id: "SURG_MISC", gl: null, label: "Consent, surgical miscarriage", sublabel: "EVA / MVA, risks & patient information" },
+        { type: "consent", id: "SURG_MISC", gl: null, label: "Counsel, surgical miscarriage", sublabel: "EVA / MVA, risks & patient information" },
       ],
     },
   },
   CG621_INPATIENT: {
     "end-surgical-inpatient": {
       whatsNext: [
-        { type: "consent", id: "SURG_MISC", gl: null, label: "Consent, surgical miscarriage", sublabel: "EVA / MVA, risks & patient information" },
+        { type: "consent", id: "SURG_MISC", gl: null, label: "Counsel, surgical miscarriage", sublabel: "EVA / MVA, risks & patient information" },
       ],
     },
   },
