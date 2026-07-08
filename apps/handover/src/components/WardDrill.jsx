@@ -28,7 +28,7 @@ function CountBadge({ open, urgent }) {
 // is instead of tracking its own separate, easily-stale idea of "here".
 export default function WardDrill({
   jobs, wardNames, wardLayouts, recentWards, recentBeds,
-  editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onDelete,
+  editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onSetRemindAt, onDelete,
   onAddJob, onSetupWard,
   selectedWard, setSelectedWard, selectedBed, setSelectedBed, bedSelected, setBedSelected,
   listBottomPad,
@@ -37,7 +37,7 @@ export default function WardDrill({
 
   const { wards, noWard } = buildHierarchy(jobs, { wardNames, wardLayouts, recentBeds });
 
-  const cardProps = { editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onDelete, recentWards, recentBeds };
+  const cardProps = { editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onSetRemindAt, onDelete, recentWards, recentBeds };
   const renderCard = (job) => (
     <JobCard key={job.id} job={job} hideLocation editing={editingId === job.id} {...cardProps} />
   );

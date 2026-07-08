@@ -50,7 +50,7 @@ function BedJobPanel({ ward, bed, jobs, jobCount, onAddJob, renderCard }) {
 // its beds as a grid; expand a bed to see tasks in a full-width panel below.
 export default function MasterSheet({
   jobs, wardNames, wardLayouts, recentWards, recentBeds,
-  editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onDelete,
+  editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onSetRemindAt, onDelete,
   onAddJob, listBottomPad,
 }) {
   const [openWards, setOpenWards] = useState(new Set());
@@ -72,7 +72,7 @@ export default function MasterSheet({
     return n;
   });
 
-  const cardProps = { editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onDelete, recentWards, recentBeds };
+  const cardProps = { editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onSetRemindAt, onDelete, recentWards, recentBeds };
   const renderCard = (job, hideLocation) => (
     <JobCard key={job.id} job={job} hideLocation={hideLocation} editing={editingId === job.id} {...cardProps} />
   );

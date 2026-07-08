@@ -10,10 +10,7 @@ const CHIP = "px-3 py-2 rounded-lg text-xs font-bold border transition-colors ac
 const CHIP_ON = "bg-claude-600 text-white border-claude-600";
 const CHIP_OFF = "bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-800";
 const LABEL = "text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-600 mb-2";
-const SELECT = "min-w-0 w-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-3 py-3 text-base text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-claude-500/30 focus:border-claude-500";
-
-const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
-const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
+const TIME_INPUT = "min-w-0 w-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-3 py-3 text-base text-center tabular-nums text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-claude-500/30 focus:border-claude-500";
 
 function defaultTimeValue() {
   const d = new Date();
@@ -23,8 +20,11 @@ function defaultTimeValue() {
 
 function splitTime(hhmm) {
   const [h, m] = (hhmm || defaultTimeValue()).split(":");
-  const hour = HOURS.includes(h) ? h : "12";
+  const hourNum = Number(h);
   const minuteNum = Number(m);
+  const hour = Number.isFinite(hourNum) && hourNum >= 0 && hourNum < 24
+    ? String(hourNum).padStart(2, "0")
+    : "12";
   const minute = Number.isFinite(minuteNum) && minuteNum >= 0 && minuteNum < 60
     ? String(minuteNum).padStart(2, "0")
     : "00";
@@ -33,6 +33,16 @@ function splitTime(hhmm) {
 
 function joinTime(hour, minute) {
   return `${hour}:${minute}`;
+}
+
+function clampHour(value) {
+  const n = Math.min(23, Math.max(0, Number(value) || 0));
+  return String(n).padStart(2, "0");
+}
+
+function clampMinute(value) {
+  const n = Math.min(59, Math.max(0, Number(value) || 0));
+  return String(n).padStart(2, "0");
 }
 
 export default function ReminderPicker({ remindAt, onChange }) {
@@ -59,18 +69,18 @@ export default function ReminderPicker({ remindAt, onChange }) {
     }
   };
 
-  const setHour = (nextHour) => setPendingTime(joinTime(nextHour, minute));
-  const setMinute = (nextMinute) => setPendingTime(joinTime(hour, nextMinute));
-
-  const stopSwipe = (e) => e.stopPropagation();
-
-  const stopPointer = {
-    onPointerDown: stopSwipe,
-    onPointerUp: stopSwipe,
+  const setHour = (raw) => {
+    setPendingTime((current) => joinTime(clampHour(raw), splitTime(current).minute));
   };
 
+  const setMinute = (raw) => {
+    setPendingTime((current) => joinTime(splitTime(current).hour, clampMinute(raw)));
+  };
+
+  const stopBubble = (e) => e.stopPropagation();
+
   return (
-    <div className="min-w-0 max-w-full overflow-hidden relative z-10" {...stopPointer}>
+    <div className="min-w-0 max-w-full overflow-hidden relative z-10">
       <p className={LABEL}>Reminder</p>
       <div className="grid grid-cols-3 gap-1.5 mb-1.5">
         {REMINDER_OFFSETS.map(({ label, minutes }) => (
@@ -105,48 +115,51 @@ export default function ReminderPicker({ remindAt, onChange }) {
       {timeOpen && (
         <div
           className="mt-2 min-w-0 max-w-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-3 flex flex-col gap-2"
-          {...stopPointer}
+          onClick={stopBubble}
+          onPointerDown={stopBubble}
         >
-          <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Remind at</label>
-          <div className="grid grid-cols-2 gap-2 min-w-0" {...stopPointer}>
-            <select
-              value={hour}
-              onChange={(e) => setHour(e.target.value)}
-              className={SELECT}
-              aria-label="Reminder hour"
-              {...stopPointer}
-            >
-              {HOURS.map((h) => (
-                <option key={h} value={h}>{h}</option>
-              ))}
-            </select>
-            <select
-              value={minute}
-              onChange={(e) => setMinute(e.target.value)}
-              className={SELECT}
-              aria-label="Reminder minute"
-              {...stopPointer}
-            >
-              {MINUTES.map((m) => (
-                <option key={m} value={m}>{m}</option>
-              ))}
-            </select>
+          <p className="text-xs font-bold text-gray-500 dark:text-gray-400">Remind at</p>
+          <div className="grid grid-cols-2 gap-2 min-w-0">
+            <label className="min-w-0 flex flex-col gap-1">
+              <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-gray-600">Hour</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                min={0}
+                max={23}
+                value={Number(hour)}
+                onChange={(e) => setHour(e.target.value)}
+                className={TIME_INPUT}
+                aria-label="Reminder hour"
+              />
+            </label>
+            <label className="min-w-0 flex flex-col gap-1">
+              <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-gray-600">Min</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                min={0}
+                max={59}
+                value={Number(minute)}
+                onChange={(e) => setMinute(e.target.value)}
+                className={TIME_INPUT}
+                aria-label="Reminder minute"
+              />
+            </label>
           </div>
-          <p className="text-[11px] text-gray-400 dark:text-gray-600 tabular-nums">{pendingTime}</p>
+          <p className="text-[11px] text-gray-400 dark:text-gray-600 tabular-nums text-center">{pendingTime}</p>
           <div className="grid grid-cols-2 gap-2 min-w-0">
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); setTimeOpen(false); }}
+              onClick={(e) => { stopBubble(e); setTimeOpen(false); }}
               className="min-w-0 py-2.5 rounded-xl text-sm font-bold text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800 touch-manipulation"
-              {...stopPointer}
             >
               Cancel
             </button>
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); confirmTime(); }}
+              onClick={(e) => { stopBubble(e); confirmTime(); }}
               className="min-w-0 py-2.5 rounded-xl text-sm font-bold bg-claude-600 text-white touch-manipulation"
-              {...stopPointer}
             >
               Set reminder
             </button>

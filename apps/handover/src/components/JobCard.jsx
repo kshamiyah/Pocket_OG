@@ -84,11 +84,13 @@ export default function JobCard({
       )}
 
       <div
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
-        style={{ transform: `translateX(${dragX}px)`, transition: dragging ? "none" : "transform 150ms ease-out", touchAction: editing ? "auto" : "pan-y" }}
+        {...(swipeEnabled ? {
+          onPointerDown,
+          onPointerMove,
+          onPointerUp: endDrag,
+          onPointerCancel: endDrag,
+        } : {})}
+        style={{ transform: `translateX(${dragX}px)`, transition: dragging ? "none" : "transform 150ms ease-out", touchAction: editing ? "manipulation" : "pan-y" }}
         className={`rounded-xl border px-3 py-2.5 bg-gray-50 dark:bg-gray-900/60 ${
           reminder === "due" && !job.done
             ? "border-claude-500 dark:border-claude-600 ring-1 ring-claude-500/30"
@@ -175,11 +177,9 @@ export default function JobCard({
 
             {editing && (
               <div
-                className="mt-2 min-w-0 max-w-full overflow-hidden flex flex-col gap-3 relative z-10"
-                onPointerDown={(e) => e.stopPropagation()}
-                onPointerUp={(e) => e.stopPropagation()}
-                onPointerMove={(e) => e.stopPropagation()}
+                className="mt-2 min-w-0 max-w-full overflow-hidden flex flex-col gap-3 relative z-10 touch-manipulation"
                 onClick={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
               >
                 <ReminderPicker
                   remindAt={job.remindAt}
