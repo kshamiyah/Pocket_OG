@@ -95,7 +95,7 @@ export const CONSENT_SECTIONS = CONSENT_PROCEDURES.map(p => ({
   condition: "Consent",
   setting: p.subtypes ?? "Patient information",
   title: p.title,
-  tags: uniq(["consent", "risks", "patient information", ...words(p.title), ...words(p.subtypes), ...words(p.source)]),
+  tags: uniq(["consent", "counsel", "counselling", "risks", "patient information", ...words(p.title), ...words(p.subtypes), ...words(p.source)]),
   content: [
     { type: "text", value: p.subtypes ? `Consent & risk information — ${p.subtypes}.` : "Consent & risk information." },
     { type: "text", value: `Source: ${p.source}` },

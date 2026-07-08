@@ -409,6 +409,43 @@ export const CS_COMPARISON_SECTIONS = [
   },
 ];
 
+// Benefits of planned CS vs planned vaginal birth — figures verbatim from
+// NICE NG192 Appendix A (2021). Population averages; comparator named per row.
+export const CS_BENEFITS_ELECTIVE = [
+  {
+    id: "pain_during_birth",
+    name: "Far less pain during the birth itself",
+    rate: "Pain score 1.0 vs 7.3",
+    detail: "median, vs vaginal birth",
+    source: "NICE NG192 App A",
+    plain: "Pain during the birth itself is much lower with caesarean under spinal anaesthetic (median pain score 1.0 vs 7.3). However, abdominal wound pain afterwards is common.",
+  },
+  {
+    id: "no_vaginal_tear",
+    name: "No vaginal tears",
+    rate: "0 vs 560 per 100,000",
+    detail: "vs vaginal birth",
+    source: "NICE NG192 App A",
+    plain: "Vaginal tears do not occur with caesarean birth.",
+  },
+  {
+    id: "urinary_incont_benefit",
+    name: "Lower risk of urinary incontinence lasting more than a year",
+    rate: "1 in 5 vs 1 in 2",
+    detail: "vs unassisted vaginal birth",
+    source: "NICE NG192 App A",
+    plain: "Caesarean birth is associated with a lower risk of long-term urinary incontinence: about 19,600 per 100,000 vs 48,700 per 100,000 after unassisted vaginal birth, and about 7,300 vs 19,800 per 100,000 compared with assisted (forceps or ventouse) birth.",
+  },
+  {
+    id: "faecal_incont_benefit",
+    name: "Lower risk of faecal incontinence lasting more than a year",
+    rate: "1 in 13 vs 1 in 7",
+    detail: "vs assisted vaginal birth",
+    source: "NICE NG192 App A",
+    plain: "Compared with assisted (forceps or ventouse) vaginal birth, caesarean carries a lower risk of long-term faecal incontinence: about 7,800 vs 15,100 per 100,000. Compared with unassisted vaginal birth the risk is similar.",
+  },
+];
+
 // RCOG Consent Advice No. 12 — shown when placenta praevia factor active
 export const CS_PP_RISK_SECTIONS = [
   {
@@ -828,11 +865,15 @@ export const CS_PAGES = {
   elective: {
     what: {
       heading: "Elective Caesarean Section",
-      body: "A caesarean section is an operation to deliver your baby through a cut made in your abdomen and womb. It is performed in an operating theatre.\n\nMost planned caesareans are done under a spinal anaesthetic — you are awake but numb from the waist down and will not feel pain. Your birth partner is usually able to be present.\n\nThe operation itself takes around 40–50 minutes. Your baby is usually delivered within the first 10 minutes.",
+      body: "A caesarean section is an operation to deliver your baby through a cut made in your abdomen and womb. It is performed in an operating theatre. A planned caesarean is not usually carried out before 39 weeks, because babies born earlier are more likely to have temporary breathing problems.\n\nBefore the operation\n\n• You will be seen beforehand to confirm the plan, have blood tests and go through the consent form.\n• You will be asked not to eat for several hours before surgery, and given medicine to reduce stomach acid.\n• Most planned caesareans are done under a spinal anaesthetic: you are awake but numb from the chest down. You will feel pressure, pulling and tugging, but not pain. A general anaesthetic is occasionally needed and your anaesthetist will discuss this.\n• A thin tube (catheter) is placed into your bladder to keep it empty and protect it during the operation.\n• Antibiotics are given through a drip before the first cut, to reduce the chance of infection.\n• Your birth partner can usually be with you in theatre, and a screen is placed so you do not see the operation.\n\nThe operation\n\n• The skin cut is almost always horizontal, along the bikini line just above the pubic bone.\n• A second cut is made in the lower part of the womb and your baby is delivered through it, usually within the first 10 minutes.\n• You are given an injection of oxytocin to help the womb contract and reduce bleeding, and the placenta is delivered through the same cut.\n• If all is well, you can usually have skin-to-skin contact with your baby in theatre.\n• The womb and the layers of the tummy are closed with dissolvable stitches; the skin is closed with stitches or clips. The whole operation takes around 40–50 minutes.\n\nAfterwards\n\n• You and your baby are observed closely in a recovery area, and feeding is supported as soon as possible.\n• The bladder catheter is removed once you are up and walking, usually within a day.\n• You will be offered regular pain relief, and assessed for blood-thinning injections to reduce the risk of clots.\n• Most women stay in hospital around 4 days; full recovery usually takes about 6 weeks.",
     },
     why: {
       heading: "Why is this being recommended?",
       body: "A planned caesarean is recommended when vaginal birth is considered to carry a higher risk for you or your baby than surgical delivery. The specific reason will have been discussed with your consultant.\n\nCommon reasons include: placenta praevia, previous caesarean sections, breech presentation, or maternal preference following counselling about the risks and benefits of each mode of delivery.",
+    },
+    alternatives: {
+      heading: "Alternatives and your right to decline",
+      body: "No caesarean can be performed without your consent, and you have the right to decline one even where it has been recommended. Declining does not affect your right to good care.\n\nThe main alternative is a planned vaginal birth. How the two compare depends on why a caesarean has been offered; the Options tab shows the outcomes side by side for an average pregnancy.\n\nDepending on your situation, other options may include:\n\n• Vaginal birth after caesarean (VBAC): many women with a previous caesarean can plan a vaginal birth. Your consultant can discuss your individual chance of success.\n• Turning a breech baby (ECV): if your baby is breech, an attempt to turn the baby by pressing on your abdomen can be offered from around 36 weeks. If it works, vaginal birth becomes possible.\n• Waiting and monitoring: in some situations it is reasonable to continue the pregnancy with closer monitoring and revisit the decision.\n\nYour doctor will explain which of these genuinely apply in your case and what each would mean for you. Take the time you need and ask any questions before deciding.",
     },
     decline: {
       heading: "If you decide not to proceed",

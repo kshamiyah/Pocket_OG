@@ -4,6 +4,16 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.9.0",
+    date: "08/07/2026",
+    title: "Consent becomes Counsel",
+    changes: [
+      { tag: "new", text: "The Consent tab is now Counsel: a walkthrough for counselling a patient about a procedure or decision, covering what it involves, benefits, risks, alternatives and common questions." },
+      { tag: "new", text: "Elective caesarean pilots the new shape: a step-by-step explanation of the operation (before, during and after), a Benefits tab and an Options tab comparing planned caesarean with planned vaginal birth (NICE NG192 Appendix A), and Decline reframed as Alternatives (planned vaginal birth, VBAC, ECV)." },
+      { tag: "improved", text: "Searching \"counsel\" or \"counselling\" now finds these pages; \"consent\" still works." },
+    ],
+  },
+  {
     version: "1.8.0",
     date: "06/07/2026",
     title: "Diabetes, anaemia & mental health drugs",

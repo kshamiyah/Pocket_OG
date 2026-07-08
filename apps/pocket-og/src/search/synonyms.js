@@ -1,4 +1,9 @@
 export const SYNONYMS = {
+  // Counsel (formerly Consent)
+  "counsel": ["consent","counselling","risks","benefits","patient information"],
+  "counselling": ["consent","counsel","risks","benefits","patient information"],
+  "consent": ["counsel","counselling","risks","patient information"],
+
   // Fetal monitoring / CTG (NICE NG229)
   "ctg": ["cardiotocography","cardiotocograph","fetal monitoring","fetal heart rate","fhr","efm","ng229","pathological ctg","suspicious ctg"],
   "cardiotocography": ["ctg","fetal monitoring","fetal heart rate","efm","ng229"],
