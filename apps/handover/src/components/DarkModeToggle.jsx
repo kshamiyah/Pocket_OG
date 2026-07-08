@@ -34,7 +34,7 @@ function ThemeSwitch({ on, onToggle }) {
   );
 }
 
-/** Row with label + switch (menus, settings). */
+/** Row with label + switch (shift menu). */
 export function DarkModeToggleRow() {
   const { dark, toggle } = useTheme();
   return (
@@ -47,21 +47,5 @@ export function DarkModeToggleRow() {
       </div>
       <ThemeSwitch on={dark} onToggle={toggle} />
     </div>
-  );
-}
-
-/** Floating icon button (global access). */
-export default function DarkModeFab() {
-  const { dark, toggle } = useTheme();
-  return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-      className="fixed z-40 left-4 w-11 h-11 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 flex items-center justify-center shadow-lg active:scale-95 transition-transform"
-      style={{ bottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}
-    >
-      {dark ? <SunIcon /> : <MoonIcon />}
-    </button>
   );
 }

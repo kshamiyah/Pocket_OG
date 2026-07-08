@@ -12,9 +12,42 @@ function Chevron({ open }) {
   return <span className={`inline-block transition-transform ${open ? "rotate-90" : ""}`}>›</span>;
 }
 
+function bedLabel(bed) {
+  return bed === null ? "General" : bed;
+}
+
+function BedTileButton({ label, open, tone, counts, onClick }) {
+  return (
+    <div className={`rounded-lg border overflow-hidden ${tone.shell} ${open ? "ring-2 ring-claude-500/50 border-claude-300 dark:border-claude-800" : ""}`}>
+      <button type="button" onClick={onClick} className="w-full flex items-center justify-between px-3 py-2">
+        <span className={`${tone.labelSm} flex items-center gap-1.5`}>
+          <Chevron open={open} /> {label}
+        </span>
+        {!tone.empty && (
+          <span className="flex items-center gap-1.5">
+            {counts.urgent > 0 && <span className="w-1.5 h-1.5 rounded-full bg-red-500" aria-label="Has urgent jobs" />}
+            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{counts.open}</span>
+          </span>
+        )}
+      </button>
+    </div>
+  );
+}
+
+function BedJobPanel({ ward, bed, jobs, jobCount, onAddJob, renderCard }) {
+  const label = bedLabel(bed);
+  return (
+    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-3 py-3 flex flex-col gap-2">
+      <p className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">{label}</p>
+      <QuickAddRow ward={ward} bed={bed || ""} jobs={jobs} onAddJob={onAddJob} />
+      {jobCount === 0 && <p className="text-xs text-gray-400 dark:text-gray-600">No jobs here yet.</p>}
+      {renderCard}
+    </div>
+  );
+}
+
 // View 2: everything, nested — wards collapsed by default, expand one to see
-// its beds collapsed, expand a bed to see (and add to) its tasks inline.
-// Same data as WardDrill, presented as one page instead of a walk-through.
+// its beds as a grid; expand a bed to see tasks in a full-width panel below.
 export default function MasterSheet({
   jobs, wardNames, wardLayouts, recentWards, recentBeds,
   editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onDelete,
@@ -94,41 +127,37 @@ export default function MasterSheet({
                       </button>
                     ) : null}
                     {sectionOpen && (
-                    <div className={group.grid ? "grid grid-cols-2 gap-1.5" : "flex flex-col gap-1.5"}>
-                      {group.beds.map((b) => {
-                        const key = bedKey(w.ward, b.bed);
-                        const bOpen = openBeds.has(key);
-                        const label = b.bed === null ? "General" : b.bed;
-                        const tone = bedRowTone({ open: b.open, urgent: b.urgent });
-                        return (
-                          <div
-                            key={key}
-                            className={`rounded-lg border overflow-hidden ${tone.shell}`}
-                          >
-                            <button
+                    <div className="flex flex-col gap-2">
+                      <div className={group.grid ? "grid grid-cols-2 gap-1.5" : "flex flex-col gap-1.5"}>
+                        {group.beds.map((b) => {
+                          const key = bedKey(w.ward, b.bed);
+                          const bOpen = openBeds.has(key);
+                          const tone = bedRowTone({ open: b.open, urgent: b.urgent });
+                          return (
+                            <BedTileButton
+                              key={key}
+                              label={bedLabel(b.bed)}
+                              open={bOpen}
+                              tone={tone}
+                              counts={{ open: b.open, urgent: b.urgent }}
                               onClick={() => toggleBed(w.ward, b.bed)}
-                              className="w-full flex items-center justify-between px-3 py-2"
-                            >
-                              <span className={`${tone.labelSm} flex items-center gap-1.5`}>
-                                <Chevron open={bOpen} /> {label}
-                              </span>
-                              {!tone.empty && (
-                                <span className="flex items-center gap-1.5">
-                                  {b.urgent > 0 && <span className="w-1.5 h-1.5 rounded-full bg-red-500" aria-label="Has urgent jobs" />}
-                                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{b.open}</span>
-                                </span>
-                              )}
-                            </button>
-                            {bOpen && (
-                              <div className="px-3 pb-3 flex flex-col gap-2 border-t border-gray-100 dark:border-gray-800/60">
-                                <QuickAddRow ward={w.ward} bed={b.bed || ""} jobs={jobs} onAddJob={onAddJob} />
-                                {b.jobs.length === 0 && <p className="text-xs text-gray-400 dark:text-gray-600">No jobs here yet.</p>}
-                                {b.jobs.map((job) => renderCard(job, true))}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
+                            />
+                          );
+                        })}
+                      </div>
+                      {group.beds
+                        .filter((b) => openBeds.has(bedKey(w.ward, b.bed)))
+                        .map((b) => (
+                          <BedJobPanel
+                            key={`panel-${bedKey(w.ward, b.bed)}`}
+                            ward={w.ward}
+                            bed={b.bed}
+                            jobs={jobs}
+                            jobCount={b.jobs.length}
+                            onAddJob={onAddJob}
+                            renderCard={b.jobs.map((job) => renderCard(job, true))}
+                          />
+                        ))}
                     </div>
                     )}
                   </div>

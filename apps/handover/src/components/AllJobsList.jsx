@@ -7,14 +7,17 @@ import JobCard from "./JobCard";
 // no location grouping by default, for the moments a whole-patch glance
 // matters more than walking the building (triage, pre-handover check).
 export default function AllJobsList({
-  jobs, recentWards, recentBeds,
-  editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onDelete,
+  jobs, recentWards, recentBeds, wardLayouts,
+  editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onSetRemindAt, onDelete,
   listBottomPad,
 }) {
   const [sortMode, setSortMode] = useState(SORT_MODE.URGENCY);
   const summary = useMemo(() => summarize(jobs), [jobs]);
 
-  const cardProps = { editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onDelete, recentWards, recentBeds };
+  const cardProps = {
+    editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onSetRemindAt, onDelete,
+    recentWards, recentBeds, wardLayouts,
+  };
   const renderCard = (job) => <JobCard key={job.id} job={job} editing={editingId === job.id} {...cardProps} />;
 
   return (

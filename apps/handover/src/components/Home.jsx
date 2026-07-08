@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SHIFT_TYPES } from "../utils/constants";
 import { summarize } from "../utils/jobs";
+import { countDueReminders, dueTasks, upcomingTasks } from "../utils/reminders";
 import { pushMRU } from "../utils/storage";
 import AddJobForm from "./AddJobForm";
 import WardDrill from "./WardDrill";
@@ -8,6 +9,7 @@ import MasterSheet from "./MasterSheet";
 import AllJobsList from "./AllJobsList";
 import UndoToast from "./UndoToast";
 import HomeMenu from "./HomeMenu";
+import NotificationCentre from "./NotificationCentre";
 import HandoverMark from "./HandoverMark";
 import { SCREEN } from "../utils/screenLayout";
 
@@ -32,6 +34,8 @@ export default function Home({
   const [wizardOpen, setWizardOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuSession, setMenuSession] = useState(0);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationsSession, setNotificationsSession] = useState(0);
   const [undo, setUndo] = useState(null);
   const undoTimer = useRef(null);
 
@@ -59,7 +63,11 @@ export default function Home({
   const addJob = (job) => setJobs([...jobs, job]);
   const toggleDone = (id) => {
     const job = jobs.find((j) => j.id === id);
-    setJobs(jobs.map((j) => (j.id === id ? { ...j, done: !j.done } : j)));
+    setJobs(jobs.map((j) => {
+      if (j.id !== id) return j;
+      const nextDone = !j.done;
+      return { ...j, done: nextDone, ...(nextDone ? { remindAt: null } : {}) };
+    }));
     if (job && !job.done) flashUndo("Marked done", jobs);
   };
   const toggleEdit = (id) => setEditingId((cur) => (cur === id ? null : id));
@@ -74,6 +82,9 @@ export default function Home({
   };
   const setPriority = (id, priority) => setJobs(jobs.map((j) => (j.id === id ? { ...j, priority } : j)));
   const setText = (id, text) => setJobs(jobs.map((j) => (j.id === id ? { ...j, text } : j)));
+  const setRemindAt = (id, remindAt) => {
+    setJobs(jobs.map((j) => (j.id === id ? { ...j, remindAt: remindAt || null } : j)));
+  };
   const deleteJob = (id) => {
     setEditingId(null);
     flashUndo("Deleted", jobs);
@@ -83,7 +94,28 @@ export default function Home({
   const sharedProps = {
     jobs, recentWards, recentBeds, wardLayouts,
     editingId, onToggleDone: toggleDone, onToggleEdit: toggleEdit,
-    onSetWard: setWard, onSetBed: setBed, onSetPriority: setPriority, onSetText: setText, onDelete: deleteJob,
+    onSetWard: setWard, onSetBed: setBed, onSetPriority: setPriority, onSetText: setText,
+    onSetRemindAt: setRemindAt, onDelete: deleteJob,
+  };
+
+  const [reminderTick, setReminderTick] = useState(() => Date.now());
+  useEffect(() => {
+    if (!jobs.some((j) => j.remindAt && !j.done)) return undefined;
+    const id = window.setInterval(() => setReminderTick(Date.now()), 30_000);
+    return () => window.clearInterval(id);
+  }, [jobs]);
+  const dueReminders = countDueReminders(jobs, reminderTick);
+  const dueTaskList = dueTasks(jobs, reminderTick);
+  const upcomingTaskList = upcomingTasks(jobs, reminderTick);
+
+  const openNotifications = () => {
+    setNotificationsSession((n) => n + 1);
+    setNotificationsOpen(true);
+  };
+
+  const openTaskFromNotifications = (id) => {
+    setMode("all");
+    setEditingId(id);
   };
 
   const inBedFocus = mode === "byward" && density === "walk" && selectedWard && bedSelected;
@@ -130,10 +162,26 @@ export default function Home({
           </button>
           <button
             type="button"
+            onClick={openNotifications}
+            aria-label={dueReminders > 0 ? `${dueReminders} tasks due` : "Notifications"}
+            className={`${ICON_BTN} relative border-claude-200 dark:border-claude-900 text-claude-700 dark:text-claude-400`}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            {dueReminders > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[1.125rem] h-[1.125rem] px-0.5 rounded-full bg-claude-600 text-white text-[10px] font-bold flex items-center justify-center">
+                {dueReminders > 9 ? "9+" : dueReminders}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
             onClick={() => { setMenuSession((n) => n + 1); setMenuOpen(true); }}
             data-coach="menu-btn"
             aria-label="More options"
-            className={`${ICON_BTN} border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-300`}
+            className={`${ICON_BTN} border-claude-200 dark:border-claude-900 text-claude-700 dark:text-claude-400`}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <circle cx="5" cy="12" r="1.8" />
@@ -183,17 +231,15 @@ export default function Home({
         )}
       </div>
 
-      {summary.open > 0 && (
+      {dueReminders > 0 && (
         <button
           type="button"
-          onClick={onHandover}
-          data-coach="handover-btn"
-          className="shrink-0 mx-5 mt-2 mb-1 px-4 py-2.5 rounded-xl bg-claude-50 dark:bg-claude-950/30 border border-claude-200 dark:border-claude-900 flex items-center justify-between active:scale-[0.99] transition-all"
+          onClick={openNotifications}
+          className="shrink-0 mx-5 mt-2 mb-1 px-4 py-2 rounded-xl bg-claude-100 dark:bg-claude-950/40 border border-claude-300 dark:border-claude-800 w-[calc(100%-2.5rem)] text-left active:scale-[0.99] transition-all"
         >
           <span className="text-sm font-bold text-claude-900 dark:text-claude-200">
-            {summary.open} open{summary.urgent > 0 ? ` · ${summary.urgent} urgent` : ""}
+            {dueReminders} task{dueReminders === 1 ? "" : "s"} due
           </span>
-          <span className="text-sm font-bold text-claude-700 dark:text-claude-400">Hand over →</span>
         </button>
       )}
 
@@ -256,6 +302,16 @@ export default function Home({
         onManageWards={onManageWards}
         onEditProfile={onEditProfile}
         onEndShift={onEndShift}
+      />
+
+      <NotificationCentre
+        key={notificationsSession}
+        open={notificationsOpen}
+        onClose={() => setNotificationsOpen(false)}
+        due={dueTaskList}
+        upcoming={upcomingTaskList}
+        now={reminderTick}
+        onOpenTask={openTaskFromNotifications}
       />
     </div>
   );

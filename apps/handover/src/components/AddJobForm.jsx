@@ -4,6 +4,7 @@ import { createJob, nextId } from "../utils/jobs";
 import { pushMRU } from "../utils/storage";
 import { bedsForWard, hasLayout, mostRecentBed } from "../utils/wardLayouts";
 import { safeBottom } from "../utils/screenLayout";
+import ReminderPicker from "./ReminderPicker";
 
 const CHIP = "shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors";
 const CHIP_ON = "bg-claude-600 text-white border-claude-600";
@@ -55,6 +56,7 @@ export default function AddJobForm({
 }) {
   const [text, setText] = useState("");
   const [urgent, setUrgent] = useState(false);
+  const [remindAt, setRemindAt] = useState(null);
   const [entered, setEntered] = useState(false);
   const [closing, setClosing] = useState(false);
   const inputRef = useRef(null);
@@ -98,10 +100,18 @@ export default function AddJobForm({
   const save = () => {
     const trimmed = text.trim();
     if (!trimmed) return;
-    const job = createJob({ id: nextId(jobs), text: trimmed, ward: stickyWard, bed: stickyBed, priority: urgent ? PRIORITY.URGENT : PRIORITY.ROUTINE });
+    const job = createJob({
+      id: nextId(jobs),
+      text: trimmed,
+      ward: stickyWard,
+      bed: stickyBed,
+      priority: urgent ? PRIORITY.URGENT : PRIORITY.ROUTINE,
+      remindAt,
+    });
     onAddJob(job);
     setText("");
     setUrgent(false);
+    setRemindAt(null);
     inputRef.current?.focus();
   };
 
@@ -161,6 +171,10 @@ export default function AddJobForm({
           placeholder="e.g. Chase repeat FBC"
           className="w-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl px-4 py-4 text-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-claude-500/30 focus:border-claude-500 mb-6"
         />
+
+        <div className="mb-6">
+          <ReminderPicker remindAt={remindAt} onChange={setRemindAt} />
+        </div>
 
         <p className={LABEL}>Urgency</p>
         <div className="flex gap-2">

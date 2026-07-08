@@ -81,8 +81,13 @@ export default function App() {
     }
   };
 
-  const finishHandover = ({ clear }) => {
-    if (clear) setJobs([]);
+  const finishHandover = ({ clear, handedOverIds = [] }) => {
+    if (clear && handedOverIds.length > 0) {
+      const remove = new Set(handedOverIds);
+      setJobs(jobs.filter((j) => !remove.has(j.id)));
+    } else if (clear) {
+      setJobs([]);
+    }
     Storage.clearShift();
     setShiftState(null);
     setView("hub");

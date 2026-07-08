@@ -1,35 +1,46 @@
-import { useRef, useState } from "react";
-import { PRIORITY, NO_WARD_LABEL } from "../utils/constants";
-import { bedsForWard } from "../utils/wardLayouts";
+import { useEffect, useRef, useState } from "react";
+import { PRIORITY } from "../utils/constants";
+import { formatJobTime } from "../utils/time";
+import { formatReminderLabel, reminderStatus, remindAtFromOffset, SNOOZE_MINUTES } from "../utils/reminders";
+import ReminderPicker from "./ReminderPicker";
 
-const CHIP = "shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors";
-const CHIP_ON = "bg-claude-600 text-white border-claude-600";
-const CHIP_OFF = "bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-800";
 const REVEAL_WIDTH = 76;
 
-// hideLocation suppresses the ward/bed badges when the surrounding screen
-// already fixes that context (a bed's own task list, an expanded row in the
-// master sheet) — editing is still reachable via the small Edit button
-// rather than tapping a now-hidden badge.
 export default function JobCard({
   job, editing, hideLocation = false,
-  onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onDelete,
-  recentWards, recentBeds, wardLayouts = {},
+  onToggleDone, onToggleEdit, onSetPriority, onSetText, onSetRemindAt, onDelete,
 }) {
   const urgent = job.priority === PRIORITY.URGENT;
-  const jobBeds = job.ward ? bedsForWard(job.ward, wardLayouts, recentBeds) : [];
 
-  // Swipe-left-to-reveal-delete, pointer events (not touch-only) so it
-  // works with a mouse too. Marking done already has a fast single tap;
-  // delete didn't, until now, without opening the editor first.
+  const [now, setNow] = useState(() => Date.now());
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const drag = useRef(null);
 
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const timeLabel = formatJobTime(job.createdAt, now);
+  const reminder = reminderStatus(job.remindAt, now);
+  const reminderLabel = job.remindAt && !job.done ? formatReminderLabel(job.remindAt, now) : null;
+
+  const swipeEnabled = !editing;
+
+  const toggleEdit = () => {
+    setDragX(0);
+    setDragging(false);
+    drag.current = null;
+    onToggleEdit(job.id);
+  };
+
   const onPointerDown = (e) => {
+    if (!swipeEnabled) return;
     drag.current = { startX: e.clientX, startY: e.clientY, baseX: dragX, locked: false, pointerId: e.pointerId };
   };
   const onPointerMove = (e) => {
+    if (!swipeEnabled) return;
     const d = drag.current;
     if (!d) return;
     const dx = e.clientX - d.startX;
@@ -43,6 +54,7 @@ export default function JobCard({
     setDragX(Math.max(-REVEAL_WIDTH, Math.min(0, d.baseX + dx)));
   };
   const endDrag = () => {
+    if (!swipeEnabled) return;
     const d = drag.current;
     if (!d) return;
     if (d.locked) setDragX((x) => (x < -REVEAL_WIDTH / 2 ? -REVEAL_WIDTH : 0));
@@ -51,7 +63,7 @@ export default function JobCard({
   };
 
   return (
-    <div className="relative rounded-xl overflow-hidden">
+    <div className={`relative rounded-xl ${editing ? "" : "overflow-hidden"}`}>
       {dragX < 0 && (
         <button
           onClick={() => onDelete(job.id)}
@@ -76,9 +88,13 @@ export default function JobCard({
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
-        style={{ transform: `translateX(${dragX}px)`, transition: dragging ? "none" : "transform 150ms ease-out", touchAction: "pan-y" }}
+        style={{ transform: `translateX(${dragX}px)`, transition: dragging ? "none" : "transform 150ms ease-out", touchAction: editing ? "auto" : "pan-y" }}
         className={`rounded-xl border px-3 py-2.5 bg-gray-50 dark:bg-gray-900/60 ${
-          urgent && !job.done ? "border-red-300 dark:border-red-900" : "border-gray-200 dark:border-gray-800"
+          reminder === "due" && !job.done
+            ? "border-claude-500 dark:border-claude-600 ring-1 ring-claude-500/30"
+            : urgent && !job.done
+              ? "border-red-300 dark:border-red-900"
+              : "border-gray-200 dark:border-gray-800"
         }`}
       >
         <div className="flex items-start gap-2.5">
@@ -92,82 +108,114 @@ export default function JobCard({
             {job.done && <span className="text-white text-[10px]">✓</span>}
           </button>
 
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 overflow-hidden">
             <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-              {!hideLocation && (
-                <button
-                  onClick={() => onToggleEdit(job.id)}
-                  className={job.ward
-                    ? "text-[10px] font-bold uppercase tracking-wide text-claude-800 dark:text-claude-400 bg-claude-100 dark:bg-claude-900/30 px-1.5 py-0.5 rounded"
-                    : "text-[10px] font-semibold text-gray-400 dark:text-gray-600 px-1.5 py-0.5 rounded border border-dashed border-gray-300 dark:border-gray-700"}
-                >
-                  {job.ward || "+ ward"}
-                </button>
-              )}
               {!hideLocation && job.ward && (
-                <button
-                  onClick={() => onToggleEdit(job.id)}
-                  className={job.bed
-                    ? "text-[10px] font-bold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-800 px-1.5 py-0.5 rounded"
-                    : "text-[10px] font-semibold text-gray-400 dark:text-gray-600 px-1.5 py-0.5 rounded border border-dashed border-gray-300 dark:border-gray-700"}
-                >
-                  {job.bed || "+ bed"}
-                </button>
+                <span className="text-[10px] font-bold uppercase tracking-wide text-claude-800 dark:text-claude-400 bg-claude-100 dark:bg-claude-900/30 px-1.5 py-0.5 rounded">
+                  {job.ward}
+                </span>
+              )}
+              {!hideLocation && job.bed && (
+                <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                  {job.bed}
+                </span>
               )}
               {urgent && !job.done && (
                 <span className="text-[10px] font-bold uppercase tracking-wide text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 rounded">
                   Urgent
                 </span>
               )}
-              {hideLocation && (
-                <button onClick={() => onToggleEdit(job.id)} className="ml-auto text-[10px] font-bold text-gray-400 dark:text-gray-600">
-                  Edit
+              {editing ? (
+                <button type="button" onClick={toggleEdit} className="ml-auto text-[10px] font-bold text-gray-400 dark:text-gray-600">
+                  Done
                 </button>
-              )}
+              ) : null}
             </div>
 
             {editing ? (
               <input
                 value={job.text}
                 onChange={(e) => onSetText(job.id, e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
+                onKeyDown={(e) => e.key === "Enter" && toggleEdit()}
                 className="w-full bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-claude-500/30 focus:border-claude-500"
               />
             ) : (
-              <p className={`text-sm leading-snug ${job.done ? "text-gray-400 dark:text-gray-600 line-through" : "text-gray-900 dark:text-gray-100"}`}>
-                {job.text}
+              <button
+                type="button"
+                onClick={toggleEdit}
+                onPointerDown={(e) => e.stopPropagation()}
+                className="w-full text-left active:opacity-80"
+                aria-label={`Edit job: ${job.text}`}
+              >
+                <p className={`text-sm leading-snug ${job.done ? "text-gray-400 dark:text-gray-600 line-through" : "text-gray-900 dark:text-gray-100"}`}>
+                  {job.text}
+                </p>
+                {timeLabel && (
+                  <p className="mt-0.5 text-[11px] tabular-nums text-gray-400 dark:text-gray-600">
+                    {timeLabel}
+                  </p>
+                )}
+                {reminderLabel && (
+                  <p className={`mt-0.5 text-[11px] font-bold tabular-nums ${
+                    reminder === "due"
+                      ? "text-claude-700 dark:text-claude-400"
+                      : "text-gray-500 dark:text-gray-500"
+                  }`}
+                  >
+                    {reminderLabel}
+                  </p>
+                )}
+              </button>
+            )}
+            {editing && timeLabel && (
+              <p className="mt-0.5 text-[11px] tabular-nums text-gray-400 dark:text-gray-600">
+                Added {timeLabel}
               </p>
             )}
 
             {editing && (
-              <div className="mt-2 flex flex-col gap-1.5">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {recentWards.map((w) => (
-                    <button key={w} onClick={() => onSetWard(job.id, w)} className={`${CHIP} ${job.ward === w ? CHIP_ON : CHIP_OFF}`}>
-                      {w}
-                    </button>
-                  ))}
-                  <button onClick={() => onSetWard(job.id, "")} className={`${CHIP} ${CHIP_OFF}`}>{NO_WARD_LABEL}</button>
+              <div
+                className="mt-2 min-w-0 max-w-full overflow-hidden flex flex-col gap-3"
+                onPointerDown={(e) => e.stopPropagation()}
+                onPointerMove={(e) => e.stopPropagation()}
+              >
+                <ReminderPicker
+                  remindAt={job.remindAt}
+                  onChange={(next) => onSetRemindAt(job.id, next)}
+                />
+                {job.remindAt && (
                   <button
-                    onClick={() => onSetPriority(job.id, urgent ? PRIORITY.ROUTINE : PRIORITY.URGENT)}
-                    className={`${CHIP} ${urgent ? "bg-red-600 text-white border-red-600" : CHIP_OFF}`}
+                    type="button"
+                    onClick={() => onSetRemindAt(job.id, remindAtFromOffset(SNOOZE_MINUTES))}
+                    className="self-start text-xs font-bold text-claude-700 dark:text-claude-400"
                   >
-                    {urgent ? "Urgent ✓" : "Mark urgent"}
+                    Snooze +{SNOOZE_MINUTES}m
                   </button>
-                  <button onClick={() => onDelete(job.id)} className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-red-600 dark:text-red-400">
-                    Delete
+                )}
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onSetPriority(job.id, PRIORITY.ROUTINE)}
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-colors ${
+                      !urgent
+                        ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950 border-gray-900 dark:border-white"
+                        : "bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-800"
+                    }`}
+                  >
+                    Routine
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onSetPriority(job.id, PRIORITY.URGENT)}
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-colors ${
+                      urgent
+                        ? "bg-red-600 text-white border-red-600"
+                        : "bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-800"
+                    }`}
+                  >
+                    Urgent
                   </button>
                 </div>
-                {job.ward && jobBeds.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {jobBeds.map((b) => (
-                      <button key={b} onClick={() => onSetBed(job.id, b)} className={`${CHIP} ${job.bed === b ? CHIP_ON : CHIP_OFF}`}>
-                        {b}
-                      </button>
-                    ))}
-                    <button onClick={() => onSetBed(job.id, "")} className={`${CHIP} ${CHIP_OFF}`}>No bed</button>
-                  </div>
-                )}
               </div>
             )}
           </div>

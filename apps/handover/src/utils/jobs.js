@@ -8,8 +8,8 @@ export function nextId(existingJobs) {
   return max + 1;
 }
 
-export function createJob({ id, text, ward, bed, priority }) {
-  return {
+export function createJob({ id, text, ward, bed, priority, remindAt }) {
+  const job = {
     id,
     text: text.trim(),
     ward: (ward || "").trim(),
@@ -18,6 +18,8 @@ export function createJob({ id, text, ward, bed, priority }) {
     done: false,
     createdAt: new Date().toISOString(),
   };
+  if (remindAt) job.remindAt = remindAt;
+  return job;
 }
 
 // Open jobs first (urgent before routine, oldest first within a tier), done jobs last.
