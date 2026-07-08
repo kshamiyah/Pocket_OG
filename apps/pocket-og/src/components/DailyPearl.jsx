@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { GUIDELINES } from "@pocket-og/guidelines";
 import { glColors } from "../data/glColors";
 import { pearlLinks } from "../data/pearls";
@@ -60,8 +61,11 @@ export default function DailyPearl({ pearl, unseen, onSeen, onDismiss, onNavigat
         >×</button>
       </div>
 
-      {/* Expanded modal */}
-      {open && (
+      {/* Expanded modal. Rendered through a portal: the landing column animates
+          with a transform, and iOS Safari keeps treating it as the containing
+          block for fixed descendants, which pinned this overlay inside the
+          column instead of the screen. */}
+      {open && createPortal(
         <div
           className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm"
           onClick={closeModal}
@@ -71,7 +75,7 @@ export default function DailyPearl({ pearl, unseen, onSeen, onDismiss, onNavigat
             onClick={e => e.stopPropagation()}
             style={{ fontFamily: "'Geist', -apple-system, BlinkMacSystemFont, sans-serif" }}
           >
-            <div className="p-6">
+            <div className="p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:pb-6">
               <div className="flex items-start justify-between gap-3 mb-4">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">💡</span>
@@ -122,7 +126,8 @@ export default function DailyPearl({ pearl, unseen, onSeen, onDismiss, onNavigat
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
