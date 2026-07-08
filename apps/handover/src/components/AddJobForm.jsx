@@ -51,6 +51,7 @@ export default function AddJobForm({
   onClose, jobs, onAddJob,
   stickyWard, setStickyWard, stickyBed, setStickyBed,
   recentWards, setRecentWards, recentBeds, setRecentBeds,
+  recentPhrases, setRecentPhrases,
   wardLayouts, onSetupWard,
 }) {
   const [text, setText] = useState("");
@@ -100,8 +101,14 @@ export default function AddJobForm({
     if (!trimmed) return;
     const job = createJob({ id: nextId(jobs), text: trimmed, ward: stickyWard, bed: stickyBed, priority: urgent ? PRIORITY.URGENT : PRIORITY.ROUTINE });
     onAddJob(job);
+    setRecentPhrases(pushMRU(recentPhrases, trimmed));
     setText("");
     setUrgent(false);
+    inputRef.current?.focus();
+  };
+
+  const fillPhrase = (phrase) => {
+    setText(phrase);
     inputRef.current?.focus();
   };
 
@@ -153,6 +160,15 @@ export default function AddJobForm({
         )}
 
         <p className={LABEL}>Job</p>
+        {recentPhrases.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-2">
+            {recentPhrases.map((phrase) => (
+              <button key={phrase} type="button" onClick={() => fillPhrase(phrase)} className={`${CHIP} ${CHIP_OFF}`}>
+                {phrase}
+              </button>
+            ))}
+          </div>
+        )}
         <input
           ref={inputRef}
           value={text}
