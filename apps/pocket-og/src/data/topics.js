@@ -68,6 +68,7 @@ export const TOPICS = {
         heading: "Don't miss",
         entries: [
           { type: "reader", id: "NG133", sectionId: "ng133-prevention", gl: "NG133", label: "Aspirin prophylaxis & risk stratification", sublabel: "NG133: prevention section" },
+          { type: "consent", id: "ASPIRIN", gl: "NG133", label: "Aspirin, counsel", sublabel: "Benefits, practical points & declining" },
           { type: "reader", id: "GL952", sectionId: "pet-postnatal-community", gl: "GL952", label: "Postnatal follow-up after discharge", sublabel: "GL952: community section" },
         ],
       },
@@ -223,6 +224,7 @@ export const TOPICS = {
         heading: "Don't miss",
         entries: [
           { type: "reader", id: "CG623", sectionId: "ep-patientinfo", gl: "CG623", label: "Patient information for MTX", sublabel: "CG623: what to tell her before treatment" },
+          { type: "consent", id: "ECTOPIC", gl: "CG623", label: "Ectopic pregnancy, counsel", sublabel: "Methotrexate / surgery / expectant: benefits, risks & alternatives" },
         ],
       },
     ],

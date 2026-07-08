@@ -24,6 +24,14 @@ import {
   HYSTEROSCOPY_BENEFITS,
   ACS_CONTEXT_OPTIONS, ACS_PATIENT_FACTORS,
   ACS_RISK_SECTIONS, ACS_BENEFITS, ACS_FAQ, ACS_PAGES,
+  VBAC_PATIENT_FACTORS, VBAC_RISK_SECTIONS, VBAC_COMPARISON_SECTIONS,
+  VBAC_BENEFITS, VBAC_PAGES, VBAC_FAQ,
+  ECV_PATIENT_FACTORS, ECV_RISK_SECTIONS, ECV_BENEFITS, ECV_PAGES, ECV_FAQ,
+  GBS_PATIENT_FACTORS, GBS_RISK_SECTIONS, GBS_BENEFITS, GBS_PAGES, GBS_FAQ,
+  ECTOPIC_CONTEXT_OPTIONS, ECTOPIC_PATIENT_FACTORS, ECTOPIC_RISK_SECTIONS,
+  ECTOPIC_BENEFITS, ECTOPIC_PAGES, ECTOPIC_FAQ,
+  LLETZ_PATIENT_FACTORS, LLETZ_RISK_SECTIONS, LLETZ_BENEFITS, LLETZ_PAGES, LLETZ_FAQ,
+  ASPIRIN_PATIENT_FACTORS, ASPIRIN_RISK_SECTIONS, ASPIRIN_BENEFITS, ASPIRIN_PAGES, ASPIRIN_FAQ,
   CERTAINTY,
 } from "../data/consent";
 
@@ -127,6 +135,80 @@ const PROCEDURE_CONFIG = {
     faq: ACS_FAQ,
     getInstrument: () => null,
     sourceLabel: "RCOG GTG (Stock 2022)",
+  },
+  VBAC: {
+    contextOptions: null,
+    patientFactors: VBAC_PATIENT_FACTORS,
+    getRiskSections: () => VBAC_RISK_SECTIONS,
+    getBenefits: () => VBAC_BENEFITS,
+    getOptions: () => VBAC_COMPARISON_SECTIONS,
+    benefitsNote: "Figures from RCOG GTG45 and its patient information; they describe planned VBAC with one previous lower-segment caesarean.",
+    optionsNote: "Planned VBAC compared with planned repeat caesarean (ERCS). Figures from RCOG GTG45; population averages, not specific to your situation.",
+    comparisonSections: null,
+    getPages: () => VBAC_PAGES,
+    faq: VBAC_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "RCOG GTG45",
+  },
+  ECV: {
+    contextOptions: null,
+    patientFactors: ECV_PATIENT_FACTORS,
+    getRiskSections: () => ECV_RISK_SECTIONS,
+    getBenefits: () => ECV_BENEFITS,
+    benefitsNote: "Figures from RCOG GTG20 and its patient information.",
+    comparisonSections: null,
+    getPages: () => ECV_PAGES,
+    faq: ECV_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "RCOG GTG20",
+  },
+  GBS: {
+    contextOptions: null,
+    patientFactors: GBS_PATIENT_FACTORS,
+    getRiskSections: () => GBS_RISK_SECTIONS,
+    getBenefits: () => GBS_BENEFITS,
+    benefitsNote: "Figures from RCOG GTG36 and the RCOG group B Streptococcus patient information.",
+    comparisonSections: null,
+    getPages: () => GBS_PAGES,
+    faq: GBS_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "RCOG GTG36",
+  },
+  ECTOPIC: {
+    contextOptions: ECTOPIC_CONTEXT_OPTIONS,
+    patientFactors: ECTOPIC_PATIENT_FACTORS,
+    getRiskSections: (ctx) => ECTOPIC_RISK_SECTIONS[ctx] ?? [],
+    getBenefits: (ctx) => ECTOPIC_BENEFITS[ctx] ?? [],
+    benefitsNote: "Methotrexate figures verbatim from CG623; surgical and expectant framing from NICE NG126. Your scan and blood results decide which routes are open.",
+    comparisonSections: null,
+    getPages: (ctx) => ECTOPIC_PAGES[ctx],
+    faq: ECTOPIC_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "CG623 · NICE NG126",
+  },
+  LLETZ: {
+    contextOptions: null,
+    patientFactors: LLETZ_PATIENT_FACTORS,
+    getRiskSections: () => LLETZ_RISK_SECTIONS,
+    getBenefits: () => LLETZ_BENEFITS,
+    benefitsNote: "Figures from NHSCSP colposcopy guidance; see the in-app Cervical Screening & Colposcopy guide.",
+    comparisonSections: null,
+    getPages: () => LLETZ_PAGES,
+    faq: LLETZ_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "NHSCSP20",
+  },
+  ASPIRIN: {
+    contextOptions: null,
+    patientFactors: ASPIRIN_PATIENT_FACTORS,
+    getRiskSections: () => ASPIRIN_RISK_SECTIONS,
+    getBenefits: () => ASPIRIN_BENEFITS,
+    benefitsNote: "NICE NG133 recommends aspirin for these risk profiles; it does not quote a single patient-facing effect size, so the benefits are described without invented numbers.",
+    comparisonSections: null,
+    getPages: () => ASPIRIN_PAGES,
+    faq: ASPIRIN_FAQ,
+    getInstrument: () => null,
+    sourceLabel: "NICE NG133",
   },
 };
 
@@ -537,7 +619,7 @@ function OptionsPage({ sections, note }) {
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.1em] mb-2">{section.heading}</p>
           <div className="rounded-xl overflow-hidden bg-white border border-gray-100">
             {section.type === "comparison" && section.risks.map(r => (
-              <ComparisonRiskRow key={r.id} risk={r} />
+              <ComparisonRiskRow key={r.id} risk={r} labels={section.labels} />
             ))}
             {section.type === "simple" && section.items.map(item => (
               <div key={item} className="flex items-center gap-3 py-3 px-4 border-b border-gray-100 last:border-0">
@@ -698,19 +780,28 @@ function FreqRiskRow({ risk }) {
   );
 }
 
-function ComparisonRiskRow({ risk }) {
+// Two-option comparison row. Rows use either the original CS-vs-vaginal fields
+// (cs / vaginal / cs_higher) or the generic ones (a / b / a_higher); the column
+// labels come from the section's `labels` (default CS / VB).
+function ComparisonRiskRow({ risk, labels }) {
   const [expanded, setExpanded] = useState(false);
+  const aLabel   = labels?.a ?? "CS";
+  const bLabel   = labels?.b ?? "VB";
+  const aValue   = risk.a ?? risk.cs;
+  const bValue   = risk.b ?? risk.vaginal;
+  const aHigher  = risk.a_higher ?? risk.cs_higher;
+  const tidy = (v) => v.replace("About ", "").replace(" on average", "");
   return (
     <div className={`border-b border-gray-100 last:border-0 ${expanded ? "bg-gray-50/40" : ""}`}>
       <button onClick={() => setExpanded(e => !e)} className="w-full flex items-start gap-3 py-3.5 px-4 text-left">
         <span className="w-2 h-2 rounded-full shrink-0 mt-1.5 bg-gray-200" />
         <p className="flex-1 min-w-0 text-[14px] text-gray-900 font-medium leading-snug pr-2">{risk.name}</p>
         <div className="shrink-0 text-right max-w-[110px] space-y-0.5">
-          <p className={`text-[11px] font-bold tabular-nums leading-snug ${risk.cs_higher ? "text-rose-500" : "text-teal-500"}`}>
-            CS {risk.cs.replace("About ", "").replace(" on average", "")}
+          <p className={`text-[11px] font-bold tabular-nums leading-snug ${aHigher ? "text-rose-500" : "text-teal-500"}`}>
+            {aLabel} {tidy(aValue)}
           </p>
-          <p className={`text-[11px] font-semibold tabular-nums leading-snug ${risk.cs_higher ? "text-teal-400" : "text-rose-400"}`}>
-            VB {risk.vaginal.replace("About ", "").replace(" on average", "")}
+          <p className={`text-[11px] font-semibold tabular-nums leading-snug ${aHigher ? "text-teal-400" : "text-rose-400"}`}>
+            {bLabel} {tidy(bValue)}
           </p>
         </div>
       </button>

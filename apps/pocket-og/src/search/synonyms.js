@@ -3,6 +3,12 @@ export const SYNONYMS = {
   "counsel": ["consent","counselling","risks","benefits","patient information"],
   "counselling": ["consent","counsel","risks","benefits","patient information"],
   "consent": ["counsel","counselling","risks","patient information"],
+  "vbac": ["birth after caesarean","vaginal birth after caesarean","ercs","uterine rupture","gtg45","counsel"],
+  "birth after caesarean": ["vbac","ercs","repeat caesarean","uterine rupture","gtg45"],
+  "ercs": ["vbac","repeat caesarean","elective caesarean","birth after caesarean"],
+  "ecv": ["external cephalic version","breech","turning baby","tocolysis","gtg20"],
+  "external cephalic version": ["ecv","breech","turning baby","gtg20"],
+  "breech": ["ecv","external cephalic version","caesarean","vaginal breech birth","gtg20"],
 
   // Fetal monitoring / CTG (NICE NG229)
   "ctg": ["cardiotocography","cardiotocograph","fetal monitoring","fetal heart rate","fhr","efm","ng229","pathological ctg","suspicious ctg"],

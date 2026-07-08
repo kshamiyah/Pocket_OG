@@ -4,6 +4,20 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.10.0",
+    date: "08/07/2026",
+    title: "Six new Counsel topics",
+    changes: [
+      { tag: "new", text: "Birth after caesarean (VBAC): success rates, uterine rupture and the full side-by-side comparison of planned VBAC vs planned repeat caesarean, from RCOG GTG45." },
+      { tag: "new", text: "Ectopic pregnancy: walk through methotrexate, surgery or expectant management, with the eligibility criteria, success rates and follow-up from CG623 and NICE NG126." },
+      { tag: "new", text: "External cephalic version (ECV): success rates, what the procedure involves, and the breech alternatives if it fails, from RCOG GTG20." },
+      { tag: "new", text: "GBS antibiotics in labour: the 1 in 400 vs 1 in 4,000 numbers, practicalities of the drip, and what declining means, from RCOG GTG36." },
+      { tag: "new", text: "LLETZ: what treatment involves, the ~95% cure rate, and the preterm birth conversation for future pregnancies, from NHSCSP guidance." },
+      { tag: "new", text: "Aspirin for pre-eclampsia prevention: NG133 risk factors as tappable chips, benefits, practical points and alternatives." },
+      { tag: "improved", text: "Ectopic and pre-eclampsia topic cards now link to their Counsel entries." },
+    ],
+  },
+  {
     version: "1.9.0",
     date: "08/07/2026",
     title: "Consent becomes Counsel",
