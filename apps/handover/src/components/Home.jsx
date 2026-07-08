@@ -249,6 +249,7 @@ export default function Home({
           <WardDrill
             listBottomPad={LIST_BOTTOM_PAD}
             wardNames={wardNames} onAddJob={addJob} onSetupWard={onSetupWard}
+            recentPhrases={recentPhrases} setRecentPhrases={setRecentPhrases}
             selectedWard={selectedWard} setSelectedWard={setSelectedWard}
             selectedBed={selectedBed} setSelectedBed={setSelectedBed}
             bedSelected={bedSelected} setBedSelected={setBedSelected}
@@ -256,7 +257,11 @@ export default function Home({
           />
       )}
       {mode === "byward" && density === "expand" && (
-          <MasterSheet listBottomPad={LIST_BOTTOM_PAD} wardNames={wardNames} onAddJob={addJob} {...sharedProps} />
+          <MasterSheet
+            listBottomPad={LIST_BOTTOM_PAD} wardNames={wardNames} onAddJob={addJob}
+            recentPhrases={recentPhrases} setRecentPhrases={setRecentPhrases}
+            {...sharedProps}
+          />
       )}
       {mode === "all" && (
           <AllJobsList listBottomPad={LIST_BOTTOM_PAD} {...sharedProps} />

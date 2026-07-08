@@ -1,11 +1,12 @@
 import { useRef, useState } from "react";
 import { PRIORITY } from "../utils/constants";
 import { createJob, nextId } from "../utils/jobs";
+import { pushMRU } from "../utils/storage";
 
 // Minimal add row for when ward/bed are already fixed by the surrounding
 // screen (a bed's own task list, an expanded bed row in the master sheet) —
 // no location fields, just the task and its priority.
-export default function QuickAddRow({ ward, bed, jobs, onAddJob }) {
+export default function QuickAddRow({ ward, bed, jobs, onAddJob, recentPhrases, setRecentPhrases }) {
   const [text, setText] = useState("");
   const [urgent, setUrgent] = useState(false);
   const inputRef = useRef(null);
@@ -15,6 +16,7 @@ export default function QuickAddRow({ ward, bed, jobs, onAddJob }) {
     if (!trimmed) return;
     const job = createJob({ id: nextId(jobs), text: trimmed, ward, bed, priority: urgent ? PRIORITY.URGENT : PRIORITY.ROUTINE });
     onAddJob(job);
+    if (setRecentPhrases) setRecentPhrases(pushMRU(recentPhrases || [], trimmed));
     setText("");
     setUrgent(false);
     inputRef.current?.focus();

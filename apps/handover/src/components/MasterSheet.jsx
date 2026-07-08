@@ -34,12 +34,12 @@ function BedTileButton({ label, open, tone, counts, onClick }) {
   );
 }
 
-function BedJobPanel({ ward, bed, jobs, jobCount, onAddJob, renderCard }) {
+function BedJobPanel({ ward, bed, jobs, jobCount, onAddJob, recentPhrases, setRecentPhrases, renderCard }) {
   const label = bedLabel(bed);
   return (
     <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-3 py-3 flex flex-col gap-2">
       <p className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">{label}</p>
-      <QuickAddRow ward={ward} bed={bed || ""} jobs={jobs} onAddJob={onAddJob} />
+      <QuickAddRow ward={ward} bed={bed || ""} jobs={jobs} onAddJob={onAddJob} recentPhrases={recentPhrases} setRecentPhrases={setRecentPhrases} />
       {jobCount === 0 && <p className="text-xs text-gray-400 dark:text-gray-600">No jobs here yet.</p>}
       {renderCard}
     </div>
@@ -51,7 +51,7 @@ function BedJobPanel({ ward, bed, jobs, jobCount, onAddJob, renderCard }) {
 export default function MasterSheet({
   jobs, wardNames, wardLayouts, recentWards, recentBeds,
   editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onSetRemindAt, onDelete,
-  onAddJob, listBottomPad,
+  onAddJob, recentPhrases, setRecentPhrases, listBottomPad,
 }) {
   const [openWards, setOpenWards] = useState(new Set());
   const [openBeds, setOpenBeds] = useState(new Set());
@@ -155,6 +155,8 @@ export default function MasterSheet({
                             jobs={jobs}
                             jobCount={b.jobs.length}
                             onAddJob={onAddJob}
+                            recentPhrases={recentPhrases}
+                            setRecentPhrases={setRecentPhrases}
                             renderCard={b.jobs.map((job) => renderCard(job, true))}
                           />
                         ))}
