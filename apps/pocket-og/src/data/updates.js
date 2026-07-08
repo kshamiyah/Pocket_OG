@@ -9,7 +9,8 @@ export const UPDATES = [
     title: "Consent becomes Counsel",
     changes: [
       { tag: "new", text: "The Consent tab is now Counsel: a walkthrough for counselling a patient about a procedure or decision, covering what it involves, benefits, risks, alternatives and common questions." },
-      { tag: "new", text: "Elective caesarean pilots the new shape: a step-by-step explanation of the operation (before, during and after), a Benefits tab and an Options tab comparing planned caesarean with planned vaginal birth (NICE NG192 Appendix A), and Decline reframed as Alternatives (planned vaginal birth, VBAC, ECV)." },
+      { tag: "new", text: "Elective caesarean gets the fullest treatment: a step-by-step explanation of the operation (before, during and after), a Benefits tab and an Options tab comparing planned caesarean with planned vaginal birth (NICE NG192 Appendix A), and Decline reframed as Alternatives (planned vaginal birth, VBAC, ECV)." },
+      { tag: "new", text: "Every Counsel entry now uses the counselling shape: emergency caesarean, instrumental birth, all four induction methods, surgical and medical miscarriage, laparoscopy, hysteroscopy and antenatal corticosteroids each gain a Benefits tab and an Alternatives tab in place of Decline." },
       { tag: "improved", text: "Searching \"counsel\" or \"counselling\" now finds these pages; \"consent\" still works." },
       { tag: "fixed", text: "Pearl of the day no longer opens trapped inside the home column on iPhone: the popup now dims the whole screen, sits as a proper bottom sheet and clears the home indicator." },
     ],

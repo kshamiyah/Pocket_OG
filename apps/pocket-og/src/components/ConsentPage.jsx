@@ -8,14 +8,20 @@ import {
   FREQ,
   CS_CONTEXT_OPTIONS, CS_PATIENT_FACTORS, CS_RISK_SECTIONS,
   CS_COMPARISON_SECTIONS, CS_PP_RISK_SECTIONS, CS_FAQ, CS_PAGES,
-  CS_BENEFITS_ELECTIVE,
+  CS_BENEFITS_ELECTIVE, CS_BENEFITS_EMERGENCY,
   OVD_CONTEXT_OPTIONS, OVD_PATIENT_FACTORS, OVD_RISK_SECTIONS, OVD_FAQ, OVD_PAGES,
+  OVD_BENEFITS,
   IOL_CONTEXT_OPTIONS, IOL_PATIENT_FACTORS, IOL_RISK_SECTIONS, IOL_FAQ, IOL_PAGES,
+  IOL_BENEFITS,
   SURG_MISC_PATIENT_FACTORS, SURG_MISC_RISK_SECTIONS, SURG_MISC_FAQ, SURG_MISC_PAGES,
+  SURG_MISC_BENEFITS,
   MED_MISC_PATIENT_FACTORS, MED_MISC_RISK_SECTIONS, MED_MISC_FAQ, MED_MISC_PAGES,
+  MED_MISC_BENEFITS,
   LAPAROSCOPY_PATIENT_FACTORS, LAPAROSCOPY_RISK_SECTIONS, LAPAROSCOPY_FAQ, LAPAROSCOPY_PAGES,
+  LAPAROSCOPY_BENEFITS,
   HYSTEROSCOPY_CONTEXT_OPTIONS, HYSTEROSCOPY_PATIENT_FACTORS,
   HYSTEROSCOPY_RISK_SECTIONS, HYSTEROSCOPY_FAQ, HYSTEROSCOPY_PAGES,
+  HYSTEROSCOPY_BENEFITS,
   ACS_CONTEXT_OPTIONS, ACS_PATIENT_FACTORS,
   ACS_RISK_SECTIONS, ACS_BENEFITS, ACS_FAQ, ACS_PAGES,
   CERTAINTY,
@@ -29,11 +35,14 @@ const PROCEDURE_CONFIG = {
     getRiskSections: (_ctx, factors) =>
       factors.has("placenta_praevia") ? CS_PP_RISK_SECTIONS : CS_RISK_SECTIONS,
     comparisonSections: CS_COMPARISON_SECTIONS,
-    // Elective CS pilots the counsel shape: Benefits and Options become tabs,
-    // and the comparison table moves out of the Risks footnote into Options.
-    getBenefits: (ctx) => (ctx === "elective" ? CS_BENEFITS_ELECTIVE : []),
+    // Elective CS additionally gets an Options tab: the comparison table moves
+    // out of the Risks footnote into its own tab.
+    getBenefits: (ctx) => (ctx === "elective" ? CS_BENEFITS_ELECTIVE : CS_BENEFITS_EMERGENCY),
     getOptions: (ctx) => (ctx === "elective" ? CS_COMPARISON_SECTIONS : null),
-    benefitsNote: "Population averages for planned caesarean compared with planned vaginal birth, from NICE NG192 Appendix A (2021). Tap any row for the detail.",
+    benefitsNote: (ctx) =>
+      ctx === "elective"
+        ? "Population averages for planned caesarean compared with planned vaginal birth, from NICE NG192 Appendix A (2021). Tap any row for the detail."
+        : null,
     optionsNote: "Planned caesarean compared with planned vaginal birth. Population averages from NICE NG192 Appendix A (2021), not specific to your situation.",
     getPages: (ctx) => CS_PAGES[ctx],
     faq: CS_FAQ,
@@ -44,6 +53,7 @@ const PROCEDURE_CONFIG = {
     contextOptions: OVD_CONTEXT_OPTIONS,
     patientFactors: OVD_PATIENT_FACTORS,
     getRiskSections: () => OVD_RISK_SECTIONS,
+    getBenefits: () => OVD_BENEFITS,
     comparisonSections: null,
     getPages: (ctx) => OVD_PAGES[ctx],
     faq: OVD_FAQ,
@@ -55,6 +65,7 @@ const PROCEDURE_CONFIG = {
     patientFactors: IOL_PATIENT_FACTORS,
     getRiskSections: (_ctx, factors) =>
       IOL_RISK_SECTIONS.filter(s => !s.factorOnly || factors.has(s.factorOnly)),
+    getBenefits: (ctx) => IOL_BENEFITS[ctx] ?? [],
     comparisonSections: null,
     getPages: (ctx) => IOL_PAGES[ctx],
     faq: IOL_FAQ,
@@ -65,6 +76,7 @@ const PROCEDURE_CONFIG = {
     contextOptions: null,
     patientFactors: SURG_MISC_PATIENT_FACTORS,
     getRiskSections: () => SURG_MISC_RISK_SECTIONS,
+    getBenefits: () => SURG_MISC_BENEFITS,
     comparisonSections: null,
     getPages: () => SURG_MISC_PAGES,
     faq: SURG_MISC_FAQ,
@@ -75,6 +87,7 @@ const PROCEDURE_CONFIG = {
     contextOptions: null,
     patientFactors: MED_MISC_PATIENT_FACTORS,
     getRiskSections: () => MED_MISC_RISK_SECTIONS,
+    getBenefits: () => MED_MISC_BENEFITS,
     comparisonSections: null,
     getPages: () => MED_MISC_PAGES,
     faq: MED_MISC_FAQ,
@@ -85,6 +98,7 @@ const PROCEDURE_CONFIG = {
     contextOptions: null,
     patientFactors: LAPAROSCOPY_PATIENT_FACTORS,
     getRiskSections: () => LAPAROSCOPY_RISK_SECTIONS,
+    getBenefits: () => LAPAROSCOPY_BENEFITS,
     comparisonSections: null,
     getPages: () => LAPAROSCOPY_PAGES,
     faq: LAPAROSCOPY_FAQ,
@@ -95,6 +109,7 @@ const PROCEDURE_CONFIG = {
     contextOptions: HYSTEROSCOPY_CONTEXT_OPTIONS,
     patientFactors: HYSTEROSCOPY_PATIENT_FACTORS,
     getRiskSections: () => HYSTEROSCOPY_RISK_SECTIONS,
+    getBenefits: (ctx) => HYSTEROSCOPY_BENEFITS[ctx] ?? [],
     comparisonSections: null,
     getPages: (ctx) => HYSTEROSCOPY_PAGES[ctx],
     faq: HYSTEROSCOPY_FAQ,
@@ -833,6 +848,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
   const optionsSections  = cfg.getOptions?.(context) ?? null;
   // When the comparison table has its own Options tab, drop it from Risks.
   const comparisonSections = optionsSections ? null : (cfg.comparisonSections ?? null);
+  const benefitsNote     = typeof cfg.benefitsNote === "function" ? cfg.benefitsNote(context) : cfg.benefitsNote;
 
   const tabs = buildTabs({
     hasBenefits: benefits.length > 0,
@@ -927,7 +943,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
           {activeTab === "what"         && <WhatPage         pages={pages} />}
           {activeTab === "why"          && <WhyPage          pages={pages} />}
           {activeTab === "options"      && <OptionsPage      sections={optionsSections} note={cfg.optionsNote} />}
-          {activeTab === "benefits"     && <BenefitsPage     benefits={benefits} note={cfg.benefitsNote} />}
+          {activeTab === "benefits"     && <BenefitsPage     benefits={benefits} note={benefitsNote} />}
           {activeTab === "risks"        && <RisksPage        sections={riskSections} comparisonSections={comparisonSections} instrument={instrument ?? context} activeFactors={activeFactors} />}
           {activeTab === "alternatives" && <AlternativesPage pages={pages} />}
           {activeTab === "decline"      && <DeclinePage      pages={pages} />}
