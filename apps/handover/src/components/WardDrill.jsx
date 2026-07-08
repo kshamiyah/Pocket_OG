@@ -29,7 +29,7 @@ function CountBadge({ open, urgent }) {
 export default function WardDrill({
   jobs, wardNames, wardLayouts, recentWards, recentBeds,
   editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onSetRemindAt, onDelete,
-  onAddJob, onSetupWard,
+  onAddJob, onSetupWard, recentPhrases, setRecentPhrases,
   selectedWard, setSelectedWard, selectedBed, setSelectedBed, bedSelected, setBedSelected,
   listBottomPad,
 }) {
@@ -52,7 +52,7 @@ export default function WardDrill({
           ← Wards
         </button>
         <h2 className="text-lg font-extrabold text-gray-900 dark:text-white -mt-1">{NO_WARD_LABEL}</h2>
-        <QuickAddRow ward="" bed="" jobs={jobs} onAddJob={onAddJob} />
+        <QuickAddRow ward="" bed="" jobs={jobs} onAddJob={onAddJob} recentPhrases={recentPhrases} setRecentPhrases={setRecentPhrases} />
         <div className="flex flex-col gap-2">
           {noWard.jobs.length === 0 && <p className="text-sm text-gray-400 dark:text-gray-600">No jobs here yet.</p>}
           {noWard.jobs.map(renderCard)}
@@ -72,7 +72,7 @@ export default function WardDrill({
         <h2 className="text-lg font-extrabold text-gray-900 dark:text-white -mt-1">
           {selectedBed === null ? "General" : selectedBed}
         </h2>
-        <QuickAddRow ward={selectedWard} bed={selectedBed || ""} jobs={jobs} onAddJob={onAddJob} />
+        <QuickAddRow ward={selectedWard} bed={selectedBed || ""} jobs={jobs} onAddJob={onAddJob} recentPhrases={recentPhrases} setRecentPhrases={setRecentPhrases} />
         <div className="flex flex-col gap-2">
           {bedData.jobs.length === 0 && <p className="text-sm text-gray-400 dark:text-gray-600">No jobs here yet.</p>}
           {bedData.jobs.map(renderCard)}
