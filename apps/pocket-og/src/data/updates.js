@@ -4,6 +4,14 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.11.0",
+    date: "08/07/2026",
+    title: "Dark mode",
+    changes: [
+      { tag: "new", text: "Dark mode across the whole app. Tap the moon in the top-left of the home screen to switch; your choice is remembered on this device." },
+    ],
+  },
+  {
     version: "1.10.1",
     date: "08/07/2026",
     title: "Counsel everywhere",

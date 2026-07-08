@@ -179,6 +179,18 @@ export default function App() {
   const [rxNavKey, setRxNavKey] = useState(0);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [updatesOpen, setUpdatesOpen] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    try { return localStorage.getItem("pocketog_theme_v1") ?? "light"; } catch { return "light"; }
+  });
+
+  // Dark mode: a `dark` class on <html> drives the overrides in index.css,
+  // and the PWA status bar follows via the theme-color meta tag.
+  useEffect(() => {
+    const dark = theme === "dark";
+    document.documentElement.classList.toggle("dark", dark);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", dark ? "#111827" : "#ffffff");
+    try { localStorage.setItem("pocketog_theme_v1", theme); } catch { /* best effort */ }
+  }, [theme]);
   const [updatesUnseen, setUpdatesUnseen] = useState(() => hasUnseenUpdates());
   const [hintIndex, setHintIndex] = useState(0);
   const inputRef = useRef(null);
@@ -338,6 +350,7 @@ export default function App() {
         html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
+        html.dark ::-webkit-scrollbar-thumb { background: #334155; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         :focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; border-radius: 4px; }
@@ -358,6 +371,27 @@ export default function App() {
           <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
           </svg>
+        </button>
+      )}
+
+      {/* Theme toggle — top-left on the search landing screen, mirroring About */}
+      {activeTab === "search" && !hasQuery && (
+        <button
+          type="button"
+          onClick={() => setTheme(t => (t === "dark" ? "light" : "dark"))}
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          className="fixed left-4 z-30 w-8 h-8 flex items-center justify-center bg-white/95 backdrop-blur border border-gray-200 shadow-sm rounded-full text-gray-400 hover:text-gray-600 hover:shadow-md active:scale-95 transition-all"
+          style={{ top: "max(1rem, env(safe-area-inset-top))" }}
+        >
+          {theme === "dark" ? (
+            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1.5M12 19.5V21M4.22 4.22l1.06 1.06M18.72 18.72l1.06 1.06M3 12h1.5M19.5 12H21M4.22 19.78l1.06-1.06M18.72 5.28l1.06-1.06M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+            </svg>
+          ) : (
+            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 15A9.72 9.72 0 0118 15.75c-5.39 0-9.75-4.36-9.75-9.75 0-1.33.27-2.6.75-3.75A9.75 9.75 0 003 11.25C3 16.64 7.36 21 12.75 21a9.75 9.75 0 009-6z" />
+            </svg>
+          )}
         </button>
       )}
 
