@@ -175,9 +175,11 @@ export default function JobCard({
 
             {editing && (
               <div
-                className="mt-2 min-w-0 max-w-full overflow-hidden flex flex-col gap-3"
+                className="mt-2 min-w-0 max-w-full overflow-hidden flex flex-col gap-3 relative z-10"
                 onPointerDown={(e) => e.stopPropagation()}
+                onPointerUp={(e) => e.stopPropagation()}
                 onPointerMove={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
               >
                 <ReminderPicker
                   remindAt={job.remindAt}

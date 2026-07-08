@@ -7,9 +7,15 @@ Standalone shift job-list PWA for ward handover. Capture jobs by ward and bed, h
 - **Onboarding:** welcome, profile (name + role), optional ward setup before first shift
 - **Shift flow:** home hub (take over / start shift), job list with ward drill-down and bed board
 - **Ward layouts:** bays, side rooms, collapsible sections; configurable in ward setup
-- **Handover:** QR encode/decode (ward, bed, and task text all travel on the wire verbatim, nothing is auto-stripped, so keep task text non-identifying yourself)
-- **Dark mode:** manual toggle (bottom-left FAB); preference stored in `handover_theme_v1`
+- **Jobs:** tap to edit; timestamps (clock + relative age); routine/urgent; swipe to delete
+- **Reminders:** +30m / +1h / +2h presets or custom time (hour + minute); due banner and notification centre (bell icon)
+- **Handover:** pick which jobs to pass on; filter by ward; QR or share link; tap QR to expand; optional keep-copy (removes only handed-over jobs)
+- **Dark mode:** manual toggle in the menu (···); preference stored in `handover_theme_v1`
 - **Offline-first:** all data in `localStorage`; installable PWA
+
+## Privacy
+
+Handover payloads are **not encrypted**. Ward, bed, and task text travel on the wire verbatim (base64 in the QR or link). Keep job text to **non-identifying clinical shorthand** (no names, DOB, or hospital numbers). Prefer showing the QR in person rather than sharing the link in chat.
 
 ## Commands
 

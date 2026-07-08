@@ -13,24 +13,21 @@ const LABEL = "text-xs font-bold uppercase tracking-widest text-gray-400 dark:te
 const SELECT = "min-w-0 w-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-3 py-3 text-base text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-claude-500/30 focus:border-claude-500";
 
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
-const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, "0"));
+const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
 
 function defaultTimeValue() {
   const d = new Date();
-  d.setMinutes(Math.ceil(d.getMinutes() / 5) * 5 + 30);
-  if (d.getMinutes() >= 60) {
-    d.setHours(d.getHours() + 1);
-    d.setMinutes(d.getMinutes() - 60);
-  }
+  d.setMinutes(d.getMinutes() + 30);
   return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
 }
 
 function splitTime(hhmm) {
   const [h, m] = (hhmm || defaultTimeValue()).split(":");
   const hour = HOURS.includes(h) ? h : "12";
-  const minute = MINUTES.includes(m) ? m : MINUTES.reduce((best, cand) => (
-    Math.abs(Number(cand) - Number(m)) < Math.abs(Number(best) - Number(m)) ? cand : best
-  ), "00");
+  const minuteNum = Number(m);
+  const minute = Number.isFinite(minuteNum) && minuteNum >= 0 && minuteNum < 60
+    ? String(minuteNum).padStart(2, "0")
+    : "00";
   return { hour, minute };
 }
 
@@ -67,8 +64,13 @@ export default function ReminderPicker({ remindAt, onChange }) {
 
   const stopSwipe = (e) => e.stopPropagation();
 
+  const stopPointer = {
+    onPointerDown: stopSwipe,
+    onPointerUp: stopSwipe,
+  };
+
   return (
-    <div className="min-w-0 max-w-full overflow-hidden" onPointerDown={stopSwipe} onPointerMove={stopSwipe}>
+    <div className="min-w-0 max-w-full overflow-hidden relative z-10" {...stopPointer}>
       <p className={LABEL}>Reminder</p>
       <div className="grid grid-cols-3 gap-1.5 mb-1.5">
         {REMINDER_OFFSETS.map(({ label, minutes }) => (
@@ -101,14 +103,18 @@ export default function ReminderPicker({ remindAt, onChange }) {
         )}
       </div>
       {timeOpen && (
-        <div className="mt-2 min-w-0 max-w-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-3 flex flex-col gap-2">
+        <div
+          className="mt-2 min-w-0 max-w-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-3 flex flex-col gap-2"
+          {...stopPointer}
+        >
           <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Remind at</label>
-          <div className="grid grid-cols-2 gap-2 min-w-0">
+          <div className="grid grid-cols-2 gap-2 min-w-0" {...stopPointer}>
             <select
               value={hour}
               onChange={(e) => setHour(e.target.value)}
               className={SELECT}
               aria-label="Reminder hour"
+              {...stopPointer}
             >
               {HOURS.map((h) => (
                 <option key={h} value={h}>{h}</option>
@@ -119,6 +125,7 @@ export default function ReminderPicker({ remindAt, onChange }) {
               onChange={(e) => setMinute(e.target.value)}
               className={SELECT}
               aria-label="Reminder minute"
+              {...stopPointer}
             >
               {MINUTES.map((m) => (
                 <option key={m} value={m}>{m}</option>
@@ -129,15 +136,17 @@ export default function ReminderPicker({ remindAt, onChange }) {
           <div className="grid grid-cols-2 gap-2 min-w-0">
             <button
               type="button"
-              onClick={() => setTimeOpen(false)}
-              className="min-w-0 py-2.5 rounded-xl text-sm font-bold text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800"
+              onClick={(e) => { e.stopPropagation(); setTimeOpen(false); }}
+              className="min-w-0 py-2.5 rounded-xl text-sm font-bold text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-800 touch-manipulation"
+              {...stopPointer}
             >
               Cancel
             </button>
             <button
               type="button"
-              onClick={confirmTime}
-              className="min-w-0 py-2.5 rounded-xl text-sm font-bold bg-claude-600 text-white"
+              onClick={(e) => { e.stopPropagation(); confirmTime(); }}
+              className="min-w-0 py-2.5 rounded-xl text-sm font-bold bg-claude-600 text-white touch-manipulation"
+              {...stopPointer}
             >
               Set reminder
             </button>
