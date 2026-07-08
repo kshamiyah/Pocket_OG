@@ -860,7 +860,8 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
   const canNext = currentIdx < tabs.length - 1;
 
   return (
-    <div className="min-h-screen pb-28">
+    // Bottom padding clears the tab bar + pager bar + iOS safe area.
+    <div className="min-h-screen" style={{ paddingBottom: "calc(9.5rem + env(safe-area-inset-bottom, 0px))" }}>
       <div className="max-w-lg mx-auto">
 
         {/* Sticky header */}
@@ -951,9 +952,14 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
         </div>
       </div>
 
-      {/* Prev / Next bar */}
-      <div className="fixed bottom-16 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-gray-100">
-        <div className="max-w-lg mx-auto flex items-center gap-3 px-5 py-3">
+      {/* Prev / Next bar. Anchored above the tab bar; on iPhone the tab bar is
+          taller than 4rem because of the home-indicator safe area, so the
+          offset must include it or the nav covers the Next button. */}
+      <div
+        className="fixed inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-gray-100"
+        style={{ bottom: "calc(4rem + env(safe-area-inset-bottom, 0px))" }}
+      >
+        <div className="max-w-lg mx-auto flex items-center gap-3 px-5 py-2.5">
           <button
             onClick={() => canPrev && setActiveTab(tabs[currentIdx - 1].id)}
             disabled={!canPrev}

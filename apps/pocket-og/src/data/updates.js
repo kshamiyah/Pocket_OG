@@ -13,6 +13,7 @@ export const UPDATES = [
       { tag: "new", text: "Every Counsel entry now uses the counselling shape: emergency caesarean, instrumental birth, all four induction methods, surgical and medical miscarriage, laparoscopy, hysteroscopy and antenatal corticosteroids each gain a Benefits tab and an Alternatives tab in place of Decline." },
       { tag: "improved", text: "Searching \"counsel\" or \"counselling\" now finds these pages; \"consent\" still works." },
       { tag: "fixed", text: "Pearl of the day no longer opens trapped inside the home column on iPhone: the popup now dims the whole screen, sits as a proper bottom sheet and clears the home indicator." },
+      { tag: "fixed", text: "The Back/Next bar in Counsel walkthroughs no longer hides behind the iPhone tab bar; it now sits fully visible above it and pages leave room for it when scrolled to the bottom." },
     ],
   },
   {
