@@ -7,7 +7,7 @@ const FEATURES = [
   { label: "Search", detail: "Ask a clinical question across summarised guideline content" },
   { label: "Guides", detail: "Browse RCOG, NICE, and local trust guidelines" },
   { label: "Flow", detail: "Step through interactive clinical pathways" },
-  { label: "Consent", detail: "Consent prompts and procedure summaries" },
+  { label: "Counsel", detail: "Counselling walkthroughs: benefits, risks and alternatives" },
   { label: "Calc", detail: "Ward calculators and dosing tools" },
   { label: "Rx", detail: "Prescribing reference for common O&G scenarios" },
 ];

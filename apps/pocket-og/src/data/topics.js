@@ -159,9 +159,9 @@ export const TOPICS = {
         ],
       },
       {
-        heading: "Consent",
+        heading: "Counsel",
         entries: [
-          { type: "consent", id: "IOL", gl: "GL861", label: "Induction of labour, consent", sublabel: "Risks by method" },
+          { type: "consent", id: "IOL", gl: "GL861", label: "Induction of labour, counsel", sublabel: "Risks by method" },
         ],
       },
       {
@@ -311,9 +311,9 @@ export const TOPICS = {
         ],
       },
       {
-        heading: "Consent",
+        heading: "Counsel",
         entries: [
-          { type: "consent", id: "ACS", gl: "NG25", label: "Antenatal corticosteroids, consent", sublabel: "Benefits & harms by gestation band" },
+          { type: "consent", id: "ACS", gl: "NG25", label: "Antenatal corticosteroids, counsel", sublabel: "Benefits & harms by gestation band" },
         ],
       },
       {

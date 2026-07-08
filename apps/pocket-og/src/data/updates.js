@@ -4,6 +4,14 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.10.1",
+    date: "08/07/2026",
+    title: "Counsel everywhere",
+    changes: [
+      { tag: "improved", text: "The Counsel rename now runs through the whole app: search results, topic cards, cross-links from guides and flowcharts, the About screen and the feedback form all say Counsel instead of Consent. The word consent still appears where it is clinically correct, such as the right to decline and consent forms." },
+    ],
+  },
+  {
     version: "1.10.0",
     date: "08/07/2026",
     title: "Six new Counsel topics",
