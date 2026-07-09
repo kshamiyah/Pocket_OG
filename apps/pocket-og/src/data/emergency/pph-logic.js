@@ -201,9 +201,23 @@ export function txaEligible(taskStates, level, txaTime) {
   return levelVal(level) >= levelVal("major");
 }
 
-export function effectiveTaskStatus(id, taskStates, level, txaTime) {
-  const s = taskStates[id]?.status ?? null;
+// Blood-product tasks whose "not given" skip is not permanent — they must be
+// re-offered while she is still bleeding (unlike a normal skipped task).
+export const BLOOD_REPROMPT_TASK_IDS = new Set(["blood_products", "mhp_pack"]);
+
+export function effectiveTaskStatus(id, taskStates, level, txaTime, now, log) {
+  const ts = taskStates[id];
+  const s = ts?.status ?? null;
   if (id === "txa" && s === "skipped" && txaEligible(taskStates, level, txaTime)) return null;
+  // Blood products skipped ("not given") → re-eligible while still bleeding, on the
+  // bleed-rate-scaled recheck clock: quick re-prompt when heavy, longer as it settles,
+  // and never re-prompted once bleeding has stopped (rate < 1 ml/min).
+  if (BLOOD_REPROMPT_TASK_IDS.has(id) && s === "skipped" && log && now != null) {
+    const rate = bloodLossRate(log, now);
+    if (rate >= 1 && (now - (ts.skippedAt ?? 0)) >= reassessInterval(rate, level) * 1000) {
+      return null;
+    }
+  }
   return s;
 }
 
@@ -261,7 +275,7 @@ export function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTim
     return (task.deps || []).every(id => depSatisfied(id, taskStates));
   }
   function relevant(task) { return levelVal(task.level) <= levelVal(level) || (forcedTasks || []).includes(task.id); }
-  function st(id) { return effectiveTaskStatus(id, taskStates, level, txaTime); }
+  function st(id) { return effectiveTaskStatus(id, taskStates, level, txaTime, now, log); }
   function toneGate(task) {
     if (toneAssessed) return false;
     if (task.id === "bimanual" || task.id === "trauma_assess" || task.id === "tissue_assess") {

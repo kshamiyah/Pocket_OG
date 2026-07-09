@@ -4,7 +4,7 @@
     {
       "name": "clinref",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": ["run", "dev", "--workspace", "apps/pocket-og"],
       "port": 5173
     }
   ]

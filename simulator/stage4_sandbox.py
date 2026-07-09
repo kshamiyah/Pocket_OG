@@ -39,6 +39,7 @@ from stage3_sandbox import (
     FIBRINOGEN_START_G_L, FIBRINOGEN_TREAT_THRESHOLD_G_L, FIBRINOGEN_MIN_G_L, FIBRINOGEN_MAX_G_L,
     FIBRINOGEN_CONSUMPTION_PER_L_EBL, FIBRINOGEN_DILUTION_PER_L_PRBC, FIBRINOGEN_GAIN_PER_L_FFP,
     FIBRINOLYSIS_G_L_MIN_AT_MAX_BLEED, COAG_MULTIPLIER_BREAKPOINTS,
+    CRYO_DOSE_FIBRINOGEN_G, CRYO_MG_PER_KG_PER_G_L, CRYO_ONSET_MIN,
     CARBO_MAX_DOSES, CARBO_REPEAT_BASE_SEC, CARBO_REPEAT_FLOOR_SEC,
     URGENCY_EBL_ML, URGENCY_BLEED_ML_MIN, DRUG_INCREMENT, DRUG_TONE_CEILING,
 )
@@ -101,6 +102,7 @@ class PatientV4:
         self._txa_effect_from = float("inf")   # sim minutes — antifibrinolytic effect active
         self._pending = []           # uterotonics: (effect_min, target)  — scaled by R
         self._pending_surg = []      # surgical: (effect_min, target, step) — mechanical
+        self._pending_cryo = []      # fibrinogen replacement: (effect_min, g/L gain)
 
     @property
     def level(self):
@@ -205,6 +207,13 @@ class PatientV4:
         if not self.bimanual_ineffective:
             self.compression_until = max(self.compression_until, now_min + BIMANUAL_DURATION_MIN)
 
+    def give_cryoprecipitate(self, now_min):
+        """Fibrinogen replacement — cryo (2 pools ≈ 4 g) or fibrinogen concentrate
+        (~60 mg/kg). Weight-scaled rise lands after onset (R-COAG). This is the real
+        fibrinogen fix; FFP barely moves it."""
+        gain = (CRYO_DOSE_FIBRINOGEN_G * 1000.0) / (CRYO_MG_PER_KG_PER_G_L * self.weight_kg)
+        self._pending_cryo.append((now_min + CRYO_ONSET_MIN, gain))
+
     def give_txa(self, now_min):
         """Antifibrinolytic — slows fibrinolysis after onset (R-COAG-6 / WOMAN)."""
         was_active = self.txa_active
@@ -249,6 +258,14 @@ class PatientV4:
             else:
                 keep.append((effect_min, drug_id))
         self._pending = keep
+        # fibrinogen replacement — cryo / fibrinogen concentrate lands after onset (R-COAG).
+        keep_c = []
+        for effect_min, gain in self._pending_cryo:
+            if now_min >= effect_min:
+                self.fibrinogen_g_l = min(FIBRINOGEN_MAX_G_L, self.fibrinogen_g_l + gain)
+            else:
+                keep_c.append((effect_min, gain))
+        self._pending_cryo = keep_c
         source_bleed = self.source_bleed_rate
         effective_bleed = source_bleed * self.coag_multiplier
         bled = effective_bleed * dt_min

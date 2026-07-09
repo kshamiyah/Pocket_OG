@@ -39,6 +39,9 @@ SURGICAL_SEQUENCE = ["balloon", "sutures", "hysterectomy"]
 # waiting on a timer, fast-forward the clock.
 DT_ACTION_MIN = 0.15   # ~9 s per active tap
 DT_IDLE_MIN = 1.0      # fast-forward while waiting
+# Cryoprecipitate redose cadence: cryo onset ~5 min, each dose ~+1 g/L, so redose to
+# target every ~6 min while fibrinogen stays below the 2 g/L guidance threshold.
+CRYO_REDOSE_MIN = 6
 
 
 class AppBridge:
@@ -116,6 +119,7 @@ def stream(scenario, max_steps=300):
     mhp_active = False
     rapid_cryst_ml = 0.0
     surg_idx = 0
+    last_cryo_min = None
     t_min = 0.0
 
     def mark_done(task_id):
@@ -266,6 +270,18 @@ def stream(scenario, max_steps=300):
             blood_in = prbc_rate * step_dt
             if mhp_active and session["level"] == "massive":
                 ffp_in = MASSIVE_FFP_ML_MIN * step_dt
+
+        # Cryoprecipitate per the blood-product guidance ("Cryoprecipitate 2 pools —
+        # fibrinogen <2 g/L"). The app never prompts it discretely, so the operator,
+        # following the written guidance, gives it to target while fibrinogen is low.
+        # This is an operator-fidelity assumption (clinician reads guidance + the result).
+        if transfusing and p.fibrinogen_low and (
+                last_cryo_min is None or t_min - last_cryo_min >= CRYO_REDOSE_MIN):
+            p.give_cryoprecipitate(t_min)
+            last_cryo_min = t_min
+            note = f"{note} · cryo 2 pools (fib {p.fibrinogen_g_l:.1f})".lstrip(" ·") if note else \
+                   f"cryo 2 pools (fib {p.fibrinogen_g_l:.1f})"
+            acted = True
 
         p.tick(t_min, dt_min=step_dt, fluids_in=fluids_in, blood_in=blood_in, ffp_in=ffp_in)
         t_min += step_dt

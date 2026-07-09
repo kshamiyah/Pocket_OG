@@ -131,7 +131,11 @@ FIBRINOGEN_START_G_L = 4.5       # term pregnancy baseline [ASSUMED band 4–6 g
 FIBRINOGEN_TREAT_THRESHOLD_G_L = 2.0   # PPH treatment threshold (R-COAG-2)
 FIBRINOGEN_MIN_G_L = 0.3
 FIBRINOGEN_MAX_G_L = 6.0
-FIBRINOGEN_CONSUMPTION_PER_L_EBL = 0.12   # g/L lost per L effective haemorrhage [ASSUMED]
+FIBRINOGEN_CONSUMPTION_PER_L_EBL = 1.0    # g/L lost per L effective haemorrhage.
+# Calibrated to the untreated early-decline slope in the Blood Advances 2018 cohort
+# (~4.5 -> ~2.1 g/L over the first ~2.3 L). The observed plateau at ~1.8 g/L beyond
+# 4 L is treatment (FFP/cryo/MHP) propping it up, modelled separately below — so raw
+# consumption keeps falling and an UNTREATED massive bleed correctly reaches DIC.
 FIBRINOGEN_DILUTION_PER_L_PRBC = 0.20     # g/L drop per L PRBC infused [ASSUMED]
 FIBRINOGEN_GAIN_PER_L_FFP = 0.30          # g/L rise per L FFP [ASSUMED]
 FIBRINOLYSIS_G_L_MIN_AT_MAX_BLEED = 0.04  # g/L/min fibrinogen loss at 700 ml/min source bleed
@@ -141,6 +145,13 @@ COAG_MULTIPLIER_BREAKPOINTS = [   # (fibrinogen g/L, bleed multiplier on source 
 FFP_EFF = 0.85                   # effective perfusion credit per ml FFP [ASSUMED]
 PRBC_EFF_LOW_FIBRIN = 0.70       # PRBC perfusion credit when fibrinogen < 2 g/L [ASSUMED]
 MASSIVE_FFP_ML_MIN = round(MASSIVE_PRBC_ML_MIN * 4 / 6)  # MHP 6 RBC : 4 FFP ratio
+# Cryoprecipitate / fibrinogen concentrate — the ACTUAL fibrinogen replacement (FFP is
+# a weak fibrinogen source). Standard dose 2 pools cryo ≈ 4 g fibrinogen (CRYOSTAT-1);
+# fibrinogen concentrate ~60 mg/kg raises plasma fibrinogen ~1 g/L. Weight-scaled here:
+# gain (g/L) = dose_grams / (mg_per_kg_per_gL/1000 × weight_kg) → ~1.0 g/L for a 70 kg woman.
+CRYO_DOSE_FIBRINOGEN_G = 4.0     # grams fibrinogen per standard dose (2 pools / 4 g concentrate)
+CRYO_MG_PER_KG_PER_G_L = 60.0    # ~60 mg/kg raises plasma fibrinogen ~1 g/L (ASH 2015; CRYOSTAT-1)
+CRYO_ONSET_MIN = 5               # infused / effect builds over ~10–30 min [ASSUMED — sign-off]
 # Legacy names (deprecated sandboxes import these)
 MAJOR_INFUSION_ML_MIN = MAJOR_PRBC_ML_MIN
 MASSIVE_INFUSION_ML_MIN = MASSIVE_PRBC_ML_MIN
