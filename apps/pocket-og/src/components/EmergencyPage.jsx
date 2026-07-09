@@ -329,10 +329,24 @@ function txaEligible(taskStates, level, txaTime) {
   return levelVal(level) >= levelVal("major");
 }
 
-function effectiveTaskStatus(id, taskStates, level, txaTime) {
-  const s = taskStates[id]?.status ?? null;
+// Blood-product tasks whose "not given" skip is not permanent — re-offered while
+// she is still bleeding (mirrors data/emergency/pph-logic.js).
+const BLOOD_REPROMPT_TASK_IDS = new Set(["blood_products", "mhp_pack"]);
+
+function effectiveTaskStatus(id, taskStates, level, txaTime, now, log) {
+  const ts = taskStates[id];
+  const s = ts?.status ?? null;
   // Skipped TXA without a dose — still eligible at major+
   if (id === "txa" && s === "skipped" && txaEligible(taskStates, level, txaTime)) return null;
+  // Blood products skipped ("not given") → re-eligible while still bleeding, on the
+  // bleed-rate-scaled recheck clock (quick when heavy, longer as it settles, and
+  // never re-prompted once bleeding has stopped).
+  if (BLOOD_REPROMPT_TASK_IDS.has(id) && s === "skipped" && log && now != null) {
+    const rate = bloodLossRate(log, now);
+    if (rate >= 1 && (now - (ts.skippedAt ?? 0)) >= reassessInterval(rate, level) * 1000) {
+      return null;
+    }
+  }
   return s;
 }
 
@@ -479,7 +493,7 @@ export function computeNextPrompt({ taskStates, level, toneAssessed, log, txaTim
   // A task is relevant at the current level, OR if it has been force-activated as a
   // fallback after a higher-tier drug was found contraindicated.
   function relevant(task) { return levelVal(task.level) <= levelVal(level) || (forcedTasks || []).includes(task.id); }
-  function st(id) { return effectiveTaskStatus(id, taskStates, level, txaTime); }
+  function st(id) { return effectiveTaskStatus(id, taskStates, level, txaTime, now, log); }
   function toneGate(task) {
     if (deferFourTs(task, taskStates, level)) return true;
     if (toneAssessed) return false;
@@ -1616,6 +1630,69 @@ function CarboDosePrompt({ count, onDose, onSkip }) {
   );
 }
 
+// Blood products captured for documentation only (units/pools) — no algorithm feedback.
+const BLOOD_PRODUCT_ROWS = [
+  { key: "rbc",       label: "Red cells",       unit: "units" },
+  { key: "ffp",       label: "FFP",             unit: "units" },
+  { key: "cryo",      label: "Cryoprecipitate", unit: "pools" },
+  { key: "platelets", label: "Platelets",       unit: "units" },
+];
+const EMPTY_BLOOD_PRODUCTS = { rbc: 0, ffp: 0, cryo: 0, platelets: 0 };
+
+function BloodProductsPrompt({ task, tally = EMPTY_BLOOD_PRODUCTS, onRecord, onDone, onAssign, onSkip }) {
+  const [units, setUnits] = useState(EMPTY_BLOOD_PRODUCTS);
+  const [skipConfirm, setSkipConfirm] = useState(false);
+  const step = (key, d) => setUnits(u => ({ ...u, [key]: Math.max(0, u[key] + d) }));
+  const total = BLOOD_PRODUCT_ROWS.reduce((n, r) => n + units[r.key], 0);
+  const given = BLOOD_PRODUCT_ROWS.filter(r => (tally[r.key] || 0) > 0)
+    .map(r => `${r.label} ×${tally[r.key]}`);
+
+  if (skipConfirm) {
+    return (
+      <div className="px-4 py-3.5 space-y-3">
+        <span className="text-xs font-bold uppercase tracking-wider text-red-400">Critical task — confirm not given</span>
+        <p className="text-white text-base font-bold leading-snug">{task.title}</p>
+        <p className="text-gray-500 text-xs">Recorded as not given — you'll be re-prompted while bleeding continues.</p>
+        <div className="flex gap-2 pt-1">
+          <button onClick={() => setSkipConfirm(false)} className="flex-1 border border-gray-700 text-gray-300 font-medium py-3 text-sm rounded-lg">Cancel</button>
+          <button onClick={() => { setSkipConfirm(false); onSkip(task); }} className="flex-1 border border-red-900 text-red-400 font-bold py-3 text-sm rounded-lg">Not given</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-4 py-3.5 space-y-3">
+      <span className="text-xs font-bold uppercase tracking-wider text-gray-600">Blood products</span>
+      <p className="text-white text-xl font-bold leading-snug">{task.title}</p>
+      {task.detail && <p className="text-gray-500 text-xs whitespace-pre-line leading-relaxed">{task.detail}</p>}
+      <div className="space-y-2 pt-1">
+        {BLOOD_PRODUCT_ROWS.map(r => (
+          <div key={r.key} className="flex items-center justify-between">
+            <span className="text-white text-sm font-medium">{r.label} <span className="text-gray-600 text-xs">({r.unit})</span></span>
+            <div className="flex items-center gap-3">
+              <button onClick={() => step(r.key, -1)} disabled={units[r.key] === 0} className="w-9 h-9 rounded-lg border border-gray-700 text-white text-lg font-bold leading-none disabled:opacity-30">−</button>
+              <span className="w-6 text-center text-white text-lg font-bold tabular-nums">{units[r.key]}</span>
+              <button onClick={() => step(r.key, 1)} className="w-9 h-9 rounded-lg border border-gray-700 text-white text-lg font-bold leading-none">+</button>
+            </div>
+          </div>
+        ))}
+      </div>
+      {given.length > 0 && <p className="text-gray-500 text-xs">Given so far: {given.join(" · ")}</p>}
+      <div className="flex flex-col gap-2 pt-1">
+        <div className="flex gap-2">
+          <button onClick={() => { if (total > 0) { onRecord({ ...units }); setUnits(EMPTY_BLOOD_PRODUCTS); } }} disabled={total === 0} className="flex-1 border border-gray-700 text-white font-medium py-2.5 text-sm rounded-lg disabled:opacity-30">Record{total > 0 ? ` +${total}` : ""}</button>
+          <button onClick={() => { if (total > 0) onRecord({ ...units }); onDone(task); }} className="flex-1 bg-white text-gray-950 font-bold py-2.5 text-sm rounded-lg">Done ✓</button>
+        </div>
+        <div className="flex gap-2">
+          {onAssign && <button onClick={() => onAssign(task)} className="flex-1 border border-gray-700 hover:border-gray-500 text-white font-medium py-2.5 text-sm rounded-lg transition">Assign →</button>}
+          {onSkip && <button onClick={() => task.critical ? setSkipConfirm(true) : onSkip(task)} className="flex-1 border border-gray-700 text-gray-400 font-medium py-2.5 text-sm rounded-lg">Not given</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TxaSecondPrompt({ onGiven, onNotNeeded }) {
   useEffect(() => { if ("vibrate" in navigator) navigator.vibrate([100, 60, 100]); }, []);
   return (
@@ -1831,7 +1908,9 @@ function ActivePromptArea({ prompt, bloodLoss, level, carboCount, assignedCount,
     case "arrest_rhythm":
     case "arrest_shock":
       return null;
-    case "task":         content = <TaskPrompt task={prompt.task} onDone={onDone} onAssign={onAssign} onSkip={onSkip} onNotAvailable={onNotAvailable} onAlreadyGiven={onAlreadyGiven} ivAccessDone={ivAccessDone} onCheckCardiacArrest={prompt.task.id === "abc" && cardiacArrestPending ? onCheckCardiacArrest : undefined} showAlreadyGiven={shouldOfferAlreadyGiven(prompt.task, taskStates, carboCount)} />; break;
+    case "task":         content = prompt.task.type === "blood"
+                           ? <BloodProductsPrompt task={prompt.task} tally={handlers.bloodProductsTally} onRecord={handlers.onBloodProductRecord} onDone={onDone} onAssign={onAssign} onSkip={onSkip} />
+                           : <TaskPrompt task={prompt.task} onDone={onDone} onAssign={onAssign} onSkip={onSkip} onNotAvailable={onNotAvailable} onAlreadyGiven={onAlreadyGiven} ivAccessDone={ivAccessDone} onCheckCardiacArrest={prompt.task.id === "abc" && cardiacArrestPending ? onCheckCardiacArrest : undefined} showAlreadyGiven={shouldOfferAlreadyGiven(prompt.task, taskStates, carboCount)} />; break;
     case "followup":     content = <FollowupPrompt task={prompt.task} onYes={onFollowupYes} onNo={onFollowupNo} early={prompt.early} />; break;
     case "theatre_transfer": content = <TheatreTransferPrompt task={prompt.task} onInTheatre={onTheatreInTheatre} onStillPreparing={onTheatreStillPreparing} />; break;
     case "assess":       content = <AssessPrompt task={prompt.task} onExclude={onAssessExclude} onPresent={onAssessPresent} />; break;
@@ -2938,6 +3017,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest, resumeFr
     return s.carboCount ?? 0;
   });
   const [carboLastTime, setCarboLastTime] = useState(() => resumeSnapshot?.carboLastTime ?? null);
+  const [bloodProducts, setBloodProducts] = useState(() => resumeSnapshot?.bloodProducts ?? { ...EMPTY_BLOOD_PRODUCTS });
   const [ciCleared, setCiCleared] = useState(() => resumeSnapshot?.ciCleared ?? {});
   const [forcedTasks, setForcedTasks] = useState(() => resumeSnapshot?.forcedTasks ?? []);
   const [uterotonicHold, setUterotonicHold] = useState(() => resumeSnapshot?.uterotonicHold ?? false);
@@ -3029,6 +3109,19 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest, resumeFr
     setLog(prev => [...prev, { kind, label, time: nowTs() }]);
   }
 
+  function recordBloodProducts(delta) {
+    const parts = BLOOD_PRODUCT_ROWS
+      .filter(r => (delta[r.key] || 0) > 0)
+      .map(r => `${r.label} ×${delta[r.key]} ${r.unit}`);
+    if (!parts.length) return;
+    setBloodProducts(prev => {
+      const next = { ...prev };
+      for (const r of BLOOD_PRODUCT_ROWS) next[r.key] = (next[r.key] || 0) + (delta[r.key] || 0);
+      return next;
+    });
+    addLog("blood_product", `Blood products given: ${parts.join(" · ")}`);
+  }
+
   function recordBloodLossDelta(delta, label) {
     const next = bloodLoss + delta;
     const at = nowTs();
@@ -3077,6 +3170,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest, resumeFr
       birthTime,
       carboCount,
       carboLastTime,
+      bloodProducts,
       ciCleared,
       forcedTasks,
       uterotonicHold,
@@ -3101,7 +3195,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest, resumeFr
   useEffect(() => {
     if (phase !== "active") return;
     flushSession();
-  }, [phase, bloodLoss, peakBloodLoss, aftercareCompleted, taskStates, toneAssessed, log, txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime, ciCleared, forcedTasks, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, ivFailSnoozeUntil, infusionReassess, sessionRecoveredAt, leadMode, jointArrest]);
+  }, [phase, bloodLoss, peakBloodLoss, aftercareCompleted, taskStates, toneAssessed, log, txaTime, txaHandled, txaSecondDone, birthTime, carboCount, carboLastTime, bloodProducts, ciCleared, forcedTasks, uterotonicHold, uterotonicEscalate, queuedUterotonicId, ivAccessPendingSince, ivAccessRetries, ivFailSnoozeUntil, infusionReassess, sessionRecoveredAt, leadMode, jointArrest]);
 
   useEffect(() => {
     if (!resumeSnapshot || parallelReturnLogged.current) return;
@@ -3308,7 +3402,10 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest, resumeFr
 
   function handleSkip(task) {
     setTaskStates(prev => ({ ...prev, [task.id]: { status: "skipped", skippedAt: nowTs() } }));
-    addLog("task_skipped", `Skipped: ${task.title}`);
+    // Blood products skip is "not given (yet)" — it will be re-prompted while bleeding.
+    addLog("task_skipped", BLOOD_REPROMPT_TASK_IDS.has(task.id)
+      ? `Blood products not given (yet) — ${task.title}`
+      : `Skipped: ${task.title}`);
     if (task.fallback) {
       const fb = TASKS.find(t => t.id === task.fallback);
       setForcedTasks(prev => prev.includes(task.fallback) ? prev : [...prev, task.fallback]);
@@ -4126,6 +4223,7 @@ export default function EmergencyPage({ onClose, onLaunchCardiacArrest, resumeFr
     onFollowupYes: handleFollowupYes, onFollowupNo: handleFollowupNo,
     onAssessExclude: handleAssessExclude, onAssessPresent: handleAssessPresent,
     onBloodAdd: handleBloodAdd, onBloodUnchanged: handleBloodUnchanged, onBloodPending: handleBloodPending, onBloodCorrect: handleBloodCorrect,
+    onBloodProductRecord: recordBloodProducts, bloodProductsTally: bloodProducts,
     onCarboDose: handleCarboDose, onCarboSkip: handleCarboSkip,
     onTxaSecondGiven: handleTxaSecondGiven, onTxaSecondNotNeeded: handleTxaSecondNotNeeded,
     onToneCheckFirm: handleToneCheckFirm, onToneCheckBoggy: handleToneCheckBoggy,
