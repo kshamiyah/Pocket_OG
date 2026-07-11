@@ -39,6 +39,7 @@ export const GUIDELINES = {
   GTG27B: { code: "GTG27B", label: "Vasa Praevia", version: "GTG27b", date: "September 2018", color: "amber", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/vasa-praevia-diagnosis-and-management-green-top-guideline-27b/" },
   NG192: { code: "NG192", label: "Caesarean Birth", version: "NG192", date: "March 2021 (updated September 2024)", color: "teal", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng192" },
   GTG26: { code: "GTG26", label: "Assisted Vaginal Birth", version: "GTG26", date: "April 2020", color: "indigo", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/assisted-vaginal-birth-green-top-guideline-no-26/" },
+  GTG45: { code: "GTG45", label: "Birth After Previous Caesarean", version: "GTG45", date: "October 2015", color: "violet", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/birth-after-previous-caesarean-birth-green-top-guideline-no-45/" },
 };
 
 export const GL_COLORS = {
@@ -81,4 +82,5 @@ export const GL_COLORS = {
   GTG27B: { badge: "bg-amber-900/50 text-amber-300 border-amber-600/40", dot: "bg-amber-400" },
   NG192: { badge: "bg-teal-900/50 text-teal-300 border-teal-600/40", dot: "bg-teal-400" },
   GTG26: { badge: "bg-indigo-900/50 text-indigo-300 border-indigo-600/40", dot: "bg-indigo-400" },
+  GTG45: { badge: "bg-violet-900/50 text-violet-300 border-violet-600/40", dot: "bg-violet-400" },
 };
