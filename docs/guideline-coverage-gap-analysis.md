@@ -44,9 +44,11 @@ a Green-top page.
   reader page. Reasonable as-is since the calculators carry the content, but
   worth a full page if ectopic/VTE get deeper treatment later.
 - **GTG63 (Antepartum Haemorrhage)** is the 2011 edition; RCOG has since split
-  APH management from placenta praevia/accreta (GTG27a, 2018) and vasa praevia
-  (GTG27b) as separate documents. Current APH content is the oldest full-text
-  guideline in the library and is the most overdue for a refresh + split.
+  placenta praevia/accreta and vasa praevia out into their own current
+  documents — **GTG27a and GTG27b (2018), now added**. GTG63 itself still
+  covers general APH (abruption, unexplained bleeding) and is the oldest
+  full-text guideline left in the library — still worth a refresh, but the
+  praevia/accreta/vasa gap it left is closed.
 
 ## 3. Coverage map by domain
 
@@ -195,7 +197,7 @@ guideline pages**, prioritised below rather than added alphabetically.
 1. ~~Anti-D / rhesus disease prophylaxis~~ — done (GTG22)
 2. ~~Shoulder dystocia~~ — done (GTG42)
 3. ~~Sepsis in pregnancy and the puerperium~~ — done (GTG64, the current Dec 2024 unified guideline; supersedes the old GTG64a/b split)
-4. Placenta accreta spectrum + vasa praevia (splits out of the ageing GTG63)
+4. ~~Placenta accreta spectrum + vasa praevia~~ — done (GTG27a, GTG27b)
 5. Postnatal care pathway (NICE NG194)
 
 **P1, high daily-use, currently thin or missing:**

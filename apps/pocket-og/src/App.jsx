@@ -123,6 +123,8 @@ const FLOWCHART_LINKS = [
   { id: "GTG22_ANTID",           gl: "GTG22" },
   { id: "GTG42_SHOULDER",        gl: "GTG42" },
   { id: "GTG64_SEPSIS",          gl: "GTG64" },
+  { id: "GTG27A_PAS",            gl: "GTG27A" },
+  { id: "GTG27B_VASA",           gl: "GTG27B" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -156,6 +158,8 @@ const FLOWCHART_GROUPS = [
   { gl: "GTG22",     label: "Anti-D Prophylaxis" },
   { gl: "GTG42",     label: "Shoulder Dystocia" },
   { gl: "GTG64",     label: "Maternal Sepsis" },
+  { gl: "GTG27A",    label: "Placenta Praevia & Accreta Spectrum" },
+  { gl: "GTG27B",    label: "Vasa Praevia" },
 ];
 
 export default function App() {

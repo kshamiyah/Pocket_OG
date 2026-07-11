@@ -40,3 +40,5 @@ export { GTG56_SECTIONS } from "./GTG56.js";
 export { GTG22_SECTIONS } from "./GTG22.js";
 export { GTG42_SECTIONS } from "./GTG42.js";
 export { GTG64_SECTIONS } from "./GTG64.js";
+export { GTG27A_SECTIONS } from "./GTG27A.js";
+export { GTG27B_SECTIONS } from "./GTG27B.js";
