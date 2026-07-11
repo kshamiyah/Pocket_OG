@@ -4,6 +4,17 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.12.0",
+    date: "11/07/2026",
+    title: "Four new emergency & antenatal guides",
+    changes: [
+      { tag: "new", text: "Anti-D prophylaxis: RAADP dosing, anti-D for potentially sensitising events, FMH/Kleihauer quantification, and postnatal anti-D, from RCOG GTG22 and NICE TA156. Includes a step-by-step flowchart." },
+      { tag: "new", text: "Shoulder dystocia: recognition, the full manoeuvre sequence (McRoberts', suprapubic pressure, internal/all-fours manoeuvres, last-resort measures), and post-birth documentation, from RCOG GTG42. Includes an emergency flowchart." },
+      { tag: "new", text: "Maternal sepsis: red flags, the Sepsis Six hour-1 bundle, source control, and postpartum-specific causes, from RCOG GTG64 (the current guideline, replacing the old GTG64a/b split). Includes an emergency flowchart." },
+      { tag: "new", text: "Placenta praevia & accreta spectrum, and vasa praevia: diagnosis pathways, risk factors, antenatal management and delivery planning, from RCOG GTG27a and GTG27b. Each includes its own flowchart." },
+    ],
+  },
+  {
     version: "1.11.0",
     date: "08/07/2026",
     title: "Dark mode",
