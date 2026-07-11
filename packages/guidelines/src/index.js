@@ -38,3 +38,4 @@ export { MBRRACE_SLMC2025_SECTIONS } from "./MBRRACE_SLMC2025.js";
 export { GTG5_SECTIONS } from "./GTG5.js";
 export { GTG56_SECTIONS } from "./GTG56.js";
 export { GTG22_SECTIONS } from "./GTG22.js";
+export { GTG42_SECTIONS } from "./GTG42.js";

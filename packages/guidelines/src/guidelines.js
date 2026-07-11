@@ -33,6 +33,7 @@ export const GUIDELINES = {
   GTG5: { code: "GTG5", label: "Ovarian Hyperstimulation Syndrome", version: "GTG5", date: "February 2026", color: "amber", pdf: true, source: "RCOG", pdfUrl: "https://obgyn.onlinelibrary.wiley.com/doi/10.1111/1471-0528.70195" },
   GTG56: { code: "GTG56", label: "Maternal Collapse in Pregnancy and the Puerperium", version: "GTG56", date: "December 2019", color: "red", pdf: true, source: "RCOG", pdfUrl: "https://obgyn.onlinelibrary.wiley.com/doi/10.1111/1471-0528.15995" },
   GTG22: { code: "GTG22", label: "Anti-D Prophylaxis (Rhesus D Alloimmunisation Prevention)", version: "GTG22", date: "March 2011 · RAADP dosing per NICE TA156", color: "cyan", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/the-use-of-anti-d-immunoglobulin-for-rhesus-d-prophylaxis-green-top-guideline-no-22/" },
+  GTG42: { code: "GTG42", label: "Shoulder Dystocia", version: "GTG42", date: "March 2012", color: "red", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/shoulder-dystocia-green-top-guideline-no-42/" },
 };
 
 export const GL_COLORS = {
@@ -69,4 +70,5 @@ export const GL_COLORS = {
   GTG5: { badge: "bg-amber-900/50 text-amber-300 border-amber-600/40", dot: "bg-amber-400" },
   GTG56: { badge: "bg-red-900/50 text-red-300 border-red-600/40", dot: "bg-red-400" },
   GTG22: { badge: "bg-cyan-900/50 text-cyan-300 border-cyan-600/40", dot: "bg-cyan-400" },
+  GTG42: { badge: "bg-red-900/50 text-red-300 border-red-600/40", dot: "bg-red-400" },
 };

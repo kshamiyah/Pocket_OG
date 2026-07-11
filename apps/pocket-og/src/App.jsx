@@ -121,6 +121,7 @@ const FLOWCHART_LINKS = [
   { id: "TOG_VALVULAR_PREGNANCY",    gl: "TOG" },
   { id: "MATERNAL_COLLAPSE_ARREST",  gl: "GTG56" },
   { id: "GTG22_ANTID",           gl: "GTG22" },
+  { id: "GTG42_SHOULDER",        gl: "GTG42" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -152,6 +153,7 @@ const FLOWCHART_GROUPS = [
   { gl: "TOG",       label: "TOG Reviews" },
   { gl: "GTG56",     label: "Maternal Collapse & Cardiac Arrest" },
   { gl: "GTG22",     label: "Anti-D Prophylaxis" },
+  { gl: "GTG42",     label: "Shoulder Dystocia" },
 ];
 
 export default function App() {

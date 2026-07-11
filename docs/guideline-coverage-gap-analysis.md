@@ -192,8 +192,8 @@ guideline pages**, prioritised below rather than added alphabetically.
 ## 5. Priority order to close the gap
 
 **P0, safety-critical and currently absent:**
-1. ~~Anti-D / rhesus disease prophylaxis~~ — done (GTG22, app v1.12.0)
-2. Shoulder dystocia
+1. ~~Anti-D / rhesus disease prophylaxis~~ — done (GTG22)
+2. ~~Shoulder dystocia~~ — done (GTG42)
 3. Sepsis in pregnancy and the puerperium (bacterial sepsis, GTG64a/b)
 4. Placenta accreta spectrum + vasa praevia (splits out of the ageing GTG63)
 5. Postnatal care pathway (NICE NG194)
