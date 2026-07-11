@@ -4,6 +4,20 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.13.0",
+    date: "11/07/2026",
+    title: "Seven new labour ward & antenatal guides",
+    changes: [
+      { tag: "new", text: "Caesarean birth: the four urgency categories with decision-to-delivery targets, mode-of-birth decisions including maternal request, surgical technique, and perioperative care, from NICE NG192. Includes a category-triage flowchart." },
+      { tag: "new", text: "Assisted vaginal birth: prerequisites, station/rotation classification, forceps vs ventouse trade-offs, trial-in-theatre criteria, and conduct of the attempt, from RCOG GTG26. Includes a decision flowchart." },
+      { tag: "new", text: "Birth after previous caesarean (VBAC): intrapartum monitoring requirements and recognising uterine scar rupture, from RCOG GTG45. Includes a monitoring/emergency flowchart." },
+      { tag: "new", text: "Group B Streptococcus: the UK's risk-based screening policy, who's offered intrapartum antibiotic prophylaxis, and the postnatal neonatal observation and red-flag pathway, from RCOG GTG36. Includes a decision flowchart." },
+      { tag: "new", text: "Twin and triplet pregnancy: recommended timing and mode of birth by chorionicity, and TTTS Quintero staging, from NICE NG137 (alongside the existing QS46). Includes a decision flowchart." },
+      { tag: "new", text: "Obesity in pregnancy: BMI-triggered antenatal, intrapartum and postnatal pathway, from RCOG GTG72. Includes a decision flowchart." },
+      { tag: "new", text: "Breech presentation at term: external cephalic version and the management of vaginal breech birth, from RCOG GTG20a and GTG20b. Includes a shared decision flowchart." },
+    ],
+  },
+  {
     version: "1.12.0",
     date: "11/07/2026",
     title: "Four new emergency & antenatal guides",
