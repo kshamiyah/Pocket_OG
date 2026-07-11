@@ -37,6 +37,7 @@ export const GUIDELINES = {
   GTG64: { code: "GTG64", label: "Maternal Sepsis (During & Following Pregnancy)", version: "GTG64", date: "December 2024 · supersedes GTG64a/64b (2012)", color: "rose", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/identification-and-management-of-maternal-sepsis-during-and-following-pregnancy-green-top-guideline-no-64/" },
   GTG27A: { code: "GTG27A", label: "Placenta Praevia & Accreta Spectrum", version: "GTG27a", date: "September 2018", color: "orange", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/placenta-praevia-and-placenta-accreta-diagnosis-and-management-green-top-guideline-no-27a/" },
   GTG27B: { code: "GTG27B", label: "Vasa Praevia", version: "GTG27b", date: "September 2018", color: "amber", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/vasa-praevia-diagnosis-and-management-green-top-guideline-27b/" },
+  NG192: { code: "NG192", label: "Caesarean Birth", version: "NG192", date: "March 2021 (updated September 2024)", color: "teal", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng192" },
 };
 
 export const GL_COLORS = {
@@ -77,4 +78,5 @@ export const GL_COLORS = {
   GTG64: { badge: "bg-rose-900/50 text-rose-300 border-rose-600/40", dot: "bg-rose-400" },
   GTG27A: { badge: "bg-orange-900/50 text-orange-300 border-orange-600/40", dot: "bg-orange-400" },
   GTG27B: { badge: "bg-amber-900/50 text-amber-300 border-amber-600/40", dot: "bg-amber-400" },
+  NG192: { badge: "bg-teal-900/50 text-teal-300 border-teal-600/40", dot: "bg-teal-400" },
 };

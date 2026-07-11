@@ -201,7 +201,7 @@ guideline pages**, prioritised below rather than added alphabetically.
 5. Postnatal care pathway (NICE NG194)
 
 **P1, high daily-use, currently thin or missing:**
-6. Caesarean section (full guideline, not just the consent page)
+6. ~~Caesarean section~~ — done (NG192)
 7. Operative vaginal delivery
 8. Vaginal birth after caesarean
 9. Group B Streptococcus in pregnancy

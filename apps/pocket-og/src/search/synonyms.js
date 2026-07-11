@@ -10,6 +10,16 @@ export const SYNONYMS = {
   "external cephalic version": ["ecv","breech","turning baby","gtg20"],
   "breech": ["ecv","external cephalic version","caesarean","vaginal breech birth","gtg20"],
 
+  "caesarean": ["caesarean section","c section","lscs","ng192","category 1","category 2"],
+  "caesarean section": ["caesarean","c section","lscs","ng192"],
+  "c section": ["caesarean","caesarean section","lscs","ng192"],
+  "lscs": ["caesarean","caesarean section","c section"],
+  "category 1 caesarean": ["crash section","emergency caesarean","decision to delivery interval","30 minutes"],
+  "category 2 caesarean": ["emergency caesarean","decision to delivery interval","75 minutes"],
+  "crash section": ["category 1 caesarean","emergency caesarean","decision to delivery interval"],
+  "decision to delivery interval": ["category 1 caesarean","category 2 caesarean","ddi"],
+  "maternal request caesarean": ["caesarean","elective caesarean","ng192"],
+
   // Fetal monitoring / CTG (NICE NG229)
   "ctg": ["cardiotocography","cardiotocograph","fetal monitoring","fetal heart rate","fhr","efm","ng229","pathological ctg","suspicious ctg"],
   "cardiotocography": ["ctg","fetal monitoring","fetal heart rate","efm","ng229"],
