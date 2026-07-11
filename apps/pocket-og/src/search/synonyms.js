@@ -269,6 +269,10 @@ export const SYNONYMS = {
   "fetal medicine": ["fmc","tertiary referral","fetal medicine centre","ttts","laser ablation"],
   "birth plan": ["delivery plan","mode of delivery","mode of birth","caesarean","vaginal birth","twins","28 weeks"],
   "twin clinic": ["multiple pregnancy","mdt","specialist obstetrician","specialist midwife"],
+  "quintero staging": ["ttts","twin to twin transfusion","ttts staging","laser ablation"],
+  "sfgr": ["selective fetal growth restriction","selective growth restriction","monochorionic","fetal growth restriction"],
+  "selective fetal growth restriction": ["sfgr","selective growth restriction","monochorionic"],
+  "timing of birth twins": ["ng137","twin pregnancy","dcda","mcda","mcma","elective birth twins"],
   // Antenatal care / QS22
   "booking": ["booking appointment","antenatal booking","10 weeks","first appointment","antenatal care"],
   "booking appointment": ["booking","antenatal booking","10 weeks","first antenatal","risk assessment"],

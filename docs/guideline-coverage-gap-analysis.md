@@ -205,7 +205,7 @@ guideline pages**, prioritised below rather than added alphabetically.
 7. ~~Operative vaginal delivery~~ — done (GTG26, "Assisted Vaginal Birth")
 8. ~~Vaginal birth after caesarean~~ — done (GTG45)
 9. ~~Group B Streptococcus in pregnancy~~ — done (GTG36)
-10. Twin and triplet pregnancy (full NG137, upgrading QS46)
+10. ~~Twin and triplet pregnancy~~ — done (NG137, added alongside QS46 rather than replacing it — QS46 covers the antenatal MDT/surveillance pathway, NG137 adds timing/mode of birth and complication staging)
 11. Obesity in pregnancy
 12. Breech presentation at term
 13. Perineal trauma / OASI repair

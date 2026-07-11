@@ -41,6 +41,7 @@ export const GUIDELINES = {
   GTG26: { code: "GTG26", label: "Assisted Vaginal Birth", version: "GTG26", date: "April 2020", color: "indigo", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/assisted-vaginal-birth-green-top-guideline-no-26/" },
   GTG45: { code: "GTG45", label: "Birth After Previous Caesarean", version: "GTG45", date: "October 2015", color: "violet", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/birth-after-previous-caesarean-birth-green-top-guideline-no-45/" },
   GTG36: { code: "GTG36", label: "Group B Streptococcus Prevention", version: "GTG36", date: "September 2017", color: "lime", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/prevention-of-early-onset-group-b-streptococcal-disease-green-top-guideline-no-36/" },
+  NG137: { code: "NG137", label: "Twin and Triplet Pregnancy", version: "NG137", date: "September 2019 (updated 2024)", color: "cyan", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng137" },
 };
 
 export const GL_COLORS = {
@@ -85,4 +86,5 @@ export const GL_COLORS = {
   GTG26: { badge: "bg-indigo-900/50 text-indigo-300 border-indigo-600/40", dot: "bg-indigo-400" },
   GTG45: { badge: "bg-violet-900/50 text-violet-300 border-violet-600/40", dot: "bg-violet-400" },
   GTG36: { badge: "bg-lime-900/50 text-lime-300 border-lime-600/40", dot: "bg-lime-400" },
+  NG137: { badge: "bg-cyan-900/50 text-cyan-300 border-cyan-600/40", dot: "bg-cyan-400" },
 };
