@@ -117,8 +117,13 @@ export const SYNONYMS = {
   "section antibiotics": ["caesarean","lscs","prophylaxis","co-amoxiclav"],
   "cs antibiotics": ["caesarean","lscs","prophylaxis"],
   // GBS
-  "gbs": ["group b strep","streptococcus","iap","benzylpenicillin"],
+  "gbs": ["group b strep","streptococcus","iap","benzylpenicillin","gtg36"],
   "strep b": ["gbs","group b strep","iap"],
+  "group b streptococcus": ["gbs","strep b","iap","gtg36"],
+  "gbs bacteriuria": ["gbs","group b strep","iap"],
+  "gbs screening": ["gbs","universal screening","risk based","gtg36"],
+  "early onset neonatal infection": ["gbs","neonatal sepsis","ng195","red flag neonatal"],
+  "well baby observation": ["neonatal observation","gbs","ng195"],
   // Sepsis / infection
   "bug": ["infection","sepsis","antibiotics"],
   "womb infection": ["endometritis","uterus"],

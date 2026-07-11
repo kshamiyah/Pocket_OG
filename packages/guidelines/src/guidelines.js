@@ -40,6 +40,7 @@ export const GUIDELINES = {
   NG192: { code: "NG192", label: "Caesarean Birth", version: "NG192", date: "March 2021 (updated September 2024)", color: "teal", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng192" },
   GTG26: { code: "GTG26", label: "Assisted Vaginal Birth", version: "GTG26", date: "April 2020", color: "indigo", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/assisted-vaginal-birth-green-top-guideline-no-26/" },
   GTG45: { code: "GTG45", label: "Birth After Previous Caesarean", version: "GTG45", date: "October 2015", color: "violet", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/birth-after-previous-caesarean-birth-green-top-guideline-no-45/" },
+  GTG36: { code: "GTG36", label: "Group B Streptococcus Prevention", version: "GTG36", date: "September 2017", color: "lime", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/prevention-of-early-onset-group-b-streptococcal-disease-green-top-guideline-no-36/" },
 };
 
 export const GL_COLORS = {
@@ -83,4 +84,5 @@ export const GL_COLORS = {
   NG192: { badge: "bg-teal-900/50 text-teal-300 border-teal-600/40", dot: "bg-teal-400" },
   GTG26: { badge: "bg-indigo-900/50 text-indigo-300 border-indigo-600/40", dot: "bg-indigo-400" },
   GTG45: { badge: "bg-violet-900/50 text-violet-300 border-violet-600/40", dot: "bg-violet-400" },
+  GTG36: { badge: "bg-lime-900/50 text-lime-300 border-lime-600/40", dot: "bg-lime-400" },
 };

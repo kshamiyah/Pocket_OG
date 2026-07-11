@@ -204,7 +204,7 @@ guideline pages**, prioritised below rather than added alphabetically.
 6. ~~Caesarean section~~ — done (NG192)
 7. ~~Operative vaginal delivery~~ — done (GTG26, "Assisted Vaginal Birth")
 8. ~~Vaginal birth after caesarean~~ — done (GTG45)
-9. Group B Streptococcus in pregnancy
+9. ~~Group B Streptococcus in pregnancy~~ — done (GTG36)
 10. Twin and triplet pregnancy (full NG137, upgrading QS46)
 11. Obesity in pregnancy
 12. Breech presentation at term

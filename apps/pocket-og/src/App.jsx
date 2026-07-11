@@ -128,6 +128,7 @@ const FLOWCHART_LINKS = [
   { id: "NG192_CATEGORY",        gl: "NG192" },
   { id: "GTG26_ASSISTED_BIRTH",  gl: "GTG26" },
   { id: "GTG45_VBAC",            gl: "GTG45" },
+  { id: "GTG36_GBS",             gl: "GTG36" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -166,6 +167,7 @@ const FLOWCHART_GROUPS = [
   { gl: "NG192",     label: "Caesarean Birth" },
   { gl: "GTG26",     label: "Assisted Vaginal Birth" },
   { gl: "GTG45",     label: "Birth After Previous Caesarean" },
+  { gl: "GTG36",     label: "Group B Streptococcus Prevention" },
 ];
 
 export default function App() {
