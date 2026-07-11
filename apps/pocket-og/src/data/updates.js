@@ -4,6 +4,18 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.14.0",
+    date: "11/07/2026",
+    title: "Postnatal care & obstetric medicine",
+    changes: [
+      { tag: "new", text: "Postnatal care: the routine contact schedule, maternal red flags cross-linked to the guidelines that manage each one, what the 6-8 week check should cover, and newborn assessment/safety-netting, from NICE NG194." },
+      { tag: "new", text: "Epilepsy in pregnancy: AED optimisation, the valproate Pregnancy Prevention Programme, antenatal drug-level monitoring, and intrapartum/postnatal safety advice, from RCOG GTG68. Includes a seizure-management flowchart." },
+      { tag: "new", text: "Asthma in pregnancy: why to keep treating as normal, acute exacerbation management, and medication cautions around delivery, from the BTS/NICE/SIGN asthma pathway (NG244). Includes an acute-exacerbation flowchart." },
+      { tag: "new", text: "Renal disease in pregnancy: risk stratification, medication switching, and the pre-eclampsia overlap problem, from the UK Kidney Association's 2019 guideline." },
+      { tag: "new", text: "Cardiac disease in pregnancy: mWHO risk stratification, the Pregnancy Heart Team model, and red flags for a missed diagnosis, from the 2025 ESC guidelines — now the full-guideline home for the existing congenital heart disease, cardiomyopathy, MI, arrhythmia and valvular disease pathways." },
+    ],
+  },
+  {
     version: "1.13.0",
     date: "11/07/2026",
     title: "Seven new labour ward & antenatal guides",
