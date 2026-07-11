@@ -131,6 +131,7 @@ const FLOWCHART_LINKS = [
   { id: "GTG36_GBS",             gl: "GTG36" },
   { id: "NG137_TWINS",           gl: "NG137" },
   { id: "GTG72_OBESITY",         gl: "GTG72" },
+  { id: "GTG20_BREECH",          gl: "GTG20B" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -172,6 +173,8 @@ const FLOWCHART_GROUPS = [
   { gl: "GTG36",     label: "Group B Streptococcus Prevention" },
   { gl: "NG137",     label: "Twin and Triplet Pregnancy" },
   { gl: "GTG72",     label: "Obesity in Pregnancy" },
+  { gl: "GTG20A",    label: "External Cephalic Version" },
+  { gl: "GTG20B",    label: "Breech Presentation" },
 ];
 
 export default function App() {

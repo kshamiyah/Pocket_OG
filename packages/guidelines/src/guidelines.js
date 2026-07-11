@@ -43,6 +43,8 @@ export const GUIDELINES = {
   GTG36: { code: "GTG36", label: "Group B Streptococcus Prevention", version: "GTG36", date: "September 2017", color: "lime", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/prevention-of-early-onset-group-b-streptococcal-disease-green-top-guideline-no-36/" },
   NG137: { code: "NG137", label: "Twin and Triplet Pregnancy", version: "NG137", date: "September 2019 (updated 2024)", color: "cyan", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng137" },
   GTG72: { code: "GTG72", label: "Care of Women with Obesity in Pregnancy", version: "GTG72", date: "2018/2019", color: "amber", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/care-of-women-with-obesity-in-pregnancy-green-top-guideline-no-72/" },
+  GTG20A: { code: "GTG20A", label: "External Cephalic Version", version: "GTG20a", date: "2017", color: "sky", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/external-cephalic-version-and-reducing-the-incidence-of-term-breech-presentation-green-top-guideline-no-20a/" },
+  GTG20B: { code: "GTG20B", label: "Management of Breech Presentation", version: "GTG20b", date: "2017", color: "orange", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/management-of-breech-presentation-green-top-guideline-no-20b/" },
 };
 
 export const GL_COLORS = {
@@ -89,4 +91,6 @@ export const GL_COLORS = {
   GTG36: { badge: "bg-lime-900/50 text-lime-300 border-lime-600/40", dot: "bg-lime-400" },
   NG137: { badge: "bg-cyan-900/50 text-cyan-300 border-cyan-600/40", dot: "bg-cyan-400" },
   GTG72: { badge: "bg-amber-900/50 text-amber-300 border-amber-600/40", dot: "bg-amber-400" },
+  GTG20A: { badge: "bg-sky-900/50 text-sky-300 border-sky-600/40", dot: "bg-sky-400" },
+  GTG20B: { badge: "bg-orange-900/50 text-orange-300 border-orange-600/40", dot: "bg-orange-400" },
 };

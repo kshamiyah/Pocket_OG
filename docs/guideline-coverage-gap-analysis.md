@@ -207,7 +207,7 @@ guideline pages**, prioritised below rather than added alphabetically.
 9. ~~Group B Streptococcus in pregnancy~~ — done (GTG36)
 10. ~~Twin and triplet pregnancy~~ — done (NG137, added alongside QS46 rather than replacing it — QS46 covers the antenatal MDT/surveillance pathway, NG137 adds timing/mode of birth and complication staging)
 11. ~~Obesity in pregnancy~~ — done (GTG72)
-12. Breech presentation at term
+12. ~~Breech presentation at term~~ — done (GTG20a "External Cephalic Version", GTG20b "Management of Breech Presentation")
 13. Perineal trauma / OASI repair
 14. Fix the GTG50 cord prolapse orphan (§2)
 

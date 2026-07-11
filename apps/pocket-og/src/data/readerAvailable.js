@@ -22,4 +22,6 @@ export const READER_AVAILABLE = new Set([
   "GTG36",
   "NG137",
   "GTG72",
+  "GTG20A",
+  "GTG20B",
 ]);
