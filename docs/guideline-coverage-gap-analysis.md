@@ -7,16 +7,18 @@ punch list towards roughly 70% coverage of that corpus.
 
 ## 1. What's in the library today
 
-**32 full guideline pages** (reader available), across:
+**49 full guideline pages** (reader available), across:
 
 | Source | Count | Codes |
 |---|---|---|
 | RBH local (`GL`/`CG` prefix) | 11 | GL952, GL787, GL895, GL861, GL783, GL880, GL891, GL983, CG565, CG621, CG623 |
-| RCOG Green-top | 8 | GTG57, GTG63, GTG67, GTG52, GTG69, GTG31, GTG17, GTG5, GTG56 (9, see below) |
-| NICE | 7 | QS46, QS22, NG88, NG25, CG192, NG133, NG229, NG73 (8) |
+| RCOG Green-top | 21 | GTG57, GTG63, GTG67, GTG52, GTG69, GTG31, GTG17, GTG5, GTG56, GTG22, GTG42, GTG64, GTG27A, GTG27B, GTG26, GTG45, GTG36, GTG72, GTG20A, GTG20B, GTG68 |
+| NICE | 11 | QS22, NG88, NG25, CG192, NG133, NG229, NG73, NG192, NG137, NG194, NG244 |
 | BASHH | 2 | BASHH_PID, BASHH_HSV |
 | NHSCSP | 1 | NHSCSP20 |
 | MBRRACE | 1 | MBRRACE_SLMC2025 (surveillance report, not a management guideline) |
+| UK Kidney Association | 1 | UKKA_RENAL |
+| ESC | 1 | ESC_CVD |
 
 Around these, the app has 49 flowcharts, 13 consent/counselling pages, 15 drug
 (Rx) categories, and a set of curated topic pages tying guides, flowcharts,
@@ -187,9 +189,10 @@ source), **Missing** (nothing beyond a passing mention).
 Counting the corpus a UK O&G trainee is realistically expected to know
 (RCOG Green-top Guidelines ~60, relevant NICE guidelines ~18, BASHH ~10,
 FSRH ~8, NHSCSP/other ~5) gives a working denominator of roughly 100–110
-documents. At 32 full guideline pages, the library sits at **around
-28–30% coverage**. Reaching 70% needs on the order of **45–50 more full
-guideline pages**, prioritised below rather than added alphabetically.
+documents. At 49 full guideline pages, the library sits at **around
+45–49% coverage**, up from 28–30% at the start of this punch list. Reaching
+70% needs on the order of **25–30 more full guideline pages**, prioritised
+below rather than added alphabetically.
 
 ## 5. Priority order to close the gap
 
