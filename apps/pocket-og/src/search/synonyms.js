@@ -336,6 +336,9 @@ export const SYNONYMS = {
   "rhd negative": ["rh negative","rhesus negative","anti-d","group and screen","anti-d ig"],
   "rhesus negative": ["rhd negative","rh negative","anti-d","anti-d immunoglobulin","kleihauer"],
   "rhesus prophylaxis": ["anti-d","anti-d immunoglobulin","rhd negative","kleihauer"],
+  "raadp": ["routine antenatal anti-d prophylaxis","anti-d","anti-d immunoglobulin","28 weeks anti-d"],
+  "sensitising event": ["sensitizing event","anti-d","potentially sensitising event","kleihauer","fetomaternal haemorrhage"],
+  "sensitizing event": ["sensitising event","anti-d","kleihauer"],
   // Heavy Menstrual Bleeding / NG88
   "hmb": ["heavy menstrual bleeding","menorrhagia","heavy periods","flooding","menstrual blood loss","abnormal uterine bleeding"],
   "menorrhagia": ["hmb","heavy menstrual bleeding","heavy periods","flooding","aub","ng88"],

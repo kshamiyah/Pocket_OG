@@ -32,6 +32,7 @@ export const GUIDELINES = {
   MBRRACE_SLMC2025: { code: "MBRRACE_SLMC2025", label: "MBRRACE 2025", version: "2021–23 data", date: "September 2025", color: "rose", pdf: true, source: "MBRRACE", pdfUrl: "https://www.npeu.ox.ac.uk/assets/downloads/mbrrace-uk/reports/maternal-report-2025/MBRRACE-UK%20Maternal%20Report%202025%20-%20Main%20v1.2.pdf" },
   GTG5: { code: "GTG5", label: "Ovarian Hyperstimulation Syndrome", version: "GTG5", date: "February 2026", color: "amber", pdf: true, source: "RCOG", pdfUrl: "https://obgyn.onlinelibrary.wiley.com/doi/10.1111/1471-0528.70195" },
   GTG56: { code: "GTG56", label: "Maternal Collapse in Pregnancy and the Puerperium", version: "GTG56", date: "December 2019", color: "red", pdf: true, source: "RCOG", pdfUrl: "https://obgyn.onlinelibrary.wiley.com/doi/10.1111/1471-0528.15995" },
+  GTG22: { code: "GTG22", label: "Anti-D Prophylaxis (Rhesus D Alloimmunisation Prevention)", version: "GTG22", date: "March 2011 · RAADP dosing per NICE TA156", color: "cyan", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/the-use-of-anti-d-immunoglobulin-for-rhesus-d-prophylaxis-green-top-guideline-no-22/" },
 };
 
 export const GL_COLORS = {
@@ -67,4 +68,5 @@ export const GL_COLORS = {
   NG73: { badge: "bg-purple-900/50 text-purple-300 border-purple-600/40", dot: "bg-purple-400" },
   GTG5: { badge: "bg-amber-900/50 text-amber-300 border-amber-600/40", dot: "bg-amber-400" },
   GTG56: { badge: "bg-red-900/50 text-red-300 border-red-600/40", dot: "bg-red-400" },
+  GTG22: { badge: "bg-cyan-900/50 text-cyan-300 border-cyan-600/40", dot: "bg-cyan-400" },
 };

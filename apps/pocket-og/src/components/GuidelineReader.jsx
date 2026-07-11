@@ -17,6 +17,7 @@ import {
   MBRRACE_SLMC2025_SECTIONS,
   GTG5_SECTIONS,
   GTG56_SECTIONS,
+  GTG22_SECTIONS,
 } from "@pocket-og/guidelines";
 import { FLOWCHARTS } from "../data/flowcharts";
 import { GUIDELINE_KEYWORD_LINKS } from "../data/connections";
@@ -60,6 +61,7 @@ const SECTIONS_MAP = {
   MBRRACE_SLMC2025: MBRRACE_SLMC2025_SECTIONS,
   GTG5: GTG5_SECTIONS,
   GTG56: GTG56_SECTIONS,
+  GTG22: GTG22_SECTIONS,
 };
 
 

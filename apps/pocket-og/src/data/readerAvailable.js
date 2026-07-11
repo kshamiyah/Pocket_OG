@@ -11,4 +11,5 @@ export const READER_AVAILABLE = new Set([
   "MBRRACE_SLMC2025",
   "GTG5",
   "GTG56",
+  "GTG22",
 ]);
