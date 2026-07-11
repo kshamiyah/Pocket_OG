@@ -19,6 +19,18 @@ export const SYNONYMS = {
   "crash section": ["category 1 caesarean","emergency caesarean","decision to delivery interval"],
   "decision to delivery interval": ["category 1 caesarean","category 2 caesarean","ddi"],
   "maternal request caesarean": ["caesarean","elective caesarean","ng192"],
+  "assisted vaginal birth": ["operative vaginal delivery","forceps","ventouse","instrumental delivery","gtg26"],
+  "operative vaginal delivery": ["assisted vaginal birth","forceps","ventouse","instrumental delivery","gtg26"],
+  "instrumental delivery": ["assisted vaginal birth","operative vaginal delivery","forceps","ventouse"],
+  "forceps": ["ventouse","assisted vaginal birth","instrumental delivery","kiellands forceps"],
+  "ventouse": ["forceps","vacuum extraction","assisted vaginal birth","kiwi omnicup"],
+  "vacuum extraction": ["ventouse","assisted vaginal birth","instrumental delivery"],
+  "kiellands forceps": ["rotational forceps","forceps","assisted vaginal birth"],
+  "trial in theatre": ["trial of instrumental delivery","assisted vaginal birth","failed instrumental delivery"],
+  "failed instrumental delivery": ["trial in theatre","assisted vaginal birth","abandon instrumental delivery"],
+  "oasi": ["obstetric anal sphincter injury","third degree tear","fourth degree tear","perineal trauma"],
+  "obstetric anal sphincter injury": ["oasi","third degree tear","fourth degree tear","perineal trauma"],
+  "cephalhaematoma": ["ventouse","neonatal head injury","subgaleal haemorrhage"],
 
   // Fetal monitoring / CTG (NICE NG229)
   "ctg": ["cardiotocography","cardiotocograph","fetal monitoring","fetal heart rate","fhr","efm","ng229","pathological ctg","suspicious ctg"],

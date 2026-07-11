@@ -126,6 +126,7 @@ const FLOWCHART_LINKS = [
   { id: "GTG27A_PAS",            gl: "GTG27A" },
   { id: "GTG27B_VASA",           gl: "GTG27B" },
   { id: "NG192_CATEGORY",        gl: "NG192" },
+  { id: "GTG26_ASSISTED_BIRTH",  gl: "GTG26" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -162,6 +163,7 @@ const FLOWCHART_GROUPS = [
   { gl: "GTG27A",    label: "Placenta Praevia & Accreta Spectrum" },
   { gl: "GTG27B",    label: "Vasa Praevia" },
   { gl: "NG192",     label: "Caesarean Birth" },
+  { gl: "GTG26",     label: "Assisted Vaginal Birth" },
 ];
 
 export default function App() {

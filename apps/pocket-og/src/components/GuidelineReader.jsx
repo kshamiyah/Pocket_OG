@@ -23,6 +23,7 @@ import {
   GTG27A_SECTIONS,
   GTG27B_SECTIONS,
   NG192_SECTIONS,
+  GTG26_SECTIONS,
 } from "@pocket-og/guidelines";
 import { FLOWCHARTS } from "../data/flowcharts";
 import { GUIDELINE_KEYWORD_LINKS } from "../data/connections";
@@ -72,6 +73,7 @@ const SECTIONS_MAP = {
   GTG27A: GTG27A_SECTIONS,
   GTG27B: GTG27B_SECTIONS,
   NG192: NG192_SECTIONS,
+  GTG26: GTG26_SECTIONS,
 };
 
 

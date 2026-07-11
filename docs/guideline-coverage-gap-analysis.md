@@ -202,7 +202,7 @@ guideline pages**, prioritised below rather than added alphabetically.
 
 **P1, high daily-use, currently thin or missing:**
 6. ~~Caesarean section~~ — done (NG192)
-7. Operative vaginal delivery
+7. ~~Operative vaginal delivery~~ — done (GTG26, "Assisted Vaginal Birth")
 8. Vaginal birth after caesarean
 9. Group B Streptococcus in pregnancy
 10. Twin and triplet pregnancy (full NG137, upgrading QS46)
