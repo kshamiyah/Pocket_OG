@@ -131,7 +131,6 @@ const FLOWCHART_LINKS = [
   { id: "NG137_TWINS",           gl: "NG137" },
   { id: "GTG72_OBESITY",         gl: "GTG72" },
   { id: "GTG20_BREECH",          gl: "GTG20B" },
-  { id: "NG194_POSTNATAL",       gl: "NG194" },
 ];
 
 const FLOWCHART_GROUPS = [

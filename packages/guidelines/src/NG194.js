@@ -37,7 +37,6 @@ export const NG194_SECTIONS = [
       "postnatal headache", "postnatal chest pain", "6 week check contents",
       "8 week check contents",
     ],
-    flowchartId: "NG194_POSTNATAL",
     content: [
       { type: "alert", value: "Tell every woman, at the first postnatal contact, which symptoms need medical advice without delay — don't assume this is obvious or that she'll remember being told once in labour." },
       { type: "table",
