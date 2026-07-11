@@ -130,6 +130,7 @@ const FLOWCHART_LINKS = [
   { id: "GTG45_VBAC",            gl: "GTG45" },
   { id: "GTG36_GBS",             gl: "GTG36" },
   { id: "NG137_TWINS",           gl: "NG137" },
+  { id: "GTG72_OBESITY",         gl: "GTG72" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -170,6 +171,7 @@ const FLOWCHART_GROUPS = [
   { gl: "GTG45",     label: "Birth After Previous Caesarean" },
   { gl: "GTG36",     label: "Group B Streptococcus Prevention" },
   { gl: "NG137",     label: "Twin and Triplet Pregnancy" },
+  { gl: "GTG72",     label: "Obesity in Pregnancy" },
 ];
 
 export default function App() {

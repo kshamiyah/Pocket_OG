@@ -273,6 +273,11 @@ export const SYNONYMS = {
   "sfgr": ["selective fetal growth restriction","selective growth restriction","monochorionic","fetal growth restriction"],
   "selective fetal growth restriction": ["sfgr","selective growth restriction","monochorionic"],
   "timing of birth twins": ["ng137","twin pregnancy","dcda","mcda","mcma","elective birth twins"],
+  "obesity": ["obesity in pregnancy","bmi","class 1 obesity","class 2 obesity","morbid obesity","gtg72"],
+  "obesity in pregnancy": ["obesity","bmi","morbid obesity","gtg72"],
+  "bmi": ["obesity","obesity in pregnancy","body mass index"],
+  "morbid obesity": ["obesity","class 3 obesity","bmi 40","gtg72"],
+  "folic acid 5mg": ["obesity in pregnancy","high dose folic acid","folic acid"],
   // Antenatal care / QS22
   "booking": ["booking appointment","antenatal booking","10 weeks","first appointment","antenatal care"],
   "booking appointment": ["booking","antenatal booking","10 weeks","first antenatal","risk assessment"],

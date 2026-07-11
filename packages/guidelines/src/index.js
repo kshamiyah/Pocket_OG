@@ -47,3 +47,4 @@ export { GTG26_SECTIONS } from "./GTG26.js";
 export { GTG45_SECTIONS } from "./GTG45.js";
 export { GTG36_SECTIONS } from "./GTG36.js";
 export { NG137_SECTIONS } from "./NG137.js";
+export { GTG72_SECTIONS } from "./GTG72.js";
