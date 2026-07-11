@@ -4,14 +4,6 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
-    version: "1.12.0",
-    date: "11/07/2026",
-    title: "Anti-D prophylaxis",
-    changes: [
-      { tag: "new", text: "Anti-D prophylaxis: RAADP dosing, anti-D for potentially sensitising events (miscarriage, ectopic, ECV, APH, trauma, invasive procedures), FMH/Kleihauer quantification, and postnatal anti-D after delivery, from RCOG GTG22 and NICE TA156. Includes a step-by-step flowchart." },
-    ],
-  },
-  {
     version: "1.11.0",
     date: "08/07/2026",
     title: "Dark mode",
