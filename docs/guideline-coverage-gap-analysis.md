@@ -99,9 +99,9 @@ source), **Missing** (nothing beyond a passing mention).
 ### Postnatal
 | Topic | Status |
 |---|---|
-| Postnatal care pathway | **Missing** (NICE NG194) |
+| Postnatal care pathway | Strong (NG194) |
 | Perinatal mental health | Strong (CG192) |
-| Sepsis following pregnancy | **Missing** |
+| Sepsis following pregnancy | Strong (GTG64) |
 | Secondary PPH | **Missing** (covered only incidentally under GTG52) |
 
 ### Medical disorders in pregnancy
@@ -198,7 +198,7 @@ guideline pages**, prioritised below rather than added alphabetically.
 2. ~~Shoulder dystocia~~ — done (GTG42)
 3. ~~Sepsis in pregnancy and the puerperium~~ — done (GTG64, the current Dec 2024 unified guideline; supersedes the old GTG64a/b split)
 4. ~~Placenta accreta spectrum + vasa praevia~~ — done (GTG27a, GTG27b)
-5. Postnatal care pathway (NICE NG194)
+5. ~~Postnatal care pathway~~ — done (NG194) — **P0 now fully closed out**
 
 **P1, high daily-use, currently thin or missing:**
 6. ~~Caesarean section~~ — done (NG192)

@@ -131,6 +131,7 @@ const FLOWCHART_LINKS = [
   { id: "NG137_TWINS",           gl: "NG137" },
   { id: "GTG72_OBESITY",         gl: "GTG72" },
   { id: "GTG20_BREECH",          gl: "GTG20B" },
+  { id: "NG194_POSTNATAL",       gl: "NG194" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -173,6 +174,7 @@ const FLOWCHART_GROUPS = [
   { gl: "GTG72",     label: "Obesity in Pregnancy" },
   { gl: "GTG20A",    label: "External Cephalic Version" },
   { gl: "GTG20B",    label: "Breech Presentation" },
+  { gl: "NG194",     label: "Postnatal Care" },
 ];
 
 export default function App() {

@@ -129,6 +129,13 @@ export const SYNONYMS = {
   "gbs bacteriuria": ["gbs","group b strep","iap"],
   "gbs screening": ["gbs","universal screening","risk based","gtg36"],
   "early onset neonatal infection": ["gbs","neonatal sepsis","ng195","red flag neonatal"],
+  "postnatal care": ["postnatal check", "postnatal contacts", "ng194", "6 week check", "8 week check"],
+  "postnatal check": ["postnatal care", "6 week check", "8 week check", "ng194"],
+  "6 week check": ["6-8 week check", "postnatal check", "postnatal care", "ng194"],
+  "8 week check": ["6-8 week check", "postnatal check", "postnatal care", "ng194"],
+  "postnatal red flags": ["postnatal care", "secondary pph", "postnatal sepsis", "postnatal vte", "ng194"],
+  "newborn weight loss": ["baby weight loss", "postnatal care", "feeding assessment", "ng194"],
+  "postnatal weight loss": ["newborn weight loss", "baby weight loss", "ng194"],
   "well baby observation": ["neonatal observation","gbs","ng195"],
   // Sepsis / infection
   "bug": ["infection","sepsis","antibiotics"],

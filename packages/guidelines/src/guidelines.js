@@ -44,6 +44,7 @@ export const GUIDELINES = {
   GTG72: { code: "GTG72", label: "Care of Women with Obesity in Pregnancy", version: "GTG72", date: "2018/2019", color: "amber", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/care-of-women-with-obesity-in-pregnancy-green-top-guideline-no-72/" },
   GTG20A: { code: "GTG20A", label: "External Cephalic Version", version: "GTG20a", date: "2017", color: "sky", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/external-cephalic-version-and-reducing-the-incidence-of-term-breech-presentation-green-top-guideline-no-20a/" },
   GTG20B: { code: "GTG20B", label: "Management of Breech Presentation", version: "GTG20b", date: "2017", color: "orange", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/management-of-breech-presentation-green-top-guideline-no-20b/" },
+  NG194: { code: "NG194", label: "Postnatal Care", version: "NG194", date: "April 2021", color: "emerald", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng194" },
 };
 
 export const GL_COLORS = {
@@ -91,4 +92,5 @@ export const GL_COLORS = {
   GTG72: { badge: "bg-amber-900/50 text-amber-300 border-amber-600/40", dot: "bg-amber-400" },
   GTG20A: { badge: "bg-sky-900/50 text-sky-300 border-sky-600/40", dot: "bg-sky-400" },
   GTG20B: { badge: "bg-orange-900/50 text-orange-300 border-orange-600/40", dot: "bg-orange-400" },
+  NG194: { badge: "bg-emerald-900/50 text-emerald-300 border-emerald-600/40", dot: "bg-emerald-400" },
 };
