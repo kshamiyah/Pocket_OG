@@ -45,6 +45,10 @@ export const GUIDELINES = {
   GTG20A: { code: "GTG20A", label: "External Cephalic Version", version: "GTG20a", date: "2017", color: "sky", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/external-cephalic-version-and-reducing-the-incidence-of-term-breech-presentation-green-top-guideline-no-20a/" },
   GTG20B: { code: "GTG20B", label: "Management of Breech Presentation", version: "GTG20b", date: "2017", color: "orange", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/management-of-breech-presentation-green-top-guideline-no-20b/" },
   NG194: { code: "NG194", label: "Postnatal Care", version: "NG194", date: "April 2021", color: "emerald", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng194" },
+  GTG68: { code: "GTG68", label: "Epilepsy in Pregnancy", version: "GTG68", date: "June 2016", color: "violet", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/epilepsy-in-pregnancy-green-top-guideline-no-68/" },
+  NG244: { code: "NG244", label: "Asthma in Pregnancy", version: "NG244", date: "Updated November 2024", color: "teal", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng244/chapter/Managing-asthma-in-pregnancy-during-labour-and-when-breastfeeding" },
+  UKKA_RENAL: { code: "UKKA_RENAL", label: "Renal Disease in Pregnancy", version: "UKKA 2019", date: "September 2019", color: "emerald", pdf: true, source: "UKKA", pdfUrl: "https://www.ukkidney.org/sites/renal.org/files/FINAL-Pregnancy-Guideline-September-2019.pdf" },
+  ESC_CVD: { code: "ESC_CVD", label: "Cardiac Disease in Pregnancy", version: "ESC 2025", date: "2025 (supersedes 2018 edition)", color: "rose", pdf: true, source: "ESC", pdfUrl: "https://academic.oup.com/eurheartj/article/46/43/4462/8234487" },
 };
 
 export const GL_COLORS = {
@@ -93,4 +97,8 @@ export const GL_COLORS = {
   GTG20A: { badge: "bg-sky-900/50 text-sky-300 border-sky-600/40", dot: "bg-sky-400" },
   GTG20B: { badge: "bg-orange-900/50 text-orange-300 border-orange-600/40", dot: "bg-orange-400" },
   NG194: { badge: "bg-emerald-900/50 text-emerald-300 border-emerald-600/40", dot: "bg-emerald-400" },
+  GTG68: { badge: "bg-violet-900/50 text-violet-300 border-violet-600/40", dot: "bg-violet-400" },
+  NG244: { badge: "bg-teal-900/50 text-teal-300 border-teal-600/40", dot: "bg-teal-400" },
+  UKKA_RENAL: { badge: "bg-emerald-900/50 text-emerald-300 border-emerald-600/40", dot: "bg-emerald-400" },
+  ESC_CVD: { badge: "bg-rose-900/50 text-rose-300 border-rose-600/40", dot: "bg-rose-400" },
 };

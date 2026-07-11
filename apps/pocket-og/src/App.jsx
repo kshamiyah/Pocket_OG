@@ -131,6 +131,9 @@ const FLOWCHART_LINKS = [
   { id: "NG137_TWINS",           gl: "NG137" },
   { id: "GTG72_OBESITY",         gl: "GTG72" },
   { id: "GTG20_BREECH",          gl: "GTG20B" },
+  { id: "GTG68_SEIZURE",         gl: "GTG68" },
+  { id: "NG244_ACUTE_ASTHMA",    gl: "NG244" },
+  { id: "ESC_MWHO_TRIAGE",       gl: "ESC_CVD" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -174,6 +177,9 @@ const FLOWCHART_GROUPS = [
   { gl: "GTG20A",    label: "External Cephalic Version" },
   { gl: "GTG20B",    label: "Breech Presentation" },
   { gl: "NG194",     label: "Postnatal Care" },
+  { gl: "GTG68",     label: "Epilepsy in Pregnancy" },
+  { gl: "NG244",     label: "Asthma in Pregnancy" },
+  { gl: "ESC_CVD",   label: "Cardiac Disease in Pregnancy" },
 ];
 
 export default function App() {

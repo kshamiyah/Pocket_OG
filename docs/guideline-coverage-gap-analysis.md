@@ -108,11 +108,11 @@ source), **Missing** (nothing beyond a passing mention).
 | Topic | Status |
 |---|---|
 | Thyroid disease | Thin (TOG-sourced flowchart only) |
-| Cardiac disease (congenital, acquired, MI, arrhythmia, valvular) | Thin (TOG-sourced flowcharts only; no ESC/RCOG full guideline) |
-| Epilepsy in pregnancy | **Missing** |
-| Asthma in pregnancy | **Missing** |
-| Renal disease in pregnancy | **Missing** |
-| Obesity in pregnancy | **Missing** (also listed above) |
+| Cardiac disease (congenital, acquired, MI, arrhythmia, valvular) | Strong (ESC 2025 guideline added on top of the existing TOG flowcharts — risk stratification, red flags, delivery planning, with the TOG flowcharts now reached via the reader rather than standing alone) |
+| Epilepsy in pregnancy | Strong (GTG68) |
+| Asthma in pregnancy | Strong (NG244) |
+| Renal disease in pregnancy | Strong (UK Kidney Association 2019) |
+| Obesity in pregnancy | Strong (GTG72, also listed above) |
 
 ### Early pregnancy
 | Topic | Status |
@@ -212,10 +212,10 @@ guideline pages**, prioritised below rather than added alphabetically.
 14. Fix the GTG50 cord prolapse orphan (§2)
 
 **P2, completes core obstetric medicine and gynae oncology (currently a hard zero):**
-15. Epilepsy in pregnancy
-16. Asthma in pregnancy
-17. Renal disease in pregnancy
-18. Cardiac disease in pregnancy (upgrade TOG flowcharts to a full guideline tier)
+15. ~~Epilepsy in pregnancy~~ — done (GTG68)
+16. ~~Asthma in pregnancy~~ — done (NG244)
+17. ~~Renal disease in pregnancy~~ — done (UK Kidney Association 2019)
+18. ~~Cardiac disease in pregnancy~~ — done (ESC 2025, upgrades the existing TOG flowcharts to a full guideline tier — all four obstetric medicine items now closed out)
 19. Ovarian cancer (suspected malignancy, RMI)
 20. Endometrial cancer
 21. Cervical cancer

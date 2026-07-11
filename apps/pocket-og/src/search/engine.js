@@ -31,6 +31,10 @@ import {
   GTG20A_SECTIONS,
   GTG20B_SECTIONS,
   NG194_SECTIONS,
+  GTG68_SECTIONS,
+  NG244_SECTIONS,
+  UKKA_RENAL_SECTIONS,
+  ESC_CVD_SECTIONS,
 } from "@pocket-og/guidelines";
 import { QUICKREF_SECTIONS } from "../data/quickref";
 import { APPROACH_SECTIONS } from "../data/approaches";
@@ -154,6 +158,10 @@ const _WIKI = [
   ...GTG20A_SECTIONS,
   ...GTG20B_SECTIONS,
   ...NG194_SECTIONS,
+  ...GTG68_SECTIONS,
+  ...NG244_SECTIONS,
+  ...UKKA_RENAL_SECTIONS,
+  ...ESC_CVD_SECTIONS,
   ...QUICKREF_SECTIONS,
   ...APPROACH_SECTIONS,
   ...TOG_SECTIONS,

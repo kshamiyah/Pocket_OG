@@ -25,4 +25,8 @@ export const READER_AVAILABLE = new Set([
   "GTG20A",
   "GTG20B",
   "NG194",
+  "GTG68",
+  "NG244",
+  "UKKA_RENAL",
+  "ESC_CVD",
 ]);

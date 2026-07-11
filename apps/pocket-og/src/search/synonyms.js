@@ -1,4 +1,28 @@
 export const SYNONYMS = {
+  // Obstetric medicine
+  "epilepsy": ["epilepsy in pregnancy","seizure","aed","antiepileptic","gtg68"],
+  "epilepsy in pregnancy": ["epilepsy","seizure","aed","gtg68"],
+  "aed": ["antiepileptic drug","epilepsy","valproate","lamotrigine","levetiracetam"],
+  "valproate": ["sodium valproate","valproate pregnancy prevention programme","ppp","aed","gtg68"],
+  "valproate pregnancy prevention programme": ["valproate","ppp","mhra valproate"],
+  "lamotrigine": ["aed","epilepsy","levetiracetam","antiepileptic"],
+  "levetiracetam": ["aed","epilepsy","lamotrigine","antiepileptic"],
+  "asthma": ["asthma in pregnancy","acute asthma","salbutamol","ng244"],
+  "asthma in pregnancy": ["asthma","acute asthma","inhalers pregnancy","ng244"],
+  "acute asthma": ["asthma","asthma in pregnancy","salbutamol nebuliser","ng244"],
+  "carboprost asthma": ["asthma","carboprost","uterotonic","bronchospasm"],
+  "renal disease pregnancy": ["ckd pregnancy","chronic kidney disease","renal transplant pregnancy","ukka"],
+  "ckd pregnancy": ["renal disease pregnancy","chronic kidney disease","ukka"],
+  "chronic kidney disease": ["ckd pregnancy","renal disease pregnancy","ukka"],
+  "renal transplant pregnancy": ["ckd pregnancy","renal disease pregnancy","mycophenolate","tacrolimus"],
+  "mycophenolate": ["renal transplant pregnancy","teratogenic","azathioprine"],
+  "cardiac disease pregnancy": ["heart disease pregnancy","mwho","pregnancy heart team","esc guidelines"],
+  "heart disease pregnancy": ["cardiac disease pregnancy","mwho","esc guidelines"],
+  "mwho": ["modified who classification","cardiac disease pregnancy","pregnancy heart team"],
+  "modified who classification": ["mwho","cardiac disease pregnancy","pregnancy heart team"],
+  "pregnancy heart team": ["mwho","cardiac disease pregnancy","esc guidelines"],
+  "peripartum cardiomyopathy": ["cardiomyopathy pregnancy","cardiac disease pregnancy","postnatal breathlessness"],
+
   // Counsel (formerly Consent)
   "counsel": ["consent","counselling","risks","benefits","patient information"],
   "counselling": ["consent","counsel","risks","benefits","patient information"],
@@ -95,7 +119,7 @@ export const SYNONYMS = {
   // Seizure
   "fitting": ["eclampsia","seizure","convulsion","mgso4"],
   "fit": ["eclampsia","seizure","mgso4"],
-  "seizure": ["eclampsia","fitting","convulsion","mgso4"],
+  "seizure": ["eclampsia","fitting","convulsion","mgso4","epilepsy","aed","gtg68"],
   "convulsion": ["eclampsia","seizure","fitting","mgso4"],
   // Discharge
   "how long": ["length of stay","discharge","stay","duration"],

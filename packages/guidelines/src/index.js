@@ -50,3 +50,7 @@ export { GTG72_SECTIONS } from "./GTG72.js";
 export { GTG20A_SECTIONS } from "./GTG20A.js";
 export { GTG20B_SECTIONS } from "./GTG20B.js";
 export { NG194_SECTIONS } from "./NG194.js";
+export { GTG68_SECTIONS } from "./GTG68.js";
+export { NG244_SECTIONS } from "./NG244.js";
+export { UKKA_RENAL_SECTIONS } from "./UKKA_RENAL.js";
+export { ESC_CVD_SECTIONS } from "./ESC_CVD.js";

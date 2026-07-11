@@ -24,10 +24,12 @@ export const SOURCE_COLORS = {
   MBRRACE:  { badge: "bg-indigo-50 text-indigo-700",   border: "border-indigo-100",  conditionColor: "text-indigo-500",  icon: "text-indigo-500",  accent: "bg-indigo-500",  solid: "bg-indigo-600",  solidHover: "hover:bg-indigo-700",  text: "text-indigo-700",  bg: "bg-indigo-50" },
   TOG:      { badge: "bg-pink-50 text-pink-700",       border: "border-pink-100",    conditionColor: "text-pink-500",    icon: "text-pink-500",    accent: "bg-pink-500",    solid: "bg-pink-600",    solidHover: "hover:bg-pink-700",    text: "text-pink-700",    bg: "bg-pink-50" },
   TRIAL:    { badge: "bg-cyan-50 text-cyan-700",       border: "border-cyan-100",    conditionColor: "text-cyan-600",    icon: "text-cyan-500",    accent: "bg-cyan-500",    solid: "bg-cyan-600",    solidHover: "hover:bg-cyan-700",    text: "text-cyan-700",    bg: "bg-cyan-50" },
+  UKKA:     { badge: "bg-emerald-50 text-emerald-700", border: "border-emerald-100", conditionColor: "text-emerald-500", icon: "text-emerald-500", accent: "bg-emerald-500", solid: "bg-emerald-600", solidHover: "hover:bg-emerald-700", text: "text-emerald-700", bg: "bg-emerald-50" },
+  ESC:      { badge: "bg-rose-50 text-rose-700",       border: "border-rose-100",    conditionColor: "text-rose-500",    icon: "text-rose-500",    accent: "bg-rose-500",    solid: "bg-rose-600",    solidHover: "hover:bg-rose-700",    text: "text-rose-700",    bg: "bg-rose-50" },
 };
 
 // Sources that appear in the app, in legend order.
-export const SOURCE_ORDER = ["RBH", "NICE", "RCOG", "BASHH", "NHSCSP", "MBRRACE", "TOG", "TRIAL"];
+export const SOURCE_ORDER = ["RBH", "NICE", "RCOG", "BASHH", "NHSCSP", "MBRRACE", "TOG", "TRIAL", "UKKA", "ESC"];
 
 export const SOURCE_LABELS = {
   RBH: "RBH — local trust",
@@ -38,6 +40,8 @@ export const SOURCE_LABELS = {
   MBRRACE: "MBRRACE-UK",
   TOG: "TOG — RCOG review journal",
   TRIAL: "Landmark trial",
+  UKKA: "UK Kidney Association",
+  ESC: "European Society of Cardiology",
 };
 
 // Hex equivalents (the -500 shades) for places that can't use Tailwind classes
@@ -45,7 +49,7 @@ export const SOURCE_LABELS = {
 export const SOURCE_HEX = {
   RBH: "#3b82f6", NICE: "#14b8a6", RCOG: "#8b5cf6",
   BASHH: "#d946ef", NHSCSP: "#64748b", MBRRACE: "#6366f1",
-  TOG: "#ec4899", TRIAL: "#06b6d4",
+  TOG: "#ec4899", TRIAL: "#06b6d4", UKKA: "#10b981", ESC: "#f43f5e",
 };
 
 export const DEFAULT_GL_COLORS = {
