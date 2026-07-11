@@ -194,7 +194,7 @@ guideline pages**, prioritised below rather than added alphabetically.
 **P0, safety-critical and currently absent:**
 1. ~~Anti-D / rhesus disease prophylaxis~~ — done (GTG22)
 2. ~~Shoulder dystocia~~ — done (GTG42)
-3. Sepsis in pregnancy and the puerperium (bacterial sepsis, GTG64a/b)
+3. ~~Sepsis in pregnancy and the puerperium~~ — done (GTG64, the current Dec 2024 unified guideline; supersedes the old GTG64a/b split)
 4. Placenta accreta spectrum + vasa praevia (splits out of the ageing GTG63)
 5. Postnatal care pathway (NICE NG194)
 

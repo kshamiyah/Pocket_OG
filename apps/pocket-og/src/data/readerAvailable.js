@@ -13,4 +13,5 @@ export const READER_AVAILABLE = new Set([
   "GTG56",
   "GTG22",
   "GTG42",
+  "GTG64",
 ]);

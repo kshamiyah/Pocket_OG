@@ -19,6 +19,7 @@ import {
   GTG56_SECTIONS,
   GTG22_SECTIONS,
   GTG42_SECTIONS,
+  GTG64_SECTIONS,
 } from "@pocket-og/guidelines";
 import { QUICKREF_SECTIONS } from "../data/quickref";
 import { APPROACH_SECTIONS } from "../data/approaches";
@@ -130,6 +131,7 @@ const _WIKI = [
   ...GTG56_SECTIONS,
   ...GTG22_SECTIONS,
   ...GTG42_SECTIONS,
+  ...GTG64_SECTIONS,
   ...QUICKREF_SECTIONS,
   ...APPROACH_SECTIONS,
   ...TOG_SECTIONS,

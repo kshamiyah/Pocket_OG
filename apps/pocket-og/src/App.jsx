@@ -122,6 +122,7 @@ const FLOWCHART_LINKS = [
   { id: "MATERNAL_COLLAPSE_ARREST",  gl: "GTG56" },
   { id: "GTG22_ANTID",           gl: "GTG22" },
   { id: "GTG42_SHOULDER",        gl: "GTG42" },
+  { id: "GTG64_SEPSIS",          gl: "GTG64" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -154,6 +155,7 @@ const FLOWCHART_GROUPS = [
   { gl: "GTG56",     label: "Maternal Collapse & Cardiac Arrest" },
   { gl: "GTG22",     label: "Anti-D Prophylaxis" },
   { gl: "GTG42",     label: "Shoulder Dystocia" },
+  { gl: "GTG64",     label: "Maternal Sepsis" },
 ];
 
 export default function App() {
