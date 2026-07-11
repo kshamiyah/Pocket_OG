@@ -125,7 +125,6 @@ const FLOWCHART_LINKS = [
   { id: "GTG64_SEPSIS",          gl: "GTG64" },
   { id: "GTG27A_PAS",            gl: "GTG27A" },
   { id: "GTG27B_VASA",           gl: "GTG27B" },
-  { id: "NG192_CATEGORY",        gl: "NG192" },
   { id: "GTG26_ASSISTED_BIRTH",  gl: "GTG26" },
   { id: "GTG45_VBAC",            gl: "GTG45" },
   { id: "GTG36_GBS",             gl: "GTG36" },

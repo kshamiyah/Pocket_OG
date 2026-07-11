@@ -13,7 +13,6 @@ export const NG192_SECTIONS = [
       "category 1 caesarean", "category 2 caesarean", "category 3 caesarean", "category 4 caesarean",
       "decision to delivery interval", "emergency caesarean", "crash section",
     ],
-    flowchartId: "NG192_CATEGORY",
     content: [
       { type: "text", value: "Every caesarean birth is assigned an urgency category at the point of decision — this drives staffing, theatre priority, and how the decision is communicated to the team, not just how fast the knife goes in." },
       { type: "table",
