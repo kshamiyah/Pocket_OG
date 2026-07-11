@@ -1,6 +1,6 @@
 export const READER_AVAILABLE = new Set([
   "GL861", "GL952", "GL891", "GL983", "GL880", "GL787", "GL783", "GL895",
-  "CG565", "CG621", "CG623", "QS46", "QS22", "GTG57", "GTG63", "GTG67",
+  "CG565", "CG621", "CG623", "QS22", "GTG57", "GTG63", "GTG67",
   "NG88", "NHSCSP20",
   "GTG52", "GTG69", "NG25", "GTG31", "GTG17", "CG192",
   "NG133",

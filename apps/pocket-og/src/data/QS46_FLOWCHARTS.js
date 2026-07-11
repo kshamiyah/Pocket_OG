@@ -1,11 +1,12 @@
-// QS46 — Multiple Pregnancy: Twin & Triplet Pregnancies (NICE)
+// NG137 — Twin and Triplet Pregnancy (NICE), incorporating the QS46
+// quality standard's care pathway
 // Flowchart 1: Chorionicity → Care Pathway
 // Flowchart 2: When to involve tertiary fetal medicine centre
 
 export const QS46_CARE_PATHWAY_FLOWCHART = {
   id: "QS46_CARE_PATHWAY",
   title: "Multiple Pregnancy: Care Pathway by Chorionicity",
-  subtitle: "QS46 · NICE: Twin & Triplet Pregnancies",
+  subtitle: "NG137 · NICE: Twin & Triplet Pregnancy",
   startId: "scan",
   nodes: {
 
@@ -213,7 +214,7 @@ export const QS46_CARE_PATHWAY_FLOWCHART = {
 export const QS46_TERTIARY_FLOWCHART = {
   id: "QS46_TERTIARY",
   title: "When to Involve Tertiary Fetal Medicine Centre",
-  subtitle: "QS46 · NICE: Twin & Triplet Pregnancies",
+  subtitle: "NG137 · NICE: Twin & Triplet Pregnancy",
   startId: "assess",
   nodes: {
 

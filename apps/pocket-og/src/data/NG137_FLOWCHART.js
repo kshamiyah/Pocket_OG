@@ -1,7 +1,7 @@
 // NG137 — Twin and Triplet Pregnancy (NICE Guideline NG137, September 2019,
 // updated 2024). Timing and mode of birth for an otherwise uncomplicated
-// multiple pregnancy — bring forward for any complication (see QS46 for
-// the complication/tertiary-referral pathway).
+// multiple pregnancy — bring forward for any complication (see the
+// complication/tertiary-referral pathway in the reader for that route).
 
 export const NG137_TWINS_FLOWCHART = {
   id: "NG137_TWINS",

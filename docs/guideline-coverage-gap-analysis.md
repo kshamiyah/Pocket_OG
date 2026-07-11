@@ -66,7 +66,7 @@ source), **Missing** (nothing beyond a passing mention).
 | PPROM / preterm labour | Strong (GL895, NG25) |
 | Reduced fetal movements | Strong (GTG57) |
 | Small for gestational age / FGR | Strong (GTG31) |
-| Multiple pregnancy | Thin (QS46 is a quality standard summary, not the full NICE NG137 twin/triplet guideline) |
+| Multiple pregnancy | Strong (NG137, merged with its QS46 quality standard into one reader page) |
 | Nausea & vomiting / hyperemesis | Strong (GTG69) |
 | Antenatal care pathway | Thin (QS22 quality standard only, not full NICE NG201) |
 | Antenatal corticosteroids | Thin (consent page only, no flowchart/guideline) |
@@ -205,7 +205,7 @@ guideline pages**, prioritised below rather than added alphabetically.
 7. ~~Operative vaginal delivery~~ — done (GTG26, "Assisted Vaginal Birth")
 8. ~~Vaginal birth after caesarean~~ — done (GTG45)
 9. ~~Group B Streptococcus in pregnancy~~ — done (GTG36)
-10. ~~Twin and triplet pregnancy~~ — done (NG137, added alongside QS46 rather than replacing it — QS46 covers the antenatal MDT/surveillance pathway, NG137 adds timing/mode of birth and complication staging)
+10. ~~Twin and triplet pregnancy~~ — done (NG137, since merged with QS46 into a single "Twin & Triplet Pregnancy" reader page — QS46's statements were a distillation of NG137 itself, not a separate source, so splitting them across two pages was more confusing than useful)
 11. ~~Obesity in pregnancy~~ — done (GTG72)
 12. ~~Breech presentation at term~~ — done (GTG20a "External Cephalic Version", GTG20b "Management of Breech Presentation")
 13. Perineal trauma / OASI repair

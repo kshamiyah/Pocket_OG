@@ -184,7 +184,7 @@ export const PEARLS = [
     topic: "Multiple pregnancy",
     pearl: "Chorionicity, set early, dictates how closely twins are watched.",
     detail: "Monochorionic twins share a placenta and risk twin-to-twin transfusion, so they're scanned fortnightly from 16 weeks. Determining chorionicity in the first trimester is one of the most consequential scans of the pregnancy.",
-    gl: "QS46",
+    gl: "NG137",
     fc: "QS46_CARE_PATHWAY", fcLabel: "Twin care pathway",
   },
   {

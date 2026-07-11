@@ -15,7 +15,6 @@ export { CG621_SECTIONS } from "./CG621.js";
 export { CG623_SECTIONS } from "./CG623.js";
 
 export { QS22_SECTIONS } from "./QS22.js";
-export { QS46_SECTIONS } from "./QS46.js";
 
 export { GTG57_SECTIONS } from "./GTG57.js";
 export { GTG63_SECTIONS } from "./GTG63.js";
