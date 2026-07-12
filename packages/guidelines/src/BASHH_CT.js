@@ -37,8 +37,36 @@ export const BASHH_CT_SECTIONS = [
       { type: "alert", value: "Doxycycline 100 mg twice daily for 7 days is first-line for uncomplicated urogenital, pharyngeal and rectal infection — this replaced azithromycin as first-line after rising azithromycin resistance (2018 update)." },
       { type: "list", items: [
         "Pregnancy and breastfeeding: doxycycline is contraindicated — use azithromycin 1 g single dose, or an alternative per current BASHH guidance/local protocol",
-        "Test of cure is recommended in pregnancy (from around 5–6 weeks after treatment) and for rectal infection, given the higher chance of treatment failure at these sites/in this group",
-        "Partner notification: trace and treat partners from the preceding period per local protocol; advise abstinence until both partners have completed treatment",
+        "Test of cure is recommended around 5 weeks after treatment for pregnant women, and for rectal infection (7 days after treatment) and pharyngeal infection (12 days after treatment), given the higher chance of treatment failure at these sites/in this group",
+        "Partner notification: trace and treat all sexual partners from the preceding 4 weeks (asymptomatic index case) or since the onset of symptoms if longer; advise abstinence until both partners have completed treatment (or 7 days after a single-dose regimen)",
+      ]},
+    ],
+  },
+
+  {
+    id: "bashh-ct-complications-lgv",
+    gl: "BASHH_CT",
+    condition: "Chlamydia",
+    setting: "Sexual Health",
+    title: "Complications & Lymphogranuloma Venereum (LGV)",
+    tags: [
+      "chlamydia complications", "pid chlamydia", "epididymitis chlamydia",
+      "reactive arthritis chlamydia", "lgv", "lymphogranuloma venereum",
+      "rectal chlamydia lgv", "neonatal chlamydia conjunctivitis",
+    ],
+    content: [
+      { type: "subheading", value: "Complications of Untreated Infection" },
+      { type: "list", items: [
+        "Pelvic inflammatory disease (PID), and downstream tubal factor infertility and ectopic pregnancy risk",
+        "Epididymo-orchitis in men",
+        "Sexually acquired reactive arthritis (formerly Reiter's syndrome) — an immune-mediated arthritis following genital infection",
+        "Neonatal conjunctivitis or pneumonia if acquired at birth from an untreated maternal infection — a further reason to test and treat promptly in pregnancy",
+      ]},
+      { type: "alert", value: "LGV is a distinct, more invasive serovar of Chlamydia trachomatis, seen predominantly in men who have sex with men, presenting as proctitis (rectal pain, discharge, tenesmus) that can mimic inflammatory bowel disease, or inguinal lymphadenopathy." },
+      { type: "list", items: [
+        "LGV requires a longer course than standard chlamydia — doxycycline 100 mg twice daily for 21 days once confirmed",
+        "Suspect LGV in anyone with symptomatic proctitis and a positive rectal chlamydia NAAT — request specific LGV testing on the sample",
+        "Partner notification for LGV extends further back — trace and offer presumptive treatment to partners from the preceding 60 days",
       ]},
     ],
   },

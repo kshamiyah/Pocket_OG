@@ -36,15 +36,24 @@ export const BASHH_SYPHILIS_SECTIONS = [
     tags: [
       "benzathine penicillin syphilis", "syphilis treatment",
       "ceftriaxone syphilis", "penicillin allergy syphilis",
+      "jarisch-herxheimer reaction", "neurosyphilis",
     ],
+    flowchartId: "BASHH_SYPHILIS_TREATMENT",
     content: [
       { type: "alert", value: "Penicillin (benzathine benzylpenicillin) is the only reliably effective treatment at every stage and in pregnancy — penicillin allergy should be confirmed, not assumed, given how central penicillin is to cure." },
-      { type: "list", items: [
-        "Early syphilis (primary, secondary, early latent): a single intramuscular dose of benzathine benzylpenicillin is standard",
-        "Late latent syphilis or unknown duration: a longer, multi-dose course is required — follow the current BASHH dosing schedule/local protocol for exact number of doses and intervals",
-        "Ceftriaxone is an alternative where penicillin genuinely cannot be used, in most cases — macrolides are no longer recommended due to resistance",
-        "The 2024 update licensed benzathine penicillin with lidocaine, and extended the acceptable interval between doses in multi-dose regimens",
+      { type: "table", headers: ["Stage", "Regimen"], rows: [
+        ["Early syphilis (primary, secondary, early latent)", "Benzathine benzylpenicillin 2.4 MU IM, single dose"],
+        ["Late latent, unknown duration, cardiovascular or gummatous syphilis", "Benzathine benzylpenicillin 2.4 MU IM, weekly for 3 weeks (3 doses total)"],
+        ["Neurosyphilis", "IV benzylpenicillin — an inpatient regimen, not the outpatient IM benzathine form; discuss with a specialist"],
       ]},
+      { type: "list", items: [
+        "Penicillin allergy, early syphilis: doxycycline 100 mg twice daily for 14 days is the standard oral alternative",
+        "Penicillin allergy, late latent/unknown duration: doxycycline 100 mg twice daily for 28 days",
+        "Ceftriaxone is a further alternative where doxycycline is unsuitable, in most cases — macrolides are no longer recommended due to resistance",
+        "The 2024 update licensed benzathine penicillin with lidocaine (reducing injection pain), and extended the acceptable interval between doses in multi-dose regimens",
+      ]},
+      { type: "alert", value: "Warn about the Jarisch-Herxheimer reaction — fever, myalgia and headache within 24 hours of the first dose, from the immune response to dying spirochaetes. It is not a penicillin allergy and does not mean treatment should stop; it is more pronounced in early syphilis and can (rarely) trigger preterm labour if it occurs in pregnancy, so monitor accordingly." },
+      { type: "text", value: "Co-infection with HIV does not change the treatment regimen, but follow-up serology should be more intensive, and neurosyphilis should be considered at a lower threshold." },
     ],
   },
 
@@ -65,6 +74,12 @@ export const BASHH_SYPHILIS_SECTIONS = [
         "Penicillin desensitisation is required for genuinely penicillin-allergic pregnant women — there is no fully effective non-penicillin alternative for preventing congenital syphilis",
         "Diagnosis in the second half of pregnancy: arrange sonographic assessment for signs of fetal infection (hepatomegaly, ascites, hydrops)",
         "Notify the paediatric team antenatally so the neonate can be assessed and treated as needed after birth",
+      ]},
+      { type: "subheading", value: "Congenital Syphilis" },
+      { type: "list", items: [
+        "Early features (first 2 years): hepatosplenomegaly, rash, snuffles (nasal discharge), failure to thrive, jaundice",
+        "Late features (if untreated): Hutchinson's teeth, saddle nose, sabre shins, sensorineural deafness — all preventable with adequate antenatal treatment",
+        "Every case in pregnancy warrants a paediatric plan agreed before delivery, not arranged reactively afterwards",
       ]},
     ],
   },

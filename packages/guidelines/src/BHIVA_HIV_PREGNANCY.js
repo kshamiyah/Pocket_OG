@@ -21,6 +21,12 @@ export const BHIVA_HIV_PREGNANCY_SECTIONS = [
         "Women diagnosed in pregnancy, or not on treatment, should start ART as soon as possible — by 24 weeks at the latest, and earlier wherever practical, to allow time to achieve an undetectable viral load before delivery",
         "Aim for an undetectable viral load by delivery — this is the single biggest determinant of mother-to-child transmission risk",
       ]},
+      { type: "subheading", value: "Preconception & Screening Context" },
+      { type: "list", items: [
+        "Preconception counselling for women with known HIV: discuss achieving an undetectable viral load before conception, folic acid, and reviewing ART for any agents with a less favourable pregnancy safety profile",
+        "HIV screening in pregnancy is opt-out and repeated later in pregnancy for women with ongoing risk factors, or presenting with a new potential exposure",
+        "Screen for and treat opportunistic infections and co-infections that affect pregnancy management — syphilis, hepatitis B/C, and TB risk factors — as part of the same antenatal pathway",
+      ]},
     ],
   },
 
@@ -41,6 +47,7 @@ export const BHIVA_HIV_PREGNANCY_SECTIONS = [
         [">1,000 copies/ml", "Pre-labour caesarean section, with an intravenous zidovudine infusion started 4 hours before surgery"],
       ]},
       { type: "text", value: "Avoid unnecessary invasive procedures that increase fetal exposure to maternal blood — fetal scalp electrodes, fetal blood sampling, and instrumental delivery are used only when there is a compelling obstetric indication, and preferably only once the viral load is known to be suppressed." },
+      { type: "text", value: "Where a pre-labour caesarean is planned for HIV alone, timing around 38–39 weeks is usual, balancing the aim of an undetectable viral load against the risk of spontaneous labour or rupture of membranes before the planned date." },
     ],
   },
 
@@ -63,6 +70,8 @@ export const BHIVA_HIV_PREGNANCY_SECTIONS = [
         "Women who choose to breastfeed should be supported by the clinical team to do so as safely as possible, with ongoing monitoring",
         "Formula feeding remains the option with no transmission risk and is fully supported for women who prefer it",
       ]},
+      { type: "subheading", value: "Infant Testing Schedule" },
+      { type: "text", value: "Infant HIV PCR testing follows a staged schedule (birth, around 6 weeks, and around 12 weeks, adjusted for feeding method and risk category), with a confirmatory HIV antibody test at 18–24 months once maternal antibody has cleared — verify the exact schedule against current BHIVA guidance and local protocol, as it is stratified by risk category." },
     ],
   },
 ];

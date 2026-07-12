@@ -138,6 +138,11 @@ const FLOWCHART_LINKS = [
   { id: "NG23_MENOPAUSE_PATHWAY", gl: "NG23" },
   { id: "NG123_UI_POP_PATHWAY", gl: "NG123" },
   { id: "GTG48_PMS_LADDER", gl: "GTG48" },
+  { id: "BASHH_SYPHILIS_TREATMENT", gl: "BASHH_SYPHILIS" },
+  { id: "NG257_SUBFERTILITY_PATHWAY", gl: "NG257" },
+  { id: "PCOS2023_DIAGNOSIS", gl: "PCOS2023" },
+  { id: "FSRH_EC_METHOD_CHOICE", gl: "FSRH_EC" },
+  { id: "GTG38_GTD_PATHWAY", gl: "GTG38" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -188,6 +193,11 @@ const FLOWCHART_GROUPS = [
   { gl: "NG23",      label: "Menopause" },
   { gl: "NG123",     label: "Urinary Incontinence & Prolapse" },
   { gl: "GTG48",     label: "Premenstrual Syndrome" },
+  { gl: "BASHH_SYPHILIS", label: "Syphilis" },
+  { gl: "NG257",     label: "Fertility Problems" },
+  { gl: "PCOS2023",  label: "Polycystic Ovary Syndrome" },
+  { gl: "FSRH_EC",   label: "Emergency Contraception" },
+  { gl: "GTG38",     label: "Gestational Trophoblastic Disease" },
 ];
 
 export default function App() {

@@ -33,6 +33,7 @@ export const NG123_SECTIONS = [
         "POP-Q (Pelvic Organ Prolapse Quantification) staging: stage 0 (no prolapse) to stage 4 (complete eversion) describes the leading edge relative to the hymen",
         "Symptoms (sensation of a bulge, dragging, pressure) correlate poorly with stage — treat the symptom, not the number",
       ]},
+      { type: "alert", value: "Red flags warranting more urgent or specialist assessment rather than routine conservative management: visible haematuria, recurrent UTI, voiding difficulty or urinary retention, a palpable bladder after voiding, and pelvic pain out of keeping with simple prolapse." },
     ],
   },
 

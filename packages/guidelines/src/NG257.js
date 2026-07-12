@@ -31,7 +31,9 @@ export const NG257_SECTIONS = [
     tags: [
       "semen analysis", "who semen reference values", "mid luteal progesterone",
       "ovulation confirmation", "hsg", "hycosy", "tubal patency test",
+      "ovarian reserve testing", "amh", "antral follicle count",
     ],
+    flowchartId: "NG257_SUBFERTILITY_PATHWAY",
     content: [
       { type: "subheading", value: "Semen Analysis" },
       { type: "table", headers: ["Parameter", "WHO reference value"], rows: [
@@ -50,6 +52,13 @@ export const NG257_SECTIONS = [
         "Hysterosalpingography (HSG) or hysterosalpingo-contrast sonography (HyCoSy) — first-line in women without comorbidities affecting their choice of management",
         "Laparoscopy and dye test where there is a higher likelihood of tubal or other pelvic pathology (e.g. history of pelvic infection, endometriosis, previous pelvic surgery)",
       ]},
+      { type: "subheading", value: "Ovarian Reserve Testing" },
+      { type: "list", items: [
+        "Anti-Müllerian hormone (AMH) and antral follicle count (AFC) both estimate ovarian reserve and predict response to ovarian stimulation",
+        "Neither test reliably predicts the chance of natural conception or live birth on its own — use them to plan IVF stimulation protocols, not to counsel a woman that she cannot conceive naturally",
+      ]},
+      { type: "subheading", value: "Male Factor" },
+      { type: "text", value: "An abnormal semen analysis warrants review by a specialist in male infertility — further assessment may include hormonal profile, scrotal ultrasound, or genetic testing depending on the pattern of abnormality (e.g. azoospermia)." },
     ],
   },
 

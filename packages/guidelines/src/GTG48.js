@@ -23,6 +23,12 @@ export const GTG48_SECTIONS = [
       ]},
       { type: "alert", value: "Diagnosis requires prospective symptom recording over at least 2 menstrual cycles — retrospective recall is unreliable. The Daily Record of Severity of Problems (DRSP) is a validated, simple diary tool for this." },
       { type: "text", value: "Where the diagnosis is unclear or symptoms are atypical, a 3-month trial of a GnRH analogue can be used diagnostically — resolution of symptoms during ovarian suppression confirms an ovarian-hormone-driven cause." },
+      { type: "subheading", value: "Differential Diagnosis" },
+      { type: "list", items: [
+        "Underlying depression or anxiety disorder without a clear premenstrual pattern — the symptom diary is what distinguishes this from PMS/PMDD",
+        "Perimenopause — overlapping mood and vasomotor symptoms, but without the cyclical, luteal-only pattern",
+        "Thyroid dysfunction — check if symptoms don't fit a clean cyclical pattern",
+      ]},
     ],
   },
 

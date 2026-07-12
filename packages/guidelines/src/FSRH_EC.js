@@ -13,6 +13,7 @@ export const FSRH_EC_SECTIONS = [
       "ulipristal acetate", "upa-ec", "copper iud emergency contraception",
       "morning after pill",
     ],
+    flowchartId: "FSRH_EC_METHOD_CHOICE",
     content: [
       { type: "table", headers: ["Method", "Licensed window", "Notes"], rows: [
         ["Copper IUD", "Up to 5 days after unprotected sex, or up to 5 days after the earliest estimated date of ovulation (whichever is later)", "Most effective option overall; also provides ongoing contraception if kept in place"],
@@ -40,6 +41,12 @@ export const FSRH_EC_SECTIONS = [
         "After LNG-EC: any hormonal method can be started immediately",
         "After UPA-EC: delay starting (or restarting) hormonal contraception for 5 days — ulipristal is a progesterone receptor modulator and can reduce the effectiveness of progestogen-containing methods started too soon, and vice versa",
         "Advise barrier contraception (or abstinence) until the newly started method has been used long enough to be effective, and until a pregnancy test can exclude pregnancy from this cycle if a period is late or abnormal",
+      ]},
+      { type: "subheading", value: "Repeated EC & Follow-Up" },
+      { type: "list", items: [
+        "More than one dose of oral EC can be needed within the same cycle if there is repeated unprotected sex — UPA-EC efficacy may be reduced if LNG-EC has been taken in the same cycle (and vice versa); the copper IUD does not have this interaction and is the best option when repeat cover is needed",
+        "Advise a pregnancy test if the next period is more than 7 days late, lighter than usual, or if there is any concern about efficacy",
+        "Use every consultation as an opportunity to discuss and start ongoing contraception, not just to supply EC in isolation",
       ]},
     ],
   },

@@ -21,6 +21,12 @@ export const GTG38_SECTIONS = [
         ["Malignant (GTN)", "Invasive mole; choriocarcinoma; placental site trophoblastic tumour (PSTT); epithelioid trophoblastic tumour (ETT) — the last two are very rare"],
       ]},
       { type: "text", value: "GTN is defined by persistence of GTD — most commonly a plateaued or rising serum βhCG after evacuation of a molar pregnancy, but it can also follow a non-molar pregnancy." },
+      { type: "subheading", value: "Risk Factors" },
+      { type: "list", items: [
+        "Age at extremes of reproductive life — under 20 or over 35–40 years",
+        "Previous molar pregnancy — increases the risk of a further molar pregnancy in a subsequent pregnancy",
+        "Complete mole carries a higher risk of progression to GTN than partial mole",
+      ]},
       { type: "subheading", value: "Presentation" },
       { type: "list", items: [
         "Irregular vaginal bleeding in early pregnancy — the most common presentation",
@@ -45,6 +51,7 @@ export const GTG38_SECTIONS = [
       "molar pregnancy evacuation", "suction curettage mole", "anti-d molar pregnancy",
       "gtd registration", "charing cross hospital gtd", "hcg screening centre",
     ],
+    flowchartId: "GTG38_GTD_PATHWAY",
     content: [
       { type: "alert", value: "Suction curettage is the method of choice for uterine evacuation of a complete mole, whatever the uterine size — avoid medical evacuation (prostaglandins/oxytocin) where possible, as it may increase the risk of embolisation of trophoblastic tissue and the need for chemotherapy." },
       { type: "list", items: [
@@ -85,7 +92,10 @@ export const GTG38_SECTIONS = [
         "Low-risk GTN: single-agent chemotherapy, typically methotrexate",
         "High-risk GTN: multi-agent chemotherapy",
         "Cure rates are very high even in high-risk disease, reflecting how chemosensitive GTN is and the benefit of centralised specialist management",
+        "Placental site trophoblastic tumour (PSTT) and epithelioid trophoblastic tumour (ETT) behave differently from choriocarcinoma — they are relatively chemo-resistant and slower-growing, so hysterectomy is often the primary treatment rather than chemotherapy alone",
       ]},
+      { type: "subheading", value: "Twin Pregnancy with a Coexisting Mole" },
+      { type: "text", value: "A molar pregnancy coexisting with a normal twin is rare but not automatically an indication for termination — refer to a specialist fetal medicine and GTD centre jointly, since ongoing pregnancy is possible with appropriate counselling and surveillance for pre-eclampsia and haemorrhage risk." },
       { type: "subheading", value: "Future Pregnancy" },
       { type: "text", value: "A future pregnancy is not otherwise restricted once follow-up is complete, though early ultrasound in the next pregnancy is advised to confirm normal placentation, and the placenta/products should again be sent for histology after that pregnancy." },
     ],

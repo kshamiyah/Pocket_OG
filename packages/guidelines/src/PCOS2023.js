@@ -15,6 +15,7 @@ export const PCOS2023_SECTIONS = [
       "pcos diagnosis", "hyperandrogenism", "pcom", "polycystic ovary morphology",
       "amh pcos", "pcos adolescents",
     ],
+    flowchartId: "PCOS2023_DIAGNOSIS",
     content: [
       { type: "text", value: "The 2023 International Evidence-based Guideline for PCOS (ESHRE/ASRM/Endocrine Society/ESE) updates and refines the Rotterdam criteria, and is the current internationally endorsed reference in the absence of a dedicated NICE guideline." },
       { type: "alert", value: "Diagnose PCOS in adults when 2 of the following 3 features are present, having excluded other causes (e.g. hypothyroidism, hyperprolactinaemia, congenital adrenal hyperplasia, androgen-secreting tumours):" },
@@ -25,6 +26,8 @@ export const PCOS2023_SECTIONS = [
       ]},
       { type: "subheading", value: "Diagnosis in Adolescents" },
       { type: "text", value: "Both ovulatory dysfunction AND hyperandrogenism are required in adolescents — ultrasound and AMH are not used, since physiological multifollicular ovaries are common at this age and would lead to overdiagnosis." },
+      { type: "subheading", value: "Endometrial Protection" },
+      { type: "text", value: "Chronic anovulation means prolonged unopposed oestrogen exposure — flag the endometrial hyperplasia risk (see GTG67) in any woman with PCOS who has infrequent withdrawal bleeds, and ensure regular withdrawal bleeding is induced (COCP, cyclical progestogen, or an LNG-IUS) rather than left unaddressed." },
     ],
   },
 
