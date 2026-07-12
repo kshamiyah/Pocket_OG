@@ -33,6 +33,7 @@ export const UPDATES = [
       { tag: "new", text: "Aspiration prophylaxis for caesarean quick-reference: the NICE NG192 principle (antacid + H2 antagonist or PPI, plus an antiemetic) with elective and emergency dose regimens; notes that ranitidine was withdrawn in 2020 and a PPI is now used. Searching \"ranitidine\" or \"antacid in labour\" now finds it." },
       { tag: "new", text: "Umbilical cord gas calculator: enter arterial pH, pCO₂, base deficit (and optional venous values and lactate) to grade acidaemia, flag significant metabolic acidosis (pH <7.00 with base deficit ≥12), classify respiratory vs metabolic vs mixed with typical causes of each, and validate the arterial sample. Thresholds from Olofsson (AJOG 2023) and the Riley & Johnson normal ranges." },
       { tag: "new", text: "Risk of Malignancy Index (RMI I) calculator: tick the ultrasound features, set menopausal status and enter CA125 to compute U × M × CA125 and triage referral of an ovarian mass to gynae-oncology (threshold >200), from RCOG GTG62 and GTG34." },
+      { tag: "new", text: "Sickle cell disease in pregnancy (British Society for Haematology, 2021, which supersedes the archived RCOG GTG61): preconception, antenatal, intrapartum and postnatal care, plus an acute painful-crisis flowchart. Covers folic acid 5 mg, stopping hydroxycarbamide, aspirin from 12 weeks, LMWH, 4-weekly growth scans from 24 weeks, avoiding pethidine, and acute chest syndrome." },
     ],
   },
   {

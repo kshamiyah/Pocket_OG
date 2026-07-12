@@ -469,6 +469,37 @@ export const TOPICS = {
     ],
   },
 
+  "sickle-cell-pregnancy": {
+    id: "sickle-cell-pregnancy",
+    title: "Sickle cell disease in pregnancy",
+    subtitle: "Preconception, antenatal, crisis & delivery",
+    description: "A high-risk pregnancy with more frequent painful crises and higher rates of pre-eclampsia, growth restriction, VTE and stillbirth; care is shared between haematology and obstetrics (BSH 2021, which supersedes RCOG GTG61).",
+    gl: "BSH_SCD",
+    terms: [
+      "sickle cell", "sickle cell disease", "sickle cell pregnancy", "scd",
+      "scd pregnancy", "hbss", "sickle cell crisis", "vaso-occlusive crisis",
+      "acute chest syndrome", "gtg61",
+    ],
+    sections: [
+      {
+        heading: "Guides",
+        entries: [
+          { type: "reader", id: "BSH_SCD", gl: "BSH_SCD", label: "Sickle cell disease in pregnancy (BSH)", sublabel: "BSH 2021: full guideline" },
+          { type: "reader", id: "BSH_SCD", sectionId: "bsh-scd-preconception", gl: "BSH_SCD", label: "Preconception care & medication review", sublabel: "BSH: folic acid, penicillin, stop hydroxycarbamide" },
+          { type: "reader", id: "BSH_SCD", sectionId: "bsh-scd-antenatal", gl: "BSH_SCD", label: "Antenatal care & monitoring", sublabel: "BSH: aspirin, LMWH, 4-weekly growth scans" },
+          { type: "reader", id: "BSH_SCD", sectionId: "bsh-scd-crisis", gl: "BSH_SCD", label: "Acute painful (vaso-occlusive) crisis", sublabel: "BSH: analgesia, avoid pethidine" },
+          { type: "reader", id: "BSH_SCD", sectionId: "bsh-scd-intrapartum", gl: "BSH_SCD", label: "Intrapartum care", sublabel: "BSH: delivery 38-40 weeks" },
+        ],
+      },
+      {
+        heading: "Pathways",
+        entries: [
+          { type: "flowchart", id: "SCD_CRISIS", gl: "BSH_SCD", label: "Sickle cell painful crisis", sublabel: "BSH 2021 flowchart, step through the algorithm" },
+        ],
+      },
+    ],
+  },
+
   "cervical-screening": {
     id: "cervical-screening",
     title: "Cervical screening & colposcopy",

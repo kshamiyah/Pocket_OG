@@ -29,10 +29,11 @@ export const SOURCE_COLORS = {
   ESHRE:    { badge: "bg-purple-50 text-purple-700",   border: "border-purple-100",  conditionColor: "text-purple-500",  icon: "text-purple-500",  accent: "bg-purple-500",  solid: "bg-purple-600",  solidHover: "hover:bg-purple-700",  text: "text-purple-700",  bg: "bg-purple-50" },
   BHIVA:    { badge: "bg-orange-50 text-orange-700",   border: "border-orange-100",  conditionColor: "text-orange-500",  icon: "text-orange-500",  accent: "bg-orange-500",  solid: "bg-orange-600",  solidHover: "hover:bg-orange-700",  text: "text-orange-700",  bg: "bg-orange-50" },
   FSRH:     { badge: "bg-lime-50 text-lime-700",       border: "border-lime-100",    conditionColor: "text-lime-600",    icon: "text-lime-600",    accent: "bg-lime-500",    solid: "bg-lime-600",    solidHover: "hover:bg-lime-700",    text: "text-lime-700",    bg: "bg-lime-50" },
+  BSH:      { badge: "bg-sky-50 text-sky-700",         border: "border-sky-100",     conditionColor: "text-sky-500",     icon: "text-sky-500",     accent: "bg-sky-500",     solid: "bg-sky-600",     solidHover: "hover:bg-sky-700",     text: "text-sky-700",     bg: "bg-sky-50" },
 };
 
 // Sources that appear in the app, in legend order.
-export const SOURCE_ORDER = ["RBH", "NICE", "RCOG", "BASHH", "NHSCSP", "MBRRACE", "TOG", "TRIAL", "UKKA", "ESC", "ESHRE", "BHIVA", "FSRH"];
+export const SOURCE_ORDER = ["RBH", "NICE", "RCOG", "BASHH", "NHSCSP", "MBRRACE", "TOG", "TRIAL", "UKKA", "ESC", "ESHRE", "BHIVA", "FSRH", "BSH"];
 
 export const SOURCE_LABELS = {
   RBH: "RBH — local trust",
@@ -48,6 +49,7 @@ export const SOURCE_LABELS = {
   ESHRE: "ESHRE / ASRM international guideline",
   BHIVA: "British HIV Association",
   FSRH: "Faculty of Sexual & Reproductive Healthcare",
+  BSH: "British Society for Haematology",
 };
 
 // Hex equivalents (the -500 shades) for places that can't use Tailwind classes
@@ -59,6 +61,7 @@ export const SOURCE_HEX = {
   ESHRE: "#a855f7",
   BHIVA: "#f97316",
   FSRH: "#84cc16",
+  BSH: "#0ea5e9",
 };
 
 export const DEFAULT_GL_COLORS = {

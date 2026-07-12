@@ -50,6 +50,7 @@ import {
   FSRH_UKMEC_SECTIONS,
   FSRH_EC_SECTIONS,
   GTG38_SECTIONS,
+  BSH_SCD_SECTIONS,
 } from "@pocket-og/guidelines";
 import { QUICKREF_SECTIONS } from "../data/quickref";
 import { APPROACH_SECTIONS } from "../data/approaches";
@@ -192,6 +193,7 @@ const _WIKI = [
   ...FSRH_UKMEC_SECTIONS,
   ...FSRH_EC_SECTIONS,
   ...GTG38_SECTIONS,
+  ...BSH_SCD_SECTIONS,
   ...QUICKREF_SECTIONS,
   ...APPROACH_SECTIONS,
   ...TOG_SECTIONS,

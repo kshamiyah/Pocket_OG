@@ -23,6 +23,13 @@ export const SYNONYMS = {
   "pregnancy heart team": ["mwho","cardiac disease pregnancy","esc guidelines"],
   "peripartum cardiomyopathy": ["cardiomyopathy pregnancy","cardiac disease pregnancy","postnatal breathlessness"],
 
+  // Sickle cell disease in pregnancy
+  "sickle cell": ["sickle cell disease","sickle cell pregnancy","scd","hbss","sickle cell crisis","haemoglobinopathy","bsh"],
+  "scd": ["sickle cell disease","sickle cell pregnancy","hbss","sickle cell crisis"],
+  "sickle cell crisis": ["vaso-occlusive crisis","painful crisis","sickle cell","acute chest syndrome"],
+  "acute chest syndrome": ["sickle cell crisis","sickle cell","scd"],
+  "hbss": ["sickle cell","sickle cell disease","scd"],
+
   // Umbilical cord gas interpretation
   "cord gas": ["cord blood gas","umbilical cord gas","cord gases","base deficit","umbilical artery ph","metabolic acidosis","cord gas calculator"],
   "cord blood gas": ["cord gas","umbilical cord gas","base deficit","umbilical artery ph","cord gas calculator"],

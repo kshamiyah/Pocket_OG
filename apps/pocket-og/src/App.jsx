@@ -112,6 +112,7 @@ const FLOWCHART_LINKS = [
   { id: "ABDO_TRIAGE",           gl: "ABDO" },
   { id: "GTG5_OHSS",             gl: "GTG5" },
   { id: "TOG_OVARIAN_TORSION",   gl: "TOG" },
+  { id: "SCD_CRISIS",            gl: "BSH_SCD" },
   { id: "TOG_POLYHYDRAMNIOS",    gl: "TOG" },
   { id: "TOG_OLIGOHYDRAMNIOS",   gl: "TOG" },
   { id: "TOG_THYROID",           gl: "TOG" },
@@ -199,6 +200,7 @@ const FLOWCHART_GROUPS = [
   { gl: "PCOS2023",  label: "Polycystic Ovary Syndrome" },
   { gl: "FSRH_EC",   label: "Emergency Contraception" },
   { gl: "GTG38",     label: "Gestational Trophoblastic Disease" },
+  { gl: "BSH_SCD",   label: "Sickle Cell Disease in Pregnancy" },
 ];
 
 export default function App() {
