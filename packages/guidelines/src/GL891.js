@@ -71,6 +71,7 @@ export const GL891_SECTIONS = [
       { type: "table", headers: ["Weight", "OD Dose"], rows: [
         ["< 46 kg", "60 mg OD"], ["47–59.9 kg", "80 mg OD"], ["60–73.9 kg", "100 mg OD"],
         ["74–89.9 kg", "120 mg OD"], ["90–109.9 kg", "150 mg OD"], ["110–125.9 kg", "180 mg OD"],
+        ["126–139.9 kg", "100 mg BD"], ["140–150 kg", "112.5 mg BD**"],
         ["> 150 kg", "Discuss Haematology"],
       ]},
       { type: "subheading", value: "Therapeutic Dosing — High Risk BD (1 mg/kg) — CrCl ≥ 30 mL/min" },
