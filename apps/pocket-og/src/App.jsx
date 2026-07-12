@@ -134,6 +134,7 @@ const FLOWCHART_LINKS = [
   { id: "GTG68_SEIZURE",         gl: "GTG68" },
   { id: "NG244_ACUTE_ASTHMA",    gl: "NG244" },
   { id: "ESC_MWHO_TRIAGE",       gl: "ESC_CVD" },
+  { id: "ADNEXAL_MASS_TRIAGE",   gl: "GTG62" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -180,6 +181,7 @@ const FLOWCHART_GROUPS = [
   { gl: "GTG68",     label: "Epilepsy in Pregnancy" },
   { gl: "NG244",     label: "Asthma in Pregnancy" },
   { gl: "ESC_CVD",   label: "Cardiac Disease in Pregnancy" },
+  { gl: "GTG62",     label: "Suspected Ovarian Masses (Premenopausal)" },
 ];
 
 export default function App() {

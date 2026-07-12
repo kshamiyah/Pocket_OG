@@ -133,7 +133,7 @@ source), **Missing** (nothing beyond a passing mention).
 | Endometrial hyperplasia | Strong (GTG67) |
 | Cervical screening & colposcopy | Strong (NHSCSP20) |
 | Ovarian hyperstimulation syndrome | Strong (GTG5) |
-| Ovarian cysts (premenopausal / postmenopausal) | **Missing** (GTG34, GTG62) |
+| Ovarian cysts (premenopausal / postmenopausal) | Strong (GTG62, GTG34) |
 | Chronic pelvic pain | **Missing** |
 | Premenstrual syndrome | **Missing** (GTG48) |
 | Menopause | **Missing** (NICE NG23) |
@@ -225,7 +225,7 @@ below rather than added alphabetically.
 22. Vulval cancer
 
 **P3, rounds out gynaecology, sexual health, reproductive medicine:**
-23. Ovarian cysts, premenopausal and postmenopausal
+23. ~~Ovarian cysts, premenopausal and postmenopausal~~ — done (GTG62 premenopausal, GTG34 postmenopausal including the December 2025 simple-cyst follow-up update, shared RMI-based triage flowchart)
 24. Menopause (NICE NG23)
 25. Urinary incontinence / pelvic organ prolapse
 26. Chronic pelvic pain, PMS

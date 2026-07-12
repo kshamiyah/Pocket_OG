@@ -23,6 +23,17 @@ export const SYNONYMS = {
   "pregnancy heart team": ["mwho","cardiac disease pregnancy","esc guidelines"],
   "peripartum cardiomyopathy": ["cardiomyopathy pregnancy","cardiac disease pregnancy","postnatal breathlessness"],
 
+  // Ovarian cysts / adnexal masses
+  "ovarian cyst": ["ovarian mass","adnexal mass","simple cyst","complex cyst","gtg62","gtg34"],
+  "ovarian mass": ["ovarian cyst","adnexal mass","rmi","gtg62","gtg34"],
+  "adnexal mass": ["ovarian cyst","ovarian mass","rmi","gtg62","gtg34"],
+  "rmi": ["risk of malignancy index","ovarian cyst","ca125","gtg62","gtg34"],
+  "risk of malignancy index": ["rmi","ovarian cyst","ca125"],
+  "ca125": ["cancer antigen 125","rmi","ovarian cyst","ovarian mass"],
+  "postmenopausal cyst": ["ovarian cyst","gtg34","postmenopausal ovarian mass"],
+  "premenopausal cyst": ["ovarian cyst","gtg62","functional cyst"],
+  "functional cyst": ["ovarian cyst","premenopausal cyst","corpus luteal cyst","follicular cyst"],
+
   // Counsel (formerly Consent)
   "counsel": ["consent","counselling","risks","benefits","patient information"],
   "counselling": ["consent","counsel","risks","benefits","patient information"],

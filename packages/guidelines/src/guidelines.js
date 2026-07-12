@@ -49,6 +49,8 @@ export const GUIDELINES = {
   NG244: { code: "NG244", label: "Asthma in Pregnancy", version: "NG244", date: "Updated November 2024", color: "teal", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng244/chapter/Managing-asthma-in-pregnancy-during-labour-and-when-breastfeeding" },
   UKKA_RENAL: { code: "UKKA_RENAL", label: "Renal Disease in Pregnancy", version: "UKKA 2019", date: "September 2019", color: "emerald", pdf: true, source: "UKKA", pdfUrl: "https://www.ukkidney.org/sites/renal.org/files/FINAL-Pregnancy-Guideline-September-2019.pdf" },
   ESC_CVD: { code: "ESC_CVD", label: "Cardiac Disease in Pregnancy", version: "ESC 2025", date: "2025 (supersedes 2018 edition)", color: "rose", pdf: true, source: "ESC", pdfUrl: "https://academic.oup.com/eurheartj/article/46/43/4462/8234487" },
+  GTG62: { code: "GTG62", label: "Suspected Ovarian Masses (Premenopausal)", version: "GTG62", date: "November 2011", color: "cyan", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/management-of-suspected-ovarian-masses-in-premenopausal-women-green-top-guideline-no-62/" },
+  GTG34: { code: "GTG34", label: "Ovarian Cysts in Postmenopausal Women", version: "GTG34", date: "July 2016 (amended December 2025)", color: "fuchsia", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/ovarian-cysts-in-postmenopausal-women-green-top-guideline-no-34/" },
 };
 
 export const GL_COLORS = {
@@ -101,4 +103,6 @@ export const GL_COLORS = {
   NG244: { badge: "bg-teal-900/50 text-teal-300 border-teal-600/40", dot: "bg-teal-400" },
   UKKA_RENAL: { badge: "bg-emerald-900/50 text-emerald-300 border-emerald-600/40", dot: "bg-emerald-400" },
   ESC_CVD: { badge: "bg-rose-900/50 text-rose-300 border-rose-600/40", dot: "bg-rose-400" },
+  GTG62: { badge: "bg-cyan-900/50 text-cyan-300 border-cyan-600/40", dot: "bg-cyan-400" },
+  GTG34: { badge: "bg-fuchsia-900/50 text-fuchsia-300 border-fuchsia-600/40", dot: "bg-fuchsia-400" },
 };

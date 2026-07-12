@@ -35,6 +35,8 @@ import {
   NG244_SECTIONS,
   UKKA_RENAL_SECTIONS,
   ESC_CVD_SECTIONS,
+  GTG62_SECTIONS,
+  GTG34_SECTIONS,
 } from "@pocket-og/guidelines";
 import { FLOWCHARTS } from "../data/flowcharts";
 import { GUIDELINE_KEYWORD_LINKS } from "../data/connections";
@@ -95,6 +97,8 @@ const SECTIONS_MAP = {
   NG244: NG244_SECTIONS,
   UKKA_RENAL: UKKA_RENAL_SECTIONS,
   ESC_CVD: ESC_CVD_SECTIONS,
+  GTG62: GTG62_SECTIONS,
+  GTG34: GTG34_SECTIONS,
 };
 
 
