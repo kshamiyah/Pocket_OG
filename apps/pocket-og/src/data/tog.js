@@ -116,6 +116,75 @@ export const TOG_SECTIONS = [
   },
 
   {
+    id: "tog-ovarian-torsion",
+    gl: "TOG",
+    source: "TOG",
+    condition: "TOG Review",
+    setting: "Review — Acute Gynaecology",
+    title: "Ovarian Torsion",
+    draft: false,
+    tog: {
+      article: "Ovarian torsion: a modern approach to management",
+      authors: "Bailey F, Moore G, De A, Holland T",
+      citation: "TOG 2025;27:221–30",
+      doi: "10.1111/tog.12985",
+      url: "https://obgyn.onlinelibrary.wiley.com/doi/10.1111/tog.12985",
+      year: 2025,
+    },
+    flowchartId: "TOG_OVARIAN_TORSION",
+    relatedGl: ["GTG62", "GTG5"],
+    tags: [
+      "ovarian torsion", "adnexal torsion", "torsion", "twisted ovary",
+      "ovarian cyst pain", "acute pelvic pain", "sudden pelvic pain",
+      "detorsion", "oophoropexy", "oophorectomy", "cystectomy",
+      "whirlpool sign", "follicular ring sign", "blue-black ovary",
+      "laparoscopy torsion", "acute gynaecology", "tog review", "gynae emergency",
+    ],
+    content: [
+      { type: "alert", value: "Bottom line: suspect torsion with sudden, unilateral, severe pelvic pain, especially with an ovarian cyst, in pregnancy or after assisted reproduction. Only ~40% are diagnosed on ultrasound, so a normal scan does not exclude it: if clinical suspicion is high, proceed to laparoscopy. Treat with laparoscopic detorsion and ovarian conservation, even if the ovary looks blue-black." },
+
+      { type: "subheading", value: "Presentation" },
+      { type: "list", items: [
+        "Sudden-onset, unilateral, severe lower abdominal or pelvic pain, which may fluctuate (intermittent torsion). More common on the right.",
+        "Nausea and, particularly, vomiting are common (vomiting in ~41%).",
+        "Signs may include tachycardia (~11%), an uncommon low-grade fever, a palpable adnexal mass and suprapubic tenderness.",
+        "Accounts for 2–3% of acute gynaecological presentations.",
+      ]},
+
+      { type: "subheading", value: "Who is at higher risk" },
+      { type: "list", items: [
+        "Known ovarian cyst, especially larger than 50 mm.",
+        "Pregnancy: 12–18% of torsions occur in pregnancy, most commonly in the first trimester (10–17 weeks).",
+        "Assisted reproduction (around 11-fold risk).",
+        "Post tubal-sterilisation, PCOS or multicystic ovaries.",
+        "Previous torsion (recurrence risk is higher under age 20).",
+      ]},
+
+      { type: "subheading", value: "Imaging" },
+      { type: "text", value: "Transvaginal ultrasound with and without Doppler is first-line. Suggestive signs include an asymmetrically enlarged ovary with peripheral follicle displacement, the whirlpool sign (twisted pedicle; sensitivity ~82%, specificity ~81%), the follicular ring sign, free fluid, and a displaced ovary. MRI can help when the presentation is non-specific or in pregnancy; CT has no role because of ovarian irradiation." },
+      { type: "alert", value: "Governance point (verbatim): \"Transvaginal ultrasound can aid the diagnosis when findings are positive; however, if negative, it does not override the need for laparoscopy if clinical suspicion is high.\" The decision to operate is clinical, not radiological." },
+
+      { type: "subheading", value: "Management" },
+      { type: "list", items: [
+        "Prompt laparoscopic detorsion is the mainstay in premenopausal women; laparoscopy is preferred over laparotomy, with comparable ovarian recovery and no excess thromboembolism.",
+        "Conserve the ovary even when it appears blue-black: ovarian function is preserved after detorsion.",
+        "Perform cystectomy if a causative cyst is present, to treat the underlying cause and reduce recurrence.",
+        "Oophorectomy is described as harmful and unnecessary in this setting yet remains widely performed; avoid it in premenopausal women unless clearly indicated.",
+        "Consider oophoropexy (low threshold) where there is a non-correctable cause or recurrent torsion, though no standardised technique exists.",
+      ]},
+
+      { type: "subheading", value: "Key points" },
+      { type: "list", items: [
+        "A normal ultrasound does not exclude torsion: if suspicion is high, operate.",
+        "Time matters: delay risks infarction, and prompt surgery preserves the ovary.",
+        "Default to ovarian conservation and fertility preservation in premenopausal women.",
+      ]},
+
+      { type: "text", value: "Base review: Bailey, Moore, De & Holland, TOG 2025;27:221–30 (DOI 10.1111/tog.12985). This is an original Pocket O&G summary, not a reproduction; read the full article for the complete discussion and references, and verify against local protocol. See also GTG62 (suspected ovarian masses) and GTG5 (OHSS)." },
+    ],
+  },
+
+  {
     id: "tog-oligohydramnios",
     gl: "TOG",
     source: "TOG",

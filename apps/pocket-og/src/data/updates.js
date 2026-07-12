@@ -29,6 +29,7 @@ export const UPDATES = [
       { tag: "fixed", text: "Tranexamic acid now shows its oral heavy-menstrual-bleeding dose (NICE NG88) alongside the IV PPH dose, instead of being labelled postpartum-use-only." },
       { tag: "fixed", text: "Thyroid-in-pregnancy pathway updated to RCOG GTG76 (2025): advise self-starting a levothyroxine dose increase on a positive pregnancy test (double the dose on 2 days a week), aim for TSH below 2.5 mU/L, and check TSH/fT4 every 4-6 weeks to 20 weeks then at 28 weeks." },
       { tag: "fixed", text: "Therapeutic enoxaparin dosing table (GL891) restored the 126-139.9 kg (100 mg BD) and 140-150 kg (112.5 mg BD) weight bands that were missing between 110-125.9 kg and >150 kg." },
+      { tag: "new", text: "Ovarian torsion: an acute-gynaecology review card and emergency flowchart (suspect, image, operate), covering presentation, risk factors, the caveat that a normal scan does not exclude torsion, and laparoscopic detorsion with ovarian conservation, from the TOG review (Bailey 2025)." },
     ],
   },
   {

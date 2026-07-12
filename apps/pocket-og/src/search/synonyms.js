@@ -23,6 +23,12 @@ export const SYNONYMS = {
   "pregnancy heart team": ["mwho","cardiac disease pregnancy","esc guidelines"],
   "peripartum cardiomyopathy": ["cardiomyopathy pregnancy","cardiac disease pregnancy","postnatal breathlessness"],
 
+  // Ovarian / adnexal torsion
+  "ovarian torsion": ["adnexal torsion","twisted ovary","torsion","detorsion","acute pelvic pain","tog review"],
+  "adnexal torsion": ["ovarian torsion","twisted ovary","torsion","detorsion"],
+  "twisted ovary": ["ovarian torsion","adnexal torsion","torsion"],
+  "torsion": ["ovarian torsion","adnexal torsion","twisted ovary","detorsion"],
+
   // Ovarian cysts / adnexal masses
   "ovarian cyst": ["ovarian mass","adnexal mass","simple cyst","complex cyst","gtg62","gtg34"],
   "ovarian mass": ["ovarian cyst","adnexal mass","rmi","gtg62","gtg34"],

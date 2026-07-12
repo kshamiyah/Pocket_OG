@@ -111,6 +111,7 @@ const FLOWCHART_LINKS = [
   { id: "GTG50_CORD",            gl: "GTG50" },
   { id: "ABDO_TRIAGE",           gl: "ABDO" },
   { id: "GTG5_OHSS",             gl: "GTG5" },
+  { id: "TOG_OVARIAN_TORSION",   gl: "TOG" },
   { id: "TOG_POLYHYDRAMNIOS",    gl: "TOG" },
   { id: "TOG_OLIGOHYDRAMNIOS",   gl: "TOG" },
   { id: "TOG_THYROID",           gl: "TOG" },
