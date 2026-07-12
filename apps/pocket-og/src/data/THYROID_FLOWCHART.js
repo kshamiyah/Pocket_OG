@@ -1,17 +1,17 @@
-// Thyroid Dysfunction in Pregnancy — assessment & management.
-// Original interactive pathway synthesised from the TOG review (Girling J.
-// Thyroid disease in pregnancy. TOG 2008;10:237–243, DOI
-// 10.1576/toag.10.4.237.27440). The source article is discursive rather than
-// algorithmic — this pathway distils its recommendations (trimester-specific
-// interpretation, hypothyroid vs hyperthyroid management, and the classic
-// hyperemesis-vs-Graves' distinction) into one decision tree.
-// Decision support only — a summary of a review article, not a protocol.
-// Verify against local guidance and read the full article.
+// Thyroid Dysfunction in Pregnancy: assessment & management.
+// The hypothyroidism management recommendations (dose increase on a positive
+// pregnancy test, TSH target and monitoring schedule) are taken from RCOG
+// Green-top Guideline No. 76 (Chan S-Y et al. Management of Thyroid Disorders
+// in Pregnancy. BJOG 2025;132(8):e130-e161, DOI 10.1111/1471-0528.18088).
+// The hyperthyroid/Graves' branch is still distilled from the TOG review
+// (Girling J. Thyroid disease in pregnancy. TOG 2008;10:237-243, DOI
+// 10.1576/toag.10.4.237.27440), which is discursive rather than algorithmic.
+// Decision support only, not a protocol. Verify against local guidance.
 
 export const TOG_THYROID_FLOWCHART = {
   id: "TOG_THYROID",
   title: "Thyroid Dysfunction in Pregnancy",
-  subtitle: "TOG review (Girling, 2008) · assessment & management",
+  subtitle: "RCOG GTG76 (2025) · assessment & management",
   startId: "start",
   nodes: {
 
@@ -58,12 +58,13 @@ export const TOG_THYROID_FLOWCHART = {
     "hypo_goal": {
       type: "end",
       title: "Hypothyroidism: Ongoing Management",
-      text: "Only first-trimester control has been linked to fetal wellbeing in the literature — hypothyroidism itself does not appear to influence pregnancy outcome once euthyroid.",
+      text: "Thyroxine requirements rise in early pregnancy, so a woman with known hypothyroidism needs a prompt dose increase and close monitoring to keep her euthyroid (RCOG GTG76).",
       items: [
-        "Aim for euthyroidism before conception where possible",
-        "If already optimally treated at conception: test pre-pregnancy, early first trimester, then again in the second/third trimester",
+        "Aim for euthyroidism before conception; in overt or severe subclinical hypothyroidism, titrate to a preconception TSH of 2.5 mU/L or below (GTG76, Grade B)",
+        "Advise her to self-start a dose increase on a positive pregnancy test: double the levothyroxine dose on 2 days of each week (GTG76, Grade A)",
+        "Check TSH and fT4 every 4 to 6 weeks until 20 weeks, then again at 28 weeks (GTG76, Grade A)",
+        "Aim to keep TSH below 2.5 mU/L, with fT4 within the normal trimester- and manufacturer-specific range (GTG76, Grade C)",
         "Most antenatal care can be midwifery-led if control is optimal and there are no other risk factors",
-        "Do not adjust thyroxine dose on the premise that it will prevent obstetric complications — evidence for this is inconsistent",
       ],
     },
 
