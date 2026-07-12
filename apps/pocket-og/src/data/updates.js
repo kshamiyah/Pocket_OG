@@ -25,6 +25,7 @@ export const UPDATES = [
       { tag: "improved", text: "Pearl of the Day expanded from 27 to 200 pearls, now drawing from every guideline in the library." },
       { tag: "fixed", text: "Searching \"cord prolapse\" now shows the GTG50 emergency pathway as a topic card at the top, instead of ranking pelvic organ prolapse and induction results above it." },
       { tag: "fixed", text: "Searching \"abnormal smear\" now shows a cervical screening & colposcopy topic card (NHSCSP), instead of ranking a fetal-monitoring CTG page above it." },
+      { tag: "fixed", text: "Searching \"POP-Q\" now shows a pelvic organ prolapse topic card (NG123), instead of ranking progestogen-only pill entries above it." },
     ],
   },
   {

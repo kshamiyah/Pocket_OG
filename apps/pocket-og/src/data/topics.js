@@ -439,6 +439,36 @@ export const TOPICS = {
     ],
   },
 
+  "pelvic-organ-prolapse": {
+    id: "pelvic-organ-prolapse",
+    title: "Pelvic organ prolapse",
+    subtitle: "POP-Q staging, pessaries & surgical options",
+    description: "Descent of one or more of the anterior vaginal wall, posterior vaginal wall, uterus or vaginal vault; graded by POP-Q staging (0 to 4) relative to the hymen, and managed conservatively (pelvic floor muscle training, pessary) or surgically (NICE NG123).",
+    gl: "NG123",
+    terms: [
+      "pop-q", "popq", "pop q", "prolapse staging", "pelvic organ prolapse",
+      "vaginal prolapse", "uterine prolapse", "vault prolapse", "cystocele",
+      "rectocele", "vaginal pessary", "pessary",
+    ],
+    sections: [
+      {
+        heading: "Guides",
+        entries: [
+          { type: "reader", id: "NG123", gl: "NG123", label: "Urinary incontinence & pelvic organ prolapse (NICE)", sublabel: "NG123: full guideline" },
+          { type: "reader", id: "NG123", sectionId: "ng123-assessment", gl: "NG123", label: "Assessment & POP-Q classification", sublabel: "NG123: staging & examination" },
+          { type: "reader", id: "NG123", sectionId: "ng123-pop-conservative", gl: "NG123", label: "Prolapse: conservative management", sublabel: "NG123: PFMT & pessaries" },
+          { type: "reader", id: "NG123", sectionId: "ng123-pop-surgical", gl: "NG123", label: "Prolapse: surgical management", sublabel: "NG123: procedures & mesh" },
+        ],
+      },
+      {
+        heading: "Pathways",
+        entries: [
+          { type: "flowchart", id: "NG123_UI_POP_PATHWAY", gl: "NG123", label: "New incontinence / prolapse symptoms", sublabel: "NG123 flowchart, assessment & first-line management" },
+        ],
+      },
+    ],
+  },
+
   "cervical-screening": {
     id: "cervical-screening",
     title: "Cervical screening & colposcopy",
