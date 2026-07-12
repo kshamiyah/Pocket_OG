@@ -26,10 +26,13 @@ export const SOURCE_COLORS = {
   TRIAL:    { badge: "bg-cyan-50 text-cyan-700",       border: "border-cyan-100",    conditionColor: "text-cyan-600",    icon: "text-cyan-500",    accent: "bg-cyan-500",    solid: "bg-cyan-600",    solidHover: "hover:bg-cyan-700",    text: "text-cyan-700",    bg: "bg-cyan-50" },
   UKKA:     { badge: "bg-emerald-50 text-emerald-700", border: "border-emerald-100", conditionColor: "text-emerald-500", icon: "text-emerald-500", accent: "bg-emerald-500", solid: "bg-emerald-600", solidHover: "hover:bg-emerald-700", text: "text-emerald-700", bg: "bg-emerald-50" },
   ESC:      { badge: "bg-rose-50 text-rose-700",       border: "border-rose-100",    conditionColor: "text-rose-500",    icon: "text-rose-500",    accent: "bg-rose-500",    solid: "bg-rose-600",    solidHover: "hover:bg-rose-700",    text: "text-rose-700",    bg: "bg-rose-50" },
+  ESHRE:    { badge: "bg-purple-50 text-purple-700",   border: "border-purple-100",  conditionColor: "text-purple-500",  icon: "text-purple-500",  accent: "bg-purple-500",  solid: "bg-purple-600",  solidHover: "hover:bg-purple-700",  text: "text-purple-700",  bg: "bg-purple-50" },
+  BHIVA:    { badge: "bg-orange-50 text-orange-700",   border: "border-orange-100",  conditionColor: "text-orange-500",  icon: "text-orange-500",  accent: "bg-orange-500",  solid: "bg-orange-600",  solidHover: "hover:bg-orange-700",  text: "text-orange-700",  bg: "bg-orange-50" },
+  FSRH:     { badge: "bg-lime-50 text-lime-700",       border: "border-lime-100",    conditionColor: "text-lime-600",    icon: "text-lime-600",    accent: "bg-lime-500",    solid: "bg-lime-600",    solidHover: "hover:bg-lime-700",    text: "text-lime-700",    bg: "bg-lime-50" },
 };
 
 // Sources that appear in the app, in legend order.
-export const SOURCE_ORDER = ["RBH", "NICE", "RCOG", "BASHH", "NHSCSP", "MBRRACE", "TOG", "TRIAL", "UKKA", "ESC"];
+export const SOURCE_ORDER = ["RBH", "NICE", "RCOG", "BASHH", "NHSCSP", "MBRRACE", "TOG", "TRIAL", "UKKA", "ESC", "ESHRE", "BHIVA", "FSRH"];
 
 export const SOURCE_LABELS = {
   RBH: "RBH — local trust",
@@ -42,6 +45,9 @@ export const SOURCE_LABELS = {
   TRIAL: "Landmark trial",
   UKKA: "UK Kidney Association",
   ESC: "European Society of Cardiology",
+  ESHRE: "ESHRE / ASRM international guideline",
+  BHIVA: "British HIV Association",
+  FSRH: "Faculty of Sexual & Reproductive Healthcare",
 };
 
 // Hex equivalents (the -500 shades) for places that can't use Tailwind classes
@@ -50,6 +56,9 @@ export const SOURCE_HEX = {
   RBH: "#3b82f6", NICE: "#14b8a6", RCOG: "#8b5cf6",
   BASHH: "#d946ef", NHSCSP: "#64748b", MBRRACE: "#6366f1",
   TOG: "#ec4899", TRIAL: "#06b6d4", UKKA: "#10b981", ESC: "#f43f5e",
+  ESHRE: "#a855f7",
+  BHIVA: "#f97316",
+  FSRH: "#84cc16",
 };
 
 export const DEFAULT_GL_COLORS = {

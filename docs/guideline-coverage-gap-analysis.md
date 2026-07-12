@@ -7,20 +7,23 @@ punch list towards roughly 70% coverage of that corpus.
 
 ## 1. What's in the library today
 
-**49 full guideline pages** (reader available), across:
+**64 full guideline pages** (reader available), across:
 
 | Source | Count | Codes |
 |---|---|---|
 | RBH local (`GL`/`CG` prefix) | 11 | GL952, GL787, GL895, GL861, GL783, GL880, GL891, GL983, CG565, CG621, CG623 |
-| RCOG Green-top | 21 | GTG57, GTG63, GTG67, GTG52, GTG69, GTG31, GTG17, GTG5, GTG56, GTG22, GTG42, GTG64, GTG27A, GTG27B, GTG26, GTG45, GTG36, GTG72, GTG20A, GTG20B, GTG68 |
-| NICE | 11 | QS22, NG88, NG25, CG192, NG133, NG229, NG73, NG192, NG137, NG194, NG244 |
-| BASHH | 2 | BASHH_PID, BASHH_HSV |
+| RCOG Green-top | 25 | GTG57, GTG63, GTG67, GTG52, GTG69, GTG31, GTG17, GTG5, GTG56, GTG22, GTG42, GTG64, GTG27A, GTG27B, GTG26, GTG45, GTG36, GTG72, GTG20A, GTG20B, GTG68, GTG62, GTG34, GTG48, GTG38 |
+| NICE | 14 | QS22, NG88, NG25, CG192, NG133, NG229, NG73, NG192, NG137, NG194, NG244, NG23, NG123, NG257 |
+| BASHH | 6 | BASHH_PID, BASHH_HSV, BASHH_CT, BASHH_GC, BASHH_SYPHILIS, BASHH_BV_TV |
 | NHSCSP | 1 | NHSCSP20 |
 | MBRRACE | 1 | MBRRACE_SLMC2025 (surveillance report, not a management guideline) |
 | UK Kidney Association | 1 | UKKA_RENAL |
 | ESC | 1 | ESC_CVD |
+| ESHRE/ASRM international guideline | 1 | PCOS2023 |
+| BHIVA | 1 | BHIVA_HIV_PREGNANCY |
+| FSRH | 2 | FSRH_UKMEC, FSRH_EC |
 
-Around these, the app has 49 flowcharts, 13 consent/counselling pages, 15 drug
+Around these, the app has 75 flowcharts, 13 consent/counselling pages, 15 drug
 (Rx) categories, and a set of curated topic pages tying guides, flowcharts,
 drugs and trials together for the 11 highest-yield presentations (pre-eclampsia,
 PPH, IOL, ectopic, hyperemesis, PPROM, HMB, maternal collapse, diabetes,
@@ -122,7 +125,7 @@ source), **Missing** (nothing beyond a passing mention).
 | First trimester miscarriage | Strong (CG565, CG621) |
 | Recurrent miscarriage | Strong (GTG17) |
 | Ectopic pregnancy | Strong (CG623, calculator, GTG21 cited) |
-| Gestational trophoblastic disease | **Missing** |
+| Gestational trophoblastic disease | Strong (GTG38) |
 | Antiphospholipid syndrome / recurrent loss workup | **Missing** beyond GTG17 |
 
 ### Gynaecology: benign
@@ -135,7 +138,7 @@ source), **Missing** (nothing beyond a passing mention).
 | Ovarian hyperstimulation syndrome | Strong (GTG5) |
 | Ovarian cysts (premenopausal / postmenopausal) | Strong (GTG62, GTG34) |
 | Chronic pelvic pain | **Missing** |
-| Premenstrual syndrome | **Missing** (GTG48) |
+| Premenstrual syndrome | Strong (GTG48) |
 | Menopause | Strong (NICE NG23) |
 | Fibroids beyond HMB | Thin (folded into NG88 flowcharts only) |
 | Lichen sclerosus / vulval disease | **Missing** |
@@ -152,32 +155,32 @@ source), **Missing** (nothing beyond a passing mention).
 ### Urogynaecology
 | Topic | Status |
 |---|---|
-| Urinary incontinence | **Missing** (NICE NG123) |
-| Pelvic organ prolapse | **Missing** |
+| Urinary incontinence | Strong (NICE NG123) |
+| Pelvic organ prolapse | Strong (NICE NG123, same guideline) |
 
 ### Reproductive medicine / subfertility
 | Topic | Status |
 |---|---|
 | OHSS | Strong (GTG5) |
-| General subfertility assessment | **Missing** (NICE NG156) |
-| PCOS | **Missing** |
+| General subfertility assessment | Strong (NICE NG257, replaces the old CG156) |
+| PCOS | Strong (ESHRE/ASRM International Guideline 2023 — NICE removed PCOS-specific content from NG257 pending its own dedicated guideline) |
 
 ### Sexual health (BASHH)
 | Topic | Status |
 |---|---|
 | Pelvic inflammatory disease | Strong (BASHH_PID) |
 | Genital herpes in pregnancy | Strong (BASHH_HSV) |
-| Chlamydia | **Missing** |
-| Gonorrhoea | **Missing** |
-| Syphilis | **Missing** |
-| Bacterial vaginosis / trichomonas | **Missing** |
-| HIV in pregnancy (BHIVA) | **Missing** |
+| Chlamydia | Strong (BASHH_CT) |
+| Gonorrhoea | Strong (BASHH_GC) |
+| Syphilis | Strong (BASHH_SYPHILIS, includes syphilis in pregnancy) |
+| Bacterial vaginosis / trichomonas | Strong (BASHH_BV_TV) |
+| HIV in pregnancy (BHIVA) | Strong (BHIVA_HIV_PREGNANCY) |
 
 ### Contraception
 | Topic | Status |
 |---|---|
 | Contraception drugs (Rx) | Present as drug reference only |
-| UKMEC / method choice, emergency contraception (FSRH) | **Missing** as a guideline |
+| UKMEC / method choice, emergency contraception (FSRH) | Strong (FSRH_UKMEC, FSRH_EC) |
 
 ### Safeguarding
 | Topic | Status |
@@ -189,10 +192,12 @@ source), **Missing** (nothing beyond a passing mention).
 Counting the corpus a UK O&G trainee is realistically expected to know
 (RCOG Green-top Guidelines ~60, relevant NICE guidelines ~18, BASHH ~10,
 FSRH ~8, NHSCSP/other ~5) gives a working denominator of roughly 100–110
-documents. At 49 full guideline pages, the library sits at **around
-45–49% coverage**, up from 28–30% at the start of this punch list. Reaching
-70% needs on the order of **25–30 more full guideline pages**, prioritised
-below rather than added alphabetically.
+documents. At 64 full guideline pages, the library sits at **around
+58–64% coverage**, up from 28–30% at the start of this punch list. Reaching
+70% needs on the order of **10–15 more full guideline pages** — mainly the
+remaining gynae oncology items (P2 #19–22), perineal trauma/OASI and the
+GTG50 orphan fix (P1 #13–14), and the tail of P3 (#31–32 plus the P3 items
+not yet started: ovarian cysts follow-on topics, chronic pelvic pain).
 
 ## 5. Priority order to close the gap
 
@@ -227,13 +232,14 @@ below rather than added alphabetically.
 **P3, rounds out gynaecology, sexual health, reproductive medicine:**
 23. ~~Ovarian cysts, premenopausal and postmenopausal~~ — done (GTG62 premenopausal, GTG34 postmenopausal including the December 2025 simple-cyst follow-up update, shared RMI-based triage flowchart)
 24. ~~Menopause (NICE NG23)~~ — done (diagnosis, HRT types/regimens/routes, quantified benefit-risk counselling, non-hormonal options, GSM, and premature ovarian insufficiency)
-25. Urinary incontinence / pelvic organ prolapse
-26. Chronic pelvic pain, PMS
-27. PCOS, general subfertility assessment
-28. Chlamydia, gonorrhoea, syphilis, BV/trichomonas, HIV in pregnancy
-29. UKMEC / contraception method choice, emergency contraception
-30. Gestational trophoblastic disease
+25. ~~Urinary incontinence / pelvic organ prolapse~~ — done (NICE NG123 covers both in one guideline, shared UI/POP triage flowchart)
+26. ~~Premenstrual syndrome~~ — done (RCOG GTG48; chronic pelvic pain dropped from this item, still open below)
+27. ~~PCOS, general subfertility assessment~~ — done (PCOS via the 2023 ESHRE/ASRM international guideline, since NICE removed PCOS content from its fertility guideline pending a dedicated one; general subfertility via NICE NG257, the March 2026 successor to CG156)
+28. ~~Chlamydia, gonorrhoea, syphilis, BV/trichomonas, HIV in pregnancy~~ — done (BASHH_CT, BASHH_GC, BASHH_SYPHILIS, BASHH_BV_TV, and BHIVA_HIV_PREGNANCY per the 2025 BHIVA guideline)
+29. ~~UKMEC / contraception method choice, emergency contraception~~ — done (FSRH_UKMEC per the 2025 update, FSRH_EC)
+30. ~~Gestational trophoblastic disease~~ — done (RCOG GTG38)
 31. Domestic abuse in pregnancy / safeguarding
+32. Chronic pelvic pain (split out of the old item 26, which now covers PMS only)
 
 Each addition should follow the existing pattern end to end (see CLAUDE.md,
 "Adding content: registries to update"): sections file in

@@ -136,6 +136,8 @@ const FLOWCHART_LINKS = [
   { id: "ESC_MWHO_TRIAGE",       gl: "ESC_CVD" },
   { id: "ADNEXAL_MASS_TRIAGE",   gl: "GTG62" },
   { id: "NG23_MENOPAUSE_PATHWAY", gl: "NG23" },
+  { id: "NG123_UI_POP_PATHWAY", gl: "NG123" },
+  { id: "GTG48_PMS_LADDER", gl: "GTG48" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -184,6 +186,8 @@ const FLOWCHART_GROUPS = [
   { gl: "ESC_CVD",   label: "Cardiac Disease in Pregnancy" },
   { gl: "GTG62",     label: "Suspected Ovarian Masses (Premenopausal)" },
   { gl: "NG23",      label: "Menopause" },
+  { gl: "NG123",     label: "Urinary Incontinence & Prolapse" },
+  { gl: "GTG48",     label: "Premenstrual Syndrome" },
 ];
 
 export default function App() {

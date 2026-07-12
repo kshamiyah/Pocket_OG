@@ -48,6 +48,60 @@ export const SYNONYMS = {
   "poi": ["premature ovarian insufficiency","early menopause","ng23"],
   "premature ovarian insufficiency": ["poi","early menopause","ng23"],
 
+  // Urogynaecology
+  "urinary incontinence": ["stress incontinence","urgency incontinence","overactive bladder","ng123"],
+  "stress incontinence": ["urinary incontinence","pelvic floor muscle training","colposuspension","ng123"],
+  "urgency incontinence": ["overactive bladder","bladder training","urinary incontinence","ng123"],
+  "overactive bladder": ["urgency incontinence","bladder training","antimuscarinic","ng123"],
+  "pelvic floor muscle training": ["pfmt","stress incontinence","prolapse","ng123"],
+  "pfmt": ["pelvic floor muscle training","stress incontinence","prolapse"],
+  "pelvic organ prolapse": ["prolapse","pop-q","vaginal pessary","cystocele","rectocele","ng123"],
+  "prolapse": ["pelvic organ prolapse","vaginal pessary","pop-q","ng123"],
+  "vaginal pessary": ["prolapse","ring pessary","pelvic organ prolapse"],
+  "pop-q": ["pelvic organ prolapse","prolapse staging"],
+  "colposuspension": ["stress incontinence surgery","autologous fascial sling","ng123"],
+
+  // Sexually transmitted infections
+  "chlamydia": ["chlamydia trachomatis","doxycycline chlamydia","naat","bashh_ct"],
+  "chlamydia trachomatis": ["chlamydia","doxycycline chlamydia","bashh_ct"],
+  "gonorrhoea": ["gonorrhea","neisseria gonorrhoeae","ceftriaxone","bashh_gc"],
+  "gonorrhea": ["gonorrhoea","neisseria gonorrhoeae","ceftriaxone","bashh_gc"],
+  "neisseria gonorrhoeae": ["gonorrhoea","ceftriaxone","bashh_gc"],
+  "syphilis": ["treponema pallidum","benzathine penicillin","bashh_syphilis","congenital syphilis"],
+  "congenital syphilis": ["syphilis","syphilis pregnancy","bashh_syphilis"],
+  "bacterial vaginosis": ["bv","amsel criteria","clue cells","metronidazole","bashh_bv_tv"],
+  "bv": ["bacterial vaginosis","amsel criteria","metronidazole","bashh_bv_tv"],
+  "trichomonas": ["trichomonas vaginalis","strawberry cervix","metronidazole","bashh_bv_tv"],
+  "trichomonas vaginalis": ["trichomonas","strawberry cervix","metronidazole","bashh_bv_tv"],
+  "hiv in pregnancy": ["hiv pregnancy","bhiva","antiretroviral pregnancy","art pregnancy"],
+  "hiv pregnancy": ["hiv in pregnancy","bhiva","antiretroviral pregnancy"],
+  "antiretroviral pregnancy": ["art pregnancy","hiv in pregnancy","bhiva"],
+  "bhiva": ["hiv in pregnancy","antiretroviral pregnancy"],
+
+  // Contraception
+  "ukmec": ["medical eligibility criteria","contraception method choice","fsrh_ukmec"],
+  "medical eligibility criteria": ["ukmec","contraception method choice"],
+  "emergency contraception": ["morning after pill","levonorgestrel ec","ulipristal acetate","copper iud","fsrh_ec"],
+  "morning after pill": ["emergency contraception","levonorgestrel ec","fsrh_ec"],
+  "ulipristal acetate": ["emergency contraception","upa-ec","fsrh_ec"],
+  "levonorgestrel ec": ["emergency contraception","morning after pill","fsrh_ec"],
+  "copper iud": ["emergency contraception","intrauterine device","fsrh_ec"],
+
+  // Gestational trophoblastic disease
+  "molar pregnancy": ["hydatidiform mole","gestational trophoblastic disease","gtd","gtg38"],
+  "hydatidiform mole": ["molar pregnancy","gestational trophoblastic disease","gtg38"],
+  "gestational trophoblastic disease": ["gtd","molar pregnancy","hydatidiform mole","gtg38"],
+  "gtd": ["gestational trophoblastic disease","molar pregnancy","gtg38"],
+  "gestational trophoblastic neoplasia": ["gtn","choriocarcinoma","gtg38"],
+  "gtn": ["gestational trophoblastic neoplasia","choriocarcinoma","gtg38"],
+  "choriocarcinoma": ["gestational trophoblastic neoplasia","gtn","gtg38"],
+
+  // Premenstrual syndrome
+  "pms": ["premenstrual syndrome","pmdd","gtg48"],
+  "premenstrual syndrome": ["pms","pmdd","gtg48"],
+  "pmdd": ["premenstrual dysphoric disorder","pms","gtg48"],
+  "premenstrual dysphoric disorder": ["pmdd","pms","gtg48"],
+
   // Counsel (formerly Consent)
   "counsel": ["consent","counselling","risks","benefits","patient information"],
   "counselling": ["consent","counsel","risks","benefits","patient information"],
@@ -532,9 +586,17 @@ export const SYNONYMS = {
   "period pain": ["dysmenorrhoea","painful periods","menstrual cramps","mefenamic acid","ibuprofen","nsaid"],
   "painful periods": ["dysmenorrhoea","period pain","menstrual cramps","nsaid","adenomyosis","endometriosis"],
   // PCOS
-  "pcos": ["polycystic ovary syndrome","anovulation","irregular periods","oligomenorrhoea","hmb","endometrial hyperplasia risk"],
-  "polycystic ovary syndrome": ["pcos","anovulation","oligomenorrhoea","irregular periods","endometrial protection"],
+  "pcos": ["polycystic ovary syndrome","anovulation","irregular periods","oligomenorrhoea","hmb","endometrial hyperplasia risk","pcos2023"],
+  "polycystic ovary syndrome": ["pcos","anovulation","oligomenorrhoea","irregular periods","endometrial protection","pcos2023"],
   "anovulation": ["pcos","irregular periods","oligomenorrhoea","endometrial hyperplasia","progesterone"],
+  "letrozole": ["ovulation induction","pcos","clomiphene","ng257"],
+  "clomiphene": ["ovulation induction","letrozole","pcos","ng257"],
+  "subfertility": ["infertility","fertility problems","ng257"],
+  "infertility": ["subfertility","fertility problems","ng257"],
+  "fertility problems": ["subfertility","infertility","ng257"],
+  "unexplained infertility": ["subfertility","infertility","ivf","ng257"],
+  "ivf": ["in vitro fertilisation","subfertility","infertility","ng257"],
+  "semen analysis": ["male factor infertility","subfertility","ng257"],
   // Perimenopause
   "perimenopause": ["perimenopausal","menopause transition","climacteric","irregular periods perimenopause","hmb perimenopause"],
   "perimenopausal hmb": ["perimenopause","menopause transition","irregular periods","endometrial biopsy","lng-ius perimenopause"],
