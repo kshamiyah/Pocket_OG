@@ -1378,11 +1378,13 @@ function interpretCordGas({ aPh, aPco2, aBd, vPh, vPco2, lactate }) {
     }
   }
 
-  // Character of acidosis (only meaningful when pH is low), with typical causes
+  // Character of acidosis (only meaningful when pH is low), with typical causes.
+  // Acute/short-lived (respiratory) vs ongoing (metabolic) framing from
+  // Armstrong & Stenson 2007; the chronic-insufficiency list from Olofsson 2023.
   if (aPh < 7.20) {
-    if (raisedBd && raisedPco2) actions.push("Mixed acidosis: raised base deficit and raised pCO₂. Typically an acute event (e.g. cord compression or uterine tachysystole) superimposed on more prolonged hypoxia, or a prolonged difficult birth.");
-    else if (raisedBd) actions.push("Metabolic acidosis: raised base deficit, reflecting more prolonged hypoxia and anaerobic metabolism. Typical causes: chronic uteroplacental insufficiency (fetal growth restriction, pre-eclampsia, maternal diabetes, smoking or anaemia), placental abruption, or prolonged fetal bradycardia.");
-    else if (raisedPco2) actions.push("Respiratory acidosis: raised pCO₂ with base deficit <12, usually acute and with a better prognosis. Typical causes: a short interruption of placental or umbilical gas exchange, e.g. acute cord compression or prolapse, or uterine hyperstimulation (tachysystole).");
+    if (raisedBd && raisedPco2) actions.push("Mixed acidosis: raised base deficit and raised pCO₂. Often an acute event on a background of more prolonged hypoxia, or a prolonged, difficult birth.");
+    else if (raisedBd) actions.push("Metabolic acidosis: raised base deficit from ongoing or prolonged impairment of the circulation, with anaerobic glycolysis (Armstrong & Stenson). Examples include chronic uteroplacental insufficiency (fetal growth restriction, pre-eclampsia, maternal diabetes, smoking or anaemia; Olofsson) or a sustained insult such as placental abruption.");
+    else if (raisedPco2) actions.push("Respiratory acidosis: raised pCO₂ with base deficit <12, from a short-lived impairment of the uteroplacental or umbilical (fetoplacental) circulation, such as uterine tachysystole or transient cord compression; usually acute and seldom associated with adverse outcome (Armstrong & Stenson).");
     else if (hasBd || hasPco2) actions.push("Low pH but neither the base deficit nor the pCO₂ is raised — an unusual combination that can reflect a sampling or measurement artefact.");
   }
 
