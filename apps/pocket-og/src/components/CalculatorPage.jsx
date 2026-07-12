@@ -1211,6 +1211,144 @@ function PuqeCalculator({ onBack, pdfs }) {
   );
 }
 
+// ─── Scenario: Risk of Malignancy Index (RMI I) ───────────────────────
+// Definition and threshold taken verbatim from the app's GTG62/GTG34
+// content (RCOG Green-top Guidelines 62 and 34). RMI I = U × M × CA125.
+const RMI_US_FEATURES = [
+  { id: "multilocular", label: "Multilocular cyst" },
+  { id: "solid", label: "Solid areas" },
+  { id: "metastases", label: "Intra-abdominal metastases" },
+  { id: "ascites", label: "Ascites" },
+  { id: "bilateral", label: "Bilateral lesions" },
+];
+
+function interpretRmi({ featureCount, postmenopausal, ca125 }) {
+  const U = featureCount === 0 ? 0 : featureCount === 1 ? 1 : 3;
+  const M = postmenopausal ? 3 : 1;
+  const rmi = Math.round(U * M * ca125);
+  const high = rmi > 200;
+
+  const actions = [
+    `Score: U ${U} (${featureCount} ultrasound feature${featureCount === 1 ? "" : "s"}) × M ${M} (${postmenopausal ? "postmenopausal" : "premenopausal"}) × CA125 ${ca125} IU/ml.`,
+    "Do not check CA125 during menstruation; it is also raised by fibroids, endometriosis, pregnancy, pelvic infection and liver disease, so interpret alongside imaging.",
+    "In women under 40 with a complex mass, also send hCG, AFP and LDH (germ cell tumours are not reliably flagged by CA125).",
+    "The IOTA simple rules are a validated ultrasound alternative or adjunct to RMI.",
+  ];
+
+  if (high) {
+    return {
+      title: `RMI ${rmi}: high risk`,
+      summary: "RMI >200",
+      detail: "Predicts a substantially higher risk of malignancy and should prompt referral to the gynaecological oncology MDT. Some centres use a threshold of 250, verify against your local protocol. Where malignancy is suspected, CT chest/abdomen/pelvis and MRI pelvis are used for staging.",
+      actions,
+      color: "text-rose-700", bg: "bg-rose-50", border: "border-rose-200",
+      citation: "RCOG GTG62 / GTG34 · RMI I threshold >200",
+    };
+  }
+  return {
+    title: `RMI ${rmi}: lower risk`,
+    summary: "RMI ≤200",
+    detail: "Below the usual referral threshold of 200 (some centres use 250, verify locally). A low RMI does not exclude malignancy: use clinical judgement, and note that an ovarian mass with no concerning ultrasound features scores U = 0 and therefore RMI = 0 regardless of CA125.",
+    actions,
+    color: "text-teal-700", bg: "bg-teal-50", border: "border-teal-200",
+    citation: "RCOG GTG62 / GTG34 · RMI I threshold >200",
+  };
+}
+
+function RmiCalculator({ onBack, pdfs }) {
+  const [features, setFeatures] = useState(new Set());
+  const [postmenopausal, setPostmenopausal] = useState(null);
+  const [ca125, setCa125] = useState("");
+  const [result, setResult] = useState(null);
+
+  const toggle = (id) => {
+    const next = new Set(features);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setFeatures(next);
+  };
+
+  const submit = () => {
+    const c = parseFloat(ca125);
+    if (postmenopausal === null || Number.isNaN(c)) return;
+    setResult(interpretRmi({ featureCount: features.size, postmenopausal, ca125: c }));
+  };
+  const reset = () => { setFeatures(new Set()); setPostmenopausal(null); setCa125(""); setResult(null); };
+
+  return (
+    <div className="min-h-screen pb-24">
+      <div className="max-w-lg mx-auto">
+        <StepHeader title="Risk of Malignancy Index (RMI I)" subtitle="RCOG GTG62 & GTG34" onBack={onBack} pdfs={pdfs} shareId="RMI" />
+        <div className="px-5 pt-6">
+          {!result && (
+            <>
+              <h3 className="text-2xl font-bold text-gray-900 mb-1">Ultrasound features</h3>
+              <p className="text-sm text-gray-400 mb-3">Tick each feature present. U = 0 (none), 1 (one), 3 (two or more).</p>
+              <div className="rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm divide-y divide-gray-100 mb-6">
+                {RMI_US_FEATURES.map(f => {
+                  const checked = features.has(f.id);
+                  return (
+                    <button
+                      key={f.id}
+                      onClick={() => toggle(f.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${checked ? "bg-fuchsia-50" : "hover:bg-gray-50"}`}
+                    >
+                      <span className={`w-5 h-5 rounded-md border-2 shrink-0 flex items-center justify-center transition-colors ${checked ? "bg-fuchsia-600 border-fuchsia-600" : "border-gray-300 bg-white"}`}>
+                        {checked && (
+                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </span>
+                      <span className="text-sm text-gray-900">{f.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <p className="text-xs font-semibold text-gray-500 mb-1.5">Menopausal status</p>
+              <div className="grid grid-cols-2 gap-2 mb-6">
+                <button
+                  onClick={() => setPostmenopausal(false)}
+                  className={`px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${postmenopausal === false ? "bg-gray-900 border-gray-900 text-white" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"}`}
+                >
+                  Premenopausal (M 1)
+                </button>
+                <button
+                  onClick={() => setPostmenopausal(true)}
+                  className={`px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${postmenopausal === true ? "bg-gray-900 border-gray-900 text-white" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"}`}
+                >
+                  Postmenopausal (M 3)
+                </button>
+              </div>
+
+              <div className="space-y-1">
+                <NumberField label="Serum CA125" value={ca125} onChange={setCa125} suffix="IU/ml" />
+                <p className="text-[11px] text-gray-400 leading-relaxed">Do not check during menstruation.</p>
+              </div>
+
+              <button
+                onClick={submit}
+                disabled={postmenopausal === null || !ca125}
+                className="w-full mt-6 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold py-3.5 rounded-2xl transition-colors"
+              >
+                Calculate RMI
+              </button>
+            </>
+          )}
+          {result && (
+            <>
+              <ResultCard result={result} />
+              <button onClick={reset} className="w-full mt-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 rounded-2xl transition-colors">
+                New calculation
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Scenario: Umbilical cord gas interpretation ──────────────────────
 // Thresholds cited from Olofsson P. Umbilical cord pH, blood gases, and
 // lactate at birth. Am J Obstet Gynecol 2023;228(5S):S1222-S1240 (DOI
@@ -1387,6 +1525,7 @@ export default function CalculatorPage({ initialScenario, onNavigate, onOpenIOLP
   if (scenarioId === "VTE_RISK") return <VteRiskCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
   if (scenarioId === "PUQE") return <PuqeCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
   if (scenarioId === "CORD_GAS") return <CordGasCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
+  if (scenarioId === "RMI") return <RmiCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
 
   return <ScenarioList onSelect={setScenarioId} onOpenIOLPrioritizer={onOpenIOLPrioritizer} />;
 }

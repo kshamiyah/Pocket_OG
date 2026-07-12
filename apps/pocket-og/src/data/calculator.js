@@ -81,6 +81,18 @@ export const CALCULATOR_SCENARIOS = [
     ],
   },
   {
+    id: "RMI",
+    title: "Risk of Malignancy Index (RMI I)",
+    subtitle: "Triage an ovarian mass: U × M × CA125",
+    source: "RCOG GTG62 & GTG34 · RMI I",
+    color: { accent: "bg-fuchsia-500", text: "text-fuchsia-700", bg: "bg-fuchsia-50", border: "border-fuchsia-200" },
+    description: "Combine ultrasound features, menopausal status and CA125 into the RMI I score to triage referral of an ovarian mass to gynaecological oncology.",
+    pdfs: [
+      { label: "RCOG GTG62", url: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/management-of-suspected-ovarian-masses-in-premenopausal-women-green-top-guideline-no-62/" },
+      { label: "RCOG GTG34", url: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/ovarian-cysts-in-postmenopausal-women-green-top-guideline-no-34/" },
+    ],
+  },
+  {
     id: "CORD_GAS",
     title: "Umbilical cord gas interpretation",
     subtitle: "Arterial pH, pCO₂, base deficit ± venous & lactate",

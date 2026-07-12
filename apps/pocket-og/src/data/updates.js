@@ -32,6 +32,7 @@ export const UPDATES = [
       { tag: "new", text: "Ovarian torsion: an acute-gynaecology review card and emergency flowchart (suspect, image, operate), covering presentation, risk factors, the caveat that a normal scan does not exclude torsion, and laparoscopic detorsion with ovarian conservation, from the TOG review (Bailey 2025)." },
       { tag: "new", text: "Aspiration prophylaxis for caesarean quick-reference: the NICE NG192 principle (antacid + H2 antagonist or PPI, plus an antiemetic) with elective and emergency dose regimens; notes that ranitidine was withdrawn in 2020 and a PPI is now used. Searching \"ranitidine\" or \"antacid in labour\" now finds it." },
       { tag: "new", text: "Umbilical cord gas calculator: enter arterial pH, pCO₂, base deficit (and optional venous values and lactate) to grade acidaemia, flag significant metabolic acidosis (pH <7.00 with base deficit ≥12), classify respiratory vs metabolic, and validate the arterial sample. Thresholds from Olofsson (AJOG 2023) and the Riley & Johnson normal ranges." },
+      { tag: "new", text: "Risk of Malignancy Index (RMI I) calculator: tick the ultrasound features, set menopausal status and enter CA125 to compute U × M × CA125 and triage referral of an ovarian mass to gynae-oncology (threshold >200), from RCOG GTG62 and GTG34." },
     ],
   },
   {
