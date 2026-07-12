@@ -549,8 +549,10 @@ export const SYNONYMS = {
   "imb": ["intermenstrual bleeding","abnormal uterine bleeding","polyp","endometrial pathology"],
   "postcoital bleeding": ["pcb","cervical pathology","polyp","cervical ectropion","endometrial"],
   "pcb": ["postcoital bleeding","cervical","polyp","smear","colposcopy"],
-  "postmenopausal bleeding": ["pmb","endometrial cancer","endometrial hyperplasia","2ww","urgent referral"],
-  "pmb": ["postmenopausal bleeding","endometrial cancer","2ww","urgent referral","endometrial thickening"],
+  "postmenopausal bleeding": ["pmb","post menopausal bleeding","bleeding after menopause","endometrial cancer","endometrial hyperplasia","endometrial thickness","gtg67","2ww","urgent referral"],
+  "pmb": ["postmenopausal bleeding","post menopausal bleeding","endometrial cancer","endometrial hyperplasia","endometrial thickness","gtg67","2ww","urgent referral"],
+  "post menopausal bleeding": ["postmenopausal bleeding","pmb","endometrial thickness","gtg67"],
+  "bleeding after menopause": ["postmenopausal bleeding","pmb","endometrial thickness"],
   "two week wait gynaecology": ["2ww","pmb","urgent referral","endometrial cancer","suspected cancer"],
   // LNG-IUS / Mirena
   "lng-ius": ["mirena","levonorgestrel iud","levonorgestrel coil","iud hmb","coil hmb","intrauterine system"],

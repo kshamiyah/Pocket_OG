@@ -500,6 +500,35 @@ export const TOPICS = {
     ],
   },
 
+  "postmenopausal-bleeding": {
+    id: "postmenopausal-bleeding",
+    title: "Postmenopausal bleeding",
+    subtitle: "2WW pathway: image, sample, triage",
+    description: "Any vaginal bleeding 12 months or more after the last period; treat as suspected endometrial cancer until proven otherwise, with urgent 2-week-wait referral and transvaginal ultrasound to guide sampling (RCOG/BSGE GTG67).",
+    gl: "GTG67",
+    terms: [
+      "postmenopausal bleeding", "post menopausal bleeding", "pmb",
+      "bleeding after menopause", "endometrial thickness", "post-menopausal bleeding",
+    ],
+    sections: [
+      {
+        heading: "Guides",
+        entries: [
+          { type: "reader", id: "GTG67", sectionId: "gtg67-diagnosis", gl: "GTG67", label: "Diagnosis & investigation", sublabel: "GTG67: 2WW, TVUSS 4 mm, pipelle, hysteroscopy" },
+          { type: "reader", id: "GTG67", gl: "GTG67", label: "Endometrial hyperplasia (RCOG/BSGE)", sublabel: "GTG67: full guideline" },
+          { type: "reader", id: "GTG67", sectionId: "gtg67-lynch-tamoxifen", gl: "GTG67", label: "Lynch syndrome & tamoxifen", sublabel: "GTG67: special situations" },
+        ],
+      },
+      {
+        heading: "Pathways",
+        entries: [
+          { type: "flowchart", id: "GTG67_PMB", gl: "GTG67", label: "Postmenopausal bleeding: triage", sublabel: "GTG67 flowchart, image then sample" },
+          { type: "flowchart", id: "GTG67_MANAGEMENT", gl: "GTG67", label: "Endometrial hyperplasia: management", sublabel: "GTG67 flowchart" },
+        ],
+      },
+    ],
+  },
+
   "cervical-screening": {
     id: "cervical-screening",
     title: "Cervical screening & colposcopy",

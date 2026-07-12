@@ -409,3 +409,85 @@ export const GTG67_AEH_FLOWCHART = {
     },
   },
 };
+
+// Flowchart 3: Postmenopausal Bleeding — investigation & triage
+export const GTG67_PMB_FLOWCHART = {
+  id: "GTG67_PMB",
+  title: "Postmenopausal Bleeding: Triage",
+  subtitle: "GTG67 · investigate, image, sample",
+  startId: "pmb",
+  nodes: {
+
+    "pmb": {
+      type: "action",
+      title: "Postmenopausal Bleeding",
+      text: "Any bleeding 12 months or more after the last period. Treat as suspected endometrial cancer until proven otherwise.",
+      items: [
+        "Urgent 2-week-wait referral",
+        "First-line transvaginal ultrasound (TVUSS) to measure endometrial thickness",
+        "Speculum examination to exclude a cervical or vaginal cause",
+      ],
+      next: "tvs",
+    },
+
+    "tvs": {
+      type: "decision",
+      title: "Endometrial Thickness on TVUSS?",
+      options: [
+        { label: "< 4 mm, thin regular endometrium", sublabel: "High negative predictive value in symptomatic PMB", next: "thin" },
+        { label: "≥ 4 mm, or irregular / thickened / heterogeneous", sublabel: "Requires tissue sampling", next: "biopsy" },
+      ],
+    },
+
+    "thin": {
+      type: "end",
+      title: "Low Risk on Imaging",
+      text: "A thin endometrium (<4 mm) has a high negative predictive value for cancer and hyperplasia in symptomatic postmenopausal bleeding.",
+      items: [
+        "Reassure, but thickness alone does not diagnose or exclude hyperplasia",
+        "If bleeding persists or recurs, proceed to endometrial sampling regardless of thickness",
+      ],
+    },
+
+    "biopsy": {
+      type: "action",
+      title: "Endometrial Biopsy (Pipelle)",
+      text: "Outpatient suction biopsy is an acceptable first-line sample.",
+      items: [
+        "Around 90% sensitivity for endometrial cancer; lower for focal hyperplasia",
+        "Samples about 4% of the endometrium, so may miss focal lesions",
+      ],
+      next: "adequate",
+    },
+
+    "adequate": {
+      type: "decision",
+      title: "Adequate Sample & No Focal Concern?",
+      options: [
+        { label: "Yes, a diagnostic sample was obtained", next: "result" },
+        { label: "No: failed/insufficient sample, stenosed cervix, or focal lesion suspected", next: "hyst" },
+      ],
+    },
+
+    "hyst": {
+      type: "action",
+      title: "Hysteroscopy + Directed Biopsy",
+      text: "Allows direct visualisation and targeted sampling, and identifies focal lesions missed by Pipelle.",
+      items: [
+        "Send all tissue removed for histology",
+      ],
+      next: "result",
+    },
+
+    "result": {
+      type: "end",
+      title: "Histology Guides Management",
+      items: [
+        "Normal or benign: reassure",
+        "Endometrial hyperplasia: follow the GTG67 management pathway (with or without atypia)",
+        "Endometrial cancer: refer to the gynaecological oncology MDT",
+      ],
+    },
+
+  },
+};
