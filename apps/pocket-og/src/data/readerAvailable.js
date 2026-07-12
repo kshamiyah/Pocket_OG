@@ -31,4 +31,5 @@ export const READER_AVAILABLE = new Set([
   "ESC_CVD",
   "GTG62",
   "GTG34",
+  "NG23",
 ]);

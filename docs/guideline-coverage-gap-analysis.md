@@ -136,7 +136,7 @@ source), **Missing** (nothing beyond a passing mention).
 | Ovarian cysts (premenopausal / postmenopausal) | Strong (GTG62, GTG34) |
 | Chronic pelvic pain | **Missing** |
 | Premenstrual syndrome | **Missing** (GTG48) |
-| Menopause | **Missing** (NICE NG23) |
+| Menopause | Strong (NICE NG23) |
 | Fibroids beyond HMB | Thin (folded into NG88 flowcharts only) |
 | Lichen sclerosus / vulval disease | **Missing** |
 | Female genital mutilation | **Missing** |
@@ -226,7 +226,7 @@ below rather than added alphabetically.
 
 **P3, rounds out gynaecology, sexual health, reproductive medicine:**
 23. ~~Ovarian cysts, premenopausal and postmenopausal~~ — done (GTG62 premenopausal, GTG34 postmenopausal including the December 2025 simple-cyst follow-up update, shared RMI-based triage flowchart)
-24. Menopause (NICE NG23)
+24. ~~Menopause (NICE NG23)~~ — done (diagnosis, HRT types/regimens/routes, quantified benefit-risk counselling, non-hormonal options, GSM, and premature ovarian insufficiency)
 25. Urinary incontinence / pelvic organ prolapse
 26. Chronic pelvic pain, PMS
 27. PCOS, general subfertility assessment

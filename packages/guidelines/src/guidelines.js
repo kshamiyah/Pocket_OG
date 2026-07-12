@@ -51,6 +51,7 @@ export const GUIDELINES = {
   ESC_CVD: { code: "ESC_CVD", label: "Cardiac Disease in Pregnancy", version: "ESC 2025", date: "2025 (supersedes 2018 edition)", color: "rose", pdf: true, source: "ESC", pdfUrl: "https://academic.oup.com/eurheartj/article/46/43/4462/8234487" },
   GTG62: { code: "GTG62", label: "Suspected Ovarian Masses (Premenopausal)", version: "GTG62", date: "November 2011", color: "cyan", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/management-of-suspected-ovarian-masses-in-premenopausal-women-green-top-guideline-no-62/" },
   GTG34: { code: "GTG34", label: "Ovarian Cysts in Postmenopausal Women", version: "GTG34", date: "July 2016 (amended December 2025)", color: "fuchsia", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/ovarian-cysts-in-postmenopausal-women-green-top-guideline-no-34/" },
+  NG23: { code: "NG23", label: "Menopause: Identification & Management", version: "NG23", date: "November 2015 (updated November 2024)", color: "pink", pdf: true, source: "NICE", pdfUrl: "https://www.nice.org.uk/guidance/ng23" },
 };
 
 export const GL_COLORS = {
@@ -105,4 +106,5 @@ export const GL_COLORS = {
   ESC_CVD: { badge: "bg-rose-900/50 text-rose-300 border-rose-600/40", dot: "bg-rose-400" },
   GTG62: { badge: "bg-cyan-900/50 text-cyan-300 border-cyan-600/40", dot: "bg-cyan-400" },
   GTG34: { badge: "bg-fuchsia-900/50 text-fuchsia-300 border-fuchsia-600/40", dot: "bg-fuchsia-400" },
+  NG23: { badge: "bg-pink-900/50 text-pink-300 border-pink-600/40", dot: "bg-pink-400" },
 };

@@ -37,6 +37,7 @@ import {
   ESC_CVD_SECTIONS,
   GTG62_SECTIONS,
   GTG34_SECTIONS,
+  NG23_SECTIONS,
 } from "@pocket-og/guidelines";
 import { FLOWCHARTS } from "../data/flowcharts";
 import { GUIDELINE_KEYWORD_LINKS } from "../data/connections";
@@ -99,6 +100,7 @@ const SECTIONS_MAP = {
   ESC_CVD: ESC_CVD_SECTIONS,
   GTG62: GTG62_SECTIONS,
   GTG34: GTG34_SECTIONS,
+  NG23: NG23_SECTIONS,
 };
 
 

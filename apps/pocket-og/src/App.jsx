@@ -135,6 +135,7 @@ const FLOWCHART_LINKS = [
   { id: "NG244_ACUTE_ASTHMA",    gl: "NG244" },
   { id: "ESC_MWHO_TRIAGE",       gl: "ESC_CVD" },
   { id: "ADNEXAL_MASS_TRIAGE",   gl: "GTG62" },
+  { id: "NG23_MENOPAUSE_PATHWAY", gl: "NG23" },
 ];
 
 const FLOWCHART_GROUPS = [
@@ -182,6 +183,7 @@ const FLOWCHART_GROUPS = [
   { gl: "NG244",     label: "Asthma in Pregnancy" },
   { gl: "ESC_CVD",   label: "Cardiac Disease in Pregnancy" },
   { gl: "GTG62",     label: "Suspected Ovarian Masses (Premenopausal)" },
+  { gl: "NG23",      label: "Menopause" },
 ];
 
 export default function App() {

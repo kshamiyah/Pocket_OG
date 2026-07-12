@@ -34,6 +34,20 @@ export const SYNONYMS = {
   "premenopausal cyst": ["ovarian cyst","gtg62","functional cyst"],
   "functional cyst": ["ovarian cyst","premenopausal cyst","corpus luteal cyst","follicular cyst"],
 
+  // Menopause
+  "menopause": ["hrt","hot flushes","vasomotor symptoms","ng23","perimenopause"],
+  "hrt": ["hormone replacement therapy","menopause","combined hrt","oestrogen only hrt","ng23"],
+  "hormone replacement therapy": ["hrt","menopause","ng23"],
+  "hot flushes": ["vasomotor symptoms","night sweats","menopause","hrt"],
+  "vasomotor symptoms": ["hot flushes","night sweats","menopause","fezolinetant"],
+  "night sweats": ["hot flushes","vasomotor symptoms","menopause"],
+  "fezolinetant": ["vasomotor symptoms","non-hormonal menopause treatment","ng23"],
+  "gsm": ["genitourinary syndrome of menopause","vaginal oestrogen","vaginal dryness","menopause"],
+  "genitourinary syndrome of menopause": ["gsm","vaginal oestrogen","vaginal dryness","menopause"],
+  "vaginal dryness": ["gsm","vaginal oestrogen","genitourinary syndrome of menopause"],
+  "poi": ["premature ovarian insufficiency","early menopause","ng23"],
+  "premature ovarian insufficiency": ["poi","early menopause","ng23"],
+
   // Counsel (formerly Consent)
   "counsel": ["consent","counselling","risks","benefits","patient information"],
   "counselling": ["consent","counsel","risks","benefits","patient information"],
