@@ -229,6 +229,15 @@ export const UTEROTONICS = [
     iconColor: "#AF52DE",
     routes: [
       {
+        type: "oral",
+        shortLabel: "Oral — HMB",
+        label: "Oral — heavy menstrual bleeding (HMB)",
+        dose: "1 g (2 × 500 mg)",
+        frequency: "up to 4 times daily, during menstruation only",
+        maxDose: "4 g/day; max 4 days per cycle",
+        notes: "NICE NG88 non-hormonal first-line for HMB — start on the first day of bleeding. Roughly halves menstrual blood loss. Does not affect ovulation or fertility. Avoid alongside combined hormonal contraception and in women with a history of thromboembolism.",
+      },
+      {
         type: "iv",
         shortLabel: "IV — PPH",
         label: "IV — PPH treatment",
@@ -240,17 +249,19 @@ export const UTEROTONICS = [
     ],
     contraindications: [
       "Active thromboembolic disease",
+      "History of venous or arterial thromboembolism (for HMB use)",
       "Haematuria from upper urinary tract",
     ],
     cautions: [
-      "TIME-CRITICAL — benefit diminishes markedly after 3 hours from delivery",
-      "Administer slowly — rapid infusion causes nausea",
-      "Give via a dedicated IV line where possible",
+      "HMB: avoid alongside combined hormonal contraception; review after 3 cycles if no improvement",
+      "PPH is TIME-CRITICAL — benefit diminishes markedly after 3 hours from delivery",
+      "IV: administer slowly — rapid infusion causes nausea; give via a dedicated line",
       "Monitor clotting studies in major PPH",
     ],
-    pregnancySafety: "For postpartum use only. WOMAN trial (2017): reduces mortality from PPH if given within 3 hours of birth.",
+    pregnancySafety: "Two distinct uses: oral, non-hormonal first-line for heavy menstrual bleeding (NICE NG88), and IV for PPH / major obstetric haemorrhage (WOMAN trial 2017 — reduces PPH mortality if given within 3 hours of birth). Avoid in thromboembolic disease.",
     sources: [
       { label: "BNF", href: "https://bnf.nice.org.uk/drugs/tranexamic-acid/" },
+      { label: "NICE NG88", href: "https://www.nice.org.uk/guidance/ng88" },
     ],
   },
 ];
