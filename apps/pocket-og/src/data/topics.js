@@ -500,6 +500,41 @@ export const TOPICS = {
     ],
   },
 
+  "fibroids": {
+    id: "fibroids",
+    title: "Uterine fibroids",
+    subtitle: "Medical, interventional & surgical options",
+    description: "Benign smooth-muscle tumours of the uterus, a common cause of heavy menstrual bleeding and bulk (pressure) symptoms; management depends on symptoms, cavity distortion and fertility plans (NICE NG88).",
+    gl: "NG88",
+    terms: [
+      "fibroid", "fibroids", "uterine fibroid", "uterine fibroids", "leiomyoma",
+      "leiomyomata", "myoma", "submucosal fibroid", "intramural fibroid",
+    ],
+    sections: [
+      {
+        heading: "Guides",
+        entries: [
+          { type: "reader", id: "NG88", sectionId: "ng88-fibroids", gl: "NG88", label: "HMB with uterine fibroids", sublabel: "NG88: fibroid-specific management" },
+          { type: "reader", id: "NG88", sectionId: "ng88-pharmacological", gl: "NG88", label: "Pharmacological treatment", sublabel: "NG88: TXA, GnRH agonists & antagonists, ulipristal" },
+          { type: "reader", id: "NG88", sectionId: "ng88-surgical", gl: "NG88", label: "Surgical & interventional treatment", sublabel: "NG88: ablation, UAE, myomectomy, hysterectomy" },
+        ],
+      },
+      {
+        heading: "Pathways",
+        entries: [
+          { type: "flowchart", id: "NG88_FIBROID", gl: "NG88", label: "HMB with fibroids", sublabel: "NG88 flowchart, step through the options" },
+        ],
+      },
+      {
+        heading: "Drugs",
+        entries: [
+          { type: "drug", id: "tranexamic_acid", gl: "NG88", label: "Tranexamic acid", sublabel: "Rx: non-hormonal, oral HMB dose" },
+          { type: "drug", id: "goserelin", gl: "NG88", label: "Goserelin (GnRH agonist)", sublabel: "Rx: pre-operative fibroid shrinkage" },
+        ],
+      },
+    ],
+  },
+
   "postmenopausal-bleeding": {
     id: "postmenopausal-bleeding",
     title: "Postmenopausal bleeding",
