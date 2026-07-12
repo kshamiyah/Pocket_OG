@@ -4,6 +4,28 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.15.0",
+    date: "12/07/2026",
+    title: "Urogynaecology, sexual health & contraception",
+    changes: [
+      { tag: "new", text: "Ovarian cysts, premenopausal (RCOG GTG62) and postmenopausal (RCOG GTG34), with a shared triage flowchart." },
+      { tag: "new", text: "Menopause: identification and management (NICE NG23)." },
+      { tag: "new", text: "Urinary incontinence & pelvic organ prolapse (NICE NG123)." },
+      { tag: "new", text: "Premenstrual syndrome (RCOG GTG48)." },
+      { tag: "new", text: "Fertility problems: assessment and treatment (NICE NG257)." },
+      { tag: "new", text: "Polycystic ovary syndrome (2023 international guideline)." },
+      { tag: "new", text: "Chlamydia (BASHH)." },
+      { tag: "new", text: "Gonorrhoea (BASHH)." },
+      { tag: "new", text: "Syphilis, including in pregnancy (BASHH)." },
+      { tag: "new", text: "Bacterial vaginosis & trichomonas vaginalis (BASHH)." },
+      { tag: "new", text: "HIV in pregnancy (BHIVA)." },
+      { tag: "new", text: "UKMEC — contraception method choice (FSRH)." },
+      { tag: "new", text: "Emergency contraception (FSRH)." },
+      { tag: "new", text: "Gestational trophoblastic disease (RCOG GTG38)." },
+      { tag: "improved", text: "Pearl of the Day expanded from 27 to 200 pearls, now drawing from every guideline in the library." },
+    ],
+  },
+  {
     version: "1.14.0",
     date: "11/07/2026",
     title: "Postnatal care & obstetric medicine",
