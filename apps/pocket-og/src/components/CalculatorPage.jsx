@@ -1378,12 +1378,12 @@ function interpretCordGas({ aPh, aPco2, aBd, vPh, vPco2, lactate }) {
     }
   }
 
-  // Character of acidosis (only meaningful when pH is low)
+  // Character of acidosis (only meaningful when pH is low), with typical causes
   if (aPh < 7.20) {
-    if (raisedBd && raisedPco2) actions.push("Mixed acidosis: raised base deficit and raised pCO₂.");
-    else if (raisedBd) actions.push("Metabolic acidosis: raised base deficit, reflecting more prolonged hypoxia.");
-    else if (raisedPco2) actions.push("Respiratory acidosis: raised pCO₂ with base deficit <12 — usually acute, with a better prognosis.");
-    else if (hasBd || hasPco2) actions.push("Low pH without a raised base deficit or pCO₂ — recheck the values and the sampling.");
+    if (raisedBd && raisedPco2) actions.push("Mixed acidosis: raised base deficit and raised pCO₂. Typically an acute event (e.g. cord compression or uterine tachysystole) superimposed on more prolonged hypoxia, or a prolonged difficult birth.");
+    else if (raisedBd) actions.push("Metabolic acidosis: raised base deficit, reflecting more prolonged hypoxia and anaerobic metabolism. Typical causes: chronic uteroplacental insufficiency (fetal growth restriction, pre-eclampsia, maternal diabetes, smoking or anaemia), placental abruption, or prolonged fetal bradycardia.");
+    else if (raisedPco2) actions.push("Respiratory acidosis: raised pCO₂ with base deficit <12, usually acute and with a better prognosis. Typical causes: a short interruption of placental or umbilical gas exchange, e.g. acute cord compression or prolapse, or uterine hyperstimulation (tachysystole).");
+    else if (hasBd || hasPco2) actions.push("Low pH but neither the base deficit nor the pCO₂ is raised — an unusual combination that can reflect a sampling or measurement artefact.");
   }
 
   if (lactate != null && !Number.isNaN(lactate)) {
@@ -1400,7 +1400,7 @@ function interpretCordGas({ aPh, aPco2, aBd, vPh, vPco2, lactate }) {
     return {
       title: "Significant metabolic acidaemia",
       summary: "pH <7.00 with base deficit ≥12.0 mmol/L",
-      detail: "Meets the common definition of significant metabolic acidaemia, which is associated with an increased risk of hypoxic-ischaemic encephalopathy. Escalate for senior and neonatal review and consider assessment for therapeutic hypothermia. " + normalRef,
+      detail: "Meets the common definition of significant metabolic acidaemia (pH <7.00 with base deficit ≥12.0 mmol/L), associated with an increased risk of hypoxic-ischaemic encephalopathy. At a base deficit of 12–16 mmol/L about 10% of newborns develop moderate or severe complications, rising to about 40% above 16 mmol/L. " + normalRef,
       actions,
       color: "text-rose-700", bg: "bg-rose-50", border: "border-rose-200",
       citation: "Olofsson, AJOG 2023 · pH <7.00 + BD ≥12.0 mmol/L",
