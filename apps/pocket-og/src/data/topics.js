@@ -439,6 +439,40 @@ export const TOPICS = {
     ],
   },
 
+  "cervical-screening": {
+    id: "cervical-screening",
+    title: "Cervical screening & colposcopy",
+    subtitle: "HPV primary screening, abnormal results & colposcopy referral",
+    description: "England screens with high-risk HPV as the primary test, with reflex cytology on HPV-positive samples deciding routine recall, early repeat or colposcopy referral; colposcopy assesses and grades CIN and guides treatment (NHSCSP 2020, updated 2025).",
+    gl: "NHSCSP20",
+    terms: [
+      "abnormal smear", "abnormal smear result", "abnormal cervical screening",
+      "abnormal cervical screening result", "smear result", "colposcopy referral",
+      "hpv positive", "high risk hpv", "hrhpv", "cin", "cervical screening",
+      "smear test", "cervical smear",
+    ],
+    sections: [
+      {
+        heading: "Guides",
+        entries: [
+          { type: "reader", id: "NHSCSP20", gl: "NHSCSP20", label: "Cervical screening & colposcopy (NHSCSP)", sublabel: "NHSCSP20: full guideline" },
+          { type: "reader", id: "NHSCSP20", sectionId: "nhscsp20-pathway", gl: "NHSCSP20", label: "HPV primary screening pathway", sublabel: "NHSCSP20: what each result means" },
+          { type: "reader", id: "NHSCSP20", sectionId: "nhscsp20-colposcopy", gl: "NHSCSP20", label: "Colposcopy: referral & assessment", sublabel: "NHSCSP20: who to refer & when" },
+          { type: "reader", id: "NHSCSP20", sectionId: "nhscsp20-cin", gl: "NHSCSP20", label: "CIN grading & management", sublabel: "NHSCSP20: CIN1/2/3" },
+          { type: "reader", id: "NHSCSP20", sectionId: "nhscsp20-toc", gl: "NHSCSP20", label: "Test of cure & follow-up", sublabel: "NHSCSP20: post-treatment surveillance" },
+        ],
+      },
+      {
+        heading: "Pathways",
+        entries: [
+          { type: "flowchart", id: "NHSCSP20_SCREENING", gl: "NHSCSP20", label: "HPV primary screening pathway", sublabel: "NHSCSP20 flowchart, step through the result" },
+          { type: "flowchart", id: "NHSCSP20_COLPOSCOPY", gl: "NHSCSP20", label: "Colposcopy referral & assessment", sublabel: "NHSCSP20 flowchart" },
+          { type: "flowchart", id: "NHSCSP20_TOC", gl: "NHSCSP20", label: "Test of cure pathway", sublabel: "NHSCSP20 flowchart" },
+        ],
+      },
+    ],
+  },
+
   "cord-prolapse": {
     id: "cord-prolapse",
     title: "Cord prolapse",

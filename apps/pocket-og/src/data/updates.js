@@ -24,6 +24,7 @@ export const UPDATES = [
       { tag: "new", text: "Gestational trophoblastic disease (RCOG GTG38)." },
       { tag: "improved", text: "Pearl of the Day expanded from 27 to 200 pearls, now drawing from every guideline in the library." },
       { tag: "fixed", text: "Searching \"cord prolapse\" now shows the GTG50 emergency pathway as a topic card at the top, instead of ranking pelvic organ prolapse and induction results above it." },
+      { tag: "fixed", text: "Searching \"abnormal smear\" now shows a cervical screening & colposcopy topic card (NHSCSP), instead of ranking a fetal-monitoring CTG page above it." },
     ],
   },
   {
