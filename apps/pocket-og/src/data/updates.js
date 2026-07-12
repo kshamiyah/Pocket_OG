@@ -4,6 +4,24 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.16.0",
+    date: "12/07/2026",
+    title: "Search fixes, safety corrections & new tools",
+    changes: [
+      { tag: "new", text: "Sickle cell disease in pregnancy (British Society for Haematology, 2021, which supersedes the archived RCOG GTG61): preconception, antenatal, intrapartum and postnatal care, plus an acute painful-crisis flowchart. Covers folic acid 5 mg, stopping hydroxycarbamide, aspirin from 12 weeks, LMWH, 4-weekly growth scans from 24 weeks, avoiding pethidine, and acute chest syndrome." },
+      { tag: "new", text: "Umbilical cord gas calculator: enter arterial pH, pCO₂, base deficit (and optional venous values and lactate) to grade acidaemia, flag significant metabolic acidosis (pH <7.00 with base deficit ≥12), classify respiratory vs metabolic vs mixed with typical causes of each, and validate the arterial sample. Thresholds from Olofsson (AJOG 2023) and the Riley & Johnson normal ranges." },
+      { tag: "new", text: "Risk of Malignancy Index (RMI I) calculator: tick the ultrasound features, set menopausal status and enter CA125 to compute U × M × CA125 and triage referral of an ovarian mass to gynae-oncology (threshold >200), from RCOG GTG62 and GTG34." },
+      { tag: "new", text: "Ovarian torsion: an acute-gynaecology review card and emergency flowchart (suspect, image, operate), covering presentation, risk factors, the caveat that a normal scan does not exclude torsion, and laparoscopic detorsion with ovarian conservation, from the TOG review (Bailey 2025)." },
+      { tag: "new", text: "Aspiration prophylaxis for caesarean quick-reference: the NICE NG192 principle (antacid + H2 antagonist or PPI, plus an antiemetic) with elective and emergency dose regimens; notes that ranitidine was withdrawn in 2020 and a PPI is now used. Searching \"ranitidine\" or \"antacid in labour\" now finds it." },
+      { tag: "fixed", text: "Thyroid-in-pregnancy pathway updated to RCOG GTG76 (2025): advise self-starting a levothyroxine dose increase on a positive pregnancy test (double the dose on 2 days a week), aim for TSH below 2.5 mU/L, and check TSH/fT4 every 4-6 weeks to 20 weeks then at 28 weeks." },
+      { tag: "fixed", text: "Therapeutic enoxaparin dosing table (GL891) restored the 126-139.9 kg (100 mg BD) and 140-150 kg (112.5 mg BD) weight bands that were missing between 110-125.9 kg and >150 kg." },
+      { tag: "fixed", text: "Tranexamic acid now shows its oral heavy-menstrual-bleeding dose (NICE NG88) alongside the IV PPH dose, instead of being labelled postpartum-use-only." },
+      { tag: "fixed", text: "Searching \"cord prolapse\" now shows the GTG50 emergency pathway as a topic card at the top, instead of ranking pelvic organ prolapse and induction results above it." },
+      { tag: "fixed", text: "Searching \"abnormal smear\" now shows a cervical screening & colposcopy topic card (NHSCSP), instead of ranking a fetal-monitoring CTG page above it." },
+      { tag: "fixed", text: "Searching \"POP-Q\" now shows a pelvic organ prolapse topic card (NG123), instead of ranking progestogen-only pill entries above it." },
+    ],
+  },
+  {
     version: "1.15.0",
     date: "12/07/2026",
     title: "Urogynaecology, sexual health & contraception",
@@ -23,17 +41,6 @@ export const UPDATES = [
       { tag: "new", text: "Emergency contraception (FSRH)." },
       { tag: "new", text: "Gestational trophoblastic disease (RCOG GTG38)." },
       { tag: "improved", text: "Pearl of the Day expanded from 27 to 200 pearls, now drawing from every guideline in the library." },
-      { tag: "fixed", text: "Searching \"cord prolapse\" now shows the GTG50 emergency pathway as a topic card at the top, instead of ranking pelvic organ prolapse and induction results above it." },
-      { tag: "fixed", text: "Searching \"abnormal smear\" now shows a cervical screening & colposcopy topic card (NHSCSP), instead of ranking a fetal-monitoring CTG page above it." },
-      { tag: "fixed", text: "Searching \"POP-Q\" now shows a pelvic organ prolapse topic card (NG123), instead of ranking progestogen-only pill entries above it." },
-      { tag: "fixed", text: "Tranexamic acid now shows its oral heavy-menstrual-bleeding dose (NICE NG88) alongside the IV PPH dose, instead of being labelled postpartum-use-only." },
-      { tag: "fixed", text: "Thyroid-in-pregnancy pathway updated to RCOG GTG76 (2025): advise self-starting a levothyroxine dose increase on a positive pregnancy test (double the dose on 2 days a week), aim for TSH below 2.5 mU/L, and check TSH/fT4 every 4-6 weeks to 20 weeks then at 28 weeks." },
-      { tag: "fixed", text: "Therapeutic enoxaparin dosing table (GL891) restored the 126-139.9 kg (100 mg BD) and 140-150 kg (112.5 mg BD) weight bands that were missing between 110-125.9 kg and >150 kg." },
-      { tag: "new", text: "Ovarian torsion: an acute-gynaecology review card and emergency flowchart (suspect, image, operate), covering presentation, risk factors, the caveat that a normal scan does not exclude torsion, and laparoscopic detorsion with ovarian conservation, from the TOG review (Bailey 2025)." },
-      { tag: "new", text: "Aspiration prophylaxis for caesarean quick-reference: the NICE NG192 principle (antacid + H2 antagonist or PPI, plus an antiemetic) with elective and emergency dose regimens; notes that ranitidine was withdrawn in 2020 and a PPI is now used. Searching \"ranitidine\" or \"antacid in labour\" now finds it." },
-      { tag: "new", text: "Umbilical cord gas calculator: enter arterial pH, pCO₂, base deficit (and optional venous values and lactate) to grade acidaemia, flag significant metabolic acidosis (pH <7.00 with base deficit ≥12), classify respiratory vs metabolic vs mixed with typical causes of each, and validate the arterial sample. Thresholds from Olofsson (AJOG 2023) and the Riley & Johnson normal ranges." },
-      { tag: "new", text: "Risk of Malignancy Index (RMI I) calculator: tick the ultrasound features, set menopausal status and enter CA125 to compute U × M × CA125 and triage referral of an ovarian mass to gynae-oncology (threshold >200), from RCOG GTG62 and GTG34." },
-      { tag: "new", text: "Sickle cell disease in pregnancy (British Society for Haematology, 2021, which supersedes the archived RCOG GTG61): preconception, antenatal, intrapartum and postnatal care, plus an acute painful-crisis flowchart. Covers folic acid 5 mg, stopping hydroxycarbamide, aspirin from 12 weeks, LMWH, 4-weekly growth scans from 24 weeks, avoiding pethidine, and acute chest syndrome." },
     ],
   },
   {
