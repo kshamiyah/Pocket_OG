@@ -80,6 +80,17 @@ export const CALCULATOR_SCENARIOS = [
       { label: "RCOG GTG69", url: "https://obgyn.onlinelibrary.wiley.com/doi/epdf/10.1111/1471-0528.17739" },
     ],
   },
+  {
+    id: "CORD_GAS",
+    title: "Umbilical cord gas interpretation",
+    subtitle: "Arterial pH, pCO₂, base deficit ± venous & lactate",
+    source: "Olofsson, AJOG 2023;228(5S):S1222–40 · Riley & Johnson 1993",
+    color: { accent: "bg-cyan-500", text: "text-cyan-700", bg: "bg-cyan-50", border: "border-cyan-200" },
+    description: "Interpret paired umbilical cord blood gases: grade acidaemia, flag significant metabolic acidosis (pH <7.00 with base deficit ≥12), classify respiratory vs metabolic, and validate the arterial sample.",
+    pdfs: [
+      { label: "Olofsson, AJOG 2023", url: "https://doi.org/10.1016/j.ajog.2022.07.001" },
+    ],
+  },
 ];
 
 // ──────────────────────────────────────────────────────────────────────

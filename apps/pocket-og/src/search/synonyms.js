@@ -23,6 +23,14 @@ export const SYNONYMS = {
   "pregnancy heart team": ["mwho","cardiac disease pregnancy","esc guidelines"],
   "peripartum cardiomyopathy": ["cardiomyopathy pregnancy","cardiac disease pregnancy","postnatal breathlessness"],
 
+  // Umbilical cord gas interpretation
+  "cord gas": ["cord blood gas","umbilical cord gas","cord gases","base deficit","umbilical artery ph","metabolic acidosis","cord gas calculator"],
+  "cord blood gas": ["cord gas","umbilical cord gas","base deficit","umbilical artery ph","cord gas calculator"],
+  "cord gases": ["cord gas","cord blood gas","umbilical cord gas"],
+  "umbilical artery ph": ["cord gas","cord blood gas","base deficit","metabolic acidosis"],
+  "base deficit": ["cord gas","cord blood gas","metabolic acidosis","base excess","umbilical artery ph"],
+  "cord ph": ["cord gas","cord blood gas","umbilical artery ph","base deficit"],
+
   // Aspiration prophylaxis for caesarean
   "ranitidine": ["aspiration prophylaxis","antacid","omeprazole","proton pump inhibitor","h2 antagonist","caesarean prophylaxis"],
   "antacid in labour": ["aspiration prophylaxis","sodium citrate","omeprazole","antacid","caesarean prophylaxis"],

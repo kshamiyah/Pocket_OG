@@ -1211,6 +1211,165 @@ function PuqeCalculator({ onBack, pdfs }) {
   );
 }
 
+// ─── Scenario: Umbilical cord gas interpretation ──────────────────────
+// Thresholds cited from Olofsson P. Umbilical cord pH, blood gases, and
+// lactate at birth. Am J Obstet Gynecol 2023;228(5S):S1222-S1240 (DOI
+// 10.1016/j.ajog.2022.07.001), and the Riley & Johnson (1993) normal cord
+// arterial reference ranges. Decision aid only.
+function interpretCordGas({ aPh, aPco2, aBd, vPh, vPco2, lactate }) {
+  const hasBd = aBd != null && !Number.isNaN(aBd);
+  const hasPco2 = aPco2 != null && !Number.isNaN(aPco2);
+  const raisedBd = hasBd && aBd >= 12;               // Olofsson: BD >= 12.0 mmol/L
+  const raisedPco2 = hasPco2 && aPco2 > 9.8;          // > upper normal ~9.8 kPa (Riley & Johnson)
+  const metabolic = aPh < 7.0 && raisedBd;            // Olofsson: pH < 7.00 AND BD >= 12.0
+
+  const actions = [];
+
+  // Sample validation (needs venous pH; pCO2 optional)
+  if (vPh != null && !Number.isNaN(vPh)) {
+    const dPh = vPh - aPh;                            // venous should be higher
+    const dPco2 = (hasPco2 && vPco2 != null && !Number.isNaN(vPco2)) ? (aPco2 - vPco2) : null;
+    if (dPh < 0.02 || (dPco2 != null && dPco2 < 0.5)) {
+      actions.push("Sample validation: the venoarterial pH difference is <0.02" +
+        (dPco2 != null ? " and/or the arteriovenous pCO₂ difference is <0.5 kPa" : "") +
+        " — the two samples may not be from separate vessels, so the arterial result may be unreliable.");
+    } else {
+      actions.push("Sample validation OK: arterial pH is lower than venous by ≥0.02" +
+        (dPco2 != null ? " with an arteriovenous pCO₂ difference ≥0.5 kPa" : "") +
+        ", consistent with genuine arterial and venous samples.");
+    }
+  }
+
+  // Character of acidosis (only meaningful when pH is low)
+  if (aPh < 7.20) {
+    if (raisedBd && raisedPco2) actions.push("Mixed acidosis: raised base deficit and raised pCO₂.");
+    else if (raisedBd) actions.push("Metabolic acidosis: raised base deficit, reflecting more prolonged hypoxia.");
+    else if (raisedPco2) actions.push("Respiratory acidosis: raised pCO₂ with base deficit <12 — usually acute, with a better prognosis.");
+    else if (hasBd || hasPco2) actions.push("Low pH without a raised base deficit or pCO₂ — recheck the values and the sampling.");
+  }
+
+  if (lactate != null && !Number.isNaN(lactate)) {
+    actions.push(lactate >= 10
+      ? `Lactate ${lactate} mmol/L: at or above the term cord-artery cutoff (~10 mmol/L), supporting significant hypoxia.`
+      : `Lactate ${lactate} mmol/L: below the term cord-artery cutoff (~10 mmol/L).`);
+  }
+
+  actions.push("Base deficit varies by analyser; base deficit in extracellular fluid (BDecf) is preferred for cord blood. Always interpret alongside the clinical picture and the baby's condition.");
+
+  const normalRef = "Normal umbilical artery (Riley & Johnson): pH 7.12–7.35, pCO₂ 5.6–9.8 kPa, base excess −9.3 to +1.5 mmol/L.";
+
+  if (metabolic) {
+    return {
+      title: "Significant metabolic acidaemia",
+      summary: "pH <7.00 with base deficit ≥12.0 mmol/L",
+      detail: "Meets the common definition of significant metabolic acidaemia, which is associated with an increased risk of hypoxic-ischaemic encephalopathy. Escalate for senior and neonatal review and consider assessment for therapeutic hypothermia. " + normalRef,
+      actions,
+      color: "text-rose-700", bg: "bg-rose-50", border: "border-rose-200",
+      citation: "Olofsson, AJOG 2023 · pH <7.00 + BD ≥12.0 mmol/L",
+    };
+  }
+  if (aPh < 7.00) {
+    return {
+      title: "Severe acidaemia",
+      summary: "pH <7.00 (base deficit <12.0 or not entered)",
+      detail: "Below the severe-acidaemia threshold, but the strict metabolic-acidosis definition also needs a base deficit ≥12.0 mmol/L. " + normalRef,
+      actions, color: "text-orange-700", bg: "bg-orange-50", border: "border-orange-200",
+      citation: "Olofsson, AJOG 2023",
+    };
+  }
+  if (aPh < 7.10) {
+    return {
+      title: "Acidaemia (below normal limit)",
+      summary: "pH 7.00–7.09",
+      detail: "Below the statistically-defined lower normal limit (mean −2 SD = 7.10). " + normalRef,
+      actions, color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200",
+      citation: "Olofsson, AJOG 2023",
+    };
+  }
+  if (aPh < 7.20) {
+    return {
+      title: "Mildly low pH",
+      summary: "pH 7.10–7.19",
+      detail: "Within the range where a minority of newborns are classed as acidaemic; correlate with the base deficit and the baby's condition. " + normalRef,
+      actions, color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200",
+      citation: "Olofsson, AJOG 2023",
+    };
+  }
+  return {
+    title: "Within normal limits",
+    summary: "Arterial pH ≥7.20",
+    detail: (raisedBd
+      ? "pH is within normal limits but the base deficit is ≥12 mmol/L — interpret alongside the clinical picture. "
+      : "Within normal limits. ") + normalRef,
+    actions, color: "text-teal-700", bg: "bg-teal-50", border: "border-teal-200",
+    citation: "Riley & Johnson 1993 · Olofsson, AJOG 2023",
+  };
+}
+
+function CordGasCalculator({ onBack, pdfs }) {
+  const [aPh, setAPh] = useState("");
+  const [aPco2, setAPco2] = useState("");
+  const [aBd, setABd] = useState("");
+  const [vPh, setVPh] = useState("");
+  const [vPco2, setVPco2] = useState("");
+  const [lactate, setLactate] = useState("");
+  const [result, setResult] = useState(null);
+
+  const submit = () => {
+    const ap = parseFloat(aPh);
+    if (Number.isNaN(ap)) return;
+    setResult(interpretCordGas({
+      aPh: ap,
+      aPco2: aPco2 === "" ? null : parseFloat(aPco2),
+      aBd: aBd === "" ? null : parseFloat(aBd),
+      vPh: vPh === "" ? null : parseFloat(vPh),
+      vPco2: vPco2 === "" ? null : parseFloat(vPco2),
+      lactate: lactate === "" ? null : parseFloat(lactate),
+    }));
+  };
+  const reset = () => { setAPh(""); setAPco2(""); setABd(""); setVPh(""); setVPco2(""); setLactate(""); setResult(null); };
+
+  return (
+    <div className="min-h-screen pb-24">
+      <div className="max-w-lg mx-auto">
+        <StepHeader title="Umbilical cord gas" subtitle="Olofsson AJOG 2023 · Riley & Johnson 1993" onBack={onBack} pdfs={pdfs} shareId="CORD_GAS" />
+        <div className="px-5 pt-6">
+          {!result && (
+            <>
+              <h3 className="text-2xl font-bold text-gray-900 mb-1">Enter the cord gases</h3>
+              <p className="text-sm text-gray-400 mb-6">Arterial pH is required; add venous values for sample validation. pCO₂ in kPa.</p>
+              <div className="space-y-4">
+                <NumberField label="Arterial pH" value={aPh} onChange={setAPh} />
+                <NumberField label="Arterial pCO₂" value={aPco2} onChange={setAPco2} suffix="kPa" />
+                <NumberField label="Arterial base deficit" value={aBd} onChange={setABd} suffix="mmol/L" />
+                <p className="text-[11px] text-gray-400 -mt-2 leading-relaxed">Enter the positive base deficit. If your analyser shows base excess (e.g. −14), enter 14.</p>
+                <NumberField label="Venous pH (optional)" value={vPh} onChange={setVPh} />
+                <NumberField label="Venous pCO₂ (optional)" value={vPco2} onChange={setVPco2} suffix="kPa" />
+                <NumberField label="Arterial lactate (optional)" value={lactate} onChange={setLactate} suffix="mmol/L" />
+              </div>
+              <button
+                onClick={submit}
+                disabled={!aPh}
+                className="w-full mt-6 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold py-3.5 rounded-2xl transition-colors"
+              >
+                Interpret
+              </button>
+            </>
+          )}
+          {result && (
+            <>
+              <ResultCard result={result} />
+              <button onClick={reset} className="w-full mt-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 rounded-2xl transition-colors">
+                New interpretation
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Entry point ──────────────────────────────────────────────────────
 
 export default function CalculatorPage({ initialScenario, onNavigate, onOpenIOLPrioritizer }) {
@@ -1227,6 +1386,7 @@ export default function CalculatorPage({ initialScenario, onNavigate, onOpenIOLP
   if (scenarioId === "MTX_SURVEILLANCE") return <MtxSurveillanceCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
   if (scenarioId === "VTE_RISK") return <VteRiskCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
   if (scenarioId === "PUQE") return <PuqeCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
+  if (scenarioId === "CORD_GAS") return <CordGasCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
 
   return <ScenarioList onSelect={setScenarioId} onOpenIOLPrioritizer={onOpenIOLPrioritizer} />;
 }
