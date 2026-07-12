@@ -23,6 +23,12 @@ export const SYNONYMS = {
   "pregnancy heart team": ["mwho","cardiac disease pregnancy","esc guidelines"],
   "peripartum cardiomyopathy": ["cardiomyopathy pregnancy","cardiac disease pregnancy","postnatal breathlessness"],
 
+  // Aspiration prophylaxis for caesarean
+  "ranitidine": ["aspiration prophylaxis","antacid","omeprazole","proton pump inhibitor","h2 antagonist","caesarean prophylaxis"],
+  "antacid in labour": ["aspiration prophylaxis","sodium citrate","omeprazole","antacid","caesarean prophylaxis"],
+  "aspiration prophylaxis": ["antacid","omeprazole","sodium citrate","ranitidine","proton pump inhibitor","mendelson","caesarean prophylaxis"],
+  "sodium citrate": ["aspiration prophylaxis","antacid","caesarean prophylaxis"],
+
   // Ovarian / adnexal torsion
   "ovarian torsion": ["adnexal torsion","twisted ovary","torsion","detorsion","acute pelvic pain","tog review"],
   "adnexal torsion": ["ovarian torsion","twisted ovary","torsion","detorsion"],

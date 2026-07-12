@@ -98,6 +98,41 @@ export const QUICKREF_SECTIONS = [
   },
 
   {
+    id: "quickref-aspiration-prophylaxis",
+    gl: "QUICKREF",
+    condition: "Quick Reference",
+    setting: "Perioperative — Doses",
+    title: "Aspiration Prophylaxis for Caesarean",
+    tags: [
+      "aspiration prophylaxis", "antacid", "antacid in labour", "ranitidine",
+      "omeprazole", "proton pump inhibitor", "ppi", "h2 antagonist", "h2 receptor antagonist",
+      "sodium citrate", "acid prophylaxis", "caesarean prophylaxis", "pre-caesarean",
+      "gastric acid", "mendelson", "aspiration pneumonitis", "pre-op caesarean", "emergency dose",
+    ],
+    content: [
+      { type: "alert", value: "Before a caesarean birth, offer an antacid plus an H2-receptor antagonist or proton pump inhibitor to reduce gastric volume and acidity, and offer an antiemetic (NICE NG192, 1.4.18–1.4.19). This lowers the risk of aspiration (Mendelson's syndrome) if general anaesthesia is needed." },
+      { type: "alert", value: "Ranitidine was withdrawn in the UK in 2020 (NDMA contamination). Use a proton pump inhibitor (omeprazole) instead." },
+      { type: "subheading", value: "Elective caesarean" },
+      { type: "table",
+        headers: ["Drug", "Dose"],
+        rows: [
+          ["Omeprazole (oral)", "40 mg the night before, and 40 mg on the morning of surgery"],
+        ],
+      },
+      { type: "subheading", value: "Emergency caesarean / general anaesthesia" },
+      { type: "table",
+        headers: ["Drug", "Dose"],
+        rows: [
+          ["Sodium citrate 0.3M (oral)", "30 mL immediately before induction"],
+          ["Omeprazole (IV)", "40 mg"],
+          ["Metoclopramide (IV)", "10 mg (antiemetic, promotes gastric emptying)"],
+        ],
+      },
+      { type: "text", value: "Principle per NICE NG192 (1.4.18–1.4.19), which recommends the drug classes but not specific doses. The doses shown are common UK anaesthetic defaults (BNF / OAA practice), not a fixed national figure: verify against your local obstetric anaesthesia protocol." },
+    ],
+  },
+
+  {
     id: "quickref-anaphylaxis",
     gl: "QUICKREF",
     condition: "Quick Reference",
