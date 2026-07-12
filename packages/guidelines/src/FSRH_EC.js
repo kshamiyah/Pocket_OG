@@ -50,4 +50,29 @@ export const FSRH_EC_SECTIONS = [
       ]},
     ],
   },
+
+  {
+    id: "fsrh-ec-mechanism-counselling",
+    gl: "FSRH_EC",
+    condition: "Emergency Contraception",
+    setting: "Sexual & Reproductive Health",
+    title: "Mechanism of Action & Counselling",
+    tags: [
+      "emergency contraception mechanism", "levonorgestrel mechanism",
+      "ulipristal acetate mechanism", "copper iud mechanism",
+      "emergency contraception not abortifacient",
+    ],
+    content: [
+      { type: "table", headers: ["Method", "How it works"], rows: [
+        ["LNG-EC", "Delays or inhibits ovulation"],
+        ["UPA-EC", "Progesterone receptor modulator — delays or inhibits ovulation, including partway into the LH surge (later than LNG can act)"],
+        ["Copper IUD", "Toxic to sperm and egg, interfering with fertilisation; also affects the endometrium"],
+      ]},
+      { type: "alert", value: "None of these methods work after implantation — all act before or around fertilisation. This is a key, evidence-based counselling point: emergency contraception does not disrupt an established pregnancy and is not a method of abortion." },
+      { type: "list", items: [
+        "This distinction matters clinically (a positive pregnancy test after EC means EC has not worked, not that it has caused harm) and matters for counselling women who have moral or religious concerns about the method",
+        "EC can be offered regardless of where a woman is in her cycle, since the exact timing of ovulation cannot be known with certainty in advance",
+      ]},
+    ],
+  },
 ];

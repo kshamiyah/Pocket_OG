@@ -57,7 +57,28 @@ export const BASHH_GC_SECTIONS = [
         "Pelvic inflammatory disease (PID) and epididymo-orchitis, as with chlamydia, with the same downstream fertility risk",
         "Ophthalmia neonatorum — severe, sight-threatening neonatal conjunctivitis acquired at birth from an untreated maternal infection; a notifiable condition requiring urgent same-day ophthalmology and paediatric assessment",
       ]},
+      { type: "text", value: "Neonatal treatment: a single dose of IM/IV ceftriaxone, adjusted for neonatal weight — check local neonatal dosing, and note that ceftriaxone needs caution in neonates with jaundice/hyperbilirubinaemia and must not be given alongside IV calcium. Since chlamydia and gonorrhoea can co-exist, cover both organisms (ceftriaxone plus oral azithromycin) if the causative organism isn't yet confirmed." },
       { type: "alert", value: "Disseminated gonococcal infection (DGI) is rare but should be considered in anyone with a triad of tenosynovitis, dermatitis (petechial/pustular acral skin lesions) and migratory polyarthralgia or septic arthritis. It needs admission for IV ceftriaxone and specialist input, not outpatient oral treatment." },
+    ],
+  },
+
+  {
+    id: "bashh-gc-resistance-screening",
+    gl: "BASHH_GC",
+    condition: "Gonorrhoea",
+    setting: "Sexual Health",
+    title: "Antimicrobial Resistance & Screening",
+    tags: [
+      "grasp programme", "ceftriaxone resistant gonorrhoea", "gonorrhoea msm screening",
+      "gonorrhoea triple site testing",
+    ],
+    content: [
+      { type: "alert", value: "Ceftriaxone-resistant gonorrhoea is an emerging problem in England — surveillance (GRASP) recorded 15 cases in the first 8 months of 2025, already exceeding the 13 recorded for all of 2024. This is why taking a culture specimen before treatment matters even when NAAT alone would confirm the diagnosis: without it, resistance can't be detected or acted on." },
+      { type: "list", items: [
+        "Report confirmed or suspected ceftriaxone treatment failure promptly per local health protection team protocol — this is how emerging resistant strains are tracked and contained",
+        "MSM: triple-site testing (urethral/urine, rectal, pharyngeal) as for chlamydia — pharyngeal infection is often asymptomatic and is also the site most associated with treatment failure",
+        "Screen every 3–6 months in MSM with ongoing risk, as for chlamydia",
+      ]},
     ],
   },
 ];

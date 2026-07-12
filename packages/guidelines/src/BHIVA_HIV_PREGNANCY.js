@@ -74,4 +74,25 @@ export const BHIVA_HIV_PREGNANCY_SECTIONS = [
       { type: "text", value: "Infant HIV PCR testing follows a staged schedule (birth, around 6 weeks, and around 12 weeks, adjusted for feeding method and risk category), with a confirmatory HIV antibody test at 18–24 months once maternal antibody has cleared — verify the exact schedule against current BHIVA guidance and local protocol, as it is stratified by risk category." },
     ],
   },
+
+  {
+    id: "bhiva-hiv-postnatal-mdt",
+    gl: "BHIVA_HIV_PREGNANCY",
+    condition: "HIV in Pregnancy",
+    setting: "Postnatal",
+    title: "Postnatal Care & Multidisciplinary Support",
+    tags: [
+      "hiv postnatal care", "hiv multidisciplinary team", "hiv contraception postnatal",
+      "hiv disclosure support", "hiv peer support pregnancy",
+    ],
+    content: [
+      { type: "text", value: "Care for a woman with HIV in pregnancy is multidisciplinary from the outset — obstetrics, HIV/infectious disease specialists, specialist midwifery, and paediatrics all need a shared plan, agreed and documented well before delivery rather than improvised on the day." },
+      { type: "list", items: [
+        "Continue maternal ART postnatally without interruption — pregnancy is not a reason to pause treatment once started",
+        "Address contraception before discharge — an unplanned pregnancy shortly afterwards undermines the careful antenatal planning just completed",
+        "Psychosocial support and peer support networks are an important part of care — disclosure concerns, stigma, and the emotional weight of infant feeding decisions all warrant explicit attention, not just clinical follow-up",
+        "Safety-net the woman and the wider family: confirm who else is aware of the diagnosis and how ongoing care will be coordinated once she is no longer attending antenatal appointments",
+      ]},
+    ],
+  },
 ];

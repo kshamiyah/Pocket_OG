@@ -86,4 +86,30 @@ export const NG257_SECTIONS = [
       ]},
     ],
   },
+
+  {
+    id: "ng257-ivf-process",
+    gl: "NG257",
+    condition: "Subfertility",
+    setting: "Gynaecology / Reproductive Medicine",
+    title: "IVF: What the Process Involves",
+    tags: [
+      "ivf process", "ovarian stimulation ivf", "egg collection", "embryo transfer",
+      "ivf counselling",
+    ],
+    content: [
+      { type: "text", value: "Understanding the practical steps helps a woman weigh up whether to proceed — this is what actually happens once IVF is agreed, regardless of who is funding it." },
+      { type: "table", headers: ["Stage", "What happens"], rows: [
+        ["Ovarian stimulation", "Daily gonadotrophin injections for around 10–12 days to develop multiple follicles, with ultrasound monitoring of response"],
+        ["Egg collection", "Transvaginal ultrasound-guided needle aspiration of follicles under sedation or general anaesthetic"],
+        ["Fertilisation", "Eggs are combined with sperm in the laboratory (standard IVF) or a single sperm is injected directly into each egg (ICSI, used for male factor infertility)"],
+        ["Embryo transfer", "A thin catheter places one embryo (occasionally two, depending on individual circumstances) into the uterus a few days after collection"],
+      ]},
+      { type: "list", items: [
+        "A full cycle typically takes 3–6 weeks from starting stimulation to the pregnancy test",
+        "Surplus good-quality embryos can be frozen for future use, avoiding a full repeat stimulation cycle",
+        "Counsel on the main risks: multiple pregnancy (mitigated by single embryo transfer where appropriate), and ovarian hyperstimulation syndrome (see GTG5) from the stimulation phase",
+      ]},
+    ],
+  },
 ];

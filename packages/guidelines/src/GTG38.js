@@ -42,6 +42,25 @@ export const GTG38_SECTIONS = [
   },
 
   {
+    id: "gtg38-epidemiology-genetics",
+    gl: "GTG38",
+    condition: "Gestational Trophoblastic Disease",
+    setting: "Gynaecology / Early Pregnancy",
+    title: "Epidemiology & Genetics",
+    tags: [
+      "molar pregnancy incidence", "complete mole karyotype", "partial mole karyotype",
+      "androgenetic mole", "triploid mole",
+    ],
+    content: [
+      { type: "text", value: "Molar pregnancy is rare — around 1 in 600 pregnancies in the UK — but the genetics behind complete and partial moles explain why they behave so differently and why complete moles carry the higher malignant potential." },
+      { type: "table", headers: ["Type", "Origin", "Karyotype", "Risk of GTN"], rows: [
+        ["Complete mole", "An empty (enucleate) egg fertilised by one sperm that duplicates, or by two sperm — all genetic material is paternal", "46,XX (~90%) or 46,XY (~10%)", "Roughly 1 in 400–450 — the higher-risk group"],
+        ["Partial mole", "A normal egg fertilised by two sperm", "Triploid (69,XXX / 69,XXY / 69,XYY) — both maternal and paternal chromosomes present", "Roughly 1 in 3,000 — much lower, but still requires the same registration and follow-up"],
+      ]},
+    ],
+  },
+
+  {
     id: "gtg38-initial-management",
     gl: "GTG38",
     condition: "Gestational Trophoblastic Disease",
@@ -93,6 +112,12 @@ export const GTG38_SECTIONS = [
         "High-risk GTN: multi-agent chemotherapy",
         "Cure rates are very high even in high-risk disease, reflecting how chemosensitive GTN is and the benefit of centralised specialist management",
         "Placental site trophoblastic tumour (PSTT) and epithelioid trophoblastic tumour (ETT) behave differently from choriocarcinoma — they are relatively chemo-resistant and slower-growing, so hysterectomy is often the primary treatment rather than chemotherapy alone",
+      ]},
+      { type: "subheading", value: "Chemotherapy Follow-Up & Relapse Risk" },
+      { type: "list", items: [
+        "Chemotherapy continues until hCG normalises, then further consolidation cycles are given afterwards to reduce relapse risk — the exact number is protocol- and risk-category-dependent at the specialist centre",
+        "hCG surveillance then continues (monthly is typical) for 12 months after completing chemotherapy for low-risk disease, longer for stage IV/high-risk disease",
+        "Relapse occurs in under 5% overall, and the great majority happen within the first year after finishing treatment — the risk falls substantially thereafter, which is why follow-up is time-limited rather than lifelong",
       ]},
       { type: "subheading", value: "Twin Pregnancy with a Coexisting Mole" },
       { type: "text", value: "A molar pregnancy coexisting with a normal twin is rare but not automatically an indication for termination — refer to a specialist fetal medicine and GTD centre jointly, since ongoing pregnancy is possible with appropriate counselling and surveillance for pre-eclampsia and haemorrhage risk." },

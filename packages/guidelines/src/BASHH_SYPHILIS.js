@@ -83,4 +83,28 @@ export const BASHH_SYPHILIS_SECTIONS = [
       ]},
     ],
   },
+
+  {
+    id: "bashh-syphilis-followup",
+    gl: "BASHH_SYPHILIS",
+    condition: "Syphilis",
+    setting: "Sexual Health",
+    title: "Serological Follow-Up",
+    tags: [
+      "syphilis serology follow up", "syphilis titre", "serofast",
+      "syphilis reinfection", "syphilis hiv monitoring",
+    ],
+    content: [
+      { type: "text", value: "Cure is confirmed serologically, not just by symptom resolution — non-treponemal titres (e.g. RPR/VDRL) are followed over time; treponemal tests usually stay positive for life and are not used to monitor response." },
+      { type: "table", headers: ["Stage", "Expected response"], rows: [
+        ["Early syphilis", "Fourfold decline in non-treponemal titre within 6–12 months"],
+        ["Late latent syphilis", "Fourfold decline within 12–24 months"],
+      ]},
+      { type: "list", items: [
+        "A sustained fourfold rise in titre after treatment suggests reinfection or treatment failure — investigate and retreat rather than assume it's a lab variation",
+        "Serofast state: titres plateau at a low positive level without meeting the fourfold-decline definition — common, and routine retreatment is not warranted without other evidence of active infection",
+        "HIV co-infection: monitor more frequently (e.g. 3-monthly rather than 6-monthly) and maintain a lower threshold for considering neurosyphilis if the clinical or serological picture is atypical",
+      ]},
+    ],
+  },
 ];

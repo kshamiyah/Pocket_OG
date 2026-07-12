@@ -53,6 +53,28 @@ export const PCOS2023_SECTIONS = [
   },
 
   {
+    id: "pcos2023-longterm-risks",
+    gl: "PCOS2023",
+    condition: "Polycystic Ovary Syndrome",
+    setting: "Gynaecology / Reproductive Medicine",
+    title: "Long-Term Health Risks",
+    tags: [
+      "pcos type 2 diabetes", "pcos nafld", "pcos endometrial cancer",
+      "pcos cardiovascular disease", "pcos long term health",
+    ],
+    content: [
+      { type: "text", value: "PCOS is a lifelong condition with consequences well beyond the reproductive years — counselling at diagnosis should set expectations for ongoing, not one-off, health review." },
+      { type: "list", items: [
+        "Type 2 diabetes: insulin resistance is intrinsic to PCOS, independent of weight, and risk is further amplified by coexisting non-alcoholic fatty liver disease (NAFLD)",
+        "NAFLD: 2–4 times more common in PCOS than in weight-matched controls without PCOS, and itself independently raises cardiovascular and diabetes risk",
+        "Cardiovascular disease: the combination of dyslipidaemia, hypertension and insulin resistance seen in PCOS is now recognised as a genuine long-term cardiovascular risk factor, not just a fertility issue",
+        "Endometrial cancer: chronic anovulation with unopposed oestrogen raises lifetime risk — this is the clinical rationale behind ensuring regular withdrawal bleeding (see Diagnosis section above)",
+        "Mental health: PCOS carries a higher risk of depression, anxiety, disordered eating and body image distress — screen alongside, not instead of, the metabolic and reproductive review",
+      ]},
+    ],
+  },
+
+  {
     id: "pcos2023-management",
     gl: "PCOS2023",
     condition: "Polycystic Ovary Syndrome",

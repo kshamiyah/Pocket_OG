@@ -70,4 +70,30 @@ export const BASHH_CT_SECTIONS = [
       ]},
     ],
   },
+
+  {
+    id: "bashh-ct-screening",
+    gl: "BASHH_CT",
+    condition: "Chlamydia",
+    setting: "Sexual Health",
+    title: "Screening & Retesting",
+    tags: [
+      "national chlamydia screening programme", "ncsp", "chlamydia under 25",
+      "chlamydia retest", "chlamydia msm screening", "triple site testing",
+    ],
+    content: [
+      { type: "subheading", value: "National Chlamydia Screening Programme (NCSP)" },
+      { type: "list", items: [
+        "Opportunistic screening for sexually active people under 25 in England — offered annually and on change of sexual partner, in a wide range of settings (GP, pharmacy, contraception services), not just sexual health clinics",
+        "Aims to detect and treat asymptomatic infection before it causes reproductive harm (PID, tubal damage) rather than waiting for symptomatic presentation",
+      ]},
+      { type: "subheading", value: "Men Who Have Sex with Men (MSM)" },
+      { type: "text", value: "Triple-site testing (urethral/urine, rectal, pharyngeal) is the standard of care in MSM — testing urine alone misses a large proportion of infections, since extragenital infection is frequently asymptomatic." },
+      { type: "list", items: [
+        "Screen every 3–6 months in MSM with ongoing risk (new or multiple partners, condomless sex), including those on HIV PrEP or living with HIV",
+      ]},
+      { type: "subheading", value: "Retesting After Treatment" },
+      { type: "text", value: "A test of cure is different from retesting for reinfection. Offer a repeat test (not just a test of cure) around 3 months after treatment in under-25s and anyone at ongoing risk — reinfection from an untreated or new partner is common and is the leading cause of a positive result at this point, rather than treatment failure." },
+    ],
+  },
 ];

@@ -47,4 +47,27 @@ export const FSRH_UKMEC_SECTIONS = [
       { type: "text", value: "These examples illustrate how UKMEC categories can move as new evidence emerges — always check the current edition rather than relying on memorised categories for anything outside routine, low-risk prescribing." },
     ],
   },
+
+  {
+    id: "fsrh-ukmec-condition-table",
+    gl: "FSRH_UKMEC",
+    condition: "Contraception Method Choice",
+    setting: "Sexual & Reproductive Health",
+    title: "Quick Reference by Condition",
+    tags: [
+      "ukmec breast cancer", "ukmec diabetes", "ukmec hypertension",
+      "ukmec migraine without aura", "ukmec table",
+    ],
+    content: [
+      { type: "table", headers: ["Condition", "CHC", "POC/IUS", "Copper IUD"], rows: [
+        ["Current breast cancer", "4", "4 (3 for past breast cancer, disease-free ≥5 years)", "1"],
+        ["Uncomplicated diabetes (no vascular disease)", "2", "2", "1"],
+        ["Adequately controlled hypertension", "3", "1–2", "1"],
+        ["Migraine without aura, age <35", "2", "1", "1"],
+        ["Migraine without aura, age ≥35", "3", "1", "1"],
+        ["Migraine with aura, any age", "4", "2", "1"],
+      ]},
+      { type: "text", value: "This table is illustrative of how UKMEC differentiates by severity and by method category (CHC vs progestogen-only vs copper IUD) — always check the full current tables for anything outside straightforward, low-risk prescribing, and note that POC/LNG-IUS categories can differ from copper IUD categories for the same condition." },
+    ],
+  },
 ];
