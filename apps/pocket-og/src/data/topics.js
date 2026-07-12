@@ -439,6 +439,27 @@ export const TOPICS = {
     ],
   },
 
+  "cord-prolapse": {
+    id: "cord-prolapse",
+    title: "Cord prolapse",
+    subtitle: "Obstetric emergency: relieve pressure, expedite birth",
+    description: "Descent of the umbilical cord through the cervix alongside (occult) or past (overt) the presenting part after membrane rupture; cord compression and vasospasm threaten the fetus, so it is an obstetric emergency requiring immediate delivery (GTG50).",
+    gl: "GTG50",
+    terms: [
+      "cord prolapse", "umbilical cord prolapse", "prolapsed cord",
+      "cord presentation", "cord prolapse emergency", "overt cord prolapse",
+      "occult cord prolapse",
+    ],
+    sections: [
+      {
+        heading: "Pathways",
+        entries: [
+          { type: "flowchart", id: "GTG50_CORD", gl: "GTG50", label: "Cord prolapse: emergency pathway", sublabel: "GTG50 flowchart, step through the algorithm" },
+        ],
+      },
+    ],
+  },
+
   "diabetes-in-pregnancy": {
     id: "diabetes-in-pregnancy",
     title: "Diabetes in pregnancy",
