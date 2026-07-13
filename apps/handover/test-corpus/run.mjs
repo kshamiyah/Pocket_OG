@@ -386,19 +386,25 @@ async function main() {
       runBugs.push(...bugs);
     }
 
-    // payload check result (run it inline for the report)
-    const payloadResult = await runPayload();
+    // isolated checks (run inline for the report + corpus tracking)
+    const payloadResult = await runCheck("payload.check.mjs", "payload.json");
+    const wardLabelsResult = await runCheck("wardlabels.check.mjs", "wardlabels.json");
 
     const payloadBugs = payloadResult.findings.map((f) => ({
       scenario: "payload", viewport: "-", net: "-", theme: "-",
       category: f.id, severity: "payload", signature: `payload::${f.id}`,
       expected: "Payload contract holds", observed: f.msg,
     }));
+    const wardLabelBugs = wardLabelsResult.findings.map((f) => ({
+      scenario: "ward-labels", viewport: "-", net: "-", theme: "-",
+      category: f.id, severity: "data", signature: `ward-labels::${f.id}`,
+      expected: "Bay/bed grid labels are unambiguous and grouped", observed: f.msg,
+    }));
 
-    const { classified, fixed } = reconcile(cases, runBugs, payloadBugs);
+    const { classified, fixed } = reconcile(cases, runBugs, [...payloadBugs, ...wardLabelBugs]);
     saveCases(cases);
     const reportPath = writeReport({
-      classified, fixed, states: stateCount, payloadResult,
+      classified, fixed, states: stateCount, payloadResult, wardLabelsResult,
       meta: { viewports: VIEWPORTS.map((v) => v.id) },
     });
     log(`\nReport written: ${reportPath}`);
@@ -411,11 +417,11 @@ async function main() {
   }
 }
 
-async function runPayload() {
+async function runCheck(script, resultFile) {
   const { spawnSync } = await import("node:child_process");
-  spawnSync("node", ["payload.check.mjs"], { cwd: new URL(".", import.meta.url).pathname, stdio: "ignore" });
+  spawnSync("node", [script], { cwd: new URL(".", import.meta.url).pathname, stdio: "ignore" });
   const { readFileSync } = await import("node:fs");
-  return JSON.parse(readFileSync(join(DIRS.results, "payload.json"), "utf8"));
+  return JSON.parse(readFileSync(join(DIRS.results, resultFile), "utf8"));
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

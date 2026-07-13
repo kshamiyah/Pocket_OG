@@ -235,12 +235,17 @@ export async function runGestures(browser, results, deps) {
     await page.getByPlaceholder("To").fill("6");
     await page.getByRole("button", { name: "Add section" }).click();
     await page.waitForTimeout(200);
-    // lettered bays A-D x4 (defaults)
-    await page.getByText("Add lettered bays").click();
+    // numbered bays with lettered beds -> 1A,1B… (the user-requested config)
+    await page.getByText("Add bays & beds").click();
     await page.waitForTimeout(150);
+    await page.getByRole("button", { name: "Numbers", exact: true }).first().click(); // bays = numbers
+    await page.getByRole("button", { name: "Letters", exact: true }).last().click();  // beds = letters
+    await page.waitForTimeout(150);
+    await snap(page, "wardsetup-1b-numbered-bays");
     await page.getByRole("button", { name: "Add section" }).click();
     await page.waitForTimeout(200);
     await snap(page, "wardsetup-1-two-sections");
+    // remove the numbered RANGE (first Remove) so we keep the grid section, then save
     const removeBtns = page.getByRole("button", { name: "Remove" });
     const nBefore = await removeBtns.count();
     if (nBefore >= 1) { await removeBtns.first().click(); await page.waitForTimeout(150); }
@@ -248,6 +253,9 @@ export async function runGestures(browser, results, deps) {
     await page.waitForTimeout(250);
     const layout = await page.evaluate(() => JSON.parse(localStorage.getItem("handover_ward_layouts_v1") || "{}").Antenatal);
     if (!layout || !layout.sections?.length) bug("ward-setup", "save", "flow", "New ward saves with its remaining section(s)", `layout=${JSON.stringify(layout)}`);
+    const grid = layout?.sections?.find((s) => s.type === "grid");
+    if (!grid || grid.bayKind !== "number" || grid.bedKind !== "letter")
+      bug("ward-setup", "numbered-bays", "data", "Grid section persists numbered bays + lettered beds", `grid=${JSON.stringify(grid)}`);
     await snap(page, "wardsetup-2-saved");
   });
 

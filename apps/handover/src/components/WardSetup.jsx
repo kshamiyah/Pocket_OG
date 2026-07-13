@@ -475,7 +475,7 @@ function NamedForm({ initialSection, onSave, onCancel }) {
   );
 }
 
-const TYPE_LABEL = { [SECTION_TYPE.RANGE]: "Numbered range", [SECTION_TYPE.GRID]: "Lettered bays", [SECTION_TYPE.NAMED]: "Named rooms" };
+const TYPE_LABEL = { [SECTION_TYPE.RANGE]: "Numbered range", [SECTION_TYPE.GRID]: "Bays & beds", [SECTION_TYPE.NAMED]: "Named rooms" };
 
 export default function WardSetup({ wardName, existingLayout, onSave, onCancel }) {
   const [sections, setSections] = useState(existingLayout?.sections || []);
@@ -556,8 +556,8 @@ export default function WardSetup({ wardName, existingLayout, onSave, onCancel }
             <span className="block text-sm font-normal opacity-80 mt-1">Plain beds, e.g. 1–12, or a prefix like SR1–SR3</span>
           </button>
           <button type="button" onClick={() => setDraft({ type: SECTION_TYPE.GRID })} className={`${CHIP} text-left px-4 py-3.5 bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-800`}>
-            + Add lettered bays
-            <span className="block text-sm font-normal opacity-80 mt-1">Bay grid — pick letter or number bays and beds</span>
+            + Add bays &amp; beds
+            <span className="block text-sm font-normal opacity-80 mt-1">A grid of bays, each with beds. Bays and beds can each be letters or numbers.</span>
           </button>
           <button type="button" onClick={() => setDraft({ type: SECTION_TYPE.NAMED })} className={`${CHIP} text-left px-4 py-3.5 bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-800`}>
             + Add named rooms
@@ -582,7 +582,7 @@ export default function WardSetup({ wardName, existingLayout, onSave, onCancel }
       {draft?.type === SECTION_TYPE.GRID && (
         <div className={ADD_FORM_WRAP}>
           <p className="text-xs font-bold uppercase tracking-widest text-claude-600 mb-3">
-            {editingSection ? "Edit lettered bays" : "Add lettered bays"}
+            {editingSection ? "Edit bays & beds" : "Add bays & beds"}
           </p>
           <GridForm
             key={draft.sectionId ?? "new-grid"}

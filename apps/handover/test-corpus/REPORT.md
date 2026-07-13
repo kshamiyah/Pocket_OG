@@ -1,6 +1,6 @@
 # Handover test loop — report
 
-_Generated 2026-07-13T08:19:13.626Z_
+_Generated 2026-07-13T12:04:25.350Z_
 
 **Pass summary:** 64 seeded flow+state screenshots across 375, 414, 1280 px (online + offline, light + dark), plus navigation/persistence walks and a full gesture suite (swipe-delete, inline edit, reminders, paste-to-takeover, handover copy-link, ward setup, section collapse, notifications).
 
@@ -9,7 +9,8 @@ _Generated 2026-07-13T08:19:13.626Z_
 | 🆕 NEW | 0 |
 | 🔁 STILL BROKEN | 0 |
 | ✅ FIXED (this run) | 0 |
-| — payload/data severity | 0 |
+| — payload severity | 0 |
+| — data-integrity severity | 0 |
 | — broken-flow severity | 0 |
 | — visual-only severity | 0 |
 
@@ -19,6 +20,13 @@ Isolated check against `src/utils/payload.js` (payload v1, 387 bytes; link 416 b
 
 - ✓ Contract assertions passed: encode→decode round-trip preserves ward/bed/text/priority; only `{w,b,t,p}` reach the wire (no `id`/`done`/`createdAt`/`remindAt` leak); corrupted codes are rejected; link round-trips.
 - ⚑ CONFIRMED: "keep a copy" has no effect on payload contents. Task text (e.g. "Consent for LSCS") is present on the wire whether keep-copy is on or off. This matches the app README ("Ward, bed, and task text travel on the wire verbatim") but CONTRADICTS the kickoff spec / CLAUDE.md, which claim task text is stripped in the keep-copy version. No stripHandover.js exists; payload version is 1.
+
+## 🧬 Ward bed-label grid check
+
+Isolated check against `src/utils/wardLayouts.js` — the four bay/bed label-kind combinations must produce unambiguous, correctly-grouped beds.
+
+- ✓ numbered bays + lettered beds → `1A 1B 1C 1D` under "Bay 1"; numbered bays + numbered beds → `1-1 1-2` under "Bay 1" (no "11" collision, grouping preserved); lettered variants unchanged.
+- ⚑ Unambiguous: bay1bed1=1-1, bay1bed11=1-11, bay11bed1=11-1.
 
 ## Findings
 

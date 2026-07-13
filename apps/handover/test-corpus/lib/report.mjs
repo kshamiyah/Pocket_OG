@@ -110,7 +110,7 @@ export function bugsFromState({ scenario, viewport, net, theme, structural, diag
   return bugs;
 }
 
-const SEV_RANK = { payload: 0, flow: 1, visual: 2 };
+const SEV_RANK = { payload: 0, data: 1, flow: 2, visual: 3 };
 
 // Classify this run's bugs against the prior corpus, update statuses, write it.
 export function reconcile(cases, runBugs, extraFindings = []) {
@@ -145,7 +145,7 @@ export function reconcile(cases, runBugs, extraFindings = []) {
   return { classified, fixed };
 }
 
-export function writeReport({ classified, fixed, states, payloadResult, meta }) {
+export function writeReport({ classified, fixed, states, payloadResult, wardLabelsResult, meta }) {
   const lines = [];
   const now = new Date().toISOString();
   lines.push(`# Handover test loop — report`);
@@ -161,7 +161,8 @@ export function writeReport({ classified, fixed, states, payloadResult, meta }) 
   lines.push(`| 🆕 NEW | ${counts["NEW"] || 0} |`);
   lines.push(`| 🔁 STILL BROKEN | ${counts["STILL BROKEN"] || 0} |`);
   lines.push(`| ✅ FIXED (this run) | ${fixed.length} |`);
-  lines.push(`| — payload/data severity | ${sev["payload"] || 0} |`);
+  lines.push(`| — payload severity | ${sev["payload"] || 0} |`);
+  lines.push(`| — data-integrity severity | ${sev["data"] || 0} |`);
   lines.push(`| — broken-flow severity | ${sev["flow"] || 0} |`);
   lines.push(`| — visual-only severity | ${sev["visual"] || 0} |`);
   lines.push("");
@@ -179,7 +180,21 @@ export function writeReport({ classified, fixed, states, payloadResult, meta }) 
   for (const n of payloadResult.notes) lines.push(`- ⚑ ${n}`);
   lines.push("");
 
-  const sevBadge = { payload: "🔒 payload", flow: "🔴 flow", visual: "🟡 visual" };
+  if (wardLabelsResult) {
+    lines.push(`## 🧬 Ward bed-label grid check`);
+    lines.push("");
+    lines.push(`Isolated check against \`src/utils/wardLayouts.js\` — the four bay/bed label-kind combinations must produce unambiguous, correctly-grouped beds.`);
+    lines.push("");
+    if (wardLabelsResult.findings.length === 0) {
+      lines.push(`- ✓ numbered bays + lettered beds → \`1A 1B 1C 1D\` under "Bay 1"; numbered bays + numbered beds → \`1-1 1-2\` under "Bay 1" (no "11" collision, grouping preserved); lettered variants unchanged.`);
+    } else {
+      for (const f of wardLabelsResult.findings) lines.push(`- ✗ **${f.id}** — ${f.msg}`);
+    }
+    for (const n of wardLabelsResult.notes) lines.push(`- ⚑ ${n}`);
+    lines.push("");
+  }
+
+  const sevBadge = { payload: "🔒 payload", data: "🧬 data", flow: "🔴 flow", visual: "🟡 visual" };
   const statusBadge = { "NEW": "🆕 NEW", "STILL BROKEN": "🔁 STILL BROKEN" };
 
   lines.push(`## Findings`);

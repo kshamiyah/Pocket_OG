@@ -6,7 +6,7 @@ Standalone shift job-list PWA for ward handover. Capture jobs by ward and bed, h
 
 - **Onboarding:** welcome, profile (name + role), optional ward setup before first shift
 - **Shift flow:** home hub (take over / start shift), job list with ward drill-down and bed board
-- **Ward layouts:** bays, side rooms, collapsible sections; configurable in ward setup
+- **Ward layouts:** bays (letters or numbers), beds (letters or numbers), side rooms, collapsible sections; configurable in ward setup
 - **Jobs:** tap to edit; timestamps (clock + relative age); routine/urgent; swipe to delete
 - **Reminders:** +30m / +1h / +2h presets or custom time (hour + minute); due banner and notification centre (bell icon)
 - **Handover:** pick which jobs to pass on; filter by ward; QR or share link; tap QR to expand; optional keep-copy (removes only handed-over jobs)

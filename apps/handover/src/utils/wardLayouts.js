@@ -49,8 +49,8 @@ function usesBedFirst(section) {
   return false;
 }
 
-function formatLabel(bayToken, bedToken, bedFirst) {
-  return bedFirst ? `${bedToken}${bayToken}` : `${bayToken}${bedToken}`;
+function formatLabel(bayToken, bedToken, bedFirst, sep = "") {
+  return bedFirst ? `${bedToken}${sep}${bayToken}` : `${bayToken}${sep}${bedToken}`;
 }
 
 export function bayListFromSection(section) {
@@ -84,9 +84,16 @@ export function normalizeGridSection(section) {
 export function gridBeds(rawSection) {
   const section = normalizeGridSection(rawSection);
   const { bedKind } = section;
+  const bayKind = section.bayKind ?? GRID_KIND.LETTER;
   const bays = bayListFromSection(section);
   const bedFirst = usesBedFirst(section);
   if (bays.length === 0) return [];
+
+  // When bay and bed use the SAME label kind, plain concatenation is ambiguous
+  // ("11" could be bay 1 bed 1 or bed 11; "AA" likewise), so separate them:
+  // "1-1", "A-B". Mixed kinds read unambiguously already ("A1", "1A"), so they
+  // stay separator-free and unchanged.
+  const sep = bayKind === bedKind ? "-" : "";
 
   return bays.flatMap((bay) => {
     const count = bedCountForBay(section, bay);
@@ -94,7 +101,7 @@ export function gridBeds(rawSection) {
     return Array.from({ length: count }, (_, i) => {
       const bayToken = String(bay);
       const bedToken = bedKind === GRID_KIND.LETTER ? indexToLetter(i) : String(i + 1);
-      return formatLabel(bayToken, bedToken, bedFirst);
+      return formatLabel(bayToken, bedToken, bedFirst, sep);
     });
   });
 }
@@ -121,6 +128,10 @@ export function parseBedLabel(label) {
   if (m) return { kind: "number", group: m[1], within: m[2].toUpperCase() };
   m = s.match(/^([A-Z]{2,})(\d+)$/i);
   if (m) return { kind: "side", group: m[1].toUpperCase(), within: Number(m[2]) };
+  m = s.match(/^(\d+)-(\d+)$/);
+  if (m) return { kind: "number", group: m[1], within: Number(m[2]) };
+  m = s.match(/^([A-Z])-([A-Z])$/i);
+  if (m) return { kind: "letter", group: m[1].toUpperCase(), within: m[2].toUpperCase() };
   m = s.match(/^(\d+)$/);
   if (m) return { kind: "plain", group: "", within: Number(m[1]) };
   return { kind: "other", group: s, within: 0 };
