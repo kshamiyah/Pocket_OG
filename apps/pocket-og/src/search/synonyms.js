@@ -554,6 +554,10 @@ export const SYNONYMS = {
   "post menopausal bleeding": ["postmenopausal bleeding","pmb","endometrial thickness","gtg67"],
   "bleeding after menopause": ["postmenopausal bleeding","pmb","endometrial thickness"],
   "two week wait gynaecology": ["2ww","pmb","urgent referral","endometrial cancer","suspected cancer"],
+  "endometrial cancer": ["uterine cancer","womb cancer","endometrial carcinoma","bgcs","pmb","pole","mmrd","p53","sentinel node","endometrial hyperplasia"],
+  "uterine cancer": ["endometrial cancer","womb cancer","endometrial carcinoma","bgcs","pmb"],
+  "womb cancer": ["endometrial cancer","uterine cancer","endometrial carcinoma","bgcs"],
+  "endometrial carcinoma": ["endometrial cancer","uterine cancer","bgcs"],
   // LNG-IUS / Mirena
   "lng-ius": ["mirena","levonorgestrel iud","levonorgestrel coil","iud hmb","coil hmb","intrauterine system"],
   "mirena": ["lng-ius","levonorgestrel","coil","intrauterine system","hmb treatment","contraception hmb"],

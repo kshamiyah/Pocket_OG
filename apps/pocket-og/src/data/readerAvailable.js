@@ -45,4 +45,5 @@ export const READER_AVAILABLE = new Set([
   "FSRH_EC",
   "GTG38",
   "BSH_SCD",
+  "BGCS_EC",
 ]);

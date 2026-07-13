@@ -65,6 +65,7 @@ export const GUIDELINES = {
   FSRH_EC: { code: "FSRH_EC", label: "Emergency Contraception", version: "FSRH 2017", date: "March 2017 (amended July 2023, further amended April 2026)", color: "lime", pdf: true, source: "FSRH", pdfUrl: "https://www.fsrh.org/standards-and-guidance/documents/ceu-clinical-guidance-emergency-contraception-march-2017/" },
   GTG38: { code: "GTG38", label: "Gestational Trophoblastic Disease", version: "GTG38", date: "September 2020", color: "teal", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/gestational-trophoblastic-disease-green-top-guideline-no-38/" },
   BSH_SCD: { code: "BSH_SCD", label: "Sickle Cell Disease in Pregnancy", version: "BSH 2021", date: "2021 (supersedes RCOG GTG61)", color: "sky", pdf: true, source: "BSH", pdfUrl: "https://doi.org/10.1111/bjh.17671" },
+  BGCS_EC: { code: "BGCS_EC", label: "Endometrial (Uterine) Cancer", version: "BGCS 2022", date: "2022", color: "zinc", pdf: true, source: "BGCS", pdfUrl: "https://doi.org/10.1016/j.ejogrb.2021.11.423" },
 };
 
 export const GL_COLORS = {
@@ -133,4 +134,5 @@ export const GL_COLORS = {
   FSRH_EC: { badge: "bg-lime-900/50 text-lime-300 border-lime-600/40", dot: "bg-lime-400" },
   GTG38: { badge: "bg-teal-900/50 text-teal-300 border-teal-600/40", dot: "bg-teal-400" },
   BSH_SCD: { badge: "bg-sky-900/50 text-sky-300 border-sky-600/40", dot: "bg-sky-400" },
+  BGCS_EC: { badge: "bg-zinc-800/60 text-zinc-300 border-zinc-600/40", dot: "bg-zinc-400" },
 };

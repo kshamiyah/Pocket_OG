@@ -70,3 +70,4 @@ export { FSRH_UKMEC_SECTIONS } from "./FSRH_UKMEC.js";
 export { FSRH_EC_SECTIONS } from "./FSRH_EC.js";
 export { GTG38_SECTIONS } from "./GTG38.js";
 export { BSH_SCD_SECTIONS } from "./BSH_SCD.js";
+export { BGCS_EC_SECTIONS } from "./BGCS_EC.js";

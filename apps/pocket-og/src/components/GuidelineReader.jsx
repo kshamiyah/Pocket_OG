@@ -51,6 +51,7 @@ import {
   FSRH_EC_SECTIONS,
   GTG38_SECTIONS,
   BSH_SCD_SECTIONS,
+  BGCS_EC_SECTIONS,
 } from "@pocket-og/guidelines";
 import { FLOWCHARTS } from "../data/flowcharts";
 import { GUIDELINE_KEYWORD_LINKS } from "../data/connections";
@@ -127,6 +128,7 @@ const SECTIONS_MAP = {
   FSRH_EC: FSRH_EC_SECTIONS,
   GTG38: GTG38_SECTIONS,
   BSH_SCD: BSH_SCD_SECTIONS,
+  BGCS_EC: BGCS_EC_SECTIONS,
 };
 
 

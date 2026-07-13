@@ -535,6 +535,37 @@ export const TOPICS = {
     ],
   },
 
+  "endometrial-cancer": {
+    id: "endometrial-cancer",
+    title: "Endometrial (uterine) cancer",
+    subtitle: "Diagnosis, molecular classification & management",
+    description: "The most common gynaecological cancer in the UK, usually presenting with postmenopausal bleeding; managed by a specialist gynae-oncology MDT with surgery, molecular classification and risk-adapted adjuvant therapy (BGCS 2022).",
+    gl: "BGCS_EC",
+    terms: [
+      "endometrial cancer", "uterine cancer", "womb cancer", "endometrial carcinoma",
+      "endometrial adenocarcinoma", "uterine carcinoma",
+    ],
+    sections: [
+      {
+        heading: "Guides",
+        entries: [
+          { type: "reader", id: "BGCS_EC", sectionId: "bgcs-ec-diagnosis", gl: "BGCS_EC", label: "Presentation & diagnosis", sublabel: "BGCS: PMB, TVUSS 4 mm, Lynch testing" },
+          { type: "reader", id: "BGCS_EC", sectionId: "bgcs-ec-classification", gl: "BGCS_EC", label: "Histological & molecular classification", sublabel: "BGCS: TCGA POLE/MMRd/p53abn/NSMP" },
+          { type: "reader", id: "BGCS_EC", sectionId: "bgcs-ec-surgery", gl: "BGCS_EC", label: "Surgery & staging", sublabel: "BGCS: TH+BSO, sentinel node" },
+          { type: "reader", id: "BGCS_EC", sectionId: "bgcs-ec-adjuvant", gl: "BGCS_EC", label: "Adjuvant treatment", sublabel: "BGCS: brachytherapy, EBRT, chemo" },
+          { type: "reader", id: "BGCS_EC", sectionId: "bgcs-ec-fertility", gl: "BGCS_EC", label: "Fertility-sparing management", sublabel: "BGCS: progestin, LNG-IUS" },
+        ],
+      },
+      {
+        heading: "Don't miss",
+        entries: [
+          { type: "reader", id: "GTG67", sectionId: "gtg67-diagnosis", gl: "GTG67", label: "Postmenopausal bleeding pathway", sublabel: "GTG67: how EC is investigated" },
+          { type: "reader", id: "GTG67", gl: "GTG67", label: "Endometrial hyperplasia", sublabel: "GTG67: the precursor lesion" },
+        ],
+      },
+    ],
+  },
+
   "postmenopausal-bleeding": {
     id: "postmenopausal-bleeding",
     title: "Postmenopausal bleeding",
@@ -552,6 +583,7 @@ export const TOPICS = {
           { type: "reader", id: "GTG67", sectionId: "gtg67-diagnosis", gl: "GTG67", label: "Diagnosis & investigation", sublabel: "GTG67: 2WW, TVUSS 4 mm, pipelle, hysteroscopy" },
           { type: "reader", id: "GTG67", gl: "GTG67", label: "Endometrial hyperplasia (RCOG/BSGE)", sublabel: "GTG67: full guideline" },
           { type: "reader", id: "GTG67", sectionId: "gtg67-lynch-tamoxifen", gl: "GTG67", label: "Lynch syndrome & tamoxifen", sublabel: "GTG67: special situations" },
+          { type: "reader", id: "BGCS_EC", sectionId: "bgcs-ec-diagnosis", gl: "BGCS_EC", label: "Endometrial cancer (BGCS)", sublabel: "BGCS 2022: if cancer is confirmed" },
         ],
       },
       {
