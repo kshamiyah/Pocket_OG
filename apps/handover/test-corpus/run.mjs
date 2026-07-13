@@ -24,6 +24,7 @@ import { captureDiagnostics, structuralChecks } from "./lib/checks.mjs";
 import {
   DIRS, loadCases, saveCases, diffAgainstBaseline, bugsFromState, reconcile, writeReport,
 } from "./lib/report.mjs";
+import { runGestures } from "./lib/gestures.mjs";
 
 const CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
 const APP_DIR = new URL("..", import.meta.url).pathname;
@@ -55,11 +56,13 @@ async function startServer() {
 }
 
 // ---- page helpers -----------------------------------------------------------
-async function seedContext(browser, { width, height }, state, offline) {
+async function seedContext(browser, { width, height }, state, offline, opts = {}) {
   const context = await browser.newContext({
     viewport: { width, height },
     deviceScaleFactor: 2,
-    permissions: [], // deny camera etc. so ScanScreen shows its fallback rather than hanging
+    // Deny camera by default so ScanScreen shows its paste fallback rather than
+    // hanging; callers can grant clipboard perms for copy-link checks.
+    permissions: opts.permissions || [],
   });
   const { data, theme } = state;
   // Pin the browser clock so reminder states and relative-age text are
@@ -108,6 +111,17 @@ async function shot(page, key) {
   const path = join(DIRS.runs, `${key}.png`);
   await page.screenshot({ path });
   return path;
+}
+
+// Seed + open the app, settle, return the page and its diagnostics drain.
+// Shared by flow walks and the gesture suite.
+async function openApp(browser, vp, state, opts = {}) {
+  const context = await seedContext(browser, vp, state, false, opts);
+  const page = await context.newPage();
+  const diag = captureDiagnostics(page);
+  await page.goto(BASE, { waitUntil: "load" });
+  await page.waitForTimeout(300);
+  return { context, page, diag };
 }
 
 // Render one seeded state across the current viewport/net, run checks.
@@ -178,7 +192,7 @@ const scenarios = [
   S("add-job", runningState(), (p) => clickLabel(p, "Add job")),
   S("menu", runningState(), (p) => clickLabel(p, "More options")),
   S("ward-setup", runningState(), async (p) => { await clickText(p, "Delivery Suite"); await clickText(p, "Manage beds"); }),
-  S("end-shift", runningState(), async (p) => { await clickLabel(p, "More options"); await clickText(p, "End shift"); }),
+  S("end-shift", runningState(), async (p) => { await clickLabel(p, "More options"); await p.waitForTimeout(350); await clickText(p, "End shift"); await p.getByText("End of shift").waitFor({ timeout: 5000 }); }),
   S("shift-picker", seedScript({ profile: PROFILE }), (p) => clickText(p, "Start a shift")),
   S("wards-intro", seedScript({ profile: PROFILE, wardLayouts: {} }), async (p) => { await clickText(p, "Start a shift"); await clickText(p, "Long day"); }),
   S("scan", seedScript({ profile: PROFILE }), (p) => clickText(p, "Take over")),
@@ -320,8 +334,9 @@ async function main() {
   const stateResults = [];
   let stateCount = 0;
 
+  const GESTURES_ONLY = process.argv.includes("--gestures-only");
   try {
-    for (const scenario of scenarios) {
+    for (const scenario of (GESTURES_ONLY ? [] : scenarios)) {
       for (const vp of VIEWPORTS) {
         const r = await renderState(browser, vp, "online", scenario);
         stateResults.push(r); stateCount++;
@@ -341,10 +356,25 @@ async function main() {
       log(`✓ ${scenario.id}`);
     }
 
-    log("running flow walks (navigation + persistence)…");
     const walkBugs = [];
-    await runWalks(browser, walkBugs);
-    stateResults.push(...walkBugs.map((b) => ({ __walk: true, ...b })));
+    if (!GESTURES_ONLY) {
+      log("running flow walks (navigation + persistence)…");
+      await runWalks(browser, walkBugs);
+      stateResults.push(...walkBugs.map((b) => ({ __walk: true, ...b })));
+    }
+
+    log("running gesture suite (swipe, edit, reminders, takeover, ward setup)…");
+    const gestureBugs = [];
+    await runGestures(browser, gestureBugs, {
+      openApp, shot, BASE, diffAgainstBaseline,
+      fixtures: { runningState, seedScript, PROFILE },
+    });
+    stateResults.push(...gestureBugs.map((b) => ({ __walk: true, ...b })));
+    if (GESTURES_ONLY) {
+      const real = gestureBugs.filter((b) => b.category !== "visual-regression");
+      log(`\ngesture findings (excl. new-baseline visreg): ${real.length}`);
+      for (const b of real) log(`  [${b.severity}] ${b.scenario}/${b.category}: ${b.observed}`);
+    }
 
     // ---- aggregate ----
     const cases = loadCases();

@@ -14,6 +14,12 @@ anything** — it reports.
   (single-line ellipsis truncation is treated as intentional).
 - **Flow** — navigation walks assert onboarding, the shift/skip branches, and
   take-over reach the right screens.
+- **Gestures** — a full interaction pass (`lib/gestures.mjs`) drives real
+  pointer swipes (swipe-to-delete + undo), tap-to-edit, reminder presets and
+  custom time entry, paste-to-takeover (decode → review → merge), handover
+  subset + copy-link payload integrity, ward setup (add/remove sections), bed
+  section collapse/expand, and notification → task. Each asserts behaviour and
+  screenshots the result for the visual audit.
 - **Persistence** — after add-job, dark-mode toggle and a ward-layout edit, the
   page is fully reloaded (simulating a PWA relaunch) and state is asserted to
   survive, with jobs still mapped to the right beds.

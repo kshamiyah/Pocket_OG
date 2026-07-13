@@ -154,7 +154,7 @@ export function writeReport({ classified, fixed, states, payloadResult, meta }) 
   lines.push("");
   const counts = classified.reduce((m, b) => (m[b.status] = (m[b.status] || 0) + 1, m), {});
   const sev = classified.reduce((m, b) => (m[b.severity] = (m[b.severity] || 0) + 1, m), {});
-  lines.push(`**Pass summary:** ${states} flow+state screenshots across ${meta.viewports.join(", ")} px, online + offline.`);
+  lines.push(`**Pass summary:** ${states} seeded flow+state screenshots across ${meta.viewports.join(", ")} px (online + offline, light + dark), plus navigation/persistence walks and a full gesture suite (swipe-delete, inline edit, reminders, paste-to-takeover, handover copy-link, ward setup, section collapse, notifications).`);
   lines.push("");
   lines.push(`| | Count |`);
   lines.push(`|---|---|`);
