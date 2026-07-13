@@ -1,12 +1,9 @@
 _Findings from an agent vision pass over new-baseline and structurally-flagged screenshots. Severity: visual-only unless noted._
 
-### V1 · Bed board over-fragments non-standard bed labels — `ward-board` · 375/414 · LOW
+### V1 · Bed board over-fragmented non-standard bed labels — ✅ RESOLVED
 
-- **Flow / state:** By-ward → Walk → open a ward whose beds were created as a numbered range with a **text prefix that contains a space** (fixture: "Delivery Suite", prefix `Room `, giving `Room 1`…`Room 6`).
-- **Expected:** The ward's beds group under one section (as `Bay A`, `SR`, and plain-numbered beds do).
-- **Observed:** Every bed renders under its own separate **"OTHER"** section header, one bed per section — a long ladder of identical "OTHER" labels.
-- **Root cause (for review, not auto-fixed):** `parseBedLabel` in `src/utils/wardLayouts.js` only recognises `A1` / `1A` / `SR1` / `12` shapes; anything else (e.g. a label with a space) falls to `kind: "other"` with `key: other-${bed}`, which is unique per bed, so `groupBedsBySection` starts a new section for each. Any prefix like `Room `, `LDR `, `Bed ` triggers it.
-- **Note:** This is induced by the test fixture's choice of a spaced prefix, but it reflects real grouping logic a user can hit. Plain numeric ranges and `SR`-style prefixes group correctly. Flagged for maintainer decision rather than fixed.
+- **Was:** any bed label that didn't match `A1` / `1A` / `SR1` / `12` (named rooms like `Theatre`, or a numbered range with a worded prefix like `Room 1`) fell to `kind: "other"` with a per-bed key, so each spawned its own **"OTHER"** section header — a ladder of one-bed sections. Named rooms were effectively unusable on the ward board.
+- **Fix:** `bedSectionMeta` now returns a single shared key (`__rooms__`, title **"Rooms"**) for all non-pattern beds, so they group under one section in layout order. Covered by `wardlabels.check.mjs` (named rooms collapse to one "Rooms" section, entry order preserved).
 
 ### Gesture audit (full interaction pass) — nothing broken
 

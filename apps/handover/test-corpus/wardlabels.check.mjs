@@ -10,7 +10,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const { gridBeds, groupBedsBySection } = await import("../src/utils/wardLayouts.js");
+const { gridBeds, groupBedsBySection, bedsForSection } = await import("../src/utils/wardLayouts.js");
 
 const findings = [];
 const notes = [];
@@ -55,6 +55,30 @@ for (const [name, section, expectedBeds, expectedTitles] of cases) {
   }
   // No two beds should collide.
   if (new Set(beds).size !== beds.length) fail("collision", `${name}: duplicate/ambiguous labels in ${JSON.stringify(beds)}`);
+}
+
+// Named rooms and worded-prefix ranges must collapse into ONE "Rooms" section
+// (not one "Other" per bed) and keep their layout order.
+function groupsFor(section) {
+  const layout = { sections: [section] };
+  const beds = bedsForSection(section);
+  return { beds, groups: groupBedsBySection(beds.map((b) => ({ bed: b, open: 0, urgent: 0 })), { layout }) };
+}
+{
+  const { groups } = groupsFor({ id: "n", type: "named", items: ["Theatre", "Recovery", "Triage"] });
+  if (groups.length !== 1 || groups[0].title !== "Rooms")
+    fail("rooms-group", `named rooms did not collapse to one "Rooms" section: ${JSON.stringify(groups.map((g) => g.title))}`);
+  else {
+    const order = groups[0].beds.map((b) => b.bed);
+    if (JSON.stringify(order) !== JSON.stringify(["Theatre", "Recovery", "Triage"]))
+      fail("rooms-order", `Rooms order not preserved (expected entry order): ${order.join(", ")}`);
+    else notes.push(`Named rooms group under one "Rooms" section in entry order: ${order.join(", ")}.`);
+  }
+}
+{
+  const { groups } = groupsFor({ id: "r", type: "range", prefix: "Room ", from: 1, to: 3 });
+  if (groups.length !== 1 || groups[0].title !== "Rooms")
+    fail("rooms-range", `worded-prefix range ("Room 1"…) did not collapse to one "Rooms" section: ${JSON.stringify(groups.map((g) => g.title))}`);
 }
 
 // Cross-config uniqueness: bay 1 bed 1 must differ from bay 1 bed 11 and bay 11 bed 1.

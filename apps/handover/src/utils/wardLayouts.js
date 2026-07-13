@@ -192,7 +192,11 @@ export function bedSectionMeta(bed) {
   if (p.kind === "plain") {
     return { key: "__plain__", title: "Beds", kind: "plain", grid: true };
   }
-  return { key: `other-${bed}`, title: "Other", kind: "other", grid: false };
+  // Anything that isn't a bay/side/plain/grid label (named rooms like "Theatre",
+  // or a numbered range with a worded prefix like "Room 1") shares ONE "Rooms"
+  // section rather than a section-per-bed, so named rooms group together and keep
+  // their layout order instead of scattering as individual "Other" headers.
+  return { key: "__rooms__", title: "Rooms", kind: "rooms", grid: false };
 }
 
 /** Preserve bed sort order while inserting section boundaries. */

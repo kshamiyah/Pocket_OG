@@ -187,6 +187,7 @@ export function writeReport({ classified, fixed, states, payloadResult, wardLabe
     lines.push("");
     if (wardLabelsResult.findings.length === 0) {
       lines.push(`- ✓ numbered bays + lettered beds → \`1A 1B 1C 1D\` under "Bay 1"; numbered bays + numbered beds → \`1-1 1-2\` under "Bay 1" (no "11" collision, grouping preserved); lettered variants unchanged.`);
+      lines.push(`- ✓ named rooms + worded-prefix ranges collapse into one **"Rooms"** section in layout order, instead of scattering as one "Other" header per bed.`);
     } else {
       for (const f of wardLabelsResult.findings) lines.push(`- ✗ **${f.id}** — ${f.msg}`);
     }
