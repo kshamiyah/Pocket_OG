@@ -71,3 +71,4 @@ export { FSRH_EC_SECTIONS } from "./FSRH_EC.js";
 export { GTG38_SECTIONS } from "./GTG38.js";
 export { BSH_SCD_SECTIONS } from "./BSH_SCD.js";
 export { BGCS_EC_SECTIONS } from "./BGCS_EC.js";
+export { BGCS_VULVAL_SECTIONS } from "./BGCS_VULVAL.js";

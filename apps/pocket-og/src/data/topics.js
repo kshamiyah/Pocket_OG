@@ -535,6 +535,30 @@ export const TOPICS = {
     ],
   },
 
+  "vulval-cancer": {
+    id: "vulval-cancer",
+    title: "Vulval cancer & VIN",
+    subtitle: "Referral, biopsy, surgery & the groin",
+    description: "Around 90% of vulval cancers are squamous cell carcinomas, arising either via HPV and usual-type VIN or, HPV-independently, via differentiated VIN on a background of lichen sclerosus; managed by a specialist gynae-oncology MDT (BGCS 2023).",
+    gl: "BGCS_VULVAL",
+    terms: [
+      "vulval cancer", "vulvar cancer", "vulval carcinoma", "vulval disease",
+      "vin", "vulval intraepithelial neoplasia", "vulval lesion", "vulval lump",
+    ],
+    sections: [
+      {
+        heading: "Guides",
+        entries: [
+          { type: "reader", id: "BGCS_VULVAL", sectionId: "bgcs-vulval-overview", gl: "BGCS_VULVAL", label: "Overview & aetiology", sublabel: "BGCS: SCC, HPV, lichen sclerosus" },
+          { type: "reader", id: "BGCS_VULVAL", sectionId: "bgcs-vulval-diagnosis", gl: "BGCS_VULVAL", label: "Referral & diagnosis", sublabel: "BGCS: 2WW, incisional biopsy, MDT" },
+          { type: "reader", id: "BGCS_VULVAL", sectionId: "bgcs-vulval-vin", gl: "BGCS_VULVAL", label: "VIN (pre-invasive disease)", sublabel: "BGCS: uVIN vs dVIN, imiquimod" },
+          { type: "reader", id: "BGCS_VULVAL", sectionId: "bgcs-vulval-surgery", gl: "BGCS_VULVAL", label: "Surgery & the groin", sublabel: "BGCS: WLE margins, sentinel node" },
+          { type: "reader", id: "BGCS_VULVAL", sectionId: "bgcs-vulval-adjuvant", gl: "BGCS_VULVAL", label: "Adjuvant, melanoma & follow-up", sublabel: "BGCS: radiotherapy, surveillance" },
+        ],
+      },
+    ],
+  },
+
   "endometrial-cancer": {
     id: "endometrial-cancer",
     title: "Endometrial (uterine) cancer",

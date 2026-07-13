@@ -46,4 +46,5 @@ export const READER_AVAILABLE = new Set([
   "GTG38",
   "BSH_SCD",
   "BGCS_EC",
+  "BGCS_VULVAL",
 ]);

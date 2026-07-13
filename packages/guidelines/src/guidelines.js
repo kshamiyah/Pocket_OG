@@ -66,6 +66,7 @@ export const GUIDELINES = {
   GTG38: { code: "GTG38", label: "Gestational Trophoblastic Disease", version: "GTG38", date: "September 2020", color: "teal", pdf: true, source: "RCOG", pdfUrl: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/gestational-trophoblastic-disease-green-top-guideline-no-38/" },
   BSH_SCD: { code: "BSH_SCD", label: "Sickle Cell Disease in Pregnancy", version: "BSH 2021", date: "2021 (supersedes RCOG GTG61)", color: "sky", pdf: true, source: "BSH", pdfUrl: "https://doi.org/10.1111/bjh.17671" },
   BGCS_EC: { code: "BGCS_EC", label: "Endometrial (Uterine) Cancer", version: "BGCS 2022", date: "2022", color: "zinc", pdf: true, source: "BGCS", pdfUrl: "https://doi.org/10.1016/j.ejogrb.2021.11.423" },
+  BGCS_VULVAL: { code: "BGCS_VULVAL", label: "Vulval Cancer", version: "BGCS 2023", date: "2023", color: "zinc", pdf: true, source: "BGCS", pdfUrl: "https://doi.org/10.1016/j.ejogrb.2023.11.013" },
 };
 
 export const GL_COLORS = {
@@ -135,4 +136,5 @@ export const GL_COLORS = {
   GTG38: { badge: "bg-teal-900/50 text-teal-300 border-teal-600/40", dot: "bg-teal-400" },
   BSH_SCD: { badge: "bg-sky-900/50 text-sky-300 border-sky-600/40", dot: "bg-sky-400" },
   BGCS_EC: { badge: "bg-zinc-800/60 text-zinc-300 border-zinc-600/40", dot: "bg-zinc-400" },
+  BGCS_VULVAL: { badge: "bg-zinc-800/60 text-zinc-300 border-zinc-600/40", dot: "bg-zinc-400" },
 };

@@ -558,6 +558,11 @@ export const SYNONYMS = {
   "uterine cancer": ["endometrial cancer","womb cancer","endometrial carcinoma","bgcs","pmb"],
   "womb cancer": ["endometrial cancer","uterine cancer","endometrial carcinoma","bgcs"],
   "endometrial carcinoma": ["endometrial cancer","uterine cancer","bgcs"],
+  "vulval cancer": ["vulvar cancer","vulval carcinoma","vulval scc","vin","vulval disease","bgcs","vulval intraepithelial neoplasia"],
+  "vulvar cancer": ["vulval cancer","vulval carcinoma","vin","bgcs"],
+  "vin": ["vulval intraepithelial neoplasia","uvin","dvin","vulval cancer","vulval precancer"],
+  "vulval intraepithelial neoplasia": ["vin","uvin","dvin","vulval cancer"],
+  "vulval disease": ["vulval cancer","vin","lichen sclerosus","vulval lesion"],
   // LNG-IUS / Mirena
   "lng-ius": ["mirena","levonorgestrel iud","levonorgestrel coil","iud hmb","coil hmb","intrauterine system"],
   "mirena": ["lng-ius","levonorgestrel","coil","intrauterine system","hmb treatment","contraception hmb"],
