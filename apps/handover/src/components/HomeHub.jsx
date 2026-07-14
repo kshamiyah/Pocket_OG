@@ -4,7 +4,7 @@ import { SCREEN, SCREEN_SCROLL, safeBottom, safeTop } from "../utils/screenLayou
 
 const LINK = "text-sm font-bold text-gray-500 dark:text-gray-400 active:text-gray-700 dark:active:text-gray-200";
 
-export default function HomeHub({ profile, onTakeover, onStartShift, onManageWards, onEditProfile }) {
+export default function HomeHub({ profile, onTakeover, onStartShift, onManageWards, onEditProfile, onAbout }) {
   const name = profile?.name?.trim();
   const label = roleLabel(profile);
 
@@ -51,13 +51,17 @@ export default function HomeHub({ profile, onTakeover, onStartShift, onManageWar
           </button>
         </div>
 
-        <div className="flex items-center justify-center gap-3 mt-6">
+        <div className="flex items-center justify-center gap-3 mt-6 flex-wrap">
           <button type="button" onClick={onManageWards} className={LINK}>
             Manage wards
           </button>
           <span className="text-gray-300 dark:text-gray-700" aria-hidden="true">·</span>
           <button type="button" onClick={onEditProfile} className={LINK}>
             Profile
+          </button>
+          <span className="text-gray-300 dark:text-gray-700" aria-hidden="true">·</span>
+          <button type="button" onClick={onAbout} className={LINK}>
+            About
           </button>
         </div>
       </div>

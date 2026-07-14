@@ -25,7 +25,7 @@ const LIST_BOTTOM_PAD = "calc(env(safe-area-inset-bottom) + 6rem)";
 export default function Home({
   jobs, setJobs, shiftType, recentWards, setRecentWards, recentBeds, setRecentBeds,
   recentPhrases, setRecentPhrases,
-  wardLayouts, bedNotes, setBedNotes, onHandover, onScan, onSetupWard, onManageWards, onEditProfile, onEndShift,
+  wardLayouts, bedNotes, setBedNotes, onHandover, onScan, onSetupWard, onManageWards, onEditProfile, onAbout, onEndShift,
   selectedWard, setSelectedWard, selectedBed, setSelectedBed, bedSelected, setBedSelected,
 }) {
   const [mode, setMode] = useState("byward");
@@ -315,6 +315,7 @@ export default function Home({
         shiftLabel={shiftLabel}
         onManageWards={onManageWards}
         onEditProfile={onEditProfile}
+        onAbout={onAbout}
         onEndShift={onEndShift}
       />
 

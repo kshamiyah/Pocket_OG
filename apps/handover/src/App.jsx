@@ -11,6 +11,7 @@ import ScanScreen from "./components/ScanScreen";
 import ReviewMerge from "./components/ReviewMerge";
 import WardManager from "./components/WardManager";
 import WardSetup from "./components/WardSetup";
+import AboutScreen from "./components/AboutScreen";
 import CoachMarks from "./components/CoachMarks";
 import { Storage, profileIsComplete } from "./utils/storage";
 import { nextId } from "./utils/jobs";
@@ -53,6 +54,7 @@ export default function App() {
   const [scanReturn, setScanReturn] = useState("hub");
   const [wardsReturn, setWardsReturn] = useState("hub");
   const [profileReturn, setProfileReturn] = useState("hub");
+  const [aboutReturn, setAboutReturn] = useState("hub");
   const [view, setView] = useState(() =>
     incomingFromUrl() ? "review" : gateView(Storage.getProfile(), Storage.getShift())
   );
@@ -124,6 +126,11 @@ export default function App() {
   const openProfileEdit = (returnTo = "hub") => {
     setProfileReturn(returnTo);
     setView("profileEdit");
+  };
+
+  const openAbout = (returnTo = "hub") => {
+    setAboutReturn(returnTo);
+    setView("about");
   };
 
   const mergeIncoming = (chosen) => {
@@ -203,8 +210,13 @@ export default function App() {
         onStartShift={() => setView("shift")}
         onManageWards={() => openWards("hub")}
         onEditProfile={() => openProfileEdit("hub")}
+        onAbout={() => openAbout("hub")}
       />
     );
+  }
+
+  if (view === "about") {
+    return <AboutScreen onBack={() => setView(aboutReturn)} />;
   }
 
   if (view === "shift") {
@@ -282,6 +294,7 @@ export default function App() {
         onSetupWard={(ward) => openWardSetup(ward, "list")}
         onManageWards={() => openWards("list")}
         onEditProfile={() => openProfileEdit("list")}
+        onAbout={() => openAbout("list")}
         onEndShift={() => setView("endShift")}
         selectedWard={selectedWard}
         setSelectedWard={setSelectedWard}

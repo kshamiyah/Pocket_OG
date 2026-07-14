@@ -4,7 +4,7 @@ import { DarkModeToggleRow } from "./DarkModeToggle";
 const ROW = "w-full text-left px-5 py-3.5 text-base font-bold text-gray-900 dark:text-white active:bg-gray-50 dark:active:bg-gray-900";
 
 export default function HomeMenu({
-  open, onClose, shiftLabel, onManageWards, onEditProfile, onEndShift,
+  open, onClose, shiftLabel, onManageWards, onEditProfile, onAbout, onEndShift,
 }) {
   const [entered, setEntered] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -55,6 +55,9 @@ export default function HomeMenu({
         </button>
         <button type="button" onClick={() => requestClose(onEditProfile)} className={ROW}>
           Profile
+        </button>
+        <button type="button" onClick={() => requestClose(onAbout)} className={ROW}>
+          About
         </button>
         <button type="button" onClick={() => requestClose(onEndShift)} className={ROW}>
           End shift
