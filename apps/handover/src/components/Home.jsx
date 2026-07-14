@@ -3,6 +3,7 @@ import { SHIFT_TYPES } from "../utils/constants";
 import { summarize } from "../utils/jobs";
 import { countDueReminders, dueTasks, upcomingTasks } from "../utils/reminders";
 import { pushMRU } from "../utils/storage";
+import { setBedNote } from "../utils/bedNotes";
 import AddJobForm from "./AddJobForm";
 import WardDrill from "./WardDrill";
 import MasterSheet from "./MasterSheet";
@@ -24,7 +25,7 @@ const LIST_BOTTOM_PAD = "calc(env(safe-area-inset-bottom) + 6rem)";
 export default function Home({
   jobs, setJobs, shiftType, recentWards, setRecentWards, recentBeds, setRecentBeds,
   recentPhrases, setRecentPhrases,
-  wardLayouts, onHandover, onScan, onSetupWard, onManageWards, onEditProfile, onEndShift,
+  wardLayouts, bedNotes, setBedNotes, onHandover, onScan, onSetupWard, onManageWards, onEditProfile, onEndShift,
   selectedWard, setSelectedWard, selectedBed, setSelectedBed, bedSelected, setBedSelected,
 }) {
   const [mode, setMode] = useState("byward");
@@ -85,6 +86,9 @@ export default function Home({
   const setText = (id, text) => setJobs(jobs.map((j) => (j.id === id ? { ...j, text } : j)));
   const setRemindAt = (id, remindAt) => {
     setJobs(jobs.map((j) => (j.id === id ? { ...j, remindAt: remindAt || null } : j)));
+  };
+  const updateBedNote = (ward, bed, text) => {
+    setBedNotes(setBedNote(bedNotes, ward, bed, text));
   };
   const deleteJob = (id) => {
     setEditingId(null);
@@ -253,6 +257,8 @@ export default function Home({
             selectedWard={selectedWard} setSelectedWard={setSelectedWard}
             selectedBed={selectedBed} setSelectedBed={setSelectedBed}
             bedSelected={bedSelected} setBedSelected={setBedSelected}
+            bedNotes={bedNotes}
+            onSetBedNote={updateBedNote}
             {...sharedProps}
           />
       )}

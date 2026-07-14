@@ -19,12 +19,17 @@ function bedLabel(bed) {
   return bed === null ? "General" : bed;
 }
 
-function BedTile({ bed, open, urgent, onClick, compact }) {
+function BedTile({ bed, open, urgent, hasNote, onClick, compact }) {
   const tone = bedRowTone({ open, urgent });
 
   return (
     <button type="button" onClick={onClick} className={compact ? tone.tileCompact : tone.tile}>
-      <span className={tone.label}>{bedLabel(bed)}</span>
+      <span className={`flex items-center gap-1.5 min-w-0 ${tone.label}`}>
+        <span className="truncate">{bedLabel(bed)}</span>
+        {hasNote && (
+          <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-claude-500" aria-label="Has a private note" />
+        )}
+      </span>
       {!tone.empty && <CountBadge open={open} urgent={urgent} />}
     </button>
   );
@@ -59,10 +64,11 @@ function BedSectionHeader({ title, open, onToggle, counts, collapsible }) {
   );
 }
 
-function BedSection({ group, onBedClick, open, onToggle }) {
+function BedSection({ group, onBedClick, open, onToggle, bedsWithNotes }) {
   const grid = group.grid ? "grid grid-cols-2 gap-2" : "flex flex-col gap-2";
   const counts = sectionCounts(group.beds);
   const collapsible = group.kind !== "general";
+  const noted = bedsWithNotes || new Set();
 
   if (group.kind === "general") {
     return (
@@ -73,6 +79,7 @@ function BedSection({ group, onBedClick, open, onToggle }) {
             bed={b.bed}
             open={b.open}
             urgent={b.urgent}
+            hasNote={noted.has(b.bed)}
             onClick={() => onBedClick(b.bed)}
           />
         ))}
@@ -97,6 +104,7 @@ function BedSection({ group, onBedClick, open, onToggle }) {
               bed={b.bed}
               open={b.open}
               urgent={b.urgent}
+              hasNote={noted.has(b.bed)}
               compact={group.grid}
               onClick={() => onBedClick(b.bed)}
             />
@@ -107,7 +115,7 @@ function BedSection({ group, onBedClick, open, onToggle }) {
   );
 }
 
-export default function WardBedList({ beds, layout, onBedClick }) {
+export default function WardBedList({ beds, layout, onBedClick, bedsWithNotes }) {
   const groups = groupBedsBySection(beds, { layout });
   const [collapsed, setCollapsed] = useState(new Set());
 
@@ -126,6 +134,7 @@ export default function WardBedList({ beds, layout, onBedClick }) {
           key={group.key}
           group={group}
           onBedClick={onBedClick}
+          bedsWithNotes={bedsWithNotes}
           open={isOpen(group.key)}
           onToggle={() => toggle(group.key)}
         />

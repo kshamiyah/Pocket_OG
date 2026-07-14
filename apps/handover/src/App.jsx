@@ -41,6 +41,7 @@ export default function App() {
   const [recentBeds, setRecentBedsState] = useState(Storage.getRecentBeds);
   const [recentPhrases, setRecentPhrasesState] = useState(Storage.getRecentPhrases);
   const [wardLayouts, setWardLayoutsState] = useState(Storage.getWardLayouts);
+  const [bedNotes, setBedNotesState] = useState(Storage.getBedNotes);
   const [incomingJobs, setIncomingJobs] = useState(incomingFromUrl);
   const [wardSetupTarget, setWardSetupTarget] = useState(null);
   const [wardSetupReturn, setWardSetupReturn] = useState("list");
@@ -61,6 +62,7 @@ export default function App() {
   const setRecentBeds = (next) => { setRecentBedsState(next); Storage.setRecentBeds(next); };
   const setRecentPhrases = (next) => { setRecentPhrasesState(next); Storage.setRecentPhrases(next); };
   const setWardLayouts = (next) => { setWardLayoutsState(next); Storage.setWardLayouts(next); };
+  const setBedNotes = (next) => { setBedNotesState(next); Storage.setBedNotes(next); };
 
   const startCoachIfNeeded = () => {
     if (!Storage.getCoachDone()) setCoachPending(true);
@@ -89,6 +91,7 @@ export default function App() {
       setJobs(jobs.filter((j) => !remove.has(j.id)));
     } else if (clear) {
       setJobs([]);
+      setBedNotes({});
     }
     Storage.clearShift();
     setShiftState(null);
@@ -97,6 +100,7 @@ export default function App() {
 
   const confirmEndShift = () => {
     setJobs([]);
+    setBedNotes({});
     Storage.clearShift();
     setShiftState(null);
     setView("hub");
@@ -271,6 +275,8 @@ export default function App() {
         recentPhrases={recentPhrases}
         setRecentPhrases={setRecentPhrases}
         wardLayouts={wardLayouts}
+        bedNotes={bedNotes}
+        setBedNotes={setBedNotes}
         onHandover={() => openHandover("list")}
         onScan={() => openScan("list")}
         onSetupWard={(ward) => openWardSetup(ward, "list")}

@@ -5,6 +5,8 @@ import { hasLayout, totalBeds } from "../utils/wardLayouts";
 import JobCard from "./JobCard";
 import QuickAddRow from "./QuickAddRow";
 import WardBedList from "./BedBoard";
+import BedNote from "./BedNote";
+import { getBedNote, notesForWard } from "../utils/bedNotes";
 const NO_WARD = "__noward__";
 const TILE = "rounded-xl border px-4 py-3.5 flex items-center justify-between text-left bg-gray-50 dark:bg-gray-900/60 border-gray-200 dark:border-gray-800";
 
@@ -31,11 +33,15 @@ export default function WardDrill({
   editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onSetRemindAt, onDelete,
   onAddJob, onSetupWard, recentPhrases, setRecentPhrases,
   selectedWard, setSelectedWard, selectedBed, setSelectedBed, bedSelected, setBedSelected,
+  bedNotes, onSetBedNote,
   listBottomPad,
 }) {
   const [newWard, setNewWard] = useState("");
 
   const { wards, noWard } = buildHierarchy(jobs, { wardNames, wardLayouts, recentBeds });
+  const bedsWithNotes = selectedWard && selectedWard !== NO_WARD
+    ? notesForWard(bedNotes, selectedWard)
+    : new Set();
 
   const cardProps = { editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onSetRemindAt, onDelete, recentWards, recentBeds };
   const renderCard = (job) => (
@@ -64,6 +70,7 @@ export default function WardDrill({
   if (selectedWard && bedSelected) {
     const wardData = wards.find((w) => w.ward === selectedWard);
     const bedData = wardData?.beds.find((b) => b.bed === selectedBed) ?? { bed: selectedBed, jobs: [] };
+    const noteValue = getBedNote(bedNotes, selectedWard, selectedBed);
     return (
       <div className={`${scrollClass} gap-3`} style={scrollPad}>
         <button onClick={() => setBedSelected(false)} className="text-sm font-bold text-gray-500 dark:text-gray-400 self-start">
@@ -72,6 +79,10 @@ export default function WardDrill({
         <h2 className="text-lg font-extrabold text-gray-900 dark:text-white -mt-1">
           {selectedBed === null ? "General" : selectedBed}
         </h2>
+        <BedNote
+          value={noteValue}
+          onChange={(text) => onSetBedNote?.(selectedWard, selectedBed, text)}
+        />
         <QuickAddRow ward={selectedWard} bed={selectedBed || ""} jobs={jobs} onAddJob={onAddJob} recentPhrases={recentPhrases} setRecentPhrases={setRecentPhrases} />
         <div className="flex flex-col gap-2">
           {bedData.jobs.length === 0 && <p className="text-sm text-gray-400 dark:text-gray-600">No jobs here yet.</p>}
@@ -103,6 +114,7 @@ export default function WardDrill({
         <WardBedList
           beds={wardData.beds}
           layout={wardLayouts[selectedWard]}
+          bedsWithNotes={bedsWithNotes}
           onBedClick={(bed) => { setSelectedBed(bed); setBedSelected(true); }}
         />
       </div>

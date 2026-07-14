@@ -6,6 +6,7 @@ const KEYS = {
   recentPhrases: "handover_recent_phrases_v1",
   wardLayouts: "handover_ward_layouts_v1",
   recentBeds: "handover_recent_beds_v1",
+  bedNotes: "handover_bed_notes_v1",
   coachDone: "handover_coach_done_v1",
   theme: "handover_theme_v1",
 };
@@ -51,6 +52,11 @@ export const Storage = {
   // { [wardName]: [bed, ...] } — most-recently-used beds, per ward
   getRecentBeds: () => read(KEYS.recentBeds, {}),
   setRecentBeds: (beds) => write(KEYS.recentBeds, beds),
+
+  // { ["ward|bed"]: noteText } — private, never handed over
+  getBedNotes: () => read(KEYS.bedNotes, {}),
+  setBedNotes: (notes) => write(KEYS.bedNotes, notes),
+  clearBedNotes: () => write(KEYS.bedNotes, {}),
 
   getCoachDone: () => read(KEYS.coachDone, false),
   setCoachDone: (done) => write(KEYS.coachDone, done),
