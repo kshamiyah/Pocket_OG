@@ -6,4 +6,11 @@
   html {
     @apply bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100;
   }
+
+  /* iOS Safari auto-zooms focused fields under 16px; keep the shell stable. */
+  input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="image"]):not([type="hidden"]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
 }

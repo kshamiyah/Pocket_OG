@@ -38,7 +38,7 @@ function NewChipEntry({ placeholder, onCommit }) {
       onKeyDown={(e) => e.key === "Enter" && commit()}
       onBlur={commit}
       placeholder={placeholder}
-      className="shrink-0 w-28 bg-gray-100 dark:bg-gray-900 border border-claude-400 rounded-lg px-2.5 py-1.5 text-sm font-bold text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none"
+      className="shrink-0 w-28 bg-gray-100 dark:bg-gray-900 border border-claude-400 rounded-lg px-2.5 py-1.5 text-base font-bold text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none"
     />
   );
 }

@@ -48,7 +48,7 @@ export default function BedNote({ value = "", onChange }) {
           rows={3}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Context for you only…"
-          className="w-full resize-none bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-claude-500/30 focus:border-claude-500"
+          className="w-full resize-none bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-base text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-claude-500/30 focus:border-claude-500"
         />
         <div className="flex items-center justify-between gap-2 mt-2">
           <span className="text-[10px] tabular-nums text-gray-400 dark:text-gray-600">
