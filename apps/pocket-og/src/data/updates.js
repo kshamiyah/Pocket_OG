@@ -4,6 +4,14 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.17.0",
+    date: "15/07/2026",
+    title: "Normal physiology of pregnancy",
+    changes: [
+      { tag: "new", text: "Physiological changes in pregnancy: a systems-based reference card covering the normal cardiovascular, haematological/coagulation, respiratory, renal, gastrointestinal, endocrine/metabolic, immune and skin/musculoskeletal adaptations, with the key figures (cardiac output +40%, plasma volume +50%, minute ventilation +40–50%, GFR +50–85%) and a 'why it matters' note per system on how each normal change can mask or mimic pathology. Searching \"physiology\", \"physiological changes\" or \"maternal adaptation\" now finds it. Compiled from Soma-Pillay & Nelson-Piercy et al (Cardiovasc J Afr 2016), Tan & Tan (Best Pract Res Clin Obstet Gynaecol 2013) and Abu-Raya et al (Front Immunol 2020)." },
+    ],
+  },
+  {
     version: "1.16.0",
     date: "12/07/2026",
     title: "Search fixes, safety corrections & new tools",

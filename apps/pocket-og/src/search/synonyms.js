@@ -773,4 +773,11 @@ export const SYNONYMS = {
   "lithium": ["mood stabiliser","bipolar pregnancy","perinatal mental health","postpartum psychosis"],
   "bipolar pregnancy": ["lithium","mood stabiliser","perinatal mental health","sodium valproate"],
   "sodium valproate": ["valproate contraindicated","teratogenic","bipolar pregnancy","lamotrigine"],
+
+  // Normal physiology of pregnancy
+  "physiology": ["physiological changes","physiology of pregnancy","maternal adaptation","normal pregnancy"],
+  "physiology of pregnancy": ["physiological changes","maternal physiology","maternal adaptation","normal changes in pregnancy"],
+  "physiological changes": ["physiology of pregnancy","maternal adaptation","normal changes in pregnancy","cardiac output pregnancy"],
+  "maternal adaptation": ["physiological changes","physiology of pregnancy","plasma volume","maternal physiology"],
+  "normal changes in pregnancy": ["physiological changes","physiology of pregnancy","maternal adaptation","normal values pregnancy"],
 };
