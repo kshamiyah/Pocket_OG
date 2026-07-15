@@ -8,6 +8,7 @@ export const UPDATES = [
     date: "15/07/2026",
     title: "Normal physiology of pregnancy",
     changes: [
+      { tag: "new", text: "Physiological changes in pregnancy: a full guide in the Guides list, browsable and section-by-section (overview, then cardiovascular, haematological/coagulation, respiratory, renal, gastrointestinal, endocrine/metabolic, immune and skin/musculoskeletal), each with a 'why it matters' note and a sources section. Opens from the quick-reference card too." },
       { tag: "new", text: "Physiological changes in pregnancy: a systems-based reference card covering the normal cardiovascular, haematological/coagulation, respiratory, renal, gastrointestinal, endocrine/metabolic, immune and skin/musculoskeletal adaptations, with the key figures (cardiac output +40%, plasma volume +50%, minute ventilation +40–50%, GFR +50–85%) and a 'why it matters' note per system on how each normal change can mask or mimic pathology. Searching \"physiology\", \"physiological changes\" or \"maternal adaptation\" now finds it. Compiled from Soma-Pillay & Nelson-Piercy et al (Cardiovasc J Afr 2016), Tan & Tan (Best Pract Res Clin Obstet Gynaecol 2013) and Abu-Raya et al (Front Immunol 2020)." },
     ],
   },

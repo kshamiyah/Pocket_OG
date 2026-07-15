@@ -53,6 +53,7 @@ import {
   BSH_SCD_SECTIONS,
   BGCS_EC_SECTIONS,
   BGCS_VULVAL_SECTIONS,
+  PHYSIOLOGY_SECTIONS,
 } from "@pocket-og/guidelines";
 import { FLOWCHARTS } from "../data/flowcharts";
 import { GUIDELINE_KEYWORD_LINKS } from "../data/connections";
@@ -131,6 +132,7 @@ const SECTIONS_MAP = {
   BSH_SCD: BSH_SCD_SECTIONS,
   BGCS_EC: BGCS_EC_SECTIONS,
   BGCS_VULVAL: BGCS_VULVAL_SECTIONS,
+  PHYSIOLOGY: PHYSIOLOGY_SECTIONS,
 };
 
 

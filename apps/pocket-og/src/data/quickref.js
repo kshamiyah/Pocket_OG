@@ -166,7 +166,7 @@ export const QUICKREF_SECTIONS = [
     // sources cited in the closing block. Amber draft banner until clinically
     // signed off: set draft:false to remove it.
     draft: true,
-    relatedGl: ["GL952", "GL891", "ESC_CVD", "NG133"],
+    relatedGl: ["PHYSIOLOGY", "GL952", "GL891", "ESC_CVD", "NG133"],
     tags: [
       "physiology", "physiological changes", "physiological changes in pregnancy",
       "physiological changes pregnancy", "physiology of pregnancy", "normal changes in pregnancy",

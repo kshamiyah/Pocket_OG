@@ -67,6 +67,7 @@ export const GUIDELINES = {
   BSH_SCD: { code: "BSH_SCD", label: "Sickle Cell Disease in Pregnancy", version: "BSH 2021", date: "2021 (supersedes RCOG GTG61)", color: "sky", pdf: true, source: "BSH", pdfUrl: "https://doi.org/10.1111/bjh.17671" },
   BGCS_EC: { code: "BGCS_EC", label: "Endometrial (Uterine) Cancer", version: "BGCS 2022", date: "2022", color: "zinc", pdf: true, source: "BGCS", pdfUrl: "https://doi.org/10.1016/j.ejogrb.2021.11.423" },
   BGCS_VULVAL: { code: "BGCS_VULVAL", label: "Vulval Cancer", version: "BGCS 2023", date: "2023", color: "zinc", pdf: true, source: "BGCS", pdfUrl: "https://doi.org/10.1016/j.ejogrb.2023.11.013" },
+  PHYSIOLOGY: { code: "PHYSIOLOGY", label: "Physiological Changes in Pregnancy", version: "Review synthesis", date: "July 2026", color: "stone", pdf: true, source: "REVIEW", pdfUrl: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4928162/" },
 };
 
 export const GL_COLORS = {
@@ -137,4 +138,5 @@ export const GL_COLORS = {
   BSH_SCD: { badge: "bg-sky-900/50 text-sky-300 border-sky-600/40", dot: "bg-sky-400" },
   BGCS_EC: { badge: "bg-zinc-800/60 text-zinc-300 border-zinc-600/40", dot: "bg-zinc-400" },
   BGCS_VULVAL: { badge: "bg-zinc-800/60 text-zinc-300 border-zinc-600/40", dot: "bg-zinc-400" },
+  PHYSIOLOGY: { badge: "bg-stone-800/60 text-stone-300 border-stone-600/40", dot: "bg-stone-400" },
 };

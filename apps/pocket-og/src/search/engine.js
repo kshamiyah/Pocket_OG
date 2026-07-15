@@ -53,6 +53,7 @@ import {
   BSH_SCD_SECTIONS,
   BGCS_EC_SECTIONS,
   BGCS_VULVAL_SECTIONS,
+  PHYSIOLOGY_SECTIONS,
 } from "@pocket-og/guidelines";
 import { QUICKREF_SECTIONS } from "../data/quickref";
 import { APPROACH_SECTIONS } from "../data/approaches";
@@ -198,6 +199,7 @@ const _WIKI = [
   ...BSH_SCD_SECTIONS,
   ...BGCS_EC_SECTIONS,
   ...BGCS_VULVAL_SECTIONS,
+  ...PHYSIOLOGY_SECTIONS,
   ...QUICKREF_SECTIONS,
   ...APPROACH_SECTIONS,
   ...TOG_SECTIONS,
