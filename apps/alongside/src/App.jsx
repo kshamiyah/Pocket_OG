@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TOPICS, getTopic } from "./content/topics";
 import TopicPage from "./components/TopicPage";
+import PhysiologyExperience from "./components/PhysiologyExperience";
 import { useTheme } from "./theme";
 
 const AREA_STYLE = {
@@ -82,9 +83,11 @@ export default function App() {
   return (
     <div className="min-h-full bg-paper">
       <Header dark={dark} toggle={toggle} />
-      {topic
-        ? <TopicPage topic={topic} onBack={() => setOpenId(null)} />
-        : <Home onOpen={setOpenId} />}
+      {openId === "pregnancy-physiology"
+        ? <PhysiologyExperience dark={dark} onExit={() => setOpenId(null)} />
+        : topic
+          ? <TopicPage topic={topic} onBack={() => setOpenId(null)} />
+          : <Home onOpen={setOpenId} />}
     </div>
   );
 }

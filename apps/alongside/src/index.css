@@ -32,3 +32,99 @@ body {
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* ---- Interactive physiology experience ---- */
+.phys-back { display:inline-flex; align-items:center; gap:6px; border:0; background:none; cursor:pointer;
+  color:var(--accent); font-family:var(--sans); font-weight:600; font-size:13px; padding:6px 2px; margin-top:8px; }
+.phys-back:focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:6px; }
+
+.phys-figwrap { position:relative; width:210px; margin:14px auto 2px; }
+.phys-figwrap svg { display:block; width:100%; height:auto; }
+.phys-hot { position:absolute; transform:translate(-50%,-50%); width:36px; height:36px; border-radius:50%;
+  border:0; background:none; cursor:pointer; display:grid; place-items:center; }
+.phys-dot { width:16px; height:16px; border-radius:50%; background:var(--accent); transition:transform .15s;
+  animation:phys-ping 2.6s ease-out infinite; }
+.phys-hot:hover .phys-dot { transform:scale(1.18); }
+.phys-hot:focus-visible { outline:none; }
+.phys-hot:focus-visible .phys-dot { outline:2px solid var(--accent); outline-offset:3px; }
+@keyframes phys-ping { 0%{box-shadow:0 0 0 0 color-mix(in oklab,var(--accent) 50%, transparent);}
+  70%{box-shadow:0 0 0 11px color-mix(in oklab,var(--accent) 0%, transparent);} 100%{box-shadow:0 0 0 0 transparent;} }
+
+.phys-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:16px; }
+.phys-card { display:flex; align-items:center; justify-content:space-between; gap:8px; text-align:left;
+  border:1px solid var(--line); background:var(--surface); border-radius:16px; padding:13px 14px; cursor:pointer;
+  font-family:var(--sans); color:var(--ink); box-shadow:var(--shadow); transition:transform .15s, border-color .15s; }
+.phys-card:hover { transform:translateY(-2px); border-color:color-mix(in oklab,var(--accent) 40%, var(--line)); }
+.phys-card:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.phys-card-lab { font-family:var(--serif); font-size:15px; font-weight:600; }
+.phys-card svg { width:16px; height:16px; color:var(--ink-faint); flex:none; }
+
+.phys-hint { display:flex; gap:9px; align-items:flex-start; margin:16px 2px 0; background:var(--surface-2);
+  border:1px solid var(--line); border-radius:16px; padding:12px 14px; }
+.phys-hint svg { flex:none; width:18px; height:18px; color:var(--accent); margin-top:1px; }
+.phys-hint p { margin:0; font-size:12px; color:var(--ink-soft); }
+
+.phys-kicker { font-size:11px; text-transform:uppercase; letter-spacing:.12em; font-weight:700; color:var(--accent); margin:8px 0 0; }
+.phys-headline { font-family:var(--serif); font-size:23px; font-weight:600; line-height:1.18; letter-spacing:-.01em;
+  text-wrap:balance; margin:5px 0 0; color:var(--ink); }
+.phys-big { color:var(--accent); }
+
+.phys-sect { margin-top:20px; }
+.phys-h { display:flex; align-items:center; gap:8px; font-size:11px; text-transform:uppercase; letter-spacing:.1em;
+  font-weight:700; color:var(--ink-faint); margin-bottom:9px; }
+.phys-rule { height:1px; background:var(--line); flex:1; }
+.phys-prose { display:block; font-size:14.5px; line-height:1.62; color:var(--ink); }
+.phys-prose + .phys-prose { margin-top:10px; }
+
+.phys-clever { display:flex; gap:11px; align-items:flex-start; background:var(--accent-soft); border-radius:16px; padding:13px 15px; }
+.phys-clever svg { flex:none; width:20px; height:20px; color:var(--accent); margin-top:1px; }
+.phys-clever span { font-size:13.5px; line-height:1.5; color:color-mix(in oklab,var(--accent) 55%, var(--ink)); }
+.phys-clever b { color:var(--accent); }
+
+.phys-feel { display:flex; flex-direction:column; gap:8px; }
+.phys-feelrow { border:1px solid var(--line); background:var(--surface); border-radius:14px; overflow:hidden; }
+.phys-feelrow > button { width:100%; text-align:left; border:0; background:none; cursor:pointer; font-family:var(--sans);
+  color:var(--ink); display:flex; align-items:center; gap:10px; padding:11px 13px; font-size:14px; font-weight:550; }
+.phys-feelrow > button:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+.phys-q { flex:1; }
+.phys-plus { width:22px; height:22px; border-radius:50%; background:var(--accent-soft); color:var(--accent);
+  display:grid; place-items:center; flex:none; transition:transform .2s; }
+.phys-feelrow[aria-expanded="true"] .phys-plus { transform:rotate(45deg); }
+.phys-a { display:none; padding:0 13px 13px 45px; }
+.phys-feelrow[aria-expanded="true"] .phys-a { display:block; }
+.phys-a span { font-size:13px; line-height:1.55; color:var(--ink-soft); }
+.phys-a b { color:var(--ink); }
+
+.phys-flags { display:flex; flex-direction:column; gap:9px; }
+.phys-flag { border:1px solid var(--line); border-radius:14px; background:var(--surface); padding:12px 14px; }
+.phys-flag-t { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+.phys-sev { width:9px; height:9px; border-radius:50%; flex:none; }
+.phys-badge { font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; padding:2px 7px; border-radius:999px; }
+.phys-flag p { margin:0; font-size:13px; line-height:1.5; color:var(--ink); }
+
+.phys-stat { display:flex; align-items:baseline; gap:10px; margin-top:16px; padding:14px 16px;
+  background:var(--surface); border:1px solid var(--line); border-radius:18px; }
+.phys-num { font-family:var(--serif); font-size:44px; font-weight:600; color:var(--accent); line-height:1; font-variant-numeric:tabular-nums; }
+.phys-cap { font-size:12.5px; color:var(--ink-soft); line-height:1.35; }
+.phys-cap b { color:var(--ink); }
+
+.phys-sim { margin-top:14px; border:1px solid var(--line); border-radius:18px; background:var(--surface); padding:14px 15px 16px; }
+.phys-sim-h { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.phys-sim-lbl { font-size:11px; text-transform:uppercase; letter-spacing:.09em; font-weight:700; color:var(--ink-faint); }
+.phys-readout { font-size:12.5px; color:var(--ink); font-weight:600; text-align:right; }
+.phys-pct { color:var(--accent); }
+.phys-chartwrap { margin-top:8px; }
+.phys-canvas { display:block; width:100%; height:132px; }
+.phys-heartline { display:flex; align-items:center; gap:9px; margin-top:12px; }
+.phys-heart { width:26px; height:26px; color:var(--urgent); flex:none; transform-origin:center; }
+.phys-heart.beat { animation:phys-beat var(--beat,.85s) ease-in-out infinite; }
+@keyframes phys-beat { 0%,100%{transform:scale(1);} 15%{transform:scale(1.22);} 30%{transform:scale(1);} 45%{transform:scale(1.14);} }
+.phys-hr { font-size:12.5px; color:var(--ink-soft); }
+.phys-hr b { color:var(--ink); font-variant-numeric:tabular-nums; }
+.phys-range { -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:999px; margin:14px 0 2px;
+  background:linear-gradient(90deg,var(--accent) 0 var(--fill,40%), var(--line) var(--fill,40%) 100%); cursor:pointer; }
+.phys-range::-webkit-slider-thumb { -webkit-appearance:none; width:22px; height:22px; border-radius:50%;
+  background:var(--surface); border:2px solid var(--accent); box-shadow:var(--shadow); cursor:pointer; }
+.phys-range::-moz-range-thumb { width:22px; height:22px; border-radius:50%; background:var(--surface); border:2px solid var(--accent); cursor:pointer; }
+.phys-range:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.phys-wkscale { display:flex; justify-content:space-between; font-size:10px; color:var(--ink-faint); font-variant-numeric:tabular-nums; }
