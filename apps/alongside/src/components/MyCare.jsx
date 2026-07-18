@@ -66,7 +66,7 @@ export default function MyCare({ week, onOpenBody }) {
         </div>
       </div>
 
-      <ProvenanceFooter codes={["QS22"]} extra={["NHS: Screening tests in pregnancy (nhs.uk, reviewed March 2026)"]} />
+      <ProvenanceFooter codes={["QS22"]} extra={["NHS antenatal screening pages, incl. the 20-week scan and Down's/Edwards'/Patau's screening (nhs.uk, 2026)"]} />
     </div>
   );
 }

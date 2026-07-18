@@ -25,16 +25,25 @@ export const SCREENING = [
     why: "It sets your dates for the rest of pregnancy, and it's usually when the combined screening test is done.",
   },
   {
-    id: "combined", from: 11, to: 14, when: "Usually 11 to 14 weeks", choice: true,
+    id: "combined", from: 10, to: 14, when: "Usually 10 to 14 weeks", choice: true,
     title: "Combined test",
-    what: "A scan measurement (the fluid at the back of your baby's neck) plus a blood test, combined to work out the chance of your baby having Down's, Edwards' or Patau's syndrome.",
-    why: "It gives a 'higher chance' or 'lower chance' result, not a yes or no. If it comes back higher chance, you'll be offered more information and further tests.",
+    what: "Two parts, usually done together: a blood test from your arm, and an ultrasound at your 12-week scan that measures the fluid at the back of your baby's neck. Combined, they work out the chance of Down's, Edwards' or Patau's syndrome.",
+    why: "It gives a 'higher chance' or 'lower chance' result, expressed as something like '1 in 1,000', never a yes or no. Most results come back lower chance, and there's no known risk to you or your baby from the blood test or scan.",
+    more: [
+      { h: "You choose what to check for", body: "You can screen for all three conditions, for Down's only, for Edwards' and Patau's only (always tested together), or for none at all. It's a personal decision, and your midwife will talk it through with you." },
+      { h: "Your results", body: "You'll usually get results within 2 weeks, by letter, phone or in person. There's a single result for Down's, and a joint result for Edwards' and Patau's, and you only get the results you asked for." },
+      { h: "If it's a higher chance", body: "A higher-chance result does not mean your baby has the condition. You'll be offered more information and further tests: a more detailed blood test (NIPT), and, if you want to know for certain, a diagnostic test such as amniocentesis or CVS." },
+    ],
+    support: "Antenatal Results and Choices (ARC) offers support: helpline 020 7713 7486 (Monday to Friday, 10am to 5.30pm), text 07908 683004, or info@arc-uk.org.",
   },
   {
     id: "quad", from: 14, to: 20, when: "Usually 14 to 20 weeks", choice: true,
     title: "Quadruple test",
-    what: "A blood test offered if the combined test wasn't possible in time. It screens for Down's syndrome only.",
-    why: "It's a second route to screening if you missed the combined-test window earlier on.",
+    what: "A blood test offered if you're more than 14 weeks and the combined test wasn't possible in time. It checks for Down's syndrome only, and is a little less accurate than the combined test.",
+    why: "It's a second route to Down's screening if you missed the combined-test window. Edwards' and Patau's would instead be looked for at your 20-week scan, if you choose to have it.",
+    more: [
+      { h: "Your results", body: "As with the combined test, you'll get a 'lower chance' or 'higher chance' result, usually within 2 weeks. A higher-chance result leads to the offer of more information and further tests (NIPT, and a diagnostic test such as amniocentesis or CVS if you want certainty)." },
+    ],
   },
   {
     id: "scan20", from: 18, to: 21, when: "Usually 18 to 21 weeks (up to 23 if needed)", choice: true,
