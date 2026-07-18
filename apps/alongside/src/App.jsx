@@ -3,6 +3,7 @@ import PhysiologyExperience from "./components/PhysiologyExperience";
 import ThisWeek from "./components/ThisWeek";
 import MyBaby from "./components/MyBaby";
 import MyCare from "./components/MyCare";
+import IsThisNormal from "./components/IsThisNormal";
 import Onboarding from "./components/Onboarding";
 import WeekSheet from "./components/WeekSheet";
 import { useTheme } from "./theme";
@@ -15,10 +16,6 @@ const TABS = [
   { id: "normal", label: "Is this normal?", icon: <><path d="M12 3a7 7 0 0 0-4 12.7V18h8v-2.3A7 7 0 0 0 12 3Z" /><path d="M9.5 21h5" strokeLinecap="round" /></> },
   { id: "care", label: "My care", icon: <><rect x="4" y="5" width="16" height="15" rx="2.5" /><path d="M8 3v4M16 3v4M4 10h16" strokeLinecap="round" /></> },
 ];
-
-const SOON = {
-  normal: { title: "Is this normal?", body: "Coming soon. Symptoms explained and connected to the change behind them, with calm guidance on when to rest and when to call, always erring toward getting seen." },
-};
 
 function Header({ week, onChangeWeek, dark, toggle }) {
   return (
@@ -38,21 +35,6 @@ function Header({ week, onChangeWeek, dark, toggle }) {
         </button>
       </div>
     </header>
-  );
-}
-
-function ComingSoon({ tabId, onGoBody, onGoWeek }) {
-  const s = SOON[tabId];
-  return (
-    <div className="soon">
-      <div className="soon-badge">In development</div>
-      <h2 className="soon-h">{s.title}</h2>
-      <p className="soon-p">{s.body}</p>
-      <div className="soon-actions">
-        <button onClick={onGoBody}>Explore My body</button>
-        <button className="alt" onClick={onGoWeek}>Back to this week</button>
-      </div>
-    </div>
   );
 }
 
@@ -86,7 +68,7 @@ export default function App() {
           <MyCare week={week} onOpenBody={openBody} />
         )}
         {tab === "normal" && (
-          <ComingSoon tabId={tab} onGoBody={() => openBody(null)} onGoWeek={() => setTab("week")} />
+          <IsThisNormal onOpenBody={openBody} />
         )}
       </main>
 
