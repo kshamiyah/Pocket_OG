@@ -103,6 +103,7 @@ function CardioSim({ dark }) {
 
 function SystemView({ sys, dark, onBack }) {
   const [open, setOpen] = useState(0);
+  const [deep, setDeep] = useState(false);
   return (
     <div>
       <button className="phys-back" onClick={onBack}>
@@ -134,6 +135,28 @@ function SystemView({ sys, dark, onBack }) {
         </div>
       </div>
 
+      {sys.deeper && (
+        <div className="phys-sect">
+          <button type="button" className="phys-deep-toggle" aria-expanded={deep} onClick={() => setDeep(d => !d)}>
+            <span className="phys-deep-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3 4 7v6c0 4.5 3.5 7 8 8 4.5-1 8-3.5 8-8V7Z" strokeLinejoin="round" /><path d="M12 8v6M9 11h6" strokeLinecap="round" /></svg>
+            </span>
+            <span className="phys-deep-txt">Go deeper: the medicine</span>
+            <svg className="phys-deep-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </button>
+          {deep && (
+            <div className="phys-deep">
+              {sys.deeper.map(([title, body], i) => (
+                <div key={i} className="phys-deepcard">
+                  <h4>{title}</h4>
+                  <Html html={body} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="phys-sect">
         <div className="phys-h"><span>The clever bit</span><span className="phys-rule" /></div>
         <div className="phys-clever">
@@ -141,6 +164,13 @@ function SystemView({ sys, dark, onBack }) {
           <Html html={sys.clever} />
         </div>
       </div>
+
+      {sys.checks && (
+        <div className="phys-checks">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l2.5 2.5L16 8" strokeLinecap="round" strokeLinejoin="round" /><rect x="3.5" y="4.5" width="17" height="15" rx="2.5" /></svg>
+          <div><p className="phys-checks-h">At your appointments</p><Html className="phys-checks-b" html={sys.checks} /></div>
+        </div>
+      )}
 
       <div className="phys-sect">
         <div className="phys-h"><span>When it's more than normal</span><span className="phys-rule" /></div>
@@ -185,7 +215,7 @@ export default function PhysiologyExperience({ dark, onExit }) {
               <path d="M62 84 Q105 70 148 84 Q156 110 152 150 Q149 205 135 260 Q129 300 120 332 L90 332 Q81 300 75 260 Q61 205 58 150 Q54 110 62 84 Z" fill="var(--accent-soft)" stroke="var(--line)" strokeWidth="1.5" />
               <ellipse cx="105" cy="205" rx="30" ry="26" fill="color-mix(in oklab,var(--accent) 16%, var(--surface))" stroke="var(--line)" />
             </svg>
-            {PHYS_ORDER.map(k => {
+            {PHYS_ORDER.filter(k => PHYS_SYSTEMS[k].hotspot).map(k => {
               const s = PHYS_SYSTEMS[k];
               return (
                 <button key={k} className="phys-hot" style={{ left: s.hotspot.left, top: s.hotspot.top }} onClick={() => setSysKey(k)} aria-label={s.label} title={s.label}>

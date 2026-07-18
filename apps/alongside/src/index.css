@@ -128,3 +128,28 @@ body {
 .phys-range::-moz-range-thumb { width:22px; height:22px; border-radius:50%; background:var(--surface); border:2px solid var(--accent); cursor:pointer; }
 .phys-range:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
 .phys-wkscale { display:flex; justify-content:space-between; font-size:10px; color:var(--ink-faint); font-variant-numeric:tabular-nums; }
+
+.phys-deep-toggle { display:flex; align-items:center; gap:10px; width:100%; text-align:left; cursor:pointer;
+  font-family:var(--sans); color:var(--ink); background:var(--surface-2); border:1px solid var(--line);
+  border-radius:14px; padding:12px 14px; }
+.phys-deep-toggle:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.phys-deep-icon { width:26px; height:26px; border-radius:8px; background:var(--accent-soft); color:var(--accent);
+  display:grid; place-items:center; flex:none; }
+.phys-deep-icon svg { width:16px; height:16px; }
+.phys-deep-txt { flex:1; font-size:13.5px; font-weight:650; }
+.phys-deep-chev { color:var(--ink-faint); transition:transform .2s; }
+.phys-deep-toggle[aria-expanded="true"] .phys-deep-chev { transform:rotate(180deg); }
+.phys-deep { display:flex; flex-direction:column; gap:9px; margin-top:9px; }
+.phys-deepcard { border:1px solid var(--line); border-left:3px solid var(--accent); background:var(--surface);
+  border-radius:12px; padding:12px 14px; }
+.phys-deepcard h4 { margin:0 0 5px; font-family:var(--serif); font-size:15px; font-weight:600; color:var(--ink); }
+.phys-deepcard span { display:block; font-size:13.5px; line-height:1.6; color:var(--ink-soft); }
+.phys-deepcard b { color:var(--ink); }
+
+.phys-checks { display:flex; gap:11px; align-items:flex-start; margin-top:18px; background:var(--calm-bg);
+  border:1px solid color-mix(in oklab,var(--calm) 22%, transparent); border-radius:16px; padding:13px 15px; }
+.phys-checks svg { width:20px; height:20px; color:var(--calm); flex:none; margin-top:1px; }
+.phys-checks-h { margin:0 0 3px; font-size:11px; text-transform:uppercase; letter-spacing:.08em; font-weight:700;
+  color:color-mix(in oklab,var(--calm) 70%, var(--ink)); }
+.phys-checks-b { display:block; font-size:13px; line-height:1.5; color:color-mix(in oklab,var(--calm) 58%, var(--ink)); }
+.phys-checks-b b { color:color-mix(in oklab,var(--calm) 72%, var(--ink)); }
