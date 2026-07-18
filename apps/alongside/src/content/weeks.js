@@ -3,31 +3,6 @@
 // standard UK antenatal practice (NHS pregnancy week-by-week, NICE NG201
 // antenatal care) and the shared PHYSIOLOGY guide. Not medical advice.
 
-// --- Your baby: a size comparison and one development highlight per stage. ---
-// Pick the last entry whose `from` week is <= the current week.
-const BABY = [
-  { from: 4, size: "a poppy seed", dev: "The tiny ball of cells has settled into your womb lining and begun forming the placenta that will feed your baby." },
-  { from: 6, size: "a lentil", dev: "A basic heart has started to beat, and the neural tube that becomes the brain and spine is forming." },
-  { from: 8, size: "a raspberry", dev: "All the major organs are forming, little limb buds have appeared, and the heartbeat is well established." },
-  { from: 10, size: "a strawberry", dev: "Now officially a fetus. The vital organs are in place and starting to work." },
-  { from: 12, size: "a lime", dev: "Fully formed, with fingers, toes and reflexes. They can move, though you can't feel it yet." },
-  { from: 14, size: "a lemon", dev: "Beginning to make facial expressions, and the kidneys are producing urine into the waters." },
-  { from: 16, size: "an avocado", dev: "May start to hear your voice, and can make sucking movements." },
-  { from: 18, size: "a sweet potato", dev: "Fingerprints are forming and they're increasingly active in there." },
-  { from: 20, size: "a banana", dev: "Halfway. The detailed anomaly scan happens around now, and many women feel their first movements." },
-  { from: 22, size: "a papaya", dev: "Settling into sleep and wake cycles, and responding to sound." },
-  { from: 24, size: "an ear of corn", dev: "A key milestone: from now, with intensive care, survival outside the womb becomes possible. The lungs are developing fast." },
-  { from: 26, size: "a courgette", dev: "Eyes are beginning to open, and they respond to your voice and to touch." },
-  { from: 28, size: "an aubergine", dev: "Around 1 kg. Eyes can open and close, and they practise breathing movements." },
-  { from: 30, size: "a cabbage", dev: "Laying down fat and getting stronger, with the brain growing quickly." },
-  { from: 32, size: "a squash", dev: "Most systems are well developed, and they're often settling into a head-down position." },
-  { from: 34, size: "a cantaloupe melon", dev: "The lungs are maturing. From here it's mostly about growing and gaining weight." },
-  { from: 36, size: "a romaine lettuce", dev: "Nearly term. Gaining weight and getting ready to breathe air." },
-  { from: 37, size: "a bunch of chard", dev: "Now full term. A birth any time from here is considered normally timed." },
-  { from: 39, size: "a small watermelon", dev: "Fully developed and ready, just adding the final layers of fat." },
-  { from: 41, size: "a small pumpkin", dev: "A little overdue is common. Your team will talk through a membrane sweep or induction." },
-];
-
 // --- Your care: the antenatal schedule, as ranges. ---
 const CARE = [
   { from: 5, to: 10, title: "Your booking appointment", detail: "Usually by 10 weeks: booking bloods, blood pressure, urine and screening choices. It's the longest appointment, and it sets your baseline." },
@@ -59,10 +34,6 @@ function pickLast(list, week) {
   let chosen = list[0];
   for (const item of list) if (item.from <= week) chosen = item;
   return chosen;
-}
-
-export function babyForWeek(week) {
-  return pickLast(BABY, week);
 }
 
 export function bodyFocusForWeek(week) {

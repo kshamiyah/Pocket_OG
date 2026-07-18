@@ -293,6 +293,34 @@ body {
 .care-conditions li { font-size:12.5px; color:var(--ink); line-height:1.45; }
 .care-support { background:var(--calm-bg); border-radius:11px; padding:10px 12px; font-size:12.5px !important;
   color:color-mix(in oklab,var(--calm) 60%, var(--ink)) !important; }
+
+/* ---- My baby ---- */
+.baby { max-width:520px; margin:0 auto; padding:16px 16px 26px; }
+.baby-kicker { font-size:11px; text-transform:uppercase; letter-spacing:.12em; font-weight:700; color:var(--calm); margin:6px 0 0; }
+.baby-weekrow { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin:2px 0 4px; }
+.baby-week { font-family:var(--serif); font-size:29px; font-weight:600; color:var(--ink); margin:0; letter-spacing:-.01em; }
+.baby-nowtag { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--calm); background:var(--calm-bg); padding:3px 9px; border-radius:999px; }
+.baby-now { font-size:12px; font-weight:650; color:var(--accent); background:var(--accent-soft); border:0; border-radius:999px; padding:5px 11px; cursor:pointer; font-family:var(--sans); }
+.baby-now:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.baby-scrubhint { font-size:11px; color:var(--ink-faint); text-align:center; margin:4px 0 0; }
+
+.baby-hero { display:flex; align-items:center; gap:16px; margin-top:16px; background:var(--surface); border:1px solid var(--line);
+  border-radius:20px; padding:18px 18px; box-shadow:var(--shadow); }
+.baby-heroblob { width:64px; height:64px; border-radius:50%; flex:none; display:grid; place-items:center;
+  background:radial-gradient(circle at 40% 35%, color-mix(in oklab,var(--calm) 30%, var(--surface)), color-mix(in oklab,var(--calm) 14%, var(--surface))); color:var(--calm); }
+.baby-heroblob svg { width:30px; height:30px; opacity:.75; }
+.baby-sizelab { font-size:11px; text-transform:uppercase; letter-spacing:.07em; font-weight:700; color:var(--ink-faint); margin:0; }
+.baby-size { font-family:var(--serif); font-size:24px; font-weight:600; color:var(--ink); margin:1px 0 2px; line-height:1.1; }
+.baby-measure { font-size:12.5px; color:var(--ink-soft); margin:0; font-variant-numeric:tabular-nums; }
+
+.baby-milestone { display:inline-flex; align-items:center; gap:6px; margin-top:14px; background:var(--accent-soft); color:var(--accent);
+  border-radius:999px; padding:6px 13px; font-size:12.5px; font-weight:700; }
+.baby-milestone svg { width:15px; height:15px; }
+.baby-headline { font-family:var(--serif); font-size:19px; font-weight:600; line-height:1.3; text-wrap:balance; color:var(--ink); margin:14px 0 0; }
+.baby-points { list-style:none; margin:14px 0 0; padding:0; display:flex; flex-direction:column; gap:11px; }
+.baby-points li { display:flex; gap:11px; font-size:14.5px; line-height:1.55; color:var(--ink); }
+.baby-points li::before { content:""; margin-top:8px; width:7px; height:7px; border-radius:50%; background:var(--calm); flex:none; }
+.baby-avgnote { font-size:11.5px; color:var(--ink-faint); line-height:1.5; margin:16px 0 0; }
 .care-checks { display:flex; flex-direction:column; gap:9px; }
 .care-check { text-align:left; border:1px solid var(--line); background:var(--surface); border-radius:14px; padding:13px 14px;
   cursor:pointer; font-family:var(--sans); color:var(--ink); box-shadow:var(--shadow); transition:border-color .15s, transform .15s; }

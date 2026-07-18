@@ -1,4 +1,5 @@
-import { babyForWeek, bodyFocusForWeek, careForWeek } from "../content/weeks";
+import { bodyFocusForWeek, careForWeek } from "../content/weeks";
+import { babyForWeek } from "../content/baby";
 import { PHYS_SYSTEMS } from "../content/physiology";
 import { trimesterLabel } from "../lib/pregnancy";
 
