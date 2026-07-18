@@ -8,7 +8,7 @@ export const UPDATES = [
     date: "18/07/2026",
     title: "Latest: what's new in O&G",
     changes: [
-      { tag: "new", text: "Latest, a new tab with a curated feed of new guidance and evidence: guideline updates (RCOG, NICE), practice-relevant trials, safety notices and reports, each in two sentences with a link to the primary source and, where the app covers the topic, a jump straight to the relevant guide or flowchart. The feed updates independently of app releases whenever you are online, and the last synced copy stays readable offline. A blue dot on the tab shows when new items have arrived." },
+      { tag: "new", text: "Latest, a new tab with a curated feed of new guidance and evidence, laid out like a news front page: practice-changing stories as full-width features, everything else as tap-to-expand cards. Covers guideline updates (RCOG, NICE), practice-relevant trials, safety notices, national reports and on-the-horizon research (new tests, devices and treatments), each in two sentences with a link to the primary source and, where the app covers the topic, a jump straight to the relevant guide or flowchart. The feed updates independently of app releases whenever you are online, and the last synced copy stays readable offline. A blue dot on the tab shows when new items have arrived." },
     ],
   },
   {

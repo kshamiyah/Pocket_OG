@@ -26,6 +26,7 @@ export const NEWS_KINDS = {
   trial: { label: "Trial" },
   safety: { label: "Safety" },
   report: { label: "Report" },
+  research: { label: "Research" },
 };
 
 function isValidItem(it) {
