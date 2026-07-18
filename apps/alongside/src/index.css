@@ -295,7 +295,7 @@ body {
   color:color-mix(in oklab,var(--calm) 60%, var(--ink)) !important; }
 
 /* ---- My baby ---- */
-.baby { max-width:520px; margin:0 auto; padding:16px 16px 26px; }
+.mybaby { max-width:520px; margin:0 auto; padding:16px 16px 26px; }
 .baby-kicker { font-size:11px; text-transform:uppercase; letter-spacing:.12em; font-weight:700; color:var(--calm); margin:6px 0 0; }
 .baby-weekrow { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin:2px 0 4px; }
 .baby-week { font-family:var(--serif); font-size:29px; font-weight:600; color:var(--ink); margin:0; letter-spacing:-.01em; }

@@ -13,7 +13,7 @@ const TABS = [
   { id: "week", label: "This week", icon: <path d="M4 11 12 4l8 7M6 10v9h12v-9" strokeLinecap="round" strokeLinejoin="round" /> },
   { id: "body", label: "My body", icon: <path d="M12 21s-7-4.6-9.5-9C1 9 2.5 5.5 6 5.5c2.1 0 3.4 1.2 4 2.3.6-1.1 1.9-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.4 12 21 12 21Z" /> },
   { id: "baby", label: "My baby", icon: <><circle cx="12" cy="9" r="4" /><path d="M6 19c0-3.3 2.6-5 6-5s6 1.7 6 5" strokeLinecap="round" /></> },
-  { id: "normal", label: "Is this normal?", icon: <><path d="M12 3a7 7 0 0 0-4 12.7V18h8v-2.3A7 7 0 0 0 12 3Z" /><path d="M9.5 21h5" strokeLinecap="round" /></> },
+  { id: "normal", label: "Symptoms", icon: <><path d="M12 3a7 7 0 0 0-4 12.7V18h8v-2.3A7 7 0 0 0 12 3Z" /><path d="M9.5 21h5" strokeLinecap="round" /></> },
   { id: "care", label: "My care", icon: <><rect x="4" y="5" width="16" height="15" rx="2.5" /><path d="M8 3v4M16 3v4M4 10h16" strokeLinecap="round" /></> },
 ];
 
@@ -59,7 +59,7 @@ export default function App() {
           <ThisWeek week={week} onChangeWeek={() => setSheet(true)} onOpenBody={openBody} onOpenTab={setTab} />
         )}
         {tab === "body" && (
-          <PhysiologyExperience key={bodyKey} dark={dark} initialSystem={bodyInitial} />
+          <PhysiologyExperience key={bodyKey} dark={dark} initialSystem={bodyInitial} week={week} />
         )}
         {tab === "baby" && (
           <MyBaby week={week} />

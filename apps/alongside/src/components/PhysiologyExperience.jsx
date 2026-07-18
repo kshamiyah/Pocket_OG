@@ -14,9 +14,9 @@ const FLAG = {
 };
 
 /* ---- cardiovascular interactive ---- */
-function CardioSim({ dark }) {
+function CardioSim({ dark, currentWeek }) {
   const canvasRef = useRef(null);
-  const [week, setWeek] = useState(24);
+  const [week, setWeek] = useState(Math.min(40, Math.max(4, currentWeek ?? 24)));
   const [vol, setVol] = useState(REDUCED ? 50 : 0);
 
   const pct = Math.round(cardiacOutputAtWeek(week));
@@ -101,7 +101,7 @@ function CardioSim({ dark }) {
   );
 }
 
-function SystemView({ sys, dark, onBack }) {
+function SystemView({ sys, dark, currentWeek, onBack }) {
   const [open, setOpen] = useState(0);
   const [deep, setDeep] = useState(false);
   return (
@@ -113,7 +113,7 @@ function SystemView({ sys, dark, onBack }) {
       <p className="phys-kicker">{sys.kicker}</p>
       <h2 className="phys-headline">{sys.headline.pre}<span className="phys-big">{sys.headline.big}</span>{sys.headline.post}</h2>
 
-      {sys.cardio && <CardioSim dark={dark} />}
+      {sys.cardio && <CardioSim dark={dark} currentWeek={currentWeek} />}
 
       <div className="phys-sect">
         <div className="phys-h"><span>Why your body does this</span><span className="phys-rule" /></div>
@@ -192,7 +192,7 @@ function SystemView({ sys, dark, onBack }) {
   );
 }
 
-export default function PhysiologyExperience({ dark, initialSystem }) {
+export default function PhysiologyExperience({ dark, initialSystem, week }) {
   // App remounts this component (via a changing key) when deep-linking from the
   // home, so initialising from initialSystem here is enough.
   const [sysKey, setSysKey] = useState(initialSystem ?? null);
@@ -201,7 +201,7 @@ export default function PhysiologyExperience({ dark, initialSystem }) {
   return (
     <div className="mx-auto max-w-2xl px-5 pb-16">
       {sys ? (
-        <SystemView sys={sys} dark={dark} onBack={() => setSysKey(null)} />
+        <SystemView sys={sys} dark={dark} currentWeek={week} onBack={() => setSysKey(null)} />
       ) : (
         <div>
           <p className="mt-4 font-serif text-xl font-semibold leading-tight text-ink">Right now, your body is quietly rebuilding itself to grow and deliver a whole person.</p>

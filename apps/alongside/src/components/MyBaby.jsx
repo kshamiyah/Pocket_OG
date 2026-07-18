@@ -9,7 +9,7 @@ export default function MyBaby({ week }) {
   const fill = ((sel - 4) / (42 - 4)) * 100;
 
   return (
-    <div className="baby">
+    <div className="mybaby">
       <div className="baby-top">
         <p className="baby-kicker">Your baby</p>
         <div className="baby-weekrow">
