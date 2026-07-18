@@ -5,6 +5,9 @@
     "apps/*",
     "packages/*"
   ],
+  "scripts": {
+    "review:content": "node scripts/content-review.mjs"
+  },
   "devDependencies": {
     "sharp": "^0.35.2"
   }

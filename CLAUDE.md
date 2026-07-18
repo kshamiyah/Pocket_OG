@@ -41,6 +41,27 @@ This is a medical reference used by trainees, so accuracy is load-bearing.
 - **Prefer principles over restating everything.** State the teaching point and
   link to the guide for the full detail, rather than copying long passages.
 
+### Content review script
+
+`node scripts/content-review.mjs` (from repo root; also `npm run review:content`)
+cross-checks app content against the guideline text in `packages/guidelines`.
+No install needed; it loads the real data modules via a small resolver hook.
+
+- `check [GL codes...]`: extracts every numeric claim (dose, threshold, timing,
+  percentage, gestation) from flowcharts and pearls and flags any value+unit
+  that does not appear in the cited guideline's sections. `--out report.md`
+  writes a file; `--strict` exits non-zero when there are findings.
+- `pack <GL>`: emits that guideline's full section text plus every app item
+  citing it as a single markdown bundle, for a proper semantic proofread
+  (wording, emphasis, missing caveats) by a human or an AI session.
+
+A finding means "cannot be verified against the in-repo guideline text", not
+"wrong". Adjudicate each one against the original guideline: fix the content,
+add the missing detail to the sections, or cite the real source. Flowcharts
+whose registry key does not start with their guideline code are mapped in
+`FLOWCHART_GL_OVERRIDES` inside the script; keep that map current when adding
+flowcharts. Run the check after any content change.
+
 ## Commands (run from `apps/pocket-og`)
 
 - Lint: `../../node_modules/.bin/eslint src/…`
