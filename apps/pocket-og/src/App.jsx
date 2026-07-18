@@ -23,6 +23,8 @@ import AboutModal from "./components/AboutModal";
 import UpdatesModal from "./components/UpdatesModal";
 import InstallBanner from "./components/InstallBanner";
 import { LATEST_VERSION, hasUnseenUpdates, markUpdatesSeen } from "./data/updates";
+import LatestTab from "./components/LatestTab";
+import { loadCachedNews, saveCachedNews, fetchLatestNews, unseenNewsIds } from "./data/latest";
 import { TOG_SECTIONS } from "./data/tog";
 import { TRIAL_SECTIONS } from "./data/trials";
 
@@ -244,6 +246,22 @@ export default function App() {
     try { localStorage.setItem("pocketog_theme_v1", theme); } catch { /* best effort */ }
   }, [theme]);
   const [updatesUnseen, setUpdatesUnseen] = useState(() => hasUnseenUpdates());
+  const [news, setNews] = useState(() => loadCachedNews()); // { feed, syncedAt } | null
+  const [newsUnseen, setNewsUnseen] = useState(() => unseenNewsIds(loadCachedNews()?.feed?.items ?? []).size > 0);
+
+  // Refresh the Latest feed once per launch; the cached copy covers offline.
+  useEffect(() => {
+    let cancelled = false;
+    fetchLatestNews()
+      .then(feed => {
+        if (cancelled) return;
+        saveCachedNews(feed);
+        setNews({ feed, syncedAt: Date.now() });
+        setNewsUnseen(unseenNewsIds(feed.items).size > 0);
+      })
+      .catch(() => { /* offline or feed unreachable — keep the cached copy */ });
+    return () => { cancelled = true; };
+  }, []);
   const [hintIndex, setHintIndex] = useState(0);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
@@ -814,6 +832,16 @@ export default function App() {
       {/* Rx tab */}
       {activeTab === "rx" && <RxPage key={rxNavKey} initialDrugId={activeRxDrug} />}
 
+      {/* Latest tab */}
+      {activeTab === "latest" && (
+        <LatestTab
+          feed={news?.feed}
+          syncedAt={news?.syncedAt}
+          onNavigate={handleNavigate}
+          onSeen={() => setNewsUnseen(false)}
+        />
+      )}
+
       {/* Guidelines tab */}
       {activeTab === "guidelines" && (
         <div className="min-h-screen pb-24">
@@ -1025,6 +1053,7 @@ export default function App() {
         <div className="flex max-w-lg mx-auto">
           {[
             { id: "search",     label: "Search",  icon: <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" /> },
+            { id: "latest",     label: "Latest",  dot: newsUnseen, icon: <path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5" /> },
             { id: "guidelines", label: "Library", icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> },
             { id: "flowcharts", label: "Flow",    icon: <path strokeLinecap="round" strokeLinejoin="round" d="M12 2L22 12L12 22L2 12L12 2Z" /> },
             { id: "consent",    label: "Counsel", icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /> },
@@ -1039,9 +1068,12 @@ export default function App() {
                 activeTab === tab.id ? "text-black" : "text-gray-400"
               }`}
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-                {tab.icon}
-              </svg>
+              <span className="relative">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                  {tab.icon}
+                </svg>
+                {tab.dot && <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-blue-500" />}
+              </span>
               <span className={`text-xs ${activeTab === tab.id ? "font-semibold" : "font-medium"}`}>{tab.label}</span>
             </button>
           ))}

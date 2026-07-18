@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Latest harvester writes this transiently for the PR body
+scripts/latest/pr-body.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
