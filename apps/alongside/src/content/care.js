@@ -37,10 +37,28 @@ export const SCREENING = [
     why: "It's a second route to screening if you missed the combined-test window earlier on.",
   },
   {
-    id: "scan20", from: 18, to: 21, when: "Usually 18 to 21 weeks", choice: true,
+    id: "scan20", from: 18, to: 21, when: "Usually 18 to 21 weeks (up to 23 if needed)", choice: true,
     title: "The 20-week screening scan",
-    what: "A detailed ultrasound that checks your baby's physical development from head to toe, screens for 11 rare conditions, and checks where your placenta is lying.",
-    why: "It's the main look at how your baby is growing and formed. Most scans are reassuring; if something is found, you'll be offered more information and support.",
+    what: "A detailed ultrasound, also called the anomaly scan, that checks your baby's physical development, screens for 11 conditions, and checks how they're growing. Your placenta and the blood flow to your womb are checked too.",
+    why: "It's the main look at how your baby is formed and growing. Most scans are completely reassuring. It can't find everything, so if something ever doesn't feel right later in pregnancy, still tell your midwife.",
+    more: [
+      { h: "What they look at", body: "They look closely at your baby's bones, heart, brain, spinal cord, face, kidneys and tummy. It takes about 30 minutes, is done at a hospital or clinic, and has no known risk to you or your baby. You may be asked if you'd like to know your baby's sex." },
+      { h: "If the scan finds something", body: "You may be offered more scans and tests, such as amniocentesis or chorionic villus sampling, and be referred to a specialist who will help you decide whether to have them. These can tell you for certain what a finding means for you and your baby." },
+    ],
+    conditions: [
+      "Anencephaly (the skull and brain not forming properly)",
+      "Open spina bifida (a gap in the spine)",
+      "Cleft lip",
+      "Diaphragmatic hernia (a gap in the muscle below the lungs)",
+      "Gastroschisis (the tummy wall not fully formed)",
+      "Exomphalos (some tummy organs developing outside the body)",
+      "Serious heart conditions",
+      "Missing or abnormal kidneys (bilateral renal agenesis)",
+      "Lethal skeletal dysplasia (bones not developing properly)",
+      "Edwards' syndrome (trisomy 18)",
+      "Patau's syndrome (trisomy 13)",
+    ],
+    support: "If you're told your baby has, or might have, a condition, Antenatal Results and Choices (ARC) offers information and a helpline: 020 7713 7486, Monday to Friday.",
   },
 ];
 

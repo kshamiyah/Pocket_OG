@@ -34,6 +34,14 @@ export default function MyCare({ week, onOpenBody }) {
                 <div className="care-detail">
                   <p><b>What it is.</b> {s.what}</p>
                   <p><b>Why.</b> {s.why}</p>
+                  {s.more && s.more.map((m, i) => <p key={i}><b>{m.h}.</b> {m.body}</p>)}
+                  {s.conditions && (
+                    <div className="care-conditions">
+                      <p className="care-cond-h">The 11 conditions it checks for</p>
+                      <ul>{s.conditions.map((c, i) => <li key={i}>{c}</li>)}</ul>
+                    </div>
+                  )}
+                  {s.support && <p className="care-support">{s.support}</p>}
                   {s.choice && <p className="care-optional">A screening choice, entirely up to you.</p>}
                 </div>
               </div>
