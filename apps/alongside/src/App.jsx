@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PhysiologyExperience from "./components/PhysiologyExperience";
 import ThisWeek from "./components/ThisWeek";
+import MyCare from "./components/MyCare";
 import Onboarding from "./components/Onboarding";
 import WeekSheet from "./components/WeekSheet";
 import { useTheme } from "./theme";
@@ -17,7 +18,6 @@ const TABS = [
 const SOON = {
   baby: { title: "Your baby, week by week", body: "Coming next. Your baby's development explained with the same depth as My body: what's forming, what they can do now, and the milestones that matter, not just fruit sizes." },
   normal: { title: "Is this normal?", body: "Coming soon. Symptoms explained and connected to the change behind them, with calm guidance on when to rest and when to call, always erring toward getting seen." },
-  care: { title: "Your care, explained", body: "Coming soon. Every appointment, scan and test, from your booking bloods to the anomaly scan and the glucose test: what each one looks for, and why it happens when it does." },
 };
 
 function Header({ week, onChangeWeek, dark, toggle }) {
@@ -79,7 +79,10 @@ export default function App() {
         {tab === "body" && (
           <PhysiologyExperience key={bodyKey} dark={dark} initialSystem={bodyInitial} />
         )}
-        {(tab === "baby" || tab === "normal" || tab === "care") && (
+        {tab === "care" && (
+          <MyCare week={week} onOpenBody={openBody} />
+        )}
+        {(tab === "baby" || tab === "normal") && (
           <ComingSoon tabId={tab} onGoBody={() => openBody(null)} onGoWeek={() => setTab("week")} />
         )}
       </main>
