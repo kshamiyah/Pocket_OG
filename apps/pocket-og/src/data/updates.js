@@ -4,6 +4,16 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.19.0",
+    date: "18/07/2026",
+    title: "Placenta praevia & PAS updated to the 2026 guideline",
+    changes: [
+      { tag: "fixed", text: "Placenta Praevia & Accreta Spectrum refreshed to RCOG GTG27a fifth edition (Jauniaux et al, BJOG 2026). Antenatal corticosteroids are now selective, not routine: offer them 24+0-34+6 weeks (with magnesium sulphate up to 30+0 weeks) only when imminent preterm birth is anticipated, replacing the old routine late-preterm course. Timing of birth is no later than 37+6 weeks for uncomplicated praevia and 36+1 to 37+0 weeks for a high probability of PAS." },
+      { tag: "improved", text: "PAS guide: routine MRI is not recommended where ultrasound expertise (including TVS) is available; a trial of labour may be offered for an asymptomatic low-lying placenta 11-20 mm from the os after 36 weeks; prophylactic ureteric stents and routine interventional radiology are not recommended; and methotrexate should not be used when the placenta is left in situ." },
+      { tag: "new", text: "New Caesarean Scar Pregnancy section: a live caesarean scar ectopic pregnancy continuing past the first trimester carries a high risk of placenta praevia and praevia accreta and needs expert consultant counselling. Searching \"caesarean scar pregnancy\", \"caesarean scar ectopic\" or \"CSEP\" now finds it." },
+    ],
+  },
+  {
     version: "1.18.0",
     date: "18/07/2026",
     title: "Latest: what's new in O&G",
