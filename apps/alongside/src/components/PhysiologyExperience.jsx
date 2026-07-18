@@ -192,8 +192,10 @@ function SystemView({ sys, dark, onBack }) {
   );
 }
 
-export default function PhysiologyExperience({ dark, onExit }) {
-  const [sysKey, setSysKey] = useState(null);
+export default function PhysiologyExperience({ dark, initialSystem }) {
+  // App remounts this component (via a changing key) when deep-linking from the
+  // home, so initialising from initialSystem here is enough.
+  const [sysKey, setSysKey] = useState(initialSystem ?? null);
   const sys = sysKey ? PHYS_SYSTEMS[sysKey] : null;
 
   return (
@@ -202,11 +204,7 @@ export default function PhysiologyExperience({ dark, onExit }) {
         <SystemView sys={sys} dark={dark} onBack={() => setSysKey(null)} />
       ) : (
         <div>
-          <button className="phys-back" onClick={onExit}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="m15 6-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            All topics
-          </button>
-          <p className="mt-3 font-serif text-xl font-semibold leading-tight text-ink">Right now, your body is quietly rebuilding itself to grow and deliver a whole person.</p>
+          <p className="mt-4 font-serif text-xl font-semibold leading-tight text-ink">Right now, your body is quietly rebuilding itself to grow and deliver a whole person.</p>
           <p className="mt-1 text-[13px] text-inksoft">Tap a part to see what is changing, and why.</p>
 
           <div className="phys-figwrap">
