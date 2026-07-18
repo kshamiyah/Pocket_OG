@@ -4,6 +4,14 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.18.0",
+    date: "18/07/2026",
+    title: "Latest: what's new in O&G",
+    changes: [
+      { tag: "new", text: "Latest, a new tab with a curated feed of new guidance and evidence: guideline updates (RCOG, NICE), practice-relevant trials, safety notices and reports, each in two sentences with a link to the primary source and, where the app covers the topic, a jump straight to the relevant guide or flowchart. The feed updates independently of app releases whenever you are online, and the last synced copy stays readable offline. A blue dot on the tab shows when new items have arrived." },
+    ],
+  },
+  {
     version: "1.17.0",
     date: "15/07/2026",
     title: "Normal physiology of pregnancy",

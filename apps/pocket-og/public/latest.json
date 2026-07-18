@@ -1,0 +1,69 @@
+{
+  "updated": "2026-07-18",
+  "items": [
+    {
+      "id": "2026-06-gtg27-pas-update",
+      "date": "2026-06-30",
+      "kind": "guideline",
+      "source": "RCOG",
+      "weight": "practice",
+      "title": "RCOG updates the placenta praevia & placenta accreta spectrum green-top guideline",
+      "why": "The first update since 2018 strengthens early risk detection and recognises that PAS is not exclusively linked to placenta praevia or previous caesarean, reflecting evidence on other uterine surgical trauma (curettage, hysteroscopic surgery, ablation, UAE, myomectomy) and adding a new section on caesarean scar ectopic pregnancy. The Pocket O&G guide still reflects the 2018 edition until it is refreshed, so read the new guideline in full.",
+      "url": "https://www.rcog.org.uk/news/rcog-publishes-update-to-clinical-guidance-on-placenta-praevia-and-placenta-accreta-spectrum/",
+      "link": { "type": "reader", "id": "GTG27A" }
+    },
+    {
+      "id": "2026-05-og-balloon-tamponade-duration",
+      "date": "2026-05-07",
+      "kind": "trial",
+      "source": "TRIAL",
+      "weight": "aware",
+      "title": "Six hours of intrauterine balloon tamponade non-inferior to 18 hours for PPH",
+      "why": "In a US randomised trial of 64 women with atonic PPH after vaginal birth (Larrea et al, Obstet Gynecol 2026), removing the balloon at 6 hours was non-inferior to 18 hours for further blood loss, with no difference in escalation. Small and single-centre, so not yet guideline-changing, but it questions routine overnight balloon dwell times.",
+      "url": "https://doi.org/10.1097/AOG.0000000000006295",
+      "link": { "type": "flowchart", "id": "GTG52_PPH" }
+    },
+    {
+      "id": "2026-05-ng235-tachysystole",
+      "date": "2026-05",
+      "kind": "guideline",
+      "source": "NICE",
+      "weight": "aware",
+      "title": "NICE clarifies the tachysystole definition in intrapartum care (NG235)",
+      "why": "A May 2026 amendment defines uterine tachysystole within hyperstimulation as 5 or more contractions per 10 minutes for at least 20 minutes, aligning NG235 with the fetal monitoring guideline and BNF advice on oxytocin for induction. Worth knowing when documenting hyperstimulation and titrating oxytocin.",
+      "url": "https://www.nice.org.uk/guidance/ng235/chapter/Update-information",
+      "link": { "type": "flowchart", "id": "NG229_CTG" }
+    },
+    {
+      "id": "2026-04-gtg57-rfm-second-edition",
+      "date": "2026-04-27",
+      "kind": "guideline",
+      "source": "RCOG",
+      "weight": "practice",
+      "title": "Reduced fetal movements: second edition of green-top guideline 57 published",
+      "why": "The first full rewrite since 2011 (Whitworth et al, BJOG 2026): no formal kick counting, handheld Doppler first to exclude fetal death, computerised CTG from 26+0 weeks once viability is confirmed, and recurrent RFM flagged as higher risk for stillbirth, growth restriction and preterm birth. Check the full guideline against the Pocket O&G RFM pathway before relying on either.",
+      "url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/reduced-fetal-movements-green-top-guideline-no-57/",
+      "link": { "type": "reader", "id": "GTG57" }
+    },
+    {
+      "id": "2026-04-og-n2o-office-hysteroscopy",
+      "date": "2026-04-09",
+      "kind": "trial",
+      "source": "TRIAL",
+      "weight": "aware",
+      "title": "Inhaled nitrous oxide reduces pain in outpatient operative hysteroscopy",
+      "why": "A double-blind placebo-controlled RCT of 214 women (Razdolsky et al, Obstet Gynecol 2026) found self-administered nitrous oxide roughly halved intraprocedural pain, raised completion rates (94% vs 84%) and markedly improved satisfaction, with the largest effect in postmenopausal women. A cheap, familiar option if your outpatient hysteroscopy service struggles with pain-related abandonment.",
+      "url": "https://doi.org/10.1097/AOG.0000000000006282"
+    },
+    {
+      "id": "2026-02-ng3-levemir-discontinued",
+      "date": "2026-02",
+      "kind": "safety",
+      "source": "NICE",
+      "weight": "practice",
+      "title": "Levemir (insulin detemir) to be discontinued: NICE flags it in diabetes in pregnancy guidance",
+      "why": "NICE added a note to the diabetes in pregnancy guideline (NG3) in February 2026 highlighting that Levemir, a long-acting insulin commonly continued or started in pregnancy, is being discontinued. Women using it will need a planned switch, so check your local diabetes-in-pregnancy pathway for the preferred alternative.",
+      "url": "https://www.nice.org.uk/guidance/ng3/chapter/Update-information"
+    }
+  ]
+}
