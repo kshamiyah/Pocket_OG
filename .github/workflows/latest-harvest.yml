@@ -1,0 +1,65 @@
+name: Latest feed harvest
+
+# Drafts new Latest-feed stories for review every 2 days, and on demand.
+# It never publishes directly: it opens a PR you review and merge. Merging the
+# PR triggers the normal Vercel deploy, and installed apps pick up the new
+# latest.json on their next online visit (no app version bump needed).
+#
+# Setup: add an ANTHROPIC_API_KEY repository secret. Optionally PUBMED_API_KEY
+# (raises NCBI rate limits) and ANTHROPIC_MODEL (defaults to claude-opus-4-8).
+
+on:
+  schedule:
+    - cron: "0 6 */2 * *" # 06:00 UTC every second day
+  workflow_dispatch:
+    inputs:
+      lookback_days:
+        description: "How many days back to harvest (default 3)"
+        required: false
+        default: "3"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: latest-harvest
+  cancel-in-progress: false
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install harvester deps
+        working-directory: scripts/latest
+        run: npm install --no-audit --no-fund
+
+      - name: Harvest candidates
+        id: harvest
+        working-directory: scripts/latest
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
+          PUBMED_API_KEY: ${{ secrets.PUBMED_API_KEY }}
+          LATEST_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '3' }}
+        run: node harvest.mjs
+
+      - name: Open pull request
+        if: steps.harvest.outputs.count && steps.harvest.outputs.count != '0'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: latest/auto-update
+          base: main
+          title: "Latest feed: ${{ steps.harvest.outputs.count }} new candidate item(s)"
+          body-path: scripts/latest/pr-body.md
+          commit-message: "Latest feed: add harvested candidate items for review"
+          add-paths: |
+            apps/pocket-og/public/latest.json
+            scripts/latest/seen.json
+          delete-branch: true

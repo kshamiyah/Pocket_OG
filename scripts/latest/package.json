@@ -1,0 +1,12 @@
+{
+  "name": "pocket-og-latest-harvester",
+  "private": true,
+  "type": "module",
+  "description": "Scheduled harvester that drafts Latest-feed candidates for PR review.",
+  "scripts": {
+    "harvest": "node harvest.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.110.0"
+  }
+}
