@@ -128,7 +128,7 @@ export const PEARLS = [
     id: "hsv-third-tri",
     topic: "Genital herpes",
     pearl: "A first episode of genital herpes in the third trimester points towards caesarean.",
-    detail: "Without time to develop protective antibodies before birth, a first episode near term carries a high neonatal transmission risk, so caesarean is recommended, especially within 6 weeks of delivery, with aciclovir suppression from 36 weeks.",
+    detail: "Without time to develop protective antibodies before birth, a first episode near term carries a high neonatal transmission risk, so caesarean is recommended, especially within 6 weeks of delivery, with aciclovir suppression from 32 weeks (from 22 weeks if high risk of premature delivery).",
     gl: "BASHH_HSV",
     fc: "BASHH_HSV_PREGNANCY", fcLabel: "HSV in pregnancy",
   },

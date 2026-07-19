@@ -4,6 +4,15 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.18.1",
+    date: "19/07/2026",
+    title: "Content review: two clinical corrections",
+    changes: [
+      { tag: "fixed", text: "Genital herpes pearl: suppressive aciclovir in pregnancy now starts from 32 weeks (from 22 weeks if high risk of premature delivery), per the 2024 BASHH/RCOG update, not from 36 weeks." },
+      { tag: "fixed", text: "Postnatal hypertension (GL952): the oral labetalol up-titration ladder now tops out at 400 mg BD, keeping it within the guideline's stated maximum of 800 mg/day, instead of 400 mg TDS (1200 mg/day)." },
+    ],
+  },
+  {
     version: "1.18.0",
     date: "18/07/2026",
     title: "Latest: what's new in O&G",

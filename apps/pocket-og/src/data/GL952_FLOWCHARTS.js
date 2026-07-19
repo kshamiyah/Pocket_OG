@@ -829,7 +829,7 @@ export const GL952_POSTNATAL_WARD_FLOWCHART = {
       title: "Titrate Labetalol",
       text: "Increase dose in stepwise fashion. Consider switching to or adding enalapril postnatally.",
       items: [
-        "Titration: 100 mg BD → 200 mg BD → 200 mg TDS → 400 mg TDS (max 800 mg/day)",
+        "Titration: 100 mg BD → 200 mg BD → 300 mg BD → 400 mg BD (max 800 mg/day)",
         "Postnatally: consider switching to Enalapril 5 mg OD (first choice per GL952)",
         "Avoid labetalol in: asthma, heart failure, bradycardia",
         "Recheck BP in 4 hours after dose change",
