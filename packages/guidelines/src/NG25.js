@@ -71,7 +71,8 @@ export const NG25_SECTIONS = [
     content: [
       { type: "subheading", value: "Indication & Dose" },
       { type: "list", items: [
-        "Offer to all women in preterm labour at 24+0 to 35+6 weeks",
+        "Offer to women at 24+0 to 33+6 weeks in suspected, diagnosed or established preterm labour, having a planned preterm birth, or with P-PROM",
+        "Consider for women at 34+0 to 35+6 weeks in the same circumstances",
         "Betamethasone 12 mg IM × 2 doses, 24 hours apart (preferred)",
         "Alternative: dexamethasone 6 mg IM × 4 doses, 12 hours apart",
         "Benefit: reduces rate of RDS, IVH, necrotising enterocolitis, neonatal mortality",

@@ -10,6 +10,8 @@ export const UPDATES = [
     changes: [
       { tag: "fixed", text: "Genital herpes pearl: suppressive aciclovir in pregnancy now starts from 32 weeks (from 22 weeks if high risk of premature delivery), per the 2024 BASHH/RCOG update, not from 36 weeks." },
       { tag: "fixed", text: "Postnatal hypertension (GL952): the oral labetalol up-titration ladder now tops out at 400 mg BD, keeping it within the guideline's stated maximum of 800 mg/day, instead of 400 mg TDS (1200 mg/day)." },
+      { tag: "fixed", text: "Antenatal corticosteroids (NG25): the timing now matches NICE, offered from 24+0 to 33+6 weeks and considered from 34+0 to 35+6 weeks, rather than a single 24+0 to 35+6 window." },
+      { tag: "fixed", text: "Postpartum haemorrhage pearl: uterine atony is now given as the cause of about 80% of cases, consistent with the GTG52 guide, instead of 70%." },
     ],
   },
   {
