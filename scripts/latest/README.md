@@ -18,18 +18,22 @@ next online visit.
    shortlist filtered on **entry date** (so a short window catches papers when
    they appear online, not months later at print), the keyless gov.uk search API
    for MHRA safety notices, and the NICE / RCOG / MBRRACE listing pages.
-2. **Dedupe** against everything already surfaced (`latest.json` ids + urls, plus
+2. **Deep excerpts**: links from those listings (plus NICE `Update-information`
+   pages when we only have an overview URL) are fetched so the model can see the
+   actual delta, not just that an update exists.
+3. **Dedupe** against everything already surfaced (`latest.json` ids + urls, plus
    `seen.json`), so nothing returns a second time.
-3. **Triage** (`harvest.mjs`): Claude scores each candidate against an explicit
-   UK-O&G-trainee rubric, formats survivors for the feed, drafts the two-sentence
-   "why", and suggests an in-app cross-link where one exists. Capped at
+4. **Triage** (`harvest.mjs`): Claude scores each candidate against an explicit
+   UK-O&G-trainee rubric. The schema requires a separate `what_changed` field
+   (concrete delta) plus a ward-facing `why`. Items with filler "check the
+   source" copy or listing-hub URLs are dropped in post-filter. Capped at
    `LATEST_MAX_ITEMS` (default 10) with a research sub-cap
-   (`LATEST_RESEARCH_SUBCAP`, default 3) so horizon-scanning never crowds out
-   practice-changing guidance.
-4. **Human review** in the PR: the real filter.
+   (`LATEST_RESEARCH_SUBCAP`, default 3).
+5. **Human review** in the PR: the real filter.
 
-The model never asserts clinical facts of its own; it quotes titles, links to
-primary sources, and its drafted "why" lines get your review before merge.
+The model never asserts clinical facts of its own; it must ground `what_changed`
+in the deep excerpts / candidates, links to primary sources, and the drafted
+lines get your review before merge.
 
 ## Setup
 

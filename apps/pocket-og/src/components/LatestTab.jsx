@@ -7,6 +7,15 @@ const NO_ITEMS = [];
 // Display serif for headlines: system Georgia, so nothing extra is downloaded.
 const SERIF = { fontFamily: "Georgia, 'Times New Roman', serif" };
 
+// First sentence (or ~110 chars) so teasers show the change without the full wall of text.
+function ledeOf(why = "") {
+  const t = why.trim();
+  if (!t) return "";
+  const m = t.match(/^[\s\S]{20,}?[.!?](?:\s|$)/);
+  if (m) return m[0].trim();
+  return t.length > 110 ? `${t.slice(0, 107).trim()}…` : t;
+}
+
 function Kicker({ item, col, fresh }) {
   const kindLabel = NEWS_KINDS[item.kind]?.label ?? "Update";
   const showSource = item.source && item.source.toUpperCase() !== kindLabel.toUpperCase();
@@ -21,24 +30,15 @@ function Kicker({ item, col, fresh }) {
 }
 
 function StoryActions({ item, col, onNavigate }) {
+  const hasApp = !!item.link;
+  const base = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors";
   return (
-    <div className="flex items-center gap-2 mt-3.5">
-      <a
-        href={item.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={e => e.stopPropagation()}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-white ${col.solid} ${col.solidHover} transition-colors`}
-      >
-        Read the source
-        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-        </svg>
-      </a>
-      {item.link && (
+    <div className="flex items-center gap-2 mt-3.5 flex-wrap">
+      {hasApp && (
         <button
+          type="button"
           onClick={e => { e.stopPropagation(); onNavigate?.(item.link); }}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/70 hover:bg-white transition-colors text-xs font-semibold text-gray-700"
+          className={`${base} text-white ${col.solid} ${col.solidHover}`}
         >
           Open in app
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -46,59 +46,101 @@ function StoryActions({ item, col, onNavigate }) {
           </svg>
         </button>
       )}
+      <a
+        href={item.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={e => e.stopPropagation()}
+        className={
+          hasApp
+            ? `${base} bg-white/80 hover:bg-white text-gray-700 border border-gray-200/80`
+            : `${base} text-white ${col.solid} ${col.solidHover}`
+        }
+      >
+        Read the source
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        </svg>
+      </a>
     </div>
   );
 }
 
-// Full-width feature card: practice-changing stories, and compact stories once expanded.
+// Expanded story: full why + actions. Tap the header/title to collapse (featured
+// practice stories included). Action buttons stay outside that control.
 function HeroCard({ item, col, fresh, onNavigate, onCollapse }) {
   return (
-    <article
-      className={`col-span-2 rounded-3xl border p-5 ${col.bg} ${col.border} ${onCollapse ? "cursor-pointer" : ""}`}
-      onClick={onCollapse}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <Kicker item={item} col={col} fresh={fresh} />
-        {item.weight === "practice" && (
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-900 text-white shrink-0">Practice changed</span>
-        )}
-      </div>
-      <h3 className="text-xl text-gray-900 leading-snug mt-2.5" style={SERIF}>{item.title}</h3>
-      <p className="text-[13px] text-gray-600 leading-relaxed mt-2">{item.why}</p>
+    <article className={`col-span-2 rounded-3xl border p-5 ${col.bg} ${col.border}`}>
+      <button type="button" onClick={onCollapse} aria-expanded="true" className="w-full text-left">
+        <div className="flex items-center justify-between gap-2">
+          <Kicker item={item} col={col} fresh={fresh} />
+          <div className="flex items-center gap-2 shrink-0">
+            {item.weight === "practice" && (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-900 text-white">
+                Practice changed
+              </span>
+            )}
+            <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+            </svg>
+          </div>
+        </div>
+        <h3 className="text-xl text-gray-900 leading-snug mt-2.5" style={SERIF}>{item.title}</h3>
+      </button>
+      {item.why ? <p className="text-[13px] text-gray-600 leading-relaxed mt-2">{item.why}</p> : null}
       <p className="text-[11px] font-medium text-gray-400 mt-2.5">{formatNewsDate(item.date)}</p>
       <StoryActions item={item} col={col} onNavigate={onNavigate} />
     </article>
   );
 }
 
-// Half-width teaser: headline and date only, taps open into a full card.
+// Teaser: headline + one-line lede of the change, taps open into a full card.
 function CompactCard({ item, col, fresh, spanFull, onExpand }) {
+  const lede = ledeOf(item.why);
   return (
     <article className={spanFull ? "col-span-2" : "col-span-1"}>
       <button
+        type="button"
         onClick={onExpand}
+        aria-expanded="false"
         className={`w-full h-full text-left rounded-3xl border p-4 flex flex-col ${col.bg} ${col.border} transition-transform active:scale-[0.98]`}
       >
-        <Kicker item={item} col={col} fresh={fresh} />
-        <h3 className="text-[15px] text-gray-900 leading-snug mt-2 line-clamp-4" style={SERIF}>{item.title}</h3>
+        <div className="flex items-center justify-between gap-2">
+          <Kicker item={item} col={col} fresh={fresh} />
+          <div className="flex items-center gap-2 shrink-0">
+            {item.weight === "practice" && (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-900 text-white">
+                Practice
+              </span>
+            )}
+            <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+        <h3 className="text-[15px] text-gray-900 leading-snug mt-2 line-clamp-3" style={SERIF}>{item.title}</h3>
+        {lede ? (
+          <p className="text-[12px] text-gray-500 leading-snug mt-2 line-clamp-2">{lede}</p>
+        ) : null}
         <p className="text-[11px] font-medium text-gray-400 mt-auto pt-2.5">{formatNewsDate(item.date)}</p>
       </button>
     </article>
   );
 }
 
-// Latest tab, magazine front page: a briefing strip, practice-changing stories
-// as full-width features, everything else as tappable half-width teasers.
-// Items come from /latest.json via App (network-first, localStorage fallback);
-// this component only renders and marks them seen.
+// Hybrid: practice stories start featured/open; everything else starts collapsed.
+// Any story can be toggled, featured included. Items from /latest.json via App.
 export default function LatestTab({ feed, syncedAt, onNavigate, onSeen }) {
   const items = feed?.items ?? NO_ITEMS;
   const [kindFilter, setKindFilter] = useState("ALL");
-  const [expanded, setExpanded] = useState({});
+  const [expanded, setExpanded] = useState(() => {
+    const init = {};
+    for (const it of items) {
+      if (it.weight === "practice") init[it.id] = true;
+    }
+    return init;
+  });
 
-  // Snapshot which items were unseen when the tab opened, so the "New" markers
-  // survive the seen-state being cleared by the effect below. Items that only
-  // arrive after mount (first ever sync) simply render without a marker.
   const [fresh] = useState(() => unseenNewsIds(items));
 
   useEffect(() => {
@@ -107,18 +149,39 @@ export default function LatestTab({ feed, syncedAt, onNavigate, onSeen }) {
     onSeen?.();
   }, [items, onSeen]);
 
+  // Open newly arrived practice stories; leave existing user toggles alone.
+  useEffect(() => {
+    setExpanded(prev => {
+      let changed = false;
+      const next = { ...prev };
+      for (const it of items) {
+        if (it.weight === "practice" && next[it.id] === undefined) {
+          next[it.id] = true;
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [items]);
+
   const kindsPresent = useMemo(
     () => ["ALL", ...Object.keys(NEWS_KINDS).filter(k => items.some(it => it.kind === k))],
     [items]
   );
-  const visible = kindFilter === "ALL" ? items : items.filter(it => it.kind === kindFilter);
+  const hasPractice = items.some(it => it.weight === "practice");
+  const visible = useMemo(() => {
+    if (kindFilter === "PRACTICE") return items.filter(it => it.weight === "practice");
+    if (kindFilter === "ALL") return items;
+    return items.filter(it => it.kind === kindFilter);
+  }, [items, kindFilter]);
   const syncedAgo = formatSyncedAgo(syncedAt);
 
-  // Layout plan: hero for practice-weight or expanded stories; compact teasers
-  // pair up two across, and the last teaser of an odd run stretches full width
-  // so the grid never leaves a ragged gap.
+  const setOpen = (id, open) => setExpanded(prev => ({ ...prev, [id]: open }));
+
+  // Open = full-width hero. Closed teasers pair two-across; last of an odd run
+  // stretches full width so the grid never leaves a ragged gap.
   const laidOut = useMemo(() => {
-    const isHero = it => it.weight === "practice" || !!expanded[it.id];
+    const isHero = it => !!expanded[it.id];
     return visible.map((it, i) => {
       if (isHero(it)) return { item: it, hero: true, spanFull: true };
       let runStart = i;
@@ -162,10 +225,33 @@ export default function LatestTab({ feed, syncedAt, onNavigate, onSeen }) {
               </div>
             )}
 
-            {kindsPresent.length > 2 && (
+            {(kindsPresent.length > 2 || hasPractice) && (
               <div className="px-5 pt-3 pb-1 flex gap-1.5 flex-wrap">
-                {kindsPresent.map(k => (
+                <button
+                  type="button"
+                  onClick={() => setKindFilter("ALL")}
+                  aria-pressed={kindFilter === "ALL"}
+                  className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-colors ${
+                    kindFilter === "ALL" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                  }`}
+                >
+                  All
+                </button>
+                {hasPractice && (
                   <button
+                    type="button"
+                    onClick={() => setKindFilter("PRACTICE")}
+                    aria-pressed={kindFilter === "PRACTICE"}
+                    className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-colors ${
+                      kindFilter === "PRACTICE" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                    }`}
+                  >
+                    Practice
+                  </button>
+                )}
+                {kindsPresent.filter(k => k !== "ALL").map(k => (
+                  <button
+                    type="button"
                     key={k}
                     onClick={() => setKindFilter(k)}
                     aria-pressed={kindFilter === k}
@@ -173,7 +259,7 @@ export default function LatestTab({ feed, syncedAt, onNavigate, onSeen }) {
                       kindFilter === k ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                     }`}
                   >
-                    {k === "ALL" ? "All" : NEWS_KINDS[k].label}
+                    {NEWS_KINDS[k].label}
                   </button>
                 ))}
               </div>
@@ -191,7 +277,7 @@ export default function LatestTab({ feed, syncedAt, onNavigate, onSeen }) {
                       col={col}
                       fresh={isFresh}
                       onNavigate={onNavigate}
-                      onCollapse={item.weight === "practice" ? undefined : () => setExpanded(prev => ({ ...prev, [item.id]: false }))}
+                      onCollapse={() => setOpen(item.id, false)}
                     />
                   ) : (
                     <CompactCard
@@ -200,7 +286,7 @@ export default function LatestTab({ feed, syncedAt, onNavigate, onSeen }) {
                       col={col}
                       fresh={isFresh}
                       spanFull={spanFull}
-                      onExpand={() => setExpanded(prev => ({ ...prev, [item.id]: true }))}
+                      onExpand={() => setOpen(item.id, true)}
                     />
                   );
                 })}

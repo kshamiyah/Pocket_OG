@@ -18,10 +18,17 @@ async function getJson(url) {
 }
 
 async function getText(url) {
-  const res = await fetch(url, { headers: { "User-Agent": UA } });
+  const res = await fetch(url, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (compatible; PocketOG-Latest/1.0; +https://github.com/kshamiyah/pocket_og)",
+      Accept: "text/html,application/xhtml+xml,application/pdf;q=0.9,*/*;q=0.8",
+    },
+  });
   if (!res.ok) throw new Error(`${res.status} ${url}`);
   return res.text();
 }
+
+export { htmlToText, getText };
 
 function ymd(d) {
   return `${d.getUTCFullYear()}/${String(d.getUTCMonth() + 1).padStart(2, "0")}/${String(d.getUTCDate()).padStart(2, "0")}`;
@@ -122,14 +129,108 @@ const PAGES = [
   { source: "MBRRACE", url: "https://www.npeu.ox.ac.uk/mbrrace-uk/reports" },
 ];
 
+// Deep links worth fetching so the model can name the concrete change, not just
+// that an update existed on a listing page.
+const DEEP_HREF_RE = /href=["']([^"']+)["']/gi;
+const DEEP_PATH_RE = /\/(?:guidance\/(?:ng|cg|ta|dg|qs|m|ipg|hte)\d+(?:\/chapter\/Update-information)?|guidance\/indevelopment\/[a-z0-9-]+|news\/articles\/[a-z0-9-]+|news\/[a-z0-9-]+\/?|guidance\/browse-all-guidance\/[^"'#?]+)/i;
+
+function absolutize(href, base) {
+  try { return new URL(href, base).href; } catch { return null; }
+}
+
+function isListingHub(url) {
+  try {
+    const u = new URL(url);
+    const p = u.pathname.replace(/\/$/, "") || "/";
+    if (/nice\.org\.uk$/i.test(u.hostname) && (p === "/news" || p === "/news/articles" || p.startsWith("/guidance/published"))) return true;
+    if (/rcog\.org\.uk$/i.test(u.hostname) && (p === "/news" || p === "/guidance" || p === "/guidance/browse-all-guidance")) return true;
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+function extractDeepLinks(html, baseUrl, cap = 30) {
+  const found = [];
+  const seen = new Set();
+  let m;
+  DEEP_HREF_RE.lastIndex = 0;
+  while ((m = DEEP_HREF_RE.exec(html)) && found.length < cap) {
+    const abs = absolutize(m[1], baseUrl);
+    if (!abs || isListingHub(abs)) continue;
+    let pathname;
+    try { pathname = new URL(abs).pathname; } catch { continue; }
+    if (!DEEP_PATH_RE.test(pathname)) continue;
+    const key = abs.toLowerCase().replace(/\/$/, "");
+    if (seen.has(key)) continue;
+    seen.add(key);
+    found.push(abs);
+  }
+  return found;
+}
+
+// Prefer NICE Update-information when we only have the overview URL.
+function preferUpdateInfo(url) {
+  try {
+    const u = new URL(url);
+    if (!/nice\.org\.uk$/i.test(u.hostname)) return [url];
+    const m = u.pathname.match(/^\/guidance\/((?:ng|cg|ta|dg|qs|m|ipg|hte)\d+)\/?$/i);
+    if (!m) return [url];
+    return [
+      `https://www.nice.org.uk/guidance/${m[1]}/chapter/Update-information`,
+      url,
+    ];
+  } catch {
+    return [url];
+  }
+}
+
 export async function harvestPages() {
   const out = [];
   for (const p of PAGES) {
     try {
-      out.push({ source: p.source, url: p.url, text: htmlToText(await getText(p.url)) });
+      const html = await getText(p.url);
+      out.push({
+        source: p.source,
+        url: p.url,
+        text: htmlToText(html),
+        links: extractDeepLinks(html, p.url),
+      });
     } catch (e) {
       console.warn(`page ${p.source}: ${e.message}`);
     }
   }
   return out;
 }
+
+// Fetch the article / Update-information pages discovered on listings so triage
+// can read the actual delta. Best-effort: one dead page never fails the run.
+export async function fetchDeepExcerpts(pages, { max = 24, cap = 5000 } = {}) {
+  const queue = [];
+  const seen = new Set();
+  for (const p of pages) {
+    for (const link of p.links || []) {
+      for (const url of preferUpdateInfo(link)) {
+        const key = url.toLowerCase().replace(/\/$/, "");
+        if (seen.has(key) || isListingHub(url)) continue;
+        seen.add(key);
+        queue.push({ source: p.source, url });
+      }
+    }
+  }
+
+  const out = [];
+  for (const item of queue.slice(0, max)) {
+    try {
+      const html = await getText(item.url);
+      const text = htmlToText(html, cap);
+      if (text.length < 80) continue;
+      out.push({ source: item.source, url: item.url, text });
+    } catch (e) {
+      console.warn(`deep ${item.url}: ${e.message}`);
+    }
+  }
+  return out;
+}
+
+export { isListingHub };

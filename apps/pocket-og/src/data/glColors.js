@@ -32,10 +32,12 @@ export const SOURCE_COLORS = {
   BSH:      { badge: "bg-sky-50 text-sky-700",         border: "border-sky-100",     conditionColor: "text-sky-500",     icon: "text-sky-500",     accent: "bg-sky-500",     solid: "bg-sky-600",     solidHover: "hover:bg-sky-700",     text: "text-sky-700",     bg: "bg-sky-50" },
   BGCS:     { badge: "bg-zinc-100 text-zinc-700",      border: "border-zinc-200",    conditionColor: "text-zinc-500",    icon: "text-zinc-500",    accent: "bg-zinc-500",    solid: "bg-zinc-700",    solidHover: "hover:bg-zinc-800",    text: "text-zinc-700",    bg: "bg-zinc-50" },
   REVIEW:   { badge: "bg-stone-100 text-stone-700",    border: "border-stone-200",   conditionColor: "text-stone-500",   icon: "text-stone-500",   accent: "bg-stone-500",   solid: "bg-stone-600",   solidHover: "hover:bg-stone-700",   text: "text-stone-700",   bg: "bg-stone-50" },
+  MHRA:     { badge: "bg-red-50 text-red-700",         border: "border-red-100",     conditionColor: "text-red-500",     icon: "text-red-500",     accent: "bg-red-500",     solid: "bg-red-600",     solidHover: "hover:bg-red-700",     text: "text-red-700",     bg: "bg-red-50" },
+  REPORT:   { badge: "bg-amber-50 text-amber-800",     border: "border-amber-100",   conditionColor: "text-amber-600",   icon: "text-amber-600",   accent: "bg-amber-500",   solid: "bg-amber-600",   solidHover: "hover:bg-amber-700",   text: "text-amber-800",   bg: "bg-amber-50" },
 };
 
 // Sources that appear in the app, in legend order.
-export const SOURCE_ORDER = ["RBH", "NICE", "RCOG", "BASHH", "NHSCSP", "MBRRACE", "TOG", "TRIAL", "UKKA", "ESC", "ESHRE", "BHIVA", "FSRH", "BSH", "BGCS", "REVIEW"];
+export const SOURCE_ORDER = ["RBH", "NICE", "RCOG", "BASHH", "NHSCSP", "MBRRACE", "TOG", "TRIAL", "UKKA", "ESC", "ESHRE", "BHIVA", "FSRH", "BSH", "BGCS", "MHRA", "REPORT", "REVIEW"];
 
 export const SOURCE_LABELS = {
   RBH: "RBH — local trust",
@@ -53,6 +55,8 @@ export const SOURCE_LABELS = {
   FSRH: "Faculty of Sexual & Reproductive Healthcare",
   BSH: "British Society for Haematology",
   BGCS: "British Gynaecological Cancer Society",
+  MHRA: "MHRA",
+  REPORT: "National report",
   REVIEW: "Peer-reviewed review literature",
 };
 
@@ -67,6 +71,8 @@ export const SOURCE_HEX = {
   FSRH: "#84cc16",
   BSH: "#0ea5e9",
   BGCS: "#71717a",
+  MHRA: "#ef4444",
+  REPORT: "#f59e0b",
   REVIEW: "#78716c",
 };
 

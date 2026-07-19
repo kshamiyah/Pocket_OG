@@ -8,8 +8,8 @@
       "source": "NICE",
       "weight": "practice",
       "title": "NICE updates NG88 on heavy menstrual bleeding",
-      "why": "NICE has refreshed its heavy menstrual bleeding guideline, so check the assessment and management pathway before your next menstrual clinic. The app guide reflects the earlier edition, so confirm any changed recommendations against the source.",
-      "url": "https://www.nice.org.uk/guidance/ng88",
+      "why": "July 2026 removes the old advice against routine serum ferritin in HMB (recommendation 1.2.8). After revisiting the 2007 evidence, NICE concluded that line was not justified given the high risk of iron deficiency in this group. The rest of the assessment and management pathway is unchanged.",
+      "url": "https://www.nice.org.uk/guidance/ng88/chapter/Update-information",
       "link": {
         "type": "reader",
         "id": "NG88"
@@ -22,8 +22,8 @@
       "source": "NICE",
       "weight": "practice",
       "title": "NICE updates NG126 on ectopic pregnancy and miscarriage",
-      "why": "An update to the early pregnancy guideline may affect diagnosis thresholds and initial management, relevant to every EPAU and gynae on-call shift. Review the revised recommendations before applying them.",
-      "url": "https://www.nice.org.uk/guidance/ng126"
+      "why": "June 2026 anti-D rewrite only: do not offer anti-D for ectopic pregnancy, miscarriage or threatened miscarriage at ≤11+6 weeks, including after procedures. Offer at least 250 IU at 12+0 to 12+6 for medical or surgical management, and consider it for threatened miscarriage with heavy or recurrent bleeding in that week. Use ultrasound dating if LMP and scan disagree.",
+      "url": "https://www.nice.org.uk/guidance/ng126/chapter/Update-information"
     },
     {
       "id": "2026-06-ng194-postnatal-care-update",
@@ -31,9 +31,9 @@
       "kind": "guideline",
       "source": "NICE",
       "weight": "aware",
-      "title": "NICE updates NG194 postnatal care guideline",
-      "why": "The postnatal care guideline has been revised, so check for changes to maternal and neonatal review recommendations. The app guide may reflect the previous edition.",
-      "url": "https://www.nice.org.uk/guidance/ng194",
+      "title": "NG194 gains a vitamin K cross-reference to intrapartum care",
+      "why": "June 2026 is a small edit, not a postnatal rewrite: NG194 now cross-refers to vitamin K prophylaxis in NG235 (IM preferred; oral if parents decline, with multiple doses as per the product). Maternal and baby contact schedules are otherwise unchanged.",
+      "url": "https://www.nice.org.uk/guidance/ng194/chapter/Update-information",
       "link": {
         "type": "reader",
         "id": "NG194"
@@ -46,17 +46,17 @@
       "source": "RCOG",
       "weight": "practice",
       "title": "NHS England publishes National Maternity Triage Specification",
-      "why": "NHS England has set a national standard for maternity triage built on the RCOG Good Practice Paper, which will shape how triage is delivered and audited on labour ward. Familiarise yourself with the expected standards.",
-      "url": "https://www.rcog.org.uk/news/"
+      "why": "NHSE's July 2026 National Maternity Triage Specification adopts RCOG Good Practice Paper 17 as the national standard, with a 12-month implementation window. Units will be measured on triage staffing, protected training time and fit-for-purpose facilities; check local plans against the RCOG paper and the NHSE specification.",
+      "url": "https://www.england.nhs.uk/wp-content/uploads/2026/07/prn02402-national-maternity-triage-specification-july-2026.pdf"
     },
     {
       "id": "2026-01-mhra-isotretinoin-prescribing-changes",
       "date": "2026-01-22",
       "kind": "safety",
-      "source": "NICE",
+      "source": "MHRA",
       "weight": "aware",
       "title": "MHRA strengthens isotretinoin prescribing and pregnancy prevention measures",
-      "why": "New risk minimisation measures affect women of childbearing potential on isotretinoin, so reinforce reliable contraception and pregnancy prevention counselling when these patients present. Relevant to contraception and pre-pregnancy advice.",
+      "why": "January 2026 MHRA change: a second independent prescriber is no longer required for under-18s on isotretinoin. That gate is replaced by a new risk-minimisation pack (acknowledgement of risk form, clinical audit, patient video); existing pregnancy-prevention measures remain. Relevant when these patients appear in gynae or contraception clinic.",
       "url": "https://www.gov.uk/drug-safety-update/isotretinoin-changes-to-prescribing-guidance-and-additional-risk-minimisation-measures"
     },
     {
@@ -65,9 +65,9 @@
       "kind": "guideline",
       "source": "NICE",
       "weight": "aware",
-      "title": "NICE recommends new treatment for recurrent or metastatic cervical cancer",
-      "why": "A new option is now available on the NHS for recurrent or metastatic cervical cancer, useful context for gynae-oncology MDT discussions. Not a change to first-line surgical or screening practice.",
-      "url": "https://www.nice.org.uk/news/articles"
+      "title": "NICE recommends cemiplimab for recurrent or metastatic cervical cancer after platinum",
+      "why": "Cemiplimab (Libtayo) is recommended for adults whose recurrent or metastatic cervical cancer has progressed on or after platinum chemotherapy and who have not had prior immunotherapy (~90 eligible per year). EMPOWER Cervical-1 showed median OS 11.7 vs 8.5 months versus single-agent chemotherapy; immediate CDF access, then routine commissioning. MDT context only.",
+      "url": "https://www.nice.org.uk/news/articles/new-treatment-option-recommended-for-recurrent-or-metastatic-cervical-cancer"
     },
     {
       "id": "2026-04-nice-cg122-ovarian-cancer-update",
@@ -75,9 +75,9 @@
       "kind": "guideline",
       "source": "NICE",
       "weight": "aware",
-      "title": "NICE updates CG122 on ovarian cancer recognition and initial management",
-      "why": "The ovarian cancer guideline has been revised, worth checking for changes to recognition and referral thresholds seen in gynae clinics. Review before quoting the pathway.",
-      "url": "https://www.nice.org.uk/guidance/cg122"
+      "title": "Ovarian cancer primary-care detection moves from CG122 into updated NG12",
+      "why": "April 2026 removes primary-care detection from CG122. Recognition and CA125 thresholds now live in NG12: age-specific serum CA125 cut-offs for urgent abdominal/pelvic ultrasound from age 40 (for example ≥35 IU/ml at 40–49, with lower thresholds in older bands), and do not use CA125 alone under 40. Use NG12 for GP/referral decisions.",
+      "url": "https://www.nice.org.uk/guidance/ng12"
     },
     {
       "id": "2026-07-nice-pmos-draft-guideline",
@@ -86,8 +86,8 @@
       "source": "NICE",
       "weight": "aware",
       "title": "NICE consults on draft guideline for polyendocrine metabolic ovarian syndrome",
-      "why": "A draft NICE guideline proposes earlier diagnosis and annual review for this condition and may reshape how polycystic ovary presentations are managed. It is out for consultation, so not yet practice, but worth watching; the app currently reflects the 2023 PCOS guidance.",
-      "url": "https://www.nice.org.uk/news/articles",
+      "why": "Draft NICE guideline (consultation 1 July to 11 August 2026; final expected December) renames PCOS to PMOS and proposes offering an annual review covering symptoms, medicines and long-term risks (diabetes, CVD), plus clearer rules on when to suspect and investigate (irregular/absent cycles with hyperandrogenism). Not yet practice.",
+      "url": "https://www.nice.org.uk/guidance/indevelopment/gid-ng10436",
       "link": {
         "type": "reader",
         "id": "PCOS2023"
@@ -100,18 +100,18 @@
       "source": "REPORT",
       "weight": "aware",
       "title": "Ockenden final report on Nottingham maternity services published",
-      "why": "The final independent review into Nottingham maternity care carries system-wide safety lessons for maternity units. Trainees should be aware of its findings and recommendations.",
-      "url": "https://www.rcog.org.uk/news/"
+      "why": "Final Ockenden review of maternity services at Nottingham University Hospitals (published June 2026) examined more than 2,500 family cases and sets out findings, conclusions and essential actions on care quality, harm and listening to families. Expect local and national follow-through on maternity governance and safety culture, alongside the Amos investigation.",
+      "url": "https://www.gov.uk/government/publications/ockenden-review-into-maternity-services-at-nottingham-university-hospitals-nhs-trust-final-report"
     },
     {
-      "id": "2026-07-chloraprep-1ml-recall",
-      "date": "2026-07-13",
+      "id": "2026-06-chloraprep-recall",
+      "date": "2026-06-02",
       "kind": "safety",
-      "source": "NICE",
+      "source": "MHRA",
       "weight": "aware",
-      "title": "Class 2 recall of ChloraPrep 1mL applicators over sterility concern",
-      "why": "Batches of ChloraPrep 1mL skin prep applicators are being recalled for a potential packaging sterility breach, relevant to theatre and bedside procedure trolleys. Check stock against the affected batches.",
-      "url": "https://www.gov.uk/drug-device-alerts/class-2-medicines-recall-beckton-dickson-uk-ltd-chloraprep-1ml-applicator-el-26-a-slash-34"
+      "title": "Class 2 recall of ChloraPrep 2% 1 mL and Frepp 1.5 mL applicators",
+      "why": "Becton Dickinson is recalling specified batches of ChloraPrep 2% 1 mL and ChloraPrep Frepp 2% 1.5 mL applicators (EL(26)A/26) because of a potential packaging sterility breach. Quarantine affected stock on theatre and procedure trolleys and follow the MHRA batch list.",
+      "url": "https://www.gov.uk/drug-device-alerts/class-2-medicines-recall-becton-dickinson-uk-ltd-chloraprep-2-percent-1ml-and-chloraprep-frepp-2-percent-1-dot-5ml-applicators-el-26-a-slash-26"
     },
     {
       "id": "2026-07-endotest-saliva-endometriosis",
@@ -120,8 +120,8 @@
       "source": "NICE",
       "weight": "aware",
       "title": "Saliva test for endometriosis recommended for NHS use in draft NICE guidance",
-      "why": "NICE early value guidance backs the Ziwig Endotest, a salivary micro-RNA test (109 miRNAs, sequencing plus AI; reported sensitivity around 97% and specificity around 94% in the 971-patient ENDOmiRNA study), and the EndoSure test as complementary diagnostic tools for an initial three years while real-world evidence is gathered. Aimed at cutting the roughly nine-year average diagnostic delay; laparoscopy remains the pathway standard, so read the guidance before quoting it in clinic.",
-      "url": "https://www.nice.org.uk/news/articles/new-technologies-for-endometriosis-diagnosis-in-primary-care",
+      "why": "NICE early-use assessment (project gid-htg10877) backs the Ziwig Endotest salivary micro-RNA panel (109 miRNAs; reported sensitivity ~97% and specificity ~94% in ENDOmiRNA, n=971) and EndoSure as complementary tools for an initial three years of real-world evidence gathering. Aimed at shortening the ~nine-year diagnostic delay; laparoscopy remains the pathway reference standard.",
+      "url": "https://www.nice.org.uk/guidance/indevelopment/gid-htg10877",
       "link": {
         "type": "reader",
         "id": "NG73"
@@ -144,8 +144,8 @@
       "source": "RCOG",
       "weight": "practice",
       "title": "RCOG updates the placenta praevia & placenta accreta spectrum green-top guideline",
-      "why": "The first update since 2018 strengthens early risk detection and recognises that PAS is not exclusively linked to placenta praevia or previous caesarean, reflecting evidence on other uterine surgical trauma (curettage, hysteroscopic surgery, ablation, UAE, myomectomy) and adding a section on caesarean scar ectopic pregnancy. The Pocket O&G guide has been refreshed to this fifth edition; open it for the key changes.",
-      "url": "https://www.rcog.org.uk/news/rcog-publishes-update-to-clinical-guidance-on-placenta-praevia-and-placenta-accreta-spectrum/",
+      "why": "First GTG27a update since 2018 strengthens early risk detection and recognises that PAS is not limited to placenta praevia or prior caesarean, reflecting other uterine surgical trauma (curettage, hysteroscopy, ablation, UAE, myomectomy) and adding caesarean scar ectopic pregnancy. Pocket O&G already reflects this fifth edition.",
+      "url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/placenta-praevia-and-placenta-accreta-diagnosis-and-management-green-top-guideline-no-27a/",
       "link": {
         "type": "reader",
         "id": "GTG27A"
@@ -186,7 +186,7 @@
       "source": "RCOG",
       "weight": "practice",
       "title": "Reduced fetal movements: second edition of green-top guideline 57 published",
-      "why": "The first full rewrite since 2011 (Whitworth et al, BJOG 2026): no formal kick counting, handheld Doppler first to exclude fetal death, computerised CTG from 26+0 weeks once viability is confirmed, and recurrent RFM flagged as higher risk for stillbirth, growth restriction and preterm birth. Check the full guideline against the Pocket O&G RFM pathway before relying on either.",
+      "why": "First full rewrite since 2011 (Whitworth et al, BJOG 2026): no formal kick counting; handheld Doppler first to exclude fetal death; computerised CTG from 26+0 once viability is confirmed; recurrent RFM flagged as higher risk for stillbirth, growth restriction and preterm birth.",
       "url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/reduced-fetal-movements-green-top-guideline-no-57/",
       "link": {
         "type": "reader",
@@ -224,7 +224,7 @@
       "source": "NICE",
       "weight": "practice",
       "title": "Levemir (insulin detemir) to be discontinued: NICE flags it in diabetes in pregnancy guidance",
-      "why": "NICE added a note to the diabetes in pregnancy guideline (NG3) in February 2026 highlighting that Levemir, a long-acting insulin commonly continued or started in pregnancy, is being discontinued. Women using it will need a planned switch, so check your local diabetes-in-pregnancy pathway for the preferred alternative.",
+      "why": "February 2026 note in NG3: Levemir (insulin detemir) Penfill and FlexPen presentations are being discontinued. Women continued or started on it in pregnancy need a planned switch; confirm the preferred alternative on your local diabetes-in-pregnancy pathway.",
       "url": "https://www.nice.org.uk/guidance/ng3/chapter/Update-information"
     },
     {
