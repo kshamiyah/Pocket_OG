@@ -58,13 +58,18 @@ SURG_TARGET = {"balloon": 0.95, "sutures": 0.97, "hysterectomy": 0.999}
 
 from patient_profile import (  # noqa: E402
     uterotonics_refractory, fundal_refractory, bimanual_refractory,
-    surgical_ineffective_steps,
+    surgical_ineffective_steps, INEFFECTIVE,
 )
+
+# R-BLEED-3: trauma repair (suture) — definitive control of a genital-tract tear,
+# landing after a short onset (time to expose, identify, suture the vessel).
+REPAIR_ONSET_MIN = 4
 
 
 class PatientV4:
     def __init__(self, weight_kg=70, risk_factors=None, surgical_ineffective=None, bmi=25,
-                 start_ebl=500, base_tone=BASE_START_TONE, treatment_response=None):
+                 start_ebl=500, base_tone=BASE_START_TONE, treatment_response=None,
+                 trauma_severity=0.0):
         # start_ebl = blood already lost when PPH is recognised / SOS is opened.
         # SOS is not triggered below ~500 ml (minor PPH), so default to 500.
         self.weight_kg = weight_kg
@@ -77,6 +82,7 @@ class PatientV4:
             self.drug_refractory = uterotonics_refractory(self.treatment_response)
             self.fundal_ineffective = fundal_refractory(self.treatment_response)
             self.bimanual_ineffective = bimanual_refractory(self.treatment_response)
+            self.repair_ineffective = self.treatment_response.get("repair") == INEFFECTIVE
         else:
             # Legacy path (deprecated sandboxes)
             self.treatment_response = None
@@ -84,6 +90,11 @@ class PatientV4:
             self.drug_refractory = "balloon" in self.surgical_ineffective
             self.fundal_ineffective = False
             self.bimanual_ineffective = False
+            self.repair_ineffective = False
+        # R-BLEED-3: trauma is a SEPARATE, tone-independent bleed term from the same
+        # arterial supply (BASELINE_FLOW). trauma_severity 0→1 = fraction of that supply
+        # leaking from a torn vessel; drug/tone/balloon-independent, cleared by REPAIR.
+        self.trauma_severity = max(0.0, min(1.0, trauma_severity))
         # R-SEVERITY: risk factors set how ATONIC she starts (severity / bleed rate),
         # not treatability. Lower starting tone = faster bleed.
         self.start_tone = start_tone_from_risk_factors(risk_factors or [], base_tone)
@@ -103,6 +114,7 @@ class PatientV4:
         self._pending = []           # uterotonics: (effect_min, target)  — scaled by R
         self._pending_surg = []      # surgical: (effect_min, target, step) — mechanical
         self._pending_cryo = []      # fibrinogen replacement: (effect_min, g/L gain)
+        self._pending_repair = []    # trauma repair: (effect_min,) — clears trauma_severity
 
     @property
     def level(self):
@@ -141,11 +153,17 @@ class PatientV4:
         return self.fibrinogen_g_l < FIBRINOGEN_TREAT_THRESHOLD_G_L
 
     @property
+    def trauma_bleed_rate(self):
+        # R-BLEED-3: tone-independent arterial leak from a tear; unaffected by
+        # uterotonics/massage/balloon. Cleared only by repair (drops trauma_severity).
+        return BASELINE_FLOW_ML_MIN * self.trauma_severity
+
+    @property
     def source_bleed_rate(self):
-        base = BASELINE_FLOW_ML_MIN * (1.0 - self.palpation_tone)
+        atony = BASELINE_FLOW_ML_MIN * (1.0 - self.palpation_tone)
         if self.compression_active and not self.bimanual_ineffective:
-            base *= BIMANUAL_BLEED_FACTOR
-        return base
+            atony *= BIMANUAL_BLEED_FACTOR   # bimanual compresses the uterus, not a tear
+        return atony + self.trauma_bleed_rate
 
     @property
     def bleed_rate(self):
@@ -153,7 +171,10 @@ class PatientV4:
 
     @property
     def durable_bleed_rate(self):
-        return BASELINE_FLOW_ML_MIN * (1.0 - self.sustained_tone) * self.coag_multiplier
+        # Durable = excludes transient massage/bimanual, but trauma IS durable until
+        # repaired (repair lowers trauma_severity itself), so it stays in.
+        atony = BASELINE_FLOW_ML_MIN * (1.0 - self.sustained_tone)
+        return (atony + self.trauma_bleed_rate) * self.coag_multiplier
 
     @property
     def effective_replacement_ml(self):
@@ -198,6 +219,12 @@ class PatientV4:
 
     def give_surgical(self, step, now_min):
         self._pending_surg.append((now_min + SURG_ONSET_MIN[step], SURG_TARGET[step], step))
+
+    def give_repair(self, now_min):
+        """Suture / repair a genital-tract tear — definitive trauma control after onset.
+        If the tear is beyond simple repair (repair_ineffective), it does not resolve →
+        the app's follow-up escalates to theatre (ligation/hysterectomy)."""
+        self._pending_repair.append(now_min + REPAIR_ONSET_MIN)
 
     def give_fundal_massage(self):
         if not self.fundal_ineffective:
@@ -266,6 +293,16 @@ class PatientV4:
             else:
                 keep_c.append((effect_min, gain))
         self._pending_cryo = keep_c
+        # trauma repair — clears the tear (trauma_severity → 0) once the suture lands,
+        # unless the tear is beyond simple repair (then it persists → theatre escalation).
+        keep_r = []
+        for effect_min in self._pending_repair:
+            if now_min >= effect_min:
+                if not self.repair_ineffective:
+                    self.trauma_severity = 0.0
+            else:
+                keep_r.append(effect_min)
+        self._pending_repair = keep_r
         source_bleed = self.source_bleed_rate
         effective_bleed = source_bleed * self.coag_multiplier
         bled = effective_bleed * dt_min

@@ -92,6 +92,9 @@ def stream(scenario, max_steps=300):
     Each snapshot: {t, ebl, tone, bleed, map, lactate, ptype, tid, note, acted,
     verdict}. The final snapshot carries the terminal verdict."""
     start_ebl = scenario.get("start_ebl", 500)
+    kw = {}
+    if "base_tone" in scenario:      # firm uterus for a pure-trauma case
+        kw["base_tone"] = scenario["base_tone"]
     p = PatientV4(
         scenario.get("weight_kg", 70),
         scenario.get("risk_factors", []),
@@ -99,6 +102,8 @@ def stream(scenario, max_steps=300):
         bmi=scenario.get("bmi", 25),
         start_ebl=start_ebl,
         treatment_response=scenario.get("treatment_response"),
+        trauma_severity=scenario.get("trauma_severity", 0.0),
+        **kw,
     )
     # no reflexive massage — the app prompts fundal_massage/bimanual itself, so she
     # presents at her true starting tone until the app actually orders massage.
@@ -175,6 +180,10 @@ def stream(scenario, max_steps=300):
                 mhp_active = True
             mark_done(tid)
             note = f"START transfusion ({tid})"
+        elif ptype == "task" and tid == "suture":
+            p.give_repair(t_min); mark_done(tid)
+            note = "suture / repair tear" if not p.repair_ineffective else \
+                   "suture attempted — tear not controlled (needs theatre)"
         elif ptype == "task" and tid == "rapid_cryst":
             mark_done(tid); note = "START rapid crystalloid"
         elif ptype == "task" and tid == "iv_fluids":
@@ -232,8 +241,17 @@ def stream(scenario, max_steps=300):
             p.give_txa(t_min)
             session["txaSecondDone"] = True
             note = "GIVE txa 2nd dose"
+        elif ptype == "assess" and tid == "trauma_assess" and p.trauma_severity > 0:
+            # SERA has a genital-tract tear → answer "present", which forces the app's
+            # suture pathway (mirrors handleAssessPresent: done+present, treatment forced).
+            session["taskStates"][tid] = {
+                "status": "done", "doneAt": now_ms, "assessOutcome": "present",
+            }
+            if "suture" not in session["forcedTasks"]:
+                session["forcedTasks"] = [*session["forcedTasks"], "suture"]
+            note = f"TRAUMA present (sev {p.trauma_severity:.2f}) — proceed to repair"
         elif ptype == "assess" and tid:
-            mark_done(tid); note = f"exclude {tid}"   # atony scenarios: no trauma/tissue
+            mark_done(tid); note = f"exclude {tid}"   # no trauma/tissue for this patient
         elif ptype in ("task", "ci_check", "consider", "followup") and tid:
             if ptype == "ci_check":
                 session["ciCleared"][tid] = True
