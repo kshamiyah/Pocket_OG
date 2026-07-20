@@ -20,6 +20,7 @@
 
 const CACHE_KEY = "pocketog_news_v1";
 const SEEN_KEY = "pocketog_news_seen_v1";
+const FIRST_SEEN_KEY = "pocketog_news_first_seen_v1";
 
 export const NEWS_KINDS = {
   guideline: { label: "Guideline" },
@@ -110,6 +111,65 @@ export function markNewsSeen(items) {
   try {
     localStorage.setItem(SEEN_KEY, JSON.stringify(items.map(it => it.id)));
   } catch { /* storage unavailable — ignore */ }
+}
+
+// UTC ms for "YYYY-MM-DD" or "YYYY-MM" (day defaults to 1).
+export function newsItemTimestamp(date) {
+  if (!date) return null;
+  const [y, m, d] = date.split("-").map(Number);
+  if (!y || !m) return null;
+  return Date.UTC(y, m - 1, d || 1);
+}
+
+// Items dated within the last N days (feed order preserved).
+export function newsItemsWithinDays(items, days = 7) {
+  const cutoff = Date.now() - days * 86400000;
+  return items.filter(it => {
+    const ts = newsItemTimestamp(it.date);
+    return ts != null && ts >= cutoff;
+  });
+}
+
+function loadFirstSeen() {
+  try {
+    const raw = localStorage.getItem(FIRST_SEEN_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+// Stamp first-seen time when an id first appears in the synced feed.
+export function recordNewsFeedItems(items) {
+  if (!items?.length) return;
+  try {
+    const map = loadFirstSeen();
+    const now = Date.now();
+    let changed = false;
+    for (const it of items) {
+      if (!map[it.id]) {
+        map[it.id] = now;
+        changed = true;
+      }
+    }
+    if (changed) localStorage.setItem(FIRST_SEEN_KEY, JSON.stringify(map));
+  } catch { /* storage unavailable — ignore */ }
+}
+
+// Items that first appeared in the user's feed within the last N days.
+export function newsItemsAddedWithinDays(items, days = 7) {
+  const map = loadFirstSeen();
+  const cutoff = Date.now() - days * 86400000;
+  return items.filter(it => {
+    const ts = map[it.id];
+    return ts != null && ts >= cutoff;
+  });
+}
+
+// Unseen items dated within the last N days (feed order preserved).
+export function recentUnseenNewsItems(items, days = 7) {
+  const fresh = unseenNewsIds(items);
+  return newsItemsWithinDays(items, days).filter(it => fresh.has(it.id));
 }
 
 // "30 Jun 2026" from "2026-06-30", "Jun 2026" from "2026-06".

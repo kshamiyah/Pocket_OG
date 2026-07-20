@@ -10,7 +10,6 @@ import TopicCard from "./components/TopicCard";
 import { topicForQuery } from "./data/topics";
 import FlowchartPlayer from "./components/FlowchartPlayer";
 import IOLPrioritizer from "./components/IOLPrioritizer";
-import DailyPearl from "./components/DailyPearl";
 import { pearlForDate, hasUnseenPearl, markPearlSeen, isPearlDismissed, dismissPearl } from "./data/pearls";
 import FeedbackButton from "./components/FeedbackButton";
 import ConsentPage from "./components/ConsentPage";
@@ -21,12 +20,14 @@ import RxPage from "./components/RxPage";
 import DisclaimerModal from "./components/DisclaimerModal";
 import AboutModal from "./components/AboutModal";
 import UpdatesModal from "./components/UpdatesModal";
-import InstallBanner from "./components/InstallBanner";
+import HomeScreen from "./components/HomeScreen";
 import { LATEST_VERSION, hasUnseenUpdates, markUpdatesSeen } from "./data/updates";
 import LatestTab from "./components/LatestTab";
 import TabPageHeader from "./components/TabPageHeader";
 import ThemeToggle from "./components/ThemeToggle";
-import { loadCachedNews, saveCachedNews, fetchLatestNews, unseenNewsIds } from "./data/latest";
+import TextSizeToggle from "./components/TextSizeToggle";
+import { TextScaleProvider } from "./context/TextScaleContext";
+import { loadCachedNews, saveCachedNews, fetchLatestNews, unseenNewsIds, recordNewsFeedItems } from "./data/latest";
 import { TOG_SECTIONS } from "./data/tog";
 import { TRIAL_SECTIONS } from "./data/trials";
 
@@ -251,6 +252,7 @@ export default function App() {
   const [updatesUnseen, setUpdatesUnseen] = useState(() => hasUnseenUpdates());
   const [news, setNews] = useState(() => loadCachedNews()); // { feed, syncedAt } | null
   const [newsUnseen, setNewsUnseen] = useState(() => unseenNewsIds(loadCachedNews()?.feed?.items ?? []).size > 0);
+  const [focusNewsId, setFocusNewsId] = useState(null);
 
   // Refresh the Latest feed once per launch; the cached copy covers offline.
   useEffect(() => {
@@ -265,6 +267,13 @@ export default function App() {
       .catch(() => { /* offline or feed unreachable — keep the cached copy */ });
     return () => { cancelled = true; };
   }, []);
+
+  // Stamp when each story id first appears in the synced feed (home briefing window).
+  useEffect(() => {
+    const items = news?.feed?.items;
+    if (items?.length) recordNewsFeedItems(items);
+  }, [news?.feed?.items]);
+
   const [hintIndex, setHintIndex] = useState(0);
   const inputRef = useRef(null);
   const resultsInputRef = useRef(null);
@@ -412,7 +421,13 @@ export default function App() {
     setActiveTab(tabId);
   };
 
+  const openNewsStory = (id) => {
+    setFocusNewsId(id);
+    switchTab("latest");
+  };
+
   return (
+    <TextScaleProvider>
     <div className="min-h-screen bg-white" style={{ fontFamily: "'Geist', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
       <DisclaimerModal />
       <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
@@ -468,121 +483,32 @@ export default function App() {
         <>
           {/* Hero / idle state */}
           {!hasQuery && (
-            <div
-              className="flex flex-col items-center justify-center min-h-[100dvh] px-5"
-              style={{
-                paddingTop: "max(3rem, calc(env(safe-area-inset-top) + 2rem))",
-                paddingBottom: "calc(5.5rem + env(safe-area-inset-bottom, 0px))",
+            <HomeScreen
+              theme={theme}
+              onThemeToggle={toggleTheme}
+              onAbout={() => setAboutOpen(true)}
+              updatesUnseen={updatesUnseen}
+              onOpenUpdates={() => { setUpdatesOpen(true); markUpdatesSeen(); setUpdatesUnseen(false); }}
+              inputRef={inputRef}
+              searchHints={SEARCH_HINTS}
+              hintIndex={hintIndex}
+              inputValue={inputValue}
+              onInputChange={e => setInputValue(e.target.value)}
+              onSubmitSearch={val => {
+                if (val) setInputValue(val);
+                submitSearch(val);
               }}
-            >
-              <div className="w-full max-w-lg animate-enter">
-
-                <div className="w-full flex items-center justify-between mb-10">
-                  <button
-                    type="button"
-                    onClick={() => setAboutOpen(true)}
-                    aria-label="About Pocket O&G"
-                    className="w-8 h-8 flex items-center justify-center bg-white/95 backdrop-blur border border-gray-200 shadow-sm rounded-full text-gray-400 hover:text-gray-600 hover:shadow-md active:scale-95 transition-all"
-                  >
-                    <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                    </svg>
-                  </button>
-                  <ThemeToggle theme={theme} onToggle={toggleTheme} />
-                </div>
-
-                {/* Hero */}
-                <div className="text-center mb-12 sm:mb-14">
-                  <h1 className="text-[42px] sm:text-[56px] font-[800] tracking-[-0.02em] text-black">Pocket O&G</h1>
-                  <p className="mt-3 text-lg leading-relaxed text-gray-400">
-                    Pocket the evidence. Make the call.
-                  </p>
-                  {updatesUnseen && (
-                    <button
-                      type="button"
-                      onClick={() => { setUpdatesOpen(true); markUpdatesSeen(); setUpdatesUnseen(false); }}
-                      className="mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-xs font-semibold text-blue-600 hover:bg-blue-100 active:scale-95 transition-all"
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                      v{LATEST_VERSION} · What&apos;s new
-                    </button>
-                  )}
-                </div>
-
-                {/* Search */}
-                <div className="relative mb-10 sm:mb-12">
-                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-                  </svg>
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    placeholder={SEARCH_HINTS[hintIndex]}
-                    value={inputValue}
-                    onChange={e => setInputValue(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && submitSearch()}
-                    className="w-full bg-white border border-gray-200 rounded-2xl pl-11 pr-14 py-4 text-[17px] text-gray-900 placeholder-gray-400 shadow-lg shadow-gray-200/60 focus:outline-none focus:border-gray-300 focus:ring-4 focus:ring-gray-900/5 focus:shadow-xl transition-all"
-                  />
-                  <button
-                    onClick={() => submitSearch()}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-xl bg-black hover:bg-gray-800 active:scale-95 transition-all"
-                  >
-                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                    </svg>
-                  </button>
-                </div>
-
-                {/* Suggestion chips */}
-                <div className="flex flex-wrap justify-center gap-2">
-                  {SUGGESTIONS.map(s => (
-                    <button
-                      key={s}
-                      onClick={() => { setInputValue(s); submitSearch(s); }}
-                      className="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-xs text-gray-600 transition-colors"
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Pearl of the day, auto-surfacing card */}
-                {!pearlDismissed && (
-                  <div className="mt-8">
-                    <DailyPearl
-                      pearl={todaysPearl}
-                      unseen={pearlUnseen}
-                      onSeen={() => { markPearlSeen(); setPearlUnseen(false); }}
-                      onDismiss={() => { dismissPearl(); setPearlDismissed(true); }}
-                      onNavigate={handleNavigate}
-                    />
-                  </div>
-                )}
-
-                <InstallBanner />
-
-                <p className="mt-8 text-center text-xs text-gray-400">
-                  Built by{" "}
-                  <a
-                    href="https://drshamiyah.com/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline underline-offset-2 hover:text-gray-600 transition-colors"
-                  >
-                    Khalid Shamiyah
-                  </a>
-                  {" · "}
-                  <button
-                    type="button"
-                    onClick={() => { setUpdatesOpen(true); markUpdatesSeen(); setUpdatesUnseen(false); }}
-                    className="underline underline-offset-2 hover:text-gray-600 transition-colors"
-                  >
-                    v{LATEST_VERSION}
-                  </button>
-                </p>
-
-              </div>
-            </div>
+              suggestions={SUGGESTIONS}
+              feed={news?.feed}
+              onOpenNews={openNewsStory}
+              onNavigate={handleNavigate}
+              onSwitchTab={switchTab}
+              pearl={todaysPearl}
+              pearlUnseen={pearlUnseen}
+              pearlDismissed={pearlDismissed}
+              onPearlSeen={() => { markPearlSeen(); setPearlUnseen(false); }}
+              onPearlDismiss={() => { dismissPearl(); setPearlDismissed(true); }}
+            />
           )}
 
       {/* Results state */}
@@ -602,7 +528,8 @@ export default function App() {
                   value={inputValue}
                   onChange={e => setInputValue(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && submitSearch()}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-10 py-2.5 text-sm text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-10 py-2.5 text-base text-gray-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                  style={{ fontSize: "16px" }}
                 />
                 <button
                   onClick={clearSearch}
@@ -614,7 +541,10 @@ export default function App() {
                   </svg>
                 </button>
               </div>
-              <ThemeToggle theme={theme} onToggle={toggleTheme} />
+              <div className="flex items-center gap-2 shrink-0">
+                <TextSizeToggle />
+                <ThemeToggle theme={theme} onToggle={toggleTheme} />
+              </div>
             </div>
             {/* Filter pills row */}
             <div className="flex gap-2 overflow-x-auto px-4 pb-3 no-scrollbar border-b border-gray-100">
@@ -832,6 +762,8 @@ export default function App() {
           onSeen={() => setNewsUnseen(false)}
           theme={theme}
           onThemeToggle={toggleTheme}
+          focusStoryId={focusNewsId}
+          onFocusStoryHandled={() => setFocusNewsId(null)}
         />
       )}
 
@@ -1076,5 +1008,6 @@ export default function App() {
       </div>
 
     </div>
+    </TextScaleProvider>
   );
 }

@@ -1,5 +1,6 @@
 import BottomSheet from "./BottomSheet";
 import { sourceColors, SOURCE_ORDER, SOURCE_LABELS } from "../data/glColors";
+import TextSizeStepper from "./TextSizeStepper";
 
 const BUILD = typeof __BUILD_INFO__ !== "undefined" ? __BUILD_INFO__ : { version: "dev", sha: "dev", date: "" };
 
@@ -36,6 +37,14 @@ export default function AboutModal({ open, onClose }) {
             Pocket the evidence. Make the call.
           </p>
         </div>
+
+        <section className="mb-5">
+          <p className="text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-2">Display</p>
+          <div className="rounded-2xl bg-gray-50 px-3.5 py-3">
+            <p className="text-[13px] text-gray-600 leading-snug mb-3">Text size across the app. You can also use the Aa button top-right.</p>
+            <TextSizeStepper />
+          </div>
+        </section>
 
         <section className="mb-5">
           <p className="text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-2">What&apos;s inside</p>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { sourceColors } from "../data/glColors";
 import { NEWS_KINDS, NEWS_KIND_COLORS, formatNewsDate, formatSyncedAgo, markNewsSeen, unseenNewsIds } from "../data/latest";
 import TabPageHeader from "./TabPageHeader";
@@ -69,9 +69,9 @@ function StoryActions({ item, col, onNavigate }) {
 
 // Expanded story: full why + actions. Tap the header/title to collapse (featured
 // practice stories included). Action buttons stay outside that control.
-function HeroCard({ item, col, fresh, onNavigate, onCollapse }) {
+function HeroCard({ item, col, fresh, onNavigate, onCollapse, storyRef }) {
   return (
-    <article className={`col-span-2 rounded-3xl border p-5 ${col.bg} ${col.border}`}>
+    <article ref={storyRef} className={`col-span-2 rounded-3xl border p-5 ${col.bg} ${col.border}`}>
       <button type="button" onClick={onCollapse} aria-expanded="true" className="w-full text-left">
         <div className="flex items-center justify-between gap-2">
           <Kicker item={item} col={col} fresh={fresh} />
@@ -96,10 +96,10 @@ function HeroCard({ item, col, fresh, onNavigate, onCollapse }) {
 }
 
 // Teaser: headline + one-line lede of the change, taps open into a full card.
-function CompactCard({ item, col, fresh, spanFull, onExpand }) {
+function CompactCard({ item, col, fresh, spanFull, onExpand, storyRef }) {
   const lede = ledeOf(item.why);
   return (
-    <article className={spanFull ? "col-span-2" : "col-span-1"}>
+    <article ref={storyRef} className={spanFull ? "col-span-2" : "col-span-1"}>
       <button
         type="button"
         onClick={onExpand}
@@ -144,7 +144,7 @@ function layoutStories(list, expanded) {
   });
 }
 
-function StoryGrid({ laidOut, fresh, onNavigate, setOpen }) {
+function StoryGrid({ laidOut, fresh, onNavigate, setOpen, bindStoryRef }) {
   return (
     <div className="grid grid-cols-2 gap-3">
       {laidOut.map(({ item, hero, spanFull }) => {
@@ -158,6 +158,7 @@ function StoryGrid({ laidOut, fresh, onNavigate, setOpen }) {
             fresh={isFresh}
             onNavigate={onNavigate}
             onCollapse={() => setOpen(item.id, false)}
+            storyRef={bindStoryRef(item.id)}
           />
         ) : (
           <CompactCard
@@ -167,6 +168,7 @@ function StoryGrid({ laidOut, fresh, onNavigate, setOpen }) {
             fresh={isFresh}
             spanFull={spanFull}
             onExpand={() => setOpen(item.id, true)}
+            storyRef={bindStoryRef(item.id)}
           />
         );
       })}
@@ -176,10 +178,11 @@ function StoryGrid({ laidOut, fresh, onNavigate, setOpen }) {
 
 // Briefing first (unseen), then Earlier. Practice stories start featured/open;
 // everything else starts collapsed. Any story can be toggled. Items from /latest.json via App.
-export default function LatestTab({ feed, syncedAt, onNavigate, onSeen, theme, onThemeToggle }) {
+export default function LatestTab({ feed, syncedAt, onNavigate, onSeen, theme, onThemeToggle, focusStoryId, onFocusStoryHandled }) {
   const items = feed?.items ?? NO_ITEMS;
   const [kindFilter, setKindFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+  const storyRefs = useRef({});
   const [expanded, setExpanded] = useState(() => {
     const init = {};
     for (const it of items) {
@@ -240,6 +243,27 @@ export default function LatestTab({ feed, syncedAt, onNavigate, onSeen, theme, o
   const searchActive = searchQuery.trim().length > 0;
 
   const setOpen = (id, open) => setExpanded(prev => ({ ...prev, [id]: open }));
+
+  const bindStoryRef = id => el => {
+    storyRefs.current[id] = el;
+    if (el) el.style.scrollMarginTop = "120px";
+  };
+
+  useEffect(() => {
+    if (!focusStoryId || !items.some(it => it.id === focusStoryId)) return;
+    setKindFilter("ALL");
+    setSearchQuery("");
+    setExpanded(prev => ({ ...prev, [focusStoryId]: true }));
+  }, [focusStoryId, items]);
+
+  useEffect(() => {
+    if (!focusStoryId || !expanded[focusStoryId]) return;
+    const timer = setTimeout(() => {
+      storyRefs.current[focusStoryId]?.scrollIntoView({ behavior: "smooth", block: "start" });
+      onFocusStoryHandled?.();
+    }, 80);
+    return () => clearTimeout(timer);
+  }, [focusStoryId, expanded, briefingLaidOut, earlierLaidOut, allLaidOut, onFocusStoryHandled]);
 
   return (
     <div className="min-h-screen pb-24">
@@ -355,13 +379,13 @@ export default function LatestTab({ feed, syncedAt, onNavigate, onSeen, theme, o
                         Since you were last here · {briefing.length}
                       </h3>
                     </div>
-                    <StoryGrid laidOut={briefingLaidOut} fresh={fresh} onNavigate={onNavigate} setOpen={setOpen} />
+                    <StoryGrid laidOut={briefingLaidOut} fresh={fresh} onNavigate={onNavigate} setOpen={setOpen} bindStoryRef={bindStoryRef} />
                   </section>
                   <section>
                     <h3 className="text-xs font-bold tracking-wide uppercase text-gray-400 mb-2.5 px-0.5">
                       Earlier
                     </h3>
-                    <StoryGrid laidOut={earlierLaidOut} fresh={fresh} onNavigate={onNavigate} setOpen={setOpen} />
+                    <StoryGrid laidOut={earlierLaidOut} fresh={fresh} onNavigate={onNavigate} setOpen={setOpen} bindStoryRef={bindStoryRef} />
                   </section>
                 </div>
               ) : briefing.length > 0 ? (
@@ -372,10 +396,10 @@ export default function LatestTab({ feed, syncedAt, onNavigate, onSeen, theme, o
                       Since you were last here · {briefing.length}
                     </h3>
                   </div>
-                  <StoryGrid laidOut={briefingLaidOut} fresh={fresh} onNavigate={onNavigate} setOpen={setOpen} />
+                  <StoryGrid laidOut={briefingLaidOut} fresh={fresh} onNavigate={onNavigate} setOpen={setOpen} bindStoryRef={bindStoryRef} />
                 </section>
               ) : (
-                <StoryGrid laidOut={allLaidOut} fresh={fresh} onNavigate={onNavigate} setOpen={setOpen} />
+                <StoryGrid laidOut={allLaidOut} fresh={fresh} onNavigate={onNavigate} setOpen={setOpen} bindStoryRef={bindStoryRef} />
               )}
               <p className="text-[11px] text-gray-400 mt-3 px-1 leading-snug">
                 Signposts to new guidance and evidence, each linking to the primary source. Read the source itself

@@ -1,4 +1,5 @@
 import ThemeToggle from "./ThemeToggle";
+import TextSizeToggle from "./TextSizeToggle";
 
 export default function TabPageHeader({ title, subtitle, theme, onThemeToggle, trailing = null, children = null }) {
   return (
@@ -14,7 +15,10 @@ export default function TabPageHeader({ title, subtitle, theme, onThemeToggle, t
       <div className="flex items-center gap-2 shrink-0 pt-0.5">
         {trailing}
         {onThemeToggle ? (
-          <ThemeToggle theme={theme} onToggle={onThemeToggle} />
+          <>
+            <TextSizeToggle />
+            <ThemeToggle theme={theme} onToggle={onThemeToggle} />
+          </>
         ) : null}
       </div>
     </div>
