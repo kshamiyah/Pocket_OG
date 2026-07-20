@@ -4,11 +4,15 @@
 // flowchart node, and knowledge/checklist beats quote the guideline sections,
 // so a case can never disagree with the cited guidance it teaches.
 //
-// Beat kinds (rendered by SimPlayer):
+// Beat kinds (rendered by SimPlayer as an unfolding encounter feed):
 //   info      — narrative only; sets the scene, may update the obs panel
 //   choice    — single-best-answer question; `answer` is the correct index
 //   checklist — pick-the-right-set; each item is required or a distractor
 //   lesson    — closing teaching screen: takeaways, score and deep links
+// Any beat may also carry:
+//   time      — clock time shown in the feed ("18:40"), advancing the shift
+//   dialogue  — [{ who: "patient" | "midwife", text }] spoken lines, rendered
+//               as speech bubbles between the narrative and the question
 //
 // A choice beat with `fromNode: { fc, node }` renders the live options of that
 // flowchart decision node, so guideline updates flow through automatically.
@@ -30,22 +34,32 @@ export const SIM_CASES = [
     title: "Reduced fetal movements",
     setting: "Maternity Assessment Unit",
     gl: "GTG57",
+    room: "Room 2",
     intro: "A midwife hands you the triage card for the next patient. All patients in this simulation are fictional.",
     patient: {
       name: "Amara O (fictional)",
+      firstName: "Amara",
       details: "32 · G2 P1 · 34+2 weeks",
       history: "Previous term SVD. This pregnancy uncomplicated so far; anomaly scan normal. Smokes 8–10 cigarettes/day. Anterior placenta on the 20-week scan.",
     },
     beats: [
       {
         kind: "info",
+        time: "18:40",
         title: "Arrival in MAU",
-        narrative: "Amara attends MAU at 18:40. She has felt her baby move much less since yesterday evening; normally the baby is \"busy after dinner\", but last night and today the movements have felt occasional and weak. She is well in herself, with no pain, bleeding or fluid loss.",
+        narrative: "The unit is mid-evening busy: two CTGs running, a phone that will not stop. The coordinating midwife hands you a triage card.",
+        dialogue: [
+          { who: "midwife", text: "Room 2 for you. Amara, 34 plus 2, second baby. Baby moving much less since yesterday evening, no pain, no bleeding, no fluid. Obs are fine. She's quite worked up." },
+        ],
         obs: { "BP": "118/74", "Pulse": "82", "Temp": "36.7 °C", "Urinalysis": "pending" },
       },
       {
         kind: "choice",
-        narrative: "She settles onto the couch and looks at you anxiously: \"Is the baby okay?\"",
+        time: "18:44",
+        narrative: "Amara is perched on the edge of the couch, coat still on, one hand resting on her bump. She searches your face as you introduce yourself.",
+        dialogue: [
+          { who: "patient", text: "Is she okay? She's normally so busy after dinner, kicking away while I watch telly. Since last night it's just been these little flutters." },
+        ],
         question: "What is your first priority?",
         options: [
           { label: "Auscultate the fetal heart with a handheld Doppler", sublabel: "Confirm viability before anything else" },
@@ -59,8 +73,12 @@ export const SIM_CASES = [
       },
       {
         kind: "checklist",
-        narrative: "The Doppler picks up a fetal heart of 148 bpm, clearly distinct from Amara's pulse of 82. She relaxes a little.",
-        question: "Fetal heart confirmed. Which of the following complete your bedside assessment?",
+        time: "18:47",
+        narrative: "You find the fetal heart quickly with the sonicaid: 148 bpm, galloping along, clearly distinct from Amara's pulse of 82. Her shoulders drop an inch.",
+        dialogue: [
+          { who: "patient", text: "Oh, thank God. So she's alright then?" },
+        ],
+        question: "A heartbeat is not the whole answer. Which of the following complete your bedside assessment?",
         obs: { "BP": "118/74", "Pulse": "82", "FH (Doppler)": "148 bpm" },
         items: [
           { label: "History of risk factors for stillbirth and FGR", required: true, why: "Smoking, hypertension, diabetes, prior SGA or stillbirth, obesity and recurrent RFM all raise the risk of adverse outcome and change the pathway." },
@@ -74,7 +92,12 @@ export const SIM_CASES = [
       },
       {
         kind: "choice",
-        narrative: "SFH measures 33 cm, plotting on the 50th centile for 34 weeks. BP 118/74, urinalysis negative. She confirms she smokes 8–10 a day; there is no diabetes, hypertension or previous small baby. This is her first episode of RFM.",
+        time: "18:52",
+        narrative: "SFH measures 33 cm, plotting on the 50th centile for 34 weeks. BP 118/74, urinalysis negative. Going through her history she confirms she smokes, 8 to 10 a day, \"less than before I was pregnant\". No diabetes, no hypertension, no previous small baby. This is her first episode of reduced movements.",
+        obs: { "SFH": "33 cm (50th)", "BP": "118/74", "Urinalysis": "NAD", "Smoker": "8–10/day" },
+        dialogue: [
+          { who: "midwife", text: "Do you want her on the monitor?" },
+        ],
         question: "She is 34+2 weeks and the fetal heart is confirmed. What monitoring does the guideline call for now?",
         options: [
           { label: "Computerised CTG for at least 20 minutes", sublabel: "Preferred over visual interpretation" },
@@ -88,7 +111,12 @@ export const SIM_CASES = [
       },
       {
         kind: "choice",
-        narrative: "The computerised CTG runs for 24 minutes: baseline 145 bpm, normal variability, accelerations present, no decelerations. It meets criteria. Amara felt a couple of flutters during the trace but says the movements are still much less than her baby's usual pattern.",
+        time: "19:24",
+        narrative: "The computerised CTG runs for 24 minutes and meets criteria: baseline 145 bpm, normal variability, accelerations present, no decelerations. Amara felt a couple of flutters during the trace. You come back to review it and she catches your eye before you can speak.",
+        obs: { "cCTG": "criteria met, 24 min", "Baseline": "145 bpm", "Accelerations": "present" },
+        dialogue: [
+          { who: "patient", text: "The machine looked fine, the midwife said. But the kicks still feel less than they should be. I know her." },
+        ],
         question: "The CTG is normal. Following the RFM care pathway, what happens next?",
         fromNode: { fc: "GTG57_CARE_PATHWAY", node: "ctg-result" },
         answer: 2,
@@ -97,7 +125,9 @@ export const SIM_CASES = [
       },
       {
         kind: "choice",
-        narrative: "USS the same evening: EFW 2,350 g (48th centile), deepest vertical pocket 5.2 cm, umbilical artery Doppler with normal PI and end-diastolic flow present. Growth is tracking its curve.",
+        time: "20:05",
+        narrative: "The on-call sonographer fits her in. You watch the screen together: EFW 2,350 g on the 48th centile, deepest vertical pocket 5.2 cm, umbilical artery Doppler with normal PI and end-diastolic flow present. Growth is tracking its curve. Amara watches your face, not the screen.",
+        obs: { "EFW": "2,350 g (48th)", "DVP": "5.2 cm", "UA Doppler": "normal PI, EDF present" },
         question: "How do you act on these ultrasound findings?",
         fromNode: { fc: "GTG57_CARE_PATHWAY", node: "uss-result" },
         answer: 0,
@@ -106,7 +136,11 @@ export const SIM_CASES = [
       },
       {
         kind: "choice",
-        narrative: "Before going home, Amara asks: \"Should I download one of those kick-counting apps so I know when to come back?\"",
+        time: "20:30",
+        narrative: "Coat back on, notes in hand, she pauses at the door.",
+        dialogue: [
+          { who: "patient", text: "Should I download one of those kick-counting apps? So I know when to come back?" },
+        ],
         question: "What discharge advice does the guideline support?",
         options: [
           { label: "No formal counting: know your baby's own pattern, and return immediately with any further reduction or change", sublabel: "Movements do not decrease towards term" },
