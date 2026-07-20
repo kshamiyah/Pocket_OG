@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo } from "react";
+import TabPageHeader from "./TabPageHeader";
 import { ANTIHYPERTENSIVES } from "../data/rx/antihypertensives";
 import { UTEROTONICS } from "../data/rx/uterotonics";
 import { ANTIEMETICS } from "../data/rx/antiemetics";
@@ -232,7 +233,7 @@ const CATEGORIES = [
   "Antihypertensive", "Antiviral", "Contraception", "Endometriosis", "Tocolytic", "Uterotonic",
 ];
 
-export default function RxPage({ initialDrugId = null }) {
+export default function RxPage({ initialDrugId = null, theme, onThemeToggle }) {
   const [selectedDrug, setSelectedDrug] = useState(
     initialDrugId ? ALL_DRUGS.find(d => d.id === initialDrugId) ?? null : null
   );
@@ -273,13 +274,12 @@ export default function RxPage({ initialDrugId = null }) {
       <div className="min-h-screen bg-white pb-28">
         <div className="max-w-lg mx-auto">
 
-          {/* Header */}
-          <div className="px-5 pt-14 pb-1">
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Rx</h2>
-            <p className="text-xs text-gray-400 mt-0.5">
-              {activeCategory ? `${filtered.length} of ${ALL_DRUGS.length} drugs` : `${ALL_DRUGS.length} drugs`} — quick dose lookup
-            </p>
-          </div>
+          <TabPageHeader
+            title="Rx"
+            subtitle={`${activeCategory ? `${filtered.length} of ${ALL_DRUGS.length} drugs` : `${ALL_DRUGS.length} drugs`} — quick dose lookup`}
+            theme={theme}
+            onThemeToggle={onThemeToggle}
+          />
 
           {/* Sticky search + filter */}
           <div className="sticky top-0 z-20 bg-white border-b border-gray-100">

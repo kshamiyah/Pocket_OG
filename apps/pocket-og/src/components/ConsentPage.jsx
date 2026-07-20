@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef } from "react";
-import AlphabetSidebar from "./AlphabetSidebar";
+import TabPageHeader from "./TabPageHeader";
 import ShareButton from "./ShareButton";
 import { shareUrl as deepLinkUrl } from "../utils/deepLink";
 import { sourceColors, sourceFromLabel } from "../data/glColors";
@@ -214,7 +214,7 @@ const PROCEDURE_CONFIG = {
 
 // ─── Step 0: procedure list ───────────────────────────────────────────────────
 
-function ProcedureList({ onSelect }) {
+function ProcedureList({ onSelect, theme, onThemeToggle }) {
   const [searchQuery, setSearchQuery] = useState("");
   const sectionRefs = useRef({});
 
@@ -240,10 +240,12 @@ function ProcedureList({ onSelect }) {
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <div className="px-5 pt-14 pb-1">
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Counsel</h2>
-          <p className="text-xs text-gray-400 mt-0.5">Benefits, risks &amp; alternatives, verbatim from RCOG &amp; NICE</p>
-        </div>
+        <TabPageHeader
+          title="Counsel"
+          subtitle="Benefits, risks & alternatives, verbatim from RCOG & NICE"
+          theme={theme}
+          onThemeToggle={onThemeToggle}
+        />
 
         {/* Sticky search bar */}
         <div className="sticky top-0 z-20 bg-white border-b border-gray-100 pl-4 pr-8 pt-3 pb-3">
@@ -1105,7 +1107,7 @@ function ConsentSummary({ procedureId, context, factors, onBack, onReset }) {
 
 // ─── main export ──────────────────────────────────────────────────────────────
 
-export default function ConsentPage({ initialProcedure }) {
+export default function ConsentPage({ initialProcedure, theme, onThemeToggle }) {
   const [step, setStep]           = useState(() => {
     if (!initialProcedure) return 0;
     const hasContext = (PROCEDURE_CONFIG[initialProcedure]?.contextOptions?.length ?? 0) > 0;
@@ -1131,7 +1133,7 @@ export default function ConsentPage({ initialProcedure }) {
 
   const reset = () => { setStep(0); setProcId(null); setContext(null); setFactors(new Set()); };
 
-  if (step === 0) return <ProcedureList onSelect={selectProcedure} />;
+  if (step === 0) return <ProcedureList onSelect={selectProcedure} theme={theme} onThemeToggle={onThemeToggle} />;
   if (step === 1) return <ContextPicker procedureId={procedureId} onSelect={selectContext} onBack={reset} />;
   if (step === 2) return (
     <PatientFactors

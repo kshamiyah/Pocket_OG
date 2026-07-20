@@ -24,6 +24,8 @@ import UpdatesModal from "./components/UpdatesModal";
 import InstallBanner from "./components/InstallBanner";
 import { LATEST_VERSION, hasUnseenUpdates, markUpdatesSeen } from "./data/updates";
 import LatestTab from "./components/LatestTab";
+import TabPageHeader from "./components/TabPageHeader";
+import ThemeToggle from "./components/ThemeToggle";
 import { loadCachedNews, saveCachedNews, fetchLatestNews, unseenNewsIds } from "./data/latest";
 import { TOG_SECTIONS } from "./data/tog";
 import { TRIAL_SECTIONS } from "./data/trials";
@@ -245,6 +247,7 @@ export default function App() {
     document.querySelector('meta[name="theme-color"]')?.setAttribute("content", dark ? "#111827" : "#ffffff");
     try { localStorage.setItem("pocketog_theme_v1", theme); } catch { /* best effort */ }
   }, [theme]);
+  const toggleTheme = () => setTheme(t => (t === "dark" ? "light" : "dark"));
   const [updatesUnseen, setUpdatesUnseen] = useState(() => hasUnseenUpdates());
   const [news, setNews] = useState(() => loadCachedNews()); // { feed, syncedAt } | null
   const [newsUnseen, setNewsUnseen] = useState(() => unseenNewsIds(loadCachedNews()?.feed?.items ?? []).size > 0);
@@ -429,42 +432,7 @@ export default function App() {
       {/* Feedback button — always visible */}
       <FeedbackButton query={query} filter={filter} />
 
-      {/* About — info icon on the search landing screen (hidden once results appear) */}
-      {activeTab === "search" && !hasQuery && (
-        <button
-          type="button"
-          onClick={() => setAboutOpen(true)}
-          aria-label="About Pocket O&G"
-          className="fixed right-4 z-30 w-8 h-8 flex items-center justify-center bg-white/95 backdrop-blur border border-gray-200 shadow-sm rounded-full text-gray-400 hover:text-gray-600 hover:shadow-md active:scale-95 transition-all"
-          style={{ top: "max(1rem, env(safe-area-inset-top))" }}
-        >
-          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-          </svg>
-        </button>
-      )}
-
-      {/* Theme toggle — top-left on the search landing screen, mirroring About */}
-      {activeTab === "search" && !hasQuery && (
-        <button
-          type="button"
-          onClick={() => setTheme(t => (t === "dark" ? "light" : "dark"))}
-          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          className="fixed left-4 z-30 w-8 h-8 flex items-center justify-center bg-white/95 backdrop-blur border border-gray-200 shadow-sm rounded-full text-gray-400 hover:text-gray-600 hover:shadow-md active:scale-95 transition-all"
-          style={{ top: "max(1rem, env(safe-area-inset-top))" }}
-        >
-          {theme === "dark" ? (
-            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1.5M12 19.5V21M4.22 4.22l1.06 1.06M18.72 18.72l1.06 1.06M3 12h1.5M19.5 12H21M4.22 19.78l1.06-1.06M18.72 5.28l1.06-1.06M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-            </svg>
-          ) : (
-            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 15A9.72 9.72 0 0118 15.75c-5.39 0-9.75-4.36-9.75-9.75 0-1.33.27-2.6.75-3.75A9.75 9.75 0 003 11.25C3 16.64 7.36 21 12.75 21a9.75 9.75 0 009-6z" />
-            </svg>
-          )}
-        </button>
-      )}
-
+      {/* About lives in the search landing header row */}
       {/* IOL Prioritizer overlay */}
       {showIOLPrioritizer && <IOLPrioritizer onClose={() => setShowIOLPrioritizer(false)} />}
 
@@ -508,6 +476,20 @@ export default function App() {
               }}
             >
               <div className="w-full max-w-lg animate-enter">
+
+                <div className="w-full flex items-center justify-between mb-10">
+                  <button
+                    type="button"
+                    onClick={() => setAboutOpen(true)}
+                    aria-label="About Pocket O&G"
+                    className="w-8 h-8 flex items-center justify-center bg-white/95 backdrop-blur border border-gray-200 shadow-sm rounded-full text-gray-400 hover:text-gray-600 hover:shadow-md active:scale-95 transition-all"
+                  >
+                    <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                    </svg>
+                  </button>
+                  <ThemeToggle theme={theme} onToggle={toggleTheme} />
+                </div>
 
                 {/* Hero */}
                 <div className="text-center mb-12 sm:mb-14">
@@ -609,8 +591,8 @@ export default function App() {
           {/* Sticky compact header */}
           <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-gray-100">
             {/* Search row */}
-            <div className="max-w-lg mx-auto px-4 pt-6 pb-2">
-              <div className="relative">
+            <div className="max-w-lg mx-auto px-4 pt-6 pb-2 flex items-center gap-2">
+              <div className="relative flex-1">
                 <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
                 </svg>
@@ -632,6 +614,7 @@ export default function App() {
                   </svg>
                 </button>
               </div>
+              <ThemeToggle theme={theme} onToggle={toggleTheme} />
             </div>
             {/* Filter pills row */}
             <div className="flex gap-2 overflow-x-auto px-4 pb-3 no-scrollbar border-b border-gray-100">
@@ -702,10 +685,12 @@ export default function App() {
         <div className="min-h-screen pb-24">
           <div className="max-w-lg mx-auto">
 
-            <div className="px-5 pt-14 pb-1">
-              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Flowcharts</h2>
-              <p className="text-xs text-gray-400 mt-0.5">Interactive clinical decision pathways</p>
-            </div>
+            <TabPageHeader
+              title="Flowcharts"
+              subtitle="Interactive clinical decision pathways"
+              theme={theme}
+              onThemeToggle={toggleTheme}
+            />
 
             {/* Sticky: source filter + search */}
             <div className="sticky top-0 z-20 bg-white border-b border-gray-100 pl-4 pr-12 pt-3 pb-3">
@@ -816,6 +801,8 @@ export default function App() {
           key={consentNavKey}
           initialProcedure={activeConsentProcedure}
           onNavigate={handleNavigate}
+          theme={theme}
+          onThemeToggle={toggleTheme}
         />
       )}
 
@@ -826,11 +813,15 @@ export default function App() {
           initialScenario={activeCalcScenario}
           onNavigate={handleNavigate}
           onOpenIOLPrioritizer={() => setShowIOLPrioritizer(true)}
+          theme={theme}
+          onThemeToggle={toggleTheme}
         />
       )}
 
       {/* Rx tab */}
-      {activeTab === "rx" && <RxPage key={rxNavKey} initialDrugId={activeRxDrug} />}
+      {activeTab === "rx" && (
+        <RxPage key={rxNavKey} initialDrugId={activeRxDrug} theme={theme} onThemeToggle={toggleTheme} />
+      )}
 
       {/* Latest tab */}
       {activeTab === "latest" && (
@@ -839,6 +830,8 @@ export default function App() {
           syncedAt={news?.syncedAt}
           onNavigate={handleNavigate}
           onSeen={() => setNewsUnseen(false)}
+          theme={theme}
+          onThemeToggle={toggleTheme}
         />
       )}
 
@@ -846,10 +839,12 @@ export default function App() {
       {activeTab === "guidelines" && (
         <div className="min-h-screen pb-24">
           <div className="max-w-lg mx-auto">
-            <div className="px-5 pt-14 pb-1">
-              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Library</h2>
-              <p className="text-xs text-gray-400 mt-0.5">Guidelines and TOG review articles</p>
-            </div>
+            <TabPageHeader
+              title="Library"
+              subtitle="Guidelines and TOG review articles"
+              theme={theme}
+              onThemeToggle={toggleTheme}
+            />
 
             {/* Guidelines / Articles toggle */}
             <div className="px-5 pt-2 pb-1">

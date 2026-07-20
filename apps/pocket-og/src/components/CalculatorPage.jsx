@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef } from "react";
 import SeeAlso from "./SeeAlso";
+import TabPageHeader from "./TabPageHeader";
 import ShareButton from "./ShareButton";
 import { shareUrl as deepLinkUrl } from "../utils/deepLink";
 import { CALCULATOR_CONNECTIONS } from "../data/connections";
@@ -27,7 +28,7 @@ import {
 
 // ─── Step 0: scenario picker ──────────────────────────────────────────
 
-function ScenarioList({ onSelect, onOpenIOLPrioritizer }) {
+function ScenarioList({ onSelect, onOpenIOLPrioritizer, theme, onThemeToggle }) {
   const [searchQuery, setSearchQuery] = useState("");
   const sectionRefs = useRef({});
 
@@ -64,10 +65,12 @@ function ScenarioList({ onSelect, onOpenIOLPrioritizer }) {
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <div className="px-5 pt-14 pb-1">
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Calculator</h2>
-          <p className="text-xs text-gray-400 mt-0.5">Decision-support calculators — verbatim from NICE & RCOG</p>
-        </div>
+        <TabPageHeader
+          title="Calculator"
+          subtitle="Decision-support calculators — verbatim from NICE & RCOG"
+          theme={theme}
+          onThemeToggle={onThemeToggle}
+        />
 
         {/* Sticky search bar */}
         <div className="sticky top-0 z-20 bg-white border-b border-gray-100 pl-4 pr-8 pt-3 pb-3">
@@ -1512,10 +1515,19 @@ function CordGasCalculator({ onBack, pdfs }) {
 
 // ─── Entry point ──────────────────────────────────────────────────────
 
-export default function CalculatorPage({ initialScenario, onNavigate, onOpenIOLPrioritizer }) {
+export default function CalculatorPage({ initialScenario, onNavigate, onOpenIOLPrioritizer, theme, onThemeToggle }) {
   const [scenarioId, setScenarioId] = useState(initialScenario ?? null);
 
-  if (!scenarioId) return <ScenarioList onSelect={setScenarioId} onOpenIOLPrioritizer={onOpenIOLPrioritizer} />;
+  if (!scenarioId) {
+    return (
+      <ScenarioList
+        onSelect={setScenarioId}
+        onOpenIOLPrioritizer={onOpenIOLPrioritizer}
+        theme={theme}
+        onThemeToggle={onThemeToggle}
+      />
+    );
+  }
 
   const back = () => setScenarioId(null);
   const pdfs = CALCULATOR_SCENARIOS.find(s => s.id === scenarioId)?.pdfs ?? [];
@@ -1529,5 +1541,12 @@ export default function CalculatorPage({ initialScenario, onNavigate, onOpenIOLP
   if (scenarioId === "CORD_GAS") return <CordGasCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
   if (scenarioId === "RMI") return <RmiCalculator onBack={back} pdfs={pdfs} onNavigate={onNavigate} />;
 
-  return <ScenarioList onSelect={setScenarioId} onOpenIOLPrioritizer={onOpenIOLPrioritizer} />;
+  return (
+    <ScenarioList
+      onSelect={setScenarioId}
+      onOpenIOLPrioritizer={onOpenIOLPrioritizer}
+      theme={theme}
+      onThemeToggle={onThemeToggle}
+    />
+  );
 }

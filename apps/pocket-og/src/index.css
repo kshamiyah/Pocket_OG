@@ -35,7 +35,7 @@ table {
 /* ── Dark mode ─────────────────────────────────────────────────────────────
    The app is authored light-only with a consistent utility vocabulary, so
    dark mode is a centralised remap of those utilities under html.dark
-   (toggled from the home screen; persisted as pocketog_theme_v1).
+   (toggled from App.jsx; persisted as pocketog_theme_v1).
    Generated block: hue tints are the Tailwind -500 value mixed into the
    #111827 base; hue text steps up two shades (700→300 etc).            */
 html.dark { color-scheme: dark; background-color: #111827; }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { sourceColors } from "../data/glColors";
 import { NEWS_KINDS, NEWS_KIND_COLORS, formatNewsDate, formatSyncedAgo, markNewsSeen, unseenNewsIds } from "../data/latest";
+import TabPageHeader from "./TabPageHeader";
 
 const NO_ITEMS = [];
 
@@ -175,7 +176,7 @@ function StoryGrid({ laidOut, fresh, onNavigate, setOpen }) {
 
 // Briefing first (unseen), then Earlier. Practice stories start featured/open;
 // everything else starts collapsed. Any story can be toggled. Items from /latest.json via App.
-export default function LatestTab({ feed, syncedAt, onNavigate, onSeen }) {
+export default function LatestTab({ feed, syncedAt, onNavigate, onSeen, theme, onThemeToggle }) {
   const items = feed?.items ?? NO_ITEMS;
   const [kindFilter, setKindFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
@@ -243,11 +244,12 @@ export default function LatestTab({ feed, syncedAt, onNavigate, onSeen }) {
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <div className="px-5 pt-14 pb-1">
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Latest</h2>
-          <p className="text-xs text-gray-400 mt-0.5">
-            Latest news, guidance and evidence in O&amp;G · curated
-          </p>
+        <TabPageHeader
+          title="Latest"
+          subtitle="Latest news, guidance and evidence in O&G · curated"
+          theme={theme}
+          onThemeToggle={onThemeToggle}
+        >
           {(feed?.updated || syncedAgo) && (
             <p className="text-xs text-gray-400 mt-0.5">
               {feed?.updated ? <>feed updated {formatNewsDate(feed.updated)}</> : null}
@@ -255,7 +257,7 @@ export default function LatestTab({ feed, syncedAt, onNavigate, onSeen }) {
               {syncedAgo ? <>synced {syncedAgo}</> : null}
             </p>
           )}
-        </div>
+        </TabPageHeader>
 
         {items.length === 0 ? (
           <div className="px-5 pt-10 text-center">
