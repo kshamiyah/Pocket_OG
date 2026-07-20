@@ -4,6 +4,16 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.20.0",
+    date: "20/07/2026",
+    title: "Latest tab: briefing layout and search",
+    changes: [
+      { tag: "improved", text: "Latest now leads with unseen stories under \"Since you were last here\", then \"Earlier\" for the rest, so the tab dot matches what you see first." },
+      { tag: "new", text: "Search the feed: filter stories by title, summary, source or kind as you type." },
+      { tag: "improved", text: "Kind filter chips (Guideline, Trial, Safety, Report, Research) use colour accents; feed-updated and last-synced times sit on their own line under the subline." },
+    ],
+  },
+  {
     version: "1.19.0",
     date: "18/07/2026",
     title: "Placenta praevia & PAS updated to the 2026 guideline",

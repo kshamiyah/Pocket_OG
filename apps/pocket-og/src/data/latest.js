@@ -29,6 +29,30 @@ export const NEWS_KINDS = {
   research: { label: "Research" },
 };
 
+// Kind chip accents (posts still theme by source). Full class strings so Tailwind keeps them.
+export const NEWS_KIND_COLORS = {
+  guideline: {
+    idle: "bg-teal-50 text-teal-700 hover:bg-teal-100",
+    active: "bg-teal-600 text-white",
+  },
+  trial: {
+    idle: "bg-cyan-50 text-cyan-700 hover:bg-cyan-100",
+    active: "bg-cyan-600 text-white",
+  },
+  safety: {
+    idle: "bg-red-50 text-red-700 hover:bg-red-100",
+    active: "bg-red-600 text-white",
+  },
+  report: {
+    idle: "bg-amber-50 text-amber-800 hover:bg-amber-100",
+    active: "bg-amber-600 text-white",
+  },
+  research: {
+    idle: "bg-stone-100 text-stone-700 hover:bg-stone-200",
+    active: "bg-stone-600 text-white",
+  },
+};
+
 function isValidItem(it) {
   return it && typeof it.id === "string" && typeof it.title === "string" && typeof it.url === "string";
 }
