@@ -10,6 +10,8 @@ import TopicCard from "./components/TopicCard";
 import { topicForQuery } from "./data/topics";
 import FlowchartPlayer from "./components/FlowchartPlayer";
 import IOLPrioritizer from "./components/IOLPrioritizer";
+import SimPlayer from "./components/SimPlayer";
+import { SIM_CASE_MAP } from "./data/simCases";
 import { pearlForDate, hasUnseenPearl, markPearlSeen, isPearlDismissed, dismissPearl } from "./data/pearls";
 import FeedbackButton from "./components/FeedbackButton";
 import ConsentPage from "./components/ConsentPage";
@@ -218,6 +220,7 @@ export default function App() {
   const [libraryView, setLibraryView] = useState("guidelines"); // "guidelines" | "articles"
   const [articleView, setArticleView] = useState("tog"); // "tog" | "trials"
   const [showIOLPrioritizer, setShowIOLPrioritizer] = useState(false);
+  const [activeSimId, setActiveSimId] = useState(null);
   const [pearlUnseen, setPearlUnseen] = useState(() => hasUnseenPearl());
   const [pearlDismissed, setPearlDismissed] = useState(() => isPearlDismissed());
   const todaysPearl = useMemo(() => pearlForDate(), []);
@@ -300,6 +303,8 @@ export default function App() {
       setActiveTab("rx");
     } else if (type === "iol-prioritizer") {
       setShowIOLPrioritizer(true);
+    } else if (type === "sim") {
+      setActiveSimId(id);
     } else if (type === "reader") {
       setGuidelineScrollTo(null);
       setActiveGuidelineGl(id);
@@ -416,6 +421,7 @@ export default function App() {
     setGuidelineScrollTo(null);
     setActiveFlowchartId(null);
     setShowIOLPrioritizer(false);
+    setActiveSimId(null);
     if (tabId !== "consent") setActiveConsentProcedure(null);
     if (tabId !== "calculator") setActiveCalcScenario(null);
     setActiveTab(tabId);
@@ -450,6 +456,16 @@ export default function App() {
       {/* About lives in the search landing header row */}
       {/* IOL Prioritizer overlay */}
       {showIOLPrioritizer && <IOLPrioritizer onClose={() => setShowIOLPrioritizer(false)} />}
+
+      {/* On Call simulation overlay */}
+      {activeSimId && SIM_CASE_MAP[activeSimId] && (
+        <SimPlayer
+          key={activeSimId}
+          simCase={SIM_CASE_MAP[activeSimId]}
+          onClose={() => setActiveSimId(null)}
+          onNavigate={handleNavigate}
+        />
+      )}
 
       {/* Guideline reader overlay */}
       {activeGuidelineGl && (

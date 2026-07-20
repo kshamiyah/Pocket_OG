@@ -7,6 +7,7 @@ const KEYS = {
   flowchart: "fc",
   calculator: "calc",
   consent: "consent",
+  sim: "sim",
 };
 
 export function shareUrl(type, id) {

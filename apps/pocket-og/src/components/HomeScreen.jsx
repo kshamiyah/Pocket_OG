@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { sourceColors } from "../data/glColors";
+import { sourceColors, glColors } from "../data/glColors";
+import { SIM_CASES } from "../data/simCases";
 import { NEWS_KINDS, unseenNewsIds, newsItemsAddedWithinDays } from "../data/latest";
 import ThemeToggle from "./ThemeToggle";
 import TextSizeToggle from "./TextSizeToggle";
@@ -299,6 +300,36 @@ export default function HomeScreen({
             />
           </div>
         )}
+
+        {/* On Call — case simulation entry */}
+        {SIM_CASES.length > 0 && (() => {
+          const sim = SIM_CASES[0];
+          const c = glColors(sim.gl);
+          return (
+            <button
+              type="button"
+              onClick={() => onNavigate?.({ type: "sim", id: sim.id })}
+              className="mb-6 w-full text-left px-4 py-3.5 rounded-2xl bg-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 active:scale-[0.99] transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <span className={`w-9 h-9 rounded-xl ${c.bg} border ${c.border} flex items-center justify-center shrink-0`}>
+                  <svg className={c.text} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75} style={{ width: 18, height: 18 }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h4l3 7 4-14 3 7h4" />
+                  </svg>
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 leading-tight">
+                    On Call <span className={`ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold align-middle ${c.badge}`}>NEW</span>
+                  </p>
+                  <p className="text-xs text-gray-400 leading-snug mt-0.5">
+                    {sim.setting}: a patient is waiting. Work the case, get the lesson.
+                  </p>
+                </div>
+                <span className="text-gray-300 text-lg shrink-0">›</span>
+              </div>
+            </button>
+          );
+        })()}
 
         <InstallBanner />
 

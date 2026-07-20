@@ -4,6 +4,14 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.21.0",
+    date: "20/07/2026",
+    title: "On Call: your first simulated patient",
+    changes: [
+      { tag: "new", text: "On Call, a case simulation on the home screen: a fictional patient arrives in the Maternity Assessment Unit with reduced fetal movements, and you make the calls, from first priority at the bedside through CTG and ultrasound decisions to discharge advice. Six scored questions, each marked against GTG57 with the reasoning and source shown, ending with a lesson screen and links into the guide and flowcharts. Decision questions take their options live from the RFM care pathway flowchart, so the sim always matches the guidance. More patients and settings (antenatal clinic, delivery suite) to follow." },
+    ],
+  },
+  {
     version: "1.20.0",
     date: "20/07/2026",
     title: "Latest tab: briefing layout and search",
