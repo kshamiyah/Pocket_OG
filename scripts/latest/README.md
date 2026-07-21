@@ -30,8 +30,8 @@ next online visit.
    two-sentence `why` for the app (gist + ward hook): topic before guideline code,
    briefing tone not changelog prose. `what_changed` is not merged into the feed.
    Items with filler copy, duplicate why/delta, or listing-hub URLs are dropped. Guideline
-   amendments must name a concrete delta in `what_changed`; news and `report` items only need
-   a clear what-happened sentence grounded in the source.
+   amendments must name a concrete delta in `what_changed`; news, `report`, and RCOG news posts
+   only need a clear what-happened sentence grounded in the source.
    Capped at `LATEST_MAX_ITEMS` (default 10) with a research sub-cap
    (`LATEST_RESEARCH_SUBCAP`, default 3).
 5. **Human review** in the PR: the real filter.

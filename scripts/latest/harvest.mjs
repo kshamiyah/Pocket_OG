@@ -24,7 +24,7 @@ import { readFileSync, writeFileSync, existsSync, appendFileSync } from "node:fs
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import Anthropic from "@anthropic-ai/sdk";
-import { harvestPubMed, harvestGovUk, harvestNhsEnglandMaternity, harvestPages, fetchDeepExcerpts, isListingHub } from "./sources.mjs";
+import { harvestPubMed, harvestGovUk, harvestNhsEnglandMaternity, harvestPages, fetchDeepExcerpts, isListingHub, isRcogNewsArticle } from "./sources.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, "..", "..");
@@ -49,7 +49,7 @@ const LINK_TYPES = ["reader", "flowchart", "calculator", "consent", "drug", ""];
 // Filler tells the reader to open the source without naming the change.
 const FILLER_RE = /\b(check (the|your|against)|review (the|before)|confirm (any|the)|familiarise|worth checking|read the (source|guidance|guideline|full)|see the (update|source|guidance)|go (and )?read)\b/i;
 // Verbs / markers that usually mean a concrete delta was named.
-const DELTA_RE = /\b(removes?|removed|adds?|added|defines?|defined|clarifies?|clarified|recommends?|recommended|no longer|do not offer|offers?|offered|threshold|cut-?off|vs\.?|versus|compared|non-inferior|discontinu|withdraws?|withdrawn|replaces?|replaced|renames?|renamed|introduces?|introduced|strengthens?|amends?|amended|updates? the (definition|recommendation|advice))\b/i;
+const DELTA_RE = /\b(removes?|removed|adds?|added|defines?|defined|clarifies?|clarified|recommends?|recommended|no longer|do not offer|offers?|offered|threshold|cut-?off|vs\.?|versus|compared|non-inferior|discontinu|withdraws?|withdrawn|replaces?|replaced|renames?|renamed|introduces?|introduced|strengthens?|amends?|amended|updates? the (definition|recommendation|advice)|drops?|dropped|adopts?|adopted|deprecates?|deprecated|endorses?|endorsed)\b/i;
 const NEWS_URL_RE = /\/government\/news\b/i;
 
 function readJson(path, fallback) {
@@ -151,10 +151,12 @@ OUTPUT RULES:
   Do not sensationalise.
 - what_changed: REQUIRED for the human reviewer only (shown in the PR, not in the app). ONE sentence
   grounded in the source. Plain language; topic (CODE) on first mention for guidelines.
-  For kind "report" and gov.uk news URLs: state what happened (who announced what, scope, timing).
-  Rec numbers and changelog verbs are not required for news. GOOD (news): "NHS England extended
-  Martha's Rule to all maternity settings after a national review of serious incidents." For kind
-  "guideline" with an actual amendment: name the concrete delta; include the key number, dose,
+  For kind "report", gov.uk news URLs, and RCOG news posts: state what happened (who announced
+  what, scope, timing). Rec numbers and changelog verbs are not required. GOOD (news): "NHS England
+  extended Martha's Rule to all maternity settings after a national review of serious incidents."
+  GOOD (RCOG news on a green-top): "Small-for-gestational-age fetus (GTG31): RCOG no longer
+  endorses INTERGROWTH charts; four UK chart standards are now recommended." For kind "guideline"
+  with an actual amendment on a NICE Update-information page: name the concrete delta; include the key number, dose,
   threshold, product, or definition when the source gives one and it is the story. BAD: "NICE
   updated NG88; check the pathway." GOOD (guideline): "Heavy menstrual bleeding (NG88): July 2026
   removes the old advice against routine serum ferritin (rec 1.2.8)." For safety / trial / research,
@@ -225,7 +227,8 @@ function hasConcreteStatement(text = "") {
 }
 
 function isNewsLike(it) {
-  return it.kind === "report" || NEWS_URL_RE.test(it.url || "");
+  const url = it.url || "";
+  return it.kind === "report" || NEWS_URL_RE.test(url) || isRcogNewsArticle(url);
 }
 
 function isFiller(text = "") {
@@ -295,7 +298,7 @@ function hasBriefingWhy(text = "") {
 function rejectWhatChanged(it) {
   const wc = it.what_changed || "";
   if (isNewsLike(it)) {
-    if (!hasConcreteStatement(wc)) return "what_changed too thin for news item";
+    if (!hasConcreteStatement(wc)) return "what_changed too thin for news/announcement item";
     return null;
   }
   if (it.kind === "guideline") {
