@@ -1,6 +1,30 @@
 {
-  "updated": "2026-07-19",
+  "updated": "2026-07-21",
   "items": [
+    {
+      "id": "2026-07-gtg31-sga-growth-charts",
+      "date": "2026-07-21",
+      "kind": "guideline",
+      "source": "RCOG",
+      "weight": "practice",
+      "title": "SGA fetus (GTG31): INTERGROWTH dropped, four growth charts supported",
+      "why": "The small-for-gestational-age guideline (GTG31) no longer backs INTERGROWTH and instead supports four growth chart standards, Hadlock, WHO, FMF and GROW, without preferring any one. You will meet this in growth scan clinics and on the antenatal ward as your unit switches charts following NHS England's decision.",
+      "url": "https://www.rcog.org.uk/news/rcog-the-investigation-and-management-of-the-small-for-gestational-age-fetus-green-top-guideline-update/",
+      "link": {
+        "type": "reader",
+        "id": "GTG31"
+      }
+    },
+    {
+      "id": "2026-05-ng195-neonatal-infection-oral-switch",
+      "date": "2026-05-13",
+      "kind": "guideline",
+      "source": "NICE",
+      "weight": "practice",
+      "title": "Neonatal infection (NG195): IV-to-oral antibiotic switch and revised PROM risk",
+      "why": "The neonatal infection guideline (NG195) now permits switching from IV to oral antibiotics for suspected early-onset infection when criteria are met, and revises the fever and chorioamnionitis risk factors. Comes up on the postnatal and neonatal wards, and the reviewed evidence on term prelabour rupture of membranes affects how you counsel and monitor.",
+      "url": "https://www.nice.org.uk/guidance/ng195/chapter/Update-information"
+    },
     {
       "id": "2026-07-ng88-hmb-update",
       "date": "2026-07-07",
