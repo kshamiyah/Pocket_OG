@@ -232,6 +232,41 @@ function largelyDuplicates(a, b) {
   return false;
 }
 
+function isRetryableAnthropicError(err) {
+  const status = err?.status;
+  if (status === 529 || status === 429 || status === 503 || status === 502) return true;
+  if (err?.error?.error?.type === "overloaded_error") return true;
+  if (err?.type === "overloaded_error") return true;
+  if (err?.headers?.get?.("x-should-retry") === "true") return true;
+  return false;
+}
+
+async function sleep(ms) {
+  await new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// SDK default retries are often not enough during overload spikes.
+async function createTriageMessage(client, request) {
+  const attempts = Number(process.env.LATEST_ANTHROPIC_RETRIES || 6);
+  const baseMs = Number(process.env.LATEST_ANTHROPIC_RETRY_BASE_MS || 8000);
+  let lastErr;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await client.messages.create(request);
+    } catch (err) {
+      lastErr = err;
+      if (!isRetryableAnthropicError(err) || i === attempts - 1) throw err;
+      const wait = baseMs * (2 ** i) + Math.floor(Math.random() * 2000);
+      console.warn(
+        `Anthropic triage overloaded (${err.status ?? err.type ?? "error"}); ` +
+        `retry ${i + 1}/${attempts - 1} in ${Math.round(wait / 1000)}s`
+      );
+      await sleep(wait);
+    }
+  }
+  throw lastErr;
+}
+
 function hasBriefingWhy(text = "") {
   const t = normalizeText(text);
   // what_changed carries the auditable delta; why may use plain briefing language.
@@ -285,8 +320,8 @@ async function main() {
     decisions: recentDecisions(),
   });
 
-  const client = new Anthropic();
-  const msg = await client.messages.create({
+  const client = new Anthropic({ maxRetries: 0 });
+  const msg = await createTriageMessage(client, {
     model: MODEL,
     max_tokens: 16000,
     thinking: { type: "adaptive" },
