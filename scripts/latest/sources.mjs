@@ -1,7 +1,7 @@
 // Harvest sources for the Latest feed.
 //
 // Two kinds of source:
-//   - Structured (PubMed, gov.uk): return clean JSON we can parse into candidates.
+//   - Structured (PubMed, gov.uk MHRA, gov.uk NHSE maternity): JSON candidates.
 //   - Pages (NICE, RCOG, MBRRACE): HTML listing pages whose text we hand to the
 //     triage model to extract candidates from. More resilient than a scraper.
 //
@@ -121,6 +121,40 @@ export async function harvestGovUk() {
   return out;
 }
 
+function govUkLink(link = "") {
+  return link.startsWith("http") ? link : `https://www.gov.uk${link}`;
+}
+
+function kindHintForGovUk(url, title = "") {
+  if (/\/government\/statistics\b/i.test(url)) return "report";
+  if (/screening|handbook|pathway|immunisation|vaccination/i.test(title)) return "guideline";
+  if (/\/government\/publications\b/i.test(url)) return "guideline";
+  if (/\/government\/news\b/i.test(url)) return "report";
+  return "report";
+}
+
+// --- NHS England maternity publications & news via gov.uk search API ---
+export async function harvestNhsEnglandMaternity({ count = 15 } = {}) {
+  try {
+    const url =
+      "https://www.gov.uk/api/search.json?" +
+      `filter_organisations=nhs-england&q=maternity&order=-public_timestamp&count=${count}` +
+      "&fields=title,link,public_timestamp,description";
+    const data = await getJson(url);
+    return (data?.results ?? []).map(r => ({
+      source: "REPORT",
+      kind_hint: kindHintForGovUk(govUkLink(r.link ?? ""), r.title ?? ""),
+      title: r.title ?? "",
+      date: (r.public_timestamp ?? "").slice(0, 10),
+      description: r.description ?? "",
+      url: govUkLink(r.link ?? ""),
+    }));
+  } catch (e) {
+    console.warn(`gov.uk NHSE maternity: ${e.message}`);
+    return [];
+  }
+}
+
 // --- Tier 1/3: listing pages we hand to the model to extract from ---
 const PAGES = [
   { source: "NICE", url: "https://www.nice.org.uk/guidance/published?ndt=Guidance&ngt=Antenatal,Intrapartum,Postnatal,Fertility,Gynaecology&type=apg,csg,cg,mpg,ng,qs" },
@@ -147,6 +181,16 @@ function isListingHub(url) {
     return false;
   } catch {
     return true;
+  }
+}
+
+function isRcogNewsArticle(url) {
+  try {
+    const u = new URL(url);
+    if (!/rcog\.org\.uk$/i.test(u.hostname) || isListingHub(url)) return false;
+    return /^\/news\/[^/]+/.test(u.pathname);
+  } catch {
+    return false;
   }
 }
 
@@ -203,10 +247,9 @@ export async function harvestPages() {
   return out;
 }
 
-// Fetch the article / Update-information pages discovered on listings so triage
-// can read the actual delta. Best-effort: one dead page never fails the run.
-export async function fetchDeepExcerpts(pages, { max = 24, cap = 5000 } = {}) {
-  const queue = [];
+function buildDeepQueue(pages) {
+  const rcog = [];
+  const other = [];
   const seen = new Set();
   for (const p of pages) {
     for (const link of p.links || []) {
@@ -214,13 +257,25 @@ export async function fetchDeepExcerpts(pages, { max = 24, cap = 5000 } = {}) {
         const key = url.toLowerCase().replace(/\/$/, "");
         if (seen.has(key) || isListingHub(url)) continue;
         seen.add(key);
-        queue.push({ source: p.source, url });
+        const item = { source: p.source, url };
+        if (isRcogNewsArticle(url)) rcog.push(item);
+        else other.push(item);
       }
     }
   }
+  return { rcog, other };
+}
+
+// Fetch article / Update-information pages. Reserve slots for RCOG news posts so
+// NICE Update-information links do not crowd them out of the budget.
+export async function fetchDeepExcerpts(pages, { max = 24, rcogReserve = 8, cap = 5000 } = {}) {
+  const { rcog, other } = buildDeepQueue(pages);
+  const rcogTake = Math.min(rcogReserve, rcog.length);
+  const otherTake = Math.min(other.length, Math.max(0, max - rcogTake));
+  const plan = [...rcog.slice(0, rcogTake), ...other.slice(0, otherTake)];
 
   const out = [];
-  for (const item of queue.slice(0, max)) {
+  for (const item of plan) {
     try {
       const html = await getText(item.url);
       const text = htmlToText(html, cap);
@@ -233,4 +288,4 @@ export async function fetchDeepExcerpts(pages, { max = 24, cap = 5000 } = {}) {
   return out;
 }
 
-export { isListingHub };
+export { isListingHub, isRcogNewsArticle };

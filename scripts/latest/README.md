@@ -17,10 +17,12 @@ next online visit.
 1. **Trusted sources in** (`sources.mjs`): a locked PubMed query over a journal
    shortlist filtered on **entry date** (so a short window catches papers when
    they appear online, not months later at print), the keyless gov.uk search API
-   for MHRA safety notices, and the NICE / RCOG / MBRRACE listing pages.
+   for MHRA safety notices and **NHS England maternity** publications/news, and
+   the NICE / RCOG / MBRRACE listing pages.
 2. **Deep excerpts**: links from those listings (plus NICE `Update-information`
    pages when we only have an overview URL) are fetched so the model can see the
-   actual delta, not just that an update exists.
+   actual delta, not just that an update exists. Up to eight deep-fetch slots are
+   reserved for **RCOG news articles** so NICE links do not crowd them out.
 3. **Dedupe** against everything already surfaced (`latest.json` ids + urls, plus
    `seen.json`), so nothing returns a second time.
 4. **Triage** (`harvest.mjs`): Claude scores each candidate against an explicit
