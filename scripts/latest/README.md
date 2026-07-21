@@ -44,8 +44,8 @@ lines get your review before merge.
 
 Add repository secrets:
 
-- `ANTHROPIC_API_KEY` (required)
-- `ANTHROPIC_MODEL` (optional; defaults to `claude-opus-4-8`)
+- `anthropic_api_key` (required GitHub Actions secret; passed to the harvester as `ANTHROPIC_API_KEY`)
+- `ANTHROPIC_MODEL` (optional; defaults to `claude-sonnet-5`)
 - `PUBMED_API_KEY` (optional; raises NCBI rate limits)
 
 ## Teaching it your taste

@@ -34,7 +34,7 @@ const DECISIONS_PATH = resolve(HERE, "decisions.jsonl");
 const READER_PATH = resolve(REPO, "apps/pocket-og/src/data/readerAvailable.js");
 const FLOWCHARTS_PATH = resolve(REPO, "apps/pocket-og/src/data/flowcharts.js");
 
-const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
+const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
 const MAX_ITEMS = Number(process.env.LATEST_MAX_ITEMS || 10);
 const RESEARCH_SUBCAP = Number(process.env.LATEST_RESEARCH_SUBCAP || 3);
 const LOOKBACK_DAYS = Number(process.env.LATEST_LOOKBACK_DAYS || 3);
