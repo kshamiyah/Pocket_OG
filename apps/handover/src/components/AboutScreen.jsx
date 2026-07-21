@@ -41,6 +41,14 @@ export default function AboutScreen({ onBack }) {
             A handover QR or link only carries the jobs you choose to send.
             Private bed notes are never included.
           </p>
+          <a
+            href="/privacy.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block mt-2 text-sm font-semibold text-claude-600 dark:text-claude-400 underline underline-offset-2"
+          >
+            Read the full privacy policy
+          </a>
         </div>
 
         <div className={SECTION}>
