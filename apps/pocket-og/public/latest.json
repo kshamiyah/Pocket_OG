@@ -1,6 +1,26 @@
 {
-  "updated": "2026-07-19",
+  "updated": "2026-07-21",
   "items": [
+    {
+      "id": "2026-06-marthas-rule-maternity-rollout",
+      "date": "2026-06-24",
+      "kind": "report",
+      "source": "REPORT",
+      "weight": "practice",
+      "title": "Martha's Rule rolled out to all maternity settings",
+      "why": "Martha's Rule, the pathway letting patients or families trigger an urgent clinical review, now covers every maternity setting in England. Expect a formal escalation route on your ward and make sure you know how to respond promptly when it is invoked.",
+      "url": "https://www.gov.uk/government/news/marthas-rule-extended-to-all-maternity-services"
+    },
+    {
+      "id": "2026-06-nhse-maternity-neonatal-commissioner",
+      "date": "2026-06-29",
+      "kind": "report",
+      "source": "REPORT",
+      "weight": "aware",
+      "title": "England appoints first maternity and neonatal commissioner",
+      "why": "England now has a dedicated maternity and neonatal commissioner backed by new funding to push consistency across units. This is background for handover chat about safety reforms rather than something that changes bedside practice yet.",
+      "url": "https://www.gov.uk/government/news/uks-first-maternity-and-neonatal-commissioner-to-be-appointed"
+    },
     {
       "id": "2026-07-ng88-hmb-update",
       "date": "2026-07-07",
