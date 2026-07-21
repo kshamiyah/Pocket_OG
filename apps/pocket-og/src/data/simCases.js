@@ -11,16 +11,25 @@
 //   lesson    — closing teaching screen: takeaways, score and deep links
 // Any beat may also carry:
 //   time      — clock time shown in the feed ("18:40"), advancing the shift
-//   dialogue  — [{ who: "patient" | "midwife", text }] spoken lines, rendered
-//               as speech bubbles between the narrative and the question
+//   dialogue  — [{ who: "patient" | "midwife", text }] spoken lines
+//   obs       — flat key/value pairs logged to Notes (legacy vitals fallback)
+//   bedside   — structured panel: { kind: "vitals"|"ctg"|"scan", ... }
 //
-// A choice beat with `fromNode: { fc, node }` renders the live options of that
-// flowchart decision node, so guideline updates flow through automatically.
+// A choice beat with `fromNode: { fc, node }` ties the answer index to the
+// flowchart node. Optional `options` override the labels shown in the sim
+// (action-oriented wording); if omitted, options are pulled verbatim from the node.
 // Distractors in authored beats are real pathway actions that are wrong for
 // this patient, or approaches the guideline explicitly recommends against;
 // nothing is invented.
 
 import { FLOWCHARTS } from "./flowcharts";
+
+// Options for a choice beat: authored options first, else flowchart node verbatim.
+export function beatOptions(beat) {
+  if (beat.options?.length) return beat.options;
+  if (beat.fromNode) return nodeOptions(beat.fromNode.fc, beat.fromNode.node);
+  return [];
+}
 
 // Options of a flowchart decision node, verbatim.
 export function nodeOptions(fcId, nodeId) {
@@ -113,13 +122,36 @@ export const SIM_CASES = [
       {
         kind: "choice",
         time: "19:24",
-        narrative: "The computerised CTG runs for 24 minutes and meets criteria: baseline 145 bpm, normal variability, accelerations present, no decelerations. Amara felt a couple of flutters during the trace. You come back to review it and she catches your eye before you can speak.",
-        obs: { "cCTG": "criteria met, 24 min", "Baseline": "145 bpm", "Accelerations": "present" },
+        narrative: "The computerised CTG runs for 24 minutes. The printout shows a reactive trace: baseline 145 bpm, variability 5–25 bpm, accelerations coinciding with the flutters Amara felt, and no decelerations. Computerised interpretation: normal. You come back to review it and she catches your eye before you can speak.",
+        bedside: {
+          kind: "ctg",
+          duration: "24 min · computerised",
+          category: "normal",
+          source: "NG229 §1.4 · GTG57 computerised CTG",
+          features: [
+            { label: "Baseline", value: "145 bpm", grade: "white" },
+            { label: "Variability", value: "5–25 bpm", grade: "white" },
+            { label: "Accelerations", value: "Present with movements", grade: "white" },
+            { label: "Decelerations", value: "None", grade: "white" },
+          ],
+        },
+        obs: {
+          "CTG": "Normal (24 min)",
+          "Baseline": "145 bpm",
+          "Variability": "5–25 bpm",
+          "Accelerations": "present",
+          "Decelerations": "none",
+        },
         dialogue: [
           { who: "patient", text: "The machine looked fine, the midwife said. But the kicks still feel less than they should be. I know her." },
         ],
         question: "The CTG is normal. Following the RFM care pathway, what happens next?",
         fromNode: { fc: "GTG57_CARE_PATHWAY", node: "ctg-result" },
+        options: [
+          { label: "Senior obstetrician review", sublabel: "CTG suspicious or pathological" },
+          { label: "Reassure and discharge", sublabel: "Movements back to normal, no risk factors" },
+          { label: "Book an ultrasound scan", sublabel: "Growth, liquor and umbilical artery Doppler" },
+        ],
         answer: 2,
         why: "The CTG is normal, but her perception of reduced movements persists and she has a risk factor (smoking, aOR 2.96 for adverse outcome). A normal CTG with persisting RFM or any risk factor for FGR or stillbirth is an indication for ultrasound assessment: EFW and abdominal circumference, amniotic fluid volume and umbilical artery Doppler. Discharge on the strength of the CTG alone would be premature here.",
         source: { gl: "GTG57", sectionId: "gtg57-clinical-assessment", label: "GTG57 · USS after normal CTG (when indicated)" },
@@ -128,9 +160,22 @@ export const SIM_CASES = [
         kind: "choice",
         time: "20:05",
         narrative: "The on-call sonographer fits her in. You watch the screen together: EFW 2,350 g on the 48th centile, deepest vertical pocket 5.2 cm, umbilical artery Doppler with normal PI and end-diastolic flow present. Growth is tracking its curve. Amara watches your face, not the screen.",
+        bedside: {
+          kind: "scan",
+          title: "Ultrasound",
+          findings: [
+            { label: "EFW", value: "2,350 g", sub: "48th centile" },
+            { label: "Liquor (DVP)", value: "5.2 cm", sub: "Normal volume" },
+            { label: "UA Doppler", value: "Normal PI", sub: "End-diastolic flow present" },
+          ],
+        },
         obs: { "EFW": "2,350 g (48th)", "DVP": "5.2 cm", "UA Doppler": "normal PI, EDF present" },
         question: "How do you act on these ultrasound findings?",
         fromNode: { fc: "GTG57_CARE_PATHWAY", node: "uss-result" },
+        options: [
+          { label: "Reassure her and arrange discharge", sublabel: "Normal growth, liquor and Doppler" },
+          { label: "Manage as SGA or abnormal scan", sublabel: "Follow GTG31" },
+        ],
         answer: 0,
         why: "Growth, liquor and Doppler are all normal, so there is no objective evidence of fetal compromise. She should be reassured: with normal investigations there is no indication for expediting birth (Grade A), and around 70% of women with RFM go on to have a good pregnancy outcome. Had the scan shown SGA, oligohydramnios or an abnormal Doppler, management would follow GTG31.",
         source: { gl: "GTG57", sectionId: "gtg57-after-normal-investigations", label: "GTG57 · After normal investigations" },
