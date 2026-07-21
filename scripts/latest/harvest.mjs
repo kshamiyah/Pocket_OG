@@ -13,6 +13,8 @@
 //   3. dedupe against everything already surfaced (latest.json + seen.json)
 //   4. Claude scores each candidate; drafts what_changed (reviewer) + why (app, two sentences)
 //   5. post-filter rejects filler, duplicate why/delta, and listing-hub URLs
+//      (guideline items need a changelog delta; news/report items need a clear
+//      what-happened statement instead)
 //   6. a human reviews and merges the PR (the real quality gate)
 //
 // The model never invents clinical claims: it quotes titles, links to primary
@@ -48,6 +50,7 @@ const LINK_TYPES = ["reader", "flowchart", "calculator", "consent", "drug", ""];
 const FILLER_RE = /\b(check (the|your|against)|review (the|before)|confirm (any|the)|familiarise|worth checking|read the (source|guidance|guideline|full)|see the (update|source|guidance)|go (and )?read)\b/i;
 // Verbs / markers that usually mean a concrete delta was named.
 const DELTA_RE = /\b(removes?|removed|adds?|added|defines?|defined|clarifies?|clarified|recommends?|recommended|no longer|do not offer|offers?|offered|threshold|cut-?off|vs\.?|versus|compared|non-inferior|discontinu|withdraws?|withdrawn|replaces?|replaced|renames?|renamed|introduces?|introduced|strengthens?|amends?|amended|updates? the (definition|recommendation|advice))\b/i;
+const NEWS_URL_RE = /\/government\/news\b/i;
 
 function readJson(path, fallback) {
   try { return JSON.parse(readFileSync(path, "utf8")); } catch { return fallback; }
@@ -120,10 +123,12 @@ RELEVANCE RUBRIC (score each candidate, keep only the strongest):
    UK bodies govern our practice (NHSCSP for screening, BHIVA for HIV, FSRH for contraception,
    BGCS for gynae-oncology, BSH for haematology). US society guidance rarely changes UK practice.
 2. Would a UK O&G trainee change or check their practice, or want to sound current, because of this?
-3. Actionability or currency. Practice-changing guidance and safety notices rank highest.
-   New tests / devices / treatments on the horizon (kind "research") are welcome even before they
-   change UK practice, if a trainee would want to know about them. Reject basic science, animal
-   studies, protocol papers, recruitment-methods papers, and pure health-policy noise.
+3. Actionability or currency. Practice-changing guidance, safety notices, and national maternity
+   news rank highest. Include NHSE / RCOG news when a trainee would want to sound current or it
+   may affect local practice (e.g. national reviews, rollout of a safety intervention). New tests /
+   devices / treatments on the horizon (kind "research") are welcome even before they change UK
+   practice, if a trainee would want to know about them. Reject basic science, animal studies,
+   protocol papers, recruitment-methods papers, and generic health-policy noise with no O&G hook.
 4. When in doubt, drop it. A thin, high-signal feed beats a full one. An empty cycle is fine.
 
 VOICE (how this reads in the app):
@@ -145,11 +150,16 @@ OUTPUT RULES:
   bleeding on HRT", not "NG23 aligns with…". For trials/reports, lead with the finding or topic.
   Do not sensationalise.
 - what_changed: REQUIRED for the human reviewer only (shown in the PR, not in the app). ONE sentence
-  naming the concrete delta from the source. Plain language; topic (CODE) on first mention. Include
-  the key number, dose, threshold, product, or definition when the source gives one and it is the
-  story. BAD: "NICE updated NG88; check the pathway." GOOD: "Heavy menstrual bleeding (NG88): July
-  2026 removes the old advice against routine serum ferritin (rec 1.2.8)." If deep_excerpts do not
-  let you name the delta, DROP the item. Never invent a delta.
+  grounded in the source. Plain language; topic (CODE) on first mention for guidelines.
+  For kind "report" and gov.uk news URLs: state what happened (who announced what, scope, timing).
+  Rec numbers and changelog verbs are not required for news. GOOD (news): "NHS England extended
+  Martha's Rule to all maternity settings after a national review of serious incidents." For kind
+  "guideline" with an actual amendment: name the concrete delta; include the key number, dose,
+  threshold, product, or definition when the source gives one and it is the story. BAD: "NICE
+  updated NG88; check the pathway." GOOD (guideline): "Heavy menstrual bleeding (NG88): July 2026
+  removes the old advice against routine serum ferritin (rec 1.2.8)." For safety / trial / research,
+  a clear finding or alert statement is enough when there is no rec-level delta. If the source does
+  not let you state what happened or changed, DROP the item. Never invent facts.
 - why: REQUIRED. Exactly TWO sentences, stored verbatim in the app (what_changed is NOT appended).
   Sentence 1 (gist): the concrete change in plain language; must stand alone as the teaser. Topic
   before code, e.g. "The menopause guideline (NG23) now…", never "NG23 now…". One main idea; avoid
@@ -207,6 +217,15 @@ function normalize(url = "") {
 
 function hasDelta(text = "") {
   return DELTA_RE.test(text) && text.trim().length >= 40;
+}
+
+function hasConcreteStatement(text = "") {
+  const t = normalizeText(text);
+  return t.length >= 40 && !isFiller(t);
+}
+
+function isNewsLike(it) {
+  return it.kind === "report" || NEWS_URL_RE.test(it.url || "");
 }
 
 function isFiller(text = "") {
@@ -273,10 +292,27 @@ function hasBriefingWhy(text = "") {
   return t.length >= 50 && !isFiller(t);
 }
 
+function rejectWhatChanged(it) {
+  const wc = it.what_changed || "";
+  if (isNewsLike(it)) {
+    if (!hasConcreteStatement(wc)) return "what_changed too thin for news item";
+    return null;
+  }
+  if (it.kind === "guideline") {
+    if (!hasDelta(wc)) return "what_changed missing a concrete delta";
+    return null;
+  }
+  if (!hasDelta(wc) && !hasConcreteStatement(wc)) {
+    return "what_changed missing a concrete delta or clear statement";
+  }
+  return null;
+}
+
 function rejectReason(it) {
   if (!it.id || !it.title || !it.url) return "missing id/title/url";
   if (isListingHub(it.url)) return `listing-hub url: ${it.url}`;
-  if (!hasDelta(it.what_changed || "")) return "what_changed missing a concrete delta";
+  const wcReject = rejectWhatChanged(it);
+  if (wcReject) return wcReject;
   const why = feedWhy(it.why || "");
   if (!why) return "why missing";
   if (!hasBriefingWhy(why)) return "why too short or filler-only";
