@@ -34,8 +34,14 @@ export default function ScanScreen({ onBack, onScanned }) {
         await videoRef.current.play();
         setCameraReady(true);
         tick();
-      } catch {
-        setError("Couldn't access the camera. Paste the handover link instead.");
+      } catch (err) {
+        if (err?.name === "NotAllowedError" || err?.name === "SecurityError") {
+          setError("Camera access is off. Allow it in Settings, or paste the handover link below.");
+        } else if (err?.name === "NotFoundError" || err?.name === "OverconstrainedError") {
+          setError("No camera found. Paste the handover link below instead.");
+        } else {
+          setError("Couldn't start the camera. Paste the handover link below instead.");
+        }
       }
     }
 
