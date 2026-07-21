@@ -226,14 +226,19 @@ function largelyDuplicates(a, b) {
   return false;
 }
 
+function hasBriefingWhy(text = "") {
+  const t = normalizeText(text);
+  // what_changed carries the auditable delta; why may use plain briefing language.
+  return t.length >= 50 && !isFiller(t);
+}
+
 function rejectReason(it) {
   if (!it.id || !it.title || !it.url) return "missing id/title/url";
   if (isListingHub(it.url)) return `listing-hub url: ${it.url}`;
   if (!hasDelta(it.what_changed || "")) return "what_changed missing a concrete delta";
   const why = feedWhy(it.why || "");
   if (!why) return "why missing";
-  if (isFiller(why) && !hasDelta(why)) return "why is filler without a delta";
-  if (!hasDelta(why)) return "why missing a concrete change";
+  if (!hasBriefingWhy(why)) return "why too short or filler-only";
   if (largelyDuplicates(it.what_changed, why)) return "why duplicates what_changed";
   return null;
 }
