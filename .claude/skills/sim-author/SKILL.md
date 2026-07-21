@@ -59,18 +59,30 @@ Assign each case a level (1/2/3) using `reference/difficulty-rubric.md`. Turn
 the difficulty *dials* deliberately; do not fake difficulty with obscurity or
 trickery. State which level each case targets and why.
 
-### 3. Draft the wrapper
-Write the beats into the schema: an `info` opener that sets the scene, then the
-scored `choice` / `checklist` beats along the path, then the `lesson`. Prefer
+### 3. Scaffold the skeleton (optional but recommended)
+Let the scaffolder lay down the bones so the answer indices come straight from
+the flowchart and cannot be typed wrong. From the repo root:
+
+- See the flowchart's decision points and pick a path:
+  `node scripts/scaffoldSim.mjs <FLOWCHART_ID>`
+- Emit a case skeleton for a chosen path (one option index per decision):
+  `node scripts/scaffoldSim.mjs <FLOWCHART_ID> --path 2,1`
+
+It prints a `SIM_CASES` entry full of TODOs with `fromNode` and `answer` already
+filled from the pathway. The medicine is inherited; your job is the wrapper.
+
+### 4. Draft the wrapper
+Fill every TODO: an `info` opener that sets the scene, then the scored
+`choice` / `checklist` beats along the path, then the `lesson`. Prefer
 `fromNode` for decision beats. Follow `reference/style-guide.md` for voice,
 British English, no em dashes, the clock, dialogue and the disclaimer framing.
 
-### 4. Bind and cite every answer
+### 5. Bind and cite every answer
 Every scored beat gets a `source: { gl, sectionId, label }` receipt pointing at
 a real, reader-available section. Write the `why` so it quotes or paraphrases
 that section, never beyond it. See `reference/traceability.md`.
 
-### 5. Self-check before handing over
+### 6. Self-check before handing over
 Run, from `apps/pocket-og`:
 - `../../node_modules/.bin/vitest run src/data/simCheck.test.js src/data/simStyleCheck.test.js`
 - `../../node_modules/.bin/eslint src/data/simCases.js`
@@ -78,15 +90,15 @@ Fix everything red. The integrity test enforces that every node, option index,
 receipt and link resolves; the style test enforces the house rules. A draft that
 does not pass both is not ready.
 
-### 6. Present for review
+### 7. Present for review
 Hand each case over as a **playable draft**, never as JSON to proofread. Mark it
 `draft: true`, give Khalid the preview deep link (`?sim=<id>`), and a short crib:
 the difficulty level, the decisions, and the source each answer is bound to.
 Then Khalid **approves / alters / rejects**. See `reference/review-and-publish.md`.
 
-### 7. Publish on approval
+### 8. Publish on approval
 On approval, remove the `draft` flag and commit. Rejected cases are discarded.
-"Alter" loops back to step 3 for that case only.
+"Alter" loops back to step 4 for that case only.
 
 ## Modes
 
