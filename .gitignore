@@ -26,7 +26,9 @@ scripts/latest/pr-body.md
 *.sln
 *.sw?
 .vercel
-.claude/
+.claude/*
+!.claude/launch.json
+!.claude/skills/
 screenshots*.js
 
 # generated search ranker comparison report
