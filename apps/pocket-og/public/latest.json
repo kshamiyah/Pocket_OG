@@ -1,6 +1,40 @@
 {
-  "updated": "2026-07-19",
+  "updated": "2026-07-21",
   "items": [
+    {
+      "id": "2026-04-ng23-hrt-bleeding-update",
+      "date": "2026-04-15",
+      "kind": "guideline",
+      "source": "NICE",
+      "weight": "practice",
+      "title": "NICE menopause guideline aligns HRT bleeding advice with suspected cancer pathway",
+      "why": "April 2026 amends recommendation 1.8.4 and adds 1.8.5 on unscheduled vaginal bleeding while taking systemic HRT, bringing NG23 into line with the suspected cancer guideline on when to investigate. When counselling women starting or on systemic HRT, treat persistent unscheduled bleeding as a trigger for endometrial assessment; the app guide reflects the earlier edition.",
+      "url": "https://www.nice.org.uk/guidance/ng23/chapter/Update-information",
+      "link": {
+        "type": "reader",
+        "id": "NG23"
+      }
+    },
+    {
+      "id": "2026-05-ng195-iv-oral-antibiotic-switch",
+      "date": "2026-05-13",
+      "kind": "guideline",
+      "source": "NICE",
+      "weight": "practice",
+      "title": "NICE neonatal infection guideline allows IV-to-oral antibiotic switch for early-onset infection",
+      "why": "May 2026 adds [2026] recommendations permitting a switch from IV to oral antibiotics in suspected early-onset neonatal infection, amends fever and chorioamnionitis risk factors on safety grounds, and reviews the PROM-to-birth interval at term. Relevant to maternity teams counselling on term prelabour rupture of membranes and to neonatal antibiotic decisions, potentially enabling earlier discharge home.",
+      "url": "https://www.nice.org.uk/guidance/ng195/chapter/Update-information"
+    },
+    {
+      "id": "2026-04-ng198-isotretinoin-two-hcp-removed",
+      "date": "2026-04-30",
+      "kind": "guideline",
+      "source": "NICE",
+      "weight": "aware",
+      "title": "NICE acne guideline drops two-clinician sign-off for isotretinoin in under-18s",
+      "why": "April 2026 amends recommendations 1.5.19 and 1.5.20 to remove the requirement for two independent healthcare professionals to approve isotretinoin in people under 18, replaced by new MHRA risk minimisation measures. Relevant when co-managing acne in young women of reproductive age, where the pregnancy prevention programme still applies despite the streamlined approval.",
+      "url": "https://www.nice.org.uk/guidance/ng198/chapter/Update-information"
+    },
     {
       "id": "2026-07-ng88-hmb-update",
       "date": "2026-07-07",
