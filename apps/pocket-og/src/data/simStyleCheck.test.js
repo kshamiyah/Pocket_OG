@@ -21,6 +21,12 @@ function authoredStrings(c) {
     (b.links ?? []).forEach(l => push(l.label));
     push(b.why);
     if (b.source && typeof b.source === "object") push(b.source.label);
+    if (b.bedside) {
+      push(b.bedside.duration, b.bedside.category, b.bedside.summary, b.bedside.impression);
+      (b.bedside.features ?? []).forEach(f => push(f.label, f.value));
+      (b.bedside.rows ?? []).forEach(r => push(r.label, r.value));
+    }
+    if (b.obs) Object.entries(b.obs).forEach(([k, v]) => push(k, v));
   }
   return out;
 }
