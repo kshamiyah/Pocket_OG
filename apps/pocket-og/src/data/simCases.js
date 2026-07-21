@@ -34,6 +34,7 @@ export const SIM_CASES = [
     title: "Reduced fetal movements",
     setting: "Maternity Assessment Unit",
     gl: "GTG57",
+    difficulty: 2,
     room: "Room 2",
     intro: "A midwife hands you the triage card for the next patient. All patients in this simulation are fictional.",
     patient: {
@@ -69,7 +70,7 @@ export const SIM_CASES = [
         ],
         answer: 0,
         why: "RFM is the presenting symptom in around 50% of intrauterine fetal deaths, so the first priority is always to confirm fetal viability with handheld Doppler auscultation, differentiating the fetal heart from the maternal pulse (the FHR should be roughly double the maternal rate). CTG and USS have their place later in the pathway, and an anterior placenta must never be used to falsely reassure.",
-        source: "GTG57 · RFM care pathway (initial assessment)",
+        source: { gl: "GTG57", sectionId: "gtg57-clinical-assessment", label: "GTG57 · Clinical assessment when RFM presents" },
       },
       {
         kind: "checklist",
@@ -88,7 +89,7 @@ export const SIM_CASES = [
           { label: "Book a routine USS for every RFM presentation", required: false, why: "Routine USS for all RFM presentations is not recommended: in the AFFIRM trial it did not reduce stillbirth but increased induction and caesarean rates. USS is for selected cases." },
           { label: "Biophysical profile", required: false, why: "There is insufficient evidence to recommend the biophysical profile routinely in RFM." },
         ],
-        source: "GTG57 · Clinical assessment when RFM presents",
+        source: { gl: "GTG57", sectionId: "gtg57-clinical-assessment", label: "GTG57 · Clinical assessment when RFM presents" },
       },
       {
         kind: "choice",
@@ -107,7 +108,7 @@ export const SIM_CASES = [
         ],
         answer: 0,
         why: "At 26+0 weeks or beyond, once viability is confirmed, a computerised CTG for at least 20 minutes is used to exclude acute fetal compromise. Computerised interpretation is preferred because it reduces inter-observer variation; a reactive trace with accelerations alongside movements indicates an intact fetal autonomic nervous system. A Doppler heartbeat alone says nothing about compromise.",
-        source: "GTG57 · Computerised CTG (≥26 weeks)",
+        source: { gl: "GTG57", sectionId: "gtg57-clinical-assessment", label: "GTG57 · Computerised CTG (≥26 weeks)" },
       },
       {
         kind: "choice",
@@ -121,7 +122,7 @@ export const SIM_CASES = [
         fromNode: { fc: "GTG57_CARE_PATHWAY", node: "ctg-result" },
         answer: 2,
         why: "The CTG is normal, but her perception of reduced movements persists and she has a risk factor (smoking, aOR 2.96 for adverse outcome). A normal CTG with persisting RFM or any risk factor for FGR or stillbirth is an indication for ultrasound assessment: EFW and abdominal circumference, amniotic fluid volume and umbilical artery Doppler. Discharge on the strength of the CTG alone would be premature here.",
-        source: "GTG57 · RFM care pathway (CTG result)",
+        source: { gl: "GTG57", sectionId: "gtg57-clinical-assessment", label: "GTG57 · USS after normal CTG (when indicated)" },
       },
       {
         kind: "choice",
@@ -132,7 +133,7 @@ export const SIM_CASES = [
         fromNode: { fc: "GTG57_CARE_PATHWAY", node: "uss-result" },
         answer: 0,
         why: "Growth, liquor and Doppler are all normal, so there is no objective evidence of fetal compromise. She should be reassured: with normal investigations there is no indication for expediting birth (Grade A), and around 70% of women with RFM go on to have a good pregnancy outcome. Had the scan shown SGA, oligohydramnios or an abnormal Doppler, management would follow GTG31.",
-        source: "GTG57 · After normal investigations",
+        source: { gl: "GTG57", sectionId: "gtg57-after-normal-investigations", label: "GTG57 · After normal investigations" },
       },
       {
         kind: "choice",
@@ -150,7 +151,7 @@ export const SIM_CASES = [
         ],
         answer: 0,
         why: "Formal fetal movement counting to a specified number is not recommended (Grade A); awareness of the baby's individual pattern matters more than a target. She should be told that movements do not decrease towards term and to attend immediately with any further RFM, never to wait out a silent day. And with normal investigations there is no indication for induction: AFFIRM showed routine intervention increased inductions and caesareans without reducing stillbirth. If she re-attends, recurrent RFM makes ultrasound mandatory.",
-        source: "GTG57 · After normal investigations; AFFIRM trial",
+        source: { gl: "GTG57", sectionId: "gtg57-after-normal-investigations", label: "GTG57 · After normal investigations (AFFIRM)" },
       },
       {
         kind: "lesson",

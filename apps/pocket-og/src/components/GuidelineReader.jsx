@@ -198,7 +198,7 @@ export default function GuidelineReader({ gl, onClose, onNavigate, scrollToSecti
   }, [gl, scrollToSectionId]);
 
   return (
-    <div className="fixed inset-0 z-40 bg-white flex flex-col">
+    <div className="fixed inset-0 z-50 bg-white flex flex-col">
 
       {/* Main header */}
       <div className="shrink-0 bg-white border-b border-gray-100">

@@ -10,6 +10,7 @@ export const UPDATES = [
     changes: [
       { tag: "new", text: "On Call, a case simulation on the home screen: a fictional patient arrives in the Maternity Assessment Unit with reduced fetal movements, and you make the calls, from first priority at the bedside through CTG and ultrasound decisions to discharge advice. Six scored questions, each marked against GTG57 with the reasoning and source shown, ending with a lesson screen and links into the guide and flowcharts. Decision questions take their options live from the RFM care pathway flowchart, so the sim always matches the guidance. More patients and settings (antenatal clinic, delivery suite) to follow." },
       { tag: "improved", text: "The sim plays as a live encounter, not a quiz: the shift clock advances from triage to discharge, the patient and midwife speak in their own words, observations land on a bedside-monitor panel, and every decision you make is recorded in the running transcript with the guideline's verdict beside it." },
+      { tag: "improved", text: "Every right or wrong verdict in the sim now carries a tappable receipt that opens the exact guideline section it is based on, so any answer can be checked against the source in the app. Guideline pages also now sit above the tab bar when open, matching the flowchart view." },
     ],
   },
   {

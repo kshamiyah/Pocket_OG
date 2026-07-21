@@ -15,6 +15,26 @@ function beatOptions(beat) {
   return beat.options ?? [];
 }
 
+// The clickable receipt behind every verdict: opens the cited guideline at the
+// exact section, stacking over the sim so closing it returns to the case.
+function SourceReceipt({ source, onNavigate }) {
+  if (!source) return null;
+  const label = typeof source === "string" ? source : source.label;
+  const canOpen = typeof source === "object" && source.gl;
+  if (!canOpen) return <p className="mt-2 text-xs text-gray-400">{label}</p>;
+  return (
+    <button
+      onClick={() => onNavigate?.({ type: "reader", id: source.gl, sectionId: source.sectionId })}
+      className="mt-2 inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 underline underline-offset-2 decoration-gray-300 transition-colors"
+    >
+      <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75h6.75a.75.75 0 01.75.75v9.75a.75.75 0 01-.75.75H5.25a.75.75 0 01-.75-.75V7.5a.75.75 0 01.75-.75H9m3 0V4.5m0 2.25L9.75 4.5M12 6.75L14.25 4.5" />
+      </svg>
+      {label}
+    </button>
+  );
+}
+
 // Bedside monitor. Fixed dark styling in both themes (it reads as a monitor),
 // so it uses arbitrary-value classes the dark remap leaves alone.
 function ObsMonitor({ obs }) {
@@ -157,7 +177,10 @@ export default function SimPlayer({ simCase, onClose, onNavigate }) {
                   return (
                     <div key={i} className="flex items-start gap-2 text-sm">
                       <span className={`mt-0.5 shrink-0 font-bold ${ok ? "text-green-600" : "text-amber-600"}`}>{ok ? "✓" : "✕"}</span>
-                      <span className="text-gray-700 leading-snug">{b.time && <span className="text-gray-400 tabular-nums mr-1">{b.time}</span>}{label}</span>
+                      <div className="min-w-0">
+                        <span className="text-gray-700 leading-snug">{b.time && <span className="text-gray-400 tabular-nums mr-1">{b.time}</span>}{label}</span>
+                        <div><SourceReceipt source={b.source} onNavigate={onNavigate} /></div>
+                      </div>
                     </div>
                   );
                 })}
@@ -326,10 +349,10 @@ export default function SimPlayer({ simCase, onClose, onNavigate }) {
                 <div className={`mt-4 rounded-2xl border p-4 ${correct ? "bg-green-50 border-green-100" : "bg-amber-50 border-amber-100"}`}>
                   <p className={`text-xs font-bold mb-1.5 ${correct ? "text-green-700" : "text-amber-700"}`}>{correct ? "Right call" : "Not quite"}</p>
                   <p className="text-sm text-gray-700 leading-relaxed">{beat.why}</p>
-                  {beat.source && <p className="mt-2 text-xs text-gray-400">{beat.source}</p>}
+                  <SourceReceipt source={beat.source} onNavigate={onNavigate} />
                 </div>
               )}
-              {beat.kind === "checklist" && beat.source && <p className="mt-3 text-xs text-gray-400">{beat.source}</p>}
+              {beat.kind === "checklist" && <SourceReceipt source={beat.source} onNavigate={onNavigate} />}
               <button onClick={advance} className={`mt-3 w-full py-3.5 rounded-2xl text-sm font-semibold text-white transition-colors ${theme.solid} ${theme.solidHover}`}>
                 Continue →
               </button>

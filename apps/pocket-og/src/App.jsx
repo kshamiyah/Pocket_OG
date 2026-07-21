@@ -283,7 +283,7 @@ export default function App() {
   const glSectionRefs = useRef({});
   const fcSectionRefs = useRef({});
 
-  const handleNavigate = ({ type, id }) => {
+  const handleNavigate = ({ type, id, sectionId }) => {
     if (type === "calculator") {
       setActiveFlowchartId(null);
       setActiveCalcScenario(id);
@@ -306,7 +306,7 @@ export default function App() {
     } else if (type === "sim") {
       setActiveSimId(id);
     } else if (type === "reader") {
-      setGuidelineScrollTo(null);
+      setGuidelineScrollTo(sectionId ?? null);
       setActiveGuidelineGl(id);
     } else if (type === "trial") {
       setActiveFlowchartId(null);
