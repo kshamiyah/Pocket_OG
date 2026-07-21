@@ -12,6 +12,21 @@ Everything else is time. A Mac is required for the iOS build.
 
 ---
 
+## Locked-in reference values
+
+| Value | Setting |
+|-------|---------|
+| Bundle ID / App ID | `com.drshamiyah.handover` |
+| Store name | **TBD** (working: Ward Handover) |
+| Privacy policy URL | `https://pocket-handover.vercel.app/privacy.html` |
+| Support / contact email | `k.shamiyah@gmail.com` |
+| Production domain | `pocket-handover.vercel.app` |
+
+> The privacy policy URL only goes live once this branch is deployed to the
+> handover production project on Vercel.
+
+---
+
 ## Phase 0 — Decisions to make first
 
 - [ ] **Pick a distinct store name.** "Handover" alone is generic and almost

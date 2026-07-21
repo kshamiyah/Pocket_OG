@@ -38,6 +38,14 @@ Or edit `apps/handover/ios/App/App/Info.plist` directly and add:
 <string>Handover uses the camera to scan a colleague's handover QR code.</string>
 ```
 
+While in `Info.plist`, also add this so the export-compliance question is skipped
+on every upload (the app uses no non-exempt encryption):
+
+```xml
+<key>ITSAppUsesNonExemptEncryption</key>
+<false/>
+```
+
 ## 3. Set the display name
 
 In Xcode → App target → **General** → **Display Name:** `Handover`
