@@ -45,8 +45,9 @@ In Xcode → App target → **General** → **Display Name:** `Handover`
 
 ## 4. App icon + launch screen
 
-- Drop the 1024×1024 marketing icon into the asset catalog
-  (`Assets.xcassets/AppIcon`). We'll generate the icon set separately.
+- Drop `apps/handover/public/icon-1024.png` (already generated: 1024×1024,
+  square, opaque, no alpha) into the asset catalog (`Assets.xcassets/AppIcon`).
+  Xcode generates the smaller sizes from it.
 - Capacitor ships a default launch screen; we can theme it to match the app's
   `#fbe9e7` background.
 
