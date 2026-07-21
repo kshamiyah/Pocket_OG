@@ -24,10 +24,11 @@ next online visit.
 3. **Dedupe** against everything already surfaced (`latest.json` ids + urls, plus
    `seen.json`), so nothing returns a second time.
 4. **Triage** (`harvest.mjs`): Claude scores each candidate against an explicit
-   UK-O&G-trainee rubric. The schema requires a separate `what_changed` field
-   (concrete delta) plus a ward-facing `why`. Items with filler "check the
-   source" copy or listing-hub URLs are dropped in post-filter. Capped at
-   `LATEST_MAX_ITEMS` (default 10) with a research sub-cap
+   UK-O&G-trainee rubric. It drafts `what_changed` for the PR reviewer and a
+   two-sentence `why` for the app (gist + ward hook): topic before guideline code,
+   briefing tone not changelog prose. `what_changed` is not merged into the feed.
+   Items with filler copy, duplicate why/delta, or listing-hub URLs are dropped.
+   Capped at `LATEST_MAX_ITEMS` (default 10) with a research sub-cap
    (`LATEST_RESEARCH_SUBCAP`, default 3).
 5. **Human review** in the PR: the real filter.
 

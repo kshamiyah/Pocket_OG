@@ -10,8 +10,8 @@
 //   1. narrow, trusted sources in (PubMed journal shortlist, gov.uk, NICE/RCOG)
 //   2. deep-fetch Update-information / article pages so the delta is in context
 //   3. dedupe against everything already surfaced (latest.json + seen.json)
-//   4. Claude scores each candidate; must name what_changed (concrete delta)
-//   5. post-filter rejects filler "why" lines and listing-hub URLs
+//   4. Claude scores each candidate; drafts what_changed (reviewer) + why (app, two sentences)
+//   5. post-filter rejects filler, duplicate why/delta, and listing-hub URLs
 //   6. a human reviews and merges the PR (the real quality gate)
 //
 // The model never invents clinical claims: it quotes titles, links to primary
@@ -123,6 +123,12 @@ RELEVANCE RUBRIC (score each candidate, keep only the strongest):
    studies, protocol papers, recruitment-methods papers, and pure health-policy noise.
 4. When in doubt, drop it. A thin, high-signal feed beats a full one. An empty cycle is fine.
 
+VOICE (how this reads in the app):
+Brief a colleague between jobs, not a guideline changelog. Trainees do not have guideline codes
+memorised: lead with the clinical topic; put the code in parentheses on first mention only.
+The collapsed card shows only the first sentence of "why", so sentence 1 must work alone as
+the gist. Active, plain British English. NEVER use em dashes.
+
 OUTPUT RULES:
 - Keep at most ${MAX_ITEMS} items total, and at most ${RESEARCH_SUBCAP} of kind "research".
 - Rank most important first; practice-changing guidance and safety before "aware" items.
@@ -132,24 +138,31 @@ OUTPUT RULES:
 - source: a short issuer key used for the accent colour. Use one of: NICE, RCOG, BASHH, NHSCSP,
   MBRRACE, FSRH, BSH, BGCS, MHRA for named bodies; TRIAL for journal studies; REPORT for national reports.
 - weight: "practice" only when it changes what a trainee should do; otherwise "aware".
-- title: a plain, accurate headline. Do not sensationalise.
-- what_changed: REQUIRED. ONE sentence naming the concrete delta from the source (what was added,
-  removed, redefined, recommended, found, recalled, renamed). Include the key number, dose, threshold,
-  product, or definition when the source gives one. BAD: "NICE updated NG88; check the pathway."
-  GOOD: "July 2026 removes the old advice against routine serum ferritin in HMB (rec 1.2.8)."
-  If the deep_excerpts do not let you name the delta, DROP the item. Never invent a delta.
-- why: REQUIRED. ONE further sentence on what it means on the ward (who acts, when, caveat). British
-  English. NEVER use em dashes. Do NOT repeat "an update happened" or tell the reader only to
-  "check / review / confirm / read the source". Do not overstate certainty; for single studies note
-  the limitation. This is a signpost, not a summary you are vouching for.
+- title: outcome-first headline, ~12 words max. Topic before code: "Menopause (NG23): unscheduled
+  bleeding on HRT", not "NG23 aligns with…". For trials/reports, lead with the finding or topic.
+  Do not sensationalise.
+- what_changed: REQUIRED for the human reviewer only (shown in the PR, not in the app). ONE sentence
+  naming the concrete delta from the source. Plain language; topic (CODE) on first mention. Include
+  the key number, dose, threshold, product, or definition when the source gives one and it is the
+  story. BAD: "NICE updated NG88; check the pathway." GOOD: "Heavy menstrual bleeding (NG88): July
+  2026 removes the old advice against routine serum ferritin (rec 1.2.8)." If deep_excerpts do not
+  let you name the delta, DROP the item. Never invent a delta.
+- why: REQUIRED. Exactly TWO sentences, stored verbatim in the app (what_changed is NOT appended).
+  Sentence 1 (gist): the concrete change in plain language; must stand alone as the teaser. Topic
+  before code, e.g. "The menopause guideline (NG23) now…", never "NG23 now…". One main idea; avoid
+  rec-number laundry lists unless a specific number is the point. Sentence 2 (hook): where the trainee
+  meets it (ward, clinic, handover) and what to do, check, or stop doing; optional scope caveat.
+  Do NOT repeat sentence 1 or restate what_changed. Do not tell the reader only to "check / review /
+  confirm / read the source". Do not overstate certainty; for single studies note the limitation.
+  This is a signpost, not a summary you are vouching for.
 - url: the primary source document. Required. Prefer the guideline Update-information or project page,
   DOI, PDF, or gov.uk alert itself. Prefer a URL that appears in deep_excerpts when available.
   Do NOT use listing hubs (/news/, /news/articles, guidance published indexes) or press-release pages
   when a deeper document URL exists. A news post is only acceptable when it is the only published URL.
 - linkType/linkId: OPTIONAL in-app cross-link. Only set them when the app clearly covers the topic and
   the id is in the provided app index. reader ids and flowchart ids are listed below. Otherwise leave both "".
-  If a guideline update supersedes an app guide, still link to that guide's reader id and say in "why"
-  that the app guide reflects the older edition.
+  If a guideline update supersedes an app guide, still link to that guide's reader id and note in
+  sentence 2 of "why" that the in-app guide reflects the older edition.
 - reason: one line for the human reviewer on why you kept it and how confident you are. Not shown to users.
 
 DEDUPE: skip any candidate whose id, DOI, or URL already appears in the "already surfaced" lists.
@@ -194,20 +207,34 @@ function isFiller(text = "") {
   return FILLER_RE.test(text) && !hasDelta(text);
 }
 
-function composeWhy(whatChanged, why) {
-  const delta = (whatChanged || "").trim().replace(/\s+/g, " ");
-  const take = (why || "").trim().replace(/\s+/g, " ");
-  if (!take || take === delta || isFiller(take)) return delta;
-  // Avoid near-duplicates when the model restates the delta in why.
-  if (take.toLowerCase().startsWith(delta.toLowerCase().slice(0, 40))) return take;
-  return `${delta} ${take}`;
+function normalizeText(text = "") {
+  return text.trim().replace(/\s+/g, " ");
+}
+
+// why is user-facing only; what_changed stays in the PR for reviewers.
+function feedWhy(why) {
+  return normalizeText(why);
+}
+
+function largelyDuplicates(a, b) {
+  const na = normalizeText(a).toLowerCase();
+  const nb = normalizeText(b).toLowerCase();
+  if (!na || !nb) return false;
+  if (na === nb) return true;
+  const probe = Math.min(50, na.length, nb.length);
+  if (probe >= 30 && (na.slice(0, probe) === nb.slice(0, probe))) return true;
+  return false;
 }
 
 function rejectReason(it) {
   if (!it.id || !it.title || !it.url) return "missing id/title/url";
   if (isListingHub(it.url)) return `listing-hub url: ${it.url}`;
   if (!hasDelta(it.what_changed || "")) return "what_changed missing a concrete delta";
-  if (isFiller(it.why || "") && !hasDelta(it.why || "")) return "why is filler without a delta";
+  const why = feedWhy(it.why || "");
+  if (!why) return "why missing";
+  if (isFiller(why) && !hasDelta(why)) return "why is filler without a delta";
+  if (!hasDelta(why)) return "why missing a concrete change";
+  if (largelyDuplicates(it.what_changed, why)) return "why duplicates what_changed";
   return null;
 }
 
@@ -288,7 +315,7 @@ async function main() {
       source: it.source,
       weight: WEIGHTS.includes(it.weight) ? it.weight : "aware",
       title: it.title,
-      why: composeWhy(it.what_changed, it.why),
+      why: feedWhy(it.why),
       url: it.url,
     };
     // Attach the cross-link only if it points at something the app actually has.
@@ -325,14 +352,15 @@ async function main() {
   // Summary for the PR body.
   const summary = kept.map((k, i) =>
     `${i + 1}. **${k.item.title}** (${k.item.kind} · ${k.item.source} · ${k.item.weight})\n` +
-    `   Delta: ${k.what_changed}\n` +
-    `   Why: ${k.item.why}\n` +
+    `   Delta (reviewer only): ${k.what_changed}\n` +
+    `   Why (in app): ${k.item.why}\n` +
     `   Source: ${k.item.url}\n` +
     `   _Editor note: ${k.reason}_`
   ).join("\n\n");
   writeFileSync(resolve(HERE, "pr-body.md"),
     `Automated Latest-feed harvest added ${count} candidate ${count === 1 ? "story" : "stories"}.\n\n` +
-    `Review each item below. Edit the wording, fix any cross-link, or delete items you don't want, then merge. ` +
+    `Review each item below. Edit the title and "Why (in app)" wording, fix any cross-link, or delete ` +
+    `items you don't want, then merge. Only the title and Why appear in the app; Delta is for your review. ` +
     `Deleted items won't be proposed again (their keys are recorded in seen.json).\n\n${summary}\n`);
 
   console.log(`Proposed ${count} item(s):\n${summary}`);

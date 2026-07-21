@@ -14,7 +14,7 @@
 //   source  a SOURCE_COLORS key (NICE, RCOG, TRIAL, ...) for the accent colour
 //   weight  "practice" (practice changed) | "aware" (worth knowing)
 //   title   headline
-//   why     two sentences max on what it means on the ward
+//   why     two sentences: gist (teaser) + ward hook; topic before code, e.g. menopause (NG23)
 //   url     the primary source; every item must link out
 //   link    optional { type, id } for handleNavigate into an app card
 
