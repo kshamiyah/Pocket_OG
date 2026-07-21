@@ -22,16 +22,6 @@
       "url": "https://www.gov.uk/government/news/uks-first-maternity-and-neonatal-commissioner-to-be-appointed"
     },
     {
-      "id": "2026-01-mhra-glp1-pancreatitis-warning",
-      "date": "2026-01-29",
-      "kind": "safety",
-      "source": "MHRA",
-      "weight": "aware",
-      "title": "GLP-1 agonists: stronger pancreatitis warning, including fatal cases",
-      "why": "GLP-1 and GLP-1/GIP receptor agonists now carry a strengthened warning about severe, sometimes fatal, acute pancreatitis. These drugs are increasingly used off-label for weight loss in women with PCOS or planning pregnancy, so counsel on stopping before conception and flag sudden abdominal pain promptly.",
-      "url": "https://www.gov.uk/drug-safety-update/glp-1-receptor-agonists-and-dual-glp-1-slash-gip-receptor-agonists-strengthened-warnings-on-acute-pancreatitis-including-necrotising-and-fatal-cases"
-    },
-    {
       "id": "2026-07-ng88-hmb-update",
       "date": "2026-07-07",
       "kind": "guideline",
