@@ -9,13 +9,15 @@ limits. Store name is a recommendation, change it everywhere if you prefer anoth
 
 | Field | Value | Limit |
 |-------|-------|-------|
-| App name | **Ward Handover** | 30 chars |
+| App name | **Handover** | 30 chars |
 | Subtitle | **Shift job list, handed over** | 30 chars |
 | Bundle ID | `com.drshamiyah.handover` | — |
 | Primary category | Medical | — |
 | Secondary category | Productivity | — |
 
-> Alternatives if "Ward Handover" is taken: *Shift Handover*, *Handover: Ward Jobs*.
+> App Store names must be globally unique. "Handover" is a common word and may
+> already be taken. Fallbacks if so: *Handover: Shift List*, *Ward Handover*,
+> *Shift Handover*.
 
 ---
 
@@ -28,7 +30,7 @@ limits. Store name is a recommendation, change it everywhere if you prefer anoth
 
 ## Description (full)
 
-> Ward Handover is a shift job list for your phone, built for the pace of a
+> Handover is a shift job list for your phone, built for the pace of a
 > hospital ward.
 >
 > Capture jobs by ward and bed as you go. Walk the ward bed by bed with a clear
@@ -51,7 +53,7 @@ limits. Store name is a recommendation, change it everywhere if you prefer anoth
 > colleague.
 >
 > A NOTE ON SAFE USE
-> Ward Handover is a task list for healthcare professionals, not a patient record.
+> Handover is a task list for healthcare professionals, not a patient record.
 > Use non-identifying shorthand only. It supports, and does not replace, verbal
 > handover and clinical responsibility.
 
@@ -63,8 +65,7 @@ limits. Store name is a recommendation, change it everywhere if you prefer anoth
 shift,jobs,ward,doctor,nurse,oncall,rounds,hospital,nhs,clinical,todo,checklist,bleep,qr
 ```
 
-> Don't repeat words already in the app name ("handover", "ward"), Apple already
-> indexes those.
+> Don't repeat the app name ("handover"), Apple already indexes it.
 
 ---
 

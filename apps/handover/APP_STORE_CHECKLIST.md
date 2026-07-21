@@ -17,7 +17,7 @@ Everything else is time. A Mac is required for the iOS build.
 | Value | Setting |
 |-------|---------|
 | Bundle ID / App ID | `com.drshamiyah.handover` |
-| Store name | **TBD** (working: Ward Handover) |
+| Store name | **Handover** (fallback if taken: Handover: Shift List) |
 | Privacy policy URL | `https://pocket-handover.vercel.app/privacy.html` |
 | Support / contact email | `k.shamiyah@gmail.com` |
 | Production domain | `pocket-handover.vercel.app` |
