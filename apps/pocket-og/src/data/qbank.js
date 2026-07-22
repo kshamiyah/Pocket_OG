@@ -1,0 +1,262 @@
+// Qbank — a growing bank of single-best-answer questions for O&G revision.
+// Distinct from the narrative On Call sims: each item here is a standalone SBA,
+// built backwards from one documented guideline pitfall (see the sim-author
+// skill's item-writing method). Every item is guideline-traceable.
+//
+// Item shape:
+//   id          unique kebab-case
+//   topic       broad grouping ("Postpartum haemorrhage", "Pre-eclampsia")
+//   difficulty  1 | 2 | 3
+//   pitfall     the documented trap the question is built on (author's note)
+//   stem        the vignette + lead-in
+//   options     [strings]; homogeneous, length-balanced
+//   answer      index of the correct option
+//   explanation why the answer is right and the traps are wrong
+//   source      { gl, sectionId, label } — the guideline receipt
+//   tags        search/filter terms
+
+export const QBANK = [
+  // ── Postpartum haemorrhage (GTG52) ────────────────────────────────────────
+  {
+    id: "pph-firm-uterus-trauma",
+    topic: "Postpartum haemorrhage",
+    difficulty: 1,
+    pitfall: "A firm, well-contracted uterus that keeps bleeding is trauma, not tone.",
+    stem: "A woman is bleeding steadily after a forceps birth. You give the oxytocin infusion and rub up a contraction; the fundus is now firm and central, but bright red blood keeps coming, 700 ml so far. What is the most likely source, and your next step?",
+    options: [
+      "Genital tract trauma: examine the cervix and vagina under direct vision",
+      "Uterine atony: give a further uterotonic",
+      "Retained tissue: proceed to manual removal of placenta",
+      "Coagulopathy: send a clotting screen and await the result",
+    ],
+    answer: 0,
+    explanation: "A firm, contracted uterus argues against tone as the cause. Continued brisk bleeding after an instrumental birth points to genital tract trauma, which is found by examining the cervix and vagina under good exposure and light. Giving more uterotonics for a uterus that is already contracted, or reaching for manual removal or a clotting screen first, misses the likely source.",
+    source: { gl: "GTG52", sectionId: "gtg52-minor", label: "GTG52 · Minor PPH: address the cause" },
+    tags: ["pph", "trauma", "4 ts", "forceps", "atony", "cause"],
+  },
+  {
+    id: "pph-escalate-on-compromise",
+    topic: "Postpartum haemorrhage",
+    difficulty: 1,
+    pitfall: "Escalate on haemodynamic compromise, not only once loss crosses 1000 ml.",
+    stem: "You have called for help and the oxytocin infusion is running. Total loss is 850 ml. Her pulse has risen from 88 to 120 and her BP is 94/50. What is the most appropriate next step?",
+    options: [
+      "Activate the major PPH protocol now",
+      "Continue current measures; loss is under 1000 ml",
+      "Give ergometrine and reassess in ten minutes",
+      "Recheck her observations in fifteen minutes",
+    ],
+    answer: 0,
+    explanation: "She is tachycardic and hypotensive: haemodynamically compromised, which is itself a trigger to escalate regardless of the sub-1000 ml figure. Anchoring on the number, fiddling with another drug, or passively rechecking are the delayed-escalation patterns that PPH reviews repeatedly flag.",
+    source: { gl: "GTG52", sectionId: "gtg52-minor", label: "GTG52 · Minor PPH: when to escalate" },
+    tags: ["pph", "escalation", "shock", "observations", "mbrrace"],
+  },
+  {
+    id: "pph-ergometrine-hypertension",
+    topic: "Postpartum haemorrhage",
+    difficulty: 2,
+    pitfall: "Ergometrine is contraindicated in hypertension; skip it to carboprost.",
+    stem: "A woman is bleeding briskly 20 minutes after a forceps birth. The oxytocin infusion is running but the uterus stays soft; loss is 1100 ml. Her notes record a booking blood pressure of 148/96 and 'started on labetalol at 30 weeks'. Which is the most appropriate next uterotonic?",
+    options: [
+      "Carboprost 0.25 mg intramuscularly",
+      "Ergometrine 500 mcg intramuscularly",
+      "A repeat oxytocin bolus",
+      "Misoprostol 400 mcg orally",
+    ],
+    answer: 0,
+    explanation: "The labetalol and raised booking BP mark her out as hypertensive, in whom ergometrine (the reflex second-line uterotonic) is contraindicated. The next appropriate agent is carboprost. Repeating oxytocin adds no new mechanism, and misoprostol sits lower on the ladder.",
+    source: { gl: "GTG52", sectionId: "gtg52-minor", label: "GTG52 · Minor PPH: uterotonics" },
+    tags: ["pph", "ergometrine", "hypertension", "uterotonic", "contraindication"],
+  },
+  {
+    id: "pph-carboprost-asthma",
+    topic: "Postpartum haemorrhage",
+    difficulty: 2,
+    pitfall: "Carboprost is contraindicated in asthma.",
+    stem: "Oxytocin and ergometrine have been given, but the uterus stays soft and she has lost 1500 ml. Her drug chart lists a salbutamol inhaler 'used most days' and she was admitted with wheeze last winter. Which is the most appropriate next uterotonic?",
+    options: [
+      "Misoprostol 800 mcg",
+      "Carboprost 0.25 mg intramuscularly",
+      "A repeat dose of ergometrine",
+      "A further oxytocin bolus",
+    ],
+    answer: 0,
+    explanation: "The inhaler and the wheeze admission point to asthma, in which carboprost (the usual next uterotonic after oxytocin and ergometrine) is contraindicated. Misoprostol is the appropriate choice. Repeating ergometrine or oxytocin adds nothing new.",
+    source: { gl: "GTG52", sectionId: "gtg52-major", label: "GTG52 · Major PPH: pharmacological management" },
+    tags: ["pph", "carboprost", "asthma", "uterotonic", "contraindication"],
+  },
+  {
+    id: "pph-do-not-wait-for-labs",
+    topic: "Postpartum haemorrhage",
+    difficulty: 2,
+    pitfall: "Do not delay treatment awaiting laboratory results in major PPH.",
+    stem: "She has lost 1800 ml and is still bleeding. The lab phones to say the FBC and clotting will be another 25 minutes. She has already had oxytocin, ergometrine and misoprostol. What is the most appropriate action now?",
+    options: [
+      "Give tranexamic acid and start empirical blood products without waiting",
+      "Await the clotting result before giving blood products",
+      "Wait for the full crossmatch before transfusing",
+      "Give a further dose of misoprostol",
+    ],
+    answer: 0,
+    explanation: "In major PPH you do not delay treatment for laboratory results: give tranexamic acid and transfuse empirically, using O-negative blood if life-threatening before crossmatch is ready. Waiting for the clotting screen or the full crossmatch costs time, and another dose of misoprostol adds no new mechanism.",
+    source: { gl: "GTG52", sectionId: "gtg52-major", label: "GTG52 · Major PPH: resuscitation" },
+    tags: ["pph", "major", "empirical", "transfusion", "txa", "o-negative"],
+  },
+  {
+    id: "pph-cryoprecipitate-first",
+    topic: "Postpartum haemorrhage",
+    difficulty: 2,
+    pitfall: "Cryoprecipitate, not FFP, is the first-choice for low fibrinogen.",
+    stem: "During an ongoing major PPH the point-of-care results return: fibrinogen 1.1 g/L, platelets 90, Hb 82, and she is still bleeding. Which product is the priority?",
+    options: [
+      "Cryoprecipitate",
+      "Fresh frozen plasma",
+      "Platelets",
+      "Red cells",
+    ],
+    answer: 0,
+    explanation: "Fibrinogen below 2 g/L is the priority to correct, and cryoprecipitate is the first-choice product for it. Platelets at 90 are above the 75 transfusion trigger, the Hb of 82 is near target, and FFP is for broader coagulopathy or a 1:1 ratio in massive transfusion, not the specific fibrinogen deficit.",
+    source: { gl: "GTG52", sectionId: "gtg52-major", label: "GTG52 · Major PPH: blood products" },
+    tags: ["pph", "fibrinogen", "cryoprecipitate", "blood products", "coagulopathy"],
+  },
+  {
+    id: "pph-warm-and-calcium",
+    topic: "Postpartum haemorrhage",
+    difficulty: 3,
+    pitfall: "Hypothermia and hypocalcaemia sabotage clotting; correct them (often forgotten).",
+    stem: "During a massive PPH she is into her sixth unit of red cells with FFP and cryoprecipitate given, yet she keeps oozing. Temperature 34.8, ionised calcium low on the gas. Besides continuing products, what is most important now?",
+    options: [
+      "Actively warm her and give calcium",
+      "Give recombinant Factor VIIa",
+      "Switch resuscitation to colloid",
+      "Repeat the fibrinogen and wait for it",
+    ],
+    answer: 0,
+    explanation: "Hypothermia and hypocalcaemia both impair clotting and are common, correctable reasons that bleeding persists despite products. Warm her actively and replace calcium. Factor VIIa is a last resort, the fluid type is not the issue, and repeat testing without correcting the physiology wastes time.",
+    source: { gl: "GTG52", sectionId: "gtg52-massive", label: "GTG52 · Massive PPH: activate MHP" },
+    tags: ["pph", "massive", "hypothermia", "hypocalcaemia", "coagulopathy", "calcium"],
+  },
+  {
+    id: "pph-unstable-surgery-not-ir",
+    topic: "Postpartum haemorrhage",
+    difficulty: 3,
+    pitfall: "Uterine artery embolisation is only for the haemodynamically stable woman.",
+    stem: "In theatre the uterus is atonic despite a balloon. She is on her second unit of O-negative, BP 82/46, pulse 134, and the anaesthetist is struggling to keep up with losses. What is the most appropriate next step to secure haemostasis?",
+    options: [
+      "Laparotomy with a brace suture, to devascularisation or hysterectomy if needed",
+      "Uterine artery embolisation in interventional radiology",
+      "Recombinant Factor VIIa, then reassess the bleeding",
+      "Deflate the balloon and repeat the uterotonic ladder",
+    ],
+    answer: 0,
+    explanation: "She is haemodynamically unstable, so uterine artery embolisation (which requires a stable woman) is not appropriate; she needs surgical control now. Factor VIIa is no substitute for surgical haemostasis, and re-trialling uterotonics goes backwards.",
+    source: { gl: "GTG52", sectionId: "gtg52-massive", label: "GTG52 · Massive PPH: surgical options" },
+    tags: ["pph", "massive", "surgery", "embolisation", "instability", "b-lynch"],
+  },
+  {
+    id: "pph-no-premature-stepdown",
+    topic: "Postpartum haemorrhage",
+    difficulty: 3,
+    pitfall: "Premature step-down from critical care after massive PPH (an MBRRACE avoidable factor).",
+    stem: "Haemostasis is achieved after a B-Lynch suture. She is warm, BP 112/70, lactate falling. The registrar suggests moving her to the postnatal ward as a bed is needed. What is the most appropriate ongoing plan?",
+    options: [
+      "Critical care with close monitoring, and thromboprophylaxis once haemostasis is secure",
+      "Move to the postnatal ward now she is stable",
+      "Start LMWH immediately for the high VTE risk",
+      "Discharge home in 24 hours if observations stay normal",
+    ],
+    answer: 0,
+    explanation: "After a massive PPH she needs HDU or ITU: early step-down has led to missed coagulopathy and renal failure. VTE risk is high, so LMWH is given, but timed to once haemostasis is secure rather than immediately, and never withheld altogether.",
+    source: { gl: "GTG52", sectionId: "gtg52-massive", label: "GTG52 · Massive PPH: post-event care" },
+    tags: ["pph", "massive", "critical care", "vte", "lmwh", "mbrrace", "step-down"],
+  },
+
+  // ── Pre-eclampsia and eclampsia (GL952) ───────────────────────────────────
+  {
+    id: "pet-magnesium-not-antihypertensive",
+    topic: "Pre-eclampsia",
+    difficulty: 2,
+    pitfall: "Magnesium stops the seizure but does not lower the blood pressure; that needs its own agent.",
+    stem: "A woman at 37 weeks with severe pre-eclampsia has a tonic-clonic seizure that self-terminates after 90 seconds. The magnesium sulfate loading dose is given. Her BP is now 172/116. What is the most appropriate immediate next step?",
+    options: [
+      "Give a rapid-acting antihypertensive such as labetalol to control the blood pressure",
+      "Give a second magnesium loading dose",
+      "Start the magnesium maintenance infusion and watch the blood pressure",
+      "Proceed straight to caesarean without treating the blood pressure",
+    ],
+    answer: 0,
+    explanation: "A BP of 172/116 is in the severe range and carries a stroke risk; magnesium controls seizures but is not an antihypertensive, so it needs a separate rapid-acting agent such as labetalol. More magnesium does nothing for the pressure, and rushing to delivery with uncontrolled BP is unsafe: stabilise first.",
+    source: { gl: "GL952", sectionId: "pet-severe-lw", label: "GL952 · Severe PET / eclampsia (labour ward)" },
+    tags: ["pre-eclampsia", "eclampsia", "magnesium", "antihypertensive", "labetalol", "seizure"],
+  },
+  {
+    id: "pet-magnesium-toxicity-stop",
+    topic: "Pre-eclampsia",
+    difficulty: 2,
+    pitfall: "Loss of patellar reflexes is the first sign of magnesium toxicity; stop the infusion.",
+    stem: "Four hours into a magnesium maintenance infusion for eclampsia she is drowsy. Respiratory rate 14, urine output 140 ml over the last 4 hours, but her patellar reflexes are now absent. What is the most appropriate action?",
+    options: [
+      "Stop the magnesium infusion until reflexes return",
+      "Give calcium gluconate immediately",
+      "Reduce the infusion to 0.5 g/hr",
+      "Continue and recheck in an hour",
+    ],
+    answer: 0,
+    explanation: "Absent patellar reflexes indicate magnesium toxicity, and the correct response is to stop the infusion until reflexes return. Calcium gluconate is reserved for respiratory depression (her rate is 14), reducing the infusion is the response to low urine output (hers is normal at 140 ml), and continuing ignores the sign.",
+    source: { gl: "GL952", sectionId: "pet-severe-lw", label: "GL952 · Magnesium toxicity monitoring" },
+    tags: ["pre-eclampsia", "magnesium", "toxicity", "reflexes", "calcium gluconate"],
+  },
+  {
+    id: "pet-oliguria-fluid-restrict",
+    topic: "Pre-eclampsia",
+    difficulty: 2,
+    pitfall: "Oliguria in severe PET is managed by fluid restriction, not fluid boluses (pulmonary oedema risk).",
+    stem: "A woman with severe pre-eclampsia is oliguric, 60 ml over 3 hours. A colleague suggests a 500 ml crystalloid bolus to improve her urine output. What is the most appropriate fluid management?",
+    options: [
+      "Maintain strict fluid restriction and do not bolus for the oliguria",
+      "Give the 500 ml crystalloid bolus",
+      "Give repeated boluses until urine output improves",
+      "Start a furosemide infusion",
+    ],
+    answer: 0,
+    explanation: "Oliguria in severe pre-eclampsia is expected and is managed with strict fluid restriction; giving fluid boluses to chase urine output risks pulmonary oedema. Repeated boluses compound the danger, and a diuretic is not the answer.",
+    source: { gl: "GL952", sectionId: "pet-severe-lw", label: "GL952 · Severe PET: strict fluid balance" },
+    tags: ["pre-eclampsia", "oliguria", "fluid restriction", "pulmonary oedema"],
+  },
+  {
+    id: "pet-hellp-steroids",
+    topic: "Pre-eclampsia",
+    difficulty: 2,
+    pitfall: "Steroids do not treat HELLP (they are for fetal lung maturation only).",
+    stem: "Bloods return in a woman with severe pre-eclampsia: platelets 68, ALT 210, haemolysis on the film, HELLP syndrome. The registrar asks whether to give dexamethasone to treat it. What is the most appropriate response about steroids?",
+    options: [
+      "Steroids do not treat HELLP; give them only for fetal lung maturation if preterm delivery is planned",
+      "Give high-dose dexamethasone to treat the HELLP",
+      "Give steroids to raise the platelet count before delivery",
+      "Withhold steroids entirely whatever the gestation",
+    ],
+    answer: 0,
+    explanation: "Steroids do not treat HELLP; their only role here is fetal lung maturation if preterm delivery is planned. Giving them to treat HELLP or to raise the platelet count reflects a disproven practice, while withholding them regardless of gestation forgets the fetal indication.",
+    source: { gl: "GL952", sectionId: "pet-definition", label: "GL952 · HELLP syndrome" },
+    tags: ["pre-eclampsia", "hellp", "steroids", "dexamethasone", "platelets"],
+  },
+  {
+    id: "pet-third-stage-oxytocin-alone",
+    topic: "Pre-eclampsia",
+    difficulty: 2,
+    pitfall: "Ergometrine and Syntometrine raise BP; use oxytocin alone for the third stage in a hypertensive woman.",
+    stem: "A woman with severe pre-eclampsia proceeds to a vaginal delivery. As the baby is born, the midwife asks which drug to give for the active third stage. Which is the most appropriate uterotonic here?",
+    options: [
+      "Oxytocin alone",
+      "Syntometrine (oxytocin with ergometrine)",
+      "Ergometrine",
+      "Carboprost",
+    ],
+    answer: 0,
+    explanation: "Ergometrine, and therefore Syntometrine which contains it, raises blood pressure and is avoided in hypertension, so the third stage is managed with oxytocin alone. Carboprost is not a routine third-stage agent.",
+    source: { gl: "GL952", sectionId: "pet-severe-lw", label: "GL952 · Severe PET: intrapartum care" },
+    tags: ["pre-eclampsia", "third stage", "ergometrine", "syntometrine", "oxytocin", "hypertension"],
+  },
+];
+
+export const QBANK_TOPICS = [...new Set(QBANK.map(q => q.topic))];
