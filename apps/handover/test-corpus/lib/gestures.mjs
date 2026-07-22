@@ -166,7 +166,7 @@ export async function runGestures(browser, results, deps) {
     ];
     const code = encodeHandoverPayload(incoming);
     const link = `${BASE}?ho=${code}`;
-    await page.getByLabel("Hand over or take over").click();
+    await page.getByLabel("Exchange").click();
     await page.waitForTimeout(150);
     await page.getByRole("button", { name: /Scan or paste a colleague/ }).click();
     await page.waitForTimeout(200);
@@ -196,7 +196,7 @@ export async function runGestures(browser, results, deps) {
 
   // ============================ 6. Handover subset → copy-link integrity =====
   await withPage(async (page) => {
-    await page.getByLabel("Hand over or take over").click();
+    await page.getByLabel("Exchange").click();
     await page.waitForTimeout(150);
     await page.getByRole("button", { name: "Hand over" }).click();
     await page.waitForTimeout(250);
@@ -229,7 +229,8 @@ export async function runGestures(browser, results, deps) {
     // HomeMenu.requestClose waits 280ms (a JS timer, not a CSS transition) before
     // navigating, so wait for the target screen rather than a fixed sleep.
     await page.getByText("Bed setup").waitFor({ timeout: 5000 });
-    await page.getByPlaceholder("New ward name").fill("Antenatal");
+    await page.getByLabel("Add ward").click();
+    await page.getByPlaceholder("Ward name").fill("Antenatal");
     await page.getByRole("button", { name: "Set up", exact: true }).click();
     await page.getByText("Set up Antenatal").waitFor({ timeout: 5000 });
     await page.getByRole("button", { name: "Add section" }).click();

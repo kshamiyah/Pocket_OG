@@ -91,7 +91,7 @@ export default function JobCard({
 
   return (
     <div
-      className={`relative rounded-xl animate-list-item-enter motion-reduce:animate-none ${editing ? "" : "overflow-hidden"}`}
+      className={`relative rounded-xl ${hideLocation ? "" : "animate-list-item-enter motion-reduce:animate-none"} ${editing ? "" : "overflow-hidden"}`}
       style={{ animationDelay: enterDelay ? `${enterDelay}ms` : undefined }}
     >
       {dragX < 0 && (

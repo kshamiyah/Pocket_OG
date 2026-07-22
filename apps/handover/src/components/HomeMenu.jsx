@@ -7,7 +7,7 @@ import { TYPE_BODY, TYPE_DISMISS, TYPE_OVERLINE } from "../utils/typography";
 const ROW = `w-full text-left px-5 py-3.5 ${TYPE_BODY} font-semibold active:bg-gray-50 dark:active:bg-gray-900`;
 
 export default function HomeMenu({
-  open, onClose, shiftLabel, onManageWards, onEditProfile, onAbout, onEndShift,
+  open, onClose, shiftLabel, onManageWards, onEditProfile, onAbout,
 }) {
   const [entered, setEntered] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -62,9 +62,6 @@ export default function HomeMenu({
           </button>
           <button type="button" onClick={() => requestClose(onAbout)} className={ROW}>
             About
-          </button>
-          <button type="button" onClick={() => requestClose(onEndShift)} className={ROW}>
-            End shift
           </button>
           <div className="border-t border-gray-100 dark:border-gray-900">
             <DarkModeToggleRow />

@@ -7,7 +7,13 @@ import SheetDragHandle, { SheetSafeBottom } from "./SheetDragHandle";
 import { PRIMARY_BTN_COMPACT, safeBottom } from "../utils/screenLayout";
 import { TYPE_CAPTION, TYPE_OVERLINE } from "../utils/typography";
 
-export default function ShareWardSheet({ open, wardName, layout, onClose }) {
+const QR_TOO_LARGE = "Too much for one QR. Copy the link instead, or share fewer wards.";
+
+function bedsInLayouts(layouts) {
+  return Object.values(layouts || {}).reduce((n, layout) => n + totalBeds(layout), 0);
+}
+
+export default function ShareWardSheet({ open, layouts, onClose }) {
   const [entered, setEntered] = useState(false);
   const [closing, setClosing] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState(null);
@@ -15,10 +21,12 @@ export default function ShareWardSheet({ open, wardName, layout, onClose }) {
   const [copied, setCopied] = useState(false);
   const closingRef = useRef(false);
 
+  const wardNames = useMemo(() => Object.keys(layouts || {}), [layouts]);
+
   const url = useMemo(() => {
-    if (!open || !wardName || !layout) return null;
-    return buildHandoverUrl([], { [wardName]: layout });
-  }, [open, wardName, layout]);
+    if (!open || wardNames.length === 0) return null;
+    return buildHandoverUrl([], layouts);
+  }, [open, layouts, wardNames.length]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -34,7 +42,7 @@ export default function ShareWardSheet({ open, wardName, layout, onClose }) {
       .catch(() => {
         if (!cancelled) {
           setQrDataUrl(null);
-          setQrError("Too much for one QR. Copy the link instead.");
+          setQrError(QR_TOO_LARGE);
         }
       });
     return () => { cancelled = true; };
@@ -56,9 +64,15 @@ export default function ShareWardSheet({ open, wardName, layout, onClose }) {
 
   const share = async () => {
     if (!url) return;
+    const title = wardNames.length === 1
+      ? `${wardNames[0]} bed setup`
+      : `${wardNames.length} ward layouts`;
+    const text = wardNames.length === 1
+      ? `Bed layout for ${wardNames[0]}`
+      : `Bed layouts: ${wardNames.join(", ")}`;
     if (navigator.share) {
       try {
-        await navigator.share({ title: `${wardName} bed setup`, text: `Bed layout for ${wardName}`, url });
+        await navigator.share({ title, text, url });
       } catch { /* cancelled */ }
     } else {
       try {
@@ -71,7 +85,8 @@ export default function ShareWardSheet({ open, wardName, layout, onClose }) {
 
   if (!open && !closing) return null;
 
-  const bedCount = totalBeds(layout);
+  const bedCount = bedsInLayouts(layouts);
+  const multi = wardNames.length > 1;
 
   return (
     <div className="fixed inset-0 z-[60] flex flex-col justify-end">
@@ -91,21 +106,30 @@ export default function ShareWardSheet({ open, wardName, layout, onClose }) {
           <SheetDragHandle handleProps={handleProps} />
           <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden touch-pan-y px-5 pt-3 pb-4">
             <p className={TYPE_OVERLINE}>Share ward setup</p>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mt-1">{wardName}</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white mt-1">
+              {multi ? `${wardNames.length} wards` : wardNames[0]}
+            </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               {bedCount} bed{bedCount === 1 ? "" : "s"} · no jobs, layout only
             </p>
+            {multi && (
+              <p className={`${TYPE_CAPTION} mt-2 leading-snug`}>
+                {wardNames.join(" · ")}
+              </p>
+            )}
 
             <div className="flex justify-center py-4">
               {qrDataUrl && (
                 <img
                   src={qrDataUrl}
-                  alt={`QR code for ${wardName} bed setup`}
+                  alt="Ward setup QR code"
                   className="w-full max-w-[min(72vw,14rem)] rounded-2xl border border-gray-200 dark:border-gray-800 bg-white p-3 object-contain"
                 />
               )}
               {!qrDataUrl && qrError && (
-                <p className={`${TYPE_CAPTION} text-red-600 dark:text-red-400 text-center`}>{qrError}</p>
+                <p className={`${TYPE_CAPTION} text-red-600 dark:text-red-400 text-center leading-snug px-2`}>
+                  {qrError}
+                </p>
               )}
             </div>
 

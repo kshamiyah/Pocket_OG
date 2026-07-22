@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const DISMISS_THRESHOLD = 100;
 
@@ -6,6 +6,24 @@ export function bottomSheetTransform({ entered, closing, dragY = 0, lift = 0 }) 
   if (!entered || closing) return "translateY(100%)";
   const y = dragY + lift;
   return y === 0 ? "translateY(0)" : `translateY(${y}px)`;
+}
+
+/** Slide-up enter when `open` becomes true; pair with `setEntered(false)` on close. */
+export function useSheetEntered(open) {
+  const [entered, setEntered] = useState(false);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const id = requestAnimationFrame(() => setEntered(true));
+    return () => cancelAnimationFrame(id);
+  }, [open]);
+
+  return [entered, setEntered];
+}
+
+export function sheetMotionClass({ dragging, instant = false }) {
+  if (dragging || instant) return "";
+  return "transition-transform duration-300 ease-out";
 }
 
 export function useBottomSheetSwipe(onDismiss) {

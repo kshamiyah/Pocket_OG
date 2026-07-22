@@ -57,6 +57,8 @@ export default function App() {
   const [selectedBed, setSelectedBed] = useState(null);
   const [bedSelected, setBedSelected] = useState(false);
   const [handoverReturn, setHandoverReturn] = useState("list");
+  const [handoverMode, setHandoverMode] = useState("share");
+  const [endShiftContext, setEndShiftContext] = useState(null);
   const [scanReturn, setScanReturn] = useState("hub");
   const [wardsReturn, setWardsReturn] = useState("hub");
   const [profileReturn, setProfileReturn] = useState("hub");
@@ -143,15 +145,33 @@ export default function App() {
     }
   };
 
-  const finishHandover = ({ clear, handedOverIds = [] }) => {
-    const handedCount = handedOverIds.length;
-    if (clear && handedOverIds.length > 0) {
+  const applyShareJobs = ({ handedOverIds = [], removeFromPhone = false }) => {
+    if (removeFromPhone && handedOverIds.length > 0) {
       const remove = new Set(handedOverIds);
       setJobs(jobs.filter((j) => !remove.has(j.id)));
-    } else if (clear) {
-      setJobs([]);
-      setBedNotes({});
     }
+  };
+
+  const finishShareJobs = ({ handedOverIds = [], removeFromPhone = false }) => {
+    const count = handedOverIds.length;
+    applyShareJobs({ handedOverIds, removeFromPhone });
+    navigate("list", "back");
+    if (count > 0) {
+      flashToast(`Shared ${count} job${count === 1 ? "" : "s"}`);
+    }
+  };
+
+  const bridgeShareToEndShift = ({ handedOverIds = [], removeFromPhone = false }) => {
+    setEndShiftContext({ jobs, handedOverIds });
+    applyShareJobs({ handedOverIds, removeFromPhone });
+    navigate("endShift");
+  };
+
+  const finishEndShiftHandover = ({ handedOverIds = [] }) => {
+    const handedCount = handedOverIds.length;
+    setEndShiftContext(null);
+    setJobs([]);
+    setBedNotes({});
     Storage.clearShift();
     setShiftState(null);
     navigate("hub", "back");
@@ -163,16 +183,30 @@ export default function App() {
   };
 
   const confirmEndShift = () => {
+    setEndShiftContext(null);
     setJobs([]);
     setBedNotes({});
     Storage.clearShift();
     setShiftState(null);
     navigate("hub", "back");
+    flashToast("Shift ended");
   };
 
-  const openHandover = (returnTo = "list") => {
-    setHandoverReturn(returnTo);
+  const openShareJobs = () => {
+    setHandoverMode("share");
+    setHandoverReturn("list");
     navigate("handover");
+  };
+
+  const openHandoverForEndShift = () => {
+    setHandoverMode("endShift");
+    setHandoverReturn("endShift");
+    navigate("handover");
+  };
+
+  const openEndShift = () => {
+    setEndShiftContext(null);
+    navigate("endShift");
   };
 
   const openScan = (returnTo = "hub") => {
@@ -195,6 +229,11 @@ export default function App() {
     navigate("about");
   };
 
+  const viewAfterReview = () => {
+    if (scanReturn === "wards" || scanReturn === "wardsIntro") return scanReturn;
+    return gateView(profile, shift);
+  };
+
   const mergeIncoming = ({ jobs: chosen, layoutImport, bedRemaps }) => {
     const remapped = applyBedRemaps(chosen, bedRemaps);
     let running = [...jobs];
@@ -209,7 +248,7 @@ export default function App() {
     }
 
     setIncomingPayload(null);
-    const nextView = gateView(profile, shift);
+    const nextView = viewAfterReview();
     navigate(nextView);
 
     const parts = [];
@@ -226,7 +265,7 @@ export default function App() {
 
   const discardIncoming = () => {
     setIncomingPayload(null);
-    navigate(gateView(profile, shift), "back");
+    navigate(viewAfterReview(), "back");
   };
 
   const openWardSetup = (wardName, returnTo = "list") => {
@@ -243,7 +282,7 @@ export default function App() {
       delete next[ward];
       setRecentBeds(next);
     }
-    navigate(wardSetupReturn, "back");
+    navigate(wardSetupReturn, "fade");
   };
 
   const deleteWard = (wardName) => {
@@ -378,10 +417,14 @@ export default function App() {
     if (view === "endShift") {
       return (
         <EndShiftSummary
-          jobs={jobs}
+          jobs={endShiftContext?.jobs ?? jobs}
+          handedOverIds={endShiftContext?.handedOverIds ?? []}
           shiftType={shift?.type}
-          onBack={() => navigate("list", "back")}
-          onHandover={() => openHandover("endShift")}
+          onBack={() => {
+            setEndShiftContext(null);
+            navigate("list", "back");
+          }}
+          onHandover={openHandoverForEndShift}
           onConfirmEnd={confirmEndShift}
         />
       );
@@ -393,7 +436,9 @@ export default function App() {
           jobs={jobs}
           wardLayouts={wardLayouts}
           onBack={() => navigate(handoverReturn, "back")}
-          onFinish={finishHandover}
+          onFinish={handoverMode === "endShift" ? finishEndShiftHandover : finishShareJobs}
+          onBridgeToEndShift={bridgeShareToEndShift}
+          mode={handoverMode}
         />
       );
     }
@@ -418,6 +463,7 @@ export default function App() {
           jobs={jobs}
           onEditWard={(ward) => openWardSetup(ward, "wards")}
           onDeleteWard={deleteWard}
+          onScanSetup={() => openScan("wards")}
           onBack={() => navigate(wardsReturn, "back")}
         />
       );
@@ -429,7 +475,7 @@ export default function App() {
           wardName={wardSetupTarget}
           existingLayout={wardLayouts[wardSetupTarget]}
           onSave={saveWardLayout}
-          onCancel={() => navigate(wardSetupReturn, "back")}
+          onCancel={() => navigate(wardSetupReturn, "fade")}
         />
       );
     }
@@ -440,6 +486,7 @@ export default function App() {
           jobs={jobs}
           setJobs={setJobs}
           shiftType={shift?.type}
+          shiftStartedAt={shift?.startedAt}
           recentWards={recentWards}
           setRecentWards={setRecentWards}
           recentBeds={recentBeds}
@@ -449,13 +496,13 @@ export default function App() {
           wardLayouts={wardLayouts}
           bedNotes={bedNotes}
           setBedNotes={setBedNotes}
-          onHandover={() => openHandover("list")}
           onScan={() => openScan("list")}
+          onShareJobs={openShareJobs}
+          onEndShift={openEndShift}
           onSetupWard={(ward) => openWardSetup(ward, "list")}
           onManageWards={() => openWards("list")}
           onEditProfile={() => openProfileEdit("list")}
           onAbout={() => openAbout("list")}
-          onEndShift={() => navigate("endShift")}
           selectedWard={selectedWard}
           setSelectedWard={setSelectedWard}
           selectedBed={selectedBed}

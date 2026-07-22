@@ -125,12 +125,12 @@ export default function WardDrill({
           <div className="flex items-baseline gap-3 mb-2 flex-wrap">
             <h2 className={TYPE_TITLE}>{selectedWard}</h2>
             <button type="button" onClick={() => onSetupWard(selectedWard)} className={`${TYPE_LINK} text-claude-700 dark:text-claude-400`}>
-              Manage beds
+              Manage ward
             </button>
           </div>
           {layoutEmpty && (
             <p className="text-sm text-gray-400 dark:text-gray-600 mb-1">
-              No beds on this ward. Add jobs under General, or use Manage beds to set up again.
+              No beds on this ward. Add jobs under General, or use Manage ward to set up again.
             </p>
           )}
           <WardBedList

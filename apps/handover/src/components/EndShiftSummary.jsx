@@ -1,5 +1,6 @@
+import { useMemo } from "react";
 import HandoverMark from "./HandoverMark";
-import { SHIFT_TYPES } from "../utils/constants";
+import { PRIORITY, SHIFT_TYPES } from "../utils/constants";
 import { shiftSummary } from "../utils/jobs";
 import { SCREEN, SCREEN_FOOTER, SCREEN_SCROLL, safeBottom, safeTop, BACK_LINK, PRIMARY_BTN } from "../utils/screenLayout";
 import {
@@ -19,10 +20,16 @@ function Stat({ label, value, accent }) {
   );
 }
 
-export default function EndShiftSummary({ jobs, shiftType, onBack, onHandover, onConfirmEnd }) {
+export default function EndShiftSummary({
+  jobs, shiftType, handedOverIds = [], onBack, onHandover, onConfirmEnd,
+}) {
   const stats = shiftSummary(jobs);
+  const handedSet = useMemo(() => new Set(handedOverIds), [handedOverIds]);
+  const open = jobs.filter((j) => !j.done && !handedSet.has(j.id)).length;
+  const urgent = jobs.filter((j) => !j.done && j.priority === PRIORITY.URGENT && !handedSet.has(j.id)).length;
   const shiftLabel = SHIFT_TYPES.find((s) => s.key === shiftType)?.label ?? "Shift";
-  const hasOpen = stats.open > 0;
+  const hasOpen = open > 0;
+  const bridgedHandover = handedOverIds.length > 0;
 
   return (
     <div className={`${SCREEN} px-5`}>
@@ -37,18 +44,22 @@ export default function EndShiftSummary({ jobs, shiftType, onBack, onHandover, o
         <p className={`${TYPE_OVERLINE} mb-1`}>
           {shiftLabel} shift
         </p>
-        <h1 className={`${TYPE_DISPLAY} mb-2`}>End of shift</h1>
+        <h1 className={`${TYPE_DISPLAY} mb-2`}>End shift</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
           {stats.total === 0
             ? "You didn't add any jobs this shift."
-            : "Here's how your shift looked before you clock out."}
+            : hasOpen
+              ? "Share open jobs before you leave, or end without handover."
+              : bridgedHandover
+                ? "You handed over your open jobs. Review your shift, then finish."
+                : "Nothing left open. You can finish your shift."}
         </p>
 
         <div className="grid grid-cols-2 gap-2.5 mb-5">
           <Stat label="Jobs created" value={stats.total} />
           <Stat label="Wards covered" value={stats.wardCount} />
           <Stat label="Done" value={stats.done} />
-          <Stat label="Outstanding" value={stats.open} accent={hasOpen} />
+          <Stat label="Outstanding" value={open} accent={hasOpen} />
         </div>
 
         {stats.wards.length > 0 && (
@@ -72,19 +83,13 @@ export default function EndShiftSummary({ jobs, shiftType, onBack, onHandover, o
         {hasOpen && (
           <div className="rounded-2xl border border-claude-200 dark:border-claude-900 bg-claude-50 dark:bg-claude-950/20 px-4 py-3.5 mb-4">
             <p className={`${TYPE_UI_SM} text-claude-900 dark:text-claude-200 mb-1`}>
-              {stats.open} job{stats.open === 1 ? "" : "s"} still open
-              {stats.urgent > 0 ? ` · ${stats.urgent} urgent` : ""}
+              {open} job{open === 1 ? "" : "s"} still open
+              {urgent > 0 ? ` · ${urgent} urgent` : ""}
             </p>
             <p className="text-sm text-claude-800/80 dark:text-claude-300/80 leading-snug">
-              Hand these over to whoever is taking over before you leave. They can scan your QR to pick them up.
+              Hand these over as a QR or link. Your list clears when you finish your shift.
             </p>
           </div>
-        )}
-
-        {!hasOpen && stats.total > 0 && (
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            Nothing left open. You're clear to end your shift.
-          </p>
         )}
       </div>
 
@@ -96,7 +101,7 @@ export default function EndShiftSummary({ jobs, shiftType, onBack, onHandover, o
               onClick={onHandover}
               className="w-full py-4 rounded-2xl bg-claude-600 text-white text-base font-bold active:scale-95 transition-all"
             >
-              Hand over now
+              Hand over and end shift
             </button>
             <button
               type="button"

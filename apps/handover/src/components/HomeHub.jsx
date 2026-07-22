@@ -1,7 +1,8 @@
 import HandoverMark from "./HandoverMark";
 import { roleLabel, timeGreeting } from "../utils/constants";
+import { formatDisplayDate } from "../utils/time";
 import { SCREEN, SCREEN_SCROLL, safeBottom, safeTop } from "../utils/screenLayout";
-import { TYPE_BODY, TYPE_DISPLAY, TYPE_LINK } from "../utils/typography";
+import { TYPE_BODY, TYPE_DISPLAY, TYPE_LINK, TYPE_OVERLINE } from "../utils/typography";
 
 const LINK = `${TYPE_LINK} text-gray-500 dark:text-gray-400 active:text-gray-700 dark:active:text-gray-200`;
 
@@ -16,6 +17,9 @@ export default function HomeHub({ profile, onTakeover, onStartShift, onManageWar
         style={{ ...safeTop("1.5rem"), ...safeBottom("1rem") }}
       >
         <HandoverMark className={`${TYPE_DISPLAY} mb-1`} />
+        <p className={`${TYPE_OVERLINE} mb-1`}>
+          {formatDisplayDate().toUpperCase()}
+        </p>
         <p className="text-lg font-semibold text-claude-600 dark:text-claude-400 mb-5">
           From takeover to handover.
         </p>

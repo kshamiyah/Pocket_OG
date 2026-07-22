@@ -27,7 +27,8 @@ export default function WardsIntroScreen({ wardLayouts, onAddWard, onScanSetup, 
           Add your wards
         </h1>
         <p className={`${TYPE_BODY} text-gray-600 dark:text-gray-400 leading-snug mb-6`}>
-          Add one at a time and set up its beds. You can always add more later from the menu.
+          Add wards and set up beds yourself, or scan a setup code from a colleague who
+          already uses the app. Once yours is ready, you can share it from Manage wards.
         </p>
 
         <div className={`${PANEL} p-4 mb-4`}>
@@ -80,7 +81,7 @@ export default function WardsIntroScreen({ wardLayouts, onAddWard, onScanSetup, 
             onClick={onScanSetup}
             className="w-full py-3 rounded-xl border border-gray-200 dark:border-gray-800 text-sm font-bold text-gray-700 dark:text-gray-300 active:scale-[0.98] transition-all"
           >
-            Scan ward setup code
+            Scan a colleague&apos;s ward setup
           </button>
         )}
         <button type="button" onClick={onComplete} className={PRIMARY_BTN}>

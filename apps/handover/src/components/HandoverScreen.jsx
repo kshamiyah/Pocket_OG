@@ -77,6 +77,9 @@ function wardKey(job) {
   return job.ward || NO_WARD_LABEL;
 }
 
+const COPY_BTN = "flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-colors";
+const COPY_ON = SELECTED_CHIP;
+const COPY_OFF = "bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-800";
 const WARD_CHIP_ON = SELECTED_CHIP;
 const WARD_CHIP_OFF = "bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-800";
 
@@ -159,7 +162,10 @@ function QrExpandSheet({ open, onClose, qrDataUrl, jobCount }) {
   );
 }
 
-export default function HandoverScreen({ jobs, wardLayouts = {}, onBack, onFinish }) {
+export default function HandoverScreen({
+  jobs, wardLayouts = {}, onBack, onFinish, onBridgeToEndShift, mode = "share",
+}) {
+  const endShift = mode === "endShift";
   const [includeCompleted, setIncludeCompleted] = useState(false);
   const [keepCopy, setKeepCopy] = useState(true);
   const [optionsOpen, setOptionsOpen] = useState(false);
@@ -210,6 +216,13 @@ export default function HandoverScreen({ jobs, wardLayouts = {}, onBack, onFinis
 
   const jobsToSend = sortedPool.filter((j) => selectedIds.has(j.id));
   const urgentSelected = jobsToSend.filter((j) => !j.done && j.priority === PRIORITY.URGENT).length;
+
+  const remainingOpen = useMemo(() => {
+    if (endShift || keepCopy) return openJobs.length;
+    return openJobs.filter((j) => !selectedIds.has(j.id)).length;
+  }, [endShift, keepCopy, openJobs, selectedIds]);
+
+  const showEndShiftBridge = !endShift && remainingOpen === 0 && jobsToSend.length > 0;
   const layoutsToSend = useMemo(
     () => layoutsForJobWards(wardLayouts, jobsToSend),
     [wardLayouts, jobsToSend],
@@ -270,20 +283,57 @@ export default function HandoverScreen({ jobs, wardLayouts = {}, onBack, onFinis
     }
   };
 
-  const finish = () => onFinish({
-    clear: !keepCopy,
+  const finishPayload = () => ({
     handedOverIds: jobsToSend.map((j) => j.id),
+    removeFromPhone: !endShift && !keepCopy,
   });
+
+  const finish = () => onFinish(finishPayload());
+
+  const bridgeToEndShift = () => {
+    if (!onBridgeToEndShift) return;
+    onBridgeToEndShift(finishPayload());
+  };
 
   return (
     <div className={`${SCREEN}`}>
       <div className="shrink-0 px-5 border-b border-gray-100 dark:border-gray-900" style={safeTop("0.75rem")}>
         <div className="flex items-center gap-3 pb-3">
-          <button onClick={onBack} className={BACK_LINK} aria-label="Back to home">
-            ← Home
+          <button onClick={onBack} className={BACK_LINK} aria-label={endShift ? "Back to end of shift" : "Back to home"}>
+            {endShift ? "← Back" : "← Home"}
           </button>
-          <HandoverMark className={TYPE_TITLE} />
+          <div className="min-w-0">
+            <HandoverMark className={TYPE_TITLE} />
+            {endShift ? (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
+                Share with whoever is taking over, then finish your shift
+              </p>
+            ) : (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
+                Your shift keeps running until you end it
+              </p>
+            )}
+          </div>
         </div>
+
+        {!endShift && pool.length > 0 && (
+          <div className="flex gap-2 pb-3">
+            <button
+              type="button"
+              onClick={() => setKeepCopy(true)}
+              className={`${COPY_BTN} ${keepCopy ? COPY_ON : COPY_OFF}`}
+            >
+              Keep on my list
+            </button>
+            <button
+              type="button"
+              onClick={() => setKeepCopy(false)}
+              className={`${COPY_BTN} ${!keepCopy ? COPY_ON : COPY_OFF}`}
+            >
+              Remove from my list
+            </button>
+          </div>
+        )}
 
         <div className="flex items-center justify-between pb-3">
           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -373,13 +423,6 @@ export default function HandoverScreen({ jobs, wardLayouts = {}, onBack, onFinis
                 </div>
                 <Toggle on={includeCompleted} onClick={toggleIncludeCompleted} />
               </div>
-              <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-800">
-                <div>
-                  <div className="text-sm font-semibold text-gray-900 dark:text-white">Keep a copy here</div>
-                  <div className="text-xs text-gray-400 dark:text-gray-600">Off removes handed-over jobs</div>
-                </div>
-                <Toggle on={keepCopy} onClick={() => setKeepCopy((v) => !v)} />
-              </div>
             </div>
           )}
         </div>
@@ -432,12 +475,21 @@ export default function HandoverScreen({ jobs, wardLayouts = {}, onBack, onFinis
         )}
       </div>
 
-      <div className={`${SCREEN_FOOTER} px-5`} style={safeBottom()}>
+      <div className={`${SCREEN_FOOTER} px-5 flex flex-col gap-2`} style={safeBottom()}>
+        {showEndShiftBridge && onBridgeToEndShift && (
+          <button
+            type="button"
+            onClick={bridgeToEndShift}
+            className="w-full py-3 rounded-xl border border-claude-200 dark:border-claude-900 bg-claude-50 dark:bg-claude-950/30 text-sm font-semibold text-claude-800 dark:text-claude-200 active:scale-[0.98] transition-all"
+          >
+            Nothing left on your list. End your shift instead?
+          </button>
+        )}
         <button
           onClick={finish}
           className={PRIMARY_BTN}
         >
-          Done
+          {endShift ? "Finish shift" : "Done"}
         </button>
       </div>
 

@@ -31,3 +31,4 @@ screenshots*.js
 
 # generated search ranker comparison report
 apps/pocket-og/src/search/ranker-compare.html
+.env*

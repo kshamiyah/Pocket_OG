@@ -124,9 +124,9 @@ async function main() {
       const ctx = await seedContext(browser, runningState());
       const page = await ctx.newPage();
       await open(page);
-      await page.getByLabel("Hand over or take over").click();
+      await page.getByLabel("Exchange").click();
       await page.waitForTimeout(150);
-      await page.getByRole("button", { name: /Hand over Share open jobs/ }).click();
+      await page.getByRole("button", { name: "Hand over" }).click();
       await page.waitForTimeout(300);
       await snap(page, "v2-01-handover-with-jobs");
       await page.evaluate(() => {
@@ -160,7 +160,7 @@ async function main() {
       }));
       const page = await ctx.newPage();
       await open(page);
-      await page.getByLabel("Hand over or take over").click();
+      await page.getByLabel("Exchange").click();
       await page.waitForTimeout(150);
       await page.getByRole("button", { name: /Take over Scan or paste/ }).click();
       await page.waitForTimeout(200);
@@ -280,7 +280,7 @@ async function main() {
       await page.waitForTimeout(400);
       await page.getByText("Add your wards").waitFor({ timeout: 5000 });
       await snap(page, "v2-14-wards-intro");
-      await page.getByRole("button", { name: "Scan ward setup code" }).click();
+      await page.getByRole("button", { name: /Scan a colleague/ }).click();
       await page.waitForTimeout(350);
       await snap(page, "v2-15-wards-intro-scan");
       await ctx.close();
@@ -292,7 +292,7 @@ async function main() {
       const ctx = await seedContext(browser, runningState());
       const page = await ctx.newPage();
       await open(page);
-      await page.getByLabel("Hand over or take over").click();
+      await page.getByLabel("Exchange").click();
       await page.waitForTimeout(300);
       await snap(page, "v2-16-exchange-sheet");
       await ctx.close();

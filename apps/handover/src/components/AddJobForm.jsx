@@ -4,7 +4,7 @@ import { createJob, nextId } from "../utils/jobs";
 import { pushMRU } from "../utils/storage";
 import { hasLayout, mostRecentBed } from "../utils/wardLayouts";
 import { useKeyboardInset } from "../utils/useKeyboardInset";
-import { bottomSheetTransform, useBottomSheetSwipe } from "../utils/useBottomSheetSwipe";
+import { bottomSheetTransform, sheetMotionClass, useBottomSheetSwipe, useSheetEntered } from "../utils/useBottomSheetSwipe";
 import SheetDragHandle, { SheetSafeBottom } from "./SheetDragHandle";
 import BedPickerPanel from "./BedPickerPanel";
 import ReminderPicker from "./ReminderPicker";
@@ -15,7 +15,7 @@ const CHIP = "shrink-0 px-2.5 py-1 rounded-lg text-xs font-semibold border trans
 const CHIP_ON = "bg-claude-600 text-white border-claude-600";
 const CHIP_OFF = "bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-800";
 const TOTAL_STEPS = 3;
-const WIZARD_SHEET_HEIGHT = "min(88dvh, 320px)";
+const WIZARD_SHEET_HEIGHT = "min(88dvh, 520px)";
 const SEG = "flex-1 py-2 rounded-lg text-xs font-semibold border transition-colors";
 const JOB_INPUT =
   "w-full h-12 shrink-0 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-3 text-base text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-claude-500/30 focus:border-claude-500";
@@ -94,6 +94,7 @@ export default function AddJobForm({
   recentPhrases, setRecentPhrases,
   wardLayouts, onSetupWard,
   startCompact = false,
+  locationLocked = false,
 }) {
   const [step, setStep] = useState(1);
   const [text, setText] = useState("");
@@ -102,7 +103,7 @@ export default function AddJobForm({
   const [bedPickerOpen, setBedPickerOpen] = useState(false);
   const [customTimeOpen, setCustomTimeOpen] = useState(false);
   const [reminderKey, setReminderKey] = useState(0);
-  const [entered, setEntered] = useState(false);
+  const [entered, setEntered] = useSheetEntered(true);
   const [closing, setClosing] = useState(false);
   const inputRef = useRef(null);
   const [sheetNode, setSheetNode] = useState(null);
@@ -110,14 +111,9 @@ export default function AddJobForm({
   const keyboardInset = useKeyboardInset();
 
   const warmStart = startCompact && Boolean(stickyWard?.trim());
-  const skipLocation = warmStart;
+  const skipLocation = warmStart && locationLocked;
   const wardConfigured = hasLayout(wardLayouts, stickyWard);
   const wardChips = [...new Set([...recentWards, ...Object.keys(wardLayouts)])];
-
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setEntered(true));
-    return () => cancelAnimationFrame(id);
-  }, []);
 
   useEffect(() => {
     if (!entered || step !== 1) return undefined;
@@ -135,13 +131,13 @@ export default function AddJobForm({
   const { dragY, dragging, handleProps } = useBottomSheetSwipe(requestClose);
 
   useEffect(() => {
-    if (preselected.current || stickyBed || !stickyWard) return;
+    if (preselected.current || stickyBed || !stickyWard || warmStart) return;
     const recent = mostRecentBed(stickyWard, recentBeds);
     if (recent) {
       preselected.current = true;
       setStickyBed(recent);
     }
-  }, [stickyWard, stickyBed, recentBeds, setStickyBed]);
+  }, [stickyWard, stickyBed, recentBeds, setStickyBed, warmStart]);
 
   const chooseWard = (ward) => {
     if (ward !== stickyWard) {
@@ -265,25 +261,33 @@ export default function AddJobForm({
 
   const renderStep2 = () => (
     <>
-      <p className={TYPE_SECTION}>Ward</p>
-      <div className="flex flex-wrap gap-1.5 mb-3">
-        {wardChips.map((w) => (
-          <button
-            key={w}
-            type="button"
-            onClick={() => chooseWard(w)}
-            className={`${CHIP} ${stickyWard === w ? CHIP_ON : CHIP_OFF}`}
-          >
-            {w}
-          </button>
-        ))}
-        <NewChipEntry placeholder="Ward" onCommit={chooseWard} />
-        {stickyWard && (
-          <button type="button" onClick={() => chooseWard("")} className={`${CHIP} ${CHIP_OFF}`}>
-            {NO_WARD_LABEL}
-          </button>
-        )}
-      </div>
+      {!warmStart && (
+        <>
+          <p className={TYPE_SECTION}>Ward</p>
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {wardChips.map((w) => (
+              <button
+                key={w}
+                type="button"
+                onClick={() => chooseWard(w)}
+                className={`${CHIP} ${stickyWard === w ? CHIP_ON : CHIP_OFF}`}
+              >
+                {w}
+              </button>
+            ))}
+            <NewChipEntry placeholder="Ward" onCommit={chooseWard} />
+            {stickyWard && (
+              <button type="button" onClick={() => chooseWard("")} className={`${CHIP} ${CHIP_OFF}`}>
+                {NO_WARD_LABEL}
+              </button>
+            )}
+          </div>
+        </>
+      )}
+
+      {warmStart && stickyWard && (
+        <p className={`${TYPE_META} mb-3`}>{stickyWard}</p>
+      )}
 
       {stickyWard && (
         <>
@@ -353,7 +357,7 @@ export default function AddJobForm({
         }`}
       />
       <div
-        className={`relative z-10 flex flex-col overflow-hidden ${dragging ? "" : "transition-transform duration-300 ease-out"}`}
+        className={`relative z-10 flex flex-col overflow-hidden ${sheetMotionClass({ dragging, instant: keyboardInset > 0 })}`}
         style={sheetSizeStyle}
       >
         <div ref={setSheetNode} className="relative bg-white dark:bg-gray-950 flex flex-col h-full min-h-0 rounded-t-3xl shadow-2xl overflow-hidden">

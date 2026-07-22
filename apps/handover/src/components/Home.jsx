@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import PanelTransition from "./PanelTransition";
 import { SHIFT_TYPES } from "../utils/constants";
-import { summarize } from "../utils/jobs";
 import { countDueReminders, dueTasks, upcomingTasks } from "../utils/reminders";
 import { pushMRU } from "../utils/storage";
 import { setBedNote } from "../utils/bedNotes";
@@ -14,17 +13,17 @@ import ExchangeSheet from "./ExchangeSheet";
 import NotificationCentre from "./NotificationCentre";
 import HandoverMark from "./HandoverMark";
 import { SCREEN, SELECTED_CHIP } from "../utils/screenLayout";
+import { formatDisplayDate } from "../utils/time";
 import { TYPE_META, TYPE_TITLE, TYPE_UI_SM } from "../utils/typography";
 
 const ICON_BTN = "w-11 h-11 rounded-full border flex items-center justify-center active:scale-95 transition-all";
-const EXCHANGE_BTN_HANDOVER = "bg-claude-600 border-claude-600 text-white";
-const EXCHANGE_BTN_TAKEOVER = "border-claude-200 dark:border-claude-900 text-claude-700 dark:text-claude-400 bg-white dark:bg-gray-950";
+const EXCHANGE_BTN = "border-claude-200 dark:border-claude-900 text-claude-700 dark:text-claude-400 bg-white dark:bg-gray-950";
 const LIST_BOTTOM_PAD = "calc(env(safe-area-inset-bottom) + 6rem)";
 
 export default function Home({
-  jobs, setJobs, shiftType, recentWards, setRecentWards, recentBeds, setRecentBeds,
+  jobs, setJobs, shiftType, shiftStartedAt, recentWards, setRecentWards, recentBeds, setRecentBeds,
   recentPhrases, setRecentPhrases,
-  wardLayouts, bedNotes, setBedNotes, onHandover, onScan, onSetupWard, onManageWards, onEditProfile, onAbout, onEndShift,
+  wardLayouts, bedNotes, setBedNotes, onScan, onShareJobs, onEndShift, onSetupWard, onManageWards, onEditProfile, onAbout,
   selectedWard, setSelectedWard, selectedBed, setSelectedBed, bedSelected, setBedSelected,
 }) {
   const [mode, setMode] = useState("byward");
@@ -41,8 +40,9 @@ export default function Home({
   const [undo, setUndo] = useState(null);
   const undoTimer = useRef(null);
 
-  const summary = summarize(jobs);
   const shiftLabel = SHIFT_TYPES.find((s) => s.key === shiftType)?.label ?? "Shift";
+  const shiftDate = formatDisplayDate(shiftStartedAt ?? new Date());
+  const shiftMeta = `${shiftLabel} · ${shiftDate}`;
 
   const wardNames = [...new Set([
     ...Object.keys(wardLayouts),
@@ -145,8 +145,7 @@ export default function Home({
     setExchangeOpen(true);
   };
 
-  const exchangeLabel = "Hand over or take over";
-  const handoverMode = summary.open > 0;
+  const exchangeLabel = "Exchange";
 
   return (
     <div className={`fixed inset-0 z-0 ${SCREEN}`}>
@@ -156,8 +155,8 @@ export default function Home({
       >
         <div>
           <HandoverMark className={`${TYPE_TITLE} leading-none`} />
-          <div className={`${TYPE_META} uppercase mt-1`}>
-            {shiftLabel}
+          <div className={`${TYPE_META} mt-1`}>
+            {shiftMeta}
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -166,7 +165,7 @@ export default function Home({
             onClick={openExchange}
             data-coach="exchange-btn"
             aria-label={exchangeLabel}
-            className={`${ICON_BTN} ${handoverMode ? EXCHANGE_BTN_HANDOVER : EXCHANGE_BTN_TAKEOVER}`}
+            className={`${ICON_BTN} ${EXCHANGE_BTN}`}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M7 7h10l-3-3" />
@@ -287,6 +286,7 @@ export default function Home({
           jobs={jobs}
           onAddJob={addJob}
           startCompact={mode === "byward" && Boolean(selectedWard)}
+          locationLocked={mode === "byward" && Boolean(selectedWard) && bedSelected}
           stickyWard={stickyWard}
           setStickyWard={setStickyWard}
           stickyBed={stickyBed}
@@ -306,10 +306,9 @@ export default function Home({
         key={exchangeSession}
         open={exchangeOpen}
         onClose={() => setExchangeOpen(false)}
-        openCount={summary.open}
-        urgentCount={summary.urgent}
-        onHandover={onHandover}
         onScan={onScan}
+        onShareJobs={onShareJobs}
+        onEndShift={onEndShift}
       />
 
       <HomeMenu
@@ -320,7 +319,6 @@ export default function Home({
         onManageWards={onManageWards}
         onEditProfile={onEditProfile}
         onAbout={onAbout}
-        onEndShift={onEndShift}
       />
 
       <NotificationCentre

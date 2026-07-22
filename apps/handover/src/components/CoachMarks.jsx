@@ -21,8 +21,8 @@ const STEPS = [
   },
   {
     target: "[data-coach='exchange-btn']",
-    title: "Hand over or take over",
-    body: "Tap to hand over your jobs or scan a colleague's QR, even mid-shift.",
+    title: "Exchange",
+    body: "Take over a colleague's jobs, hand over yours mid-shift, or end your shift.",
     placement: "below",
     shape: "circle",
     pad: 8,

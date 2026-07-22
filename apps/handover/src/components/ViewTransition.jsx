@@ -26,7 +26,6 @@ export default function ViewTransition({ viewKey, direction = "forward", childre
 
     setPane((prev) => {
       if (viewKey === prev.key) {
-        if (prev.exiting) return prev;
         return { ...prev, node: childRef.current, direction };
       }
       return {
