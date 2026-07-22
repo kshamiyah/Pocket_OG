@@ -6,16 +6,25 @@ tied to training stage, or it means nothing.
 
 ## The three levels
 
-- **Level 1 — Foundation / SHO (recognition).** The first safe step. Textbook
-  presentation, pre-interpreted data, obvious distractors, single decisions.
-  Tests: do you know the pathway exists and its first move.
-- **Level 2 — Registrar (application).** Interpreting and running the case.
-  Raw data you must read yourself, some ambiguity, one genuinely close
-  distractor, chained decisions. Tests: can you run the case.
-- **Level 3 — Senior / MRCOG (judgment).** Judgment where the guideline hands
-  off. Atypical, recurrent or masked presentations, noise, competing
-  priorities, subtle distractors, escalation. Tests: do you know when to leave
-  the algorithm.
+The tiers map to Bloom's cognitive levels, and difficulty is set mainly by **how
+many inferential steps sit between the vignette and the answer** (see
+`item-writing.md` §4). Higher level means the answer must be *built* from more
+steps, not that the words are more obscure.
+
+- **Level 1 — Foundation / SHO (apply, one step).** The first safe step. Data is
+  mostly interpreted for you; one decision; distractors are real but clearly
+  wrong. The answer is one inference from the stem. Tests: do you know the
+  pathway and its first move. (Still a real decision, never "classify a stated
+  number", see below.)
+- **Level 2 — Registrar (analysis, two steps).** You interpret raw data yourself
+  and combine it with a second fact to decide: derive the state, then act;
+  or apply a contraindication you had to infer. One genuinely close distractor.
+  Tests: can you run the case.
+- **Level 3 — Senior / MRCOG (evaluation, multistep judgment).** Two or three
+  linked inferences under uncertainty: interpret results, weigh competing
+  priorities or constraints, and choose where the guideline stops giving a
+  single answer. Distractors are all defensible on the pathway and separated by
+  a subtlety you must extract. Tests: do you know when to leave the algorithm.
 
 ## The dials (turn these, don't fake it)
 

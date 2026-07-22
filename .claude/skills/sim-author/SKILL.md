@@ -77,18 +77,29 @@ Fill every TODO: an `info` opener that sets the scene, then the scored
 `fromNode` for decision beats. Follow `reference/style-guide.md` for voice,
 British English, no em dashes, the clock, dialogue and the disclaimer framing.
 
+Write the questions to a professional standard: `reference/item-writing.md` is
+the craft guide (NBME method plus the higher-order literature). Every scored
+beat must pass the cover-the-options test, be answerable only by *building* the
+answer from two or more inferential steps (give data, not the diagnosis; chain
+interpret then act; two-constraint elimination), and have homogeneous, plausible
+distractors that each catch a nameable mistake.
+
 ### 5. Bind and cite every answer
 Every scored beat gets a `source: { gl, sectionId, label }` receipt pointing at
 a real, reader-available section. Write the `why` so it quotes or paraphrases
 that section, never beyond it. See `reference/traceability.md`.
 
 ### 6. Self-check before handing over
-Run, from `apps/pocket-og`:
+First, run the **item-flaw checklist** in `reference/item-writing.md` §6/§7 over
+every scored beat by hand: cover-the-options, answer built not spotted, correct
+answer not the longest option, no absolute terms or clang clues, homogeneous
+distractors. Then run, from `apps/pocket-og`:
 - `../../node_modules/.bin/vitest run src/data/simCheck.test.js src/data/simStyleCheck.test.js`
 - `../../node_modules/.bin/eslint src/data/simCases.js`
 Fix everything red. The integrity test enforces that every node, option index,
-receipt and link resolves; the style test enforces the house rules. A draft that
-does not pass both is not ready.
+receipt and link resolves; the style test enforces the house rules. Tests catch
+structure and style; the item-flaw checklist is what the machine cannot check,
+so do not skip it. A draft that does not pass all three is not ready.
 
 ### 7. Present for review
 Hand each case over as a **playable draft**, never as JSON to proofread. Mark it
@@ -133,6 +144,8 @@ Introduce these in order of trust. Default to the earliest the request implies.
 
 - `reference/case-schema.md` — the exact data shape of a case and every beat.
 - `reference/style-guide.md` — house voice, British English, clock, dialogue, obs.
+- `reference/item-writing.md` — the professional item-writing standard (NBME
+  method, higher-order/multistep techniques, the technical-flaw checklist).
 - `reference/difficulty-rubric.md` — the three levels, the dials, RFM worked.
 - `reference/traceability.md` — the "no source, no answer" rule in detail.
 - `reference/review-and-publish.md` — draft staging, review, approve/publish.
