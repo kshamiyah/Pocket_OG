@@ -1,7 +1,13 @@
+import { Storage } from "../utils/storage";
 import { SCREEN, safeTop, BACK_LINK } from "../utils/screenLayout";
 import { TYPE_TITLE } from "../utils/typography";
+import { THEME_DARK } from "../utils/theme";
 
 export default function PrivacyPolicyScreen({ onBack }) {
+  const theme = Storage.getTheme();
+  const dark = theme === THEME_DARK;
+  const src = `/privacy.html?theme=${dark ? "dark" : "light"}`;
+
   return (
     <div className={`${SCREEN} bg-[#fbe9e7] dark:bg-gray-950`}>
       <div
@@ -15,8 +21,9 @@ export default function PrivacyPolicyScreen({ onBack }) {
       </div>
       <iframe
         title="Handover privacy policy"
-        src="/privacy.html"
+        src={src}
         className="flex-1 w-full min-h-0 border-0 bg-[#fbe9e7] dark:bg-gray-950"
+        style={{ colorScheme: dark ? "dark" : "light" }}
       />
     </div>
   );

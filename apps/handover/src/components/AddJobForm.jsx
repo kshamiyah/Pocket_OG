@@ -15,7 +15,11 @@ const CHIP = "shrink-0 px-2.5 py-1 rounded-lg text-xs font-semibold border trans
 const CHIP_ON = "bg-claude-600 text-white border-claude-600";
 const CHIP_OFF = "bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-800";
 const TOTAL_STEPS = 3;
-const WIZARD_SHEET_HEIGHT = "min(88dvh, 520px)";
+/** Compact by default; taller only while the bed picker is open on step 2. */
+function wizardSheetHeight(step, bedPickerOpen) {
+  if (step === 2 && bedPickerOpen) return "min(88dvh, 520px)";
+  return "min(88dvh, 320px)";
+}
 const SEG = "flex-1 py-2 rounded-lg text-xs font-semibold border transition-colors";
 const JOB_INPUT =
   "w-full h-12 shrink-0 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-3 text-base text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-claude-500/30 focus:border-claude-500";
@@ -211,7 +215,9 @@ export default function AddJobForm({
 
   const lift = keyboardInset > 0 ? -keyboardInset : 0;
   const sheetTransform = bottomSheetTransform({ entered, closing, dragY, lift });
-  const sheetSizeStyle = { transform: sheetTransform, height: WIZARD_SHEET_HEIGHT, maxHeight: "92dvh" };
+  const sheetHeight = wizardSheetHeight(step, bedPickerOpen);
+  const sheetSizeStyle = { transform: sheetTransform, height: sheetHeight, maxHeight: "92dvh" };
+  const animateHeight = !dragging && keyboardInset === 0;
   const step3Context = [text.trim(), contextLine(stickyWard, stickyBed)].filter(Boolean).join(" · ");
 
   const renderStep1 = () => (
@@ -357,7 +363,7 @@ export default function AddJobForm({
         }`}
       />
       <div
-        className={`relative z-10 flex flex-col overflow-hidden ${sheetMotionClass({ dragging, instant: keyboardInset > 0 })}`}
+        className={`relative z-10 flex flex-col overflow-hidden ${sheetMotionClass({ dragging, instant: keyboardInset > 0 })} ${animateHeight ? "transition-[height] duration-300 ease-out" : ""}`}
         style={sheetSizeStyle}
       >
         <div ref={setSheetNode} className="relative bg-white dark:bg-gray-950 flex flex-col h-full min-h-0 rounded-t-3xl shadow-2xl overflow-hidden">
@@ -379,7 +385,7 @@ export default function AddJobForm({
 
             <StepProgress step={step} skipLocation={skipLocation} />
 
-            <div className="flex-1 min-h-0 overflow-hidden relative">
+            <div className={`flex-1 min-h-0 relative ${bedPickerOpen ? "overflow-hidden" : "overflow-y-auto overscroll-y-contain touch-pan-y"}`}>
               {step === 1 && renderStep1()}
               {step === 2 && renderStep2()}
               {step === 3 && renderStep3()}
