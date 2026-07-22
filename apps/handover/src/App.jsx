@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Capacitor } from "@capacitor/core";
+import { App as CapApp } from "@capacitor/app";
 import WelcomeScreen from "./components/WelcomeScreen";
+import DisclaimerScreen from "./components/DisclaimerScreen";
 import PortfolioSetup from "./components/PortfolioSetup";
 import WardsIntroScreen from "./components/WardsIntroScreen";
 import ShiftPicker from "./components/ShiftPicker";
@@ -13,20 +16,23 @@ import WardManager from "./components/WardManager";
 import WardSetup from "./components/WardSetup";
 import AboutScreen from "./components/AboutScreen";
 import CoachMarks from "./components/CoachMarks";
+import FeedbackToast from "./components/FeedbackToast";
+import ViewTransition from "./components/ViewTransition";
 import { Storage, profileIsComplete } from "./utils/storage";
 import { nextId } from "./utils/jobs";
-import { decodeHandoverPayload, extractHandoverCode } from "./utils/payload";
+import { parseIncomingHandover } from "./utils/payload";
+import { syncJobReminders } from "./utils/jobNotifications";
+import { deleteLayout } from "./utils/wardLayouts";
+import { applyBedRemaps, applyLayoutImportPlan } from "./utils/layoutWire";
 
-function incomingFromUrl() {
-  const code = extractHandoverCode();
-  if (!code) return null;
+function readIncomingFromUrl() {
+  const payload = parseIncomingHandover(window.location.href);
+  if (!payload) return null;
   window.history.replaceState(null, "", window.location.pathname);
-  try {
-    return decodeHandoverPayload(code);
-  } catch {
-    return null;
-  }
+  return payload;
 }
+
+const INITIAL_INCOMING = readIncomingFromUrl();
 
 function gateView(profile, shift) {
   if (!profileIsComplete(profile)) return profile ? "setup" : "welcome";
@@ -43,7 +49,7 @@ export default function App() {
   const [recentPhrases, setRecentPhrasesState] = useState(Storage.getRecentPhrases);
   const [wardLayouts, setWardLayoutsState] = useState(Storage.getWardLayouts);
   const [bedNotes, setBedNotesState] = useState(Storage.getBedNotes);
-  const [incomingJobs, setIncomingJobs] = useState(incomingFromUrl);
+  const [incomingPayload, setIncomingPayload] = useState(INITIAL_INCOMING);
   const [wardSetupTarget, setWardSetupTarget] = useState(null);
   const [wardSetupReturn, setWardSetupReturn] = useState("list");
   const [coachPending, setCoachPending] = useState(false);
@@ -56,8 +62,29 @@ export default function App() {
   const [profileReturn, setProfileReturn] = useState("hub");
   const [aboutReturn, setAboutReturn] = useState("hub");
   const [view, setView] = useState(() =>
-    incomingFromUrl() ? "review" : gateView(Storage.getProfile(), Storage.getShift())
+    INITIAL_INCOMING ? "review" : gateView(Storage.getProfile(), Storage.getShift())
   );
+  const [navDirection, setNavDirection] = useState("forward");
+  const [toast, setToast] = useState(null);
+  const [toastElevated, setToastElevated] = useState(false);
+  const toastTimer = useRef(null);
+
+  const flashToast = (message, { elevated = false } = {}) => {
+    if (!message) return;
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToastElevated(elevated);
+    setToast(message);
+    toastTimer.current = setTimeout(() => setToast(null), 4000);
+  };
+
+  useEffect(() => () => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+  }, []);
+
+  const navigate = useCallback((next, direction = "forward") => {
+    setNavDirection(direction);
+    setView(next);
+  }, []);
 
   const setJobs = (next) => { setJobsState(next); Storage.setJobs(next); };
   const setRecentWards = (next) => { setRecentWardsState(next); Storage.setRecentWards(next); };
@@ -65,6 +92,35 @@ export default function App() {
   const setRecentPhrases = (next) => { setRecentPhrasesState(next); Storage.setRecentPhrases(next); };
   const setWardLayouts = (next) => { setWardLayoutsState(next); Storage.setWardLayouts(next); };
   const setBedNotes = (next) => { setBedNotesState(next); Storage.setBedNotes(next); };
+
+  useEffect(() => {
+    syncJobReminders(jobs);
+  }, [jobs]);
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return undefined;
+
+    const openIncoming = (url) => {
+      const payload = parseIncomingHandover(url);
+      if (!payload) return;
+      setIncomingPayload(payload);
+      setNavDirection("forward");
+      setView("review");
+    };
+
+    CapApp.getLaunchUrl().then((result) => {
+      if (result?.url) openIncoming(result.url);
+    });
+
+    let removeListener;
+    CapApp.addListener("appUrlOpen", (event) => {
+      openIncoming(event.url);
+    }).then((handle) => {
+      removeListener = () => handle.remove();
+    });
+
+    return () => removeListener?.();
+  }, []);
 
   const startCoachIfNeeded = () => {
     if (!Storage.getCoachDone()) setCoachPending(true);
@@ -80,14 +136,15 @@ export default function App() {
     Storage.setShift(nextShift);
     setShiftState(nextShift);
     if (Object.keys(wardLayouts).length === 0) {
-      setView("wardsIntro");
+      navigate("wardsIntro");
     } else {
-      setView("list");
+      navigate("list");
       startCoachIfNeeded();
     }
   };
 
   const finishHandover = ({ clear, handedOverIds = [] }) => {
+    const handedCount = handedOverIds.length;
     if (clear && handedOverIds.length > 0) {
       const remove = new Set(handedOverIds);
       setJobs(jobs.filter((j) => !remove.has(j.id)));
@@ -97,7 +154,12 @@ export default function App() {
     }
     Storage.clearShift();
     setShiftState(null);
-    setView("hub");
+    navigate("hub", "back");
+    flashToast(
+      handedCount > 0
+        ? `Handover sent · ${handedCount} job${handedCount === 1 ? "" : "s"}`
+        : "Shift ended",
+    );
   };
 
   const confirmEndShift = () => {
@@ -105,53 +167,72 @@ export default function App() {
     setBedNotes({});
     Storage.clearShift();
     setShiftState(null);
-    setView("hub");
+    navigate("hub", "back");
   };
 
   const openHandover = (returnTo = "list") => {
     setHandoverReturn(returnTo);
-    setView("handover");
+    navigate("handover");
   };
 
   const openScan = (returnTo = "hub") => {
     setScanReturn(returnTo);
-    setView("scan");
+    navigate("scan");
   };
 
   const openWards = (returnTo = "hub") => {
     setWardsReturn(returnTo);
-    setView("wards");
+    navigate("wards");
   };
 
   const openProfileEdit = (returnTo = "hub") => {
     setProfileReturn(returnTo);
-    setView("profileEdit");
+    navigate("profileEdit");
   };
 
   const openAbout = (returnTo = "hub") => {
     setAboutReturn(returnTo);
-    setView("about");
+    navigate("about");
   };
 
-  const mergeIncoming = (chosen) => {
+  const mergeIncoming = ({ jobs: chosen, layoutImport, bedRemaps }) => {
+    const remapped = applyBedRemaps(chosen, bedRemaps);
     let running = [...jobs];
     let id = nextId(running);
-    const withIds = chosen.map((j) => ({ ...j, id: id++ }));
+    const withIds = remapped.map((j) => ({ ...j, id: id++ }));
     running = [...running, ...withIds];
     setJobs(running);
-    setIncomingJobs(null);
-    setView(gateView(profile, shift));
+
+    const layoutCount = Object.values(layoutImport || {}).filter((s) => s.mode !== "skip").length;
+    if (layoutCount > 0) {
+      setWardLayouts(applyLayoutImportPlan(wardLayouts, layoutImport));
+    }
+
+    setIncomingPayload(null);
+    const nextView = gateView(profile, shift);
+    navigate(nextView);
+
+    const parts = [];
+    if (remapped.length > 0) {
+      parts.push(`${remapped.length} job${remapped.length === 1 ? "" : "s"}`);
+    }
+    if (layoutCount > 0) {
+      parts.push(`${layoutCount} ward layout${layoutCount === 1 ? "" : "s"}`);
+    }
+    if (parts.length > 0) {
+      flashToast(`Added ${parts.join(" and ")}`, { elevated: nextView === "list" });
+    }
   };
 
   const discardIncoming = () => {
-    setIncomingJobs(null);
-    setView(gateView(profile, shift));
+    setIncomingPayload(null);
+    navigate(gateView(profile, shift), "back");
   };
 
   const openWardSetup = (wardName, returnTo = "list") => {
     setWardSetupTarget(wardName);
     setWardSetupReturn(returnTo);
-    setView("wardSetup");
+    navigate("wardSetup", "up");
   };
 
   const saveWardLayout = (layout) => {
@@ -162,7 +243,43 @@ export default function App() {
       delete next[ward];
       setRecentBeds(next);
     }
-    setView(wardSetupReturn);
+    navigate(wardSetupReturn, "back");
+  };
+
+  const deleteWard = (wardName) => {
+    const key = (wardName || "").trim();
+    if (!key) return;
+
+    setWardLayouts((layouts) => deleteLayout(layouts, key));
+    setRecentWards((wards) => wards.filter((w) => w !== key));
+
+    setRecentBeds((beds) => {
+      if (!beds[key]) return beds;
+      const next = { ...beds };
+      delete next[key];
+      return next;
+    });
+
+    setBedNotes((notes) => {
+      const prefix = `${key}|`;
+      const noteKeys = Object.keys(notes).filter((k) => k.startsWith(prefix));
+      if (noteKeys.length === 0) return notes;
+      const next = { ...notes };
+      for (const k of noteKeys) delete next[k];
+      return next;
+    });
+
+    setJobs((list) => {
+      if (!list.some((j) => j.ward === key)) return list;
+      return list.map((j) => (j.ward === key ? { ...j, ward: "", bed: "" } : j));
+    });
+
+    if (selectedWard === key) {
+      setSelectedWard(null);
+      setSelectedBed(null);
+      setBedSelected(false);
+    }
+    if (wardSetupTarget === key) setWardSetupTarget(null);
   };
 
   const wardNames = [...new Set([
@@ -171,146 +288,199 @@ export default function App() {
     ...jobs.map((j) => j.ward).filter(Boolean),
   ])].sort((a, b) => a.localeCompare(b));
 
-  if (view === "welcome") {
-    return <WelcomeScreen onComplete={() => setView("setup")} />;
-  }
+  const renderScreen = () => {
+    if (view === "welcome") {
+      return (
+        <WelcomeScreen
+          onComplete={() => navigate(Storage.getDisclaimerDone() ? "setup" : "disclaimer")}
+        />
+      );
+    }
 
-  if (view === "setup" || view === "profileEdit") {
+    if (view === "disclaimer") {
+      return (
+        <DisclaimerScreen
+          onComplete={() => {
+            Storage.setDisclaimerDone(true);
+            navigate("setup");
+          }}
+        />
+      );
+    }
+
+    if (view === "setup" || view === "profileEdit") {
+      return (
+        <PortfolioSetup
+          initialProfile={profile}
+          editMode={view === "profileEdit"}
+          onComplete={(next) => {
+            saveProfile(next);
+            navigate(view === "profileEdit" ? profileReturn : "hub");
+          }}
+          onCancel={view === "profileEdit" ? () => navigate(profileReturn, "back") : undefined}
+        />
+      );
+    }
+
+    if (view === "wardsIntro") {
+      return (
+        <WardsIntroScreen
+          wardLayouts={wardLayouts}
+          onAddWard={(ward) => openWardSetup(ward, "wardsIntro")}
+          onScanSetup={() => openScan("wardsIntro")}
+          onComplete={() => {
+            navigate("list");
+            startCoachIfNeeded();
+          }}
+        />
+      );
+    }
+
+    if (view === "hub") {
+      return (
+        <HomeHub
+          profile={profile}
+          onTakeover={() => openScan("hub")}
+          onStartShift={() => navigate("shift")}
+          onManageWards={() => openWards("hub")}
+          onEditProfile={() => openProfileEdit("hub")}
+          onAbout={() => openAbout("hub")}
+        />
+      );
+    }
+
+    if (view === "about") {
+      return <AboutScreen onBack={() => navigate(aboutReturn, "back")} />;
+    }
+
+    if (view === "shift") {
+      return (
+        <ShiftPicker
+          profile={profile}
+          onComplete={completeShift}
+          onBack={() => navigate("hub", "back")}
+        />
+      );
+    }
+
+    if (view === "review" && incomingPayload) {
+      return (
+        <ReviewMerge
+          incomingJobs={incomingPayload.jobs}
+          incomingLayouts={incomingPayload.layouts}
+          wardLayouts={wardLayouts}
+          onMerge={mergeIncoming}
+          onDiscard={discardIncoming}
+        />
+      );
+    }
+
+    if (view === "endShift") {
+      return (
+        <EndShiftSummary
+          jobs={jobs}
+          shiftType={shift?.type}
+          onBack={() => navigate("list", "back")}
+          onHandover={() => openHandover("endShift")}
+          onConfirmEnd={confirmEndShift}
+        />
+      );
+    }
+
+    if (view === "handover") {
+      return (
+        <HandoverScreen
+          jobs={jobs}
+          wardLayouts={wardLayouts}
+          onBack={() => navigate(handoverReturn, "back")}
+          onFinish={finishHandover}
+        />
+      );
+    }
+
+    if (view === "scan") {
+      return (
+        <ScanScreen
+          onBack={() => navigate(scanReturn, "back")}
+          onScanned={(payload) => {
+            setIncomingPayload(payload);
+            navigate("review");
+          }}
+        />
+      );
+    }
+
+    if (view === "wards") {
+      return (
+        <WardManager
+          wardNames={wardNames}
+          wardLayouts={wardLayouts}
+          jobs={jobs}
+          onEditWard={(ward) => openWardSetup(ward, "wards")}
+          onDeleteWard={deleteWard}
+          onBack={() => navigate(wardsReturn, "back")}
+        />
+      );
+    }
+
+    if (view === "wardSetup") {
+      return (
+        <WardSetup
+          wardName={wardSetupTarget}
+          existingLayout={wardLayouts[wardSetupTarget]}
+          onSave={saveWardLayout}
+          onCancel={() => navigate(wardSetupReturn, "back")}
+        />
+      );
+    }
+
     return (
-      <PortfolioSetup
-        initialProfile={profile}
-        editMode={view === "profileEdit"}
-        onComplete={(next) => {
-          saveProfile(next);
-          setView(view === "profileEdit" ? profileReturn : "hub");
-        }}
-        onCancel={view === "profileEdit" ? () => setView(profileReturn) : undefined}
-      />
+      <>
+        <Home
+          jobs={jobs}
+          setJobs={setJobs}
+          shiftType={shift?.type}
+          recentWards={recentWards}
+          setRecentWards={setRecentWards}
+          recentBeds={recentBeds}
+          setRecentBeds={setRecentBeds}
+          recentPhrases={recentPhrases}
+          setRecentPhrases={setRecentPhrases}
+          wardLayouts={wardLayouts}
+          bedNotes={bedNotes}
+          setBedNotes={setBedNotes}
+          onHandover={() => openHandover("list")}
+          onScan={() => openScan("list")}
+          onSetupWard={(ward) => openWardSetup(ward, "list")}
+          onManageWards={() => openWards("list")}
+          onEditProfile={() => openProfileEdit("list")}
+          onAbout={() => openAbout("list")}
+          onEndShift={() => navigate("endShift")}
+          selectedWard={selectedWard}
+          setSelectedWard={setSelectedWard}
+          selectedBed={selectedBed}
+          setSelectedBed={setSelectedBed}
+          bedSelected={bedSelected}
+          setBedSelected={setBedSelected}
+        />
+        {coachPending && (
+          <CoachMarks
+            onComplete={() => {
+              Storage.setCoachDone(true);
+              setCoachPending(false);
+            }}
+          />
+        )}
+      </>
     );
-  }
-
-  if (view === "wardsIntro") {
-    return (
-      <WardsIntroScreen
-        wardLayouts={wardLayouts}
-        onAddWard={(ward) => openWardSetup(ward, "wardsIntro")}
-        onComplete={() => {
-          setView("list");
-          startCoachIfNeeded();
-        }}
-      />
-    );
-  }
-
-  if (view === "hub") {
-    return (
-      <HomeHub
-        profile={profile}
-        onTakeover={() => openScan("hub")}
-        onStartShift={() => setView("shift")}
-        onManageWards={() => openWards("hub")}
-        onEditProfile={() => openProfileEdit("hub")}
-        onAbout={() => openAbout("hub")}
-      />
-    );
-  }
-
-  if (view === "about") {
-    return <AboutScreen onBack={() => setView(aboutReturn)} />;
-  }
-
-  if (view === "shift") {
-    return <ShiftPicker profile={profile} onComplete={completeShift} onBack={() => setView("hub")} />;
-  }
-
-  if (view === "review" && incomingJobs) {
-    return <ReviewMerge incomingJobs={incomingJobs} onMerge={mergeIncoming} onDiscard={discardIncoming} />;
-  }
-
-  if (view === "endShift") {
-    return (
-      <EndShiftSummary
-        jobs={jobs}
-        shiftType={shift?.type}
-        onBack={() => setView("list")}
-        onHandover={() => openHandover("endShift")}
-        onConfirmEnd={confirmEndShift}
-      />
-    );
-  }
-
-  if (view === "handover") {
-    return <HandoverScreen jobs={jobs} onBack={() => setView(handoverReturn)} onFinish={finishHandover} />;
-  }
-
-  if (view === "scan") {
-    return (
-      <ScanScreen
-        onBack={() => setView(scanReturn)}
-        onScanned={(scannedJobs) => { setIncomingJobs(scannedJobs); setView("review"); }}
-      />
-    );
-  }
-
-  if (view === "wards") {
-    return (
-      <WardManager
-        wardNames={wardNames}
-        wardLayouts={wardLayouts}
-        onEditWard={(ward) => openWardSetup(ward, "wards")}
-        onBack={() => setView(wardsReturn)}
-      />
-    );
-  }
-
-  if (view === "wardSetup") {
-    return (
-      <WardSetup
-        wardName={wardSetupTarget}
-        existingLayout={wardLayouts[wardSetupTarget]}
-        onSave={saveWardLayout}
-        onCancel={() => setView(wardSetupReturn)}
-      />
-    );
-  }
+  };
 
   return (
     <>
-      <Home
-        jobs={jobs}
-        setJobs={setJobs}
-        shiftType={shift?.type}
-        recentWards={recentWards}
-        setRecentWards={setRecentWards}
-        recentBeds={recentBeds}
-        setRecentBeds={setRecentBeds}
-        recentPhrases={recentPhrases}
-        setRecentPhrases={setRecentPhrases}
-        wardLayouts={wardLayouts}
-        bedNotes={bedNotes}
-        setBedNotes={setBedNotes}
-        onHandover={() => openHandover("list")}
-        onScan={() => openScan("list")}
-        onSetupWard={(ward) => openWardSetup(ward, "list")}
-        onManageWards={() => openWards("list")}
-        onEditProfile={() => openProfileEdit("list")}
-        onAbout={() => openAbout("list")}
-        onEndShift={() => setView("endShift")}
-        selectedWard={selectedWard}
-        setSelectedWard={setSelectedWard}
-        selectedBed={selectedBed}
-        setSelectedBed={setSelectedBed}
-        bedSelected={bedSelected}
-        setBedSelected={setBedSelected}
-      />
-      {coachPending && (
-        <CoachMarks
-          onComplete={() => {
-            Storage.setCoachDone(true);
-            setCoachPending(false);
-          }}
-        />
-      )}
+      <ViewTransition viewKey={view} direction={navDirection}>
+        {renderScreen()}
+      </ViewTransition>
+      <FeedbackToast message={toast} elevated={toastElevated} />
     </>
   );
 }

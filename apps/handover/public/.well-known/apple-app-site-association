@@ -1,0 +1,18 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["M7S2LXWTDD.com.drshamiyah.handover"],
+        "components": [
+          {
+            "/": "/*",
+            "?": {
+              "ho": "*"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

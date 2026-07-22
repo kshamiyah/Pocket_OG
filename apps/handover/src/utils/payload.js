@@ -1,8 +1,14 @@
-// Handover payload: a compact, versioned, checksummed encoding of the open
-// job list, carried either as a QR code or a plain shareable link (?ho=...).
+// Handover payload: a compact, versioned, checksummed encoding of open jobs
+// and optional ward bed layouts, carried as a QR code or shareable link (?ho=...).
 // No server involved — the code itself is the entire message.
 
-const VERSION = 1;
+import { Capacitor } from "@capacitor/core";
+import { compactLayoutForWire, expandLayoutFromWire } from "./layoutWire.js";
+
+const VERSION_V1 = 1;
+const VERSION_V2 = 2;
+/** Public PWA origin for handover links from the native app (Capacitor uses capacitor:// locally). */
+export const HANDOVER_LINK_ORIGIN = "https://pocket-handover.vercel.app";
 
 function toBase64Url(str) {
   const bytes = new TextEncoder().encode(str);
@@ -28,20 +34,71 @@ function checksum(str) {
 
 export class HandoverPayloadError extends Error {}
 
-export function encodeHandoverPayload(jobs) {
-  const compact = {
-    v: VERSION,
-    j: jobs.map((job) => ({
-      w: job.ward || "",
-      b: job.bed || "",
-      t: job.text,
-      p: job.priority === "urgent" ? "u" : "r",
-    })),
+function compactJob(job) {
+  return {
+    w: job.ward || "",
+    b: job.bed || "",
+    t: job.text,
+    p: job.priority === "urgent" ? "u" : "r",
   };
+}
+
+function expandJob(job, i) {
+  return {
+    id: `incoming-${Date.now()}-${i}`,
+    ward: job.w || "",
+    bed: job.b || "",
+    text: job.t || "",
+    priority: job.p === "u" ? "urgent" : "routine",
+    done: false,
+    createdAt: new Date().toISOString(),
+  };
+}
+
+function compactLayouts(layouts) {
+  const w = {};
+  for (const [ward, layout] of Object.entries(layouts || {})) {
+    const compact = compactLayoutForWire(layout);
+    if (compact) w[ward] = compact;
+  }
+  return w;
+}
+
+function expandLayouts(wireMap) {
+  const layouts = {};
+  for (const [ward, layout] of Object.entries(wireMap || {})) {
+    layouts[ward] = expandLayoutFromWire(layout);
+  }
+  return layouts;
+}
+
+/**
+ * @param {Array|{ jobs: Array, layouts?: Record<string, object> }} jobsOrPayload
+ * @returns {string}
+ */
+export function encodeHandoverPayload(jobsOrPayload, layoutsArg) {
+  const jobs = Array.isArray(jobsOrPayload) ? jobsOrPayload : (jobsOrPayload?.jobs || []);
+  const layouts = Array.isArray(jobsOrPayload)
+    ? (layoutsArg || {})
+    : (jobsOrPayload?.layouts || {});
+
+  const wireLayouts = compactLayouts(layouts);
+  const hasLayouts = Object.keys(wireLayouts).length > 0;
+  const version = hasLayouts ? VERSION_V2 : VERSION_V1;
+
+  const compact = {
+    v: version,
+    j: jobs.map(compactJob),
+  };
+  if (hasLayouts) compact.w = wireLayouts;
+
   const body = toBase64Url(JSON.stringify(compact));
   return `${body}.${checksum(body)}`;
 }
 
+/**
+ * @returns {{ version: number, jobs: Array, layouts: Record<string, object> }}
+ */
 export function decodeHandoverPayload(code) {
   const parts = String(code || "").split(".");
   if (parts.length !== 2 || !parts[0] || !parts[1]) {
@@ -57,23 +114,25 @@ export function decodeHandoverPayload(code) {
   } catch {
     throw new HandoverPayloadError("That code didn't come through cleanly. Try scanning it again.");
   }
-  if (!compact || compact.v !== VERSION || !Array.isArray(compact.j)) {
+  if (!compact || !Array.isArray(compact.j)) {
     throw new HandoverPayloadError("This code is from a different version of Handover.");
   }
-  return compact.j.map((job, i) => ({
-    id: `incoming-${Date.now()}-${i}`,
-    ward: job.w || "",
-    bed: job.b || "",
-    text: job.t || "",
-    priority: job.p === "u" ? "urgent" : "routine",
-    done: false,
-    createdAt: new Date().toISOString(),
-  }));
+  if (compact.v !== VERSION_V1 && compact.v !== VERSION_V2) {
+    throw new HandoverPayloadError("This code is from a different version of Handover.");
+  }
+
+  return {
+    version: compact.v,
+    jobs: compact.j.map(expandJob),
+    layouts: compact.v === VERSION_V2 ? expandLayouts(compact.w) : {},
+  };
 }
 
-export function buildHandoverUrl(jobs) {
-  const code = encodeHandoverPayload(jobs);
-  const url = new URL(window.location.origin + window.location.pathname);
+export function buildHandoverUrl(jobs, layouts = {}) {
+  const code = encodeHandoverPayload({ jobs, layouts });
+  const url = Capacitor.isNativePlatform()
+    ? new URL("/", HANDOVER_LINK_ORIGIN)
+    : new URL(window.location.origin + window.location.pathname);
   url.searchParams.set("ho", code);
   return url.toString();
 }
@@ -81,6 +140,16 @@ export function buildHandoverUrl(jobs) {
 export function extractHandoverCode(url = window.location.href) {
   try {
     return new URL(url).searchParams.get("ho");
+  } catch {
+    return null;
+  }
+}
+
+export function parseIncomingHandover(url) {
+  const code = extractHandoverCode(url);
+  if (!code) return null;
+  try {
+    return decodeHandoverPayload(code);
   } catch {
     return null;
   }

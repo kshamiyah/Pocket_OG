@@ -1,15 +1,18 @@
 import HandoverMark from "./HandoverMark";
 import { SHIFT_TYPES } from "../utils/constants";
 import { shiftSummary } from "../utils/jobs";
-import { SCREEN, SCREEN_FOOTER, SCREEN_SCROLL, safeBottom, safeTop } from "../utils/screenLayout";
+import { SCREEN, SCREEN_FOOTER, SCREEN_SCROLL, safeBottom, safeTop, BACK_LINK, PRIMARY_BTN } from "../utils/screenLayout";
+import {
+  TYPE_BADGE, TYPE_DISPLAY, TYPE_OVERLINE, TYPE_SECTION_MB2, TYPE_STAT, TYPE_STAT_ACCENT, TYPE_STAT_LABEL, TYPE_TITLE, TYPE_UI_SM,
+} from "../utils/typography";
 
 function Stat({ label, value, accent }) {
   return (
     <div className={`rounded-2xl border px-4 py-3 ${accent ? "border-claude-200 dark:border-claude-900 bg-claude-50 dark:bg-claude-950/30" : "border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50"}`}>
-      <div className={`font-mono text-3xl font-extrabold tabular-nums leading-none ${accent ? "text-claude-800 dark:text-claude-300" : "text-gray-900 dark:text-white"}`}>
+      <div className={`${accent ? TYPE_STAT_ACCENT : TYPE_STAT}`}>
         {value}
       </div>
-      <div className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-600 mt-1.5">
+      <div className={TYPE_STAT_LABEL}>
         {label}
       </div>
     </div>
@@ -25,16 +28,16 @@ export default function EndShiftSummary({ jobs, shiftType, onBack, onHandover, o
     <div className={`${SCREEN} px-5`}>
       <div className={`${SCREEN_SCROLL} pb-3`} style={safeTop()}>
         <div className="flex items-center gap-3 mb-6">
-          <button type="button" onClick={onBack} className="text-sm font-bold text-gray-500 dark:text-gray-400">
+          <button type="button" onClick={onBack} className={BACK_LINK}>
             ← Back
           </button>
-          <HandoverMark className="font-extrabold text-lg text-gray-900 dark:text-white" />
+          <HandoverMark className={TYPE_TITLE} />
         </div>
 
-        <p className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-600 mb-1">
+        <p className={`${TYPE_OVERLINE} mb-1`}>
           {shiftLabel} shift
         </p>
-        <h1 className="text-gray-900 dark:text-white text-3xl font-bold leading-tight mb-2">End of shift</h1>
+        <h1 className={`${TYPE_DISPLAY} mb-2`}>End of shift</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
           {stats.total === 0
             ? "You didn't add any jobs this shift."
@@ -50,14 +53,14 @@ export default function EndShiftSummary({ jobs, shiftType, onBack, onHandover, o
 
         {stats.wards.length > 0 && (
           <div className="mb-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-600 mb-2">
+            <p className={TYPE_SECTION_MB2}>
               Wards on your list
             </p>
             <div className="flex flex-wrap gap-1.5">
               {stats.wards.map((ward) => (
                 <span
                   key={ward}
-                  className="text-xs font-bold text-claude-800 dark:text-claude-300 bg-claude-100 dark:bg-claude-900/30 px-2 py-1 rounded-lg"
+                  className={`${TYPE_BADGE} text-claude-800 dark:text-claude-300 bg-claude-100 dark:bg-claude-900/30 px-2 py-1 rounded-lg`}
                 >
                   {ward}
                 </span>
@@ -68,12 +71,12 @@ export default function EndShiftSummary({ jobs, shiftType, onBack, onHandover, o
 
         {hasOpen && (
           <div className="rounded-2xl border border-claude-200 dark:border-claude-900 bg-claude-50 dark:bg-claude-950/20 px-4 py-3.5 mb-4">
-            <p className="text-sm font-bold text-claude-900 dark:text-claude-200 mb-1">
+            <p className={`${TYPE_UI_SM} text-claude-900 dark:text-claude-200 mb-1`}>
               {stats.open} job{stats.open === 1 ? "" : "s"} still open
               {stats.urgent > 0 ? ` · ${stats.urgent} urgent` : ""}
             </p>
             <p className="text-sm text-claude-800/80 dark:text-claude-300/80 leading-snug">
-              Hand these over to the incoming doctor before you leave. They can scan your QR to pick them up.
+              Hand these over to whoever is taking over before you leave. They can scan your QR to pick them up.
             </p>
           </div>
         )}
@@ -107,7 +110,7 @@ export default function EndShiftSummary({ jobs, shiftType, onBack, onHandover, o
           <button
             type="button"
             onClick={onConfirmEnd}
-            className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all"
+            className={PRIMARY_BTN}
           >
             End shift
           </button>

@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react";
 import { SORT_MODE, NO_WARD_LABEL } from "../utils/constants";
-import { sortByUrgency, groupByWard, summarize } from "../utils/jobs";
+import { groupByWard, summarize } from "../utils/jobs";
 import JobCard from "./JobCard";
+import JobListWithCompleted from "./JobListWithCompleted";
+import PanelTransition from "./PanelTransition";
+import { SEGMENT_TAB, SEGMENT_ON, JOB_LIST_SCROLL, JOB_LIST_SECTION } from "../utils/screenLayout";
+import { TYPE_META, TYPE_OVERLINE, TYPE_UI_SM } from "../utils/typography";
 
 // The flat, urgency-first master view — same jobs as WardDrill/MasterSheet,
 // no location grouping by default, for the moments a whole-patch glance
@@ -18,47 +22,62 @@ export default function AllJobsList({
     editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onSetRemindAt, onDelete,
     recentWards, recentBeds, wardLayouts,
   };
-  const renderCard = (job) => <JobCard key={job.id} job={job} editing={editingId === job.id} {...cardProps} />;
+  const renderCard = (job, index = 0) => (
+    <JobCard
+      job={job}
+      hideWard={sortMode === SORT_MODE.WARD}
+      editing={editingId === job.id}
+      enterDelay={index * 30}
+      {...cardProps}
+    />
+  );
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <div className="shrink-0 px-5 pt-3 flex items-center justify-between">
-        <div className="font-mono text-[11px] tabular-nums tracking-wide text-gray-500 dark:text-gray-400">
+        <div className={`${TYPE_META} uppercase`}>
           {summary.open} OPEN · {summary.urgent} URGENT · {summary.done} DONE
         </div>
-        <div className="flex rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden text-[11px] font-bold">
-          <button onClick={() => setSortMode(SORT_MODE.URGENCY)} className={`px-2.5 py-1 ${sortMode === SORT_MODE.URGENCY ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950" : "text-gray-500 dark:text-gray-400"}`}>
+        <div className={`flex rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden ${TYPE_UI_SM}`}>
+          <button onClick={() => setSortMode(SORT_MODE.URGENCY)} className={`${SEGMENT_TAB} ${sortMode === SORT_MODE.URGENCY ? SEGMENT_ON : "text-gray-500 dark:text-gray-400"}`}>
             Urgency
           </button>
-          <button onClick={() => setSortMode(SORT_MODE.WARD)} className={`px-2.5 py-1 ${sortMode === SORT_MODE.WARD ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950" : "text-gray-500 dark:text-gray-400"}`}>
+          <button onClick={() => setSortMode(SORT_MODE.WARD)} className={`${SEGMENT_TAB} ${sortMode === SORT_MODE.WARD ? SEGMENT_ON : "text-gray-500 dark:text-gray-400"}`}>
             Ward
           </button>
         </div>
       </div>
 
-      <div
-        className="flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden px-5 py-3 flex flex-col gap-2 touch-pan-y"
-        style={{ paddingBottom: listBottomPad ?? "calc(env(safe-area-inset-bottom) + 6rem)" }}
-      >
-        {jobs.length === 0 && (
-          <p className="text-sm text-gray-400 dark:text-gray-600 text-center mt-10">
-            No jobs yet. Tap + to add your first one.
-          </p>
-        )}
+      <PanelTransition panelKey={sortMode} direction="fade" className="flex-1 min-h-0 flex flex-col">
+        <div
+          className={JOB_LIST_SCROLL}
+          style={{ paddingBottom: listBottomPad ?? "calc(env(safe-area-inset-bottom) + 6rem)" }}
+        >
+          {jobs.length === 0 && (
+            <p className="text-sm text-gray-400 dark:text-gray-600 text-center mt-10">
+              No jobs yet. Tap + to add your first one.
+            </p>
+          )}
 
-        {jobs.length > 0 && sortMode === SORT_MODE.URGENCY &&
-          sortByUrgency(jobs).map(renderCard)}
+          {jobs.length > 0 && sortMode === SORT_MODE.URGENCY && (
+            <JobListWithCompleted key="urgency-list" jobs={jobs} listClassName="animate-fade-in motion-reduce:animate-none">
+              {renderCard}
+            </JobListWithCompleted>
+          )}
 
-        {jobs.length > 0 && sortMode === SORT_MODE.WARD &&
-          groupByWard(jobs).map(([ward, list]) => (
-            <div key={ward} className="flex flex-col gap-2">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-600 mt-1">
-                {ward === NO_WARD_LABEL ? NO_WARD_LABEL : ward} · {list.length}
+          {jobs.length > 0 && sortMode === SORT_MODE.WARD &&
+            groupByWard(jobs).map(([ward, list]) => (
+              <div key={ward} className={JOB_LIST_SECTION}>
+                <div className={`${TYPE_OVERLINE} mt-1`}>
+                  {ward === NO_WARD_LABEL ? NO_WARD_LABEL : ward} · {list.length}
+                </div>
+                <JobListWithCompleted jobs={list}>
+                  {renderCard}
+                </JobListWithCompleted>
               </div>
-              {list.map(renderCard)}
-            </div>
-          ))}
-      </div>
+            ))}
+        </div>
+      </PanelTransition>
     </div>
   );
 }

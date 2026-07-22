@@ -8,6 +8,7 @@ const KEYS = {
   recentBeds: "handover_recent_beds_v1",
   bedNotes: "handover_bed_notes_v1",
   coachDone: "handover_coach_done_v1",
+  disclaimerDone: "handover_disclaimer_done_v1",
   theme: "handover_theme_v1",
 };
 
@@ -60,6 +61,9 @@ export const Storage = {
 
   getCoachDone: () => read(KEYS.coachDone, false),
   setCoachDone: (done) => write(KEYS.coachDone, done),
+
+  getDisclaimerDone: () => read(KEYS.disclaimerDone, false),
+  setDisclaimerDone: (done) => write(KEYS.disclaimerDone, done),
 
   getTheme: () => {
     try {

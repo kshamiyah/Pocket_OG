@@ -23,20 +23,20 @@ limits. Store name is a recommendation, change it everywhere if you prefer anoth
 
 ## Promotional text (170 chars, editable any time without review)
 
-> Capture ward jobs as you go, walk the ward bed by bed, then hand the list to
-> the next shift with a single QR scan. Works fully offline. Nothing leaves your phone.
+> Capture ward jobs as you go, then hand the list to the next healthcare
+> professional on shift with one QR scan. Fully offline. Nothing leaves your phone.
 
 ---
 
 ## Description (full)
 
-> Handover is a shift job list for your phone, built for the pace of a
-> hospital ward.
+> Handover is a shift job list for healthcare professionals, built for the pace of
+> a hospital ward.
 >
 > Capture jobs by ward and bed as you go. Walk the ward bed by bed with a clear
 > board in front of you. Mark jobs routine or urgent, set reminders, and tick
-> them off as you work. At the end of the shift, hand the list to the next person
-> with a QR code they scan, or a link you share, no typing it all out again.
+> them off as you work. At the end of the shift, hand the list to whoever is taking
+> over with a QR code they scan, or a link you share, no typing it all out again.
 >
 > WHY YOU'LL USE IT
 > - Fast capture: add a job in a couple of taps, by ward and bed
@@ -49,8 +49,8 @@ limits. Store name is a recommendation, change it everywhere if you prefer anoth
 >
 > PRIVATE BY DESIGN
 > Everything stays on your device. No account, no server, no cloud, no tracking.
-> Nothing you type is ever sent anywhere unless you choose to hand it over to a
-> colleague.
+> Nothing you type is ever sent anywhere unless you choose to hand it over to
+> another healthcare professional.
 >
 > A NOTE ON SAFE USE
 > Handover is a task list for healthcare professionals, not a patient record.
@@ -62,7 +62,7 @@ limits. Store name is a recommendation, change it everywhere if you prefer anoth
 ## Keywords (100 chars total, comma-separated, no spaces)
 
 ```
-shift,jobs,ward,doctor,nurse,oncall,rounds,hospital,nhs,clinical,todo,checklist,bleep,qr
+shift,jobs,ward,healthcare,professional,oncall,rounds,hospital,nhs,clinical,todo,checklist,bleep,qr
 ```
 
 > Don't repeat the app name ("handover"), Apple already indexes it.
@@ -110,8 +110,8 @@ Expected result: **4+**.
 
 ## App Review notes (paste into the "Notes" field, pre-empts rejection)
 
-> This app is a shift job list for hospital ward staff. No account or login is
-> required, and it works fully offline.
+> This app is a shift job list for healthcare professionals on the ward. No account
+> or login is required, and it works fully offline.
 >
 > HOW TO TEST
 > 1. Launch the app. Enter any name and role on the welcome screen.

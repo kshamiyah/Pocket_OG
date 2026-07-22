@@ -82,3 +82,30 @@ npm run cap:sync -w apps/handover
 ```
 
 Then rebuild in Xcode.
+
+## 7. Universal links (handover takeover URLs)
+
+Handover links (`https://pocket-handover.vercel.app/?ho=...`) can open directly in the
+installed app instead of Safari.
+
+**Personal (free) Apple Developer teams cannot use Associated Domains.** `App.entitlements`
+is intentionally empty so the app builds and runs on your iPhone. Handover still works:
+use **Take over** and paste the link, or scan the QR.
+
+**Paid Apple Developer Program only** (required for App Store anyway):
+
+1. App IDs → `com.drshamiyah.handover` → enable **Associated Domains**.
+2. Copy `App.entitlements.production` over `App.entitlements` (or merge the
+   `com.apple.developer.associated-domains` entry).
+3. Deploy so `public/.well-known/apple-app-site-association` is live on Vercel
+   (`application/json` via `vercel.json`). Verify:
+
+```bash
+curl -sI https://pocket-handover.vercel.app/.well-known/apple-app-site-association
+```
+
+4. Rebuild and install on a device. Tap a handover link in Messages or Notes; it should
+   offer to open in Handover.
+
+Universal links can take a few minutes to propagate after the first install. If a link
+still opens Safari, paste the URL on the Take over screen (still works).

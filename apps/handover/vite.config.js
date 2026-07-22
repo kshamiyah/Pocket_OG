@@ -10,9 +10,9 @@ export default defineConfig({
       devOptions: {
         enabled: false,
       },
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'fonts/Geist-Variable.woff2'],
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
       },
       manifest: {
         name: 'Handover',

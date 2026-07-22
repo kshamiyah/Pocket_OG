@@ -93,7 +93,7 @@ Everything else is time. A Mac is required for the iOS build.
 - [ ] **Information-governance note (NHS context):** confirm you're comfortable
       that a personal tool storing no PID doesn't need trust IG sign-off. Keep a
       note of the reasoning. (Not an app-store requirement, but do it before
-      colleagues use it on shift.)
+      (healthcare professionals use it on shift.)
 
 ---
 
@@ -135,7 +135,7 @@ Works on Linux/this environment — no Mac needed.
 - [ ] Register the **bundle ID** (App ID) in the Apple Developer portal.
 - [ ] Add required **Info.plist usage strings**, especially
       **`NSCameraUsageDescription`** with a clear reason
-      ("Scan a colleague's handover QR code"). A vague/missing string = rejection.
+      ("Scan a handover QR code from another healthcare professional"). A vague/missing string = rejection.
 - [ ] Add app icons + launch screen in Xcode.
 - [ ] Create **signing certificate + provisioning profile** (Xcode automatic
       signing is fine).

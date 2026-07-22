@@ -1,8 +1,5 @@
 {
   "appId": "com.drshamiyah.handover",
   "appName": "Handover",
-  "webDir": "dist",
-  "ios": {
-    "contentInset": "always"
-  }
+  "webDir": "dist"
 }

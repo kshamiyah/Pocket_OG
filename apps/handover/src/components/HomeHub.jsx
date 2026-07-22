@@ -1,8 +1,9 @@
 import HandoverMark from "./HandoverMark";
 import { roleLabel, timeGreeting } from "../utils/constants";
 import { SCREEN, SCREEN_SCROLL, safeBottom, safeTop } from "../utils/screenLayout";
+import { TYPE_BODY, TYPE_DISPLAY, TYPE_LINK } from "../utils/typography";
 
-const LINK = "text-sm font-bold text-gray-500 dark:text-gray-400 active:text-gray-700 dark:active:text-gray-200";
+const LINK = `${TYPE_LINK} text-gray-500 dark:text-gray-400 active:text-gray-700 dark:active:text-gray-200`;
 
 export default function HomeHub({ profile, onTakeover, onStartShift, onManageWards, onEditProfile, onAbout }) {
   const name = profile?.name?.trim();
@@ -14,11 +15,11 @@ export default function HomeHub({ profile, onTakeover, onStartShift, onManageWar
         className={`${SCREEN_SCROLL} flex flex-col justify-center`}
         style={{ ...safeTop("1.5rem"), ...safeBottom("1rem") }}
       >
-        <HandoverMark className="font-extrabold text-2xl text-gray-900 dark:text-white mb-1" />
-        <p className="text-lg font-bold text-claude-600 dark:text-claude-400 mb-5">
+        <HandoverMark className={`${TYPE_DISPLAY} mb-1`} />
+        <p className="text-lg font-semibold text-claude-600 dark:text-claude-400 mb-5">
           From takeover to handover.
         </p>
-        <p className="text-base text-gray-700 dark:text-gray-300 mb-6">
+        <p className={`${TYPE_BODY} text-gray-700 dark:text-gray-300 mb-6`}>
           Good {timeGreeting()}
           {name ? (
             <>

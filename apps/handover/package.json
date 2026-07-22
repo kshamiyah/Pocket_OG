@@ -1,7 +1,7 @@
 {
   "name": "handover",
   "private": true,
-  "version": "0.2.1",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,9 +13,11 @@
     "cap:open": "cap open ios"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.1",
     "@capacitor/cli": "^8.4.2",
     "@capacitor/core": "^8.4.2",
     "@capacitor/ios": "^8.4.2",
+    "@capacitor/local-notifications": "^8.2.1",
     "jsqr": "^1.4.0",
     "qrcode": "^1.5.4",
     "react": "^19.2.6",

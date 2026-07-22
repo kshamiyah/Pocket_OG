@@ -4,7 +4,11 @@ import HandoverMark from "./HandoverMark";
 import { PRIORITY, NO_WARD_LABEL } from "../utils/constants";
 import { sortByUrgency } from "../utils/jobs";
 import { buildHandoverUrl } from "../utils/payload";
-import { SCREEN, SCREEN_FOOTER, safeBottom, safeTop } from "../utils/screenLayout";
+import { layoutsForJobWards } from "../utils/layoutWire";
+import { SCREEN, SCREEN_FOOTER, safeBottom, safeTop, BACK_LINK, PRIMARY_BTN, PRIMARY_BTN_COMPACT, SELECTED_CHIP } from "../utils/screenLayout";
+import { bottomSheetTransform, useBottomSheetSwipe } from "../utils/useBottomSheetSwipe";
+import SheetDragHandle, { SheetSafeBottom } from "./SheetDragHandle";
+import { TYPE_BADGE, TYPE_CAPTION, TYPE_OVERLINE, TYPE_TITLE } from "../utils/typography";
 
 function Toggle({ on, onClick }) {
   return (
@@ -32,13 +36,13 @@ function JobPickerRow({ job, selected, onToggle }) {
       className="w-full text-left flex items-center gap-3 py-3 px-4 active:bg-gray-50 dark:active:bg-gray-900/50"
     >
       <span
-        className={`w-5 h-5 rounded-md border-2 shrink-0 flex items-center justify-center transition-colors ${
+        className={`w-7 h-7 rounded-md border-2 shrink-0 flex items-center justify-center transition-colors ${
           selected ? "bg-claude-600 border-claude-600" : "border-gray-300 dark:border-gray-600"
         }`}
         aria-hidden="true"
       >
         {selected && (
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
             <path d="M2.5 6l2.5 2.5 4.5-5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
@@ -52,12 +56,12 @@ function JobPickerRow({ job, selected, onToggle }) {
         )}
       </div>
       {urgent && !job.done && (
-        <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-red-600 dark:text-red-400">
+        <span className={`shrink-0 ${TYPE_BADGE} text-red-600 dark:text-red-400`}>
           Urgent
         </span>
       )}
       {job.done && (
-        <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-gray-600">
+        <span className={`shrink-0 ${TYPE_BADGE} text-gray-400 dark:text-gray-600`}>
           Done
         </span>
       )}
@@ -73,7 +77,7 @@ function wardKey(job) {
   return job.ward || NO_WARD_LABEL;
 }
 
-const WARD_CHIP_ON = "bg-gray-900 dark:bg-white text-white dark:text-gray-950 border-gray-900 dark:border-white";
+const WARD_CHIP_ON = SELECTED_CHIP;
 const WARD_CHIP_OFF = "bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-800";
 
 function QrExpandSheet({ open, onClose, qrDataUrl, jobCount }) {
@@ -99,6 +103,8 @@ function QrExpandSheet({ open, onClose, qrDataUrl, jobCount }) {
     }, 280);
   };
 
+  const { dragY, dragging, handleProps } = useBottomSheetSwipe(requestClose);
+
   if (!open && !closing) return null;
 
   return (
@@ -112,40 +118,48 @@ function QrExpandSheet({ open, onClose, qrDataUrl, jobCount }) {
         }`}
       />
       <div
-        className={`relative z-10 bg-white dark:bg-gray-950 rounded-t-2xl border-t border-gray-200 dark:border-gray-800 shadow-2xl transition-transform duration-300 ease-out ${
-          entered && !closing ? "translate-y-0" : "translate-y-full"
-        }`}
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
+        className={`relative z-10 ${dragging ? "" : "transition-transform duration-300 ease-out"}`}
+        style={{ transform: bottomSheetTransform({ entered, closing, dragY }) }}
       >
-        <div className="mx-auto mt-2 mb-1 h-1 w-10 rounded-full bg-gray-200 dark:bg-gray-800" aria-hidden="true" />
-        <div className="px-5 pt-3 pb-2 text-center">
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-600">
-            Scan to take over
-          </p>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {jobCount} job{jobCount === 1 ? "" : "s"} in this code
-          </p>
+        <div className="bg-white dark:bg-gray-950 rounded-t-2xl border-t border-gray-200 dark:border-gray-800 shadow-2xl max-h-[min(92dvh,100%)] flex flex-col overflow-hidden">
+          <SheetDragHandle handleProps={handleProps} />
+          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden touch-pan-y">
+            <div className="px-5 pt-3 pb-2 text-center">
+              <p className={TYPE_OVERLINE}>
+                Scan to take over
+              </p>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                {jobCount} job{jobCount === 1 ? "" : "s"} in this code
+              </p>
+            </div>
+            <div className="flex justify-center px-5 py-3">
+              <img
+                src={qrDataUrl}
+                alt="Handover QR code"
+                className="w-full max-w-[min(72vw,14rem)] max-h-[min(42dvh,14rem)] rounded-2xl border border-gray-200 dark:border-gray-800 bg-white p-3 object-contain animate-qr-reveal motion-reduce:animate-none"
+              />
+            </div>
+          </div>
+          <div
+            className="shrink-0 px-5 pt-2 border-t border-gray-100 dark:border-gray-900 bg-white dark:bg-gray-950"
+            style={safeBottom("0.5rem")}
+          >
+            <button
+              type="button"
+              onClick={requestClose}
+              className={`w-full ${PRIMARY_BTN_COMPACT}`}
+            >
+              Close
+            </button>
+          </div>
         </div>
-        <div className="flex justify-center px-5 py-4">
-          <img
-            src={qrDataUrl}
-            alt="Handover QR code"
-            className="w-full max-w-[min(88vw,20rem)] rounded-2xl border border-gray-200 dark:border-gray-800 bg-white p-3"
-          />
-        </div>
-        <button
-          type="button"
-          onClick={requestClose}
-          className="mx-5 w-[calc(100%-2.5rem)] py-3 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-sm font-bold active:scale-[0.98] transition-all"
-        >
-          Close
-        </button>
+        <SheetSafeBottom />
       </div>
     </div>
   );
 }
 
-export default function HandoverScreen({ jobs, onBack, onFinish }) {
+export default function HandoverScreen({ jobs, wardLayouts = {}, onBack, onFinish }) {
   const [includeCompleted, setIncludeCompleted] = useState(false);
   const [keepCopy, setKeepCopy] = useState(true);
   const [optionsOpen, setOptionsOpen] = useState(false);
@@ -196,7 +210,12 @@ export default function HandoverScreen({ jobs, onBack, onFinish }) {
 
   const jobsToSend = sortedPool.filter((j) => selectedIds.has(j.id));
   const urgentSelected = jobsToSend.filter((j) => !j.done && j.priority === PRIORITY.URGENT).length;
-  const url = jobsToSend.length ? buildHandoverUrl(jobsToSend) : null;
+  const layoutsToSend = useMemo(
+    () => layoutsForJobWards(wardLayouts, jobsToSend),
+    [wardLayouts, jobsToSend],
+  );
+  const layoutWardNames = Object.keys(layoutsToSend);
+  const url = jobsToSend.length ? buildHandoverUrl(jobsToSend, layoutsToSend) : null;
 
   useEffect(() => {
     if (!url) return undefined;
@@ -260,10 +279,10 @@ export default function HandoverScreen({ jobs, onBack, onFinish }) {
     <div className={`${SCREEN}`}>
       <div className="shrink-0 px-5 border-b border-gray-100 dark:border-gray-900" style={safeTop("0.75rem")}>
         <div className="flex items-center gap-3 pb-3">
-          <button onClick={onBack} className="text-sm font-bold text-gray-500 dark:text-gray-400" aria-label="Back to home">
+          <button onClick={onBack} className={BACK_LINK} aria-label="Back to home">
             ← Home
           </button>
-          <HandoverMark className="font-extrabold text-lg text-gray-900 dark:text-white" />
+          <HandoverMark className={TYPE_TITLE} />
         </div>
 
         <div className="flex items-center justify-between pb-3">
@@ -278,10 +297,10 @@ export default function HandoverScreen({ jobs, onBack, onFinish }) {
           </p>
           {pool.length > 0 && (
             <div className="flex items-center gap-2 text-xs font-bold">
-              <button type="button" onClick={selectAll} className="text-claude-700 dark:text-claude-400 px-2 py-1">
+              <button type="button" onClick={selectAll} className="text-claude-700 dark:text-claude-400 px-2 py-2 min-h-11">
                 {wardFilter ? "All in ward" : "All"}
               </button>
-              <button type="button" onClick={clearSelection} className="text-gray-500 dark:text-gray-400 px-2 py-1">
+              <button type="button" onClick={clearSelection} className="text-gray-500 dark:text-gray-400 px-2 py-2 min-h-11">
                 {wardFilter ? "None in ward" : "None"}
               </button>
             </div>
@@ -366,25 +385,25 @@ export default function HandoverScreen({ jobs, onBack, onFinish }) {
         </div>
       </div>
 
-      <div className="shrink-0 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 px-5 py-4">
+      <div className="shrink-0 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 px-5 py-3">
         {jobsToSend.length === 0 ? (
           <p className="text-sm text-gray-400 dark:text-gray-600 text-center py-2">
             {pool.length > 0 ? "Select at least one job to generate a code." : "No jobs available."}
           </p>
         ) : (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setQrExpanded(true)}
               disabled={!qrDataUrl}
               aria-label="Expand QR code"
-              className="shrink-0 w-[8.5rem] h-[8.5rem] rounded-xl bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 flex items-center justify-center overflow-hidden active:scale-[0.98] transition-all disabled:active:scale-100"
+              className="shrink-0 w-28 h-28 rounded-xl bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 flex items-center justify-center overflow-hidden active:scale-[0.98] transition-all disabled:active:scale-100"
             >
               {qrDataUrl && (
-                <img src={qrDataUrl} alt="" className="w-full h-full object-contain p-1 pointer-events-none" />
+                <img src={qrDataUrl} alt="" className="w-full h-full object-contain p-1 pointer-events-none animate-qr-reveal motion-reduce:animate-none" />
               )}
               {!qrDataUrl && qrError && (
-                <p className="text-[11px] text-red-600 dark:text-red-400 text-center px-2 leading-snug">{qrError}</p>
+                <p className={`${TYPE_CAPTION} text-red-600 dark:text-red-400 text-center px-2 leading-snug`}>{qrError}</p>
               )}
             </button>
             <div className="min-w-0 flex-1 flex flex-col gap-2">
@@ -393,11 +412,18 @@ export default function HandoverScreen({ jobs, onBack, onFinish }) {
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 leading-snug">
                 {qrDataUrl ? "Tap the code to enlarge it." : "Show this to whoever is taking over."}
+                {layoutWardNames.length > 0 && (
+                  <span className="block mt-1 text-claude-700 dark:text-claude-400">
+                    Includes {layoutWardNames.length === 1
+                      ? `${layoutWardNames[0]} bed layout`
+                      : `${layoutWardNames.length} ward layouts`}
+                  </span>
+                )}
               </p>
               <button
                 type="button"
                 onClick={share}
-                className="mt-1 w-full py-2.5 rounded-xl bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 text-sm font-bold text-gray-700 dark:text-gray-300 active:scale-[0.98] transition-all"
+                className="w-full py-2.5 rounded-xl bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 text-sm font-bold text-gray-700 dark:text-gray-300 active:scale-[0.98] transition-all"
               >
                 {copied ? "Link copied" : navigator.share ? "Share link" : "Copy link"}
               </button>
@@ -409,7 +435,7 @@ export default function HandoverScreen({ jobs, onBack, onFinish }) {
       <div className={`${SCREEN_FOOTER} px-5`} style={safeBottom()}>
         <button
           onClick={finish}
-          className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all"
+          className={PRIMARY_BTN}
         >
           Done
         </button>
