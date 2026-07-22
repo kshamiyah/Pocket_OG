@@ -23,7 +23,7 @@ import DisclaimerModal from "./components/DisclaimerModal";
 import AboutModal from "./components/AboutModal";
 import UpdatesModal from "./components/UpdatesModal";
 import HomeScreen from "./components/HomeScreen";
-import { LATEST_VERSION, hasUnseenUpdates, markUpdatesSeen } from "./data/updates";
+import { hasUnseenUpdates, markUpdatesSeen } from "./data/updates";
 import LatestTab from "./components/LatestTab";
 import TabPageHeader from "./components/TabPageHeader";
 import ThemeToggle from "./components/ThemeToggle";
@@ -317,13 +317,17 @@ export default function App() {
     }
   };
 
-  // Open shared deep links (?g= / ?fc= / ?calc= / ?consent=) on first load.
+  // Open shared deep links (?g= / ?fc= / ?calc= / ?consent= / ?sim=) on first
+  // load. Capture the link once via a lazy initialiser so it survives React
+  // StrictMode's double-invocation in dev (which otherwise strips the URL on the
+  // first pass, leaving the second pass with nothing to open).
+  const [initialDeepLink] = useState(readDeepLink);
   useEffect(() => {
-    const link = readDeepLink();
-    if (!link) return;
+    if (!initialDeepLink) return;
     clearDeepLinkParam();
-    const t = setTimeout(() => handleNavigate(link), 0);
+    const t = setTimeout(() => handleNavigate(initialDeepLink), 0);
     return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const hasQuery = query.trim().length > 0;
 
