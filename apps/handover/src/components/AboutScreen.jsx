@@ -7,7 +7,7 @@ const SECTION = "mb-6";
 const H = "text-sm font-semibold text-gray-900 dark:text-white mb-1.5";
 const P = "text-sm text-gray-600 dark:text-gray-400 leading-relaxed";
 
-export default function AboutScreen({ onBack }) {
+export default function AboutScreen({ onBack, onOpenPrivacy }) {
   return (
     <div className={`${SCREEN} px-5`}>
       <div className="shrink-0 flex items-center gap-3 mb-4" style={safeTop()}>
@@ -42,14 +42,22 @@ export default function AboutScreen({ onBack }) {
             A handover QR or link only carries the jobs you choose to send.
             Private bed notes are never included.
           </p>
-          <a
-            href="/privacy.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block mt-2 text-sm font-semibold text-claude-600 dark:text-claude-400 underline underline-offset-2"
+          <button
+            type="button"
+            onClick={onOpenPrivacy}
+            className="inline-block mt-2 text-sm font-semibold text-claude-600 dark:text-claude-400 underline underline-offset-2 text-left"
           >
             Read the full privacy policy
-          </a>
+          </button>
+          <p className={`${P} mt-2`}>
+            Questions or feedback:{" "}
+            <a
+              href="mailto:khalid@drshamiyah.com"
+              className="font-semibold text-claude-600 dark:text-claude-400 underline underline-offset-2"
+            >
+              khalid@drshamiyah.com
+            </a>
+          </p>
         </div>
 
         <div className={SECTION}>

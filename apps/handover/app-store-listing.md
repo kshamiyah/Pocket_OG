@@ -12,8 +12,8 @@ limits. Store name is a recommendation, change it everywhere if you prefer anoth
 | App name | **Handover** | 30 chars |
 | Subtitle | **Shift job list, handed over** | 30 chars |
 | Bundle ID | `com.drshamiyah.handover` | — |
-| Primary category | Medical | — |
-| Secondary category | Productivity | — |
+| Primary category | Productivity | — |
+| Secondary category | Medical | — |
 
 > App Store names must be globally unique. "Handover" is a common word and may
 > already be taken. Fallbacks if so: *Handover: Shift List*, *Ward Handover*,
@@ -62,7 +62,7 @@ limits. Store name is a recommendation, change it everywhere if you prefer anoth
 ## Keywords (100 chars total, comma-separated, no spaces)
 
 ```
-shift,jobs,ward,healthcare,professional,oncall,rounds,hospital,nhs,clinical,todo,checklist,bleep,qr
+shift,jobs,ward,healthcare,professional,oncall,rounds,hospital,clinical,todo,checklist,bleep,qr
 ```
 
 > Don't repeat the app name ("handover"), Apple already indexes it.
@@ -74,7 +74,7 @@ shift,jobs,ward,healthcare,professional,oncall,rounds,hospital,nhs,clinical,todo
 | Field | Value |
 |-------|-------|
 | Privacy Policy URL | `https://pocket-handover.vercel.app/privacy.html` |
-| Support URL | `https://pocket-handover.vercel.app/` (or a support page) |
+| Support URL | `https://pocket-handover.vercel.app/support.html` |
 | Marketing URL (optional) | `https://pocket-handover.vercel.app/` |
 
 ---
@@ -110,20 +110,31 @@ Expected result: **4+**.
 
 ## App Review notes (paste into the "Notes" field, pre-empts rejection)
 
-> This app is a shift job list for healthcare professionals on the ward. No account
-> or login is required, and it works fully offline.
+> Handover is a shift **task list** for healthcare professionals on the ward. It is
+> **not** a patient record, diagnostic tool, or source of medical advice. No account
+> or login is required, and the app works fully offline after install.
 >
-> HOW TO TEST
-> 1. Launch the app. Enter any name and role on the welcome screen.
-> 2. Start a shift, then add a few jobs by ward and bed.
-> 3. Native camera use: tap Take Over / Scan to open the QR scanner. It uses the
->    camera only to read a handover QR code from another device. You may also
->    paste a handover link instead of scanning.
-> 4. Tap Hand Over to generate a QR code / link that passes the selected jobs to
->    the next shift.
+> **Why this is a native app (Guideline 4.2)**
+> - **Local notifications:** job reminders schedule through iOS Local Notifications
+>   (native), not just in-app banners.
+> - **Camera QR scanning:** native camera access to read a colleague&apos;s handover code.
+> - **Universal links:** handover URLs can open in the installed app when Associated
+>   Domains are enabled on the developer account.
+> - All job data stays on-device in local storage unless the user chooses to hand over.
 >
-> All data is stored locally on the device (localStorage). Nothing is transmitted
-> to any server. There is no backend.
+> **How to test**
+> 1. Launch the app. Tap Continue, read the safety notice, then enter any name and role.
+> 2. Start a shift (e.g. Day or Night). Add a few jobs by ward and bed.
+> 3. **Take over:** tap Exchange → Take over. Camera opens for QR scan, or paste a
+>    handover link in the field below the camera preview.
+> 4. **Hand over:** tap Exchange → Hand over (mid-shift) or End shift → Hand over and
+>    end shift. Select jobs, show QR or Copy link.
+> 5. **Privacy policy:** ⋯ menu → About → Read the full privacy policy (in-app viewer).
+> 6. **Reminders (optional):** add a reminder on a job; on a real device, iOS may
+>    prompt for notification permission.
+>
+> No data is sent to any server operated by the developer. There is no backend.
+> Support: khalid@drshamiyah.com · https://pocket-handover.vercel.app/support.html
 
 ---
 
@@ -132,13 +143,24 @@ Expected result: **4+**.
 The app uses no non-exempt encryption (only standard HTTPS/OS features; the
 handover payload is base64-encoded, not encrypted).
 
-- Answer **"No"** to the "Does your app use encryption?" export question, **or**
-  add this to `ios/App/App/Info.plist` to skip the prompt on every upload:
+- `ITSAppUsesNonExemptEncryption` is set to **false** in `ios/App/App/Info.plist`
+  (skips the export prompt on each upload).
+- In App Store Connect you can still answer **No** to non-exempt encryption if asked.
 
-```xml
-<key>ITSAppUsesNonExemptEncryption</key>
-<false/>
-```
+---
+
+## App icon (marketing)
+
+- Source: `public/icon-1024.png` (1024×1024, RGB, **no alpha channel**).
+- Regenerate into Xcode via `npm run cap:icons -w apps/handover` before `cap:sync`.
+- Upload the same 1024 asset to App Store Connect (opaque, no rounded corners).
+
+## Universal links
+
+- `App.entitlements` includes `applinks:pocket-handover.vercel.app`.
+- Requires **Associated Domains** enabled on App ID `com.drshamiyah.handover` in the
+  Apple Developer portal (paid programme).
+- AASA file: `public/.well-known/apple-app-site-association` (served as JSON on Vercel).
 
 ---
 

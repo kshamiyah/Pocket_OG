@@ -89,9 +89,12 @@ Then rebuild in Xcode.
 Handover links (`https://pocket-handover.vercel.app/?ho=...`) can open directly in the
 installed app instead of Safari.
 
-**Personal (free) Apple Developer teams cannot use Associated Domains.** `App.entitlements`
-is intentionally empty so the app builds and runs on your iPhone. Handover still works:
-use **Take over** and paste the link, or scan the QR.
+**Personal (free) Apple Developer teams cannot use Associated Domains.** For local
+device testing on a free team, temporarily use an empty `App.entitlements` again.
+For **App Store submission**, enable Associated Domains on the App ID and keep
+`App.entitlements` with `applinks:pocket-handover.vercel.app` (see
+`App.entitlements.production`). Handover still works without universal links: use
+**Take over** and paste the link, or scan the QR.
 
 **Paid Apple Developer Program only** (required for App Store anyway):
 

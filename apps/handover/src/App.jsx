@@ -15,6 +15,7 @@ import ReviewMerge from "./components/ReviewMerge";
 import WardManager from "./components/WardManager";
 import WardSetup from "./components/WardSetup";
 import AboutScreen from "./components/AboutScreen";
+import PrivacyPolicyScreen from "./components/PrivacyPolicyScreen";
 import CoachMarks from "./components/CoachMarks";
 import FeedbackToast from "./components/FeedbackToast";
 import ViewTransition from "./components/ViewTransition";
@@ -416,7 +417,16 @@ export default function App() {
     }
 
     if (view === "about") {
-      return <AboutScreen onBack={() => navigate(aboutReturn, "back")} />;
+      return (
+        <AboutScreen
+          onBack={() => navigate(aboutReturn, "back")}
+          onOpenPrivacy={() => navigate("privacy")}
+        />
+      );
+    }
+
+    if (view === "privacy") {
+      return <PrivacyPolicyScreen onBack={() => navigate("about", "back")} />;
     }
 
     if (view === "shift") {

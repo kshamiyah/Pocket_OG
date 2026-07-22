@@ -19,7 +19,8 @@ Everything else is time. A Mac is required for the iOS build.
 | Bundle ID / App ID | `com.drshamiyah.handover` |
 | Store name | **Handover** (fallback if taken: Handover: Shift List) |
 | Privacy policy URL | `https://pocket-handover.vercel.app/privacy.html` |
-| Support / contact email | `k.shamiyah@gmail.com` |
+| Support URL | `https://pocket-handover.vercel.app/support.html` |
+| Support / contact email | `khalid@drshamiyah.com` |
 | Production domain | `pocket-handover.vercel.app` |
 
 > The privacy policy URL only goes live once this branch is deployed to the
