@@ -47,12 +47,20 @@ A scenario has two layers. Keep them separate in your head:
 
 ## Workflow
 
-### 1. Scope
+### 1. Scope, then mine the pitfalls
 From the request ("I need PPH questions"), identify the guideline and flowchart
 already in the repo (e.g. GTG52 / `GTG52_PPH`). Pick a **spread** of distinct
 presentations, not near-duplicates: for PPH, walk the 4 Ts (tone, trauma,
 tissue, thrombin) and minor vs major vs massive. Check `simCases.js` for what
 already exists and fill gaps. Default to 3 cases unless a number is given.
+
+Then, before writing anything, **grep the linked guide section(s) for the
+pitfalls** each question will be built on: contraindications, "do not"
+statements, alert boxes, MBRRACE avoidable-factor notes, counter-intuitive
+thresholds and sequences. Each scored question is built *backwards from one
+pitfall*. This is the core of `reference/item-writing.md`, read it now, not at
+review time. A question that is not anchored to a documented pitfall almost
+never discriminates.
 
 ### 2. Choose difficulty
 Assign each case a level (1/2/3) using `reference/difficulty-rubric.md`. Turn
@@ -90,10 +98,11 @@ a real, reader-available section. Write the `why` so it quotes or paraphrases
 that section, never beyond it. See `reference/traceability.md`.
 
 ### 6. Self-check before handing over
-First, run the **item-flaw checklist** in `reference/item-writing.md` §6/§7 over
-every scored beat by hand: cover-the-options, answer built not spotted, correct
-answer not the longest option, no absolute terms or clang clues, homogeneous
-distractors. Then run, from `apps/pocket-og`:
+First, run the **adversarial gate** in `reference/item-writing.md` §7 on every
+scored beat, in criticism mode: try to break each item (elimination attack,
+cover-the-options, two-candidate divergence, spot-vs-build, technical-flaw
+sweep). Regenerate anything that fails rather than rescuing it. Then run, from
+`apps/pocket-og`:
 - `../../node_modules/.bin/vitest run src/data/simCheck.test.js src/data/simStyleCheck.test.js`
 - `../../node_modules/.bin/eslint src/data/simCases.js`
 Fix everything red. The integrity test enforces that every node, option index,

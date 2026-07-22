@@ -6,6 +6,62 @@ the medical-education literature on higher-order questions. Follow it and the
 questions test clinical reasoning; ignore it and they test recall or, worse,
 test-taking tricks. Sources are listed at the end.
 
+## The only thing that matters: discrimination
+
+A question is good **if and only if** a candidate who knows the point answers it
+right and a candidate who does not answers it *wrong*. That is discrimination.
+Every failure mode we have hit was a discrimination failure: the stem gave away
+the answer, or the answer was a fact anyone could read off, or no distractor
+trapped anyone. Vignette polish, homogeneous options, no em dashes: all of it
+serves discrimination and none of it substitutes for it.
+
+Before you write anything, answer two questions in one sentence each:
+
+1. **What exactly must the candidate know or work out to get this right?**
+2. **For each wrong option, which specific trainee, holding which specific wrong
+   idea, is pulled to it?**
+
+If you cannot answer both, you do not yet have a question. Do not proceed.
+
+## Build backwards from a pitfall, not forwards from a scenario
+
+Do not start from a patient and bolt a question on; that is how you get "classify
+1300 ml". Start from **one thing trainees actually get wrong**, then build the
+minimum vignette that forces exactly that judgment.
+
+The guidelines already hand you the pitfalls, this is the seam to mine:
+
+- **Contraindications** ("carboprost contraindicated in asthma"; "ergometrine,
+  avoid in hypertension or cardiac disease").
+- **"Do not" / "never" statements** ("do not apply cord traction without a
+  contraction"; "routine uterine massage is not recommended").
+- **Alert boxes** (the amber warnings in every guide section).
+- **MBRRACE / avoidable-factor notes** ("delayed escalation", "haematologist
+  contacted too late", "premature step-down from critical care").
+- **Counter-intuitive thresholds and sequences** (cryoprecipitate, not FFP,
+  first for low fibrinogen; a firm uterus that keeps bleeding is trauma, not
+  tone).
+
+Each of these is simultaneously your **answer key** (guideline-anchored, so
+traceable) and your **guarantee of discrimination** (the guideline is telling
+you this is where people err). Grep the linked guide section for these before
+writing; the pitfall *is* the question.
+
+## The method, in order
+
+1. **Pick the pitfall** (above). Write it as: "trainees wrongly do X; the
+   guideline says Y because Z."
+2. **State the discriminating knowledge** in one sentence (what the right
+   candidate knows that the wrong one does not).
+3. **Write each distractor as a named trap**: X itself, plus the other wrong
+   mental models a reasonable trainee holds. Homogeneous category, balanced
+   length.
+4. **Write the minimum vignette** that forces the judgment. Put the deciding
+   fact in as a *clue to be interpreted* (labetalol on the drug chart), never as
+   a *statement that resolves it* ("she is hypertensive", "placenta complete").
+5. **Run the adversarial gate** (below). If it fails, fix or discard. Never show
+   an item that has not passed it.
+
 ## 1. Anatomy of a one-best-answer item
 
 Every `choice` beat is a **stem** (the vignette narrative + a focused lead-in
@@ -111,15 +167,56 @@ candidate guess, and those that add difficulty unrelated to clinical reasoning.
 - **Inconsistent or gratuitous numbers**, "none/all of the above", tricking on a
   technicality.
 
-## 7. The author's pre-ship questions
+## 7. The adversarial gate (run on every item, try to break it)
 
-For every scored beat, confirm:
-1. Does it test an important decision a trainee actually faces?
-2. Cover the options: can a competent trainee answer from stem + lead-in alone?
-3. Is the answer *built* from ≥2 inferential steps, or merely *spotted*?
-4. Is every distractor a real, nameable mistake, homogeneous with the answer?
-5. Does it survive the technical-flaw checklist (§6)?
-6. Is every answer bound to a repo guideline section (`traceability.md`)?
+This is not a checklist to skim; it is a set of attacks you run on your own
+draft, in criticism mode, not writing mode. If the item survives all of them,
+ship it. If it fails one, fix it or discard it. Regenerate rather than rescue a
+fundamentally weak item.
+
+1. **The elimination attack.** Read only the stem and the options. Can you cross
+   off *any* option using only words in the stem ("placenta complete" kills the
+   tissue option)? If yes, the item is broken: the stem states an exclusion.
+   Remove the statement and replace it with a clue, or change the distractor.
+2. **The cover-the-options attack.** Cover the options. Can a competent trainee
+   commit to an answer from the stem and lead-in alone? If not, the lead-in is
+   unfocused.
+3. **The two-candidate attack.** Imagine a trainee who *knows* the pitfall and
+   one who *does not*. Do they actually diverge on this item? Name the option the
+   ignorant one picks. If both land on the right answer, it does not discriminate
+   — bin it.
+4. **The spot-vs-build attack.** Can the answer be reached by matching one word
+   in the stem to one word in an option? If yes, it is recall in disguise. Make
+   the deciding fact something to interpret, not to match.
+5. **The technical-flaw sweep (§6).** Correct answer the longest? Absolute terms?
+   Clang clue? Convergence? Fix.
+6. **The traceability check.** Is the correct answer bound to a repo guideline
+   section, and does the `why` stay within it? (`traceability.md`.)
+
+## 8. A worked item, built the method's way
+
+**Pitfall (GTG52):** trainees reach for ergometrine as the reflex second-line
+uterotonic; the guideline says avoid it in hypertension or cardiac disease.
+
+**Discriminating knowledge:** ergometrine is contraindicated in hypertension, so
+in a hypertensive woman you skip it to carboprost.
+
+**Distractors as named traps:** ergometrine (knows the ladder, misses the
+contraindication); repeat oxytocin (does not know the ladder progresses);
+misoprostol (reaches for an alternative but it is lower on the ladder).
+
+**Minimum vignette, deciding fact as a clue:**
+> Bleeding briskly 20 minutes after a forceps birth. Oxytocin infusion running,
+> uterus still soft, loss 1100 ml. Her notes record a booking BP of 148/96 and
+> "started on labetalol at 30 weeks." **Which is the most appropriate next
+> uterotonic?**
+> (✓ Carboprost · Ergometrine · Repeat oxytocin bolus · Misoprostol)
+
+**Gate:** nothing eliminable from the stem; answerable with options covered;
+knower picks carboprost, non-knower picks ergometrine (they diverge); the
+hypertension is *derived* from labetalol/148-96, not stated (built, not spotted);
+correct option is not the longest; bound to GTG52 (ergometrine contraindication).
+Ships.
 
 ## Sources
 
