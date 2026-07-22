@@ -187,18 +187,16 @@ export default function JobCard({
                 className="w-full text-left active:opacity-80 min-w-0"
                 aria-label={`Edit job: ${job.text}`}
               >
-                <div className="flex items-center gap-1.5 min-w-0">
-                  {urgent && !job.done && (
-                    <span className={`${TYPE_BADGE} leading-none shrink-0 text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30 px-1 py-0.5 rounded`}>
-                      Urgent
-                    </span>
-                  )}
-                  <p className={`${TYPE_BODY_SM} leading-snug truncate min-w-0 ${job.done ? "text-gray-400 dark:text-gray-600 line-through" : ""}`}>
-                    {job.text}
-                  </p>
-                </div>
+                {urgent && !job.done && (
+                  <span className={`${TYPE_BADGE} inline-block mb-0.5 text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30 px-1 py-0.5 rounded`}>
+                    Urgent
+                  </span>
+                )}
+                <p className={`${TYPE_BODY_SM} leading-snug line-clamp-2 break-words ${job.done ? "text-gray-400 dark:text-gray-600 line-through" : ""}`}>
+                  {job.text}
+                </p>
                 {metaLine && (
-                  <p className={`${TYPE_META} leading-tight mt-0.5 truncate ${reminder === "due" ? "font-semibold text-claude-700 dark:text-claude-400" : ""}`}>
+                  <p className={`${TYPE_META} leading-tight mt-0.5 line-clamp-1 ${reminder === "due" ? "font-semibold text-claude-700 dark:text-claude-400" : ""}`}>
                     {metaLine}
                   </p>
                 )}

@@ -48,7 +48,7 @@ function JobPickerRow({ job, selected, onToggle }) {
         )}
       </span>
       <div className="min-w-0 flex-1">
-        <p className={`text-sm font-medium leading-snug truncate ${job.done ? "text-gray-400 dark:text-gray-600 line-through" : "text-gray-900 dark:text-white"}`}>
+        <p className={`text-sm font-medium leading-snug line-clamp-2 break-words ${job.done ? "text-gray-400 dark:text-gray-600 line-through" : "text-gray-900 dark:text-white"}`}>
           {job.text}
         </p>
         {location && (

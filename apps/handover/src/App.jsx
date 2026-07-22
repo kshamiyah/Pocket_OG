@@ -71,22 +71,49 @@ export default function App() {
   const [toastElevated, setToastElevated] = useState(false);
   const toastTimer = useRef(null);
 
-  const flashToast = (message, { elevated = false } = {}) => {
+  const flashToast = (message, { elevated = false, duration = 2600 } = {}) => {
     if (!message) return;
     if (toastTimer.current) clearTimeout(toastTimer.current);
     setToastElevated(elevated);
     setToast(message);
-    toastTimer.current = setTimeout(() => setToast(null), 4000);
+    toastTimer.current = setTimeout(() => {
+      setToast(null);
+      setToastElevated(false);
+    }, duration);
   };
+
+  const dismissToast = useCallback(() => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast(null);
+    setToastElevated(false);
+  }, []);
+
+  // Dismiss confirmation toast on the next tap after a short grace period, so in-list
+  // navigation (ward drill, sheets) clears it even when App view stays on "list".
+  useEffect(() => {
+    if (!toast) return undefined;
+    let armed = false;
+    const armId = window.setTimeout(() => { armed = true; }, 400);
+    const onInteract = () => {
+      if (!armed) return;
+      dismissToast();
+    };
+    document.addEventListener("pointerdown", onInteract, { capture: true });
+    return () => {
+      window.clearTimeout(armId);
+      document.removeEventListener("pointerdown", onInteract, { capture: true });
+    };
+  }, [toast, dismissToast]);
 
   useEffect(() => () => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
   }, []);
 
   const navigate = useCallback((next, direction = "forward") => {
+    dismissToast();
     setNavDirection(direction);
     setView(next);
-  }, []);
+  }, [dismissToast]);
 
   const setJobs = (next) => { setJobsState(next); Storage.setJobs(next); };
   const setRecentWards = (next) => { setRecentWardsState(next); Storage.setRecentWards(next); };

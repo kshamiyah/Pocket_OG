@@ -13,7 +13,7 @@ function TaskRow({ job, now, onOpen }) {
       <div className="flex items-start gap-2">
         <span className="mt-1.5 w-2 h-2 shrink-0 rounded-full bg-claude-600" aria-hidden="true" />
         <div className="min-w-0 flex-1">
-          <p className={`${TYPE_BODY_SM} font-semibold leading-snug truncate`}>
+          <p className={`${TYPE_BODY_SM} font-semibold leading-snug line-clamp-2 break-words`}>
             {job.text}
           </p>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
@@ -44,7 +44,7 @@ function UpcomingRow({ job, now, onOpen }) {
   return (
     <button type="button" onClick={() => onOpen(job.id)} className={ROW}>
       <div className="min-w-0">
-        <p className={`${TYPE_BODY_SM} leading-snug truncate`}>
+        <p className={`${TYPE_BODY_SM} leading-snug line-clamp-2 break-words`}>
           {job.text}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
@@ -104,9 +104,9 @@ export default function NotificationCentre({
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
-      <button
-        type="button"
-        aria-label="Close notifications"
+      <div
+        role="presentation"
+        aria-hidden="true"
         onClick={() => requestClose()}
         className={`absolute inset-0 bg-black/25 transition-opacity duration-300 ease-out ${
           entered && !closing ? "opacity-100" : "opacity-0"

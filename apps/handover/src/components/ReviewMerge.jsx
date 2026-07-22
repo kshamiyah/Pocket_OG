@@ -128,7 +128,7 @@ function ReviewJobRow({
                   </span>
                 )}
               </div>
-              <p className={TYPE_BODY_SM}>{job.text || "Empty task"}</p>
+              <p className={`${TYPE_BODY_SM} leading-snug line-clamp-3 break-words`}>{job.text || "Empty task"}</p>
               <p className={`${TYPE_CAPTION} mt-1`}>Tap to edit</p>
             </button>
           )}
@@ -300,6 +300,14 @@ export default function ReviewMerge({
 
   const incomingWardNames = Object.keys(incomingLayoutsState);
 
+  const layoutSummary = useMemo(
+    () => incomingWardNames.map((ward) => {
+      const count = totalBeds(incomingLayoutsState[ward]);
+      return `${ward} (${count} bed${count === 1 ? "" : "s"})`;
+    }).join(", "),
+    [incomingWardNames, incomingLayoutsState],
+  );
+
   const toggle = (id) =>
     setSelected((prev) => {
       const next = new Set(prev);
@@ -392,30 +400,26 @@ export default function ReviewMerge({
               </span>
             </div>
             <h1 className={`${TYPE_DISPLAY} mb-1`}>Review before it lands</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
               Uncheck anything you don&apos;t want. Tap a job to edit ward, bed, or wording.
             </p>
+            {incomingWardNames.length > 0 && (
+              <div className="rounded-xl border border-claude-200 dark:border-claude-900 bg-claude-50 dark:bg-claude-950/30 px-3.5 py-3 mb-4">
+                <p className="text-xs font-bold uppercase tracking-wide text-claude-800 dark:text-claude-300 mb-1">
+                  Ward layouts in this handover
+                </p>
+                <p className="text-sm text-claude-900 dark:text-claude-200 leading-snug">
+                  {incomingWardNames.length} ward{incomingWardNames.length === 1 ? "" : "s"}: {layoutSummary}
+                </p>
+              </div>
+            )}
           </>
         )}
       </div>
 
       <div className={`${SCREEN_SCROLL} flex flex-col gap-2 pb-3 animate-fade-in motion-reduce:animate-none`}>
-        {!layoutOnly && jobs.map((job, index) => (
-          <ReviewJobRow
-            key={job.id}
-            job={job}
-            index={index}
-            selected={selected.has(job.id)}
-            editing={editingId === job.id}
-            onToggle={() => toggle(job.id)}
-            onEdit={() => setEditingId(job.id)}
-            onPatch={(patch) => patchJob(job.id, patch)}
-            onCloseEdit={() => setEditingId(null)}
-          />
-        ))}
-
         {incomingWardNames.length > 0 && (
-          <div className={layoutOnly ? "" : "mt-2 pt-2 border-t border-gray-200 dark:border-gray-800"}>
+          <div className={layoutOnly ? "" : ""}>
             {!layoutOnly && (
               <p className="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
                 Bed layouts
@@ -470,6 +474,26 @@ export default function ReviewMerge({
             })}
           </div>
         )}
+
+        {!layoutOnly && jobs.length > 0 && incomingWardNames.length > 0 && (
+          <p className="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 mt-2 mb-1 pt-2 border-t border-gray-200 dark:border-gray-800">
+            Jobs
+          </p>
+        )}
+
+        {!layoutOnly && jobs.map((job, index) => (
+          <ReviewJobRow
+            key={job.id}
+            job={job}
+            index={index}
+            selected={selected.has(job.id)}
+            editing={editingId === job.id}
+            onToggle={() => toggle(job.id)}
+            onEdit={() => setEditingId(job.id)}
+            onPatch={(patch) => patchJob(job.id, patch)}
+            onCloseEdit={() => setEditingId(null)}
+          />
+        ))}
       </div>
 
       <div className={SCREEN_FOOTER} style={safeBottom()}>
