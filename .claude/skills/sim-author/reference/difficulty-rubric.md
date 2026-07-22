@@ -41,6 +41,30 @@ harder because the wording is confusing, or it hides a number in a wall of text,
 or it hinges on a zebra. That is a bad question in a hard costume. The *decision*
 must be genuinely harder; the *reading* must not be. Reject fake difficulty.
 
+## The trap that makes questions trivial: the vignette gives away the answer
+
+A scored question must **withhold** its answer. Two failure modes to avoid,
+even at level 1:
+
+- **Classification of a stated value.** If the vignette says "1300 ml" and the
+  question asks "is this minor or major?", that is a lookup, not a decision. Do
+  not turn a flowchart classification node (blood loss bucket, "bleeding
+  controlled?") into a scored beat when the narrative already states the value
+  or the outcome. Ask "what do you *do*", not "what *is* this".
+- **Telegraphed outcome.** "The bleeding stops, total 1800 ml. Is it
+  controlled?" answers itself. Never narrate the result and then ask about it.
+
+Make the decision real instead:
+
+- **Withhold the answer**: ask the next management step, not the category.
+- **Bury the deciding fact** in the history so the "obvious" option is a trap
+  (asthma → carboprost contraindicated; hypertension or cardiac → ergometrine
+  contraindicated; instability → embolisation is wrong, theatre is right).
+- **Make distractors close**: two or three defensible-looking options the
+  guideline separates on a threshold, contraindication, sequence or priority.
+- Prefer `fromNode` for genuine *management* branch-points; do not use it for
+  classifying a number the vignette has already given.
+
 ## RFM worked at all three levels
 
 Same topic, same medicine, only the demand on the reader moves.

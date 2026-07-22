@@ -121,6 +121,10 @@ Introduce these in order of trust. Default to the earliest the request implies.
   wrong dose.
 - Vignette numbers must make exactly **one** branch correct. No borderline
   values where two options are defensible (1,200 ml, not 950 ml).
+- A scored question must **withhold its answer**. Never classify a value the
+  vignette states ("1300 ml, is this major?") or ask about an outcome the
+  narrative just gave ("bleeding stops, is it controlled?"). Ask what to *do*,
+  bury the deciding fact, keep distractors close. See the difficulty rubric.
 - Every patient is marked fictional. The decision-aid disclaimer stays.
 - The clinical sign-off (Khalid's approval) is the only step you may never
   skip or simulate.
