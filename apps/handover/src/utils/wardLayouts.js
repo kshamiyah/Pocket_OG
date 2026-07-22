@@ -324,3 +324,37 @@ export function deleteLayout(wardLayouts, ward) {
   delete next[key];
   return next;
 }
+
+const SECTION_DEFAULT_TITLE = {
+  [SECTION_TYPE.RANGE]: "Beds",
+  [SECTION_TYPE.GRID]: "Bays",
+  [SECTION_TYPE.NAMED]: "Rooms",
+};
+
+export function sectionDisplayTitle(section) {
+  const label = section?.label?.trim();
+  if (label) return label;
+  return SECTION_DEFAULT_TITLE[section?.type] || "Beds";
+}
+
+/** Grouped bed lists for the add-job picker (layout order, plus ad-hoc MRU extras). */
+export function layoutBedSections(ward, wardLayouts, recentBeds) {
+  const key = (ward || "").trim();
+  if (!key) return { sections: [], extras: [], configured: false };
+
+  const layout = wardLayouts[key];
+  const configured = hasLayout(wardLayouts, key);
+  const layoutBedSet = new Set(flattenLayout(layout).map((b) => b.bed));
+
+  const sections = (layout?.sections || [])
+    .map((section) => ({
+      id: section.id,
+      title: sectionDisplayTitle(section),
+      beds: bedsForSection(section),
+    }))
+    .filter((s) => s.beds.length > 0);
+
+  const extras = bedsForWard(key, wardLayouts, recentBeds).filter((b) => !layoutBedSet.has(b));
+
+  return { sections, extras, configured };
+}

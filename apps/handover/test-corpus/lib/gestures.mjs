@@ -166,7 +166,9 @@ export async function runGestures(browser, results, deps) {
     ];
     const code = encodeHandoverPayload(incoming);
     const link = `${BASE}?ho=${code}`;
-    await page.getByLabel("Take over").click(); // hub? No — we're on the list with 0 jobs; the exchange icon label is "Take over"
+    await page.getByLabel("Exchange").click();
+    await page.waitForTimeout(150);
+    await page.getByRole("button", { name: /Scan or paste a colleague/ }).click();
     await page.waitForTimeout(200);
     await page.getByPlaceholder("Or paste the handover link").fill(link);
     await snap(page, "takeover-1-paste");
@@ -194,7 +196,9 @@ export async function runGestures(browser, results, deps) {
 
   // ============================ 6. Handover subset → copy-link integrity =====
   await withPage(async (page) => {
-    await page.getByLabel("Hand over jobs").click();
+    await page.getByLabel("Exchange").click();
+    await page.waitForTimeout(150);
+    await page.getByRole("button", { name: "Hand over" }).click();
     await page.waitForTimeout(250);
     await page.getByRole("button", { name: "None", exact: true }).click(); // clear selection
     await page.waitForTimeout(100);
@@ -210,7 +214,7 @@ export async function runGestures(browser, results, deps) {
     if (clip) {
       const code = new URL(clip).searchParams.get("ho");
       const decoded = decodeHandoverPayload(code);
-      const texts = decoded.map((j) => j.text).sort();
+      const texts = decoded.jobs.map((j) => j.text).sort();
       const expected = ["Chase FBC + G&S, escalate if Hb < 70", "Consent for LSCS"].sort();
       if (JSON.stringify(texts) !== JSON.stringify(expected))
         bug("handover-copy", "integrity", "payload", "Copied link contains exactly the two selected jobs", `contains: ${texts.join(" | ")}`);
@@ -225,23 +229,30 @@ export async function runGestures(browser, results, deps) {
     // HomeMenu.requestClose waits 280ms (a JS timer, not a CSS transition) before
     // navigating, so wait for the target screen rather than a fixed sleep.
     await page.getByText("Bed setup").waitFor({ timeout: 5000 });
-    await page.getByPlaceholder("New ward name").fill("Antenatal");
+    await page.getByLabel("Add ward").click();
+    await page.getByPlaceholder("Ward name").fill("Antenatal");
     await page.getByRole("button", { name: "Set up", exact: true }).click();
     await page.getByText("Set up Antenatal").waitFor({ timeout: 5000 });
+    await page.getByRole("button", { name: "Add section" }).click();
     // numbered range 1..6
     await page.getByText("Add numbered range").click();
     await page.waitForTimeout(150);
     await page.getByPlaceholder("From").fill("1");
     await page.getByPlaceholder("To").fill("6");
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.waitForTimeout(150);
     await page.getByRole("button", { name: "Add section" }).click();
     await page.waitForTimeout(200);
     // numbered bays with lettered beds -> 1A,1B… (the user-requested config)
+    await page.getByRole("button", { name: "Add section" }).click();
     await page.getByText("Add bays & beds").click();
     await page.waitForTimeout(150);
     await page.getByRole("button", { name: "Numbers", exact: true }).first().click(); // bays = numbers
     await page.getByRole("button", { name: "Letters", exact: true }).last().click();  // beds = letters
     await page.waitForTimeout(150);
     await snap(page, "wardsetup-1b-numbered-bays");
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.waitForTimeout(150);
     await page.getByRole("button", { name: "Add section" }).click();
     await page.waitForTimeout(200);
     await snap(page, "wardsetup-1-two-sections");

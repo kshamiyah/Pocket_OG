@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { formatReminderLabel } from "../utils/reminders";
+import { bottomSheetTransform, useBottomSheetSwipe } from "../utils/useBottomSheetSwipe";
+import SheetDragHandle, { SheetSafeBottom } from "./SheetDragHandle";
+import { TYPE_BADGE, TYPE_BODY_SM, TYPE_GROUP_HEADER, TYPE_META, TYPE_OVERLINE, TYPE_UI_SM } from "../utils/typography";
 
 const ROW = "w-full text-left px-5 py-3.5 border-b border-gray-100 dark:border-gray-900 active:bg-gray-50 dark:active:bg-gray-900/60";
 
@@ -10,22 +13,22 @@ function TaskRow({ job, now, onOpen }) {
       <div className="flex items-start gap-2">
         <span className="mt-1.5 w-2 h-2 shrink-0 rounded-full bg-claude-600" aria-hidden="true" />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold text-gray-900 dark:text-white leading-snug truncate">
+          <p className={`${TYPE_BODY_SM} font-semibold leading-snug line-clamp-2 break-words`}>
             {job.text}
           </p>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             {job.ward && (
-              <span className="text-[10px] font-bold uppercase tracking-wide text-claude-800 dark:text-claude-400 bg-claude-100 dark:bg-claude-900/30 px-1.5 py-0.5 rounded">
+              <span className={`${TYPE_BADGE} text-claude-800 dark:text-claude-400 bg-claude-100 dark:bg-claude-900/30 px-1.5 py-0.5 rounded`}>
                 {job.ward}
               </span>
             )}
             {job.bed && (
-              <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+              <span className={`${TYPE_UI_SM} normal-case tracking-normal text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-800 px-1.5 py-0.5 rounded`}>
                 {job.bed}
               </span>
             )}
             {label && (
-              <span className="text-[11px] font-bold tabular-nums text-claude-700 dark:text-claude-400">
+              <span className={`${TYPE_META} font-semibold text-claude-700 dark:text-claude-400`}>
                 {label}
               </span>
             )}
@@ -41,22 +44,22 @@ function UpcomingRow({ job, now, onOpen }) {
   return (
     <button type="button" onClick={() => onOpen(job.id)} className={ROW}>
       <div className="min-w-0">
-        <p className="text-sm font-medium text-gray-900 dark:text-white leading-snug truncate">
+        <p className={`${TYPE_BODY_SM} leading-snug line-clamp-2 break-words`}>
           {job.text}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
           {job.ward && (
-            <span className="text-[10px] font-bold uppercase tracking-wide text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-900 px-1.5 py-0.5 rounded">
+            <span className={`${TYPE_BADGE} text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-900 px-1.5 py-0.5 rounded`}>
               {job.ward}
             </span>
           )}
           {job.bed && (
-            <span className="text-[10px] font-bold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-900 px-1.5 py-0.5 rounded">
+            <span className={`${TYPE_UI_SM} normal-case tracking-normal text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-900 px-1.5 py-0.5 rounded`}>
               {job.bed}
             </span>
           )}
           {label && (
-            <span className="text-[11px] tabular-nums text-gray-500 dark:text-gray-500">
+            <span className={TYPE_META}>
               {label}
             </span>
           )}
@@ -93,75 +96,78 @@ export default function NotificationCentre({
 
   const openTask = (id) => requestClose(() => onOpenTask(id));
 
+  const { dragY, dragging, handleProps } = useBottomSheetSwipe(() => requestClose());
+
   if (!open && !closing) return null;
 
   const empty = due.length === 0 && upcoming.length === 0;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
-      <button
-        type="button"
-        aria-label="Close notifications"
+      <div
+        role="presentation"
+        aria-hidden="true"
         onClick={() => requestClose()}
         className={`absolute inset-0 bg-black/25 transition-opacity duration-300 ease-out ${
           entered && !closing ? "opacity-100" : "opacity-0"
         }`}
       />
       <div
-        className={`relative z-10 bg-white dark:bg-gray-950 rounded-t-2xl border-t border-gray-200 dark:border-gray-800 shadow-2xl transition-transform duration-300 ease-out flex flex-col max-h-[min(70dvh,32rem)] ${
-          entered && !closing ? "translate-y-0" : "translate-y-full"
-        }`}
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.5rem)" }}
+        className={`relative z-10 ${dragging ? "" : "transition-transform duration-300 ease-out"}`}
+        style={{ transform: bottomSheetTransform({ entered, closing, dragY }) }}
       >
-        <div className="mx-auto mt-2 mb-1 h-1 w-10 rounded-full bg-gray-200 dark:bg-gray-800 shrink-0" aria-hidden="true" />
-        <div className="shrink-0 px-5 pt-2 pb-3 flex items-center justify-between">
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-600">
-            Notifications
-          </p>
-          {due.length > 0 && (
-            <span className="text-xs font-bold text-claude-700 dark:text-claude-400">
-              {due.length} due
-            </span>
-          )}
-        </div>
-
-        <div className="flex-1 min-h-0 overflow-y-auto touch-pan-y">
-          {empty && (
-            <p className="px-5 py-8 text-sm text-center text-gray-400 dark:text-gray-600">
-              No timed tasks. Set a reminder on a job to see it here.
+        <div className="bg-white dark:bg-gray-950 rounded-t-2xl border-t border-gray-200 dark:border-gray-800 shadow-2xl flex flex-col max-h-[min(70dvh,32rem)]">
+          <SheetDragHandle handleProps={handleProps} />
+          <div className="shrink-0 px-5 pt-2 pb-3 flex items-center justify-between">
+            <p className={TYPE_OVERLINE}>
+              Notifications
             </p>
-          )}
+            {due.length > 0 && (
+              <span className={`${TYPE_UI_SM} text-claude-700 dark:text-claude-400`}>
+                {due.length} due
+              </span>
+            )}
+          </div>
 
-          {due.length > 0 && (
-            <div>
-              <p className="px-5 py-2 text-[10px] font-bold uppercase tracking-widest text-claude-700 dark:text-claude-400 bg-claude-50 dark:bg-claude-950/30">
-                Due now
+          <div className="flex-1 min-h-0 overflow-y-auto touch-pan-y">
+            {empty && (
+              <p className="px-5 py-8 text-sm text-center text-gray-400 dark:text-gray-600">
+                No timed tasks. Set a reminder on a job to see it here.
               </p>
-              {due.map((job) => (
-                <TaskRow key={job.id} job={job} now={now} onOpen={openTask} />
-              ))}
-            </div>
-          )}
+            )}
 
-          {upcoming.length > 0 && (
-            <div>
-              <p className="px-5 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 bg-gray-50 dark:bg-gray-900/40">
-                Upcoming
-              </p>
-              {upcoming.map((job) => (
-                <UpcomingRow key={job.id} job={job} now={now} onOpen={openTask} />
-              ))}
-            </div>
-          )}
+            {due.length > 0 && (
+              <div>
+                <p className={`${TYPE_GROUP_HEADER} text-claude-700 dark:text-claude-400 bg-claude-50 dark:bg-claude-950/30`}>
+                  Due now
+                </p>
+                {due.map((job) => (
+                  <TaskRow key={job.id} job={job} now={now} onOpen={openTask} />
+                ))}
+              </div>
+            )}
+
+            {upcoming.length > 0 && (
+              <div>
+                <p className={`${TYPE_GROUP_HEADER} text-gray-500 dark:text-gray-500 bg-gray-50 dark:bg-gray-900/40`}>
+                  Upcoming
+                </p>
+                {upcoming.map((job) => (
+                  <UpcomingRow key={job.id} job={job} now={now} onOpen={openTask} />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => requestClose()}
+            className="shrink-0 w-full py-3 text-sm font-medium text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-900"
+          >
+            Close
+          </button>
         </div>
-
-        <button
-          type="button"
-          onClick={() => requestClose()}
-          className="shrink-0 w-full py-3 text-sm font-medium text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-900"
-        >
-          Close
-        </button>
+        <SheetSafeBottom />
       </div>
     </div>
   );

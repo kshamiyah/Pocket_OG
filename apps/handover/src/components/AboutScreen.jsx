@@ -1,24 +1,25 @@
 import HandoverMark from "./HandoverMark";
-import { SCREEN, SCREEN_SCROLL, safeBottom, safeTop } from "../utils/screenLayout";
+import { SCREEN, SCREEN_SCROLL, safeBottom, safeTop, BACK_LINK } from "../utils/screenLayout";
+import { TYPE_DISPLAY, TYPE_TITLE } from "../utils/typography";
 import pkg from "../../package.json";
 
 const SECTION = "mb-6";
-const H = "text-sm font-bold text-gray-900 dark:text-white mb-1.5";
+const H = "text-sm font-semibold text-gray-900 dark:text-white mb-1.5";
 const P = "text-sm text-gray-600 dark:text-gray-400 leading-relaxed";
 
-export default function AboutScreen({ onBack }) {
+export default function AboutScreen({ onBack, onOpenPrivacy }) {
   return (
     <div className={`${SCREEN} px-5`}>
       <div className="shrink-0 flex items-center gap-3 mb-4" style={safeTop()}>
-        <button type="button" onClick={onBack} className="text-sm font-bold text-gray-500 dark:text-gray-400" aria-label="Back">
+        <button type="button" onClick={onBack} className={BACK_LINK} aria-label="Back">
           ← Back
         </button>
-        <div className="font-extrabold text-lg text-gray-900 dark:text-white">About</div>
+        <div className={TYPE_TITLE}>About</div>
       </div>
 
       <div className={`${SCREEN_SCROLL} pb-4`} style={safeBottom()}>
-        <HandoverMark className="font-extrabold text-2xl text-gray-900 dark:text-white mb-1" />
-        <p className="text-base font-bold text-claude-600 dark:text-claude-400 mb-6">
+        <HandoverMark className={`${TYPE_DISPLAY} mb-1`} />
+        <p className="text-base font-semibold text-claude-600 dark:text-claude-400 mb-6">
           From takeover to handover.
         </p>
 
@@ -40,6 +41,22 @@ export default function AboutScreen({ onBack }) {
           <p className={`${P} mt-2`}>
             A handover QR or link only carries the jobs you choose to send.
             Private bed notes are never included.
+          </p>
+          <button
+            type="button"
+            onClick={onOpenPrivacy}
+            className="inline-block mt-2 text-sm font-semibold text-claude-600 dark:text-claude-400 underline underline-offset-2 text-left"
+          >
+            Read the full privacy policy
+          </button>
+          <p className={`${P} mt-2`}>
+            Questions or feedback:{" "}
+            <a
+              href="mailto:khalid@drshamiyah.com"
+              className="font-semibold text-claude-600 dark:text-claude-400 underline underline-offset-2"
+            >
+              khalid@drshamiyah.com
+            </a>
           </p>
         </div>
 

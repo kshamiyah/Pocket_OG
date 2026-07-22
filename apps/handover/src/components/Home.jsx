@@ -1,48 +1,48 @@
 import { useEffect, useRef, useState } from "react";
+import PanelTransition from "./PanelTransition";
 import { SHIFT_TYPES } from "../utils/constants";
-import { summarize } from "../utils/jobs";
 import { countDueReminders, dueTasks, upcomingTasks } from "../utils/reminders";
 import { pushMRU } from "../utils/storage";
 import { setBedNote } from "../utils/bedNotes";
 import AddJobForm from "./AddJobForm";
 import WardDrill from "./WardDrill";
-import MasterSheet from "./MasterSheet";
 import AllJobsList from "./AllJobsList";
 import UndoToast from "./UndoToast";
 import HomeMenu from "./HomeMenu";
+import ExchangeSheet from "./ExchangeSheet";
 import NotificationCentre from "./NotificationCentre";
 import HandoverMark from "./HandoverMark";
-import { SCREEN } from "../utils/screenLayout";
+import { SCREEN, SELECTED_CHIP } from "../utils/screenLayout";
+import { formatDisplayDate } from "../utils/time";
+import { TYPE_META, TYPE_TITLE, TYPE_UI_SM } from "../utils/typography";
 
-const DENSITIES = [
-  { key: "walk", label: "Walk" },
-  { key: "expand", label: "Expand" },
-];
-
-const ICON_BTN = "w-9 h-9 rounded-full border flex items-center justify-center active:scale-95 transition-all";
+const ICON_BTN = "w-11 h-11 rounded-full border flex items-center justify-center active:scale-95 transition-all";
+const EXCHANGE_BTN = "border-claude-200 dark:border-claude-900 text-claude-700 dark:text-claude-400 bg-white dark:bg-gray-950";
 const LIST_BOTTOM_PAD = "calc(env(safe-area-inset-bottom) + 6rem)";
 
 export default function Home({
-  jobs, setJobs, shiftType, recentWards, setRecentWards, recentBeds, setRecentBeds,
+  jobs, setJobs, shiftType, shiftStartedAt, recentWards, setRecentWards, recentBeds, setRecentBeds,
   recentPhrases, setRecentPhrases,
-  wardLayouts, bedNotes, setBedNotes, onHandover, onScan, onSetupWard, onManageWards, onEditProfile, onAbout, onEndShift,
+  wardLayouts, bedNotes, setBedNotes, onScan, onShareJobs, onEndShift, onSetupWard, onManageWards, onEditProfile, onAbout,
   selectedWard, setSelectedWard, selectedBed, setSelectedBed, bedSelected, setBedSelected,
 }) {
   const [mode, setMode] = useState("byward");
-  const [density, setDensity] = useState("walk");
   const [editingId, setEditingId] = useState(null);
   const [stickyWard, setStickyWard] = useState(recentWards[0] || "");
   const [stickyBed, setStickyBed] = useState("");
   const [wizardOpen, setWizardOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuSession, setMenuSession] = useState(0);
+  const [exchangeOpen, setExchangeOpen] = useState(false);
+  const [exchangeSession, setExchangeSession] = useState(0);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notificationsSession, setNotificationsSession] = useState(0);
   const [undo, setUndo] = useState(null);
   const undoTimer = useRef(null);
 
-  const summary = summarize(jobs);
   const shiftLabel = SHIFT_TYPES.find((s) => s.key === shiftType)?.label ?? "Shift";
+  const shiftDate = formatDisplayDate(shiftStartedAt ?? new Date());
+  const shiftMeta = `${shiftLabel} · ${shiftDate}`;
 
   const wardNames = [...new Set([
     ...Object.keys(wardLayouts),
@@ -76,6 +76,15 @@ export default function Home({
   const setWard = (id, ward) => {
     setJobs(jobs.map((j) => (j.id === id ? { ...j, ward, bed: ward ? j.bed : "" } : j)));
     if (ward) setRecentWards(pushMRU(recentWards, ward));
+  };
+  const registerWard = (ward) => {
+    const trimmed = ward.trim();
+    if (!trimmed) return;
+    setRecentWards(pushMRU(recentWards, trimmed));
+    setSelectedWard(null);
+    setSelectedBed(null);
+    setBedSelected(false);
+    onSetupWard(trimmed);
   };
   const setBed = (id, bed) => {
     const job = jobs.find((j) => j.id === id);
@@ -123,22 +132,20 @@ export default function Home({
     setEditingId(id);
   };
 
-  const inBedFocus = mode === "byward" && density === "walk" && selectedWard && bedSelected;
-
   const openWizard = () => {
-    if (mode === "byward" && density === "walk" && selectedWard) {
+    if (mode === "byward" && selectedWard) {
       setStickyWard(selectedWard);
       setStickyBed(bedSelected ? (selectedBed || "") : "");
     }
     setWizardOpen(true);
   };
 
-  const handleExchange = () => {
-    if (summary.open > 0) onHandover();
-    else onScan();
+  const openExchange = () => {
+    setExchangeSession((n) => n + 1);
+    setExchangeOpen(true);
   };
 
-  const exchangeLabel = summary.open > 0 ? "Hand over jobs" : "Take over";
+  const exchangeLabel = "Exchange";
 
   return (
     <div className={`fixed inset-0 z-0 ${SCREEN}`}>
@@ -147,18 +154,18 @@ export default function Home({
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)", paddingBottom: "0.75rem" }}
       >
         <div>
-          <HandoverMark className="font-extrabold text-lg text-gray-900 dark:text-white leading-none" />
-          <div className="font-mono text-[10px] tracking-wide text-gray-400 dark:text-gray-500 uppercase mt-1">
-            {shiftLabel}
+          <HandoverMark className={`${TYPE_TITLE} leading-none`} />
+          <div className={`${TYPE_META} mt-1`}>
+            {shiftMeta}
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={handleExchange}
+            onClick={openExchange}
             data-coach="exchange-btn"
             aria-label={exchangeLabel}
-            className={`${ICON_BTN} border-claude-200 dark:border-claude-900 text-claude-700 dark:text-claude-400`}
+            className={`${ICON_BTN} ${EXCHANGE_BTN}`}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M7 7h10l-3-3" />
@@ -176,7 +183,7 @@ export default function Home({
               <path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>
             {dueReminders > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-[1.125rem] h-[1.125rem] px-0.5 rounded-full bg-claude-600 text-white text-[10px] font-bold flex items-center justify-center">
+              <span className="absolute -top-0.5 -right-0.5 min-w-[1.125rem] h-[1.125rem] px-0.5 rounded-full bg-claude-600 text-white text-xs font-bold flex items-center justify-center tabular-nums">
                 {dueReminders > 9 ? "9+" : dueReminders}
               </span>
             )}
@@ -197,13 +204,13 @@ export default function Home({
         </div>
       </div>
 
-      <div className="shrink-0 px-5 pt-3 flex items-center justify-between">
+      <div className="shrink-0 px-5 pt-3">
         <div className="flex items-center gap-1.5" data-coach="mode-tabs">
           <button
             onClick={() => setMode("byward")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+            className={`px-3 py-2.5 min-h-11 rounded-lg ${TYPE_UI_SM} border transition-colors ${
               mode === "byward"
-                ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950 border-gray-900 dark:border-white"
+                ? SELECTED_CHIP
                 : "bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-800"
             }`}
           >
@@ -211,29 +218,15 @@ export default function Home({
           </button>
           <button
             onClick={() => setMode("all")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+            className={`px-3 py-2.5 min-h-11 rounded-lg ${TYPE_UI_SM} border transition-colors ${
               mode === "all"
-                ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950 border-gray-900 dark:border-white"
+                ? SELECTED_CHIP
                 : "bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-800"
             }`}
           >
             All jobs
           </button>
         </div>
-
-        {mode === "byward" && (
-          <div className="flex rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden text-[11px] font-bold" data-coach="density-tabs">
-            {DENSITIES.map((d) => (
-              <button
-                key={d.key}
-                onClick={() => setDensity(d.key)}
-                className={`px-2.5 py-1 ${density === d.key ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950" : "text-gray-500 dark:text-gray-400"}`}
-              >
-                {d.label}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       {dueReminders > 0 && (
@@ -242,57 +235,58 @@ export default function Home({
           onClick={openNotifications}
           className="shrink-0 mx-5 mt-2 mb-1 px-4 py-2 rounded-xl bg-claude-100 dark:bg-claude-950/40 border border-claude-300 dark:border-claude-800 w-[calc(100%-2.5rem)] text-left active:scale-[0.99] transition-all"
         >
-          <span className="text-sm font-bold text-claude-900 dark:text-claude-200">
+          <span className={`${TYPE_UI_SM} text-claude-900 dark:text-claude-200`}>
             {dueReminders} task{dueReminders === 1 ? "" : "s"} due
           </span>
         </button>
       )}
 
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-      {mode === "byward" && density === "walk" && (
-          <WardDrill
-            listBottomPad={LIST_BOTTOM_PAD}
-            wardNames={wardNames} onAddJob={addJob} onSetupWard={onSetupWard}
-            recentPhrases={recentPhrases} setRecentPhrases={setRecentPhrases}
-            selectedWard={selectedWard} setSelectedWard={setSelectedWard}
-            selectedBed={selectedBed} setSelectedBed={setSelectedBed}
-            bedSelected={bedSelected} setBedSelected={setBedSelected}
-            bedNotes={bedNotes}
-            onSetBedNote={updateBedNote}
-            {...sharedProps}
-          />
-      )}
-      {mode === "byward" && density === "expand" && (
-          <MasterSheet
-            listBottomPad={LIST_BOTTOM_PAD} wardNames={wardNames} onAddJob={addJob}
-            recentPhrases={recentPhrases} setRecentPhrases={setRecentPhrases}
-            {...sharedProps}
-          />
-      )}
-      {mode === "all" && (
-          <AllJobsList listBottomPad={LIST_BOTTOM_PAD} {...sharedProps} />
-      )}
+        <PanelTransition panelKey={mode} direction="fade" className="flex-1 min-h-0 flex flex-col">
+          {mode === "byward" ? (
+            <WardDrill
+              listBottomPad={LIST_BOTTOM_PAD}
+              wardNames={wardNames}
+              onAddJob={addJob}
+              onRegisterWard={registerWard}
+              onSetupWard={onSetupWard}
+              recentPhrases={recentPhrases}
+              setRecentPhrases={setRecentPhrases}
+              selectedWard={selectedWard}
+              setSelectedWard={setSelectedWard}
+              selectedBed={selectedBed}
+              setSelectedBed={setSelectedBed}
+              bedSelected={bedSelected}
+              setBedSelected={setBedSelected}
+              bedNotes={bedNotes}
+              onSetBedNote={updateBedNote}
+              {...sharedProps}
+            />
+          ) : (
+            <AllJobsList listBottomPad={LIST_BOTTOM_PAD} {...sharedProps} />
+          )}
+        </PanelTransition>
       </div>
 
       <UndoToast message={undo?.message} onUndo={undoAction} />
 
-      {!inBedFocus && (
-        <button
-          onClick={openWizard}
-          data-coach="fab"
-          aria-label="Add job"
-          className="fixed right-5 z-30 w-14 h-14 rounded-full bg-claude-600 text-white text-2xl font-bold shadow-lg flex items-center justify-center active:scale-95 transition-all"
-          style={{ bottom: "calc(env(safe-area-inset-bottom) + 1.25rem)" }}
-        >
-          +
-        </button>
-      )}
+      <button
+        onClick={openWizard}
+        data-coach="fab"
+        aria-label="Add job"
+        className="fixed right-5 z-30 w-14 h-14 rounded-full bg-claude-600 text-white text-2xl font-bold shadow-lg flex items-center justify-center active:scale-95 transition-all"
+        style={{ bottom: "calc(env(safe-area-inset-bottom) + 1.25rem)" }}
+      >
+        +
+      </button>
 
       {wizardOpen && (
         <AddJobForm
           onClose={() => setWizardOpen(false)}
           jobs={jobs}
           onAddJob={addJob}
+          startCompact={mode === "byward" && Boolean(selectedWard)}
+          locationLocked={mode === "byward" && Boolean(selectedWard) && bedSelected}
           stickyWard={stickyWard}
           setStickyWard={setStickyWard}
           stickyBed={stickyBed}
@@ -308,6 +302,15 @@ export default function Home({
         />
       )}
 
+      <ExchangeSheet
+        key={exchangeSession}
+        open={exchangeOpen}
+        onClose={() => setExchangeOpen(false)}
+        onScan={onScan}
+        onShareJobs={onShareJobs}
+        onEndShift={onEndShift}
+      />
+
       <HomeMenu
         key={menuSession}
         open={menuOpen}
@@ -316,7 +319,6 @@ export default function Home({
         onManageWards={onManageWards}
         onEditProfile={onEditProfile}
         onAbout={onAbout}
-        onEndShift={onEndShift}
       />
 
       <NotificationCentre

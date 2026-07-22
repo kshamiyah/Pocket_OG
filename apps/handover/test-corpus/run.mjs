@@ -182,17 +182,16 @@ const scenarios = [
   S("hub", seedScript({ profile: PROFILE }), null, { dark: true }),
   S("list-walk", runningState(), null, { dark: true, offline: true }),
   S("list-all", runningState(), (p) => clickText(p, "All jobs")),
-  S("list-expand", runningState(), (p) => clickText(p, "Expand")),
   S("ward-board", runningState(), (p) => clickText(p, "Delivery Suite"), { dark: true, offline: true }),
   S("bed-jobs", runningState(), async (p) => { await clickText(p, "Delivery Suite"); await clickText(p, "Room 3"); }),
   S("notifications", runningState(), (p) => p.getByRole("button", { name: /tasks due|Notifications/ }).first().click({ timeout: 2500 })),
-  S("handover", runningState(), (p) => clickLabel(p, "Hand over jobs"), { dark: true, offline: true }),
-  S("handover-options", runningState(), async (p) => { await clickLabel(p, "Hand over jobs"); await clickText(p, "Options"); }),
-  S("handover-wardfilter", runningState(), async (p) => { await clickLabel(p, "Hand over jobs"); await clickText(p, "Ward 42 ·"); }),
+  S("handover", runningState(), async (p) => { await clickLabel(p, "Exchange"); await p.waitForTimeout(200); await clickText(p, "Hand over"); }, { dark: true, offline: true }),
+  S("handover-options", runningState(), async (p) => { await clickLabel(p, "Exchange"); await p.waitForTimeout(200); await clickText(p, "Hand over"); await clickText(p, "Options"); }),
+  S("handover-wardfilter", runningState(), async (p) => { await clickLabel(p, "Exchange"); await p.waitForTimeout(200); await clickText(p, "Hand over"); await clickText(p, "Ward 42 ·"); }),
   S("add-job", runningState(), (p) => clickLabel(p, "Add job")),
   S("menu", runningState(), (p) => clickLabel(p, "More options")),
-  S("ward-setup", runningState(), async (p) => { await clickText(p, "Delivery Suite"); await clickText(p, "Manage beds"); }),
-  S("end-shift", runningState(), async (p) => { await clickLabel(p, "More options"); await p.waitForTimeout(350); await clickText(p, "End shift"); await p.getByText("End of shift").waitFor({ timeout: 5000 }); }),
+  S("ward-setup", runningState(), async (p) => { await clickText(p, "Delivery Suite"); await clickText(p, "Manage ward"); }),
+  S("end-shift", runningState(), async (p) => { await clickLabel(p, "Exchange"); await p.waitForTimeout(350); await clickText(p, "End shift"); await p.getByText("End shift").waitFor({ timeout: 5000 }); }),
   S("shift-picker", seedScript({ profile: PROFILE }), (p) => clickText(p, "Start a shift")),
   S("wards-intro", seedScript({ profile: PROFILE, wardLayouts: {} }), async (p) => { await clickText(p, "Start a shift"); await clickText(p, "Long day"); }),
   S("scan", seedScript({ profile: PROFILE }), (p) => clickText(p, "Take over")),
@@ -207,13 +206,14 @@ async function runWalks(browser, results) {
     expected, observed,
   });
 
-  // --- Onboarding walk: welcome → setup → hub -------------------------------
+  // --- Onboarding walk: welcome → disclaimer → setup → hub ------------------
   {
-    const ctx = await seedContext(browser, vp, seedScript({ profile: null }), false);
+    const ctx = await seedContext(browser, vp, seedScript({ profile: null, disclaimerDone: false }), false);
     const page = await ctx.newPage();
     try {
       await page.goto(BASE, { waitUntil: "load" });
-      await clickText(page, "Get started");
+      await clickText(page, "Continue");
+      await clickText(page, "I understand");
       await page.getByPlaceholder("First name is enough").fill("Alex");
       await clickText(page, "SHO / CT");
       await clickText(page, "Continue");
@@ -299,9 +299,9 @@ async function runWalks(browser, results) {
     try {
       await page.goto(BASE, { waitUntil: "load" });
       const bedsBefore = await page.evaluate(() => JSON.parse(localStorage.getItem("handover_jobs_v1") || "[]").map((j) => [j.ward, j.bed]));
-      // Enter a ward, open Manage beds, remove the last section, save.
+      // Enter a ward, open Manage ward, remove the last section, save.
       await clickText(page, "Ward 42");
-      await clickText(page, "Manage beds");
+      await clickText(page, "Manage ward");
       await page.waitForTimeout(200);
       const removeBtns = page.getByRole("button", { name: "Remove" });
       if (await removeBtns.count() > 0) {

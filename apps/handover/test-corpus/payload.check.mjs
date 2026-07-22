@@ -54,11 +54,11 @@ try {
   decoded = [];
 }
 
-if (decoded.length !== jobs.length) {
-  fail("roundtrip-count", `Decoded job count ${decoded.length} != encoded ${jobs.length}`);
+if (decoded.jobs.length !== jobs.length) {
+  fail("roundtrip-count", `Decoded job count ${decoded.jobs.length} != encoded ${jobs.length}`);
 }
 jobs.forEach((j, i) => {
-  const d = decoded[i];
+  const d = decoded.jobs[i];
   if (!d) return;
   if (d.ward !== j.ward) fail("roundtrip-ward", `Job ${i}: ward "${d.ward}" != "${j.ward}"`);
   if (d.bed !== j.bed) fail("roundtrip-bed", `Job ${i}: bed "${d.bed}" != "${j.bed}"`);
@@ -101,7 +101,7 @@ for (const secret of ["createdAt", "remindAt", "\"id\"", "done"]) {
 const codeKeep = encodeHandoverPayload(jobs);   // "keep a copy" ON
 const codeClear = encodeHandoverPayload(jobs);  // "keep a copy" OFF
 const identical = codeKeep === codeClear;
-const textPresentInKeep = decodeHandoverPayload(codeKeep).some((d) => d.text === "Consent for LSCS");
+const textPresentInKeep = decodeHandoverPayload(codeKeep).jobs.some((d) => d.text === "Consent for LSCS");
 
 if (identical && textPresentInKeep) {
   note('CONFIRMED: "keep a copy" has no effect on payload contents. Task text (e.g. "Consent for LSCS") is present on the wire whether keep-copy is on or off. This matches the app README ("Ward, bed, and task text travel on the wire verbatim") but CONTRADICTS the kickoff spec / CLAUDE.md, which claim task text is stripped in the keep-copy version. No stripHandover.js exists; payload version is 1.');

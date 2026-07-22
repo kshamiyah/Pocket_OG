@@ -5,11 +5,12 @@ export default function UndoToast({ message, onUndo }) {
   if (!message) return null;
   return (
     <div
-      className="fixed left-1/2 -translate-x-1/2 z-40 bg-gray-900 dark:bg-white text-white dark:text-gray-950 rounded-full pl-4 pr-1.5 py-1.5 flex items-center gap-3 shadow-lg text-sm font-semibold"
+      key={message}
+      className="pointer-events-none fixed left-1/2 -translate-x-1/2 z-40 bg-claude-600 text-white rounded-full pl-4 pr-1.5 py-1.5 flex items-center gap-3 shadow-lg text-sm font-semibold animate-toast-enter motion-reduce:animate-none"
       style={{ bottom: "calc(env(safe-area-inset-bottom) + 5.5rem)" }}
     >
       {message}
-      <button onClick={onUndo} className="text-claude-400 dark:text-claude-600 font-bold px-2.5 py-1 rounded-full">
+      <button type="button" onClick={onUndo} className="pointer-events-auto text-white/90 font-bold px-2.5 py-1 rounded-full underline underline-offset-2">
         Undo
       </button>
     </div>

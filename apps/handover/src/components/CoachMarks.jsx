@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { SELECTED_CHIP } from "../utils/screenLayout";
+import { TYPE_BODY_SM, TYPE_EYEBROW, TYPE_TITLE, TYPE_UI } from "../utils/typography";
 
 const STEPS = [
   {
@@ -6,28 +8,53 @@ const STEPS = [
     title: "Add a job",
     body: "Tap here any time to capture what needs doing.",
     placement: "above",
+    shape: "circle",
+    pad: 8,
   },
   {
     target: "[data-coach='mode-tabs']",
     title: "By ward or all jobs",
     body: "By ward for rounds. All jobs for a flat list.",
     placement: "below",
-  },
-  {
-    target: "[data-coach='density-tabs']",
-    title: "Walk or expand",
-    body: "Walk goes bed by bed. Expand shows the whole ward on one page.",
-    placement: "below",
+    shape: "rounded",
+    pad: 8,
   },
   {
     target: "[data-coach='exchange-btn']",
-    title: "Hand over or take over",
-    body: "Open jobs? Tap to hand over. Taking over? Tap to scan the outgoing QR. Wards and profile are under ···.",
+    title: "Exchange",
+    body: "Take over a colleague's jobs, hand over yours mid-shift, or end your shift.",
     placement: "below",
+    shape: "circle",
+    pad: 8,
   },
 ];
 
 const TOOLTIP_H = 200;
+
+function buildHole(raw, { pad, shape }) {
+  if (!raw) return null;
+
+  if (shape === "circle") {
+    const size = Math.max(raw.width, raw.height) + pad * 2;
+    const cx = raw.left + raw.width / 2;
+    const cy = raw.top + raw.height / 2;
+    return {
+      top: cy - size / 2,
+      left: cx - size / 2,
+      width: size,
+      height: size,
+      round: "rounded-full",
+    };
+  }
+
+  return {
+    top: raw.top - pad,
+    left: raw.left - pad,
+    width: raw.width + pad * 2,
+    height: raw.height + pad * 2,
+    round: "rounded-2xl",
+  };
+}
 
 function tooltipStyle(hole, placement) {
   const inset = { left: 20, right: 20 };
@@ -42,62 +69,72 @@ function tooltipStyle(hole, placement) {
 }
 
 export default function CoachMarks({ onComplete }) {
+  const overlayRef = useRef(null);
   const [step, setStep] = useState(0);
   const [rect, setRect] = useState(null);
 
   const measure = useCallback(() => {
+    const root = overlayRef.current;
     const el = document.querySelector(STEPS[step].target);
-    if (!el) {
+    if (!root || !el) {
       setRect(null);
       return;
     }
     const r = el.getBoundingClientRect();
-    setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+    const rootR = root.getBoundingClientRect();
+    setRect({
+      top: r.top - rootR.top,
+      left: r.left - rootR.left,
+      width: r.width,
+      height: r.height,
+    });
   }, [step]);
 
   useLayoutEffect(() => {
-    const id = requestAnimationFrame(() => measure());
-    const retry = setTimeout(measure, 120);
-    return () => {
-      cancelAnimationFrame(id);
-      clearTimeout(retry);
-    };
-  }, [measure]);
+    measure();
+    const el = document.querySelector(STEPS[step].target);
+    if (!el) return undefined;
 
-  useEffect(() => {
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+
+    const retry = window.setTimeout(measure, 80);
+    return () => {
+      ro.disconnect();
+      window.clearTimeout(retry);
+    };
+  }, [measure, step]);
+
+  useLayoutEffect(() => {
     window.addEventListener("resize", measure);
-    window.addEventListener("scroll", measure, true);
+    window.visualViewport?.addEventListener("resize", measure);
+    window.visualViewport?.addEventListener("scroll", measure);
     return () => {
       window.removeEventListener("resize", measure);
-      window.removeEventListener("scroll", measure, true);
+      window.visualViewport?.removeEventListener("resize", measure);
+      window.visualViewport?.removeEventListener("scroll", measure);
     };
   }, [measure]);
 
   const current = STEPS[step];
   const isLast = step >= STEPS.length - 1;
+  const hole = buildHole(rect, current);
 
   const next = () => {
     if (isLast) onComplete();
-    else setStep((s) => s + 1);
+    else {
+      setRect(null);
+      setStep((s) => s + 1);
+    }
   };
-
-  const pad = 10;
-  const hole = rect
-    ? {
-        top: Math.max(8, rect.top - pad),
-        left: Math.max(8, rect.left - pad),
-        width: rect.width + pad * 2,
-        height: rect.height + pad * 2,
-      }
-    : null;
 
   const tipStyle = tooltipStyle(hole, current.placement);
 
   return (
-    <div className="fixed inset-0 z-[60] pointer-events-none">
+    <div ref={overlayRef} className="absolute inset-0 z-[60] pointer-events-none">
       {hole && (
         <div
-          className="absolute rounded-2xl ring-4 ring-claude-500 pointer-events-none"
+          className={`absolute ${hole.round} ring-4 ring-claude-500 pointer-events-none`}
           style={{
             top: hole.top,
             left: hole.left,
@@ -108,27 +145,28 @@ export default function CoachMarks({ onComplete }) {
         />
       )}
       <div
-        className="absolute rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-5 shadow-xl pointer-events-auto"
+        key={step}
+        className="absolute rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-5 shadow-xl pointer-events-auto animate-fade-in-up motion-reduce:animate-none"
         style={tipStyle}
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="text-xs font-bold uppercase tracking-widest text-claude-600 mb-1">
+        <p className={`${TYPE_EYEBROW} mb-1`}>
           {step + 1} of {STEPS.length}
         </p>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{current.title}</h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400 leading-snug mb-4">{current.body}</p>
+        <h2 className={`${TYPE_TITLE} mb-1`}>{current.title}</h2>
+        <p className={`${TYPE_BODY_SM} text-gray-600 dark:text-gray-400 mb-4`}>{current.body}</p>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={onComplete}
-            className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-gray-800 text-sm font-bold text-gray-600 dark:text-gray-300"
+            className={`flex-1 py-3 rounded-xl border border-gray-200 dark:border-gray-800 ${TYPE_UI} text-gray-600 dark:text-gray-300`}
           >
             Skip
           </button>
           <button
             type="button"
             onClick={next}
-            className="flex-1 py-3 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-sm font-bold"
+            className={`flex-1 py-3 rounded-xl ${TYPE_UI} border transition-colors ${SELECTED_CHIP}`}
           >
             {isLast ? "Done" : "Next"}
           </button>

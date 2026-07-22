@@ -11,6 +11,7 @@ export const KEYS = {
   wardLayouts: "handover_ward_layouts_v1",
   recentBeds: "handover_recent_beds_v1",
   coachDone: "handover_coach_done_v1",
+  disclaimerDone: "handover_disclaimer_done_v1",
   theme: "handover_theme_v1",
 };
 
@@ -66,7 +67,7 @@ export const RECENT_PHRASES = ["Chase bloods", "Review CTG", "Consent", "TTOs"];
 export function seedScript(state = {}) {
   const {
     profile = null, shift = null, jobs = [], wardLayouts = {},
-    recentWards = [], recentBeds = {}, recentPhrases = [], coachDone = true, theme = "light",
+    recentWards = [], recentBeds = {}, recentPhrases = [], coachDone = true, disclaimerDone = true, theme = "light",
   } = state;
   const data = {
     [KEYS.profile]: profile,
@@ -77,6 +78,7 @@ export function seedScript(state = {}) {
     [KEYS.recentBeds]: recentBeds,
     [KEYS.recentPhrases]: recentPhrases,
     [KEYS.coachDone]: coachDone,
+    [KEYS.disclaimerDone]: disclaimerDone,
   };
   // theme is stored as a raw string, not JSON.
   return { data, theme };

@@ -32,3 +32,14 @@ export function formatJobTime(iso, now = Date.now()) {
 
   return `${when} · ${relative}`;
 }
+
+/** Header date: Wed 22 Jul (en-GB). Pass ISO string or Date; defaults to now. */
+export function formatDisplayDate(isoOrDate = new Date()) {
+  const d = isoOrDate instanceof Date ? isoOrDate : new Date(isoOrDate);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+}

@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import jsQR from "jsqr";
 import HandoverMark from "./HandoverMark";
 import { decodeHandoverPayload, extractHandoverCode } from "../utils/payload";
-import { SCREEN, safeBottom, safeTop } from "../utils/screenLayout";
+import { SCREEN, safeBottom, safeTop, BACK_LINK } from "../utils/screenLayout";
+import { TYPE_TITLE } from "../utils/typography";
 
 export default function ScanScreen({ onBack, onScanned }) {
   const videoRef = useRef(null);
@@ -15,8 +16,8 @@ export default function ScanScreen({ onBack, onScanned }) {
   const handleCode = (raw) => {
     const code = extractHandoverCode(raw) ?? raw;
     try {
-      const jobs = decodeHandoverPayload(code);
-      onScanned(jobs);
+      const payload = decodeHandoverPayload(code);
+      onScanned(payload);
     } catch (e) {
       setError(e.message || "Couldn't read that code. Try again.");
     }
@@ -34,8 +35,14 @@ export default function ScanScreen({ onBack, onScanned }) {
         await videoRef.current.play();
         setCameraReady(true);
         tick();
-      } catch {
-        setError("Couldn't access the camera. Paste the handover link instead.");
+      } catch (err) {
+        if (err?.name === "NotAllowedError" || err?.name === "SecurityError") {
+          setError("Camera access is off. Allow it in Settings, or paste the handover link below.");
+        } else if (err?.name === "NotFoundError" || err?.name === "OverconstrainedError") {
+          setError("No camera found. Paste the handover link below instead.");
+        } else {
+          setError("Couldn't start the camera. Paste the handover link below instead.");
+        }
       }
     }
 
@@ -70,8 +77,8 @@ export default function ScanScreen({ onBack, onScanned }) {
     <div className={`${SCREEN} px-5`}>
       <div className="shrink-0 px-0" style={safeTop()}>
         <div className="flex items-center gap-3 mb-4">
-          <button onClick={onBack} className="text-sm font-bold text-gray-500 dark:text-gray-400" aria-label="Back to home">← Home</button>
-          <HandoverMark className="font-extrabold text-lg text-gray-900 dark:text-white" />
+          <button onClick={onBack} className={BACK_LINK} aria-label="Back to home">← Home</button>
+          <HandoverMark className={TYPE_TITLE} />
         </div>
       </div>
 
@@ -90,7 +97,7 @@ export default function ScanScreen({ onBack, onScanned }) {
       )}
 
       <p className="shrink-0 text-sm text-gray-500 dark:text-gray-400 text-center my-2">
-        Point your camera at the outgoing doctor's takeover code
+        Point your camera at your colleague&apos;s takeover code
       </p>
 
       <div className="shrink-0 flex items-center gap-2" style={safeBottom()}>

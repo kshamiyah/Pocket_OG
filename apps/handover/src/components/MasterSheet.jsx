@@ -3,7 +3,10 @@ import { buildHierarchy } from "../utils/jobs";
 import { NO_WARD_LABEL } from "../utils/constants";
 import { groupBedsBySection } from "../utils/wardLayouts";
 import JobCard from "./JobCard";
+import JobListWithCompleted from "./JobListWithCompleted";
 import QuickAddRow from "./QuickAddRow";
+import { TYPE_OVERLINE } from "../utils/typography";
+import { JOB_LIST_SCROLL, JOB_LIST_SECTION } from "../utils/screenLayout";
 import { bedRowTone, sectionCounts } from "../utils/bedDisplay";
 
 const NO_WARD_KEY = "__noward__";
@@ -34,14 +37,18 @@ function BedTileButton({ label, open, tone, counts, onClick }) {
   );
 }
 
-function BedJobPanel({ ward, bed, jobs, jobCount, onAddJob, recentPhrases, setRecentPhrases, renderCard }) {
+function BedJobPanel({ ward, bed, bedJobs, jobs, onAddJob, recentPhrases, setRecentPhrases, renderJob }) {
   const label = bedLabel(bed);
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-3 py-3 flex flex-col gap-2">
-      <p className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">{label}</p>
+    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-3 py-3 flex flex-col gap-1.5">
+      <p className={TYPE_OVERLINE}>{label}</p>
       <QuickAddRow ward={ward} bed={bed || ""} jobs={jobs} onAddJob={onAddJob} recentPhrases={recentPhrases} setRecentPhrases={setRecentPhrases} />
-      {jobCount === 0 && <p className="text-xs text-gray-400 dark:text-gray-600">No jobs here yet.</p>}
-      {renderCard}
+      {bedJobs.length === 0 && <p className="text-xs text-gray-400 dark:text-gray-600">No jobs here yet.</p>}
+      {bedJobs.length > 0 && (
+        <JobListWithCompleted jobs={bedJobs}>
+          {renderJob}
+        </JobListWithCompleted>
+      )}
     </div>
   );
 }
@@ -73,13 +80,13 @@ export default function MasterSheet({
   });
 
   const cardProps = { editingId, onToggleDone, onToggleEdit, onSetWard, onSetBed, onSetPriority, onSetText, onSetRemindAt, onDelete, recentWards, recentBeds };
-  const renderCard = (job, hideLocation) => (
-    <JobCard key={job.id} job={job} hideLocation={hideLocation} editing={editingId === job.id} {...cardProps} />
+  const renderJob = (job, hideLocation, index = 0) => (
+    <JobCard job={job} hideLocation={hideLocation} editing={editingId === job.id} enterDelay={index * 30} {...cardProps} />
   );
 
   return (
     <div
-      className="flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden px-5 py-3 flex flex-col gap-2 touch-pan-y"
+      className={JOB_LIST_SCROLL}
       style={{ paddingBottom: listBottomPad ?? "calc(env(safe-area-inset-bottom) + 6rem)" }}
     >
       {wards.length === 0 && noWard.jobs.length === 0 && (
@@ -114,7 +121,7 @@ export default function MasterSheet({
                       >
                         <span className="flex items-center gap-1 min-w-0">
                           <Chevron open={sectionOpen} />
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 truncate">
+                          <span className={`${TYPE_OVERLINE} truncate`}>
                             {group.title}
                           </span>
                         </span>
@@ -127,7 +134,7 @@ export default function MasterSheet({
                       </button>
                     ) : null}
                     {sectionOpen && (
-                    <div className="flex flex-col gap-2">
+                    <div className={JOB_LIST_SECTION}>
                       <div className={group.grid ? "grid grid-cols-2 gap-1.5" : "flex flex-col gap-1.5"}>
                         {group.beds.map((b) => {
                           const key = bedKey(w.ward, b.bed);
@@ -153,11 +160,11 @@ export default function MasterSheet({
                             ward={w.ward}
                             bed={b.bed}
                             jobs={jobs}
-                            jobCount={b.jobs.length}
+                            bedJobs={b.jobs}
                             onAddJob={onAddJob}
                             recentPhrases={recentPhrases}
                             setRecentPhrases={setRecentPhrases}
-                            renderCard={b.jobs.map((job) => renderCard(job, true))}
+                            renderJob={(job, index) => renderJob(job, true, index)}
                           />
                         ))}
                     </div>
@@ -183,8 +190,10 @@ export default function MasterSheet({
             </span>
           </button>
           {openWards.has(NO_WARD_KEY) && (
-            <div className="px-3 pb-3 flex flex-col gap-2 pt-1">
-              {noWard.jobs.map((job) => renderCard(job, false))}
+            <div className="px-3 pb-3 pt-1">
+              <JobListWithCompleted jobs={noWard.jobs}>
+                {(job, index) => renderJob(job, false, index)}
+              </JobListWithCompleted>
             </div>
           )}
         </div>

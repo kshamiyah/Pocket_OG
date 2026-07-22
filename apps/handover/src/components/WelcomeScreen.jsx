@@ -1,36 +1,29 @@
 import HandoverMark from "./HandoverMark";
-import { SCREEN, SCREEN_FOOTER, SCREEN_SCROLL, safeBottom, safeTop } from "../utils/screenLayout";
-
-const BULLETS = [
-  "Add jobs as you go — tag a ward and bed if it helps you remember.",
-  "Walk the ward bed by bed, or see everything on one page.",
-  "Take over with a scan at the start — hand over at the end of shift.",
-];
+import { SCREEN, SCREEN_FOOTER, SCREEN_SCROLL, safeBottom, safeTop, PRIMARY_BTN } from "../utils/screenLayout";
+import { TYPE_BODY, TYPE_DISPLAY } from "../utils/typography";
 
 export default function WelcomeScreen({ onComplete }) {
   return (
     <div className={`${SCREEN} px-6`}>
-      <div className={`${SCREEN_SCROLL} pb-3`} style={safeTop("1.5rem")}>
-        <HandoverMark className="font-extrabold text-2xl text-gray-900 dark:text-white mb-2" />
-        <h1 className="text-gray-900 dark:text-white text-3xl font-bold leading-tight mb-3">
-          Your shift job list, on your phone.
+      <div
+        className={`${SCREEN_SCROLL} flex flex-col justify-center pb-3`}
+        style={safeTop("1.5rem")}
+      >
+        <HandoverMark className={`${TYPE_DISPLAY} mb-1`} />
+        <p className={`text-lg font-semibold text-claude-600 dark:text-claude-400 mb-6`}>
+          From takeover to handover.
+        </p>
+        <h1 className={`${TYPE_DISPLAY} mb-3`}>
+          Your shift job list.
         </h1>
-        <ul className="flex flex-col gap-4">
-          {BULLETS.map((text) => (
-            <li key={text} className="flex gap-3 text-base text-gray-600 dark:text-gray-400 leading-snug">
-              <span className="text-claude-600 font-bold shrink-0">·</span>
-              <span>{text}</span>
-            </li>
-          ))}
-        </ul>
+        <p className={`${TYPE_BODY} text-gray-600 dark:text-gray-400 leading-snug`}>
+          Add jobs as you go, ward by ward. Scan to take over at the start of shift and hand over what is still open at the end.
+        </p>
       </div>
 
       <div className={SCREEN_FOOTER} style={safeBottom()}>
-        <button
-          onClick={onComplete}
-          className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all"
-        >
-          Get started
+        <button type="button" onClick={onComplete} className={PRIMARY_BTN}>
+          Continue
         </button>
       </div>
     </div>

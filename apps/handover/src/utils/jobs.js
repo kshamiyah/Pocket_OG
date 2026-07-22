@@ -31,6 +31,21 @@ export function sortByUrgency(jobs) {
   });
 }
 
+/** Completed jobs, newest first (by created time; no completedAt yet). */
+export function sortCompleted(jobs) {
+  return [...jobs].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+}
+
+export function splitOpenDone(jobs) {
+  const open = [];
+  const done = [];
+  for (const job of jobs) {
+    if (job.done) done.push(job);
+    else open.push(job);
+  }
+  return { open: sortByUrgency(open), done: sortCompleted(done) };
+}
+
 // Jobs grouped into ward sections (alphabetical, unlabelled jobs last), each
 // section internally sorted by urgency.
 export function groupByWard(jobs) {
