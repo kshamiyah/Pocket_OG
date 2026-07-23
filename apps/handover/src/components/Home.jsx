@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import PanelTransition from "./PanelTransition";
 import { SHIFT_TYPES } from "../utils/constants";
-import { countDueReminders, dueTasks, upcomingTasks } from "../utils/reminders";
+import { countDueReminders, dueTasks, notificationBadgeCount, remindAtFromOffset, SNOOZE_MINUTES, upcomingTasks, urgentTasksWithoutReminder } from "../utils/reminders";
+import { syncOneJobReminder } from "../utils/jobNotifications";
 import { pushMRU } from "../utils/storage";
 import { setBedNote } from "../utils/bedNotes";
 import AddJobForm from "./AddJobForm";
@@ -25,6 +26,7 @@ export default function Home({
   recentPhrases, setRecentPhrases,
   wardLayouts, bedNotes, setBedNotes, onScan, onShareJobs, onEndShift, onSetupWard, onManageWards, onEditProfile, onAbout,
   selectedWard, setSelectedWard, selectedBed, setSelectedBed, bedSelected, setBedSelected,
+  focusJobId, onFocusJobHandled, notifCallbacks,
 }) {
   const [mode, setMode] = useState("byward");
   const [editingId, setEditingId] = useState(null);
@@ -119,8 +121,10 @@ export default function Home({
     return () => window.clearInterval(id);
   }, [jobs]);
   const dueReminders = countDueReminders(jobs, reminderTick);
+  const badgeCount = notificationBadgeCount(jobs, reminderTick);
   const dueTaskList = dueTasks(jobs, reminderTick);
   const upcomingTaskList = upcomingTasks(jobs, reminderTick);
+  const urgentTaskList = urgentTasksWithoutReminder(jobs);
 
   const openNotifications = () => {
     setNotificationsSession((n) => n + 1);
@@ -130,6 +134,32 @@ export default function Home({
   const openTaskFromNotifications = (id) => {
     setMode("all");
     setEditingId(id);
+  };
+
+  useEffect(() => {
+    if (focusJobId == null) return undefined;
+    const job = jobs.find((j) => j.id === focusJobId || j.id === Number(focusJobId));
+    const id = window.setTimeout(() => {
+      if (job) {
+        setMode("all");
+        setEditingId(job.id);
+      }
+      onFocusJobHandled?.();
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [focusJobId, jobs, onFocusJobHandled]);
+
+  const snoozeTask = (id) => {
+    const job = jobs.find((j) => j.id === id);
+    if (!job || job.done) return;
+    const remindAt = remindAtFromOffset(SNOOZE_MINUTES, reminderTick);
+    const updated = { ...job, remindAt };
+    setJobs(jobs.map((j) => (j.id === id ? updated : j)));
+    syncOneJobReminder(updated, notifCallbacks);
+  };
+
+  const markTaskDone = (id) => {
+    toggleDone(id);
   };
 
   const openWizard = () => {
@@ -175,16 +205,16 @@ export default function Home({
           <button
             type="button"
             onClick={openNotifications}
-            aria-label={dueReminders > 0 ? `${dueReminders} tasks due` : "Notifications"}
+            aria-label={badgeCount > 0 ? `${badgeCount} notification${badgeCount === 1 ? "" : "s"}` : "Notifications"}
             className={`${ICON_BTN} relative border-claude-200 dark:border-claude-900 text-claude-700 dark:text-claude-400`}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
               <path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>
-            {dueReminders > 0 && (
+            {badgeCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 min-w-[1.125rem] h-[1.125rem] px-0.5 rounded-full bg-claude-600 text-white text-xs font-bold flex items-center justify-center tabular-nums">
-                {dueReminders > 9 ? "9+" : dueReminders}
+                {badgeCount > 9 ? "9+" : badgeCount}
               </span>
             )}
           </button>
@@ -326,9 +356,12 @@ export default function Home({
         open={notificationsOpen}
         onClose={() => setNotificationsOpen(false)}
         due={dueTaskList}
+        urgent={urgentTaskList}
         upcoming={upcomingTaskList}
         now={reminderTick}
         onOpenTask={openTaskFromNotifications}
+        onSnooze={snoozeTask}
+        onMarkDone={markTaskDone}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { App as CapApp } from "@capacitor/app";
 import WelcomeScreen from "./components/WelcomeScreen";
@@ -22,7 +22,7 @@ import ViewTransition from "./components/ViewTransition";
 import { Storage, profileIsComplete } from "./utils/storage";
 import { nextId } from "./utils/jobs";
 import { parseIncomingHandover } from "./utils/payload";
-import { syncJobReminders } from "./utils/jobNotifications";
+import { syncJobReminders, listenForNotificationOpens } from "./utils/jobNotifications";
 import { deleteLayout } from "./utils/wardLayouts";
 import { applyBedRemaps, applyLayoutImportPlan } from "./utils/layoutWire";
 
@@ -70,6 +70,7 @@ export default function App() {
   const [navDirection, setNavDirection] = useState("forward");
   const [toast, setToast] = useState(null);
   const [toastElevated, setToastElevated] = useState(false);
+  const [focusJobId, setFocusJobId] = useState(null);
   const toastTimer = useRef(null);
 
   const flashToast = (message, { elevated = false, duration = 2600 } = {}) => {
@@ -123,9 +124,38 @@ export default function App() {
   const setWardLayouts = (next) => { setWardLayoutsState(next); Storage.setWardLayouts(next); };
   const setBedNotes = (next) => { setBedNotesState(next); Storage.setBedNotes(next); };
 
+  const notifCallbacks = useMemo(() => ({
+    onPermissionPrompt: () => {
+      if (!Storage.getNotifPromptShown()) {
+        Storage.setNotifPromptShown(true);
+        flashToast(
+          "Allow notifications when prompted so Handover can remind you when tasks are due.",
+          { duration: 4200 },
+        );
+      }
+    },
+    onPermissionDenied: () => {
+      if (!Storage.getNotifDeniedShown()) {
+        Storage.setNotifDeniedShown(true);
+        flashToast(
+          "Reminders stay in the app. Enable notifications in Settings to get alerts when tasks are due.",
+          { duration: 5200 },
+        );
+      }
+    },
+  }), []);
+
   useEffect(() => {
-    syncJobReminders(jobs);
-  }, [jobs]);
+    syncJobReminders(jobs, notifCallbacks);
+  }, [jobs, notifCallbacks]);
+
+  useEffect(() => {
+    return listenForNotificationOpens((jobId) => {
+      setNavDirection("forward");
+      setView("list");
+      setFocusJobId(jobId);
+    });
+  }, []);
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return undefined;
@@ -546,6 +576,9 @@ export default function App() {
           setSelectedBed={setSelectedBed}
           bedSelected={bedSelected}
           setBedSelected={setBedSelected}
+          focusJobId={focusJobId}
+          onFocusJobHandled={() => setFocusJobId(null)}
+          notifCallbacks={notifCallbacks}
         />
         {coachPending && (
           <CoachMarks

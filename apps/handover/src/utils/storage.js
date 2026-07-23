@@ -10,6 +10,8 @@ const KEYS = {
   coachDone: "handover_coach_done_v1",
   disclaimerDone: "handover_disclaimer_done_v1",
   theme: "handover_theme_v1",
+  notifDeniedShown: "handover_notif_denied_shown_v1",
+  notifPromptShown: "handover_notif_prompt_shown_v1",
 };
 
 function read(key, fallback) {
@@ -79,6 +81,12 @@ export const Storage = {
       /* storage unavailable */
     }
   },
+
+  getNotifDeniedShown: () => read(KEYS.notifDeniedShown, false),
+  setNotifDeniedShown: (shown) => write(KEYS.notifDeniedShown, shown),
+
+  getNotifPromptShown: () => read(KEYS.notifPromptShown, false),
+  setNotifPromptShown: (shown) => write(KEYS.notifPromptShown, shown),
 };
 
 export function profileIsComplete(profile) {

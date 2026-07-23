@@ -1,3 +1,5 @@
+import { PRIORITY } from "./constants";
+
 export const REMINDER_OFFSETS = [
   { label: "+30m", minutes: 30 },
   { label: "+1h", minutes: 60 },
@@ -5,6 +7,7 @@ export const REMINDER_OFFSETS = [
 ];
 
 export const SNOOZE_MINUTES = 15;
+export const UPCOMING_BADGE_MINUTES = 60;
 
 export function remindAtFromOffset(minutes, from = Date.now()) {
   return new Date(from + minutes * 60_000).toISOString();
@@ -59,18 +62,45 @@ export function formatReminderLabel(remindAt, now = Date.now()) {
   return `Remind ${clock}`;
 }
 
+function compareDueTasks(a, b) {
+  const aUrgent = a.priority === PRIORITY.URGENT ? 0 : 1;
+  const bUrgent = b.priority === PRIORITY.URGENT ? 0 : 1;
+  if (aUrgent !== bUrgent) return aUrgent - bUrgent;
+  return new Date(a.remindAt).getTime() - new Date(b.remindAt).getTime();
+}
+
 export function countDueReminders(jobs, now = Date.now()) {
   return jobs.filter((j) => !j.done && reminderStatus(j.remindAt, now) === "due").length;
 }
 
 export function dueTasks(jobs, now = Date.now()) {
-  return jobs.filter((j) => !j.done && reminderStatus(j.remindAt, now) === "due");
+  return jobs
+    .filter((j) => !j.done && reminderStatus(j.remindAt, now) === "due")
+    .sort(compareDueTasks);
 }
 
 export function upcomingTasks(jobs, now = Date.now()) {
   return jobs
     .filter((j) => !j.done && reminderStatus(j.remindAt, now) === "scheduled")
     .sort((a, b) => new Date(a.remindAt).getTime() - new Date(b.remindAt).getTime());
+}
+
+export function upcomingWithinMinutes(jobs, minutes = UPCOMING_BADGE_MINUTES, now = Date.now()) {
+  const limit = now + minutes * 60_000;
+  return upcomingTasks(jobs, now).filter((j) => new Date(j.remindAt).getTime() <= limit);
+}
+
+/** Bell badge: due now + reminders in the next hour. */
+export function notificationBadgeCount(jobs, now = Date.now()) {
+  const due = countDueReminders(jobs, now);
+  const soon = upcomingWithinMinutes(jobs, UPCOMING_BADGE_MINUTES, now).length;
+  return due + soon;
+}
+
+export function urgentTasksWithoutReminder(jobs) {
+  return jobs
+    .filter((j) => !j.done && !j.remindAt && j.priority === PRIORITY.URGENT)
+    .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
 }
 
 export function countScheduledTasks(jobs, now = Date.now()) {
