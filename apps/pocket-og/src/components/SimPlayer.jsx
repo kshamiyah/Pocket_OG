@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { glColors } from "../data/glColors";
-import { beatOptions, scoredBeatCount } from "../data/simCases";
+import { choiceView, scoredBeatCount } from "../data/simCases";
 
 // On Call simulation: one continuous room encounter with a live chart. Before you
 // enter the room, only the handover scene shows (no patient card). After that, a
@@ -85,7 +85,7 @@ function StepFeedback({ beat, mode, chosen, onNavigate }) {
   if (mode === "simulate") return null;
 
   if (beat.kind === "choice") {
-    const ok = chosen === beat.answer;
+    const ok = chosen === choiceView(beat).answer;
     return (
       <div className={`rounded-2xl border-l-4 p-4 ${ok ? "border-green-400 bg-gray-50" : "border-amber-400 bg-gray-50"}`}>
         <p className="text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">
@@ -111,12 +111,12 @@ function buildFeedbackSteps(simCase, results) {
     if (!rec) continue;
 
     if (beat.kind === "choice") {
-      const opts = beatOptions(beat);
+      const view = choiceView(beat);
       steps.push({
         question: beat.question,
-        ok: rec.chosen === beat.answer,
-        yours: opts[rec.chosen]?.label ?? "No selection",
-        correct: opts[beat.answer]?.label ?? "",
+        ok: rec.chosen === view.answer,
+        yours: view.options[rec.chosen]?.label ?? "No selection",
+        correct: view.options[view.answer]?.label ?? "",
         teaching: beat.why,
         source: beat.source,
         kind: "choice",
@@ -205,7 +205,7 @@ function entriesFromBeat(beat, { chosen, ticked, patientName }) {
     }
   }
   if (beat.kind === "choice" && chosen !== null) {
-    const label = beatOptions(beat)[chosen]?.label;
+    const label = choiceView(beat).options[chosen]?.label;
     if (label) entries.push({ time: t, text: label, kind: "action" });
     for (const [k, v] of Object.entries(beat.obs ?? {})) {
       entries.push({ time: t, text: `${k} ${v}`, kind: "obs" });
@@ -470,7 +470,7 @@ export default function SimPlayer({ simCase, onClose, onNavigate }) {
   const pick = (i) => {
     if (chosen !== null) return;
     setChosen(i);
-    if (i === beat.answer) setScore(s => s + 1);
+    if (i === choiceView(beat).answer) setScore(s => s + 1);
   };
 
   const toggleTick = (i) => {
@@ -488,7 +488,8 @@ export default function SimPlayer({ simCase, onClose, onNavigate }) {
     if (exact) setScore(s => s + 1);
   };
 
-  const options = beat.kind === "choice" ? beatOptions(beat) : [];
+  const options = beat.kind === "choice" ? choiceView(beat).options : [];
+  const correctIdx = beat.kind === "choice" ? choiceView(beat).answer : -1;
   const feedbackSteps = isLesson ? buildFeedbackSteps(simCase, results) : [];
 
   if (isLesson) {
@@ -630,7 +631,7 @@ export default function SimPlayer({ simCase, onClose, onNavigate }) {
             {beat.kind === "choice" && (
               <div className="space-y-2">
                 {options.map((opt, i) => {
-                  const isAnswer = i === beat.answer;
+                  const isAnswer = i === correctIdx;
                   const isChosen = i === chosen;
                   let cls = "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 active:scale-[0.99]";
                   if (chosen !== null) {

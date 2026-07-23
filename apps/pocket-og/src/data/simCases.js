@@ -37,6 +37,38 @@ export function nodeOptions(fcId, nodeId) {
   return (node?.options ?? []).map(o => ({ label: o.label, sublabel: o.sublabel }));
 }
 
+// Deterministic PRNG from a string seed (mulberry32 over an FNV-1a hash).
+function seededRand(seed) {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return () => {
+    h |= 0; h = (h + 0x6D2B79F5) | 0;
+    let t = Math.imul(h ^ (h >>> 15), 1 | h);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// A choice beat's options in a shuffled-but-stable order, with the correct
+// answer index remapped to its new position. Seeded from the beat's own content
+// so every call site (render, scoring, debrief) derives the SAME order without
+// shared state, and so the correct answer is never fixed to one position. The
+// data keeps `answer` pointing at the clinically correct option; only the
+// display order changes.
+export function choiceView(beat) {
+  const opts = beatOptions(beat);
+  const answer = beat.answer ?? 0;
+  if (opts.length < 2) return { options: opts, answer };
+  const seed = `${beat.question ?? ""}|${opts.map(o => o.label).join("|")}`;
+  const rnd = seededRand(seed);
+  const idx = opts.map((_, i) => i);
+  for (let i = idx.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [idx[i], idx[j]] = [idx[j], idx[i]];
+  }
+  return { options: idx.map(i => opts[i]), answer: idx.indexOf(answer) };
+}
+
 export const SIM_CASES = [
   {
     id: "mau-rfm-34",
@@ -72,7 +104,7 @@ export const SIM_CASES = [
         ],
         question: "What is your first priority?",
         options: [
-          { label: "Auscultate the fetal heart with a handheld Doppler", sublabel: "Confirm viability before anything else" },
+          { label: "Auscultate the fetal heart with a handheld Doppler" },
           { label: "Put her straight on the CTG monitor" },
           { label: "Arrange an ultrasound scan for growth and liquor" },
           { label: "Reassure her that an anterior placenta dampens movements" },
@@ -110,7 +142,7 @@ export const SIM_CASES = [
         ],
         question: "She is 34+2 weeks and the fetal heart is confirmed. What monitoring does the guideline call for now?",
         options: [
-          { label: "Computerised CTG for at least 20 minutes", sublabel: "Preferred over visual interpretation" },
+          { label: "Computerised CTG for at least 20 minutes" },
           { label: "A 10-minute visual CTG is sufficient" },
           { label: "No CTG needed, the Doppler already confirmed a heartbeat" },
           { label: "CTG only if she re-attends with a second episode" },
@@ -148,9 +180,9 @@ export const SIM_CASES = [
         question: "The CTG is normal. Following the RFM care pathway, what happens next?",
         fromNode: { fc: "GTG57_CARE_PATHWAY", node: "ctg-result" },
         options: [
-          { label: "Senior obstetrician review", sublabel: "CTG suspicious or pathological" },
-          { label: "Reassure and discharge", sublabel: "Movements back to normal, no risk factors" },
-          { label: "Book an ultrasound scan", sublabel: "Growth, liquor and umbilical artery Doppler" },
+          { label: "Senior obstetrician review" },
+          { label: "Reassure and discharge" },
+          { label: "Book an ultrasound scan" },
         ],
         answer: 2,
         why: "The CTG is normal, but her perception of reduced movements persists and she has a risk factor (smoking, aOR 2.96 for adverse outcome). A normal CTG with persisting RFM or any risk factor for FGR or stillbirth is an indication for ultrasound assessment: EFW and abdominal circumference, amniotic fluid volume and umbilical artery Doppler. Discharge on the strength of the CTG alone would be premature here.",
@@ -173,8 +205,8 @@ export const SIM_CASES = [
         question: "How do you act on these ultrasound findings?",
         fromNode: { fc: "GTG57_CARE_PATHWAY", node: "uss-result" },
         options: [
-          { label: "Reassure her and arrange discharge", sublabel: "Normal growth, liquor and Doppler" },
-          { label: "Manage as SGA or abnormal scan", sublabel: "Follow GTG31" },
+          { label: "Reassure her and arrange discharge" },
+          { label: "Manage as SGA or abnormal scan" },
         ],
         answer: 0,
         why: "Growth, liquor and Doppler are all normal, so there is no objective evidence of fetal compromise. She should be reassured: with normal investigations there is no indication for expediting birth (Grade A), and around 70% of women with RFM go on to have a good pregnancy outcome. Had the scan shown SGA, oligohydramnios or an abnormal Doppler, management would follow GTG31.",
@@ -189,7 +221,7 @@ export const SIM_CASES = [
         ],
         question: "What discharge advice does the guideline support?",
         options: [
-          { label: "No formal counting: know your baby's own pattern, and return immediately with any further reduction or change", sublabel: "Movements do not decrease towards term" },
+          { label: "No formal counting: know your baby's own pattern, and return immediately with any further reduction or change" },
           { label: "Count to ten movements every day and attend if you fall short" },
           { label: "Only return if you feel no movements at all for 24 hours" },
           { label: "Offer induction of labour now to remove the ongoing risk" },
@@ -271,7 +303,7 @@ export const SIM_CASES = [
         narrative: "You rub up a contraction and the oxytocin runs. The fundus is now firm and central, but bright red blood keeps trickling steadily, and the total is up to 700 ml.",
         question: "What is the most likely source, and your next step?",
         options: [
-          { label: "Genital tract trauma: examine the cervix and vagina under direct vision", sublabel: "A firm uterus points away from tone" },
+          { label: "Genital tract trauma: examine the cervix and vagina under direct vision" },
           { label: "Uterine atony: give a further uterotonic" },
           { label: "Retained tissue: proceed to manual removal of placenta" },
           { label: "Coagulopathy: send a clotting screen and await the result" },
@@ -286,7 +318,7 @@ export const SIM_CASES = [
         narrative: "You find a high vaginal tear and the registrar starts to repair it. As they work, the running total reaches 850 ml. Bea's pulse has climbed from 88 to 120 and her BP is 94/50.",
         question: "What is the most appropriate next step?",
         options: [
-          { label: "Activate the major PPH protocol now", sublabel: "She is compromised regardless of the number" },
+          { label: "Activate the major PPH protocol now" },
           { label: "Continue; the loss is still under 1000 ml" },
           { label: "Give ergometrine and reassess in ten minutes" },
           { label: "Recheck her observations in fifteen minutes" },
@@ -360,7 +392,7 @@ export const SIM_CASES = [
         narrative: "The oxytocin infusion is running and ergometrine is in, but the uterus stays soft and she keeps bleeding. You glance again at her drug chart: the salbutamol inhaler, and the winter admission with wheeze.",
         question: "Which is the most appropriate next uterotonic?",
         options: [
-          { label: "Misoprostol 800 mcg", sublabel: "Her history changes the usual next step" },
+          { label: "Misoprostol 800 mcg" },
           { label: "Carboprost 0.25 mg intramuscularly" },
           { label: "A repeat dose of ergometrine" },
           { label: "A further oxytocin bolus" },
@@ -375,7 +407,7 @@ export const SIM_CASES = [
         narrative: "She has lost 1800 ml and is still bleeding. The lab phones to say the FBC and clotting will be another 25 minutes.",
         question: "What is the most appropriate action now?",
         options: [
-          { label: "Give tranexamic acid and start empirical blood products without waiting", sublabel: "Do not delay for the numbers" },
+          { label: "Give tranexamic acid and start empirical blood products without waiting" },
           { label: "Await the clotting result before giving blood products" },
           { label: "Wait for the full crossmatch before transfusing" },
           { label: "Give a further dose of misoprostol" },
@@ -390,7 +422,7 @@ export const SIM_CASES = [
         narrative: "Point-of-care testing returns: fibrinogen 1.1 g/L, platelets 90, Hb 82, and she is still bleeding.",
         question: "Which product is the priority?",
         options: [
-          { label: "Cryoprecipitate", sublabel: "First choice for fibrinogen below 2 g/L" },
+          { label: "Cryoprecipitate" },
           { label: "Fresh frozen plasma" },
           { label: "Platelets" },
           { label: "Red cells" },
@@ -464,7 +496,7 @@ export const SIM_CASES = [
         narrative: "She is into her sixth unit of red cells with FFP and cryoprecipitate given, yet she keeps oozing. Temperature 34.8, and the ionised calcium is low on the gas.",
         question: "Besides continuing products, what is most important now?",
         options: [
-          { label: "Actively warm her and give calcium", sublabel: "Correct the physiology that stops her clotting" },
+          { label: "Actively warm her and give calcium" },
           { label: "Give recombinant Factor VIIa" },
           { label: "Switch resuscitation to colloid" },
           { label: "Repeat the fibrinogen and wait for it" },
@@ -479,7 +511,7 @@ export const SIM_CASES = [
         narrative: "In theatre the uterus is atonic despite the balloon. She is on her second unit of O-negative, BP 82/46, pulse 134, and the anaesthetist is struggling to keep up with losses.",
         question: "What is the most appropriate next step to secure haemostasis?",
         options: [
-          { label: "Laparotomy with a brace suture, to devascularisation or hysterectomy if needed", sublabel: "Definitive control in an unstable woman" },
+          { label: "Laparotomy with a brace suture, to devascularisation or hysterectomy if needed" },
           { label: "Transfer to interventional radiology for uterine artery embolisation" },
           { label: "Recombinant Factor VIIa, then reassess the bleeding" },
           { label: "Deflate the balloon and repeat the uterotonic ladder" },
@@ -494,7 +526,7 @@ export const SIM_CASES = [
         narrative: "A B-Lynch suture secures haemostasis and she stabilises: warm, BP 112/70, lactate falling. The registrar suggests moving her to the postnatal ward as a bed is needed.",
         question: "What is the most appropriate ongoing plan?",
         options: [
-          { label: "Critical care with close monitoring, and thromboprophylaxis once haemostasis is secure", sublabel: "High VTE risk after massive PPH" },
+          { label: "Critical care with close monitoring, and thromboprophylaxis once haemostasis is secure" },
           { label: "Move to the postnatal ward now she is stable" },
           { label: "Start LMWH immediately for the high VTE risk" },
           { label: "Discharge home in 24 hours if observations stay normal" },
@@ -554,7 +586,7 @@ export const SIM_CASES = [
         narrative: "The seizure has stopped and the magnesium load is in. The repeat blood pressure is 172/116.",
         question: "What is the most appropriate immediate next step?",
         options: [
-          { label: "Give a rapid-acting antihypertensive such as labetalol", sublabel: "Magnesium is not an antihypertensive" },
+          { label: "Give a rapid-acting antihypertensive such as labetalol" },
           { label: "Give a second magnesium loading dose" },
           { label: "Start the magnesium maintenance infusion and watch the blood pressure" },
           { label: "Proceed straight to caesarean without treating the blood pressure" },
@@ -569,7 +601,7 @@ export const SIM_CASES = [
         narrative: "The blood pressure is controlled and the magnesium maintenance infusion has run for four hours. Fatima is now drowsy. Respiratory rate 14, urine output 140 ml over the last 4 hours, but her patellar reflexes are absent.",
         question: "What is the most appropriate action?",
         options: [
-          { label: "Stop the magnesium infusion until reflexes return", sublabel: "Absent reflexes signal toxicity" },
+          { label: "Stop the magnesium infusion until reflexes return" },
           { label: "Give calcium gluconate immediately" },
           { label: "Reduce the infusion to 0.5 g/hr" },
           { label: "Continue and recheck in an hour" },
@@ -584,7 +616,7 @@ export const SIM_CASES = [
         narrative: "Reflexes have returned and the infusion is restarted. She remains oliguric: 60 ml over the last 3 hours. A colleague suggests a 500 ml crystalloid bolus to improve the urine output.",
         question: "What is the most appropriate fluid management?",
         options: [
-          { label: "Maintain strict fluid restriction and do not bolus for the oliguria", sublabel: "Filling risks pulmonary oedema" },
+          { label: "Maintain strict fluid restriction and do not bolus for the oliguria" },
           { label: "Give the 500 ml crystalloid bolus" },
           { label: "Give repeated boluses until urine output improves" },
           { label: "Start a furosemide infusion" },
@@ -599,7 +631,7 @@ export const SIM_CASES = [
         narrative: "Bloods return: platelets 68, ALT 210, haemolysis on the film. This is HELLP syndrome. The registrar asks whether to give dexamethasone to treat it.",
         question: "What is the most appropriate response about steroids?",
         options: [
-          { label: "Steroids do not treat HELLP; give them only for fetal lung maturation if preterm delivery is planned", sublabel: "Two separate questions" },
+          { label: "Steroids do not treat HELLP; give them only for fetal lung maturation if preterm delivery is planned" },
           { label: "Give high-dose dexamethasone to treat the HELLP" },
           { label: "Give steroids to raise the platelet count before delivery" },
           { label: "Withhold steroids entirely whatever the gestation" },
@@ -614,7 +646,7 @@ export const SIM_CASES = [
         narrative: "She proceeds to a vaginal delivery. As the baby is born, the midwife asks which drug to give for the active third stage.",
         question: "Which is the most appropriate uterotonic here?",
         options: [
-          { label: "Oxytocin alone", sublabel: "She remains hypertensive" },
+          { label: "Oxytocin alone" },
           { label: "Syntometrine (oxytocin with ergometrine)" },
           { label: "Ergometrine" },
           { label: "Carboprost" },
