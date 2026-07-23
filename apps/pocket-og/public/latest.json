@@ -1,6 +1,20 @@
 {
-  "updated": "2026-07-21",
+  "updated": "2026-07-23",
   "items": [
+    {
+      "id": "2026-07-gtg31-sga-growth-charts",
+      "date": "2026-07-21",
+      "kind": "guideline",
+      "source": "RCOG",
+      "weight": "practice",
+      "title": "Small-for-gestational-age fetus (GTG31): INTERGROWTH charts dropped",
+      "why": "The small-for-gestational-age fetus guideline (GTG31) no longer backs INTERGROWTH charts, following NHS England's decision to stop using them, and instead names four acceptable standards: Hadlock, WHO, FMF and GROW. Check which chart your unit has moved to for estimated fetal weight and growth surveillance, since local practice may now differ from what you were trained on.",
+      "url": "https://www.rcog.org.uk/news/rcog-the-investigation-and-management-of-the-small-for-gestational-age-fetus-green-top-guideline-update/",
+      "link": {
+        "type": "reader",
+        "id": "GTG31"
+      }
+    },
     {
       "id": "2026-06-marthas-rule-maternity-rollout",
       "date": "2026-06-24",
