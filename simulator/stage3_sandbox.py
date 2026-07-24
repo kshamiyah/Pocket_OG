@@ -119,9 +119,11 @@ CRYST_EFF = 0.30                 # crystalloid → effective perfusion [ASSUMED]
 PRBC_EFF = 0.80                  # PRBC → effective perfusion [ASSUMED]
 # Step B — deficit-driven MAP (R-CIRC-3) + bleed-outpacing stress [ASSUMED].
 DEFICIT_FRACTION_CAP = 0.55      # max fraction fed into MAP breakpoints
-BLEED_STRESS_THRESHOLD_ML_MIN = 100   # net drain (ml/min) before MAP penalty
-BLEED_STRESS_K = 0.005           # mmHg penalty per ml/min excess drain
-BLEED_STRESS_CAP_MMHG = 8        # cap acute bleed-stress penalty
+# Acute MAP penalty constants live in stage2_sandbox (R-CIRC-3b).
+# Legacy net-drain constants (stage3 sandbox only):
+BLEED_STRESS_THRESHOLD_ML_MIN = 100
+BLEED_STRESS_K = 0.005
+BLEED_STRESS_CAP_MMHG = 8
 # TXA — antifibrinolytic (WOMAN trial; GTG52 1 g IV ASAP, 2nd dose if bleeding ≥30 min).
 TXA_ONSET_MIN = 2                # IV effect on fibrinolysis [ASSUMED; over 10-min infusion]
 TXA_FIBRINOLYSIS_FACTOR_1 = 0.50 # fibrinolysis drive with 1 g [ASSUMED]
@@ -131,14 +133,12 @@ FIBRINOGEN_START_G_L = 4.5       # term pregnancy baseline [ASSUMED band 4–6 g
 FIBRINOGEN_TREAT_THRESHOLD_G_L = 2.0   # PPH treatment threshold (R-COAG-2)
 FIBRINOGEN_MIN_G_L = 0.3
 FIBRINOGEN_MAX_G_L = 6.0
-FIBRINOGEN_CONSUMPTION_PER_L_EBL = 1.0    # g/L lost per L effective haemorrhage.
-# Calibrated to the untreated early-decline slope in the Blood Advances 2018 cohort
-# (~4.5 -> ~2.1 g/L over the first ~2.3 L). The observed plateau at ~1.8 g/L beyond
-# 4 L is treatment (FFP/cryo/MHP) propping it up, modelled separately below — so raw
-# consumption keeps falling and an UNTREATED massive bleed correctly reaches DIC.
+FIBRINOGEN_CONSUMPTION_PER_L_EBL = 0.12   # R-COAG-3: g/L lost per L effective haemorrhage [ASSUMED]
+# Fibrinolysis-driven loss (R-COAG-6) is modelled separately below; TXA scales it.
 FIBRINOGEN_DILUTION_PER_L_PRBC = 0.20     # g/L drop per L PRBC infused [ASSUMED]
 FIBRINOGEN_GAIN_PER_L_FFP = 0.30          # g/L rise per L FFP [ASSUMED]
-FIBRINOLYSIS_G_L_MIN_AT_MAX_BLEED = 0.04  # g/L/min fibrinogen loss at 700 ml/min source bleed
+# R-COAG-6 fibrinolysis pathway at maximal source bleed (consumption alone is R-COAG-3).
+FIBRINOLYSIS_G_L_MIN_AT_MAX_BLEED = 0.04  # g/L/min at 700 ml/min source bleed [ASSUMED]
 COAG_MULTIPLIER_BREAKPOINTS = [   # (fibrinogen g/L, bleed multiplier on source rate)
     (0.0, 1.40), (1.0, 1.25), (1.5, 1.10), (2.0, 1.00), (6.0, 1.00),
 ]

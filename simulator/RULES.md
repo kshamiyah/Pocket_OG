@@ -31,12 +31,25 @@ arteries (Uterine Atony overview)._
 ☑ **ACCEPTED** (2026-06-28)
 
 ### R-BLEED-3 — Non-atonic causes (the other three T's) **[ASSUMED]**
-Trauma / tissue / thrombin add a separate, tone-independent bleed term
-(`bleed_extra`), set per scenario until sourced individually.
-☑ **ACCEPTED — concept; ⏸ DEFERRED (build after)** (2026-06-29). Trauma/tissue/
-thrombin bleeding is clinically less difficult than atony but adds real modelling
-complexity (separate sources, repair dynamics). Flagged for a later stage — NOT
-built now to keep the patient tractable.
+Trauma / tissue / thrombin add separate bleed mechanisms, set per scenario.
+☑ **ACCEPTED — concept** (2026-06-29). **Trauma:** `trauma_severity` 0→1,
+additive leak, cleared by repair (~4 min). **Tissue:** `tissue_severity` 0→1,
+tone ceiling (`1 − severity`) applied at bleed-calc read only; cleared by
+manual removal or hysterectomy. **Thrombin:** deferred.
+
+### R-BLEED-4 — MAP-coupled bleeding (permissive hypotension) **[TUNABLE]**
+Uterine bed is pressure-passive. Effective bleed scales with MAP:
+`perfusion_factor = clamp((MAP − P_floor) / (NORMAL_MAP − P_floor), 0, 1)`;
+`bleed_rate = source_bleed × coag_multiplier × perfusion_factor`.
+`P_floor ≈ 14 mmHg` (self-tamponade). Ships with the debt death model.
+_Sources: uteroplacental pressure-passive flow (Deranged Physiology; OpenAnesthesia)._
+☑ **IMPLEMENTED** (2026-07-24).
+
+### R-HB-1 — Haemoglobin tracking **[ASSUMED]**
+`starting_Hb` default 110 g/L. Track `Hb_mass` (g); `Hb = Hb_mass / volume`.
+Bleed removes Hb at current concentration; crystalloid/FFP dilute; PRBC add
+Hb at ~200 g/L. Feeds `DO₂ = 12 × (MAP/90) × (Hb/110)`.
+☑ **IMPLEMENTED** (2026-07-24).
 
 ---
 
@@ -101,12 +114,21 @@ _Source: StatPearls staging; ZenCur baroreflex behaviour._
 ☑ **ACCEPTED** (2026-06-28); models the "compensate then crash off a cliff"
 behaviour — the reason early action wins.
 
-**Theme-5 calibration sign-off (2026-06-29):** the specific calibration values —
-MAP-vs-%-lost breakpoints (90→85→75→45→25), the HR curve (80 + 160×fraction,
-cap 180), the arrest threshold (MAP ≤ 35), and the oxygen engine (DO₂ 12,
-VO₂ 3.5, debt floor 0.70 mL/kg/min) — are **ACCEPTED as ATLS-grounded**: they sit
-within the sourced ATLS shock-class bands (R5/R6) and the oxygen-debt physiology
-(R12). ATLS is the accountable authority for the staging.
+### R-CIRC-3b — Acute bleed-rate MAP penalty **[NEW — TUNABLE]**
+Compensated MAP breakpoints (R-CIRC-2) describe **slowly reached** volume loss.
+Fast haemorrhage overwhelms baroreflex compensation before refill can catch up.
+
+`MAP = MAP_compensated(fraction_lost) − penalty`, where:
+
+`penalty = max(0, source_stress − tolerance) × K`
+
+- `source_stress = source_bleed_rate × coag_multiplier` (pre-perfusion demand)
+- `tolerance = 300 ml/min` (chronic severe-atony source ~315 → negligible penalty)
+- `K = 0.08 mmHg per ml/min` (uncapped)
+
+Examples: source 700 → penalty 32 mmHg; source 315 → ~1 mmHg; source 35 → 0.
+_Seed: legacy BLEED_STRESS (stage3); cap removed._
+☑ **IMPLEMENTED** (2026-07-24).
 
 ---
 
@@ -294,35 +316,30 @@ calibration ([ASSUMED]) but anchored to the 0–10 / mmHg scale above._
 
 ## E. Cardiac arrest layer
 
-### R-ARR-1 — Cause-agnostic arrest & death via oxygen delivery / debt
-**Design decision (2026-06-28):** the arrest trigger is **not** blood-volume
-specific (so the model extends to sepsis, cardiac, etc.). The universal currency
-is **oxygen delivery (DO₂)** — every shock type lowers it by its own mechanism
-(haemorrhage: ↓volume→↓output; sepsis: ↓vascular resistance/maldistribution;
-cardiac: ↓pump; hypoxia: ↓O₂ content).
+### R-ARR-1 — Oxygen debt death pathway (whole-body) **[UPDATED 2026-07-24]**
+**Retired:** instantaneous `MAP ≤ 35` as the arrest/death trigger.
 
-Two distinct consequences, both off the same variable:
+Debt accrues when `VO₂_delivered < VO₂_demand` (3.5 mL/kg/min), where
+`VO₂_delivered = min(VO₂_demand, DO₂ × max_O₂ER)` and
+`DO₂ = 12 × (MAP/90) × (Hb/110)`. Trigger line: **DO₂crit ≈ 4 mL/kg/min**.
+**Death:** cumulative `oxygen_debt ≥ LD50 113.5 mL/kg` → **irreversible shock**.
 
-1. **Acute arrest event** — heart stops when oxygen delivery acutely collapses
-   (circulatory output → near zero). For the haemorrhage pathway this is
-   **calibrated** to coincide with ~40–50% volume loss (~4–5 min for an
-   untreated full atonic bleed at 700 ml/min from a ~6,650 ml maternal volume).
-   The volume figure is a _calibration anchor for bleeding_, not the universal
-   trigger.
-2. **Death / irreversibility** — governed by **cumulative oxygen debt** =
-   ∫(demand − delivery)dt. Evidence-based threshold: **LD50 ≈ 113.5 mL/kg**
-   (50% mortality), with metabolic correlates **lactate ≈ 12.9 mmol/L** and
-   **base excess ≈ −18.8 mmol/L** at that point. Debt repaid within ~2 h →
-   survivable; debt that lingers → organ failure → death.
+**Repayment:** when `VO₂_delivered > VO₂_demand`, debt drains slower than fill
+(anchor: full LD50 clears in ~2 h at full recovery; drain bounded by surplus O₂
+and slowed by debt depth). No invented point-of-no-return threshold.
 
-Central new state variable: **oxygen delivery / cumulative oxygen debt** (lactate
-as its visible readout). Each pathology plugs into it.
+_Sources: Dunham/Siegel 1991 (PMID 1989759); BJA Education; LITFL O₂ER._
+☑ **IMPLEMENTED** (2026-07-24).
 
-_Sources: Rixen & Siegel, "Bench-to-bedside review: oxygen debt…" (Critical Care,
-cc3526); "Oxygen debt and metabolic acidemia as quantitative predictors of
-mortality…" (PubMed 1989759); "Blood failure / oxygen debt" (Transfusion 2016)._
-[refs: R12, R13, R14, R15, R16]
-☑ **ACCEPTED** (2026-06-28).
+### R-ARR-1b — Coronary fuse (cardiac arrest pathway) **[UPDATED 2026-07-24]**
+Parallel fast death clock. **Pulse pressure** narrows with deficit
+(PP 40 → 30 → 15 mmHg); `DBP = MAP − PP/3`; `CPP = DBP − RAP` (RAP 10).
+**No phenotype gate.** Arrest when `CPP < 17 mmHg` sustained **~7 min**
+(reversible if CPP restored). Myocardial injury accrues only under acute
+haemorrhage (R-CIRC-3b penalty active) when CPP < 50; injury is tracked but
+does not bypass the CPP floor.
+_Sources: StatPearls NBK551531; Circulation 1999 (DTF); ATLS pulse-pressure bands._
+☑ **IMPLEMENTED** (2026-07-24).
 
 ### R-ARR-2 — Defibrillation window
 Shockable rhythm (VF/VT): defibrillate within **2 min** for best survival; each
@@ -348,33 +365,21 @@ _Source: AHA; app `PMCS_DECISION_SEC = 240`, `PMCS_DELIVERY_SEC = 300`._
 
 ## F. Outcome function
 
-### R-OUT-DEATH — Death conditions (deterministic)
-The model recognises **two** death pathways; both use deterministic thresholds
-(not probabilities) for now.
+### R-OUT-DEATH — Death conditions (deterministic) **[UPDATED 2026-07-24]**
+Two parallel pathways; **whichever fires first wins:**
 
-**(1) Acute — used to score the algorithm.**
-Once arrested, death if no return of circulation within the resuscitation window
-and (pregnant arrest) delivery not achieved by ~5 min.
-_Refs: R9 (AHA, 5-min delivery — solid); R10 (maternal IHCA survival)._
-_The resuscitation-window length is **[ASSUMED]** (no clean cut-off in R10)._
+1. **Cardiac arrest** — coronary fuse (R-ARR-1b): CPP < 17 mmHg for ~7 min
+   (from acute MAP crash, coagulopathic torrent, or any cause). Verdict: `ARREST`.
+2. **Irreversible shock** — oxygen debt ≥ LD50 (R-ARR-1). Verdict:
+   `IRREVERSIBLE_SHOCK`.
 
-**(2) Cumulative oxygen debt — MODELLED & RECORDED, not yet used to judge the
-algorithm.**
-Death if cumulative oxygen debt ≥ **~113 mL/kg** (LD50, treated as a hard line
-for now). This represents later ITU / organ-failure death even after a pulse is
-regained.
-_Refs: R12 / R13 (Rixen & Siegel, PMID 1989759)._
+**Exsanguinating** (`≥1 blood volume transfused, source uncontrolled`) is a
+**warning tag** for scoring (Section F), not a death verdict.
 
-> **Scope decision (2026-06-28):** the algorithm under test manages the **acute
-> emergency only — it does not manage ITU/post-arrest care**, so condition (2) is
-> **recorded as an outcome metric but does NOT count for/against the algorithm's
-> score.** Oxygen debt is still fully modelled (it drives the acute arrest trigger
-> R-ARR-1 and is logged as a severity marker). Scoring on condition (2) is
-> deferred until the app's scope extends to post-resuscitation care.
-> **113 mL/kg is LD50 (50% mortality)** — a future, more rigorous version may make
-> this probabilistic.
+Survivors are **graded:** `CONTROLLED_COMFORTABLY` / `CONTROLLED` / `NEAR_MISS`
+from peak debt, MAP nadir, time-to-source-control (see `simulator/scoring.py`).
 
-☑ **ACCEPTED — deterministic; condition (2) recorded-not-scored** (2026-06-28).
+☑ **IMPLEMENTED** (2026-07-24).
 
 ### R-OUT-SURVIVE — Stabilisation (acute)
 The patient survives the acute emergency if **condition (1) is avoided**: bleeding

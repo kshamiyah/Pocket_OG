@@ -36,17 +36,88 @@ MAP_BREAKPOINTS = [   # (fraction_lost, MAP)
     (0.00, 90),
     (0.15, 85),       # Class I/II boundary — still compensated
     (0.30, 75),       # Class II/III — compensation straining
-    (0.40, 45),       # Class III/IV — pressure falling steeply
-    (0.50, 25),       # exsanguination — arrest territory
+    (0.40, 58),       # decompensating — kept above coronary arrest floor [TUNABLE C-CAL]
+    (0.50, 48),       # permissive-hypotension tail — must stay above CPP arrest [TUNABLE B×G]
 ]
 
-# Oxygen engine (R-ARR-1).
-DO2_NORMAL_ML_KG_MIN = 12.0      # normal oxygen delivery [ASSUMED, standard physiology ~10-12]
+# Oxygen engine (R-ARR-1 / SERA handover Section C).
+DO2_NORMAL_ML_KG_MIN = 12.0      # normal oxygen delivery at MAP 90, Hb 110 [ASSUMED]
+DO2_CRIT_ML_KG_MIN = 4.0         # critical DO₂ — shock flag (BJA / LITFL)
 VO2_DEMAND_ML_KG_MIN = 3.5       # tissue oxygen demand (basal) [ASSUMED, ~1 MET]
-DEBT_ADEQUACY_FLOOR = 0.70       # perfusion below 70% of normal starts incurring debt [ASSUMED calibration]
+MAX_O2_EXTRACTION_RATIO = 0.65   # max O₂ER ~0.6–0.7
+# Supply-dependency shoulder (R-ARR-1): progressive strain as extraction nears its limit
+DO2_CRIT_EXTRACTION_ML_KG_MIN = VO2_DEMAND_ML_KG_MIN / MAX_O2_EXTRACTION_RATIO  # ~5.4
+DO2_STRAIN_ML_KG_MIN = 2.0 * VO2_DEMAND_ML_KG_MIN                               # 7.0 — ratio 2:1
+DEBT_SHOULDER_MAX_ML_KG_MIN = 0.5   # shoulder accrual at full strain [TUNABLE]
 LD50_DEBT_ML_KG = 113.5          # R-ARR-1 / R12 (PMID 1989759): lethal cumulative oxygen debt (LD50)
+# Repayment anchor: full LD50 debt clears in ~2 h at full surplus [TUNABLE — Section C item 19]
+DEBT_REPAY_FULL_MIN = 120.0
+DEBT_REPAY_MAX_ML_KG_MIN = LD50_DEBT_ML_KG / DEBT_REPAY_FULL_MIN
 LACTATE_AT_LD50 = 12.9           # R12: lactate correlate at LD50
 LACTATE_NORMAL = 1.0
+
+# Legacy — retired as debt trigger; kept for stage2 sandbox only
+DEBT_ADEQUACY_FLOOR = 0.70
+
+# Haemoglobin (Section D)
+STARTING_HB_DEFAULT_G_L = 110.0  # pregnancy default
+PRBC_HB_G_L = 200.0              # packed cells ~200 g/L
+HB_FLOOR_G_L = 25.0              # physiological minimum [TUNABLE — Section D]
+HB_CEILING_G_L = PRBC_HB_G_L     # cannot exceed transfused packed-cell concentration
+
+# MAP-coupled bleed (Section B)
+P_PERFUSION_FLOOR_MMHG = 14.0    # self-tamponade floor [TUNABLE 10–15]
+
+# Pulse pressure sub-model (Section G item 33) — narrows with volume deficit [ASSUMED anchors]
+PP_BREAKPOINTS = [
+    (0.00, 40.0),   # normal
+    (0.15, 38.0),
+    (0.30, 30.0),   # Class II/III — massive-transfusion predictor band
+    (0.40, 20.0),
+    (0.50, 15.0),   # terminal
+]
+RAP_MMHG = 10.0                  # right atrial pressure
+CPP_ISCHEMIA_MMHG = 50.0         # ischaemia begins (StatPearls NBK551531)
+CPP_ARREST_MMHG = 17.0           # arrest floor ~15–20
+CORONARY_REVERSIBLE_WINDOW_MIN = 7.0  # ~6–8 min reversible window [TUNABLE]
+# Injury accrual between ischaemia line and arrest floor [TUNABLE — Section G item 37]
+CORONARY_INJURY_RATE_PER_MIN = 0.15   # [TUNABLE G item 37]
+CORONARY_INJURY_RECOVERY_PER_MIN = 0.08
+CORONARY_INJURY_ARREST_THRESHOLD = 1.0  # functional arrest after sustained ischaemia [TUNABLE]
+CPP_INJURY_ARREST_MMHG = 40.0           # injury-triggered arrest while CPP below this [TUNABLE]
+# R-CIRC-3b — acute compensation failure under fast haemorrhage [TUNABLE, uncapped]
+ACUTE_BLEED_TOLERANCE_ML_MIN = 300.0  # chronic/severe atony source ~315 → minimal penalty
+ACUTE_BLEED_PENALTY_K = 0.08          # mmHg per ml/min above tolerance [TUNABLE]
+
+DTF_HR_BASE = 80.0
+DTF_AT_BASE = 0.65
+DTF_AT_MAX_HR = 0.40
+DTF_MAX_HR = 180.0
+
+
+def diastolic_time_fraction(hr):
+    """Diastolic time fraction falls with tachycardia (Circulation 1999)."""
+    hr = max(DTF_HR_BASE, min(DTF_MAX_HR, float(hr)))
+    span = DTF_MAX_HR - DTF_HR_BASE
+    return max(DTF_AT_MAX_HR, DTF_AT_BASE - (hr - DTF_HR_BASE) * (DTF_AT_BASE - DTF_AT_MAX_HR) / span)
+
+
+def acute_bleed_map_penalty(source_stress_ml_min):
+    """MAP drop from compensation failure under fast haemorrhage (R-CIRC-3b).
+
+    Applied to pre-perfusion source demand (source_bleed × coag_multiplier).
+    Tolerance sits above chronic severe-atony source (~315 ml/min) so slow tails
+    keep the compensated MAP curve; torrential source (~700 ml/min) uncaps penalty.
+    """
+    excess = max(0.0, float(source_stress_ml_min) - ACUTE_BLEED_TOLERANCE_ML_MIN)
+    return excess * ACUTE_BLEED_PENALTY_K
+
+
+def perfusion_factor(map_mmhg, p_floor=P_PERFUSION_FLOOR_MMHG, normal_map=NORMAL_MAP):
+    """Uterine bed pressure-passive bleed scaling (Section B)."""
+    if normal_map <= p_floor:
+        return 0.0
+    return max(0.0, min(1.0, (map_mmhg - p_floor) / (normal_map - p_floor)))
 
 
 def interp(x, points):

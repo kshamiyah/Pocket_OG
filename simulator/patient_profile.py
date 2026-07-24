@@ -13,6 +13,8 @@ TREATMENT_LABELS = {
     "balloon": "Bakri balloon tamponade",
     "sutures": "B-Lynch / compression sutures (theatre)",
     "hysterectomy": "Peripartum hysterectomy",
+    "repair": "Genital tract repair (suture)",
+    "manual_removal": "Manual removal of retained tissue",
 }
 
 EFFECTIVE = "effective"
@@ -35,6 +37,8 @@ _PRESET_BODY = {
     "balloon": EFFECTIVE,
     "sutures": EFFECTIVE,
     "hysterectomy": EFFECTIVE,
+    "repair": EFFECTIVE,
+    "manual_removal": EFFECTIVE,
 }
 
 PRESETS = {
@@ -46,6 +50,7 @@ PRESETS = {
         "uterotonics": INEFFECTIVE,
         "balloon": INEFFECTIVE,
         "sutures": INEFFECTIVE,
+        "manual_removal": INEFFECTIVE,
     },
 }
 
@@ -123,15 +128,27 @@ def summarise_response(response):
     return " · ".join(parts) if parts else "All treatments effective"
 
 
-def scenario_from_profile(weight_kg, bmi, start_ebl, risk_factors, treatment_response, name="live"):
+def scenario_from_profile(
+    weight_kg, bmi, start_ebl, risk_factors, treatment_response,
+    name="live", trauma_severity=0.0, tissue_severity=0.0,
+    manual_removal_duration_min=4.0, starting_Hb=110.0, asthma=False, human_factors=None,
+):
     """Build an app_operator scenario dict from presentation + phenotype."""
-    return {
+    out = {
         "name": name,
         "weight_kg": weight_kg,
         "bmi": bmi,
         "start_ebl": start_ebl,
         "risk_factors": list(risk_factors or []),
         "treatment_response": dict(treatment_response),
+        "trauma_severity": trauma_severity,
+        "tissue_severity": tissue_severity,
+        "manual_removal_duration_min": manual_removal_duration_min,
+        "starting_Hb": starting_Hb,
+        "asthma": asthma,
         # Legacy keys for deprecated sandboxes / backwards compat
         "surgical_ineffective": surgical_ineffective_steps(treatment_response) or None,
     }
+    if human_factors is not None:
+        out["human_factors"] = dict(human_factors)
+    return out

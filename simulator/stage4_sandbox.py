@@ -22,9 +22,18 @@ from stage1_sandbox import (
     BASELINE_FLOW_ML_MIN, maternal_ml_per_kg, start_tone_from_risk_factors, BASE_START_TONE,
 )
 from stage2_sandbox import (
-    NORMAL_MAP, BASELINE_HR, MAP_ARREST, MAP_BREAKPOINTS, interp,
-    DO2_NORMAL_ML_KG_MIN, VO2_DEMAND_ML_KG_MIN, DEBT_ADEQUACY_FLOOR,
-    LD50_DEBT_ML_KG, LACTATE_AT_LD50, LACTATE_NORMAL,
+    NORMAL_MAP, BASELINE_HR, MAP_BREAKPOINTS, interp,
+    DO2_NORMAL_ML_KG_MIN, DO2_CRIT_ML_KG_MIN, VO2_DEMAND_ML_KG_MIN,
+    MAX_O2_EXTRACTION_RATIO, DO2_CRIT_EXTRACTION_ML_KG_MIN, DO2_STRAIN_ML_KG_MIN,
+    DEBT_SHOULDER_MAX_ML_KG_MIN, LD50_DEBT_ML_KG, DEBT_REPAY_MAX_ML_KG_MIN,
+    LACTATE_AT_LD50, LACTATE_NORMAL,
+    STARTING_HB_DEFAULT_G_L, PRBC_HB_G_L, HB_FLOOR_G_L, HB_CEILING_G_L, P_PERFUSION_FLOOR_MMHG, perfusion_factor,
+    acute_bleed_map_penalty,
+    PP_BREAKPOINTS, RAP_MMHG, CPP_ISCHEMIA_MMHG, CPP_ARREST_MMHG,
+    CORONARY_REVERSIBLE_WINDOW_MIN, CORONARY_INJURY_RATE_PER_MIN,
+    CORONARY_INJURY_RECOVERY_PER_MIN,
+    ACUTE_BLEED_TOLERANCE_ML_MIN,
+    diastolic_time_fraction, DTF_AT_BASE,
 )
 from stage3_sandbox import (
     UTEROTONIC_PHARM_DELAY_SEC, scale_delay_by_bleed_rate,
@@ -64,12 +73,17 @@ from patient_profile import (  # noqa: E402
 # R-BLEED-3: trauma repair (suture) — definitive control of a genital-tract tear,
 # landing after a short onset (time to expose, identify, suture the vessel).
 REPAIR_ONSET_MIN = 4
+# R-BLEED-3: manual removal procedure duration (anaesthesia in place → products out).
+# Logistics to START the procedure are human factors; effect is instant on completion.
+MANUAL_REMOVAL_DURATION_MIN_DEFAULT = 4.0
 
 
 class PatientV4:
     def __init__(self, weight_kg=70, risk_factors=None, surgical_ineffective=None, bmi=25,
                  start_ebl=500, base_tone=BASE_START_TONE, treatment_response=None,
-                 trauma_severity=0.0):
+                 trauma_severity=0.0, tissue_severity=0.0,
+                 manual_removal_duration_min=MANUAL_REMOVAL_DURATION_MIN_DEFAULT,
+                 starting_Hb=STARTING_HB_DEFAULT_G_L):
         # start_ebl = blood already lost when PPH is recognised / SOS is opened.
         # SOS is not triggered below ~500 ml (minor PPH), so default to 500.
         self.weight_kg = weight_kg
@@ -83,6 +97,9 @@ class PatientV4:
             self.fundal_ineffective = fundal_refractory(self.treatment_response)
             self.bimanual_ineffective = bimanual_refractory(self.treatment_response)
             self.repair_ineffective = self.treatment_response.get("repair") == INEFFECTIVE
+            self.manual_removal_ineffective = (
+                self.treatment_response.get("manual_removal") == INEFFECTIVE
+            )
         else:
             # Legacy path (deprecated sandboxes)
             self.treatment_response = None
@@ -91,10 +108,28 @@ class PatientV4:
             self.fundal_ineffective = False
             self.bimanual_ineffective = False
             self.repair_ineffective = False
+            self.manual_removal_ineffective = False
         # R-BLEED-3: trauma is a SEPARATE, tone-independent bleed term from the same
         # arterial supply (BASELINE_FLOW). trauma_severity 0→1 = fraction of that supply
         # leaking from a torn vessel; drug/tone/balloon-independent, cleared by REPAIR.
         self.trauma_severity = max(0.0, min(1.0, trauma_severity))
+        # R-BLEED-3: tissue caps contractile tone (ceiling = 1 − severity). Drugs bank
+        # in sustained_tone; bleed reads effective_tone = min(sustained, ceiling).
+        self.tissue_severity = max(0.0, min(1.0, tissue_severity))
+        self.manual_removal_duration_min = max(0.5, float(manual_removal_duration_min))
+        self.starting_Hb = float(starting_Hb)
+        # R-HB-1: track Hb mass (g); concentration derived from blood_volume
+        remaining_ml = max(0.0, self.start_volume - start_ebl)
+        self.Hb_mass = self.starting_Hb * remaining_ml / 1000.0
+        self._hb_nadir = self.starting_Hb
+        self._peak_debt = 0.0
+        self._map_nadir = NORMAL_MAP
+        self._minutes_in_shock = 0.0
+        self._source_control_min = None
+        # R-ARR-2 coronary fuse state (Section G)
+        self._cardiac_output_failed = False
+        self._minutes_in_arrest = 0.0
+        self._coronary_injury = 0.0
         # R-SEVERITY: risk factors set how ATONIC she starts (severity / bleed rate),
         # not treatability. Lower starting tone = faster bleed.
         self.start_tone = start_tone_from_risk_factors(risk_factors or [], base_tone)
@@ -115,6 +150,20 @@ class PatientV4:
         self._pending_surg = []      # surgical: (effect_min, target, step) — mechanical
         self._pending_cryo = []      # fibrinogen replacement: (effect_min, g/L gain)
         self._pending_repair = []    # trauma repair: (effect_min,) — clears trauma_severity
+        self._pending_manual_removal = []  # (effect_min,) — clears tissue_severity if works
+
+    @property
+    def tissue_ceiling(self):
+        return 1.0 - self.tissue_severity
+
+    @property
+    def effective_sustained_tone(self):
+        return min(self.sustained_tone, self.tissue_ceiling)
+
+    @property
+    def effective_palpation_tone(self):
+        raw = min(1.0, self.sustained_tone + self.fundal_pulse)
+        return min(raw, self.tissue_ceiling)
 
     @property
     def level(self):
@@ -128,7 +177,8 @@ class PatientV4:
 
     @property
     def tone(self):
-        return self.palpation_tone
+        # Palpable tone — capped by tissue ceiling (retained products feel boggy).
+        return self.effective_palpation_tone
 
     @property
     def compression_active(self):
@@ -159,22 +209,33 @@ class PatientV4:
         return BASELINE_FLOW_ML_MIN * self.trauma_severity
 
     @property
+    def hb_g_l(self):
+        if self.blood_volume <= 0:
+            return 0.0
+        return self.Hb_mass / (self.blood_volume / 1000.0)
+
+    @property
+    def perfusion_factor(self):
+        return perfusion_factor(self.map)
+
+    @property
     def source_bleed_rate(self):
-        atony = BASELINE_FLOW_ML_MIN * (1.0 - self.palpation_tone)
+        atony = BASELINE_FLOW_ML_MIN * (1.0 - self.effective_palpation_tone)
         if self.compression_active and not self.bimanual_ineffective:
             atony *= BIMANUAL_BLEED_FACTOR   # bimanual compresses the uterus, not a tear
         return atony + self.trauma_bleed_rate
 
     @property
     def bleed_rate(self):
-        return self.source_bleed_rate * self.coag_multiplier
+        return self.source_bleed_rate * self.coag_multiplier * self.perfusion_factor
 
     @property
     def durable_bleed_rate(self):
         # Durable = excludes transient massage/bimanual, but trauma IS durable until
         # repaired (repair lowers trauma_severity itself), so it stays in.
-        atony = BASELINE_FLOW_ML_MIN * (1.0 - self.sustained_tone)
-        return (atony + self.trauma_bleed_rate) * self.coag_multiplier
+        atony = BASELINE_FLOW_ML_MIN * (1.0 - self.effective_sustained_tone)
+        raw = (atony + self.trauma_bleed_rate) * self.coag_multiplier
+        return raw * perfusion_factor(self.map)
 
     @property
     def effective_replacement_ml(self):
@@ -207,12 +268,167 @@ class PatientV4:
     def map(self):
         base = interp(max(0.0, self.effective_fraction_lost), MAP_BREAKPOINTS)
         return max(0.0, base - self._map_bleed_penalty)
+
     @property
-    def perfusion_adequacy(self): return self.map / NORMAL_MAP
+    def pulse_pressure(self):
+        return interp(max(0.0, self.effective_fraction_lost), PP_BREAKPOINTS)
+
     @property
-    def lactate(self): return LACTATE_NORMAL + self.oxygen_debt * (LACTATE_AT_LD50 - LACTATE_NORMAL) / LD50_DEBT_ML_KG
+    def dbp(self):
+        return max(0.0, self.map - self.pulse_pressure / 3.0)
+
     @property
-    def arrested(self): return self.map <= MAP_ARREST
+    def coronary_perfusion_pressure(self):
+        return max(0.0, self.dbp - RAP_MMHG)
+
+    @property
+    def coronary_supply(self):
+        return self.coronary_perfusion_pressure * diastolic_time_fraction(self.heart_rate)
+
+    @property
+    def perfusion_adequacy(self):
+        return self.map / NORMAL_MAP
+
+    @property
+    def oxygen_delivery(self):
+        # R-ARR-1 / Section C item 18: DO₂ = 12 × (MAP/90) × (Hb/110)
+        hb_ratio = self.hb_g_l / STARTING_HB_DEFAULT_G_L
+        return DO2_NORMAL_ML_KG_MIN * (self.map / NORMAL_MAP) * hb_ratio
+
+    @property
+    def vo2_delivered(self):
+        return min(VO2_DEMAND_ML_KG_MIN, self.oxygen_delivery * MAX_O2_EXTRACTION_RATIO)
+
+    @property
+    def in_shock(self):
+        return self.oxygen_delivery < DO2_CRIT_ML_KG_MIN
+
+    @property
+    def lactate(self):
+        return LACTATE_NORMAL + self.oxygen_debt * (LACTATE_AT_LD50 - LACTATE_NORMAL) / LD50_DEBT_ML_KG
+
+    @property
+    def dead_by_debt(self):
+        return self.oxygen_debt >= LD50_DEBT_ML_KG
+
+    @property
+    def cardiac_arrest_active(self):
+        return self._cardiac_output_failed
+
+    @property
+    def cardiac_arrest_irreversible(self):
+        return self._minutes_in_arrest >= CORONARY_REVERSIBLE_WINDOW_MIN
+
+    @property
+    def arrested(self):
+        """Legacy alias — coronary fuse functional arrest, not MAP≤35."""
+        return self._cardiac_output_failed
+
+    @property
+    def is_dead(self):
+        return self.dead_by_debt or self.cardiac_arrest_irreversible
+
+    @property
+    def death_cause(self):
+        if self.cardiac_arrest_irreversible:
+            return "cardiac_arrest"
+        if self.dead_by_debt:
+            return "irreversible_shock"
+        return None
+
+    def _update_hb(self, bled_ml, fluids_in, blood_in, ffp_in):
+        vol_before = max(self.blood_volume, 1.0)
+        conc = self.Hb_mass / (vol_before / 1000.0)
+        if bled_ml > 0:
+            self.Hb_mass = max(0.0, self.Hb_mass - conc * bled_ml / 1000.0)
+        if blood_in > 0:
+            self.Hb_mass += PRBC_HB_G_L * blood_in / 1000.0
+        # crystalloid / FFP: volume only — Hb_mass unchanged → dilution
+
+    def _clamp_hb_mass(self):
+        # Defensive bounds — extreme constant-rate infusion tests can dilute or
+        # concentrate Hb beyond physiology; normal operator-driven runs stay in range.
+        if self.blood_volume <= 0:
+            return
+        vol_l = self.blood_volume / 1000.0
+        lo = HB_FLOOR_G_L * vol_l
+        hi = HB_CEILING_G_L * vol_l
+        self.Hb_mass = max(lo, min(hi, self.Hb_mass))
+
+    def _update_hb_after_volume(self):
+        self._clamp_hb_mass()
+        if self.blood_volume > 0:
+            self._hb_nadir = min(self._hb_nadir, self.hb_g_l)
+
+    def _update_oxygen_debt(self, dt_min):
+        if dt_min <= 0:
+            return
+        do2 = self.oxygen_delivery
+        vo2_del = self.vo2_delivered
+        # Hard floor: extraction capped at MAX_O2_EXTRACTION_RATIO cannot meet demand
+        hard_deficit = max(0.0, VO2_DEMAND_ML_KG_MIN - do2 * MAX_O2_EXTRACTION_RATIO)
+        # Soft shoulder: microcirculatory strain as DO₂:VO₂ ratio falls toward ~2:1
+        # (progressive supply-dependency, not a sharp knee)
+        shoulder_span = DO2_STRAIN_ML_KG_MIN - DO2_CRIT_EXTRACTION_ML_KG_MIN
+        shoulder_frac = max(0.0, min(1.0, (DO2_STRAIN_ML_KG_MIN - do2) / shoulder_span))
+        shoulder = DEBT_SHOULDER_MAX_ML_KG_MIN * shoulder_frac
+        debt_accrual = hard_deficit + shoulder
+        if debt_accrual > 0:
+            self.oxygen_debt += debt_accrual * dt_min
+        elif self.oxygen_debt > 0:
+            surplus = vo2_del - VO2_DEMAND_ML_KG_MIN
+            depth_factor = 1.0 - 0.35 * min(1.0, self.oxygen_debt / LD50_DEBT_ML_KG)
+            drain = min(DEBT_REPAY_MAX_ML_KG_MIN, surplus * 0.55) * depth_factor
+            self.oxygen_debt = max(0.0, self.oxygen_debt - drain * dt_min)
+        self._peak_debt = max(self._peak_debt, self.oxygen_debt)
+
+    def _update_coronary_fuse(self, dt_min):
+        if dt_min <= 0:
+            return
+        cpp = self.coronary_perfusion_pressure
+        if cpp < CPP_ARREST_MMHG:
+            self._cardiac_output_failed = True
+            self._minutes_in_arrest += dt_min
+        elif cpp >= CPP_ISCHEMIA_MMHG:
+            self._cardiac_output_failed = False
+            self._minutes_in_arrest = 0.0
+            if self._coronary_injury > 0:
+                self._coronary_injury = max(
+                    0.0, self._coronary_injury - CORONARY_INJURY_RECOVERY_PER_MIN * dt_min,
+                )
+        # Injury accrues only under acute haemorrhage — compensation overwhelmed
+        acute = self._map_bleed_penalty > 0.0
+        if acute and cpp < CPP_ISCHEMIA_MMHG:
+            stress = (CPP_ISCHEMIA_MMHG - cpp) / CPP_ISCHEMIA_MMHG
+            hr_factor = DTF_AT_BASE / max(0.35, diastolic_time_fraction(self.heart_rate))
+            source_stress = self.source_bleed_rate * self.coag_multiplier
+            bleed_boost = 1.0 + max(0.0, source_stress - ACUTE_BLEED_TOLERANCE_ML_MIN) / 300.0
+            self._coronary_injury = min(
+                1.0,
+                self._coronary_injury + CORONARY_INJURY_RATE_PER_MIN * stress * hr_factor
+                * bleed_boost * dt_min,
+            )
+
+    def _track_margin(self, now_min, dt_min):
+        self._map_nadir = min(self._map_nadir, self.map)
+        if self.in_shock:
+            self._minutes_in_shock += dt_min
+        if (self._source_control_min is None
+                and self.durable_bleed_rate < CONTROLLED_BLEED):
+            self._source_control_min = now_min
+
+    def margin_snapshot(self):
+        return {
+            "peak_oxygen_debt": round(self._peak_debt, 1),
+            "peak_ebl": round(self.cumulative_bled),
+            "map_nadir": round(self._map_nadir),
+            "hb_nadir": round(self._hb_nadir, 1),
+            "minutes_in_shock": round(self._minutes_in_shock, 1),
+            "source_control_min": self._source_control_min,
+            "total_prbc_ml": round(self.cumulative_blood_in),
+            "total_crystalloid_ml": round(self.cumulative_fluids_in),
+            "total_ffp_ml": round(self.cumulative_ffp_in),
+        }
 
     def give_uterotonic(self, drug_id, now_min):
         self._pending.append((now_min + ONSET_MIN[drug_id], drug_id))
@@ -225,6 +441,13 @@ class PatientV4:
         If the tear is beyond simple repair (repair_ineffective), it does not resolve →
         the app's follow-up escalates to theatre (ligation/hysterectomy)."""
         self._pending_repair.append(now_min + REPAIR_ONSET_MIN)
+
+    def give_manual_removal(self, now_min):
+        """Manual removal / ERPC — procedure runs for manual_removal_duration_min;
+        on completion tissue_severity → 0 instantly if removal works."""
+        self._pending_manual_removal.append(
+            now_min + self.manual_removal_duration_min
+        )
 
     def give_fundal_massage(self):
         if not self.fundal_ineffective:
@@ -270,8 +493,13 @@ class PatientV4:
         keep_s = []
         for effect_min, target, step in self._pending_surg:
             if now_min >= effect_min:
-                if step not in self.surgical_ineffective and target > self.sustained_tone:
-                    self.sustained_tone = target      # full mechanical effect
+                if step not in self.surgical_ineffective:
+                    if target > self.sustained_tone:
+                        self.sustained_tone = target      # full mechanical effect
+                    # Definitive — uterine source (and retained tissue with it) is gone.
+                    if step == "hysterectomy":
+                        self.tissue_severity = 0.0
+                        self.trauma_severity = 0.0
             else:
                 keep_s.append((effect_min, target, step))
         self._pending_surg = keep_s
@@ -303,31 +531,35 @@ class PatientV4:
             else:
                 keep_r.append(effect_min)
         self._pending_repair = keep_r
+        # manual removal — lifts tissue ceiling instantly on completion if it works.
+        keep_m = []
+        for effect_min in self._pending_manual_removal:
+            if now_min >= effect_min:
+                if not self.manual_removal_ineffective:
+                    self.tissue_severity = 0.0
+            else:
+                keep_m.append(effect_min)
+        self._pending_manual_removal = keep_m
         source_bleed = self.source_bleed_rate
-        effective_bleed = source_bleed * self.coag_multiplier
+        effective_bleed = self.bleed_rate
         bled = effective_bleed * dt_min
         self.cumulative_bled += bled
         self.cumulative_fluids_in += fluids_in
         self.cumulative_blood_in += blood_in
         self.cumulative_ffp_in += ffp_in
+        self._update_hb(bled, fluids_in, blood_in, ffp_in)
         self._update_coagulation(source_bleed, bled, blood_in, ffp_in, dt_min)
         self.blood_volume += fluids_in + blood_in + ffp_in - bled
         if self.blood_volume < 0:
             self.blood_volume = 0.0
-        if dt_min > 0:
-            infusion_ml_min = (fluids_in + blood_in + ffp_in) / dt_min
-        else:
-            infusion_ml_min = 0.0
-        net_balance_ml_min = infusion_ml_min - effective_bleed
-        if net_balance_ml_min < -BLEED_STRESS_THRESHOLD_ML_MIN:
-            excess = -net_balance_ml_min - BLEED_STRESS_THRESHOLD_ML_MIN
-            self._map_bleed_penalty = min(BLEED_STRESS_CAP_MMHG, excess * BLEED_STRESS_K)
-        else:
-            self._map_bleed_penalty = 0.0
+        self._update_hb_after_volume()
+        # R-CIRC-3b: acute compensation failure from pre-perfusion source demand
+        source_stress = source_bleed * self.coag_multiplier
+        self._map_bleed_penalty = acute_bleed_map_penalty(source_stress)
         self.fundal_pulse = max(0.0, self.fundal_pulse - FUNDAL_DECAY_PER_MIN * dt_min)
-        if self.perfusion_adequacy < DEBT_ADEQUACY_FLOOR:
-            shortfall = (DEBT_ADEQUACY_FLOOR - self.perfusion_adequacy) / DEBT_ADEQUACY_FLOOR
-            self.oxygen_debt += VO2_DEMAND_ML_KG_MIN * shortfall * dt_min
+        self._update_oxygen_debt(dt_min)
+        self._update_coronary_fuse(dt_min)
+        self._track_margin(now_min, dt_min)
 
 
 def simulate(scenario):
@@ -419,8 +651,12 @@ def simulate(scenario):
         })
         p.tick(minute, dt_min=1.0, blood_in=blood_in)
 
-        if p.arrested:
-            verdict, verdict_min = "ARREST", minute + 1
+        if p.is_dead:
+            cause = p.death_cause
+            verdict, verdict_min = (
+                ("ARREST", minute + 1) if cause == "cardiac_arrest"
+                else ("IRREVERSIBLE_SHOCK", minute + 1)
+            )
             break
         if p.durable_bleed_rate < 50 and p.map > 60:
             verdict, verdict_min = "CONTROLLED", minute + 1
