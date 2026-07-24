@@ -130,6 +130,27 @@ Examples: source 700 → penalty 32 mmHg; source 315 → ~1 mmHg; source 35 → 
 _Seed: legacy BLEED_STRESS (stage3); cap removed._
 ☑ **IMPLEMENTED** (2026-07-24).
 
+### R-CIRC-3c — Exsanguination collapse **[NEW — TUNABLE]**
+
+`DEFICIT_FRACTION_CAP` (R-CIRC-3) caps the **compensated** MAP curve, but untreated
+bleeds can still empty the true circulating tank while MAP sits on the plateau.
+Below a critical **circulating fraction** the tank collapses:
+
+- `circulating_fraction = blood_volume / start_volume` (net of bleeding **and** infusion)
+- `EXSANG_COLLAPSE_FRACTION = 0.40` — below ~40% remaining volume, collapse begins
+- `MAP = MAP_compensated × exsanguination_map_scale(circulating_fraction)`
+- Scale is 1.0 at or above the threshold; linear taper to 0 as fraction → 0
+
+As MAP falls, `perfusion_factor` tapers bleed; CPP crosses the coronary floor →
+**cardiac_arrest** via the existing fuse (R-ARR-1 / Section G). No new death mechanism.
+
+**Design intent:** untreated slow bleeds exsanguinate (hypovolaemic arrest, EBL
+~55–85% of start volume). The **irreversible_shock / debt** path is reserved for
+treated-but-failing cases (volume propped by crystalloid, Hb diluted, MAP on plateau).
+Acute source-stress cases (R-CIRC-3b) arrest earlier with lower EBL — unchanged.
+
+☑ **IMPLEMENTED** (2026-07-24).
+
 ---
 
 ## D. Drug effects on tone (uterotonics)

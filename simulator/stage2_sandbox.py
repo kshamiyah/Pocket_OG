@@ -68,6 +68,12 @@ HB_CEILING_G_L = PRBC_HB_G_L     # cannot exceed transfused packed-cell concentr
 # MAP-coupled bleed (Section B)
 P_PERFUSION_FLOOR_MMHG = 14.0    # self-tamponade floor [TUNABLE 10–15]
 
+# R-CIRC-3c — exsanguination collapse [TUNABLE]
+# Below this circulating fraction (blood_volume / start_volume), MAP falls from the
+# compensated plateau toward 0 as the true tank empties. Reuses the coronary fuse;
+# does not bite while volume is propped by infusion (treated debt path).
+EXSANG_COLLAPSE_FRACTION = 0.40   # collapse begins below ~40% remaining volume
+
 # Pulse pressure sub-model (Section G item 33) — narrows with volume deficit [ASSUMED anchors]
 PP_BREAKPOINTS = [
     (0.00, 40.0),   # normal
@@ -118,6 +124,18 @@ def perfusion_factor(map_mmhg, p_floor=P_PERFUSION_FLOOR_MMHG, normal_map=NORMAL
     if normal_map <= p_floor:
         return 0.0
     return max(0.0, min(1.0, (map_mmhg - p_floor) / (normal_map - p_floor)))
+
+
+def exsanguination_map_scale(circulating_fraction, collapse_fraction=EXSANG_COLLAPSE_FRACTION):
+    """MAP multiplier as true circulating volume falls (R-CIRC-3c).
+
+    At or above *collapse_fraction*, returns 1.0 (compensated plateau unchanged).
+    From collapse_fraction → 0, linear taper to 0 so CPP crosses the coronary floor.
+    """
+    cf = max(0.0, float(circulating_fraction))
+    if cf >= collapse_fraction or collapse_fraction <= 0:
+        return 1.0
+    return cf / collapse_fraction
 
 
 def interp(x, points):

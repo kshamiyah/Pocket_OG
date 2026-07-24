@@ -28,7 +28,7 @@ from stage2_sandbox import (
     DEBT_SHOULDER_MAX_ML_KG_MIN, LD50_DEBT_ML_KG, DEBT_REPAY_MAX_ML_KG_MIN,
     LACTATE_AT_LD50, LACTATE_NORMAL,
     STARTING_HB_DEFAULT_G_L, PRBC_HB_G_L, HB_FLOOR_G_L, HB_CEILING_G_L, P_PERFUSION_FLOOR_MMHG, perfusion_factor,
-    acute_bleed_map_penalty,
+    acute_bleed_map_penalty, exsanguination_map_scale,
     PP_BREAKPOINTS, RAP_MMHG, CPP_ISCHEMIA_MMHG, CPP_ARREST_MMHG,
     CORONARY_REVERSIBLE_WINDOW_MIN, CORONARY_INJURY_RATE_PER_MIN,
     CORONARY_INJURY_RECOVERY_PER_MIN,
@@ -257,8 +257,15 @@ class PatientV4:
 
     @property
     def fraction_lost(self):
-        # Net circulating volume (R-VOL-2) — for display / legacy; not used for MAP.
+        # Net circulating volume (R-VOL-2) — for display / legacy.
         return (self.start_volume - self.blood_volume) / self.start_volume
+
+    @property
+    def circulating_fraction(self):
+        """True tank level (R-VOL-2): net of bleeding and infusion."""
+        if self.start_volume <= 0:
+            return 0.0
+        return max(0.0, self.blood_volume / self.start_volume)
 
     @property
     def heart_rate(self):
@@ -267,7 +274,8 @@ class PatientV4:
     @property
     def map(self):
         base = interp(max(0.0, self.effective_fraction_lost), MAP_BREAKPOINTS)
-        return max(0.0, base - self._map_bleed_penalty)
+        base = max(0.0, base - self._map_bleed_penalty)
+        return base * exsanguination_map_scale(self.circulating_fraction)
 
     @property
     def pulse_pressure(self):
