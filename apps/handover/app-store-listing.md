@@ -73,9 +73,9 @@ shift,jobs,ward,healthcare,professional,oncall,rounds,hospital,clinical,todo,che
 
 | Field | Value |
 |-------|-------|
-| Privacy Policy URL | `https://pocket-handover.vercel.app/privacy.html` |
-| Support URL | `https://pocket-handover.vercel.app/support.html` |
-| Marketing URL (optional) | `https://pocket-handover.vercel.app/` |
+| Privacy Policy URL | `https://www.drshamiyah.com/built/handover/privacy` |
+| Support URL | `https://www.drshamiyah.com/built/handover/support` |
+| Marketing URL (optional) | `https://www.drshamiyah.com/built/handover` |
 
 ---
 
@@ -134,7 +134,7 @@ Expected result: **4+**.
 >    prompt for notification permission.
 >
 > No data is sent to any server operated by the developer. There is no backend.
-> Support: khalid@drshamiyah.com · https://pocket-handover.vercel.app/support.html
+> Support: khalid@drshamiyah.com · https://www.drshamiyah.com/built/handover/support
 
 ---
 

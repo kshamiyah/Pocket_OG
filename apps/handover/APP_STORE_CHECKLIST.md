@@ -18,13 +18,14 @@ Everything else is time. A Mac is required for the iOS build.
 |-------|---------|
 | Bundle ID / App ID | `com.drshamiyah.handover` |
 | Store name | **Handover** (fallback if taken: Handover: Shift List) |
-| Privacy policy URL | `https://pocket-handover.vercel.app/privacy.html` |
-| Support URL | `https://pocket-handover.vercel.app/support.html` |
+| Privacy policy URL | `https://www.drshamiyah.com/built/handover/privacy` |
+| Support URL | `https://www.drshamiyah.com/built/handover/support` |
+| Marketing URL | `https://www.drshamiyah.com/built/handover` |
 | Support / contact email | `khalid@drshamiyah.com` |
 | Production domain | `pocket-handover.vercel.app` |
 
-> The privacy policy URL only goes live once this branch is deployed to the
-> handover production project on Vercel.
+> Privacy, support, and marketing URLs live on drshamiyah.com. The PWA itself
+> (QR/links, universal links) stays on `pocket-handover.vercel.app`.
 
 ---
 
@@ -41,8 +42,8 @@ Everything else is time. A Mac is required for the iOS build.
 - [ ] **Choose a bundle/package identifier** (reverse-DNS, permanent). e.g.
       `uk.drshamiyah.handover`. Used identically on both stores.
 - [ ] **Confirm the production URL** that will be the app's source of truth
-      (the current Vercel domain, or a custom domain). Play's TWA and the
-      privacy policy both hang off this.
+      (the current Vercel domain, or a custom domain). Play's TWA hangs off
+      this; privacy/support already point at drshamiyah.com.
 - [ ] **Decide target countries** and a **content/age rating** (this app = 4+/everyone).
 
 ---
