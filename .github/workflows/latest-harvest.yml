@@ -1,6 +1,6 @@
 name: Latest feed harvest
 
-# Drafts new Latest-feed stories for review every 2 days, and on demand.
+# Drafts new Latest-feed stories for review every Sunday, and on demand.
 # It never publishes directly: it opens a PR you review and merge. Merging the
 # PR triggers the normal Vercel deploy, and installed apps pick up the new
 # latest.json on their next online visit (no app version bump needed).
@@ -10,7 +10,7 @@ name: Latest feed harvest
 
 on:
   schedule:
-    - cron: "0 6 */2 * *" # 06:00 UTC every second day
+    - cron: "0 6 * * 0" # 06:00 UTC every Sunday
   workflow_dispatch:
     inputs:
       lookback_days:
