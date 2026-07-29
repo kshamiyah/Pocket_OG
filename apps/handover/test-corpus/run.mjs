@@ -16,7 +16,7 @@
 
 import { spawn } from "node:child_process";
 import { setTimeout as sleep } from "node:timers/promises";
-import { mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { mkdirSync, writeFileSync, rmSync, accessSync } from "node:fs";
 import { join } from "node:path";
 import { chromium } from "playwright-core";
 import { seedScript, runningState, PROFILE, JOBS, WARD_LAYOUTS, FIXED_NOW } from "./lib/fixtures.mjs";
@@ -26,7 +26,13 @@ import {
 } from "./lib/report.mjs";
 import { runGestures } from "./lib/gestures.mjs";
 
-const CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
+const CHROME_CANDIDATES = [
+  "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
+  `${process.env.HOME}/Library/Caches/ms-playwright/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing`,
+  `${process.env.HOME}/Library/Caches/ms-playwright/chromium-1148/chrome-mac/Chromium.app/Contents/MacOS/Chromium`,
+];
+const CHROME = CHROME_CANDIDATES.find((p) => { try { accessSync(p); return true; } catch { return false; } })
+  ?? CHROME_CANDIDATES[0];
 const APP_DIR = new URL("..", import.meta.url).pathname;
 const PORT = 4178;
 const BASE = `http://localhost:${PORT}/`;

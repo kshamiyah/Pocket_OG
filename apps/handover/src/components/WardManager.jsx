@@ -103,14 +103,14 @@ export default function WardManager({
       )}
 
       <AddWardSheet
-        key={addSession}
+        key={`add-ward-${addSession}`}
         open={addOpen}
         onClose={() => setAddOpen(false)}
         onAdd={onEditWard}
       />
 
       <WardActionsSheet
-        key={menuWard}
+        key={`ward-actions-${menuWard}`}
         open={Boolean(menuWard)}
         ward={menuWard}
         jobsOnWard={menuWard ? jobCount(menuWard) : 0}

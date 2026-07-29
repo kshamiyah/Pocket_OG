@@ -333,7 +333,7 @@ export default function Home({
       )}
 
       <ExchangeSheet
-        key={exchangeSession}
+        key={`exchange-${exchangeSession}`}
         open={exchangeOpen}
         onClose={() => setExchangeOpen(false)}
         onScan={onScan}
@@ -342,7 +342,7 @@ export default function Home({
       />
 
       <HomeMenu
-        key={menuSession}
+        key={`menu-${menuSession}`}
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
         shiftLabel={shiftLabel}
@@ -352,7 +352,7 @@ export default function Home({
       />
 
       <NotificationCentre
-        key={notificationsSession}
+        key={`notifications-${notificationsSession}`}
         open={notificationsOpen}
         onClose={() => setNotificationsOpen(false)}
         due={dueTaskList}
