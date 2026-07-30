@@ -340,9 +340,9 @@
     .carousel-dots {
       display: flex;
       justify-content: center;
-      gap: 0.45rem;
+      gap: 0.4rem;
       flex: 1;
-      max-width: 12rem;
+      max-width: 14rem;
     }
     .carousel-dot {
       width: 0.45rem;
@@ -541,6 +541,16 @@
           </figure>
           <figure class="slide">
             <div class="phone-shell">
+              <img src="/screenshots/ward-setup.png" alt="Ward setup in Handover" width="390" height="844" loading="lazy" />
+            </div>
+          </figure>
+          <figure class="slide">
+            <div class="phone-shell">
+              <img src="/screenshots/add-job.png" alt="Add job wizard in Handover" width="390" height="844" loading="lazy" />
+            </div>
+          </figure>
+          <figure class="slide">
+            <div class="phone-shell">
               <img src="/screenshots/job-list.png" alt="All jobs list in Handover" width="390" height="844" loading="lazy" />
             </div>
           </figure>
@@ -562,6 +572,8 @@
         <div class="carousel-dots" id="carousel-dots" role="tablist" aria-label="Screenshot slides">
           <button type="button" class="carousel-dot is-active" role="tab" aria-selected="true" aria-label="Start shift"></button>
           <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="Bed board"></button>
+          <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="Ward setup"></button>
+          <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="Add job"></button>
           <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="All jobs"></button>
           <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="End shift"></button>
           <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="Hand over"></button>
@@ -674,6 +686,8 @@
       var SLIDES = [
         { title: "Start your shift", copy: "Pick day, long day, night or on-call." },
         { title: "Walk the ward", copy: "Capture jobs by ward and bed as you go." },
+        { title: "Set up your ward", copy: "Numbered rooms, bays or named beds to match your unit." },
+        { title: "Add a job", copy: "Quick wizard for ward, bed, urgency and reminders." },
         { title: "See everything", copy: "Urgent jobs, reminders and open tasks in one list." },
         { title: "End shift", copy: "A clear summary before you leave the hospital." },
         { title: "Hand over", copy: "Share open jobs with one QR scan or link." },

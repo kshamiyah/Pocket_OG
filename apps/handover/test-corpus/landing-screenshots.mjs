@@ -1,6 +1,8 @@
 // Landing-page carousel screenshots (390×844, light mode).
 // Usage: from apps/handover/test-corpus after `npm run build`:
 //   node landing-screenshots.mjs
+//
+// Outputs seven PNGs to public/screenshots/ for early-access.html.
 
 import { spawn } from "node:child_process";
 import { accessSync, copyFileSync, mkdirSync } from "node:fs";
@@ -219,7 +221,45 @@ async function main() {
       await ctx.close();
     }
 
-    console.log("\n3. All jobs");
+    console.log("\n3. Ward setup");
+    {
+      const ctx = await seedContext(browser, "landing-ward-setup");
+      const page = await ctx.newPage();
+      await open(page);
+      await (await wardButton(page, "DS")).click();
+      await page.waitForTimeout(350);
+      await page.getByRole("button", { name: "Manage ward" }).click();
+      await page.waitForTimeout(450);
+      await page.getByText("Set up DS").waitFor({ timeout: 8000 });
+      await page.getByText("Numbered range").first().click();
+      await page.waitForTimeout(300);
+      await snap(page, "ward-setup");
+      await ctx.close();
+    }
+
+    console.log("\n4. Add job");
+    {
+      const ctx = await seedContext(browser, "landing-add-job");
+      const page = await ctx.newPage();
+      await open(page);
+      await page.getByLabel("Add job").click();
+      await page.waitForTimeout(400);
+      const wizard = page.locator(".rounded-t-3xl");
+      await wizard.getByPlaceholder("e.g. Chase repeat FBC").fill("Review CTG trace");
+      await wizard.getByRole("button", { name: "Next" }).click();
+      await page.waitForTimeout(300);
+      await wizard.getByRole("button", { name: "DS", exact: true }).click();
+      await page.waitForTimeout(200);
+      await wizard.getByRole("button", { name: "Next" }).click();
+      await page.waitForTimeout(300);
+      await wizard.getByRole("button", { name: "Urgent", exact: true }).click();
+      await page.waitForTimeout(250);
+      await wizard.getByText("Urgency").waitFor({ timeout: 5000 });
+      await snap(page, "add-job");
+      await ctx.close();
+    }
+
+    console.log("\n5. All jobs");
     {
       const ctx = await seedContext(browser, "landing-jobs");
       const page = await ctx.newPage();
@@ -230,7 +270,7 @@ async function main() {
       await ctx.close();
     }
 
-    console.log("\n4. End shift");
+    console.log("\n6. End shift");
     {
       const ctx = await seedContext(browser, "landing-end");
       const page = await ctx.newPage();
@@ -244,7 +284,7 @@ async function main() {
       await ctx.close();
     }
 
-    console.log("\n5. Handover");
+    console.log("\n7. Handover");
     {
       const ctx = await seedContext(browser, "landing-handover");
       const page = await ctx.newPage();
