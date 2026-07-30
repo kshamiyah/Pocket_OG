@@ -158,58 +158,27 @@
     .hero-cta:hover { opacity: 0.94; }
     .hero-cta:active { transform: scale(0.985); }
 
-    /* App Store-style carousel */
+    /* Peek carousel: centre phone full size, neighbours visible but dimmed */
     .showcase {
       margin: 0 0 1.75rem;
     }
-    .showcase-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      padding: 0 1.5rem;
-      margin-bottom: 0.85rem;
-    }
     .showcase-label {
-      margin: 0;
+      margin: 0 0 0.85rem;
+      padding: 0 1.5rem;
       font-size: 0.82rem;
       font-weight: 650;
       letter-spacing: 0.04em;
       text-transform: uppercase;
       color: var(--muted);
     }
-    .carousel-nav {
-      display: flex;
-      gap: 0.35rem;
-    }
-    .carousel-btn {
-      width: 2rem;
-      height: 2rem;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: var(--card);
-      color: var(--ink);
-      font: inherit;
-      font-size: 1.1rem;
-      line-height: 1;
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-      padding: 0;
-    }
-    .carousel-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .carousel-btn:disabled {
-      opacity: 0.35;
-      cursor: default;
-      border-color: var(--line);
-      color: var(--muted);
-    }
 
-    .carousel {
+    .carousel-viewport {
       overflow: hidden;
     }
     .carousel-track {
       display: flex;
+      gap: 0.65rem;
+      padding: 0.25rem 15% 0.5rem;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
       scroll-behavior: smooth;
@@ -220,24 +189,34 @@
     .carousel-track::-webkit-scrollbar { display: none; }
 
     .slide {
-      flex: 0 0 100%;
+      flex: 0 0 70%;
       scroll-snap-align: center;
       scroll-snap-stop: always;
       margin: 0;
-      padding: 0 1.5rem 0.25rem;
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
+      justify-content: center;
+      align-items: flex-end;
     }
     .phone-shell {
-      width: min(72vw, 17.5rem);
+      width: 100%;
+      max-width: 17.5rem;
       aspect-ratio: 9 / 19.5;
       border-radius: 1.5rem;
       border: 2px solid var(--phone);
       background: #fff;
       box-shadow: var(--shadow);
       overflow: hidden;
+      transform: scale(0.86);
+      opacity: 0.38;
+      filter: saturate(0.65) brightness(0.96);
+      transform-origin: center bottom;
+      transition: transform 0.28s ease, opacity 0.28s ease, filter 0.28s ease, box-shadow 0.28s ease;
+    }
+    .slide.is-active .phone-shell {
+      transform: scale(1);
+      opacity: 1;
+      filter: none;
+      box-shadow: var(--shadow);
     }
     :root[data-theme="dark"] .phone-shell { background: #111827; }
     @media (prefers-color-scheme: dark) {
@@ -249,26 +228,64 @@
       object-fit: cover;
       object-position: top center;
     }
+
+    .slide-meta {
+      text-align: center;
+      padding: 0.75rem 1.5rem 0;
+      min-height: 4.5rem;
+    }
     .slide-title {
-      margin: 1rem 0 0.25rem;
+      margin: 0 0 0.25rem;
       font-size: 1.05rem;
       font-weight: 700;
       letter-spacing: -0.02em;
     }
     .slide-copy {
-      margin: 0;
+      margin: 0 auto;
       font-size: 0.95rem;
       color: var(--muted);
-      max-width: 26ch;
+      max-width: 28ch;
       line-height: 1.4;
+    }
+
+    .carousel-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.85rem;
+      margin-top: 0.35rem;
+      padding: 0 1.5rem;
+    }
+    .carousel-btn {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      font: inherit;
+      font-size: 1.15rem;
+      line-height: 1;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      flex: none;
+    }
+    .carousel-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .carousel-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+      border-color: var(--line);
+      color: var(--muted);
     }
 
     .carousel-dots {
       display: flex;
       justify-content: center;
       gap: 0.45rem;
-      margin-top: 1rem;
-      padding: 0 1.5rem;
+      flex: 1;
+      max-width: 12rem;
     }
     .carousel-dot {
       width: 0.45rem;
@@ -424,7 +441,8 @@
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
       .carousel-track { scroll-behavior: auto; }
-      .carousel-dot { transition: none; }
+      .carousel-dot,
+      .phone-shell { transition: none; }
       .hero-cta:active,
       .submit:active { transform: none; }
     }
@@ -450,60 +468,53 @@
     </section>
 
     <section class="showcase" aria-label="How Handover works">
-      <div class="showcase-head">
-        <p class="showcase-label">See the shift flow</p>
-        <div class="carousel-nav" aria-hidden="true">
-          <button type="button" class="carousel-btn" id="carousel-prev" aria-label="Previous screenshot">‹</button>
-          <button type="button" class="carousel-btn" id="carousel-next" aria-label="Next screenshot">›</button>
-        </div>
-      </div>
+      <p class="showcase-label">See the shift flow</p>
 
-      <div class="carousel">
+      <div class="carousel-viewport">
         <div class="carousel-track" id="carousel-track">
-          <figure class="slide">
+          <figure class="slide is-active">
             <div class="phone-shell">
               <img src="/screenshots/start-shift.png" alt="Start shift screen in Handover" width="390" height="844" loading="eager" />
             </div>
-            <figcaption class="slide-title">Start your shift</figcaption>
-            <p class="slide-copy">Pick day, long day, night or on-call.</p>
           </figure>
           <figure class="slide">
             <div class="phone-shell">
               <img src="/screenshots/bed-board.png" alt="Bed board in Handover" width="390" height="844" loading="lazy" />
             </div>
-            <figcaption class="slide-title">Walk the ward</figcaption>
-            <p class="slide-copy">Capture jobs by ward and bed as you go.</p>
           </figure>
           <figure class="slide">
             <div class="phone-shell">
               <img src="/screenshots/job-list.png" alt="All jobs list in Handover" width="390" height="844" loading="lazy" />
             </div>
-            <figcaption class="slide-title">See everything</figcaption>
-            <p class="slide-copy">Urgent jobs, reminders and open tasks in one list.</p>
           </figure>
           <figure class="slide">
             <div class="phone-shell">
               <img src="/screenshots/end-shift.png" alt="End shift summary in Handover" width="390" height="844" loading="lazy" />
             </div>
-            <figcaption class="slide-title">End shift</figcaption>
-            <p class="slide-copy">A clear summary before you leave the hospital.</p>
           </figure>
           <figure class="slide">
             <div class="phone-shell">
               <img src="/screenshots/handover.png" alt="Handover QR screen in Handover" width="390" height="844" loading="lazy" />
             </div>
-            <figcaption class="slide-title">Hand over</figcaption>
-            <p class="slide-copy">Share open jobs with one QR scan or link.</p>
           </figure>
         </div>
       </div>
 
-      <div class="carousel-dots" id="carousel-dots" role="tablist" aria-label="Screenshot slides">
-        <button type="button" class="carousel-dot is-active" role="tab" aria-selected="true" aria-label="Start shift"></button>
-        <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="Bed board"></button>
-        <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="All jobs"></button>
-        <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="End shift"></button>
-        <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="Hand over"></button>
+      <div class="carousel-controls">
+        <button type="button" class="carousel-btn" id="carousel-prev" aria-label="Previous screenshot">‹</button>
+        <div class="carousel-dots" id="carousel-dots" role="tablist" aria-label="Screenshot slides">
+          <button type="button" class="carousel-dot is-active" role="tab" aria-selected="true" aria-label="Start shift"></button>
+          <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="Bed board"></button>
+          <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="All jobs"></button>
+          <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="End shift"></button>
+          <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="Hand over"></button>
+        </div>
+        <button type="button" class="carousel-btn" id="carousel-next" aria-label="Next screenshot">›</button>
+      </div>
+
+      <div class="slide-meta" aria-live="polite">
+        <h3 class="slide-title" id="slide-title">Start your shift</h3>
+        <p class="slide-copy" id="slide-copy">Pick day, long day, night or on-call.</p>
       </div>
     </section>
 
@@ -568,38 +579,63 @@
   <script>
     (function () {
       var track = document.getElementById("carousel-track");
+      var slides = Array.prototype.slice.call(track.querySelectorAll(".slide"));
       var dots = Array.prototype.slice.call(document.querySelectorAll(".carousel-dot"));
       var prevBtn = document.getElementById("carousel-prev");
       var nextBtn = document.getElementById("carousel-next");
+      var titleEl = document.getElementById("slide-title");
+      var copyEl = document.getElementById("slide-copy");
       var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-      function slideWidth() {
-        return track.clientWidth;
-      }
+      var SLIDES = [
+        { title: "Start your shift", copy: "Pick day, long day, night or on-call." },
+        { title: "Walk the ward", copy: "Capture jobs by ward and bed as you go." },
+        { title: "See everything", copy: "Urgent jobs, reminders and open tasks in one list." },
+        { title: "End shift", copy: "A clear summary before you leave the hospital." },
+        { title: "Hand over", copy: "Share open jobs with one QR scan or link." },
+      ];
 
       function activeIndex() {
-        var w = slideWidth();
-        if (!w) return 0;
-        return Math.round(track.scrollLeft / w);
+        var center = track.scrollLeft + track.clientWidth / 2;
+        var closest = 0;
+        var closestDist = Infinity;
+        slides.forEach(function (slide, i) {
+          var slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
+          var dist = Math.abs(center - slideCenter);
+          if (dist < closestDist) {
+            closestDist = dist;
+            closest = i;
+          }
+        });
+        return closest;
       }
 
       function scrollToIndex(index) {
-        var w = slideWidth();
+        var slide = slides[index];
+        if (!slide) return;
+        var left = slide.offsetLeft - (track.clientWidth - slide.offsetWidth) / 2;
         track.scrollTo({
-          left: index * w,
+          left: left,
           behavior: reducedMotion ? "auto" : "smooth",
         });
       }
 
       function updateUI() {
         var index = activeIndex();
+        slides.forEach(function (slide, i) {
+          slide.classList.toggle("is-active", i === index);
+        });
         dots.forEach(function (dot, i) {
           var on = i === index;
           dot.classList.toggle("is-active", on);
           dot.setAttribute("aria-selected", on ? "true" : "false");
         });
+        if (titleEl && copyEl && SLIDES[index]) {
+          titleEl.textContent = SLIDES[index].title;
+          copyEl.textContent = SLIDES[index].copy;
+        }
         if (prevBtn) prevBtn.disabled = index <= 0;
-        if (nextBtn) nextBtn.disabled = index >= dots.length - 1;
+        if (nextBtn) nextBtn.disabled = index >= slides.length - 1;
       }
 
       track.addEventListener("scroll", updateUI, { passive: true });
@@ -616,7 +652,7 @@
       }
       if (nextBtn) {
         nextBtn.addEventListener("click", function () {
-          scrollToIndex(Math.min(dots.length - 1, activeIndex() + 1));
+          scrollToIndex(Math.min(slides.length - 1, activeIndex() + 1));
         });
       }
 
