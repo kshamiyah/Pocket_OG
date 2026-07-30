@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Early access · Handover</title>
+  <meta name="description" content="Handover is the shift job list that hands over with a single scan. Request invite-only beta access." />
+  <meta name="theme-color" content="#fbe9e7" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#030712" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <script>
+    (function () {
+      var theme = new URLSearchParams(location.search).get("theme");
+      if (theme === "dark" || theme === "light") {
+        document.documentElement.dataset.theme = theme;
+      }
+    })();
+  </script>
+  <style>
+    :root {
+      --bg: #fbe9e7;
+      --bg-soft: #f7ddd9;
+      --card: #ffffff;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --accent: #f4511e;
+      --accent-ink: #ffffff;
+      --line: #f0dcd9;
+      --icon-bg: #fbe9e7;
+      --danger: #b91c1c;
+      --danger-bg: #fef2f2;
+      --ok: #166534;
+      --ok-bg: #f0fdf4;
+      --phone: #1f2937;
+      --phone-screen: #fff7f5;
+      --shadow: 0 18px 40px rgba(31, 41, 55, 0.12);
+    }
+    :root[data-theme="light"] {
+      --bg: #fbe9e7;
+      --bg-soft: #f7ddd9;
+      --card: #ffffff;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --accent: #f4511e;
+      --accent-ink: #ffffff;
+      --line: #f0dcd9;
+      --icon-bg: #fbe9e7;
+      --danger: #b91c1c;
+      --danger-bg: #fef2f2;
+      --ok: #166534;
+      --ok-bg: #f0fdf4;
+      --phone: #1f2937;
+      --phone-screen: #fff7f5;
+      --shadow: 0 18px 40px rgba(31, 41, 55, 0.12);
+      color-scheme: light;
+    }
+    :root[data-theme="dark"] {
+      --bg: #030712;
+      --bg-soft: #0b1220;
+      --card: #0f172a;
+      --ink: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #fb7a4e;
+      --accent-ink: #111827;
+      --line: #1f2937;
+      --icon-bg: #0f172a;
+      --danger: #fca5a5;
+      --danger-bg: #3f1d1d;
+      --ok: #86efac;
+      --ok-bg: #052e1a;
+      --phone: #e5e7eb;
+      --phone-screen: #111827;
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+      color-scheme: dark;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        --bg: #030712;
+        --bg-soft: #0b1220;
+        --card: #0f172a;
+        --ink: #e5e7eb;
+        --muted: #9ca3af;
+        --accent: #fb7a4e;
+        --accent-ink: #111827;
+        --line: #1f2937;
+        --icon-bg: #0f172a;
+        --danger: #fca5a5;
+        --danger-bg: #3f1d1d;
+        --ok: #86efac;
+        --ok-bg: #052e1a;
+        --phone: #e5e7eb;
+        --phone-screen: #111827;
+        --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+        color-scheme: dark;
+      }
+    }
+
+    @font-face {
+      font-family: Geist;
+      src: url("/fonts/Geist-Variable.woff2") format("woff2");
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      background:
+        radial-gradient(120% 80% at 50% -10%, var(--bg-soft) 0%, transparent 55%),
+        var(--bg);
+      color: var(--ink);
+      font-family: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    img { max-width: 100%; height: auto; display: block; }
+    a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+    strong { font-weight: 650; }
+
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 1.75rem 1.25rem 4rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 1.75rem;
+      opacity: 0;
+      animation: rise 0.7s ease forwards;
+    }
+    .brand svg { width: 40px; height: 40px; flex: none; }
+    .brand svg rect { fill: var(--icon-bg); }
+    .brand-name {
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .hero {
+      display: grid;
+      gap: 2rem;
+      align-items: center;
+      margin-bottom: 2.25rem;
+    }
+    @media (min-width: 720px) {
+      .hero {
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 2.25rem;
+        margin-bottom: 2.75rem;
+      }
+    }
+
+    .hero-copy {
+      opacity: 0;
+      animation: rise 0.75s ease 0.08s forwards;
+    }
+    .tagline {
+      margin: 0;
+      font-size: clamp(1.85rem, 6.4vw, 2.55rem);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+      font-weight: 750;
+    }
+    .lede {
+      margin: 0.9rem 0 0;
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 28ch;
+    }
+
+    .phones {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      opacity: 0;
+      animation: rise 0.85s ease 0.16s forwards;
+    }
+    .phone {
+      width: min(42vw, 148px);
+      aspect-ratio: 9 / 19.5;
+      border-radius: 1.35rem;
+      border: 2px solid var(--phone);
+      background: var(--phone-screen);
+      box-shadow: var(--shadow);
+      padding: 0.55rem 0.4rem 0.65rem;
+      position: relative;
+      overflow: hidden;
+      flex: none;
+    }
+    .phone:nth-child(2) {
+      transform: translateY(-0.55rem);
+    }
+    .phone:nth-child(3) {
+      display: none;
+    }
+    @media (min-width: 480px) {
+      .phone { width: 148px; }
+      .phone:nth-child(3) { display: block; }
+    }
+    .phone-notch {
+      width: 38%;
+      height: 0.35rem;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--phone) 35%, transparent);
+      margin: 0 auto 0.55rem;
+    }
+    .phone-label {
+      position: absolute;
+      left: 0.45rem;
+      right: 0.45rem;
+      bottom: 0.55rem;
+      font-size: 0.62rem;
+      font-weight: 650;
+      letter-spacing: 0.01em;
+      color: var(--muted);
+      text-align: center;
+    }
+    .mock-board,
+    .mock-jobs,
+    .mock-qr {
+      height: calc(100% - 1.8rem);
+      border-radius: 0.7rem;
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--accent) 10%, transparent), transparent 40%),
+        repeating-linear-gradient(
+          180deg,
+          color-mix(in srgb, var(--line) 80%, transparent) 0 1px,
+          transparent 1px 1.35rem
+        );
+    }
+    .mock-jobs {
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--accent) 12%, transparent), transparent 35%),
+        repeating-linear-gradient(
+          180deg,
+          transparent 0 0.55rem,
+          color-mix(in srgb, var(--line) 90%, transparent) 0.55rem 1.55rem
+        );
+    }
+    .mock-qr {
+      display: grid;
+      place-items: center;
+      background: color-mix(in srgb, var(--accent) 8%, transparent);
+    }
+    .mock-qr::after {
+      content: "";
+      width: 48%;
+      aspect-ratio: 1;
+      border-radius: 0.35rem;
+      background:
+        linear-gradient(90deg, var(--ink) 25%, transparent 25%) 0 0 / 8px 8px,
+        linear-gradient(var(--ink) 25%, transparent 25%) 0 0 / 8px 8px,
+        color-mix(in srgb, var(--ink) 12%, transparent);
+      opacity: 0.55;
+    }
+
+    .points {
+      list-style: none;
+      margin: 0 0 1.75rem;
+      padding: 0;
+      display: grid;
+      gap: 0.75rem;
+      opacity: 0;
+      animation: rise 0.75s ease 0.24s forwards;
+    }
+    .points li {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.75rem;
+      align-items: start;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0.9rem 1rem;
+    }
+    .points .n {
+      width: 1.55rem;
+      height: 1.55rem;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 14%, transparent);
+      flex: none;
+    }
+    .points p {
+      margin: 0;
+      font-size: 0.98rem;
+      letter-spacing: -0.01em;
+    }
+
+    .exclusivity {
+      margin: 0 0 1.75rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+      max-width: 42ch;
+      opacity: 0;
+      animation: rise 0.75s ease 0.3s forwards;
+    }
+
+    .signup {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 1.15rem 1.2rem 1.25rem;
+      margin: 0 0 1rem;
+      opacity: 0;
+      animation: rise 0.75s ease 0.36s forwards;
+    }
+    .signup h2 {
+      margin: 0 0 1rem;
+      font-size: 1.2rem;
+      letter-spacing: -0.02em;
+      font-weight: 700;
+    }
+    .field {
+      display: grid;
+      gap: 0.35rem;
+      margin-bottom: 0.85rem;
+    }
+    .field label {
+      font-size: 0.82rem;
+      font-weight: 650;
+      color: var(--ink);
+    }
+    .field input,
+    .field select {
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--ink);
+      border-radius: 12px;
+      padding: 0.78rem 0.9rem;
+      font: inherit;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .field select {
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+      background-position:
+        calc(100% - 1.15rem) calc(50% - 0.15rem),
+        calc(100% - 0.85rem) calc(50% - 0.15rem);
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+      padding-right: 2.25rem;
+    }
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+    }
+    .submit {
+      width: 100%;
+      margin-top: 0.25rem;
+      border: 0;
+      border-radius: 12px;
+      background: var(--accent);
+      color: var(--accent-ink);
+      font: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      padding: 0.9rem 1rem;
+      cursor: pointer;
+      transition: transform 0.12s ease, opacity 0.12s ease;
+    }
+    .submit:hover { opacity: 0.94; }
+    .submit:active { transform: scale(0.985); }
+    .submit:disabled {
+      opacity: 0.65;
+      cursor: wait;
+      transform: none;
+    }
+    .form-error {
+      display: none;
+      margin: 0 0 0.85rem;
+      padding: 0.7rem 0.85rem;
+      border-radius: 12px;
+      background: var(--danger-bg);
+      color: var(--danger);
+      font-size: 0.9rem;
+    }
+    .form-error.is-visible { display: block; }
+
+    .success {
+      display: none;
+      padding: 0.35rem 0.1rem 0.2rem;
+    }
+    .success.is-visible { display: block; }
+    .success h2 {
+      margin: 0 0 0.55rem;
+      font-size: 1.2rem;
+      letter-spacing: -0.02em;
+    }
+    .success p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+    .success-badge {
+      display: inline-grid;
+      place-items: center;
+      width: 2.1rem;
+      height: 2.1rem;
+      border-radius: 999px;
+      background: var(--ok-bg);
+      color: var(--ok);
+      margin-bottom: 0.75rem;
+      font-weight: 800;
+    }
+
+    .trust {
+      margin: 0 0 2.25rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      opacity: 0;
+      animation: rise 0.75s ease 0.42s forwards;
+    }
+
+    footer {
+      color: var(--muted);
+      font-size: 0.85rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem 0.75rem;
+      opacity: 0;
+      animation: rise 0.75s ease 0.48s forwards;
+    }
+    footer a { color: var(--muted); }
+    footer a:hover { color: var(--accent); }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .brand,
+      .hero-copy,
+      .phones,
+      .points,
+      .exclusivity,
+      .signup,
+      .trust,
+      footer {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+      .submit:active { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="16"/>
+        <g fill="none" stroke="#f4511e" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" transform="translate(16.4 16.4) scale(1.3)">
+          <path d="M7 7h10l-3-3" />
+          <path d="M17 17H7l3 3" />
+        </g>
+      </svg>
+      <span class="brand-name">Handover</span>
+    </header>
+
+    <section class="hero" aria-label="Handover early access">
+      <div class="hero-copy">
+        <h1 class="tagline">From takeover to handover.</h1>
+        <p class="lede">The shift job list that hands over with a single scan.</p>
+      </div>
+
+      <div class="phones" aria-hidden="true">
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="mock-board"></div>
+          <div class="phone-label">Bed board</div>
+        </div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="mock-jobs"></div>
+          <div class="phone-label">Job list</div>
+        </div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="mock-qr"></div>
+          <div class="phone-label">Handover QR</div>
+        </div>
+      </div>
+    </section>
+
+    <ol class="points">
+      <li>
+        <span class="n" aria-hidden="true">1</span>
+        <p>Capture jobs by ward and bed as you go.</p>
+      </li>
+      <li>
+        <span class="n" aria-hidden="true">2</span>
+        <p>Walk the ward bed by bed with a clear board.</p>
+      </li>
+      <li>
+        <span class="n" aria-hidden="true">3</span>
+        <p>Hand over to the next shift with one QR scan.</p>
+      </li>
+    </ol>
+
+    <p class="exclusivity">
+      Invite-only beta for UK ward doctors. New testers are invited in small
+      waves each week. Limited places each week.
+    </p>
+
+    <section class="signup" id="request" aria-labelledby="signup-heading">
+      <div id="form-panel">
+        <h2 id="signup-heading">Request early access.</h2>
+        <p class="form-error" id="form-error" role="alert"></p>
+        <form id="early-access-form" novalidate>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@nhs.net" />
+          </div>
+          <div class="field">
+            <label for="role">Role</label>
+            <select id="role" name="role" required>
+              <option value="" disabled selected>Select your role</option>
+              <option value="FY1/FY2">FY1/FY2</option>
+              <option value="IMT/CT">IMT/CT</option>
+              <option value="Registrar">Registrar</option>
+              <option value="Consultant">Consultant</option>
+              <option value="Nurse">Nurse</option>
+              <option value="Midwife">Midwife</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="hospital">Hospital / trust</label>
+            <input id="hospital" name="hospital" type="text" autocomplete="organization" required placeholder="e.g. Royal Berkshire NHS Foundation Trust" />
+          </div>
+          <button class="submit" type="submit" id="submit-btn">Request early access</button>
+        </form>
+      </div>
+
+      <div class="success" id="success-panel" role="status" aria-live="polite">
+        <div class="success-badge" aria-hidden="true">✓</div>
+        <h2>You're on the list.</h2>
+        <p>
+          We invite new testers in small weekly waves, look out
+          for a TestFlight email.
+        </p>
+      </div>
+    </section>
+
+    <p class="trust">
+      Non-identifying data only. A decision-support tool, not a patient record.
+    </p>
+
+    <footer>
+      <span>Built by <a href="https://drshamiyah.com/" rel="noopener">Dr Khalid Shamiyah</a></span>
+      <span aria-hidden="true">·</span>
+      <a href="/privacy.html">Privacy policy</a>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      // TODO: set Formspree endpoint (e.g. "https://formspree.io/f/xxxxxxxx")
+      // Until this is set, submit shows a graceful error and keeps the user's input.
+      var FORMSPREE_ENDPOINT = "";
+
+      var form = document.getElementById("early-access-form");
+      var formPanel = document.getElementById("form-panel");
+      var successPanel = document.getElementById("success-panel");
+      var errorEl = document.getElementById("form-error");
+      var submitBtn = document.getElementById("submit-btn");
+
+      function showError(message) {
+        errorEl.textContent = message;
+        errorEl.classList.add("is-visible");
+      }
+
+      function clearError() {
+        errorEl.textContent = "";
+        errorEl.classList.remove("is-visible");
+      }
+
+      function showSuccess() {
+        formPanel.style.display = "none";
+        successPanel.classList.add("is-visible");
+      }
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        clearError();
+
+        if (!form.reportValidity()) return;
+
+        var email = form.email.value.trim();
+        var role = form.role.value;
+        var hospital = form.hospital.value.trim();
+
+        if (!FORMSPREE_ENDPOINT) {
+          showError("Sign-up is not configured yet. Please email khalid@drshamiyah.com to request access.");
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending…";
+
+        fetch(FORMSPREE_ENDPOINT, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            email: email,
+            role: role,
+            hospital: hospital,
+            _subject: "Handover early access request"
+          })
+        })
+          .then(function (response) {
+            if (!response.ok) {
+              return response.json().catch(function () { return {}; }).then(function (data) {
+                var message = (data && (data.error || data.message)) || "Something went wrong. Please try again.";
+                throw new Error(message);
+              });
+            }
+            showSuccess();
+          })
+          .catch(function (err) {
+            showError(err && err.message ? err.message : "Something went wrong. Please try again.");
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Request early access";
+          });
+      });
+    })();
+  </script>
+</body>
+</html>
