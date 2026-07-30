@@ -172,21 +172,23 @@
     .phones {
       display: flex;
       justify-content: center;
+      align-items: flex-end;
       gap: 0.75rem;
     }
     .phone {
       width: min(42vw, 148px);
+      flex: none;
+      text-align: center;
+    }
+    .phone-frame {
       aspect-ratio: 9 / 19.5;
       border-radius: 1.35rem;
       border: 2px solid var(--phone);
       background: var(--phone-screen);
       box-shadow: var(--shadow);
-      padding: 0.55rem 0.4rem 0.65rem;
-      position: relative;
       overflow: hidden;
-      flex: none;
     }
-    .phone:nth-child(2) {
+    .phone:nth-child(2) .phone-frame {
       transform: translateY(-0.55rem);
       animation: float 5.5s ease-in-out infinite;
     }
@@ -197,61 +199,22 @@
       .phone { width: 148px; }
       .phone:nth-child(3) { display: block; }
     }
-    .phone-notch {
-      width: 38%;
-      height: 0.35rem;
-      border-radius: 999px;
-      background: color-mix(in srgb, var(--phone) 35%, transparent);
-      margin: 0 auto 0.55rem;
+    .phone-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
     }
     .phone-label {
-      position: absolute;
-      left: 0.45rem;
-      right: 0.45rem;
-      bottom: 0.55rem;
-      font-size: 0.62rem;
+      margin-top: 0.55rem;
+      font-size: 0.72rem;
       font-weight: 650;
       letter-spacing: 0.01em;
       color: var(--muted);
-      text-align: center;
     }
-    .mock-board,
-    .mock-jobs,
-    .mock-qr {
-      height: calc(100% - 1.8rem);
-      border-radius: 0.7rem;
-      background:
-        linear-gradient(180deg, color-mix(in srgb, var(--accent) 10%, transparent), transparent 40%),
-        repeating-linear-gradient(
-          180deg,
-          color-mix(in srgb, var(--line) 80%, transparent) 0 1px,
-          transparent 1px 1.35rem
-        );
-    }
-    .mock-jobs {
-      background:
-        linear-gradient(180deg, color-mix(in srgb, var(--accent) 12%, transparent), transparent 35%),
-        repeating-linear-gradient(
-          180deg,
-          transparent 0 0.55rem,
-          color-mix(in srgb, var(--line) 90%, transparent) 0.55rem 1.55rem
-        );
-    }
-    .mock-qr {
-      display: grid;
-      place-items: center;
-      background: color-mix(in srgb, var(--accent) 8%, transparent);
-    }
-    .mock-qr::after {
-      content: "";
-      width: 48%;
-      aspect-ratio: 1;
-      border-radius: 0.35rem;
-      background:
-        linear-gradient(90deg, var(--ink) 25%, transparent 25%) 0 0 / 8px 8px,
-        linear-gradient(var(--ink) 25%, transparent 25%) 0 0 / 8px 8px,
-        color-mix(in srgb, var(--ink) 12%, transparent);
-      opacity: 0.55;
+    .phone:nth-child(2) .phone-label {
+      margin-top: 1.1rem;
     }
 
     .points {
@@ -432,7 +395,7 @@
     }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
-      .phone:nth-child(2) { animation: none; }
+      .phone:nth-child(2) .phone-frame { animation: none; }
       .submit:active { transform: none; }
     }
   </style>
@@ -456,22 +419,25 @@
         <p class="lede">The shift job list that hands over with a single scan.</p>
       </div>
 
-      <div class="phones" aria-hidden="true">
-        <div class="phone">
-          <div class="phone-notch"></div>
-          <div class="mock-board"></div>
-          <div class="phone-label">Bed board</div>
-        </div>
-        <div class="phone">
-          <div class="phone-notch"></div>
-          <div class="mock-jobs"></div>
-          <div class="phone-label">Job list</div>
-        </div>
-        <div class="phone">
-          <div class="phone-notch"></div>
-          <div class="mock-qr"></div>
-          <div class="phone-label">Handover QR</div>
-        </div>
+      <div class="phones">
+        <figure class="phone">
+          <div class="phone-frame">
+            <img src="/screenshots/bed-board.png" alt="Bed board view in Handover" width="390" height="844" />
+          </div>
+          <figcaption class="phone-label">Bed board</figcaption>
+        </figure>
+        <figure class="phone">
+          <div class="phone-frame">
+            <img src="/screenshots/job-list.png" alt="Job list view in Handover" width="390" height="844" />
+          </div>
+          <figcaption class="phone-label">Job list</figcaption>
+        </figure>
+        <figure class="phone">
+          <div class="phone-frame">
+            <img src="/screenshots/handover-qr.png" alt="Handover QR share screen" width="390" height="844" />
+          </div>
+          <figcaption class="phone-label">Handover QR</figcaption>
+        </figure>
       </div>
     </section>
 
