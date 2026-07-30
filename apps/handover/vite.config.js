@@ -13,6 +13,8 @@ export default defineConfig({
       includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'fonts/Geist-Variable.woff2'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        // Let standalone static pages (early-access, privacy, support) bypass the SPA shell.
+        navigateFallbackDenylist: [/^\/early-access(\.html)?$/, /^\/privacy\.html$/, /^\/support\.html$/],
       },
       manifest: {
         name: 'Handover',

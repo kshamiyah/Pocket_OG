@@ -2,6 +2,12 @@
   "installCommand": "cd ../.. && npm install",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/early-access",
+      "destination": "/early-access.html"
+    }
+  ],
   "headers": [
     {
       "source": "/.well-known/apple-app-site-association",
