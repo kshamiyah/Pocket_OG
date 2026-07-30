@@ -27,6 +27,7 @@
       --accent-ink: #ffffff;
       --line: #f0dcd9;
       --icon-bg: #fbe9e7;
+      --icon-card: #fff0ea;
       --danger: #b91c1c;
       --danger-bg: #fef2f2;
       --ok: #166534;
@@ -47,6 +48,7 @@
       --accent-ink: #111827;
       --line: #1f2937;
       --icon-bg: #0f172a;
+      --icon-card: #1a1412;
       --danger: #fca5a5;
       --danger-bg: #3f1d1d;
       --ok: #86efac;
@@ -66,6 +68,7 @@
         --accent-ink: #111827;
         --line: #1f2937;
         --icon-bg: #0f172a;
+        --icon-card: #221814;
         --danger: #fca5a5;
         --danger-bg: #3f1d1d;
         --ok: #86efac;
@@ -89,9 +92,7 @@
     body {
       margin: 0;
       min-height: 100dvh;
-      background:
-        radial-gradient(100% 55% at 0% 0%, var(--bg-soft) 0%, transparent 55%),
-        var(--bg);
+      background: var(--bg);
       color: var(--ink);
       font-family: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       line-height: 1.55;
@@ -110,13 +111,21 @@
       margin-bottom: 1.5rem;
       padding: 0 1.5rem;
     }
+    .hero-heading {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
     .hero-mark {
       display: block;
       width: 2.75rem;
       height: 2.75rem;
-      margin-bottom: 0.85rem;
+      flex: none;
+      border-radius: 0.65rem;
+      border: 1px solid var(--line);
+      box-shadow: 0 1px 3px rgba(31, 41, 55, 0.12);
     }
-    .hero-mark rect { fill: var(--icon-bg); }
+    .hero-mark rect { fill: var(--icon-card); }
     .hero-title {
       margin: 0;
       font-size: clamp(2.35rem, 9vw, 3.1rem);
@@ -130,32 +139,23 @@
       line-height: 1.15;
       letter-spacing: -0.03em;
       font-weight: 700;
-      max-width: 18ch;
+      white-space: nowrap;
     }
     .hero-lede {
       margin: 0.65rem 0 0;
       font-size: 1.05rem;
       color: var(--muted);
-      max-width: 32ch;
       line-height: 1.45;
+      white-space: nowrap;
     }
-    .hero-cta {
-      display: inline-flex;
-      margin-top: 1.15rem;
-      border: 0;
-      border-radius: 12px;
-      background: var(--accent);
-      color: var(--accent-ink);
-      font: inherit;
-      font-size: 0.98rem;
-      font-weight: 700;
+    .hero-trust {
+      margin: 0.5rem 0 0;
+      font-size: 0.8125rem;
+      color: var(--muted);
+      line-height: 1.45;
       letter-spacing: -0.01em;
-      padding: 0.9rem 1.2rem;
-      text-decoration: none;
-      transition: transform 0.12s ease, opacity 0.12s ease;
+      white-space: nowrap;
     }
-    .hero-cta:hover { opacity: 0.94; }
-    .hero-cta:active { transform: scale(0.985); }
 
     /* Peek carousel: centre phone full size, neighbours visible but dimmed */
     .showcase {
@@ -362,82 +362,180 @@
       padding: 0 1.5rem;
     }
 
+    .access-cta {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+      text-align: center;
+    }
+
     .exclusivity {
-      margin: 0 0 1.5rem;
+      margin: 0.85rem auto 0;
+      max-width: 20rem;
       color: var(--muted);
-      font-size: 0.95rem;
+      font-size: 0.8125rem;
+      letter-spacing: -0.01em;
+      line-height: 1.45;
+    }
+
+    .access-btn {
+      display: inline-flex;
+      width: 100%;
+      max-width: 20rem;
+      justify-content: center;
+      align-items: center;
+      border: 0;
+      border-radius: 980px;
+      background: var(--accent);
+      color: var(--accent-ink);
+      font: inherit;
+      font-size: 1.0625rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      padding: 0.88rem 1.75rem;
+      cursor: pointer;
+      box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.06),
+        0 6px 18px color-mix(in srgb, var(--accent) 28%, transparent);
+      transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s ease, opacity 0.2s ease;
+    }
+    .access-btn:hover {
+      opacity: 0.96;
+      box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.08),
+        0 8px 22px color-mix(in srgb, var(--accent) 32%, transparent);
+    }
+    .access-btn:active { transform: scale(0.978); }
+    .access-btn[hidden] { display: none; }
+
+    .signup-wrap {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .signup-wrap.is-open {
+      grid-template-rows: 1fr;
+    }
+    .signup-inner {
+      overflow: hidden;
+      min-height: 0;
+    }
+    .signup-wrap .signup {
+      margin: 0 auto;
+      max-width: 20rem;
+      transform: translateY(-0.5rem) scale(0.97);
+      opacity: 0;
+      transition:
+        transform 0.5s cubic-bezier(0.32, 0.72, 0, 1),
+        opacity 0.35s ease,
+        margin 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .signup-wrap.is-open .signup {
+      margin-top: 1.35rem;
+      transform: translateY(0) scale(1);
+      opacity: 1;
     }
 
     .signup {
       background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 1.15rem 1.2rem 1.25rem;
+      border: none;
+      border-radius: 20px;
+      padding: 1.15rem 1rem 1.1rem;
       margin: 0 0 1rem;
+      box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.04),
+        0 8px 28px rgba(31, 41, 55, 0.1);
+      text-align: left;
     }
-    .signup h2 {
-      margin: 0 0 1rem;
-      font-size: 1.15rem;
-      letter-spacing: -0.02em;
-      font-weight: 700;
+    :root[data-theme="dark"] .signup {
+      box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.2),
+        0 8px 28px rgba(0, 0, 0, 0.35);
     }
-    .field {
-      display: grid;
-      gap: 0.35rem;
-      margin-bottom: 0.85rem;
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) .signup {
+        box-shadow:
+          0 1px 2px rgba(0, 0, 0, 0.2),
+          0 8px 28px rgba(0, 0, 0, 0.35);
+      }
     }
-    .field label {
-      font-size: 0.82rem;
-      font-weight: 650;
+    .signup-heading {
+      margin: 0 0 0.85rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
     }
-    .field input,
-    .field select {
+    .field-group {
+      margin: 0 0 0.85rem;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    .field-row {
+      padding: 0.7rem 0.95rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .field-row:last-child {
+      border-bottom: 0;
+    }
+    .field-row label {
+      display: block;
+      margin-bottom: 0.2rem;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .field-row input,
+    .field-row select {
       width: 100%;
       appearance: none;
       -webkit-appearance: none;
-      border: 1px solid var(--line);
-      background: var(--bg);
+      border: 0;
+      background: transparent;
       color: var(--ink);
-      border-radius: 12px;
-      padding: 0.78rem 0.9rem;
+      padding: 0.15rem 0;
       font: inherit;
-      font-size: 1rem;
+      font-size: 1.0625rem;
+      letter-spacing: -0.02em;
       outline: none;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
-    .field select {
+    .field-row select {
       background-image:
         linear-gradient(45deg, transparent 50%, var(--muted) 50%),
         linear-gradient(135deg, var(--muted) 50%, transparent 50%);
       background-position:
-        calc(100% - 1.15rem) calc(50% - 0.15rem),
-        calc(100% - 0.85rem) calc(50% - 0.15rem);
+        calc(100% - 0.15rem) calc(50% - 0.1rem),
+        calc(100% + 0.15rem) calc(50% - 0.1rem);
       background-size: 6px 6px, 6px 6px;
       background-repeat: no-repeat;
-      padding-right: 2.25rem;
+      padding-right: 1.5rem;
     }
-    .field input:focus,
-    .field select:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+    .field-row input::placeholder {
+      color: color-mix(in srgb, var(--muted) 65%, transparent);
     }
     .submit {
       width: 100%;
-      margin-top: 0.25rem;
+      margin-top: 0;
       border: 0;
-      border-radius: 12px;
+      border-radius: 980px;
       background: var(--accent);
       color: var(--accent-ink);
       font: inherit;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      padding: 0.9rem 1rem;
+      font-size: 1.0625rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      padding: 0.88rem 1rem;
       cursor: pointer;
-      transition: transform 0.12s ease, opacity 0.12s ease;
+      box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 24%, transparent);
+      transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease;
     }
-    .submit:hover { opacity: 0.94; }
-    .submit:active { transform: scale(0.985); }
+    .submit:hover { opacity: 0.96; }
+    .submit:active { transform: scale(0.978); }
     .submit:disabled {
       opacity: 0.65;
       cursor: wait;
@@ -447,46 +545,80 @@
       display: none;
       margin: 0 0 0.85rem;
       padding: 0.7rem 0.85rem;
-      border-radius: 12px;
+      border-radius: 10px;
       background: var(--danger-bg);
       color: var(--danger);
-      font-size: 0.9rem;
+      font-size: 0.875rem;
+      line-height: 1.4;
     }
     .form-error.is-visible { display: block; }
 
-    .success { display: none; padding: 0.2rem 0; }
-    .success.is-visible { display: block; }
-    .success h2 {
-      margin: 0 0 0.55rem;
-      font-size: 1.15rem;
-      letter-spacing: -0.02em;
+    .success {
+      display: none;
+      padding: 0.35rem 0 0.15rem;
+      text-align: center;
     }
-    .success p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.98rem;
+    .success.is-visible {
+      display: block;
+      animation: success-in 0.48s cubic-bezier(0.32, 0.72, 0, 1) both;
     }
-    .success-badge {
-      display: inline-grid;
+    @keyframes success-in {
+      from {
+        opacity: 0;
+        transform: translateY(0.35rem) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    .signup:has(.success.is-visible) {
+      padding-top: 1.65rem;
+      padding-bottom: 1.4rem;
+    }
+    .success-icon {
+      display: grid;
       place-items: center;
-      width: 2.1rem;
-      height: 2.1rem;
+      width: 3.25rem;
+      height: 3.25rem;
+      margin: 0 auto 1rem;
       border-radius: 999px;
-      background: var(--ok-bg);
-      color: var(--ok);
-      margin-bottom: 0.75rem;
-      font-weight: 800;
+      background: color-mix(in srgb, var(--accent) 14%, var(--card));
     }
-
-    .trust {
-      margin: 0 0 2rem;
+    .success-icon svg {
+      display: block;
+      width: 1.5rem;
+      height: 1.5rem;
+      color: var(--accent);
+    }
+    .success-title {
+      margin: 0 0 0.4rem;
+      font-size: 1.375rem;
+      letter-spacing: -0.035em;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+    .success-lede {
+      margin: 0 0 0.55rem;
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+      line-height: 1.35;
+      color: var(--ink);
+    }
+    .success-note {
+      margin: 0;
+      font-size: 0.8125rem;
       color: var(--muted);
-      font-size: 0.85rem;
+      line-height: 1.45;
+      letter-spacing: -0.01em;
     }
 
     footer {
+      margin-top: 1.5rem;
       color: var(--muted);
-      font-size: 0.85rem;
+      font-size: 0.8125rem;
+      justify-content: center;
+      text-align: center;
       display: flex;
       flex-wrap: wrap;
       gap: 0.35rem 0.75rem;
@@ -499,7 +631,10 @@
       .carousel-track { scroll-behavior: auto; }
       .carousel-dot,
       .phone-shell { transition: none; }
-      .hero-cta:active,
+      .signup-wrap,
+      .signup-wrap .signup,
+      .success.is-visible { transition: none; animation: none; }
+      .access-btn:active,
       .submit:active { transform: none; }
     }
   </style>
@@ -507,17 +642,19 @@
 <body>
   <div class="wrap">
     <section class="hero" aria-label="Handover early access">
-      <svg class="hero-mark" viewBox="0 0 64 64" aria-hidden="true">
-        <rect width="64" height="64" rx="16"/>
-        <g fill="none" stroke="#f4511e" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" transform="translate(16.4 16.4) scale(1.3)">
-          <path d="M7 7h10l-3-3" />
-          <path d="M17 17H7l3 3" />
-        </g>
-      </svg>
-      <h1 class="hero-title">Handover</h1>
+      <div class="hero-heading">
+        <h1 class="hero-title">Handover</h1>
+        <svg class="hero-mark" viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="16"/>
+          <g fill="none" stroke="#f4511e" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" transform="translate(16.4 16.4) scale(1.3)">
+            <path d="M7 7h10l-3-3" />
+            <path d="M17 17H7l3 3" />
+          </g>
+        </svg>
+      </div>
       <p class="hero-tagline">From takeover to handover.</p>
       <p class="hero-lede">The shift job list that hands over with a single scan.</p>
-      <a class="hero-cta" href="#request">Request early access</a>
+      <p class="hero-trust">Non-identifying data only. A decision-support tool, not a patient record.</p>
     </section>
 
     <section class="showcase" aria-label="How Handover works">
@@ -584,54 +721,65 @@
     </section>
 
     <div class="content">
-      <p class="exclusivity">
-        Invite-only beta for UK ward doctors. New testers are invited in small
-        waves each week. Limited places each week.
-      </p>
+      <section class="access-cta" id="request" aria-label="Request early access">
+        <button type="button" class="access-btn" id="access-toggle" aria-expanded="false" aria-controls="signup-wrap">
+          Request early access
+        </button>
+        <p class="exclusivity">Early access by invite for healthcare workers.</p>
 
-      <section class="signup" id="request" aria-labelledby="signup-heading">
-        <div id="form-panel">
-          <h2 id="signup-heading">Request early access.</h2>
-          <p class="form-error" id="form-error" role="alert"></p>
-          <form id="early-access-form" novalidate>
-            <div class="field">
-              <label for="email">Email</label>
-              <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@nhs.net" />
-            </div>
-            <div class="field">
-              <label for="role">Role</label>
-              <select id="role" name="role" required>
-                <option value="" disabled selected>Select your role</option>
-                <option value="FY1/FY2">FY1/FY2</option>
-                <option value="IMT/CT">IMT/CT</option>
-                <option value="Registrar">Registrar</option>
-                <option value="Consultant">Consultant</option>
-                <option value="Nurse">Nurse</option>
-                <option value="Midwife">Midwife</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="hospital">Hospital / trust</label>
-              <input id="hospital" name="hospital" type="text" autocomplete="organization" required placeholder="e.g. Royal Berkshire" />
-            </div>
-            <button class="submit" type="submit" id="submit-btn">Request early access</button>
-          </form>
-        </div>
+        <div class="signup-wrap" id="signup-wrap">
+          <div class="signup-inner">
+            <section class="signup" aria-labelledby="signup-heading">
+              <div id="form-panel">
+                <h2 id="signup-heading" class="signup-heading">Your details</h2>
+                <p class="form-error" id="form-error" role="alert"></p>
+                <form id="early-access-form" novalidate>
+                  <div class="field-group">
+                    <div class="field-row">
+                      <label for="name">Name</label>
+                      <input id="name" name="name" type="text" autocomplete="name" required />
+                    </div>
+                    <div class="field-row">
+                      <label for="email">Email</label>
+                      <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@example.com" />
+                    </div>
+                    <div class="field-row">
+                      <label for="role">Role</label>
+                      <select id="role" name="role" required>
+                        <option value="" disabled selected>Select your role</option>
+                        <option value="FY1/FY2">FY1/FY2</option>
+                        <option value="CT/IMT/ST">CT/IMT/ST</option>
+                        <option value="Registrar">Registrar</option>
+                        <option value="Consultant">Consultant</option>
+                        <option value="Nurse">Nurse</option>
+                        <option value="Midwife">Midwife</option>
+                        <option value="ANC">ANC</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div class="field-row">
+                      <label for="hospital">Hospital / trust</label>
+                      <input id="hospital" name="hospital" type="text" autocomplete="organization" required />
+                    </div>
+                  </div>
+                  <button class="submit" type="submit" id="submit-btn">Submit</button>
+                </form>
+              </div>
 
-        <div class="success" id="success-panel" role="status" aria-live="polite">
-          <div class="success-badge" aria-hidden="true">✓</div>
-          <h2>You're on the list.</h2>
-          <p>
-            We invite new testers in small weekly waves, look out
-            for a TestFlight email.
-          </p>
+              <div class="success" id="success-panel" role="status" aria-live="polite">
+                <div class="success-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h2 class="success-title">You're in.</h2>
+                <p class="success-lede">Watch your inbox for a TestFlight invite.</p>
+                <p class="success-note">We invite new testers in small weekly waves.</p>
+              </div>
+            </section>
+          </div>
         </div>
       </section>
-
-      <p class="trust">
-        Non-identifying data only. A decision-support tool, not a patient record.
-      </p>
 
       <footer>
         <span>Built by <a href="https://drshamiyah.com/" rel="noopener">Dr Khalid Shamiyah</a></span>
@@ -756,8 +904,39 @@
 
   <script>
     (function () {
-      // TODO: set Formspree endpoint (e.g. "https://formspree.io/f/xxxxxxxx")
-      var FORMSPREE_ENDPOINT = "";
+      var toggle = document.getElementById("access-toggle");
+      var wrap = document.getElementById("signup-wrap");
+      var nameInput = document.getElementById("name");
+      var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      function openSignup(shouldFocus) {
+        if (!wrap || wrap.classList.contains("is-open")) return;
+        wrap.classList.add("is-open");
+        if (toggle) {
+          toggle.setAttribute("aria-expanded", "true");
+          toggle.hidden = true;
+        }
+        if (shouldFocus && nameInput) {
+          window.setTimeout(function () { nameInput.focus(); }, reducedMotion ? 0 : 420);
+        }
+      }
+
+      if (toggle) {
+        toggle.addEventListener("click", function () { openSignup(true); });
+      }
+
+      if (location.hash === "#request") {
+        openSignup(false);
+        window.setTimeout(function () {
+          document.getElementById("request").scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+        }, 50);
+      }
+    })();
+  </script>
+
+  <script>
+    (function () {
+      var FORMSPREE_ENDPOINT = "https://formspree.io/f/xjgnznnv";
 
       var form = document.getElementById("early-access-form");
       var formPanel = document.getElementById("form-panel");
@@ -778,14 +957,22 @@
       function showSuccess() {
         formPanel.style.display = "none";
         successPanel.classList.add("is-visible");
+        var note = document.querySelector(".access-cta .exclusivity");
+        if (note) note.hidden = true;
       }
 
       form.addEventListener("submit", function (event) {
         event.preventDefault();
         clearError();
 
+        form.name.setCustomValidity(form.name.value.trim() ? "" : "Please enter your name.");
+        form.email.setCustomValidity(form.email.value.trim() ? "" : "Please enter your email.");
+        form.role.setCustomValidity(form.role.value ? "" : "Please select your role.");
+        form.hospital.setCustomValidity(form.hospital.value.trim() ? "" : "Please enter your hospital or trust.");
+
         if (!form.reportValidity()) return;
 
+        var name = form.name.value.trim();
         var email = form.email.value.trim();
         var role = form.role.value;
         var hospital = form.hospital.value.trim();
@@ -798,18 +985,18 @@
         submitBtn.disabled = true;
         submitBtn.textContent = "Sending…";
 
+        var payload = new FormData();
+        payload.append("name", name);
+        payload.append("email", email);
+        payload.append("role", role);
+        payload.append("hospital", hospital);
+        payload.append("_subject", "Handover early access: " + name);
+        payload.append("_replyto", email);
+
         fetch(FORMSPREE_ENDPOINT, {
           method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: email,
-            role: role,
-            hospital: hospital,
-            _subject: "Handover early access request",
-          }),
+          headers: { Accept: "application/json" },
+          body: payload,
         })
           .then(function (response) {
             if (!response.ok) {
@@ -823,7 +1010,7 @@
           .catch(function (err) {
             showError(err && err.message ? err.message : "Something went wrong. Please try again.");
             submitBtn.disabled = false;
-            submitBtn.textContent = "Request early access";
+            submitBtn.textContent = "Submit";
           });
       });
     })();
