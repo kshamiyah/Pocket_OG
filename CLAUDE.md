@@ -17,8 +17,7 @@ An offline-first PWA reference for O&G trainees. Monorepo (npm workspaces):
 
 - `apps/pocket-og`: the app (React + Vite + Tailwind + vite-plugin-pwa).
 - `apps/ward-manager`: a separate tool; occasionally a source of logic to port.
-- `apps/handover`: standalone shift job-list PWA (QR/link handover); not linked from pocket-og.
-- `packages/guidelines`: shared guideline content (`@pocket-og/guidelines`); handover does not use this package.
+- `packages/guidelines`: shared guideline content (`@pocket-og/guidelines`).
 
 **Content ethos:** hand-authored, drawn verbatim from national guidance
 (NICE / RCOG / BASHH / local). No runtime LLM. Every clinical claim must be
@@ -129,14 +128,9 @@ so new content is only findable once it is indexed.
 `registerType: 'autoUpdate'` means a deployed change often needs the app closed
 and reopened **twice** before it shows. Mention this when reporting a UI change.
 
-## Handover app (`apps/handover`)
+## Handover (separate repo)
 
-Separate PWA, own Vercel project, not navigable from pocket-og.
-
-- **localStorage:** `handover_portfolios_v2` (profiles, jobs, ward layouts, learned tasks).
-- **QR payload:** `src/utils/payload.js` (v2; beds on wire, task text stripped via `stripHandover.js`).
-- **Lint/build** from app dir: `npm run lint` / `npm run build` in `apps/handover`, or `-w apps/handover` from repo root.
-- **Deploy:** root `apps/handover`, install `cd ../.. && npm install`; see `apps/handover/vercel.json`.
+Handover moved to [github.com/kshamiyah/Handover](https://github.com/kshamiyah/Handover). Own Vercel project (`pocket-handover`), not part of this monorepo.
 
 ## Git
 

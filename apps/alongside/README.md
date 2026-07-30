@@ -28,7 +28,7 @@ normal") · When to get seen · Questions to ask · Words.
 ## How it relates to the rest of the monorepo
 
 - Separate npm workspace app (`apps/alongside`), own Vite + PWA + Tailwind setup
-  and own `vercel.json`, exactly like `apps/handover`.
+  and own `vercel.json`, exactly like Handover (now a separate repo).
 - Imports `@pocket-og/guidelines` **read-only**, purely for provenance: the
   "Based on NICE NG88" trust chip and the sources footer resolve live from the
   shared registry, so they stay in step with the clinician app. It changes

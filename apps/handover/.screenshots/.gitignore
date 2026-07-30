@@ -1,7 +1,0 @@
-# Ignore ad-hoc captures; committed corpora live in app-store/ and shift-sim/
-*.png
-!app-store/
-!app-store/**
-!shift-sim/
-!shift-sim/**
-*ERROR*.png
