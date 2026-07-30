@@ -131,8 +131,6 @@
       align-items: center;
       gap: 0.65rem;
       margin-bottom: 1.75rem;
-      opacity: 0;
-      animation: rise 0.7s ease forwards;
     }
     .brand svg { width: 40px; height: 40px; flex: none; }
     .brand svg rect { fill: var(--icon-bg); }
@@ -157,10 +155,6 @@
       }
     }
 
-    .hero-copy {
-      opacity: 0;
-      animation: rise 0.75s ease 0.08s forwards;
-    }
     .tagline {
       margin: 0;
       font-size: clamp(1.85rem, 6.4vw, 2.55rem);
@@ -179,8 +173,6 @@
       display: flex;
       justify-content: center;
       gap: 0.75rem;
-      opacity: 0;
-      animation: rise 0.85s ease 0.16s forwards;
     }
     .phone {
       width: min(42vw, 148px);
@@ -196,6 +188,7 @@
     }
     .phone:nth-child(2) {
       transform: translateY(-0.55rem);
+      animation: float 5.5s ease-in-out infinite;
     }
     .phone:nth-child(3) {
       display: none;
@@ -267,8 +260,6 @@
       padding: 0;
       display: grid;
       gap: 0.75rem;
-      opacity: 0;
-      animation: rise 0.75s ease 0.24s forwards;
     }
     .points li {
       display: grid;
@@ -303,8 +294,6 @@
       color: var(--muted);
       font-size: 0.95rem;
       max-width: 42ch;
-      opacity: 0;
-      animation: rise 0.75s ease 0.3s forwards;
     }
 
     .signup {
@@ -313,8 +302,6 @@
       border-radius: 16px;
       padding: 1.15rem 1.2rem 1.25rem;
       margin: 0 0 1rem;
-      opacity: 0;
-      animation: rise 0.75s ease 0.36s forwards;
     }
     .signup h2 {
       margin: 0 0 1rem;
@@ -427,8 +414,6 @@
       margin: 0 0 2.25rem;
       color: var(--muted);
       font-size: 0.85rem;
-      opacity: 0;
-      animation: rise 0.75s ease 0.42s forwards;
     }
 
     footer {
@@ -437,30 +422,17 @@
       display: flex;
       flex-wrap: wrap;
       gap: 0.35rem 0.75rem;
-      opacity: 0;
-      animation: rise 0.75s ease 0.48s forwards;
     }
     footer a { color: var(--muted); }
     footer a:hover { color: var(--accent); }
 
-    @keyframes rise {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes float {
+      0%, 100% { transform: translateY(-0.55rem); }
+      50% { transform: translateY(-0.95rem); }
     }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
-      .brand,
-      .hero-copy,
-      .phones,
-      .points,
-      .exclusivity,
-      .signup,
-      .trust,
-      footer {
-        animation: none;
-        opacity: 1;
-        transform: none;
-      }
+      .phone:nth-child(2) { animation: none; }
       .submit:active { transform: none; }
     }
   </style>
