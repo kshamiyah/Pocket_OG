@@ -32,24 +32,9 @@
       --ok: #166534;
       --ok-bg: #f0fdf4;
       --phone: #1f2937;
-      --shadow: 0 18px 40px rgba(31, 41, 55, 0.12);
+      --shadow: 0 22px 50px rgba(31, 41, 55, 0.16);
     }
     :root[data-theme="light"] {
-      --bg: #fbe9e7;
-      --bg-soft: #f7ddd9;
-      --card: #ffffff;
-      --ink: #1f2937;
-      --muted: #6b7280;
-      --accent: #f4511e;
-      --accent-ink: #ffffff;
-      --line: #f0dcd9;
-      --icon-bg: #fbe9e7;
-      --danger: #b91c1c;
-      --danger-bg: #fef2f2;
-      --ok: #166534;
-      --ok-bg: #f0fdf4;
-      --phone: #1f2937;
-      --shadow: 0 18px 40px rgba(31, 41, 55, 0.12);
       color-scheme: light;
     }
     :root[data-theme="dark"] {
@@ -67,7 +52,7 @@
       --ok: #86efac;
       --ok-bg: #052e1a;
       --phone: #e5e7eb;
-      --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+      --shadow: 0 22px 50px rgba(0, 0, 0, 0.45);
       color-scheme: dark;
     }
     @media (prefers-color-scheme: dark) {
@@ -86,7 +71,7 @@
         --ok: #86efac;
         --ok-bg: #052e1a;
         --phone: #e5e7eb;
-        --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+        --shadow: 0 22px 50px rgba(0, 0, 0, 0.45);
         color-scheme: dark;
       }
     }
@@ -105,7 +90,7 @@
       margin: 0;
       min-height: 100dvh;
       background:
-        radial-gradient(100% 60% at 0% 0%, var(--bg-soft) 0%, transparent 55%),
+        radial-gradient(100% 55% at 0% 0%, var(--bg-soft) 0%, transparent 55%),
         var(--bg);
       color: var(--ink);
       font-family: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -115,11 +100,10 @@
     img { max-width: 100%; height: auto; display: block; }
     a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
 
-    /* One column, same alignment top to bottom (matches privacy.html) */
     .wrap {
       width: min(100%, 44rem);
       margin: 0 auto;
-      padding: 1.75rem 1.5rem 4rem;
+      padding: 1.75rem 0 4rem;
     }
 
     .brand {
@@ -127,6 +111,7 @@
       align-items: center;
       gap: 0.65rem;
       margin-bottom: 1.75rem;
+      padding: 0 1.5rem;
     }
     .brand svg { width: 36px; height: 36px; flex: none; }
     .brand svg rect { fill: var(--icon-bg); }
@@ -138,7 +123,8 @@
     }
 
     .hero {
-      margin-bottom: 1.75rem;
+      margin-bottom: 1.5rem;
+      padding: 0 1.5rem;
     }
     .tagline {
       margin: 0;
@@ -172,72 +158,135 @@
     .hero-cta:hover { opacity: 0.94; }
     .hero-cta:active { transform: scale(0.985); }
 
-    .phones {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.65rem;
-      margin: 0 0 2rem;
+    /* App Store-style carousel */
+    .showcase {
+      margin: 0 0 1.75rem;
     }
-    .phone {
+    .showcase-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0 1.5rem;
+      margin-bottom: 0.85rem;
+    }
+    .showcase-label {
       margin: 0;
+      font-size: 0.82rem;
+      font-weight: 650;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .carousel-nav {
+      display: flex;
+      gap: 0.35rem;
+    }
+    .carousel-btn {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      font: inherit;
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      padding: 0;
+    }
+    .carousel-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .carousel-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+      border-color: var(--line);
+      color: var(--muted);
+    }
+
+    .carousel {
+      overflow: hidden;
+    }
+    .carousel-track {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      overscroll-behavior-x: contain;
+    }
+    .carousel-track::-webkit-scrollbar { display: none; }
+
+    .slide {
+      flex: 0 0 100%;
+      scroll-snap-align: center;
+      scroll-snap-stop: always;
+      margin: 0;
+      padding: 0 1.5rem 0.25rem;
       display: flex;
       flex-direction: column;
-      min-width: 0;
+      align-items: center;
+      text-align: center;
     }
-    .phone-frame {
-      flex: none;
-      width: 100%;
+    .phone-shell {
+      width: min(72vw, 17.5rem);
       aspect-ratio: 9 / 19.5;
-      border-radius: 1rem;
+      border-radius: 1.5rem;
       border: 2px solid var(--phone);
       background: #fff;
       box-shadow: var(--shadow);
       overflow: hidden;
     }
-    :root[data-theme="dark"] .phone-frame { background: #111827; }
+    :root[data-theme="dark"] .phone-shell { background: #111827; }
     @media (prefers-color-scheme: dark) {
-      :root:not([data-theme]) .phone-frame { background: #111827; }
+      :root:not([data-theme]) .phone-shell { background: #111827; }
     }
-    .phone-frame img {
+    .phone-shell img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       object-position: top center;
     }
-    .phone-label {
-      margin: 0.45rem 0 0;
-      font-size: 0.75rem;
-      font-weight: 650;
+    .slide-title {
+      margin: 1rem 0 0.25rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .slide-copy {
+      margin: 0;
+      font-size: 0.95rem;
       color: var(--muted);
-      letter-spacing: 0.01em;
-      line-height: 1.2;
-      min-height: 1.2em;
+      max-width: 26ch;
+      line-height: 1.4;
     }
 
-    .points {
-      list-style: none;
-      margin: 0 0 1.5rem;
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.45rem;
+      margin-top: 1rem;
+      padding: 0 1.5rem;
+    }
+    .carousel-dot {
+      width: 0.45rem;
+      height: 0.45rem;
+      border-radius: 999px;
+      border: 0;
       padding: 0;
-      display: grid;
-      gap: 0.85rem;
+      background: color-mix(in srgb, var(--muted) 45%, transparent);
+      cursor: pointer;
+      transition: width 0.2s ease, background 0.2s ease;
     }
-    .points li {
-      display: grid;
-      grid-template-columns: 1.25rem 1fr;
-      gap: 0.65rem;
-      align-items: start;
+    .carousel-dot.is-active {
+      width: 1.35rem;
+      background: var(--accent);
     }
-    .points .n {
-      font-size: 0.9rem;
-      font-weight: 750;
-      color: var(--accent);
-      line-height: 1.45;
-    }
-    .points p {
-      margin: 0;
-      font-size: 1rem;
-      letter-spacing: -0.01em;
-      line-height: 1.4;
+
+    .content {
+      padding: 0 1.5rem;
     }
 
     .exclusivity {
@@ -374,6 +423,8 @@
 
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
+      .carousel-track { scroll-behavior: auto; }
+      .carousel-dot { transition: none; }
       .hero-cta:active,
       .submit:active { transform: none; }
     }
@@ -398,102 +449,184 @@
       <a class="hero-cta" href="#request">Request early access</a>
     </section>
 
-    <div class="phones">
-      <figure class="phone">
-        <div class="phone-frame">
-          <img src="/screenshots/bed-board.png" alt="Bed board view in Handover" width="390" height="844" loading="eager" />
+    <section class="showcase" aria-label="How Handover works">
+      <div class="showcase-head">
+        <p class="showcase-label">See the shift flow</p>
+        <div class="carousel-nav" aria-hidden="true">
+          <button type="button" class="carousel-btn" id="carousel-prev" aria-label="Previous screenshot">‹</button>
+          <button type="button" class="carousel-btn" id="carousel-next" aria-label="Next screenshot">›</button>
         </div>
-        <figcaption class="phone-label">Bed board</figcaption>
-      </figure>
-      <figure class="phone">
-        <div class="phone-frame">
-          <img src="/screenshots/job-list.png" alt="Job list view in Handover" width="390" height="844" loading="eager" />
-        </div>
-        <figcaption class="phone-label">Job list</figcaption>
-      </figure>
-      <figure class="phone">
-        <div class="phone-frame">
-          <img src="/screenshots/handover-qr.png" alt="Handover QR share screen" width="390" height="844" loading="eager" />
-        </div>
-        <figcaption class="phone-label">Handover QR</figcaption>
-      </figure>
-    </div>
-
-    <ol class="points">
-      <li>
-        <span class="n" aria-hidden="true">1</span>
-        <p>Capture jobs by ward and bed as you go.</p>
-      </li>
-      <li>
-        <span class="n" aria-hidden="true">2</span>
-        <p>Walk the ward bed by bed with a clear board.</p>
-      </li>
-      <li>
-        <span class="n" aria-hidden="true">3</span>
-        <p>Hand over to the next shift with one QR scan.</p>
-      </li>
-    </ol>
-
-    <p class="exclusivity">
-      Invite-only beta for UK ward doctors. New testers are invited in small
-      waves each week. Limited places each week.
-    </p>
-
-    <section class="signup" id="request" aria-labelledby="signup-heading">
-      <div id="form-panel">
-        <h2 id="signup-heading">Request early access.</h2>
-        <p class="form-error" id="form-error" role="alert"></p>
-        <form id="early-access-form" novalidate>
-          <div class="field">
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@nhs.net" />
-          </div>
-          <div class="field">
-            <label for="role">Role</label>
-            <select id="role" name="role" required>
-              <option value="" disabled selected>Select your role</option>
-              <option value="FY1/FY2">FY1/FY2</option>
-              <option value="IMT/CT">IMT/CT</option>
-              <option value="Registrar">Registrar</option>
-              <option value="Consultant">Consultant</option>
-              <option value="Nurse">Nurse</option>
-              <option value="Midwife">Midwife</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="hospital">Hospital / trust</label>
-            <input id="hospital" name="hospital" type="text" autocomplete="organization" required placeholder="e.g. Royal Berkshire" />
-          </div>
-          <button class="submit" type="submit" id="submit-btn">Request early access</button>
-        </form>
       </div>
 
-      <div class="success" id="success-panel" role="status" aria-live="polite">
-        <div class="success-badge" aria-hidden="true">✓</div>
-        <h2>You're on the list.</h2>
-        <p>
-          We invite new testers in small weekly waves, look out
-          for a TestFlight email.
-        </p>
+      <div class="carousel">
+        <div class="carousel-track" id="carousel-track">
+          <figure class="slide">
+            <div class="phone-shell">
+              <img src="/screenshots/start-shift.png" alt="Start shift screen in Handover" width="390" height="844" loading="eager" />
+            </div>
+            <figcaption class="slide-title">Start your shift</figcaption>
+            <p class="slide-copy">Pick day, long day, night or on-call.</p>
+          </figure>
+          <figure class="slide">
+            <div class="phone-shell">
+              <img src="/screenshots/bed-board.png" alt="Bed board in Handover" width="390" height="844" loading="lazy" />
+            </div>
+            <figcaption class="slide-title">Walk the ward</figcaption>
+            <p class="slide-copy">Capture jobs by ward and bed as you go.</p>
+          </figure>
+          <figure class="slide">
+            <div class="phone-shell">
+              <img src="/screenshots/job-list.png" alt="All jobs list in Handover" width="390" height="844" loading="lazy" />
+            </div>
+            <figcaption class="slide-title">See everything</figcaption>
+            <p class="slide-copy">Urgent jobs, reminders and open tasks in one list.</p>
+          </figure>
+          <figure class="slide">
+            <div class="phone-shell">
+              <img src="/screenshots/end-shift.png" alt="End shift summary in Handover" width="390" height="844" loading="lazy" />
+            </div>
+            <figcaption class="slide-title">End shift</figcaption>
+            <p class="slide-copy">A clear summary before you leave the hospital.</p>
+          </figure>
+          <figure class="slide">
+            <div class="phone-shell">
+              <img src="/screenshots/handover.png" alt="Handover QR screen in Handover" width="390" height="844" loading="lazy" />
+            </div>
+            <figcaption class="slide-title">Hand over</figcaption>
+            <p class="slide-copy">Share open jobs with one QR scan or link.</p>
+          </figure>
+        </div>
+      </div>
+
+      <div class="carousel-dots" id="carousel-dots" role="tablist" aria-label="Screenshot slides">
+        <button type="button" class="carousel-dot is-active" role="tab" aria-selected="true" aria-label="Start shift"></button>
+        <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="Bed board"></button>
+        <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="All jobs"></button>
+        <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="End shift"></button>
+        <button type="button" class="carousel-dot" role="tab" aria-selected="false" aria-label="Hand over"></button>
       </div>
     </section>
 
-    <p class="trust">
-      Non-identifying data only. A decision-support tool, not a patient record.
-    </p>
+    <div class="content">
+      <p class="exclusivity">
+        Invite-only beta for UK ward doctors. New testers are invited in small
+        waves each week. Limited places each week.
+      </p>
 
-    <footer>
-      <span>Built by <a href="https://drshamiyah.com/" rel="noopener">Dr Khalid Shamiyah</a></span>
-      <span aria-hidden="true">·</span>
-      <a href="/privacy.html">Privacy policy</a>
-    </footer>
+      <section class="signup" id="request" aria-labelledby="signup-heading">
+        <div id="form-panel">
+          <h2 id="signup-heading">Request early access.</h2>
+          <p class="form-error" id="form-error" role="alert"></p>
+          <form id="early-access-form" novalidate>
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@nhs.net" />
+            </div>
+            <div class="field">
+              <label for="role">Role</label>
+              <select id="role" name="role" required>
+                <option value="" disabled selected>Select your role</option>
+                <option value="FY1/FY2">FY1/FY2</option>
+                <option value="IMT/CT">IMT/CT</option>
+                <option value="Registrar">Registrar</option>
+                <option value="Consultant">Consultant</option>
+                <option value="Nurse">Nurse</option>
+                <option value="Midwife">Midwife</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="hospital">Hospital / trust</label>
+              <input id="hospital" name="hospital" type="text" autocomplete="organization" required placeholder="e.g. Royal Berkshire" />
+            </div>
+            <button class="submit" type="submit" id="submit-btn">Request early access</button>
+          </form>
+        </div>
+
+        <div class="success" id="success-panel" role="status" aria-live="polite">
+          <div class="success-badge" aria-hidden="true">✓</div>
+          <h2>You're on the list.</h2>
+          <p>
+            We invite new testers in small weekly waves, look out
+            for a TestFlight email.
+          </p>
+        </div>
+      </section>
+
+      <p class="trust">
+        Non-identifying data only. A decision-support tool, not a patient record.
+      </p>
+
+      <footer>
+        <span>Built by <a href="https://drshamiyah.com/" rel="noopener">Dr Khalid Shamiyah</a></span>
+        <span aria-hidden="true">·</span>
+        <a href="/privacy.html">Privacy policy</a>
+      </footer>
+    </div>
   </div>
 
   <script>
     (function () {
+      var track = document.getElementById("carousel-track");
+      var dots = Array.prototype.slice.call(document.querySelectorAll(".carousel-dot"));
+      var prevBtn = document.getElementById("carousel-prev");
+      var nextBtn = document.getElementById("carousel-next");
+      var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      function slideWidth() {
+        return track.clientWidth;
+      }
+
+      function activeIndex() {
+        var w = slideWidth();
+        if (!w) return 0;
+        return Math.round(track.scrollLeft / w);
+      }
+
+      function scrollToIndex(index) {
+        var w = slideWidth();
+        track.scrollTo({
+          left: index * w,
+          behavior: reducedMotion ? "auto" : "smooth",
+        });
+      }
+
+      function updateUI() {
+        var index = activeIndex();
+        dots.forEach(function (dot, i) {
+          var on = i === index;
+          dot.classList.toggle("is-active", on);
+          dot.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        if (prevBtn) prevBtn.disabled = index <= 0;
+        if (nextBtn) nextBtn.disabled = index >= dots.length - 1;
+      }
+
+      track.addEventListener("scroll", updateUI, { passive: true });
+      window.addEventListener("resize", updateUI);
+
+      dots.forEach(function (dot, i) {
+        dot.addEventListener("click", function () { scrollToIndex(i); });
+      });
+
+      if (prevBtn) {
+        prevBtn.addEventListener("click", function () {
+          scrollToIndex(Math.max(0, activeIndex() - 1));
+        });
+      }
+      if (nextBtn) {
+        nextBtn.addEventListener("click", function () {
+          scrollToIndex(Math.min(dots.length - 1, activeIndex() + 1));
+        });
+      }
+
+      updateUI();
+    })();
+  </script>
+
+  <script>
+    (function () {
       // TODO: set Formspree endpoint (e.g. "https://formspree.io/f/xxxxxxxx")
-      // Until this is set, submit shows a graceful error and keeps the user's input.
       var FORMSPREE_ENDPOINT = "";
 
       var form = document.getElementById("early-access-form");
@@ -539,14 +672,14 @@
           method: "POST",
           headers: {
             Accept: "application/json",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             email: email,
             role: role,
             hospital: hospital,
-            _subject: "Handover early access request"
-          })
+            _subject: "Handover early access request",
+          }),
         })
           .then(function (response) {
             if (!response.ok) {

@@ -1,5 +1,5 @@
-// Landing-page hero screenshots: bed board, job list, handover QR (light).
-// Usage: from apps/handover/test-corpus after `npm run build` in apps/handover:
+// Landing-page carousel screenshots (390×844, light mode).
+// Usage: from apps/handover/test-corpus after `npm run build`:
 //   node landing-screenshots.mjs
 
 import { spawn } from "node:child_process";
@@ -11,11 +11,9 @@ import { seedScript, FIXED_NOW } from "./lib/fixtures.mjs";
 
 const APP_DIR = new URL("..", import.meta.url).pathname;
 const OUT_DIR = join(APP_DIR, ".screenshots", "landing");
-const ARTIFACT_DIR = "/opt/cursor/artifacts/screenshots";
 const PUBLIC_DIR = join(APP_DIR, "public", "screenshots");
 const PORT = 4182;
 const BASE = `http://localhost:${PORT}/`;
-// Phone-ish frame for the early-access hero (approx iPhone 14/15 logical size)
 const VP = { width: 390, height: 844 };
 
 const CHROME_CANDIDATES = [
@@ -108,7 +106,7 @@ async function startServer() {
   throw new Error("preview server did not start");
 }
 
-async function seedContext(browser, theme, tag) {
+async function seedContext(browser, tag, overrides = {}) {
   const state = seedScript({
     profile: PROFILE,
     shift: SHIFT,
@@ -121,7 +119,8 @@ async function seedContext(browser, theme, tag) {
       Sonning: ["A2", "B1"],
     },
     recentPhrases: ["Chase bloods", "Review CTG", "Consent"],
-    theme,
+    theme: "light",
+    ...overrides,
   });
   const context = await browser.newContext({
     viewport: VP,
@@ -159,12 +158,10 @@ async function seedContext(browser, theme, tag) {
 
 async function snap(page, name) {
   mkdirSync(OUT_DIR, { recursive: true });
-  mkdirSync(ARTIFACT_DIR, { recursive: true });
   mkdirSync(PUBLIC_DIR, { recursive: true });
   const file = `${name}.png`;
   const path = join(OUT_DIR, file);
   await page.screenshot({ path, fullPage: false });
-  copyFileSync(path, join(ARTIFACT_DIR, `landing-${file}`));
   copyFileSync(path, join(PUBLIC_DIR, file));
   console.log(`  ✓ ${file}`);
   return path;
@@ -182,7 +179,7 @@ async function wardButton(page, name) {
 }
 
 async function main() {
-  console.log("Capturing landing-page app screenshots…");
+  console.log("Capturing landing carousel screenshots…");
   const chrome = findChrome();
   if (!chrome) throw new Error("No Chrome found");
   console.log(`Using ${chrome}`);
@@ -195,22 +192,25 @@ async function main() {
   const server = await startServer();
 
   try {
-    // 1. Job list (flat all-jobs view)
-    console.log("\n1. Job list (all jobs)");
+    console.log("\n1. Start shift");
     {
-      const ctx = await seedContext(browser, "light", "landing-jobs");
+      const ctx = await seedContext(browser, "landing-start", {
+        shift: null,
+        jobs: [],
+        wardLayouts: {},
+      });
       const page = await ctx.newPage();
       await open(page);
-      await page.getByRole("button", { name: "All jobs" }).click();
+      await page.getByRole("button", { name: "Start a shift" }).click();
       await page.waitForTimeout(450);
-      await snap(page, "job-list");
+      await page.getByText("Starting a shift?").waitFor({ timeout: 8000 });
+      await snap(page, "start-shift");
       await ctx.close();
     }
 
-    // 2. Bed board (ward drill)
-    console.log("\n2. Bed board (ward drill)");
+    console.log("\n2. Bed board");
     {
-      const ctx = await seedContext(browser, "light", "landing-board");
+      const ctx = await seedContext(browser, "landing-board");
       const page = await ctx.newPage();
       await open(page);
       await (await wardButton(page, "DS")).click();
@@ -219,24 +219,48 @@ async function main() {
       await ctx.close();
     }
 
-    // 3. Handover QR
-    console.log("\n3. Handover QR");
+    console.log("\n3. All jobs");
     {
-      const ctx = await seedContext(browser, "light", "landing-qr");
+      const ctx = await seedContext(browser, "landing-jobs");
       const page = await ctx.newPage();
       await open(page);
-      await page.getByLabel("Exchange").click();
-      await page.waitForTimeout(400);
-      await page.getByRole("button", { name: /^End shift/ }).click();
+      await page.getByRole("button", { name: "All jobs" }).click();
       await page.waitForTimeout(450);
-      await page.getByRole("button", { name: "Hand over and end shift" }).click();
-      await page.waitForTimeout(900);
-      await page.getByText("Tap the code to enlarge").waitFor({ timeout: 10000 });
-      await snap(page, "handover-qr");
+      await snap(page, "job-list");
       await ctx.close();
     }
 
-    console.log(`\nDone.\n  ${OUT_DIR}\n  ${PUBLIC_DIR}\n  ${ARTIFACT_DIR}`);
+    console.log("\n4. End shift");
+    {
+      const ctx = await seedContext(browser, "landing-end");
+      const page = await ctx.newPage();
+      await open(page);
+      await page.getByLabel("Exchange").click();
+      await page.waitForTimeout(350);
+      await page.getByRole("button", { name: /^End shift/ }).click();
+      await page.waitForTimeout(500);
+      await page.getByText("End shift").first().waitFor({ timeout: 8000 });
+      await snap(page, "end-shift");
+      await ctx.close();
+    }
+
+    console.log("\n5. Handover");
+    {
+      const ctx = await seedContext(browser, "landing-handover");
+      const page = await ctx.newPage();
+      await open(page);
+      await page.getByLabel("Exchange").click();
+      await page.waitForTimeout(350);
+      await page.getByRole("button", { name: /^Hand over/ }).click();
+      await page.waitForTimeout(700);
+      await page.getByText("Scan or share").waitFor({ timeout: 10000 });
+      await page.getByText("Scan or share").scrollIntoViewIfNeeded();
+      await page.waitForTimeout(350);
+      await snap(page, "handover");
+      await ctx.close();
+    }
+
+    console.log(`\nDone.\n  ${PUBLIC_DIR}`);
   } finally {
     await browser.close();
     server.kill("SIGTERM");
