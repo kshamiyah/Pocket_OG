@@ -10,6 +10,7 @@ import { encodeHandoverPayload } from "../src/utils/payload.js";
 import {
   seedScript, runningState, PROFILE, SHIFT, WARD_LAYOUTS, FIXED_NOW, KEYS,
 } from "./lib/fixtures.mjs";
+import { viteBin } from "./lib/vite-bin.mjs";
 
 const APP_DIR = new URL("..", import.meta.url).pathname;
 const SHOT_DIR = join(APP_DIR, ".screenshots");
@@ -33,7 +34,7 @@ async function findChrome() {
 
 async function startServer() {
   const proc = spawn(
-    join(APP_DIR, "../../node_modules/.bin/vite"),
+    viteBin(APP_DIR),
     ["preview", "--port", String(PORT), "--strictPort"],
     { cwd: APP_DIR, stdio: "ignore" },
   );

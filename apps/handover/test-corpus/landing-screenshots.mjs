@@ -1,5 +1,5 @@
 // Landing-page carousel screenshots (390×844, light mode).
-// Usage: from apps/handover/test-corpus after `npm run build`:
+// Usage: from test-corpus/ after `npm run build`:
 //   node landing-screenshots.mjs
 //
 // Outputs seven PNGs to public/screenshots/ for early-access.html.
@@ -9,6 +9,7 @@ import { accessSync, copyFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { chromium } from "playwright-core";
+import { viteBin } from "./lib/vite-bin.mjs";
 import { seedScript, FIXED_NOW } from "./lib/fixtures.mjs";
 
 const APP_DIR = new URL("..", import.meta.url).pathname;
@@ -94,7 +95,7 @@ function findChrome() {
 
 async function startServer() {
   const proc = spawn(
-    join(APP_DIR, "../../node_modules/.bin/vite"),
+    viteBin(APP_DIR),
     ["preview", "--port", String(PORT), "--strictPort"],
     { cwd: APP_DIR, stdio: "ignore" },
   );

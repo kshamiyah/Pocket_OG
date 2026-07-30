@@ -152,7 +152,7 @@ handover payload is base64-encoded, not encrypted).
 ## App icon (marketing)
 
 - Source: `public/icon-1024.png` (1024×1024, RGB, **no alpha channel**).
-- Regenerate into Xcode via `npm run cap:icons -w apps/handover` before `cap:sync`.
+- Regenerate into Xcode via `npm run cap:icons` before `cap:sync`.
 - Upload the same 1024 asset to App Store Connect (opaque, no rounded corners).
 
 ## Universal links

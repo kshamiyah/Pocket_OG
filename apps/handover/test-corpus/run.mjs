@@ -19,6 +19,7 @@ import { setTimeout as sleep } from "node:timers/promises";
 import { mkdirSync, writeFileSync, rmSync, accessSync } from "node:fs";
 import { join } from "node:path";
 import { chromium } from "playwright-core";
+import { viteBin } from "./lib/vite-bin.mjs";
 import { seedScript, runningState, PROFILE, JOBS, WARD_LAYOUTS, FIXED_NOW } from "./lib/fixtures.mjs";
 import { captureDiagnostics, structuralChecks } from "./lib/checks.mjs";
 import {
@@ -47,7 +48,7 @@ const log = (...a) => console.log(...a);
 // ---- server -----------------------------------------------------------------
 async function startServer() {
   const proc = spawn(
-    join(APP_DIR, "../../node_modules/.bin/vite"),
+    viteBin(APP_DIR),
     ["preview", "--port", String(PORT), "--strictPort"],
     { cwd: APP_DIR, stdio: "ignore" }
   );

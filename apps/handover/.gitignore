@@ -1,1 +1,18 @@
+node_modules
+dist
+dist-ssr
+*.local
 .vercel
+.DS_Store
+.env*
+*.log
+
+# Xcode / Capacitor
+ios/App/App/public/
+ios/App/Pods/
+ios/DerivedData/
+*.xcuserstate
+*.xcuserdata
+
+# Test corpus ephemeral output (baselines are committed)
+test-corpus/runs/

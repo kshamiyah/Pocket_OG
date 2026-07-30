@@ -2,7 +2,7 @@
   "name": "handover-test-corpus",
   "private": true,
   "type": "module",
-  "description": "Automated UI/layout + flow + payload testing loop for apps/handover.",
+  "description": "Automated UI/layout + flow + payload testing loop for Handover.",
   "scripts": {
     "test": "node run.mjs",
     "payload": "node payload.check.mjs"

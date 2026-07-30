@@ -10,6 +10,7 @@ import { join } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { chromium } from "playwright-core";
 import { runningState } from "./lib/fixtures.mjs";
+import { viteBin } from "./lib/vite-bin.mjs";
 
 const APP_DIR = new URL("..", import.meta.url).pathname;
 const PORT = 4184;
@@ -29,7 +30,7 @@ const SHEETS = [
 
 async function startServer() {
   const proc = spawn(
-    join(APP_DIR, "../../node_modules/.bin/vite"),
+    viteBin(APP_DIR),
     ["preview", "--port", String(PORT), "--strictPort"],
     { cwd: APP_DIR, stdio: "ignore" }
   );

@@ -9,6 +9,7 @@ import { accessSync } from "node:fs";
 import { chromium } from "playwright-core";
 import { encodeHandoverPayload } from "../src/utils/payload.js";
 import { seedScript, KEYS, FIXED_NOW } from "./lib/fixtures.mjs";
+import { viteBin } from "./lib/vite-bin.mjs";
 
 const APP_DIR = new URL("..", import.meta.url).pathname;
 const OUT_DIR = join(APP_DIR, ".screenshots", "shift-sim");
@@ -95,7 +96,7 @@ function findChrome() {
 
 async function startServer() {
   const proc = spawn(
-    join(APP_DIR, "../../node_modules/.bin/vite"),
+    viteBin(APP_DIR),
     ["preview", "--port", String(PORT), "--strictPort"],
     { cwd: APP_DIR, stdio: "ignore" },
   );

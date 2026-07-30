@@ -1,4 +1,4 @@
-# Handover testing loop (`apps/handover/test-corpus`)
+# Handover testing loop (`test-corpus`)
 
 Automated UI/layout + flow + payload regression harness for the handover PWA.
 It drives the real built app in Chromium across a matrix of scenarios,
@@ -52,13 +52,12 @@ runs/ results/     transient per-run output (gitignored)
 ## Run it
 
 ```bash
-cd apps/handover
-../../node_modules/.bin/vite build       # the harness serves the built app
+npm run build              # from repository root
 cd test-corpus
-npm install                              # first time only (playwright-core, pixelmatch, pngjs)
-node run.mjs            # full matrix: 375, 414, 1280 px + dark/offline subsets
-node run.mjs --fast     # phone widths only (375, 414)
-node payload.check.mjs  # just the payload check
+npm install                # first time only (playwright-core, pixelmatch, pngjs)
+node run.mjs               # full matrix: 375, 414, 1280 px + dark/offline subsets
+node run.mjs --fast        # phone widths only (375, 414)
+node payload.check.mjs     # just the payload check
 ```
 
 The first run establishes baselines (everything is a "new baseline", no diff
@@ -69,10 +68,10 @@ noise). Subsequent runs classify each finding as **NEW**, **STILL BROKEN** or
 ## Re-run as a loop
 
 ```bash
-claude -p "run the handover test suite in apps/handover/test-corpus and report NEW/STILL BROKEN/FIXED"
+claude -p "run the handover test suite in test-corpus and report NEW/STILL BROKEN/FIXED"
 ```
 
-or wire `node run.mjs` into a pre-push hook scoped to `apps/handover`.
+or wire `node run.mjs` into a pre-push hook.
 
 ## Notes / caveats
 

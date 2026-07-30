@@ -23,7 +23,7 @@ this is a clinician's professional brand).
 ## Where it lives / hosting
 
 - Build it as a **standalone static page** in the existing handover project:
-  `apps/handover/public/early-access.html`.
+  `public/early-access.html`.
 - It deploys with the handover Vercel project and will be served at
   `/early-access.html` (and can be routed to `/early-access`).
 - It will be fronted by a custom subdomain: **`handover.drshamiyah.com`**
@@ -35,7 +35,7 @@ this is a clinician's professional brand).
 ## Tech approach
 
 - Plain, self-contained HTML + inline CSS, no framework, no external requests.
-- **Use `apps/handover/public/privacy.html` as the canonical style template** so
+- **Use `public/privacy.html` as the canonical style template** so
   the page feels like the same product. Match its structure, CSS variables, and
   light/dark handling.
 - Fully responsive, mobile-first (the audience is on phones). No horizontal

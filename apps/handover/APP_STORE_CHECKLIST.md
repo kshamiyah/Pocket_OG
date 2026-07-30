@@ -78,7 +78,7 @@ Everything else is time. A Mac is required for the iOS build.
 ### Verify
 - [ ] Test install, offline use, and the update flow on a real phone.
 - [ ] Quick accessibility pass (button labels, tap targets, contrast in dark mode).
-- [ ] `npm run build -w apps/handover` is clean; `npm run lint` is clean.
+- [ ] `npm run build` is clean; `npm run lint` is clean.
 
 ---
 
