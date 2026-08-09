@@ -1,6 +1,30 @@
 {
-  "updated": "2026-07-23",
+  "updated": "2026-08-09",
   "items": [
+    {
+      "id": "2026-07-rcog-cord-clamping-sip",
+      "date": "2026-07-23",
+      "kind": "guideline",
+      "source": "RCOG",
+      "weight": "aware",
+      "title": "Cord clamping: RCOG updates evidence review backing delayed clamping",
+      "why": "RCOG's updated evidence review confirms that waiting before clamping the umbilical cord improves newborn outcomes and that immediate clamping should stay the exception, not the rule. This lands at every delivery, so it is worth reaffirming delayed clamping as default and reserving immediate clamping for clear maternal or neonatal indications.",
+      "url": "https://www.rcog.org.uk/news/waiting-before-clamping-the-umbilical-cord-improves-newborn-outcomes/",
+      "link": {
+        "type": "flowchart",
+        "id": "GTG50_CORD"
+      }
+    },
+    {
+      "id": "2026-08-rcog-fibroid-guideline-development",
+      "date": "2026-08-07",
+      "kind": "report",
+      "source": "RCOG",
+      "weight": "aware",
+      "title": "Fibroids: RCOG to develop new national Green-top Guideline",
+      "why": "RCOG is building a new national guideline on fibroid care after running its first UK Fibroid Summit and raising the topic in Westminster. Nothing is published yet, but trainees managing fibroids in clinic or theatre should expect a dedicated Green-top Guideline in the coming months.",
+      "url": "https://www.rcog.org.uk/news/presidents-blog-august-2026/"
+    },
     {
       "id": "2026-07-gtg31-sga-growth-charts",
       "date": "2026-07-21",
