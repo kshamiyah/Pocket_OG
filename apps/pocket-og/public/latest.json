@@ -1,6 +1,36 @@
 {
-  "updated": "2026-08-09",
+  "updated": "2026-08-16",
   "items": [
+    {
+      "id": "2026-08-nmpa-state-of-nation-birth-trends",
+      "date": "2026-08-13",
+      "kind": "report",
+      "source": "RCOG",
+      "weight": "aware",
+      "title": "Birth trends: caesarean rate hits 42.8%, vaginal birth falls further",
+      "why": "Caesarean birth rates keep climbing across Great Britain, reaching 42.8% in 2024, while spontaneous vaginal birth without instruments dropped to 46.4%, according to the latest National Maternity and Perinatal Audit report. Expect this data on workload and staffing pressures to surface in handover and service planning discussions, alongside gaps in national blood-loss reporting.",
+      "url": "https://www.rcog.org.uk/news/new-report-reveals-continuing-shifts-in-birth-trends-in-great-britain/"
+    },
+    {
+      "id": "2026-07-mhra-domperidone-phaeochromocytoma",
+      "date": "2026-07-21",
+      "kind": "safety",
+      "source": "MHRA",
+      "weight": "practice",
+      "title": "Domperidone: new contraindication in phaeochromocytoma",
+      "why": "Domperidone now carries a contraindication in phaeochromocytoma because of reports of severe hypertensive crises. Check for a history of adrenal tumour before prescribing domperidone for hyperemesis gravidarum or lactation support, and stop it if suspicion arises.",
+      "url": "https://www.gov.uk/drug-safety-update/domperidone-new-contraindication-in-patients-with-phaeochromocytoma-due-to-the-risk-of-severe-hypertension"
+    },
+    {
+      "id": "2026-07-mhra-botulinum-toxin-iatrogenic-botulism",
+      "date": "2026-07-15",
+      "kind": "safety",
+      "source": "MHRA",
+      "weight": "aware",
+      "title": "Botulinum toxin: strengthened warning on iatrogenic botulism",
+      "why": "Botulinum toxin products now carry stronger warnings after reports of iatrogenic botulism when the toxin spreads beyond the injection site. This matters for urogynaecology clinics giving Botox for overactive bladder, so counsel patients to seek urgent review for new swallowing, breathing or muscle weakness symptoms.",
+      "url": "https://www.gov.uk/drug-safety-update/botulinum-toxin-type-a-products-updated-warnings-regarding-risk-of-iatrogenic-botulism"
+    },
     {
       "id": "2026-07-rcog-cord-clamping-sip",
       "date": "2026-07-23",
