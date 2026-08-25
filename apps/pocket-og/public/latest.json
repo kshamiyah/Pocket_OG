@@ -1,6 +1,16 @@
 {
-  "updated": "2026-08-16",
+  "updated": "2026-08-23",
   "items": [
+    {
+      "id": "2026-08-rcog-gynaecology-waiting-list-rises",
+      "date": "2026-08-17",
+      "kind": "report",
+      "source": "RCOG",
+      "weight": "aware",
+      "title": "Gynaecology waiting list keeps climbing, RCOG warns",
+      "why": "The gynaecology waiting list in England has grown for a third straight month, now standing at almost 576,000 with referral demand rising sharply too. Expect this pressure to keep surfacing in clinic and MDT conversations about delayed benign gynae care such as fibroids and heavy menstrual bleeding, and it is useful context if asked to comment on service pressures.",
+      "url": "https://www.rcog.org.uk/news/gynaecology-waits-worsen-for-third-month-as-demand-rises-rcog-warns/"
+    },
     {
       "id": "2026-08-nmpa-state-of-nation-birth-trends",
       "date": "2026-08-13",
