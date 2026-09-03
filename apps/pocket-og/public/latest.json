@@ -1,25 +1,25 @@
 {
-  "updated": "2026-08-23",
+  "updated": "2026-09-03",
   "items": [
     {
-      "id": "2026-08-rcog-gynaecology-waiting-list-rises",
-      "date": "2026-08-17",
-      "kind": "report",
+      "id": "2026-09-gtg37a-vte-interim",
+      "date": "2026-09-03",
+      "kind": "guideline",
       "source": "RCOG",
-      "weight": "aware",
-      "title": "Gynaecology waiting list keeps climbing, RCOG warns",
-      "why": "The gynaecology waiting list in England has grown for a third straight month, now standing at almost 576,000 with referral demand rising sharply too. Expect this pressure to keep surfacing in clinic and MDT conversations about delayed benign gynae care such as fibroids and heavy menstrual bleeding, and it is useful context if asked to comment on service pressures.",
-      "url": "https://www.rcog.org.uk/news/gynaecology-waits-worsen-for-third-month-as-demand-rises-rcog-warns/"
+      "weight": "practice",
+      "title": "Pregnancy VTE: interim changes to risk assessment and LMWH dosing (GTG37a)",
+      "why": "Pregnancy VTE guidance (GTG37a) now uses revised risk assessment and weight-based LMWH dosing, with prophylaxis offered at BMI 50 or above. At booking, after miscarriage or termination, and on the postnatal ward, use the relevant pathway and update local prescribing prompts while the full revision is developed.",
+      "url": "https://www.rcog.org.uk/news/rcog-aligns-guidance-on-reducing-the-risk-of-venous-thromboembolism-during-pregnancy-with-the-maternity-care-bundle/"
     },
     {
-      "id": "2026-08-nmpa-state-of-nation-birth-trends",
-      "date": "2026-08-13",
-      "kind": "report",
-      "source": "RCOG",
-      "weight": "aware",
-      "title": "Birth trends: caesarean rate hits 42.8%, vaginal birth falls further",
-      "why": "Caesarean birth rates keep climbing across Great Britain, reaching 42.8% in 2024, while spontaneous vaginal birth without instruments dropped to 46.4%, according to the latest National Maternity and Perinatal Audit report. Expect this data on workload and staffing pressures to surface in handover and service planning discussions, alongside gaps in national blood-loss reporting.",
-      "url": "https://www.rcog.org.uk/news/new-report-reveals-continuing-shifts-in-birth-trends-in-great-britain/"
+      "id": "2026-09-mhra-parenteral-nutrition-filters",
+      "date": "2026-09-02",
+      "kind": "safety",
+      "source": "MHRA",
+      "weight": "practice",
+      "title": "Parenteral nutrition: use an in-line filter to prevent embolic harm",
+      "why": "Parenteral nutrition without a filter has been linked to a fatal embolism. On neonatal units and any ward giving parenteral nutrition, ensure the specified filter is in place before starting treatment.",
+      "url": "https://www.gov.uk/drug-safety-update/filters-should-be-used-during-the-administration-of-parenteral-nutrition-for-patients-in-all-care-settings"
     },
     {
       "id": "2026-07-mhra-domperidone-phaeochromocytoma",
@@ -27,57 +27,39 @@
       "kind": "safety",
       "source": "MHRA",
       "weight": "practice",
-      "title": "Domperidone: new contraindication in phaeochromocytoma",
-      "why": "Domperidone now carries a contraindication in phaeochromocytoma because of reports of severe hypertensive crises. Check for a history of adrenal tumour before prescribing domperidone for hyperemesis gravidarum or lactation support, and stop it if suspicion arises.",
+      "title": "Domperidone: avoid use in suspected phaeochromocytoma",
+      "why": "Domperidone must not be used when phaeochromocytoma is confirmed or suspected. When choosing an antiemetic, particularly in pregnancy or acute assessment, check for this rare endocrine diagnosis before prescribing.",
       "url": "https://www.gov.uk/drug-safety-update/domperidone-new-contraindication-in-patients-with-phaeochromocytoma-due-to-the-risk-of-severe-hypertension"
     },
     {
-      "id": "2026-07-mhra-botulinum-toxin-iatrogenic-botulism",
-      "date": "2026-07-15",
+      "id": "2026-08-ngpod-device-withdrawal",
+      "date": "2026-08-24",
       "kind": "safety",
       "source": "MHRA",
-      "weight": "aware",
-      "title": "Botulinum toxin: strengthened warning on iatrogenic botulism",
-      "why": "Botulinum toxin products now carry stronger warnings after reports of iatrogenic botulism when the toxin spreads beyond the injection site. This matters for urogynaecology clinics giving Botox for overactive bladder, so counsel patients to seek urgent review for new swallowing, breathing or muscle weakness symptoms.",
-      "url": "https://www.gov.uk/drug-safety-update/botulinum-toxin-type-a-products-updated-warnings-regarding-risk-of-iatrogenic-botulism"
+      "weight": "practice",
+      "title": "NGPod pH devices: quarantine and dispose of withdrawn stock",
+      "why": "NGPod pH-testing devices have been withdrawn from the UK market and must no longer be used. On neonatal and maternity wards, quarantine stock and use the approved local alternative for confirming nasogastric tube placement.",
+      "url": "https://www.gov.uk/drug-device-alerts/ngpod-ph-testing-device-quarantine-and-dispose-of-all-devices-dsi-slash-2026-slash-009"
     },
     {
-      "id": "2026-07-rcog-cord-clamping-sip",
-      "date": "2026-07-23",
-      "kind": "guideline",
-      "source": "RCOG",
+      "id": "2026-08-nmpa-birth-trends-caesarean-rate",
+      "date": "2026-08-13",
+      "kind": "report",
+      "source": "REPORT",
       "weight": "aware",
-      "title": "Cord clamping: RCOG updates evidence review backing delayed clamping",
-      "why": "RCOG's updated evidence review confirms that waiting before clamping the umbilical cord improves newborn outcomes and that immediate clamping should stay the exception, not the rule. This lands at every delivery, so it is worth reaffirming delayed clamping as default and reserving immediate clamping for clear maternal or neonatal indications.",
-      "url": "https://www.rcog.org.uk/news/waiting-before-clamping-the-umbilical-cord-improves-newborn-outcomes/",
-      "link": {
-        "type": "flowchart",
-        "id": "GTG50_CORD"
-      }
+      "title": "Birth trends: caesarean rate reaches 42.8% across Great Britain",
+      "why": "National maternity data show caesarean birth reached 42.8% in Great Britain in 2024, while unassisted vaginal birth fell to 46.4%. Use these figures in service planning and handover discussions, but remember they describe population trends rather than a recommendation for an individual birth.",
+      "url": "https://www.rcog.org.uk/news/new-report-reveals-continuing-shifts-in-birth-trends-in-great-britain/"
     },
     {
-      "id": "2026-08-rcog-fibroid-guideline-development",
-      "date": "2026-08-07",
+      "id": "2026-08-rcog-gynaecology-waiting-list-rise",
+      "date": "2026-08-17",
       "kind": "report",
       "source": "RCOG",
       "weight": "aware",
-      "title": "Fibroids: RCOG to develop new national Green-top Guideline",
-      "why": "RCOG is building a new national guideline on fibroid care after running its first UK Fibroid Summit and raising the topic in Westminster. Nothing is published yet, but trainees managing fibroids in clinic or theatre should expect a dedicated Green-top Guideline in the coming months.",
-      "url": "https://www.rcog.org.uk/news/presidents-blog-august-2026/"
-    },
-    {
-      "id": "2026-07-gtg31-sga-growth-charts",
-      "date": "2026-07-21",
-      "kind": "guideline",
-      "source": "RCOG",
-      "weight": "practice",
-      "title": "Small-for-gestational-age fetus (GTG31): INTERGROWTH charts dropped",
-      "why": "The small-for-gestational-age fetus guideline (GTG31) no longer backs INTERGROWTH charts, following NHS England's decision to stop using them, and instead names four acceptable standards: Hadlock, WHO, FMF and GROW. Check which chart your unit has moved to for estimated fetal weight and growth surveillance, since local practice may now differ from what you were trained on.",
-      "url": "https://www.rcog.org.uk/news/rcog-the-investigation-and-management-of-the-small-for-gestational-age-fetus-green-top-guideline-update/",
-      "link": {
-        "type": "reader",
-        "id": "GTG31"
-      }
+      "title": "Gynaecology waiting list rises again as new referrals increase",
+      "why": "Gynaecology demand is rising despite a slight fall in the overall elective waiting list. In service meetings and handover, use the figures as context for capacity and prioritisation, while continuing to safety-net patients whose symptoms worsen during delays.",
+      "url": "https://www.rcog.org.uk/news/gynaecology-waits-worsen-for-third-month-as-demand-rises-rcog-warns/"
     },
     {
       "id": "2026-06-marthas-rule-maternity-rollout",
