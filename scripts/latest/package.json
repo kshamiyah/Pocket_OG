@@ -7,6 +7,6 @@
     "harvest": "node harvest.mjs"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.110.0"
+    "openai": "^7.5.0"
   }
 }

@@ -25,7 +25,7 @@ next online visit.
    reserved for **RCOG news articles** so NICE links do not crowd them out.
 3. **Dedupe** against everything already surfaced (`latest.json` ids + urls, plus
    `seen.json`), so nothing returns a second time.
-4. **Triage** (`harvest.mjs`): Claude scores each candidate against an explicit
+4. **Triage** (`harvest.mjs`): the model scores each candidate against an explicit
    UK-O&G-trainee rubric. It drafts `what_changed` for the PR reviewer and a
    two-sentence `why` for the app (gist + ward hook): topic before guideline code,
    briefing tone not changelog prose. `what_changed` is not merged into the feed.
@@ -44,8 +44,8 @@ lines get your review before merge.
 
 Add repository secrets:
 
-- `anthropic_api_key` (required GitHub Actions secret; passed to the harvester as `ANTHROPIC_API_KEY`)
-- `ANTHROPIC_MODEL` (optional; defaults to `claude-sonnet-5`)
+- `openai_api_key` (required GitHub Actions secret; passed to the harvester as `OPENAI_API_KEY`)
+- `OPENAI_MODEL` (optional; defaults to `gpt-5.6-luna`)
 - `PUBMED_API_KEY` (optional; raises NCBI rate limits)
 
 ## Teaching it your taste
@@ -66,7 +66,7 @@ Over time this turns "relevant" from a guess into your demonstrated taste.
 ```sh
 cd scripts/latest
 npm install
-ANTHROPIC_API_KEY=sk-... node harvest.mjs
+OPENAI_API_KEY=sk-... node harvest.mjs
 ```
 
 It writes proposed changes to `latest.json` / `seen.json` and a `pr-body.md`
