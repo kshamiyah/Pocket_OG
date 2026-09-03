@@ -1,7 +1,7 @@
 // Latest feed harvester.
 //
 // Runs on a schedule (see .github/workflows/latest-harvest.yml). It gathers
-// candidate stories from trusted sources, asks Claude to triage them against an
+// candidate stories from trusted sources, asks the model to triage them against an
 // explicit UK-O&G-trainee rubric, formats the survivors for latest.json, and
 // writes the changes so the workflow can open a PR. Nothing reaches users until
 // a human merges that PR.
@@ -11,7 +11,7 @@
 //      maternity, NICE/RCOG/MBRRACE listing pages)
 //   2. deep-fetch Update-information / article pages so the delta is in context
 //   3. dedupe against everything already surfaced (latest.json + seen.json)
-//   4. Claude scores each candidate; drafts what_changed (reviewer) + why (app, two sentences)
+//   4. the model scores each candidate; drafts what_changed (reviewer) + why (app, two sentences)
 //   5. post-filter rejects filler, duplicate why/delta, and listing-hub URLs
 //      (guideline items need a changelog delta; news/report items need a clear
 //      what-happened statement instead)
@@ -23,7 +23,7 @@
 import { readFileSync, writeFileSync, existsSync, appendFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { harvestPubMed, harvestGovUk, harvestNhsEnglandMaternity, harvestPages, fetchDeepExcerpts, isListingHub, isRcogNewsArticle } from "./sources.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -34,7 +34,7 @@ const DECISIONS_PATH = resolve(HERE, "decisions.jsonl");
 const READER_PATH = resolve(REPO, "apps/pocket-og/src/data/readerAvailable.js");
 const FLOWCHARTS_PATH = resolve(REPO, "apps/pocket-og/src/data/flowcharts.js");
 
-const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
+const MODEL = process.env.OPENAI_MODEL || "gpt-5.6-luna";
 const MAX_ITEMS = Number(process.env.LATEST_MAX_ITEMS || 10);
 const RESEARCH_SUBCAP = Number(process.env.LATEST_RESEARCH_SUBCAP || 3);
 const LOOKBACK_DAYS = Number(process.env.LATEST_LOOKBACK_DAYS || 3);
@@ -254,12 +254,11 @@ function largelyDuplicates(a, b) {
   return false;
 }
 
-function isRetryableAnthropicError(err) {
+function isRetryableApiError(err) {
   const status = err?.status;
-  if (status === 529 || status === 429 || status === 503 || status === 502) return true;
-  if (err?.error?.error?.type === "overloaded_error") return true;
-  if (err?.type === "overloaded_error") return true;
-  if (err?.headers?.get?.("x-should-retry") === "true") return true;
+  if (status === 429 || status === 500 || status === 502 || status === 503 || status === 529) return true;
+  if (err?.code === "rate_limit_exceeded" || err?.code === "server_error") return true;
+  if (err?.name === "APIConnectionError" || err?.name === "APIConnectionTimeoutError") return true;
   return false;
 }
 
@@ -269,18 +268,18 @@ async function sleep(ms) {
 
 // SDK default retries are often not enough during overload spikes.
 async function createTriageMessage(client, request) {
-  const attempts = Number(process.env.LATEST_ANTHROPIC_RETRIES || 6);
-  const baseMs = Number(process.env.LATEST_ANTHROPIC_RETRY_BASE_MS || 8000);
+  const attempts = Number(process.env.LATEST_TRIAGE_RETRIES || 6);
+  const baseMs = Number(process.env.LATEST_TRIAGE_RETRY_BASE_MS || 8000);
   let lastErr;
   for (let i = 0; i < attempts; i++) {
     try {
-      return await client.messages.create(request);
+      return await client.responses.create(request);
     } catch (err) {
       lastErr = err;
-      if (!isRetryableAnthropicError(err) || i === attempts - 1) throw err;
+      if (!isRetryableApiError(err) || i === attempts - 1) throw err;
       const wait = baseMs * (2 ** i) + Math.floor(Math.random() * 2000);
       console.warn(
-        `Anthropic triage overloaded (${err.status ?? err.type ?? "error"}); ` +
+        `Triage request failed (${err.status ?? err.code ?? "error"}); ` +
         `retry ${i + 1}/${attempts - 1} in ${Math.round(wait / 1000)}s`
       );
       await sleep(wait);
@@ -359,17 +358,16 @@ async function main() {
     decisions: recentDecisions(),
   });
 
-  const client = new Anthropic({ maxRetries: 0 });
+  const client = new OpenAI({ maxRetries: 0 });
   const msg = await createTriageMessage(client, {
     model: MODEL,
-    max_tokens: 16000,
-    thinking: { type: "adaptive" },
-    output_config: { effort: "medium", format: { type: "json_schema", schema: ITEM_SCHEMA } },
-    messages: [{ role: "user", content: prompt }],
+    max_output_tokens: 16000,
+    reasoning: { effort: "medium" },
+    text: { format: { type: "json_schema", name: "latest_items", schema: ITEM_SCHEMA, strict: true } },
+    input: [{ role: "user", content: prompt }],
   });
 
-  const textBlock = msg.content.find(b => b.type === "text");
-  const parsed = JSON.parse(textBlock.text);
+  const parsed = JSON.parse(msg.output_text);
   let items = Array.isArray(parsed.items) ? parsed.items : [];
 
   // Post-filter: caps, dedupe, reject filler / hub URLs, validate links.

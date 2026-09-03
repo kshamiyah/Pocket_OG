@@ -1,16 +1,16 @@
 name: Latest feed harvest
 
-# Drafts new Latest-feed stories for review every 2 days, and on demand.
+# Drafts new Latest-feed stories for review once a week, and on demand.
 # It never publishes directly: it opens a PR you review and merge. Merging the
 # PR triggers the normal Vercel deploy, and installed apps pick up the new
 # latest.json on their next online visit (no app version bump needed).
 #
-# Setup: add an anthropic_api_key repository secret. Optionally PUBMED_API_KEY
-# (raises NCBI rate limits) and ANTHROPIC_MODEL (defaults to claude-sonnet-5).
+# Setup: add an openai_api_key repository secret. Optionally PUBMED_API_KEY
+# (raises NCBI rate limits) and OPENAI_MODEL (defaults to gpt-5.6-luna).
 
 on:
   schedule:
-    - cron: "0 6 */2 * *" # 06:00 UTC every second day
+    - cron: "0 6 * * 0" # 06:00 UTC every Sunday
   workflow_dispatch:
     inputs:
       lookback_days:
@@ -44,8 +44,8 @@ jobs:
         id: harvest
         working-directory: scripts/latest
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.anthropic_api_key }}
-          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
+          OPENAI_API_KEY: ${{ secrets.openai_api_key }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
           PUBMED_API_KEY: ${{ secrets.PUBMED_API_KEY }}
           LATEST_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '3' }}
         run: node harvest.mjs
