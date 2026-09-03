@@ -22,26 +22,6 @@
       "url": "https://www.gov.uk/drug-safety-update/filters-should-be-used-during-the-administration-of-parenteral-nutrition-for-patients-in-all-care-settings"
     },
     {
-      "id": "2026-07-mhra-domperidone-phaeochromocytoma",
-      "date": "2026-07-21",
-      "kind": "safety",
-      "source": "MHRA",
-      "weight": "practice",
-      "title": "Domperidone: avoid use in suspected phaeochromocytoma",
-      "why": "Domperidone must not be used when phaeochromocytoma is confirmed or suspected. When choosing an antiemetic, particularly in pregnancy or acute assessment, check for this rare endocrine diagnosis before prescribing.",
-      "url": "https://www.gov.uk/drug-safety-update/domperidone-new-contraindication-in-patients-with-phaeochromocytoma-due-to-the-risk-of-severe-hypertension"
-    },
-    {
-      "id": "2026-08-ngpod-device-withdrawal",
-      "date": "2026-08-24",
-      "kind": "safety",
-      "source": "MHRA",
-      "weight": "practice",
-      "title": "NGPod pH devices: quarantine and dispose of withdrawn stock",
-      "why": "NGPod pH-testing devices have been withdrawn from the UK market and must no longer be used. On neonatal and maternity wards, quarantine stock and use the approved local alternative for confirming nasogastric tube placement.",
-      "url": "https://www.gov.uk/drug-device-alerts/ngpod-ph-testing-device-quarantine-and-dispose-of-all-devices-dsi-slash-2026-slash-009"
-    },
-    {
       "id": "2026-08-nmpa-birth-trends-caesarean-rate",
       "date": "2026-08-13",
       "kind": "report",
@@ -50,16 +30,6 @@
       "title": "Birth trends: caesarean rate reaches 42.8% across Great Britain",
       "why": "National maternity data show caesarean birth reached 42.8% in Great Britain in 2024, while unassisted vaginal birth fell to 46.4%. Use these figures in service planning and handover discussions, but remember they describe population trends rather than a recommendation for an individual birth.",
       "url": "https://www.rcog.org.uk/news/new-report-reveals-continuing-shifts-in-birth-trends-in-great-britain/"
-    },
-    {
-      "id": "2026-08-rcog-gynaecology-waiting-list-rise",
-      "date": "2026-08-17",
-      "kind": "report",
-      "source": "RCOG",
-      "weight": "aware",
-      "title": "Gynaecology waiting list rises again as new referrals increase",
-      "why": "Gynaecology demand is rising despite a slight fall in the overall elective waiting list. In service meetings and handover, use the figures as context for capacity and prioritisation, while continuing to safety-net patients whose symptoms worsen during delays.",
-      "url": "https://www.rcog.org.uk/news/gynaecology-waits-worsen-for-third-month-as-demand-rises-rcog-warns/"
     },
     {
       "id": "2026-06-marthas-rule-maternity-rollout",
