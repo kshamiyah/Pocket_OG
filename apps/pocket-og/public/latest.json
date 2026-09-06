@@ -1,6 +1,26 @@
 {
-  "updated": "2026-09-03",
+  "updated": "2026-09-06",
   "items": [
+    {
+      "id": "2026-02-mhra-semaglutide-naion",
+      "date": "2026-02-05",
+      "kind": "safety",
+      "source": "MHRA",
+      "weight": "aware",
+      "title": "Semaglutide linked to very rare sudden visual loss",
+      "why": "Semaglutide has a very rare association with sudden visual deterioration in one eye. Ask about GLP-1 medicines when assessing acute visual symptoms in pregnancy or reproductive health clinics, and arrange urgent ophthalmology review if vision suddenly falls.",
+      "url": "https://www.gov.uk/drug-safety-update/semaglutide-wegovy-ozempic-and-rybelsus-risk-of-non-arteritic-anterior-ischemic-optic-neuropathy-naion"
+    },
+    {
+      "id": "2026-01-mhra-gabapentinoid-dependence-warnings",
+      "date": "2026-01-08",
+      "kind": "safety",
+      "source": "MHRA",
+      "weight": "aware",
+      "title": "Gabapentinoid and sedative medicines receive stronger dependence warnings",
+      "why": "Gabapentinoids and sedatives are encountered in pregnancy, postnatal care and gynaecology pain practice. Before prescribing or stopping them, discuss dependence and withdrawal risks and make a planned review and tapering arrangement where appropriate.",
+      "url": "https://www.gov.uk/drug-safety-update/improving-information-supplied-with-gabapentinoids-pregabalin-slash-gabapentin-benzodiazepines-and-z-drugs"
+    },
     {
       "id": "2026-09-gtg37a-vte-interim",
       "date": "2026-09-03",
