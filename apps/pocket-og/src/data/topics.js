@@ -5,6 +5,8 @@
 // beyond the labels.
 //
 // Shape:
+//   kind        — optional; "report" renders a Report card (source colour,
+//                 "Report" label) instead of an orange Topic card
 //   terms       — normalised queries that trigger the card (lower-case)
 //   gl          — owning guideline code, drives the accent colour via glColors
 //   description — one sentence, paraphrased from the anchor guideline's own
@@ -16,6 +18,89 @@
 //     trial (id = trials.js page id, opens Library > Articles > Trials)
 
 export const TOPICS = {
+  // ── Reports ─────────────────────────────────────────────────────────────────
+  "mbrrace-2026": {
+    id: "mbrrace-2026",
+    kind: "report",
+    title: "MBRRACE 2026",
+    subtitle: "Saving Lives, Improving Mothers' Care · 2022–24 data",
+    description: "MBRRACE-UK's 2026 report on maternal deaths in 2022–24: 252 women died during or up to six weeks after pregnancy in the UK, a rate of 12.80 per 100,000 maternities (MBRRACE 2026).",
+    gl: "MBRRACE_SLMC2026",
+    terms: [
+      "mbrrace", "mbrrace 2026", "mbrrace-uk", "mbrrace uk", "mbrrace report", "mbrrace 2026 report",
+      "slmc", "slmc 2026", "saving lives improving mothers care", "saving lives improving mothers' care",
+      "maternal death", "maternal deaths", "maternal mortality",
+      "confidential enquiry", "confidential enquiry into maternal deaths",
+    ],
+    sections: [
+      {
+        heading: "Report sections",
+        entries: [
+          { type: "reader", id: "MBRRACE_SLMC2026", sectionId: "slmc2026-overview", gl: "MBRRACE_SLMC2026", label: "Key surveillance findings", sublabel: "2022–24: causes, trends, inequalities" },
+          { type: "reader", id: "MBRRACE_SLMC2026", sectionId: "slmc2026-recommendations", gl: "MBRRACE_SLMC2026", label: "New recommendations & recurring messages", sublabel: "The five new national recommendations" },
+          { type: "reader", id: "MBRRACE_SLMC2026", sectionId: "slmc2026-haemorrhage", gl: "MBRRACE_SLMC2026", label: "Obstetric haemorrhage & AFE", sublabel: "Recognition, coagulation, PAS, caesarean capacity" },
+          { type: "reader", id: "MBRRACE_SLMC2026", sectionId: "slmc2026-infection", gl: "MBRRACE_SLMC2026", label: "Infection & sepsis", sublabel: "Sepsis Six, group A strep, PPROM" },
+          { type: "reader", id: "MBRRACE_SLMC2026", sectionId: "slmc2026-epilepsy", gl: "MBRRACE_SLMC2026", label: "Epilepsy & seizure disorders", sublabel: "SUDEP, medication levels, joined-up care" },
+          { type: "reader", id: "MBRRACE_SLMC2026", sectionId: "slmc2026-stroke", gl: "MBRRACE_SLMC2026", label: "Stroke & headache", sublabel: "Headache red flags, postnatal hypertension" },
+          { type: "reader", id: "MBRRACE_SLMC2026", sectionId: "slmc2026-medical", gl: "MBRRACE_SLMC2026", label: "Medical & surgical conditions", sublabel: "Pancreatitis, DKA, phaeochromocytoma" },
+          { type: "reader", id: "MBRRACE_SLMC2026", sectionId: "slmc2026-critical-care", gl: "MBRRACE_SLMC2026", label: "Critical care & anaesthesia", sublabel: "ICU standards, difficult IV access" },
+        ],
+      },
+      {
+        heading: "Pathways",
+        entries: [
+          { type: "flowchart", id: "GTG52_PPH", gl: "GTG52", label: "Postpartum haemorrhage", sublabel: "GTG52 flowchart, step through the pathway" },
+          { type: "flowchart", id: "GTG64_SEPSIS", gl: "GTG64", label: "Maternal sepsis", sublabel: "GTG64 flowchart, step through the pathway" },
+          { type: "flowchart", id: "GTG68_SEIZURE", gl: "GTG68", label: "Seizures in pregnancy", sublabel: "GTG68 flowchart, step through the pathway" },
+          { type: "flowchart", id: "MATERNAL_COLLAPSE_ARREST", gl: "GTG56", label: "Obstetric cardiac arrest", sublabel: "GTG56 flowchart, step through the algorithm" },
+        ],
+      },
+      {
+        heading: "Earlier report",
+        entries: [
+          { type: "reader", id: "MBRRACE_SLMC2025", gl: "MBRRACE_SLMC2025", label: "MBRRACE 2025", sublabel: "2021–23: hypertension, cardiac, disadvantage, mental health" },
+        ],
+      },
+    ],
+  },
+
+  "mbrrace-2025": {
+    id: "mbrrace-2025",
+    kind: "report",
+    title: "MBRRACE 2025",
+    subtitle: "Saving Lives, Improving Mothers' Care · 2021–23 data",
+    description: "MBRRACE-UK's 2025 report on maternal deaths in 2021–23: 257 women died during or up to six weeks after pregnancy in the UK, a rate of 12.82 per 100,000 maternities (MBRRACE 2025).",
+    gl: "MBRRACE_SLMC2025",
+    terms: ["mbrrace 2025", "mbrrace 2025 report", "slmc 2025"],
+    sections: [
+      {
+        heading: "Report sections",
+        entries: [
+          { type: "reader", id: "MBRRACE_SLMC2025", sectionId: "slmc2025-overview", gl: "MBRRACE_SLMC2025", label: "Key surveillance findings", sublabel: "2021–23: causes, trends, inequalities" },
+          { type: "reader", id: "MBRRACE_SLMC2025", sectionId: "slmc2025-hypertension", gl: "MBRRACE_SLMC2025", label: "Hypertensive disorders of pregnancy", sublabel: "Monitoring, treatment, postnatal care" },
+          { type: "reader", id: "MBRRACE_SLMC2025", sectionId: "slmc2025-cardiac", gl: "MBRRACE_SLMC2025", label: "Cardiac disease", sublabel: "Red flags, inherited conditions" },
+          { type: "reader", id: "MBRRACE_SLMC2025", sectionId: "slmc2025-disadvantages", gl: "MBRRACE_SLMC2025", label: "Multiple disadvantages & inequalities", sublabel: "Domestic abuse, substance use, safeguarding" },
+          { type: "reader", id: "MBRRACE_SLMC2025", sectionId: "slmc2025-mental-health", gl: "MBRRACE_SLMC2025", label: "Mental health", sublabel: "Suicide, substance use, perinatal mental health teams" },
+        ],
+      },
+      {
+        heading: "Related guides",
+        entries: [
+          { type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy", sublabel: "GL952: local guideline" },
+          { type: "reader", id: "ESC_CVD", gl: "ESC_CVD", label: "Cardiac Disease in Pregnancy", sublabel: "ESC 2025" },
+          { type: "reader", id: "CG192", gl: "CG192", label: "Perinatal Mental Health", sublabel: "NICE CG192" },
+        ],
+      },
+      {
+        heading: "Newer report",
+        entries: [
+          { type: "reader", id: "MBRRACE_SLMC2026", gl: "MBRRACE_SLMC2026", label: "MBRRACE 2026", sublabel: "2022–24: latest surveillance and new recommendations" },
+        ],
+      },
+    ],
+  },
+
+  // ── Topics ──────────────────────────────────────────────────────────────────
   "pre-eclampsia": {
     id: "pre-eclampsia",
     title: "Pre-eclampsia",

@@ -11,6 +11,7 @@ export const UPDATES = [
       { tag: "new", text: "MBRRACE 2026 (Saving Lives, Improving Mothers' Care, 2022–24 data) in the reader: latest surveillance figures, the five new national recommendations, and lessons on haemorrhage and AFE, infection and sepsis, epilepsy, stroke, general medical and surgical conditions, and critical care and anaesthesia." },
       { tag: "improved", text: "MBRRACE pearls and TOG related-guide links now point to the 2026 report, with five new pearls (MEWS in all settings, group A strep, lamotrigine levels, pancreatitis, DKA with normal glucose). The 2025 report stays in the library for its hypertension, cardiac, disadvantage and mental health chapters." },
       { tag: "improved", text: "Search finds the new report by \"MBRRACE\", \"SLMC\", \"SUDEP\", \"MEWS\" or \"pancreatitis\"." },
+      { tag: "new", text: "Report cards: searching \"MBRRACE\" or \"maternal death\" shows an MBRRACE 2026 card above the results, linking to each section of the report and related pathways. \"mbrrace 2025\" shows the 2025 report card." },
       { tag: "fixed", text: "The MBRRACE 2025 report is now searchable too: try \"mbrrace 2025\", \"mbrrace cardiac\" or \"mbrrace mental health\". Section titles in both reports start with \"MBRRACE\" so they are easy to spot in results." },
     ],
   },

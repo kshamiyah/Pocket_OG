@@ -37,12 +37,33 @@ function RowIcon({ type, className }) {
   );
 }
 
+// Orange is the dedicated topic-card colour: no source body owns it, and it
+// stands out against the app's cool source palette. Report cards
+// (kind: "report") instead take their issuing body's source colour and a
+// "Report" label, so a report never reads as a clinical topic. glColors
+// returns complete, literal class strings, so nothing is lost to the purge.
+const TOPIC_THEME = {
+  frame: "border-orange-200",
+  bar: "bg-orange-500",
+  header: "border-orange-100 bg-orange-50/50",
+  pill: "bg-orange-500",
+  tagline: "text-orange-700/70",
+};
+
+function cardTheme(topic) {
+  if (topic.kind !== "report") return TOPIC_THEME;
+  const c = glColors(topic.gl);
+  return { frame: c.border, bar: c.accent, header: `${c.border} ${c.badge}`, pill: c.solid, tagline: c.text };
+}
+
 export default function TopicCard({ topic, onNavigate, onOpenGuideline }) {
   // First section open by default so the card starts compact but not empty.
   const [openSections, setOpenSections] = useState(() =>
     topic ? { [topic.sections[0]?.heading]: true } : {}
   );
   if (!topic) return null;
+  const isReport = topic.kind === "report";
+  const theme = cardTheme(topic);
   const toggleSection = (heading) =>
     setOpenSections(prev => ({ ...prev, [heading]: !prev[heading] }));
 
@@ -56,14 +77,16 @@ export default function TopicCard({ topic, onNavigate, onOpenGuideline }) {
   };
 
   return (
-    <div className="mb-6 rounded-2xl overflow-hidden bg-white border border-orange-200 shadow-sm">
-      {/* Orange is the dedicated topic-card colour: no source body owns it,
-          and it stands out against the app's cool source palette. */}
-      <div className="h-1.5 bg-orange-500" />
-      <div className="px-4 pt-3.5 pb-3 border-b border-orange-100 bg-orange-50/50">
+    <div className={`mb-6 rounded-2xl overflow-hidden bg-white border ${theme.frame} shadow-sm`}>
+      <div className={`h-1.5 ${theme.bar}`} />
+      <div className={`px-4 pt-3.5 pb-3 border-b ${theme.header}`}>
         <div className="flex items-center gap-2">
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase text-white bg-orange-500">Topic</span>
-          <span className="text-[10px] text-orange-700/70 font-medium">Everything in the app on this</span>
+          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase text-white ${theme.pill}`}>
+            {isReport ? "Report" : "Topic"}
+          </span>
+          <span className={`text-[10px] font-medium ${theme.tagline}`}>
+            {isReport ? "Key findings and lessons from this report" : "Everything in the app on this"}
+          </span>
         </div>
         <h3 className="mt-1.5 text-lg font-bold text-gray-900 tracking-tight">{topic.title}</h3>
         {topic.subtitle && <p className="text-xs text-gray-400 mt-0.5">{topic.subtitle}</p>}
@@ -92,7 +115,8 @@ export default function TopicCard({ topic, onNavigate, onOpenGuideline }) {
           <div className="pb-1">
             {section.entries.map((entry, i) => {
               const ecol = glColors(entry.gl ?? topic.gl);
-              const badgeLabel = GUIDELINES[entry.gl]?.code ?? entry.gl;
+              // A report's own sections don't need its (long) code repeated on every row.
+              const badgeLabel = isReport && entry.gl === topic.gl ? null : (GUIDELINES[entry.gl]?.code ?? entry.gl);
               return (
                 <button
                   key={`${entry.type}-${entry.id}-${entry.sectionId ?? i}`}
@@ -120,7 +144,9 @@ export default function TopicCard({ topic, onNavigate, onOpenGuideline }) {
       })}
 
       <p className="px-4 py-2.5 border-t border-gray-50 text-[10px] text-gray-400 leading-snug">
-        Curated links into cited guides, pathways and drug pages. Decision aid only; clinical responsibility remains with the treating clinician.
+        {isReport
+          ? "Links into this report's sections and related guides. Decision aid only; clinical responsibility remains with the treating clinician."
+          : "Curated links into cited guides, pathways and drug pages. Decision aid only; clinical responsibility remains with the treating clinician."}
       </p>
     </div>
   );
