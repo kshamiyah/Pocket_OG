@@ -6,7 +6,7 @@ export const MBRRACE_SLMC2025_SECTIONS = [
     setting: "All Settings",
     title: "MBRRACE 2025: Key Surveillance Findings",
     tags: [
-      "mbrrace", "mbrrace-uk", "saving lives improving mothers care", "slmc", "slmc 2025",
+      "mbrrace-uk", "mbrrace 2025", "saving lives improving mothers care", "slmc 2025",
       "maternal mortality", "maternal death", "maternal death rate", "confidential enquiry",
       "uk maternal mortality", "leading causes maternal death", "inequalities maternity",
     ],
@@ -72,7 +72,7 @@ export const MBRRACE_SLMC2025_SECTIONS = [
     setting: "Antenatal / Postnatal",
     title: "MBRRACE 2025: Hypertensive Disorders of Pregnancy",
     tags: [
-      "mbrrace hypertension", "mbrrace pre-eclampsia", "mbrrace eclampsia",
+      "mbrrace 2025", "mbrrace hypertension", "mbrrace pre-eclampsia", "mbrrace eclampsia",
       "pre-eclampsia death", "eclampsia death", "maternal hypertension mortality",
       "hypertensive disorders pregnancy deaths", "intracranial haemorrhage pregnancy",
       "HELLP syndrome death", "blood pressure pregnancy mbrrace",
@@ -130,7 +130,7 @@ export const MBRRACE_SLMC2025_SECTIONS = [
     setting: "All Settings",
     title: "MBRRACE 2025: Cardiac Disease",
     tags: [
-      "mbrrace cardiac", "mbrrace heart disease", "maternal cardiac death",
+      "mbrrace 2025", "mbrrace cardiac", "mbrrace heart disease", "maternal cardiac death",
       "cardiac disease pregnancy", "heart failure pregnancy", "aortic dissection pregnancy",
       "SADS pregnancy", "sudden cardiac death pregnancy", "ischaemic heart disease pregnancy",
       "tachycardia pregnancy red flag", "breathlessness pregnancy cardiac",
@@ -210,7 +210,7 @@ export const MBRRACE_SLMC2025_SECTIONS = [
     setting: "All Settings",
     title: "MBRRACE 2025: Multiple Disadvantages, Inequalities & Coincidental Deaths",
     tags: [
-      "mbrrace inequalities", "mbrrace deprivation", "mbrrace domestic abuse",
+      "mbrrace 2025", "mbrrace inequalities", "mbrrace deprivation", "mbrrace domestic abuse",
       "mbrrace substance use", "mbrrace social factors", "multiple disadvantages mbrrace",
       "accidental death pregnancy", "homicide pregnancy", "maternal homicide",
       "domestic violence pregnancy", "substance misuse maternity", "safeguarding maternity",
@@ -262,7 +262,7 @@ export const MBRRACE_SLMC2025_SECTIONS = [
     setting: "All Settings",
     title: "MBRRACE 2025: Mental Health",
     tags: [
-      "mbrrace mental health", "mbrrace suicide", "mbrrace substance use",
+      "mbrrace 2025", "mbrrace mental health", "mbrrace suicide", "mbrrace substance use",
       "maternal suicide", "perinatal mental health mbrrace", "postnatal suicide",
       "suicide after pregnancy", "late maternal death suicide", "psychiatric maternal death",
       "perinatal mental health team mbrrace", "substance use maternal death",
