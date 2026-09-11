@@ -10,7 +10,7 @@ export const CG192_SECTIONS = [
         "Depression and anxiety are the most common perinatal mental health conditions",
         "Postnatal psychosis (puerperal psychosis): affects 1–2 per 1000 births; can present within days of delivery",
         { text: "Bipolar disorder carries the highest risk of postpartum relapse — up to 50% risk of puerperal psychosis", mbrrace: "Women with bipolar disorder who were not on prophylactic medication in the postpartum period are disproportionately represented in maternal mental health deaths reviewed by MBRRACE 2021–23." },
-        { text: "Suicide and substance misuse are leading causes of late maternal deaths (6 weeks to 1 year postpartum)", mbrrace: "Suicide remains the leading cause of direct maternal death in the first postnatal year. MBRRACE 2025 highlights that many of these women had contact with services where their risk was not identified or acted upon." },
+        { text: "Suicide and substance misuse are leading causes of late maternal deaths (6 weeks to 1 year postpartum)", mbrrace: "Suicide remains the leading cause of maternal death between six weeks and one year after pregnancy (MBRRACE 2026). MBRRACE 2025 highlights that many of these women had contact with services where their risk was not identified or acted upon." },
       ]},
       { type: "subheading", value: "Routine Screening (NICE NG192)" },
       { type: "list", items: [

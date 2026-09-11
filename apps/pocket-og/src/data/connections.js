@@ -399,6 +399,25 @@ export const FLOWCHART_NODE_CONNECTIONS = {
 // Only phrases that appear in text / list blocks are listed (subheadings and
 // table cells render as plain text and do not receive RichText treatment).
 export const GUIDELINE_KEYWORD_LINKS = {
+  MBRRACE_SLMC2026: [
+    { phrase: "Placenta Praevia & Accreta Spectrum guide", type: "reader", id: "GTG27A", gl: "GTG27A", label: "Placenta Praevia & Accreta Spectrum" },
+    { phrase: "resuscitative hysterotomy", type: "reader", id: "GTG56",   gl: "GTG56",   label: "Maternal Collapse in Pregnancy and the Puerperium" },
+    { phrase: "Mental health conditions",  type: "reader", id: "CG192",   gl: "CG192",   label: "Perinatal Mental Health" },
+    { phrase: "Cardiac disease",           type: "reader", id: "ESC_CVD", gl: "ESC_CVD", label: "Cardiac Disease in Pregnancy" },
+    { phrase: "pre-eclampsia",             type: "reader", id: "GL952",   gl: "GL952",   label: "Hypertension in Pregnancy" },
+    { phrase: "GTG52",                     type: "reader", id: "GTG52",   gl: "GTG52",   label: "Postpartum Haemorrhage" },
+    { phrase: "GTG64",                     type: "reader", id: "GTG64",   gl: "GTG64",   label: "Maternal Sepsis (During & Following Pregnancy)" },
+    { phrase: "GTG68",                     type: "reader", id: "GTG68",   gl: "GTG68",   label: "Epilepsy in Pregnancy" },
+    { phrase: "PPROM",                     type: "reader", id: "GL895",   gl: "GL895",   label: "PPRoM" },
+    { phrase: "DKA",                       type: "reader", id: "GL983",   gl: "GL983",   label: "Diabetes in Pregnancy" },
+    { phrase: "Asthma",                    type: "reader", id: "NG244",   gl: "NG244",   label: "Asthma in Pregnancy" },
+    { phrase: "VTE",                       type: "reader", id: "GL891",   gl: "GL891",   label: "VTE in Pregnancy & Postnatal" },
+  ],
+
+  MBRRACE_SLMC2025: [
+    { phrase: "MBRRACE 2026", type: "reader", id: "MBRRACE_SLMC2026", gl: "MBRRACE_SLMC2026", label: "MBRRACE 2026" },
+  ],
+
   GL861: [
     { phrase: "pre-eclampsia",         type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
     { phrase: "diabetes",              type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },

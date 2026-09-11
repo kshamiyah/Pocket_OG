@@ -29,7 +29,7 @@ function MbrraceListItem({ item, rt }) {
       </div>
       {open && (
         <div className="mt-2 ml-5 rounded-xl bg-rose-50 border border-rose-100 px-3 py-2.5">
-          <p className="text-[9px] font-bold text-rose-400 uppercase tracking-widest mb-1">MBRRACE 2025</p>
+          <p className="text-[9px] font-bold text-rose-400 uppercase tracking-widest mb-1">MBRRACE-UK</p>
           <p className="text-xs text-rose-900 leading-snug">{item.mbrrace}</p>
         </div>
       )}

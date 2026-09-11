@@ -763,6 +763,11 @@ export const SYNONYMS = {
   "group a strep": ["gas sepsis","group a streptococcus","maternal sepsis","invasive gas"],
   "gas sepsis": ["group a strep","group a streptococcus","maternal sepsis"],
   "meows": ["maternal early obstetric warning score","early warning score pregnancy","track and trigger","maternal sepsis"],
+  "mews": ["maternity early warning score","meows","early warning score pregnancy","track and trigger"],
+  "mbrrace": ["mbrrace-uk","saving lives improving mothers care","slmc","maternal death","maternal mortality","confidential enquiry"],
+  "slmc": ["mbrrace","saving lives improving mothers care","maternal mortality"],
+  "sudep": ["sudden unexpected death in epilepsy","epilepsy","seizure","gtg68"],
+  "pancreatitis": ["acute pancreatitis","gallstones","amylase"],
 
   "perinatal mental health": ["postnatal depression","antenatal depression","epds","mental health pregnancy","postpartum psychosis"],
   "postnatal depression": ["perinatal mental health","epds","postpartum depression","antidepressants pregnancy","sertraline"],

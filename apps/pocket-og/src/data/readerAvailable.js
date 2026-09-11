@@ -8,6 +8,7 @@ export const READER_AVAILABLE = new Set([
   "BASHH_PID",
   "BASHH_HSV",
   "NG73",
+  "MBRRACE_SLMC2026",
   "MBRRACE_SLMC2025",
   "GTG5",
   "GTG56",

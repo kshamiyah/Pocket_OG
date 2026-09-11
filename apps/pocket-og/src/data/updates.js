@@ -4,6 +4,16 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.21.0",
+    date: "11/09/2026",
+    title: "MBRRACE 2026 maternal deaths report",
+    changes: [
+      { tag: "new", text: "MBRRACE 2026 (Saving Lives, Improving Mothers' Care, 2022–24 data) in the reader: latest surveillance figures, the five new national recommendations, and lessons on haemorrhage and AFE, infection and sepsis, epilepsy, stroke, general medical and surgical conditions, and critical care and anaesthesia." },
+      { tag: "improved", text: "MBRRACE pearls and TOG related-guide links now point to the 2026 report, with five new pearls (MEWS in all settings, group A strep, lamotrigine levels, pancreatitis, DKA with normal glucose). The 2025 report stays in the library for its hypertension, cardiac, disadvantage and mental health chapters." },
+      { tag: "improved", text: "Search finds the new report by \"MBRRACE\", \"SLMC\", \"SUDEP\", \"MEWS\" or \"pancreatitis\"." },
+    ],
+  },
+  {
     version: "1.20.0",
     date: "20/07/2026",
     title: "Latest tab: briefing layout and search",

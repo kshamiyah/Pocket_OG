@@ -389,7 +389,7 @@ export const TOG_SECTIONS = [
       year: 2007,
     },
     flowchartId: "TOG_CHD_PREGNANCY",
-    relatedGl: ["GL952", "MBRRACE_SLMC2025"],
+    relatedGl: ["GL952", "MBRRACE_SLMC2026"],
     tags: [
       "congenital heart disease pregnancy", "chd pregnancy", "cardiac disease pregnancy",
       "heart disease pregnancy", "coarctation of the aorta", "tetralogy of fallot",
@@ -482,7 +482,7 @@ export const TOG_SECTIONS = [
       year: 2007,
     },
     flowchartId: "TOG_ACQUIRED_CARDIAC",
-    relatedGl: ["GL891", "MBRRACE_SLMC2025"],
+    relatedGl: ["GL891", "MBRRACE_SLMC2026"],
     tags: [
       "cardiomyopathy pregnancy", "dilated cardiomyopathy pregnancy", "hypertrophic cardiomyopathy pregnancy",
       "peripartum cardiomyopathy", "heart failure pregnancy", "left ventricular dysfunction pregnancy",
@@ -532,7 +532,7 @@ export const TOG_SECTIONS = [
       year: 2013,
     },
     flowchartId: "TOG_MI_PREGNANCY",
-    relatedGl: ["GL891", "MBRRACE_SLMC2025"],
+    relatedGl: ["GL891", "MBRRACE_SLMC2026"],
     tags: [
       "myocardial infarction pregnancy", "mi pregnancy", "acute coronary syndrome pregnancy",
       "acs pregnancy", "chest pain pregnancy", "stemi pregnancy", "nstemi pregnancy",
@@ -621,7 +621,7 @@ export const TOG_SECTIONS = [
       year: 2019,
     },
     flowchartId: "TOG_ARRHYTHMIAS_PREGNANCY",
-    relatedGl: ["MBRRACE_SLMC2025"],
+    relatedGl: ["MBRRACE_SLMC2026"],
     tags: [
       "palpitations pregnancy", "cardiac arrhythmia pregnancy", "svt pregnancy",
       "supraventricular tachycardia pregnancy", "atrial fibrillation pregnancy", "atrial flutter pregnancy",
@@ -706,7 +706,7 @@ export const TOG_SECTIONS = [
       year: 2022,
     },
     flowchartId: "TOG_VALVULAR_PREGNANCY",
-    relatedGl: ["GL891", "MBRRACE_SLMC2025"],
+    relatedGl: ["GL891", "MBRRACE_SLMC2026"],
     tags: [
       "valvular heart disease pregnancy", "mitral stenosis pregnancy", "aortic stenosis pregnancy",
       "mitral regurgitation pregnancy", "aortic regurgitation pregnancy", "mechanical heart valve pregnancy",

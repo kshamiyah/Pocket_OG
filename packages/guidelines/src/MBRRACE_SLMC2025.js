@@ -4,13 +4,17 @@ export const MBRRACE_SLMC2025_SECTIONS = [
     gl: "MBRRACE_SLMC2025",
     condition: "Surveillance 2021–23",
     setting: "All Settings",
-    title: "SLMC 2025 — Key Surveillance Findings",
+    title: "MBRRACE 2025: Key Surveillance Findings",
     tags: [
       "mbrrace", "mbrrace-uk", "saving lives improving mothers care", "slmc", "slmc 2025",
       "maternal mortality", "maternal death", "maternal death rate", "confidential enquiry",
       "uk maternal mortality", "leading causes maternal death", "inequalities maternity",
     ],
     content: [
+      {
+        type: "text",
+        value: "Newer surveillance figures (2022–24) are in MBRRACE 2026. The topic chapters in this report (hypertensive disorders, cardiac disease, multiple disadvantages, mental health) remain the latest confidential enquiry findings on those topics.",
+      },
       {
         type: "text",
         value: "In 2021–23, 257 women died from direct and indirect causes during or up to six weeks after pregnancy in the UK — a maternal death rate of 12.82 per 100,000 maternities. A further 27 deaths were classified as coincidental.",
@@ -66,7 +70,7 @@ export const MBRRACE_SLMC2025_SECTIONS = [
     gl: "MBRRACE_SLMC2025",
     condition: "Hypertensive Disorders",
     setting: "Antenatal / Postnatal",
-    title: "SLMC 2025 — Hypertensive Disorders of Pregnancy",
+    title: "MBRRACE 2025: Hypertensive Disorders of Pregnancy",
     tags: [
       "mbrrace hypertension", "mbrrace pre-eclampsia", "mbrrace eclampsia",
       "pre-eclampsia death", "eclampsia death", "maternal hypertension mortality",
@@ -124,7 +128,7 @@ export const MBRRACE_SLMC2025_SECTIONS = [
     gl: "MBRRACE_SLMC2025",
     condition: "Cardiac Disease",
     setting: "All Settings",
-    title: "SLMC 2025 — Cardiac Disease",
+    title: "MBRRACE 2025: Cardiac Disease",
     tags: [
       "mbrrace cardiac", "mbrrace heart disease", "maternal cardiac death",
       "cardiac disease pregnancy", "heart failure pregnancy", "aortic dissection pregnancy",
@@ -204,7 +208,7 @@ export const MBRRACE_SLMC2025_SECTIONS = [
     gl: "MBRRACE_SLMC2025",
     condition: "Multiple Disadvantages",
     setting: "All Settings",
-    title: "SLMC 2025 — Multiple Disadvantages, Inequalities & Coincidental Deaths",
+    title: "MBRRACE 2025: Multiple Disadvantages, Inequalities & Coincidental Deaths",
     tags: [
       "mbrrace inequalities", "mbrrace deprivation", "mbrrace domestic abuse",
       "mbrrace substance use", "mbrrace social factors", "multiple disadvantages mbrrace",
@@ -256,7 +260,7 @@ export const MBRRACE_SLMC2025_SECTIONS = [
     gl: "MBRRACE_SLMC2025",
     condition: "Mental Health",
     setting: "All Settings",
-    title: "SLMC 2025 — Mental Health",
+    title: "MBRRACE 2025: Mental Health",
     tags: [
       "mbrrace mental health", "mbrrace suicide", "mbrrace substance use",
       "maternal suicide", "perinatal mental health mbrrace", "postnatal suicide",
