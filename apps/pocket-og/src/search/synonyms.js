@@ -339,6 +339,10 @@ export const SYNONYMS = {
   "uncertain viability": ["puv","pregnancy of uncertain viability","rescan","7-14 days"],
   "puv": ["uncertain viability","rescan","gestation sac","fetal pole"],
   "pul": ["pregnancy of unknown location","ectopic","bhcg","complete miscarriage"],
+  "missed miscarriage": ["silent miscarriage","delayed miscarriage","mifepristone","misoprostol","ng126"],
+  "incomplete miscarriage": ["retained products","misoprostol","ng126","miscarriage"],
+  "salpingectomy": ["ectopic surgery","tubal removal","laparoscopy ectopic","salpingotomy"],
+  "salpingotomy": ["tubal conservation","salpingectomy","ectopic surgery","persistent trophoblast"],
   "pregnancy of unknown location": ["pul","ectopic","bhcg","complete miscarriage"],
   // Iron deficiency anaemia
   "anaemia": ["iron deficiency","haemoglobin","ferritin","hb","oral iron","ferinject","iv iron","ida"],

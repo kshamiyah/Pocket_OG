@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 5173
+    },
+    {
+      "name": "pocket-og-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview", "-w", "apps/pocket-og", "--", "--port", "4173", "--strictPort"],
+      "port": 4173
     }
   ]
 }

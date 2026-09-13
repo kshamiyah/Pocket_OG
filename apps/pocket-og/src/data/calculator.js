@@ -3,7 +3,7 @@
 // Every threshold, interpretation, and clinical instruction below is taken
 // verbatim or directly cited from:
 //   - NICE NG126 (Ectopic pregnancy and miscarriage: diagnosis and initial
-//     management, last updated 23 August 2023)
+//     management, published 17 April 2019, last updated 17 June 2026)
 //   - RCOG/AEPU Green-top Guideline No. 21 (Diagnosis and Management of
 //     Ectopic Pregnancy, November 2016; BJOG 2016;123:e15–e55)
 //
@@ -15,7 +15,7 @@ export const CALCULATOR_SCENARIOS = [
     id: "PUL",
     title: "Pregnancy of unknown location",
     subtitle: "2 serum hCG levels ≥48 h apart",
-    source: "NICE NG126 §1.4.27–1.4.31",
+    source: "NICE NG126 §1.8.5–1.8.9",
     color: { accent: "bg-amber-500", text: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200" },
     description: "Use serial hCG to determine subsequent management of a pregnancy of unknown location.",
     pdfs: [
@@ -26,7 +26,7 @@ export const CALCULATOR_SCENARIOS = [
     id: "ECTOPIC_DECISION",
     title: "Tubal ectopic, initial management",
     subtitle: "Decide expectant / methotrexate / surgery",
-    source: "NICE NG126 §1.6.3–1.6.10 · RCOG GTG21 §5.1",
+    source: "NICE NG126 §1.14.1–1.15.3 · RCOG GTG21 §5.1",
     color: { accent: "bg-rose-500", text: "text-rose-700", bg: "bg-rose-50", border: "border-rose-200" },
     description: "Allocate a woman with an ultrasound-diagnosed tubal ectopic pregnancy to expectant, medical or surgical management.",
     pdfs: [
@@ -38,7 +38,7 @@ export const CALCULATOR_SCENARIOS = [
     id: "EXPECTANT_SURVEILLANCE",
     title: "Expectant management, surveillance",
     subtitle: "Serial hCG on days 2, 4 and 7",
-    source: "NICE NG126 §1.6.5",
+    source: "NICE NG126 §1.14.3",
     color: { accent: "bg-teal-500", text: "text-teal-700", bg: "bg-teal-50", border: "border-teal-200" },
     description: "Interpret serial hCG during expectant management of a tubal ectopic pregnancy.",
     pdfs: [
@@ -50,7 +50,7 @@ export const CALCULATOR_SCENARIOS = [
     id: "MTX_SURVEILLANCE",
     title: "Post-methotrexate surveillance",
     subtitle: "Day 4 and day 7 hCG after MTX",
-    source: "NICE NG126 §1.6.11 · RCOG GTG21 Appendix II",
+    source: "NICE NG126 §1.15.4 · RCOG GTG21 Appendix II",
     color: { accent: "bg-violet-500", text: "text-violet-700", bg: "bg-violet-50", border: "border-violet-200" },
     description: "Interpret day 4 → day 7 hCG following single-dose methotrexate for tubal ectopic pregnancy.",
     pdfs: [
@@ -107,10 +107,10 @@ export const CALCULATOR_SCENARIOS = [
 ];
 
 // ──────────────────────────────────────────────────────────────────────
-// Scenario 1 — PUL serial hCG (NG126 §1.4.27–1.4.32)
+// Scenario 1 — PUL serial hCG (NG126 §1.8.5–1.8.9)
 // ──────────────────────────────────────────────────────────────────────
 
-// Clinical-symptom override — NG126 §1.4.25, §1.4.28, §1.6.4
+// Clinical-symptom override — NG126 §1.8.3, §1.8.6, §1.14.2
 //   "Place more importance on clinical symptoms than on serum hCG results;
 //    review the woman's condition if any symptoms change."
 //   "Regardless of serum hCG levels, give written information about what
@@ -132,7 +132,7 @@ export function symptomOverride({ worseningPain, heavyBleeding, haemodynamicInst
     border: "border-red-200",
     summary: `Reported: ${triggers.join(", ")}.`,
     detail:
-      "NICE NG126 §1.4.25: place more importance on clinical symptoms than on serum hCG results; review the woman's condition if any symptoms change. §1.4.28: regardless of serum hCG levels, give written information about what to do if new or worsening symptoms occur, including how to access emergency care 24 hours a day.",
+      "NICE NG126 §1.8.3: place more importance on clinical symptoms than on serum hCG results; review the woman's condition if any symptoms change. §1.8.6: regardless of serum hCG levels, give written information about what to do if new or worsening symptoms occur, including how to access emergency care 24 hours a day.",
     actions: haemodynamicInstability
       ? [
           "Resuscitate (IV access, fluids, group & save / crossmatch).",
@@ -143,11 +143,12 @@ export function symptomOverride({ worseningPain, heavyBleeding, haemodynamicInst
           "Repeat TVS if not already done today.",
           "Manage symptoms and arrange senior gynaecology review.",
         ],
-    citation: "NICE NG126 §1.4.25 & §1.4.28",
+    citation: "NICE NG126 §1.8.3 & §1.8.6",
   };
 }
 
-// TVS-based PUL triage — NG126 §1.4.7, §1.4.9, §1.4.16
+// TVS-based PUL triage — NG126 §1.5.1, the guideline's definition of a
+// pregnancy of unknown location, and §1.7.1 to §1.7.4
 //   IUP seen on TVS → no longer a PUL.
 //   Adnexal mass / free fluid on TVS → suspected ectopic, leaves the PUL pathway.
 //   Only if TVS is non-diagnostic does the serial-hCG algorithm apply.
@@ -161,9 +162,9 @@ export function pulTvsTriage({ tvsDone, iupSeen, adnexalMassOrFreeFluid }) {
       border: "border-amber-200",
       summary: "TVS is the first-line diagnostic test before serial hCG.",
       detail:
-        "NICE NG126 §1.4.7: offer all women with a suspected early pregnancy complication a transvaginal ultrasound scan as the first-line diagnostic test. Use serial hCG only when TVS does not identify the location of the pregnancy.",
+        "NICE NG126 §1.5.1: offer women who attend an early pregnancy assessment service a transvaginal ultrasound scan to identify the location of the pregnancy and whether there is a fetal pole and heartbeat. §1.8.4: use serum hCG measurements only for assessing trophoblastic proliferation, to help determine subsequent management.",
       actions: ["Arrange TVS in the early pregnancy assessment service."],
-      citation: "NICE NG126 §1.4.7",
+      citation: "NICE NG126 §1.5.1",
     };
   }
   if (iupSeen) {
@@ -175,11 +176,11 @@ export function pulTvsTriage({ tvsDone, iupSeen, adnexalMassOrFreeFluid }) {
       border: "border-emerald-200",
       summary: "Manage as confirmed IUP — serial hCG is not indicated.",
       detail:
-        "NICE NG126 §1.4.9: if an intrauterine pregnancy is identified on the transvaginal ultrasound scan, the pregnancy is no longer of unknown location.",
+        "NICE NG126 defines a pregnancy of unknown location as a positive pregnancy test with no intrauterine or extrauterine pregnancy seen on transvaginal ultrasound scan (terms used in this guideline). Once an intrauterine pregnancy is seen, that definition no longer applies.",
       actions: [
         "Manage according to viability findings (viable IUP → routine antenatal care; non-viable IUP → miscarriage pathway).",
       ],
-      citation: "NICE NG126 §1.4.9",
+      citation: "NICE NG126, terms used in this guideline",
     };
   }
   if (adnexalMassOrFreeFluid) {
@@ -191,19 +192,19 @@ export function pulTvsTriage({ tvsDone, iupSeen, adnexalMassOrFreeFluid }) {
       border: "border-rose-200",
       summary: "Leave the PUL pathway and use the tubal ectopic decision calculator.",
       detail:
-        "NICE NG126 §1.4.16: if an adnexal mass or free fluid is identified on transvaginal ultrasound scan, suspect an ectopic pregnancy.",
+        "NICE NG126 §1.7.1 to §1.7.4: an adnexal mass moving separately to the ovary containing a gestational sac with a yolk sac, or with a fetal pole, indicates a tubal ectopic pregnancy. An empty gestational sac (tubal ring) or a complex inhomogeneous adnexal mass indicates a high probability, and free fluid may represent haemoperitoneum. For these features, take into account the other scan findings, the clinical presentation and serum hCG before making a diagnosis.",
       actions: [
         "Use the Tubal ectopic — initial management calculator.",
         "Senior gynaecology review.",
       ],
-      citation: "NICE NG126 §1.4.16",
+      citation: "NICE NG126 §1.7.1 to §1.7.4",
     };
   }
   return null; // TVS done, non-diagnostic → proceed to serial-hCG algorithm
 }
 
 export function interpretPUL({ hcg1, hcg2, hoursBetween }) {
-  // NG126 1.4.27: "Take 2 serum hCG measurements as near as possible to
+  // NG126 1.8.5: "Take 2 serum hCG measurements as near as possible to
   // 48 hours apart (but no earlier) to determine subsequent management
   // of a pregnancy of unknown location."
   if (hoursBetween < 48) {
@@ -215,16 +216,16 @@ export function interpretPUL({ hcg1, hcg2, hoursBetween }) {
       border: "border-gray-200",
       summary: "Samples must be taken at least 48 hours apart.",
       detail:
-        "NICE NG126 §1.4.27: take 2 serum hCG measurements as near as possible to 48 hours apart (but no earlier) to determine subsequent management of a pregnancy of unknown location.",
+        "NICE NG126 §1.8.5: take 2 serum hCG measurements as near as possible to 48 hours apart (but no earlier) to determine subsequent management of a pregnancy of unknown location.",
       actions: [],
-      citation: "NICE NG126 §1.4.27",
+      citation: "NICE NG126 §1.8.5",
     };
   }
 
   const percentChange = ((hcg2 - hcg1) / hcg1) * 100;
 
   if (percentChange > 63) {
-    // NG126 1.4.29
+    // NG126 1.8.7
     return {
       category: "LIKELY_IUP",
       title: "Likely developing intrauterine pregnancy",
@@ -233,21 +234,21 @@ export function interpretPUL({ hcg1, hcg2, hoursBetween }) {
       border: "border-emerald-200",
       summary: `Rise of ${percentChange.toFixed(0)}% in ${hoursBetween.toFixed(0)} h (>63% threshold).`,
       detail:
-        "NICE NG126 §1.4.29: she is likely to have a developing intrauterine pregnancy (although the possibility of an ectopic pregnancy cannot be excluded).",
+        "NICE NG126 §1.8.7: she is likely to have a developing intrauterine pregnancy (although the possibility of an ectopic pregnancy cannot be excluded).",
       actions: [
         "Offer a transvaginal ultrasound scan to determine the location of the pregnancy between 7 and 14 days later.",
         hcg2 >= 1500
-          ? "hCG ≥1,500 IU/L — consider an earlier scan (NG126 §1.4.29)."
+          ? "hCG ≥1,500 IU/L — consider an earlier scan (NG126 §1.8.7)."
           : "Consider an earlier scan if hCG reaches ≥1,500 IU/L.",
         "If a viable intrauterine pregnancy is confirmed, offer routine antenatal care.",
         "If a viable intrauterine pregnancy is not confirmed, refer for immediate clinical review by a senior gynaecologist.",
       ],
-      citation: "NICE NG126 §1.4.29",
+      citation: "NICE NG126 §1.8.7",
     };
   }
 
   if (percentChange < -50) {
-    // NG126 1.4.30
+    // NG126 1.8.8
     return {
       category: "LIKELY_FAILING",
       title: "Pregnancy unlikely to continue",
@@ -256,18 +257,18 @@ export function interpretPUL({ hcg1, hcg2, hoursBetween }) {
       border: "border-blue-200",
       summary: `Fall of ${Math.abs(percentChange).toFixed(0)}% in ${hoursBetween.toFixed(0)} h (>50% threshold).`,
       detail:
-        "NICE NG126 §1.4.30: inform her that the pregnancy is unlikely to continue but that this is not confirmed.",
+        "NICE NG126 §1.8.8: inform her that the pregnancy is unlikely to continue but that this is not confirmed.",
       actions: [
         "Provide oral and written information about where she can access support and counselling services.",
         "Ask her to take a urine pregnancy test 14 days after the second serum hCG test.",
         "If the test is negative, no further action is necessary.",
         "If the test is positive, she should return to the early pregnancy assessment service for clinical review within 24 hours.",
       ],
-      citation: "NICE NG126 §1.4.30",
+      citation: "NICE NG126 §1.8.8",
     };
   }
 
-  // NG126 1.4.31: fall <50% OR rise <63%
+  // NG126 1.8.9: fall <50% OR rise <63%
   return {
     category: "SUSPICIOUS",
     title: "Refer for clinical review within 24 hours",
@@ -279,35 +280,63 @@ export function interpretPUL({ hcg1, hcg2, hoursBetween }) {
         ? `Rise of ${percentChange.toFixed(0)}% in ${hoursBetween.toFixed(0)} h (<63% threshold).`
         : `Fall of ${Math.abs(percentChange).toFixed(0)}% in ${hoursBetween.toFixed(0)} h (<50% threshold).`,
     detail:
-      "NICE NG126 §1.4.31: for a woman with a decrease in serum hCG levels less than 50%, or an increase less than 63%, refer her for clinical review in the early pregnancy assessment service within 24 hours.",
+      "NICE NG126 §1.8.9: for a woman with a decrease in serum hCG levels less than 50%, or an increase less than 63%, refer her for clinical review in the early pregnancy assessment service within 24 hours.",
     actions: [
       "Refer for clinical review in the early pregnancy assessment service within 24 hours.",
-      "Regardless of serum hCG levels, give written information about what to do if new or worsening symptoms occur, including how to access emergency care 24 hours a day (§1.4.28).",
+      "Regardless of serum hCG levels, give written information about what to do if new or worsening symptoms occur, including how to access emergency care 24 hours a day (§1.8.6).",
     ],
-    citation: "NICE NG126 §1.4.31",
+    citation: "NICE NG126 §1.8.9",
   };
 }
 
 export const PUL_CAVEATS = [
-  "NICE NG126 §1.4.24: do not use serum hCG measurements to determine the location of the pregnancy.",
-  "NICE NG126 §1.4.25: place more importance on clinical symptoms than on serum hCG results; review the woman's condition if any symptoms change.",
-  "NICE NG126 §1.4.32: do not use serum progesterone measurements as an adjunct.",
+  "NICE NG126 §1.8.2: do not use serum hCG measurements to determine the location of the pregnancy.",
+  "NICE NG126 §1.8.3: place more importance on clinical symptoms than on serum hCG results; review the woman's condition if any symptoms change.",
+  "NICE NG126 §1.8.10: do not use serum progesterone measurements as an adjunct.",
 ];
 
 // ──────────────────────────────────────────────────────────────────────
 // Scenario 2 — Tubal ectopic, initial management decision
-// (NG126 §1.6.3, §1.6.4, §1.6.8, §1.6.9, §1.6.10; GTG21 §5.1)
+// (NG126 §1.14.1, §1.14.2, §1.15.1, §1.15.2, §1.15.3; GTG21 §5.1, Appendix III)
 // ──────────────────────────────────────────────────────────────────────
 
 export function interpretEctopicDecision({
   hcg,
   massSize,            // mm
+  clinicallyStable,    // bool — §1.14.1 and §1.14.2 gate for expectant management
   significantPain,     // bool
+  painFree,            // bool — stricter than "no significant pain" (§1.15.1)
   fetalHeartbeat,      // bool
   iupExcluded,         // bool — confirmed no IUP on ultrasound
   canReturnFollowUp,   // bool
 }) {
-  // NG126 §1.6.9 — surgery first-line if ANY of:
+  // Clinical instability is not an NG126 treatment-allocation criterion, but it
+  // rules out both expectant management (§1.14.1 and §1.14.2 require a
+  // clinically stable woman) and methotrexate (GTG21 Appendix III lists
+  // haemodynamic instability as a contraindication).
+  if (clinicallyStable === false) {
+    return {
+      pathways: [
+        {
+          id: "UNSTABLE",
+          title: "Not clinically stable, urgent surgical assessment",
+          color: "text-rose-700",
+          bg: "bg-rose-50",
+          border: "border-rose-300",
+          rationale: ["Not clinically stable"],
+          detail:
+            "NICE NG126 §1.14.1 and §1.14.2 offer expectant management only to women who are clinically stable and pain free. RCOG GTG21 Appendix III lists haemodynamic instability as a contraindication to methotrexate.",
+          actions: [
+            "Escalate to senior gynaecology review: expectant and medical management do not apply while she is unstable.",
+            "RCOG GTG21 §5.1.1: when surgery is indicated, perform laparoscopically whenever possible, taking into account the condition of the woman and complexity of the procedure (NG126 §1.16.1).",
+          ],
+          citation: "NICE NG126 §1.14.1 · RCOG GTG21 Appendix III",
+        },
+      ],
+      citation: "NICE NG126 §1.14.1 · RCOG GTG21 Appendix III",
+    };
+  }
+  // NG126 §1.15.2 — surgery first-line if ANY of:
   //   significant pain
   //   adnexal mass ≥35 mm
   //   fetal heartbeat visible
@@ -331,16 +360,16 @@ export function interpretEctopicDecision({
           border: "border-rose-300",
           rationale: surgeryReasons,
           detail:
-            "NICE NG126 §1.6.9: offer surgery as a first-line treatment to women who are unable to return for follow-up after methotrexate treatment or who have an ectopic pregnancy and significant pain, or an adnexal mass of 35 mm or larger, or a fetal heartbeat visible on ultrasound, or a serum hCG level of 5,000 IU/L or more.",
+            "NICE NG126 §1.15.2: offer surgery as a first-line treatment to women who are unable to return for follow-up after methotrexate treatment or who have an ectopic pregnancy and significant pain, or an adnexal mass of 35 mm or larger, or a fetal heartbeat visible on ultrasound, or a serum hCG level of 5,000 IU/L or more.",
           actions: [
-            "RCOG GTG21 §5.1.1: when surgery is indicated, perform laparoscopically whenever possible, taking into account the condition of the woman and complexity of the procedure (NG126 §1.6.12).",
+            "RCOG GTG21 §5.1.1: when surgery is indicated, perform laparoscopically whenever possible, taking into account the condition of the woman and complexity of the procedure (NG126 §1.16.1).",
             "RCOG GTG21: in the presence of a healthy contralateral tube, salpingectomy should be performed in preference to salpingotomy.",
-            "Consider salpingotomy if the contralateral tube is damaged or there are other risk factors for infertility (NG126 §1.6.16).",
+            "Consider salpingotomy if the contralateral tube is damaged or there are other risk factors for infertility (NG126 §1.17.2).",
           ],
-          citation: "NICE NG126 §1.6.9",
+          citation: "NICE NG126 §1.15.2",
         },
       ],
-      citation: "NICE NG126 §1.6.9",
+      citation: "NICE NG126 §1.15.2",
     };
   }
 
@@ -358,23 +387,43 @@ export function interpretEctopicDecision({
           border: "border-amber-300",
           rationale: ["No intrauterine pregnancy confirmed on ultrasound"],
           detail:
-            "NICE NG126 §1.6.8: methotrexate is offered only when there is no intrauterine pregnancy as confirmed on ultrasound scan. RCOG GTG21 §5.1.2: methotrexate should never be given at the first visit unless the diagnosis of ectopic pregnancy is absolutely clear and a viable intrauterine pregnancy has been excluded.",
+            "NICE NG126 §1.15.1: methotrexate is offered only when there is no intrauterine pregnancy as confirmed on ultrasound scan. RCOG GTG21 §5.1.2: methotrexate should never be given at the first visit unless the diagnosis of ectopic pregnancy is absolutely clear and a viable intrauterine pregnancy has been excluded.",
           actions: [
             "Confirm absence of intrauterine pregnancy on ultrasound scan before considering medical management.",
             "If diagnosis is uncertain, repeat hCG in 48 hours (GTG21 §5.1.2) — if hCG falls, expectant management may be appropriate; if it rises at a rate consistent with a viable IUP, repeat scan before any methotrexate is given.",
           ],
-          citation: "NICE NG126 §1.6.8 / RCOG GTG21 §5.1.2",
+          citation: "NICE NG126 §1.15.1 / RCOG GTG21 §5.1.2",
         },
       ],
-      citation: "NICE NG126 §1.6.8",
+      citation: "NICE NG126 §1.15.1",
     };
   }
 
-  // hCG ≤1,000 — Expectant OFFER (NG126 §1.6.3) + MTX OFFER (§1.6.8)
+  // NG126 §1.14.1 and §1.14.2 both require the woman to be clinically stable
+  // AND pain free. "No significant pain" (§1.15.1) is a lower bar, so a woman
+  // with some pain that is not significant can still be offered methotrexate
+  // while expectant management no longer applies to her.
+  const expectantBlocked = painFree === false;
+  const expectantIneligible = {
+    id: "EXPECTANT_NOT_ELIGIBLE",
+    title: "Expectant management, not eligible",
+    color: "text-amber-700",
+    bg: "bg-amber-50",
+    border: "border-amber-300",
+    rationale: ["Not pain free"],
+    detail:
+      "NICE NG126 §1.14.1 and §1.14.2 offer or consider expectant management only for women who are clinically stable and pain free. She has pain, so expectant management does not apply. §1.15.1 sets the lower bar of no significant pain, so methotrexate may still be an option.",
+    actions: [
+      "Reassess her pain: if it becomes significant, offer surgery as a first-line treatment (NG126 §1.15.2).",
+    ],
+    citation: "NICE NG126 §1.14.1 and §1.14.2",
+  };
+
+  // hCG ≤1,000 — Expectant OFFER (NG126 §1.14.1) + MTX OFFER (§1.15.1)
   if (hcg <= 1000) {
     return {
       pathways: [
-        {
+        expectantBlocked ? expectantIneligible : {
           id: "EXPECTANT_OFFER",
           title: "Expectant management, offer",
           color: "text-teal-700",
@@ -387,13 +436,13 @@ export function interpretEctopicDecision({
             "Able to return for follow-up",
           ],
           detail:
-            "NICE NG126 §1.6.3: offer expectant management to women who are clinically stable and pain free, have a tubal ectopic pregnancy measuring less than 35 mm with no visible heartbeat on transvaginal ultrasound, have serum hCG levels of 1,000 IU/L or less, and are able to return for follow-up.",
+            "NICE NG126 §1.14.1: offer expectant management to women who are clinically stable and pain free, have a tubal ectopic pregnancy measuring less than 35 mm with no visible heartbeat on transvaginal ultrasound, have serum hCG levels of 1,000 IU/L or less, and are able to return for follow-up.",
           actions: [
-            "Repeat hCG on days 2, 4 and 7 (NG126 §1.6.5).",
+            "Repeat hCG on days 2, 4 and 7 (NG126 §1.14.3).",
             "If hCG drops by 15% or more from the previous value, repeat weekly until <20 IU/L.",
             "If hCG does not fall by 15%, stays the same, or rises — review clinical condition and seek senior advice.",
           ],
-          citation: "NICE NG126 §1.6.3",
+          citation: "NICE NG126 §1.14.1",
         },
         {
           id: "MTX_ALSO_OPTION",
@@ -402,29 +451,29 @@ export function interpretEctopicDecision({
           bg: "bg-violet-50",
           border: "border-violet-300",
           rationale: [
-            "Meets all NG126 §1.6.8 criteria",
+            "Meets all NG126 §1.15.1 criteria",
             `Serum hCG ${hcg} IU/L (<1,500)`,
           ],
           detail:
-            "NICE NG126 §1.6.8: offer systemic methotrexate to women who have no significant pain, an unruptured tubal ectopic <35 mm with no visible heartbeat, serum hCG <1,500 IU/L, no intrauterine pregnancy, and are able to return for follow-up.",
+            "NICE NG126 §1.15.1: offer systemic methotrexate to women who have no significant pain, an unruptured tubal ectopic <35 mm with no visible heartbeat, serum hCG <1,500 IU/L, no intrauterine pregnancy, and are able to return for follow-up.",
           actions: [
             "Methotrexate 50 mg/m² IM (single-dose protocol — RCOG GTG21 App II).",
-            "Repeat hCG on days 4 and 7 after treatment (NG126 §1.6.11).",
+            "Repeat hCG on days 4 and 7 after treatment (NG126 §1.15.4).",
             "Advise: avoid alcohol and folate-containing vitamins during treatment (GTG21 §5.1.2).",
             "Advise: wait at least 3 months before trying to conceive (GTG21 §8).",
           ],
-          citation: "NICE NG126 §1.6.8",
+          citation: "NICE NG126 §1.15.1",
         },
       ],
-      citation: "NICE NG126 §1.6.3 and §1.6.8",
+      citation: "NICE NG126 §1.14.1 and §1.15.1",
     };
   }
 
-  // hCG 1,001–1,499 — Expectant CONSIDER (§1.6.4) + MTX OFFER (§1.6.8)
+  // hCG 1,001–1,499 — Expectant CONSIDER (§1.14.2) + MTX OFFER (§1.15.1)
   if (hcg < 1500) {
     return {
       pathways: [
-        {
+        expectantBlocked ? expectantIneligible : {
           id: "EXPECTANT_CONSIDER",
           title: "Expectant management, consider",
           color: "text-teal-700",
@@ -437,13 +486,13 @@ export function interpretEctopicDecision({
             "Able to return for follow-up",
           ],
           detail:
-            "NICE NG126 §1.6.4: consider expectant management as an option for women who are clinically stable and pain free, have a tubal ectopic pregnancy <35 mm with no visible heartbeat, have serum hCG above 1,000 IU/L and below 1,500 IU/L, and are able to return for follow-up.",
+            "NICE NG126 §1.14.2: consider expectant management as an option for women who are clinically stable and pain free, have a tubal ectopic pregnancy <35 mm with no visible heartbeat, have serum hCG above 1,000 IU/L and below 1,500 IU/L, and are able to return for follow-up.",
           actions: [
-            "Repeat hCG on days 2, 4 and 7 (NG126 §1.6.5).",
+            "Repeat hCG on days 2, 4 and 7 (NG126 §1.14.3).",
             "If drop ≥15% from previous value, repeat weekly until <20 IU/L.",
             "If does not fall by 15%, plateau, or rises — senior review.",
           ],
-          citation: "NICE NG126 §1.6.4",
+          citation: "NICE NG126 §1.14.2",
         },
         {
           id: "MTX_OFFER",
@@ -452,25 +501,25 @@ export function interpretEctopicDecision({
           bg: "bg-violet-50",
           border: "border-violet-300",
           rationale: [
-            "Meets all NG126 §1.6.8 criteria",
+            "Meets all NG126 §1.15.1 criteria",
             `Serum hCG ${hcg} IU/L (<1,500)`,
           ],
           detail:
-            "NICE NG126 §1.6.8: offer systemic methotrexate. Offer surgery where treatment with methotrexate is not acceptable to the woman.",
+            "NICE NG126 §1.15.1: offer systemic methotrexate. Offer surgery where treatment with methotrexate is not acceptable to the woman.",
           actions: [
             "Methotrexate 50 mg/m² IM (single-dose protocol — RCOG GTG21 App II).",
             "Repeat hCG on days 4 and 7 after treatment.",
             "Avoid alcohol and folate-containing vitamins.",
             "Wait at least 3 months before trying to conceive.",
           ],
-          citation: "NICE NG126 §1.6.8",
+          citation: "NICE NG126 §1.15.1",
         },
       ],
-      citation: "NICE NG126 §1.6.4 and §1.6.8",
+      citation: "NICE NG126 §1.14.2 and §1.15.1",
     };
   }
 
-  // hCG 1,500–<5,000 — choice MTX or surgery (§1.6.10)
+  // hCG 1,500–<5,000 — choice MTX or surgery (§1.15.3)
   return {
     pathways: [
       {
@@ -487,16 +536,16 @@ export function interpretEctopicDecision({
           "Able to return for follow-up",
         ],
         detail:
-          "NICE NG126 §1.6.10: offer the choice of either methotrexate or surgical management to women who have a serum hCG of at least 1,500 IU/L and less than 5,000 IU/L. Advise women who choose methotrexate that their chance of needing further intervention is increased and they may need to be urgently admitted if their condition deteriorates.",
+          "NICE NG126 §1.15.3: offer the choice of either methotrexate or surgical management to women who have a serum hCG of at least 1,500 IU/L and less than 5,000 IU/L. Advise women who choose methotrexate that their chance of needing further intervention is increased and they may need to be urgently admitted if their condition deteriorates.",
         actions: [
           "Discuss methotrexate vs surgical management; document her informed choice.",
-          "If methotrexate: 50 mg/m² IM; repeat hCG days 4 and 7 (NG126 §1.6.11).",
-          "If surgery: laparoscopic salpingectomy is preferred where contralateral tube is healthy (NG126 §1.6.15).",
+          "If methotrexate: 50 mg/m² IM; repeat hCG days 4 and 7 (NG126 §1.15.4).",
+          "If surgery: laparoscopic salpingectomy is preferred where contralateral tube is healthy (NG126 §1.17.1).",
         ],
-        citation: "NICE NG126 §1.6.10",
+        citation: "NICE NG126 §1.15.3",
       },
     ],
-    citation: "NICE NG126 §1.6.10",
+    citation: "NICE NG126 §1.15.3",
   };
 }
 
@@ -515,7 +564,7 @@ export const MTX_CONTRAINDICATIONS = [
 // Source: RCOG GTG21 Appendix III.
 
 // ──────────────────────────────────────────────────────────────────────
-// Scenario 3 — Expectant management surveillance (NG126 §1.6.5)
+// Scenario 3 — Expectant management surveillance (NG126 §1.14.3)
 // ──────────────────────────────────────────────────────────────────────
 
 export function interpretExpectantStep({ previous, current, dayLabel }) {
@@ -532,8 +581,8 @@ export function interpretExpectantStep({ previous, current, dayLabel }) {
       border: "border-emerald-300",
       summary: `${dayLabel}: hCG ${current} IU/L (<20).`,
       detail:
-        "NICE NG126 §1.6.5: repeat weekly until a negative result (<20 IU/L) is obtained.",
-      citation: "NICE NG126 §1.6.5",
+        "NICE NG126 §1.14.3: repeat weekly until a negative result (<20 IU/L) is obtained.",
+      citation: "NICE NG126 §1.14.3",
     };
   }
 
@@ -546,8 +595,8 @@ export function interpretExpectantStep({ previous, current, dayLabel }) {
       border: "border-teal-300",
       summary: `${dayLabel}: ${drop.toFixed(0)}% fall from previous value (≥15%).`,
       detail:
-        "NICE NG126 §1.6.5: if hCG levels drop by 15% or more from the previous value on days 2, 4 and 7, then repeat weekly until a negative result (less than 20 IU/L) is obtained.",
-      citation: "NICE NG126 §1.6.5",
+        "NICE NG126 §1.14.3: if hCG levels drop by 15% or more from the previous value on days 2, 4 and 7, then repeat weekly until a negative result (less than 20 IU/L) is obtained.",
+      citation: "NICE NG126 §1.14.3",
     };
   }
 
@@ -562,14 +611,14 @@ export function interpretExpectantStep({ previous, current, dayLabel }) {
         ? `${dayLabel}: ${pctChange.toFixed(0)}% rise from previous value.`
         : `${dayLabel}: only ${drop.toFixed(0)}% fall (<15%).`,
     detail:
-      "NICE NG126 §1.6.5: if hCG levels do not fall by 15%, stay the same or rise from the previous value, review the woman's clinical condition and seek senior advice to help decide further management.",
-    citation: "NICE NG126 §1.6.5",
+      "NICE NG126 §1.14.3: if hCG levels do not fall by 15%, stay the same or rise from the previous value, review the woman's clinical condition and seek senior advice to help decide further management.",
+    citation: "NICE NG126 §1.14.3",
   };
 }
 
 // ──────────────────────────────────────────────────────────────────────
 // Scenario 4 — Post-MTX surveillance
-// (NG126 §1.6.11, RCOG GTG21 Appendix II)
+// (NG126 §1.15.4, RCOG GTG21 Appendix II)
 // ──────────────────────────────────────────────────────────────────────
 
 export function interpretMtxStep({ day1, day4, day7 }) {
@@ -600,8 +649,8 @@ export function interpretMtxStep({ day1, day4, day7 }) {
       border: "border-teal-300",
       summary: `Day 4 → Day 7: ${drop.toFixed(0)}% fall (>15%).`,
       detail:
-        "RCOG GTG21 Appendix II: if β-hCG decrease >15% days 4–7, repeat β-hCG weekly until levels <15 IU/L. NICE NG126 §1.6.11: take 1 serum hCG measurement per week until a negative result is obtained.",
-      citation: "NICE NG126 §1.6.11 · RCOG GTG21 App II",
+        "RCOG GTG21 Appendix II: if β-hCG decrease >15% days 4–7, repeat β-hCG weekly until levels <15 IU/L. NICE NG126 §1.15.4: take 1 serum hCG measurement per week until a negative result is obtained.",
+      citation: "NICE NG126 §1.15.4 · RCOG GTG21 App II",
     };
   }
 
@@ -614,8 +663,8 @@ export function interpretMtxStep({ day1, day4, day7 }) {
       border: "border-rose-300",
       summary: `Day 4 → Day 7: ${pctChange.toFixed(0)}% ${pctChange === 0 ? "no change" : "rise"}.`,
       detail:
-        "NICE NG126 §1.6.11: if hCG levels plateau or rise, reassess the woman's condition for further treatment.",
-      citation: "NICE NG126 §1.6.11",
+        "NICE NG126 §1.15.4: if hCG levels plateau or rise, reassess the woman's condition for further treatment.",
+      citation: "NICE NG126 §1.15.4",
     };
   }
 
@@ -636,7 +685,7 @@ export function interpretMtxStep({ day1, day4, day7 }) {
 export const MTX_GENERAL_ADVICE = [
   "RCOG GTG21 §5.1.2: avoid alcohol and folate-containing vitamins during treatment.",
   "RCOG GTG21 §8: wait at least 3 months before trying to conceive again.",
-  "NICE NG126 §1.6.11: take 2 serum hCG measurements in the first week (days 4 and 7) after treatment, then 1 per week until a negative result is obtained.",
+  "NICE NG126 §1.15.4: take 2 serum hCG measurements in the first week (days 4 and 7) after treatment, then 1 per week until a negative result is obtained.",
 ];
 
 // ──────────────────────────────────────────────────────────────────────

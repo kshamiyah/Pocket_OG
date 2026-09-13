@@ -2,6 +2,13 @@
 // (RCOG Green-top Guideline No. 22, March 2011; dosing regimens for routine
 // antenatal anti-D prophylaxis per NICE TA156, "Routine antenatal anti-D
 // prophylaxis for women who are rhesus D negative")
+//
+// ARCHIVED: the RCOG guidance page for GTG22 states "This guideline has been
+// archived" and points readers to the BSH (BCSH) anti-D guideline and to more
+// recent BJOG evidence on fetal DNA testing for targeted prophylaxis. Kept for
+// reference and marked as archived in the app. Sources in packages/guidelines/src:
+// "BCSH 2014 - Anti-D immunoglobulin for prevention of HDFN.pdf" and the 2025 BSH
+// guideline on red cell antibodies in pregnancy.
 
 export const GTG22_SECTIONS = [
   {
@@ -16,6 +23,7 @@ export const GTG22_SECTIONS = [
       "rhesus alloimmunisation", "feto-maternal haemorrhage", "fmh",
     ],
     content: [
+      { type: "alert", value: "Archived guidance. The RCOG page for this guideline states \"This guideline has been archived\", and points readers to the BSH anti-D immunoglobulin guideline and to more recent BJOG evidence on fetal DNA testing for targeted prophylaxis. For early pregnancy specifically, NICE NG126 (updated June 2026) now advises against anti-D for miscarriage or ectopic pregnancy up to and including 11+6 weeks." },
       { type: "text", value: "RhD-negative women can become sensitised (alloimmunised) if fetal RhD-positive red cells cross into their circulation, a feto-maternal haemorrhage (FMH). Once sensitised, a woman produces anti-D antibodies that persist for life and can cross the placenta in future RhD-positive pregnancies to cause haemolytic disease of the fetus and newborn (HDFN) — ranging from mild neonatal jaundice/anaemia to severe hydrops and intrauterine death." },
       { type: "alert", value: "Anti-D immunoglobulin (Ig) is prophylaxis, not treatment. Given before sensitisation occurs, it clears fetal RhD-positive cells from the maternal circulation before the woman's immune system mounts a response. Once a woman is already sensitised (has detectable immune anti-D on her antibody screen), anti-D Ig has no benefit and should not be given — refer to fetal medicine for surveillance instead." },
 

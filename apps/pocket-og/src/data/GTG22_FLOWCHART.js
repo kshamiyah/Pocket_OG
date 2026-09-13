@@ -1,11 +1,14 @@
 // GTG22 — Anti-D Prophylaxis (RCOG Green-top Guideline No. 22; RAADP dosing
 // per NICE TA156). Decision support only — confirm local product/dose
 // availability and involve haematology/the transfusion lab for FMH > 4 mL.
+//
+// ARCHIVED: RCOG has archived GTG22. See the note at the top of the GTG22
+// guide. Early pregnancy anti-D now follows NICE NG126 (updated June 2026).
 
 export const GTG22_ANTID_FLOWCHART = {
   id: "GTG22_ANTID",
   title: "Anti-D Prophylaxis",
-  subtitle: "GTG22 · RhD-negative, not known to be sensitised",
+  subtitle: "GTG22 (archived) · RhD-negative, not known to be sensitised",
   startId: "indication",
   nodes: {
 

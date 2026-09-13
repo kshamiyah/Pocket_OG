@@ -4,6 +4,20 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.22.0",
+    date: "13/09/2026",
+    title: "NICE NG126: national early pregnancy guidance",
+    changes: [
+      { tag: "new", text: "NICE NG126 (Ectopic pregnancy and miscarriage, updated 17 June 2026) in the reader: initial assessment and ectopic red flags, ultrasound for location and viability, the ultrasound signs of a tubal ectopic, serial hCG in a pregnancy of unknown location, threatened miscarriage and progesterone, management of miscarriage, management of tubal ectopic pregnancy, and anti-D. The RBH guides (CG565, CG621, CG623) stay in the library as the local protocols." },
+      { tag: "improved", text: "The ectopic pregnancy topic card now leads with NG126 as the national guidance, with CG623 kept below it and labelled as local." },
+      { tag: "new", text: "The tubal ectopic calculator now asks whether she is clinically stable and whether she is pain free, because NG126 §1.14.1 and §1.14.2 require both before expectant management. A woman who is not clinically stable is directed to urgent surgical assessment (GTG21 Appendix III lists haemodynamic instability as a contraindication to methotrexate). A woman with pain that is not significant is no longer offered expectant management, while methotrexate remains an option under §1.15.1." },
+      { tag: "fixed", text: "Early pregnancy calculator citations renumbered to the June 2026 NG126, which renumbered its recommendations: serial hCG is now §1.8.5 to §1.8.9, expectant management §1.14, and medical and surgical management §1.15." },
+      { tag: "fixed", text: "Three statements in the PUL calculator corrected: transvaginal scan to identify the location of the pregnancy is §1.5.1, the definition of a pregnancy of unknown location comes from the guideline's terms rather than a recommendation, and the adnexal mass and free fluid findings are §1.7.1 to §1.7.4, which ask you to weigh the scan, the clinical presentation and hCG together before making a diagnosis." },
+      { tag: "fixed", text: "Searching \"ng126\" now brings up the guideline itself first." },
+      { tag: "improved", text: "RCOG GTG22 is marked as archived wherever it appears, with anti-D dosing pointed at NICE TA156 and NG126." },
+    ],
+  },
+  {
     version: "1.21.0",
     date: "11/09/2026",
     title: "MBRRACE 2026 maternal deaths report",

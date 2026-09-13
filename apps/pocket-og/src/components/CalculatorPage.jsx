@@ -426,7 +426,7 @@ function PulCalculator({ onBack, pdfs, onNavigate }) {
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <StepHeader title="PUL — serial hCG" subtitle="NICE NG126 §1.4.27–1.4.32" onBack={onBack} pdfs={pdfs} shareId="PUL" />
+        <StepHeader title="PUL — serial hCG" subtitle="NICE NG126 §1.8.5–1.8.9" onBack={onBack} pdfs={pdfs} shareId="PUL" />
 
         <div className="px-5 pt-6">
           {!result && <ModeToggle mode={mode} onChange={changeMode} />}
@@ -434,7 +434,7 @@ function PulCalculator({ onBack, pdfs, onNavigate }) {
           {!result && mode === "quick" && (
             <>
               <h3 className="text-2xl font-bold text-gray-900 mb-1">Enter both hCG levels</h3>
-              <p className="text-sm text-gray-400 mb-6">Samples must be ≥48 h apart (NG126 §1.4.27).</p>
+              <p className="text-sm text-gray-400 mb-6">Samples must be ≥48 h apart (NG126 §1.8.5).</p>
 
               <div className="space-y-4">
                 <NumberField label="First hCG" value={hcg1} onChange={setHcg1} suffix="IU/L" autoFocus={false} />
@@ -462,7 +462,7 @@ function PulCalculator({ onBack, pdfs, onNavigate }) {
           {!result && mode === "guided" && (
             <>
               <h3 className="text-2xl font-bold text-gray-900 mb-1">Clinical picture first</h3>
-              <p className="text-sm text-gray-400 mb-6">NG126 §1.4.25: symptoms outrank biochemistry.</p>
+              <p className="text-sm text-gray-400 mb-6">NG126 §1.8.3: symptoms outrank biochemistry.</p>
 
               <div className="space-y-3 mb-6">
                 <YesNoField label="Haemodynamic instability?" value={haemodynamicInstability} onChange={setHaemodynamicInstability} />
@@ -473,7 +473,7 @@ function PulCalculator({ onBack, pdfs, onNavigate }) {
               {symptomsAnswered && !haemodynamicInstability && !worseningPain && !heavyBleeding && (
                 <>
                   <h3 className="text-2xl font-bold text-gray-900 mb-1">Transvaginal ultrasound</h3>
-                  <p className="text-sm text-gray-400 mb-6">NG126 §1.4.7: TVS is the first-line diagnostic test.</p>
+                  <p className="text-sm text-gray-400 mb-6">NG126 §1.5.1: offer TVS to identify the location of the pregnancy.</p>
 
                   <div className="space-y-3 mb-6">
                     <YesNoField label="TVS already performed?" value={tvsDone} onChange={setTvsDone} />
@@ -490,7 +490,7 @@ function PulCalculator({ onBack, pdfs, onNavigate }) {
               {needHcg && (
                 <>
                   <h3 className="text-2xl font-bold text-gray-900 mb-1">Enter both hCG levels</h3>
-                  <p className="text-sm text-gray-400 mb-6">Samples must be ≥48 h apart (NG126 §1.4.27).</p>
+                  <p className="text-sm text-gray-400 mb-6">Samples must be ≥48 h apart (NG126 §1.8.5).</p>
 
                   <div className="space-y-4">
                     <NumberField label="First hCG" value={hcg1} onChange={setHcg1} suffix="IU/L" autoFocus={false} />
@@ -552,15 +552,24 @@ function PulCalculator({ onBack, pdfs, onNavigate }) {
 function EctopicDecisionCalculator({ onBack, pdfs, onNavigate }) {
   const [hcg, setHcg] = useState("");
   const [massSize, setMassSize] = useState("");
+  const [clinicallyStable, setClinicallyStable] = useState(null);
   const [significantPain, setSignificantPain] = useState(null);
+  const [painFree, setPainFree] = useState(null);
   const [fetalHeartbeat, setFetalHeartbeat] = useState(null);
   const [iupExcluded, setIupExcluded] = useState(null);
   const [canReturnFollowUp, setCanReturnFollowUp] = useState(null);
   const [result, setResult] = useState(null);
 
+  // NG126 §1.14.1 and §1.14.2 need her to be pain free, which is a higher bar
+  // than §1.15.1's "no significant pain". Only ask the pain-free question when
+  // significant pain has been ruled out, so the two answers cannot contradict.
+  const painFreeAnswer = significantPain === true ? false : painFree;
+
   const allAnswered =
     hcg && massSize &&
-    significantPain !== null && fetalHeartbeat !== null &&
+    clinicallyStable !== null &&
+    significantPain !== null && painFreeAnswer !== null &&
+    fetalHeartbeat !== null &&
     iupExcluded !== null && canReturnFollowUp !== null;
 
   const submit = () => {
@@ -569,7 +578,9 @@ function EctopicDecisionCalculator({ onBack, pdfs, onNavigate }) {
       interpretEctopicDecision({
         hcg: parseFloat(hcg),
         massSize: parseFloat(massSize),
+        clinicallyStable,
         significantPain,
+        painFree: painFreeAnswer,
         fetalHeartbeat,
         iupExcluded,
         canReturnFollowUp,
@@ -579,7 +590,9 @@ function EctopicDecisionCalculator({ onBack, pdfs, onNavigate }) {
 
   const reset = () => {
     setHcg(""); setMassSize("");
-    setSignificantPain(null); setFetalHeartbeat(null);
+    setClinicallyStable(null);
+    setSignificantPain(null); setPainFree(null);
+    setFetalHeartbeat(null);
     setIupExcluded(null); setCanReturnFollowUp(null);
     setResult(null);
   };
@@ -587,7 +600,7 @@ function EctopicDecisionCalculator({ onBack, pdfs, onNavigate }) {
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <StepHeader title="Tubal ectopic — initial management" subtitle="NICE NG126 §1.6.3–1.6.10 · RCOG GTG21 §5.1" onBack={onBack} pdfs={pdfs} shareId="ECTOPIC_DECISION" />
+        <StepHeader title="Tubal ectopic — initial management" subtitle="NICE NG126 §1.14.1–1.15.3 · RCOG GTG21 §5.1" onBack={onBack} pdfs={pdfs} shareId="ECTOPIC_DECISION" />
 
         <div className="px-5 pt-6">
           {!result && (
@@ -598,7 +611,11 @@ function EctopicDecisionCalculator({ onBack, pdfs, onNavigate }) {
               <div className="space-y-4">
                 <NumberField label="Serum β-hCG" value={hcg} onChange={setHcg} suffix="IU/L" />
                 <NumberField label="Adnexal mass size" value={massSize} onChange={setMassSize} suffix="mm" />
+                <YesNoField label="Clinically stable?" value={clinicallyStable} onChange={setClinicallyStable} />
                 <YesNoField label="Significant pain?" value={significantPain} onChange={setSignificantPain} />
+                {significantPain === false && (
+                  <YesNoField label="Pain free?" value={painFree} onChange={setPainFree} />
+                )}
                 <YesNoField label="Fetal heartbeat visible on ultrasound?" value={fetalHeartbeat} onChange={setFetalHeartbeat} />
                 <YesNoField label="Intrauterine pregnancy excluded on ultrasound?" value={iupExcluded} onChange={setIupExcluded} />
                 <YesNoField label="Able to return for follow-up?" value={canReturnFollowUp} onChange={setCanReturnFollowUp} />
@@ -702,7 +719,7 @@ function ExpectantSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <StepHeader title="Expectant management surveillance" subtitle="NICE NG126 §1.6.5" onBack={onBack} pdfs={pdfs} shareId="EXPECTANT_SURVEILLANCE" />
+        <StepHeader title="Expectant management surveillance" subtitle="NICE NG126 §1.14.3" onBack={onBack} pdfs={pdfs} shareId="EXPECTANT_SURVEILLANCE" />
 
         <div className="px-5 pt-6">
           <ModeToggle mode={mode} onChange={changeMode} />
@@ -710,7 +727,7 @@ function ExpectantSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
           {mode === "guided" && (
             <>
               <h3 className="text-2xl font-bold text-gray-900 mb-1">Symptom check first</h3>
-              <p className="text-sm text-gray-400 mb-6">NG126 §1.4.25: symptoms outrank biochemistry.</p>
+              <p className="text-sm text-gray-400 mb-6">NG126 §1.8.3: symptoms outrank biochemistry.</p>
 
               <div className="space-y-3 mb-6">
                 <YesNoField label="Haemodynamic instability?" value={haemodynamicInstability} onChange={setHaemodynamicInstability} />
@@ -741,14 +758,14 @@ function ExpectantSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
                 <QuickAdvisory
                   open={caveatsOpen}
                   onToggle={() => setCaveatsOpen(o => !o)}
-                  note="This assumes you've already excluded red-flag symptoms (haemodynamic instability, worsening pain, heavy bleeding). NG126 §1.4.25: symptoms outrank biochemistry — review the woman's condition if any symptoms change. If not already excluded — switch to Guided."
+                  note="This assumes you've already excluded red-flag symptoms (haemodynamic instability, worsening pain, heavy bleeding). NG126 §1.8.3: symptoms outrank biochemistry — review the woman's condition if any symptoms change. If not already excluded — switch to Guided."
                 />
               )}
             </>
           )}
 
           <div className="rounded-2xl bg-gray-50 border border-gray-100 p-4 mt-6">
-            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">NICE NG126 §1.6.5 — verbatim</p>
+            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">NICE NG126 §1.14.3 — verbatim</p>
             <p className="text-xs text-gray-600 leading-relaxed">
               For women with a tubal ectopic pregnancy being managed expectantly, repeat hCG levels on days 2, 4 and 7 after the original test.
               If hCG levels drop by 15% or more from the previous value on days 2, 4 and 7, then repeat weekly until a negative result (less than 20 IU/L) is obtained.
@@ -810,7 +827,7 @@ function MtxSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-lg mx-auto">
-        <StepHeader title="Post-methotrexate surveillance" subtitle="NICE NG126 §1.6.11 · RCOG GTG21 App II" onBack={onBack} pdfs={pdfs} shareId="MTX_SURVEILLANCE" />
+        <StepHeader title="Post-methotrexate surveillance" subtitle="NICE NG126 §1.15.4 · RCOG GTG21 App II" onBack={onBack} pdfs={pdfs} shareId="MTX_SURVEILLANCE" />
 
         <div className="px-5 pt-6">
           <ModeToggle mode={mode} onChange={changeMode} />
@@ -818,7 +835,7 @@ function MtxSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
           {mode === "guided" && (
             <>
               <h3 className="text-2xl font-bold text-gray-900 mb-1">Symptom check first</h3>
-              <p className="text-sm text-gray-400 mb-6">Pain/bleeding override hCG trend (NG126 §1.4.25).</p>
+              <p className="text-sm text-gray-400 mb-6">Pain/bleeding override hCG trend (NG126 §1.8.3).</p>
 
               <div className="space-y-3 mb-6">
                 <YesNoField label="Haemodynamic instability?" value={haemodynamicInstability} onChange={setHaemodynamicInstability} />
@@ -847,7 +864,7 @@ function MtxSurveillanceCalculator({ onBack, pdfs, onNavigate }) {
                 <QuickAdvisory
                   open={caveatsOpen}
                   onToggle={() => setCaveatsOpen(o => !o)}
-                  note="This assumes you've already excluded red-flag symptoms (haemodynamic instability, worsening pain, heavy bleeding). NG126 §1.4.25: symptoms outrank biochemistry — review the woman's condition if any symptoms change. If not already excluded — switch to Guided."
+                  note="This assumes you've already excluded red-flag symptoms (haemodynamic instability, worsening pain, heavy bleeding). NG126 §1.8.3: symptoms outrank biochemistry — review the woman's condition if any symptoms change. If not already excluded — switch to Guided."
                 />
               )}
             </>

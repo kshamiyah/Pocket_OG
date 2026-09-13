@@ -29,7 +29,7 @@ export const CYTOTOXICS = [
     ],
     cautions: [
       "BHCG 1,500–5,000 IU/L: CG623 offers MTX or surgery, haemodynamically stable, not an absolute cut-off either way",
-      "Do NOT give anti-D for medical management of ectopic pregnancy (NICE 2019)",
+      "Do NOT give anti-D for medical management of ectopic pregnancy (NICE NG126, updated June 2026: not offered up to and including 11+6 weeks)",
       "Avoid alcohol and folic acid-containing vitamins during treatment, both reduce efficacy",
       "Avoid sexual intercourse, sunlight exposure and heavy lifting until resolution",
       "Up to 75% of patients get worsening abdominal pain on days 3–7 (tubal miscarriage); attend ED if severe, or with dizziness or shoulder tip pain",

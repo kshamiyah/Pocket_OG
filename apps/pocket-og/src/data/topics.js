@@ -269,8 +269,8 @@ export const TOPICS = {
     id: "ectopic",
     title: "Ectopic pregnancy",
     subtitle: "Expectant, medical & surgical management",
-    description: "A pregnancy outside the uterine cavity, usually tubal; MTX eligibility depends on BHCG level, mass size and haemodynamic stability (CG623).",
-    gl: "CG623",
+    description: "A pregnancy outside the uterine cavity, usually tubal. NICE NG126 sets the national thresholds for expectant, medical and surgical management; RBH CG623 is the local methotrexate protocol.",
+    gl: "NG126",
     terms: [
       "ectopic", "ectopic pregnancy", "tubal ectopic", "methotrexate pregnancy",
       "pul", "pregnancy of unknown location",
@@ -279,6 +279,10 @@ export const TOPICS = {
       {
         heading: "Guides",
         entries: [
+          { type: "reader", id: "NG126", gl: "NG126", label: "Ectopic pregnancy & miscarriage (national)", sublabel: "NICE NG126: full guideline" },
+          { type: "reader", id: "NG126", sectionId: "ng126-ectopic-management", gl: "NG126", label: "Expectant, medical & surgical management", sublabel: "NG126: thresholds for each pathway" },
+          { type: "reader", id: "NG126", sectionId: "ng126-ectopic-signs", gl: "NG126", label: "Ultrasound signs of tubal ectopic", sublabel: "NG126: what to look for on TVS" },
+          { type: "reader", id: "NG126", sectionId: "ng126-pul", gl: "NG126", label: "Pregnancy of unknown location: hCG", sublabel: "NG126: serial hCG interpretation" },
           { type: "reader", id: "CG623", gl: "CG623", label: "Ectopic pregnancy: medical management (local)", sublabel: "CG623: full guideline" },
           { type: "reader", id: "CG623", sectionId: "ep-criteria", gl: "CG623", label: "MTX selection & exclusion criteria", sublabel: "CG623: eligibility for methotrexate" },
           { type: "reader", id: "CG623", sectionId: "ep-protocol", gl: "CG623", label: "MTX treatment protocol", sublabel: "CG623: dosing & surveillance schedule" },
