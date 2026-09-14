@@ -14,9 +14,15 @@ import { sourceColors } from "../data/glColors";
 //   - status is a fact about the document, never a quality judgement
 //   - local trust guidance sits outside the national card, clearly optional
 //
-// Deliberately no amber or warning colour on the header: a warning colour
-// implies something is wrong, which is itself a judgement. Colour comes only
-// from glColors, so it means "who said it", never "how good it is".
+// Yellow surface with a solid yellow header band. The band matters: the app's
+// alert blocks are bg-amber-50, which in dark mode is #352d23 against this
+// card's #343122, so a flat yellow card would be indistinguishable from the
+// alerts it sits beneath in NG126 and GTG22. No alert carries a band, so the
+// band is what separates them.
+//
+// Source colour still comes only from glColors, so a rail means "who said it",
+// never "how good it is". Every utility used here is remapped under html.dark
+// in index.css; a colour outside that set would silently stay light.
 //
 // Purely presentational: WikiCard renders it without onNavigate, so it must
 // never depend on navigation props.
@@ -37,45 +43,45 @@ export default function CompareBlock({ id }) {
 
   return (
     <div className="mb-4">
-      <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+      <div className="rounded-2xl border border-yellow-200 bg-yellow-50 overflow-hidden">
 
-        <div className="flex items-center gap-2 px-3.5 pt-3">
-          <span className="text-gray-400 text-xs leading-none">⇄</span>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+        <div className="flex items-center gap-2 px-3.5 py-2.5 bg-yellow-200">
+          <span className="text-yellow-900 text-xs leading-none">⇄</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-yellow-900">
             Guidance differs
           </span>
-          <span className="ml-auto text-[10px] text-gray-400 tabular-nums">
+          <span className="ml-auto text-[10px] font-semibold text-yellow-900 tabular-nums">
             {positions.length} sources
           </span>
         </div>
 
-        <p className="px-3.5 pt-2 text-sm font-bold text-gray-900 leading-snug">{d.question}</p>
-        {d.scope && <p className="px-3.5 pt-1 pb-3 text-[11px] text-gray-400 leading-snug">{d.scope}</p>}
+        <p className="px-3.5 pt-3 text-sm font-bold text-gray-900 leading-snug">{d.question}</p>
+        {d.scope && <p className="px-3.5 pt-1 pb-3 text-[11px] text-gray-500 leading-snug">{d.scope}</p>}
 
         {positions.map((p, i) => {
           const col = sourceColors(p.source);
           const status = STATUS[p.status] ?? STATUS.current;
           return (
-            <div key={i} className="flex gap-2.5 px-3.5 py-3 border-t border-gray-100">
+            <div key={i} className="flex gap-2.5 px-3.5 py-3 border-t border-yellow-200">
               <div className={`w-[3px] rounded-full shrink-0 ${col.accent}`} />
               <div className="min-w-0 flex flex-col gap-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs font-semibold text-gray-900">{p.body}</span>
-                  <span className="text-[11px] text-gray-400 tabular-nums">{p.year}</span>
+                  <span className="text-[11px] text-gray-500 tabular-nums">{p.year}</span>
                   <span className={`text-[9px] font-bold uppercase tracking-wide rounded px-1.5 py-0.5 ${status.cls}`}>
                     {status.label}
                   </span>
                 </div>
                 <p className="text-[13px] text-gray-700 leading-snug">{p.position}</p>
-                {p.citation && <span className="text-[10px] text-gray-400">{p.citation}</span>}
+                {p.citation && <span className="text-[10px] text-gray-500">{p.citation}</span>}
               </div>
             </div>
           );
         })}
 
         {d.agreed && (
-          <div className="border-t border-gray-100 bg-gray-50 px-3.5 py-3">
-            <span className="block text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">
+          <div className="border-t border-yellow-200 bg-yellow-100 px-3.5 py-3">
+            <span className="block text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">
               They agree on
             </span>
             <p className="text-xs text-gray-700 leading-snug">{d.agreed}</p>
@@ -83,16 +89,16 @@ export default function CompareBlock({ id }) {
         )}
 
         {d.why && (
-          <div className="border-t border-gray-100 px-3.5 py-3">
-            <span className="block text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">
+          <div className="border-t border-yellow-200 px-3.5 py-3">
+            <span className="block text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">
               Why they differ
             </span>
             <p className="text-xs text-gray-700 leading-snug">{d.why}</p>
           </div>
         )}
 
-        <div className="border-t border-gray-100 px-3.5 py-2.5">
-          <p className="text-[10px] text-gray-400 leading-snug">
+        <div className="border-t border-yellow-200 px-3.5 py-2.5">
+          <p className="text-[10px] text-gray-500 leading-snug">
             <span className="font-semibold">Listed newest first.</span>{" "}
             Pocket O&amp;G does not rank guidance.
             {d.lastReviewed ? ` Last reviewed ${d.lastReviewed}.` : ""}
@@ -111,7 +117,7 @@ export default function CompareBlock({ id }) {
                 <p className="text-xs text-gray-700 leading-snug">
                   <span className="font-semibold text-gray-900">{l.body}:</span> {l.position}
                 </p>
-                {l.citation && <span className="text-[10px] text-gray-400">{l.citation}</span>}
+                {l.citation && <span className="text-[10px] text-gray-500">{l.citation}</span>}
               </div>
             ))}
           </div>
