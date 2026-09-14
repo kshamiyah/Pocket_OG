@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { combineFeatureGrades } from "@pocket-og/guidelines";
 
-// Interactive CTG feature picker (NICE NG229 §1.4). Grades each feature as
+// Interactive CTG feature picker (NICE NG229 1.4). Grades each feature as
 // white = reassuring, amber = non-reassuring, red = abnormal, then computes the
 // overall category via the shared combineFeatureGrades engine. Used as the
 // "classifier" node of the NG229_CTG flowchart. Thresholds verified against

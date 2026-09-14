@@ -1,4 +1,4 @@
-// Shared CTG categorisation logic (NICE NG229 §1.4.16–1.4.31).
+// Shared CTG categorisation logic (NICE NG229 1.4.16–1.4.31).
 // Single source of truth for both apps:
 //   • apps/ward-manager  — classifyCTGEntry() drives the labour-ward alert engine
 //   • apps/pocket-og     — the CTG Classifier tool uses combineFeatureGrades()
@@ -31,7 +31,7 @@ export function classifyCTGEntry(entry, prevBaselineHR = null) {
   const hr   = entry.baselineHR ?? 140;
   const rise = prevBaselineHR != null ? hr - prevBaselineHR : 0;
   if (hr < 100 || hr > 160)        features.push("red");
-  // ≥20 bpm rise is a local clinical threshold; NICE NG229 §1.4 scores absolute range only
+  // ≥20 bpm rise is a local clinical threshold; NICE NG229 1.4 scores absolute range only
   else if (hr < 110 || rise >= 20) features.push("amber");
   else                              features.push("white");
 

@@ -20,17 +20,17 @@ export const SROM_KEY = "term-prom";
 
 // Selectable indications (post-dates is NOT here — it is derived from gestation).
 export const IOL_IND = [
-  { key: "severe-pet",   label: "Severe pre-eclampsia",        tier: 0, cite: "NG207 §1.2" },
-  { key: "pprom-chorio", label: "PPROM + chorioamnionitis",    tier: 0, cite: "NG207 §1.2" },
-  { key: "fgr-aedf",     label: "FGR — absent/reversed EDF",   tier: 0, cite: "NG207 §1.2" },
-  { key: "pet",          label: "Pre-eclampsia",               tier: 1, cite: "NG207 §1.2" },
-  { key: "rfm",          label: "RFM + concerns",              tier: 1, cite: "NG207 §1.2" },
-  { key: SROM_KEY,       label: "Term PROM / SROM",            tier: 2, cite: "NG207 §1.3", srom: true },
-  { key: "gdm",          label: "GDM",                         tier: 2, cite: "NG207 §1.2" },
-  { key: "icp",          label: "Obstetric cholestasis (ICP)", tier: 2, cite: "NG207 §1.2" },
-  { key: "prev-sb",      label: "Previous stillbirth",         tier: 2, cite: "NG207 §1.2" },
-  { key: "sga-stable",   label: "SGA / FGR (stable)",          tier: 2, cite: "NG207 §1.2" },
-  { key: "maternal-req", label: "Maternal request",            tier: 3, cite: "NG207 §1.2" },
+  { key: "severe-pet",   label: "Severe pre-eclampsia",        tier: 0, cite: "NG207 1.2" },
+  { key: "pprom-chorio", label: "PPROM + chorioamnionitis",    tier: 0, cite: "NG207 1.2" },
+  { key: "fgr-aedf",     label: "FGR — absent/reversed EDF",   tier: 0, cite: "NG207 1.2" },
+  { key: "pet",          label: "Pre-eclampsia",               tier: 1, cite: "NG207 1.2" },
+  { key: "rfm",          label: "RFM + concerns",              tier: 1, cite: "NG207 1.2" },
+  { key: SROM_KEY,       label: "Term PROM / SROM",            tier: 2, cite: "NG207 1.3", srom: true },
+  { key: "gdm",          label: "GDM",                         tier: 2, cite: "NG207 1.2" },
+  { key: "icp",          label: "Obstetric cholestasis (ICP)", tier: 2, cite: "NG207 1.2" },
+  { key: "prev-sb",      label: "Previous stillbirth",         tier: 2, cite: "NG207 1.2" },
+  { key: "sga-stable",   label: "SGA / FGR (stable)",          tier: 2, cite: "NG207 1.2" },
+  { key: "maternal-req", label: "Maternal request",            tier: 3, cite: "NG207 1.2" },
   { key: "social",       label: "Social",                      tier: 3, cite: "" },
 ];
 
@@ -55,8 +55,8 @@ export function indicationTier(key, entry) {
 // Derived post-dates indication from gestation (or null if <41+0).
 export function postDatesInd(entry) {
   const d = gestTotalDays(entry);
-  if (d >= 42 * 7) return { key: "postdates", label: "Post-dates 42+0", tier: 1, cite: "NG207 §1.1", auto: true };
-  if (d >= 41 * 7) return { key: "postdates", label: `Post-dates ${entry.gestWeeks}+${entry.gestDays || 0}`, tier: 2, cite: "NG207 §1.1", auto: true };
+  if (d >= 42 * 7) return { key: "postdates", label: "Post-dates 42+0", tier: 1, cite: "NG207 1.1", auto: true };
+  if (d >= 41 * 7) return { key: "postdates", label: `Post-dates ${entry.gestWeeks}+${entry.gestDays || 0}`, tier: 2, cite: "NG207 1.1", auto: true };
   return null;
 }
 

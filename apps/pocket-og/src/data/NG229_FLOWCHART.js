@@ -1,6 +1,6 @@
 // NG229 — Fetal monitoring in labour: CTG interpretation & action pathway
 // Mirrors the NG229 reader (packages/guidelines/src/NG229.js) and the tested
-// classifyCTGEntry engine in apps/ward-manager. NICE NG229 §1.4–1.5 [2022].
+// classifyCTGEntry engine in apps/ward-manager. NICE NG229 1.4–1.5 [2022].
 //
 // ⚠ Two threshold cells (baseline upper band, increased-variability timing) are
 //   flagged for verbatim verification against the NG229 PDF — see the reader.

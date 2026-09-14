@@ -1,12 +1,12 @@
 // NICE NG229 — Fetal monitoring in labour (published 14 December 2022, updated 2026)
 //
-// Source: NICE NG229 §1.2–1.6. The classification table below is the NG229
+// Source: NICE NG229 1.2–1.6. The classification table below is the NG229
 // feature classification (verified against published NG229 sources):
 //   Baseline    — reassuring 110–160; non-reassuring 100–109 or 161–180;
 //                 abnormal <100 or >180.
 //   Variability — reassuring 5–25; non-reassuring <5 for 30–50 min or >25 for
 //                 15–25 min; abnormal <5 for >50 min, >25 for >25 min, or sinusoidal.
-// Management/escalation wording is taken from NG229 §1.5.
+// Management/escalation wording is taken from NG229 1.5.
 //
 // NB: ward-manager's numeric classifyCTGEntry (ctg.js) still uses coarser
 //     operational bands (>160 abnormal; >25 cut at 10 min) and a local ≥20 bpm
@@ -46,7 +46,7 @@ export const NG229_SECTIONS = [
         "Significant fresh bleeding in labour, or suspected abruption",
         "Confirmed delay in the first or second stage",
       ]},
-      { type: "text", value: "Reference: NICE NG229 §1.2–1.3 [2022]. If continuous CTG was started for a transient reason and both mother and baby are well after a defined period, NG229 supports returning to intermittent auscultation." },
+      { type: "text", value: "Reference: NICE NG229 1.2–1.3 [2022]. If continuous CTG was started for a transient reason and both mother and baby are well after a defined period, NG229 supports returning to intermittent auscultation." },
     ],
   },
 
@@ -65,7 +65,7 @@ export const NG229_SECTIONS = [
       "fetal heart rate", "ng229", "ctg features",
     ],
     content: [
-      { type: "text", value: "Assess and document each feature individually — baseline rate, baseline variability and decelerations — then derive the overall category. NICE NG229 §1.4.16–1.4.31 [2022]." },
+      { type: "text", value: "Assess and document each feature individually — baseline rate, baseline variability and decelerations — then derive the overall category. NICE NG229 1.4.16–1.4.31 [2022]." },
       { type: "table",
         headers: ["Feature", "Reassuring", "Non-reassuring", "Abnormal"],
         rows: [
@@ -103,7 +103,7 @@ export const NG229_SECTIONS = [
       "cardiotocography", "ng229", "ctg management", "reassess",
     ],
     content: [
-      { type: "text", value: "Combine the three individual features into an overall category, then act on it. NICE NG229 §1.4 / §1.5 [2022]." },
+      { type: "text", value: "Combine the three individual features into an overall category, then act on it. NICE NG229 1.4 / 1.5 [2022]." },
       { type: "table",
         headers: ["Category", "Features", "Action"],
         rows: [
@@ -115,7 +115,7 @@ export const NG229_SECTIONS = [
       },
       { type: "alert", value: "A pathological CTG, or any single prolonged deceleration of 3 minutes or more, mandates urgent senior involvement — escalate, do not wait." },
       { type: "subheading", value: "Fetal scalp stimulation" },
-      { type: "text", value: "An acceleration in response to digital fetal scalp stimulation is reassuring and can support continued monitoring. Absence of a response is a further concern and should prompt consideration of fetal blood sampling or expediting birth, depending on the clinical picture. NICE NG229 §1.5.3 [2022]." },
+      { type: "text", value: "An acceleration in response to digital fetal scalp stimulation is reassuring and can support continued monitoring. Absence of a response is a further concern and should prompt consideration of fetal blood sampling or expediting birth, depending on the clinical picture. NICE NG229 1.5.3 [2022]." },
     ],
   },
 
@@ -132,7 +132,7 @@ export const NG229_SECTIONS = [
       "ctg escalation", "ng229", "fetal resuscitation", "cardiotocography",
     ],
     content: [
-      { type: "text", value: "When a CTG becomes suspicious or pathological, identify and correct reversible causes while escalating. NICE NG229 §1.5 [2022]." },
+      { type: "text", value: "When a CTG becomes suspicious or pathological, identify and correct reversible causes while escalating. NICE NG229 1.5 [2022]." },
       { type: "subheading", value: "Conservative (intrauterine resuscitation) measures" },
       { type: "list", items: [
         "Reposition the woman — left lateral is often first-line; avoid the supine position",
@@ -148,7 +148,7 @@ export const NG229_SECTIONS = [
         "Pathological CTG — immediate review by an obstetrician (senior/consultant)",
         "Prolonged deceleration ≥3 min — call for senior help immediately; if not recovered by ~9 min, prepare for urgent birth",
       ]},
-      { type: "text", value: "Document the category, the features, the time, the actions taken and the plan at each review. Reference: NICE NG229 §1.5 [2022]." },
+      { type: "text", value: "Document the category, the features, the time, the actions taken and the plan at each review. Reference: NICE NG229 1.5 [2022]." },
     ],
   },
 

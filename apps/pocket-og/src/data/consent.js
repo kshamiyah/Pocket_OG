@@ -2088,13 +2088,13 @@ export const IOL_RISK_SECTIONS = [
     heading: "General risks of induction",
     type: "simple",
     items: [
-      "Induced labour may be more painful than spontaneous labour. (NICE NG207 §1.1.3, §1.5.6)",
-      "Choice of place of birth will be limited — interventions recommended (oxytocin infusion, continuous CTG, epidural) are not available for home birth or in midwife-led units. (NICE NG207 §1.1.3)",
-      "There may be limitations on the use of a birthing pool. (NICE NG207 §1.1.3)",
-      "Hospital stay may be longer than with a spontaneous labour. (NICE NG207 §1.1.3)",
-      "Increased likelihood of assisted vaginal birth (forceps or ventouse), with associated increased risk of obstetric anal sphincter injury (3rd/4th degree tears). (NICE NG207 §1.1.3)",
-      "Induction may not be successful, and a caesarean section may then be needed. (NICE NG207 §1.1.4)",
-      "Vaginal examinations to assess the cervix are required before and during induction. (NICE NG207 §1.1.3)",
+      "Induced labour may be more painful than spontaneous labour. (NICE NG207 1.1.3, 1.5.6)",
+      "Choice of place of birth will be limited — interventions recommended (oxytocin infusion, continuous CTG, epidural) are not available for home birth or in midwife-led units. (NICE NG207 1.1.3)",
+      "There may be limitations on the use of a birthing pool. (NICE NG207 1.1.3)",
+      "Hospital stay may be longer than with a spontaneous labour. (NICE NG207 1.1.3)",
+      "Increased likelihood of assisted vaginal birth (forceps or ventouse), with associated increased risk of obstetric anal sphincter injury (3rd/4th degree tears). (NICE NG207 1.1.3)",
+      "Induction may not be successful, and a caesarean section may then be needed. (NICE NG207 1.1.4)",
+      "Vaginal examinations to assess the cervix are required before and during induction. (NICE NG207 1.1.3)",
     ],
   },
   {
@@ -2102,12 +2102,12 @@ export const IOL_RISK_SECTIONS = [
     heading: "Risks of the chosen method",
     type: "simple",
     items: [
-      "MEMBRANE SWEEP: pain, discomfort and vaginal bleeding are possible from the procedure. (NICE NG207 §1.3.1)",
-      "PHARMACOLOGICAL (dinoprostone / misoprostol): can cause uterine hyperstimulation — the uterus contracts too frequently or contractions last too long, which can lead to changes in fetal heart rate and fetal compromise. (NICE NG207 §1.1.3, §1.3.5)",
-      "PHARMACOLOGICAL: hyperstimulation caused by misoprostol may be more difficult to reverse than that from dinoprostone. (NICE NG207 §1.3.5)",
-      "MECHANICAL (balloon catheter): less likely to cause hyperstimulation than pharmacological methods, but carries a risk of infection. (NICE NG207 §1.2.17, §1.3.5)",
-      "ARM (amniotomy): if oxytocin is delayed after amniotomy, labour may take longer and there may be an increased risk of neonatal infection. (NICE NG207 §1.3.10)",
-      "OXYTOCIN infusion: continuous cardiotocography is required because of the risk of hyperstimulation and fetal compromise. (NICE NG207 §1.5.3)",
+      "MEMBRANE SWEEP: pain, discomfort and vaginal bleeding are possible from the procedure. (NICE NG207 1.3.1)",
+      "PHARMACOLOGICAL (dinoprostone / misoprostol): can cause uterine hyperstimulation — the uterus contracts too frequently or contractions last too long, which can lead to changes in fetal heart rate and fetal compromise. (NICE NG207 1.1.3, 1.3.5)",
+      "PHARMACOLOGICAL: hyperstimulation caused by misoprostol may be more difficult to reverse than that from dinoprostone. (NICE NG207 1.3.5)",
+      "MECHANICAL (balloon catheter): less likely to cause hyperstimulation than pharmacological methods, but carries a risk of infection. (NICE NG207 1.2.17, 1.3.5)",
+      "ARM (amniotomy): if oxytocin is delayed after amniotomy, labour may take longer and there may be an increased risk of neonatal infection. (NICE NG207 1.3.10)",
+      "OXYTOCIN infusion: continuous cardiotocography is required because of the risk of hyperstimulation and fetal compromise. (NICE NG207 1.5.3)",
     ],
   },
   {
@@ -2116,9 +2116,9 @@ export const IOL_RISK_SECTIONS = [
     type: "simple",
     factorOnly: "previous_cs",
     items: [
-      "Induction of labour can lead to an increased risk of emergency caesarean birth. (NICE NG207 §1.2.17)",
-      "Induction of labour can lead to a risk of uterine rupture (the scar on the womb opening). (NICE NG207 §1.2.17)",
-      "Dinoprostone and misoprostol are contraindicated for induction in women with a uterine scar because they increase the risk of uterine rupture. A mechanical method (balloon catheter) is usually preferred. (NICE NG207 §1.2.17)",
+      "Induction of labour can lead to an increased risk of emergency caesarean birth. (NICE NG207 1.2.17)",
+      "Induction of labour can lead to a risk of uterine rupture (the scar on the womb opening). (NICE NG207 1.2.17)",
+      "Dinoprostone and misoprostol are contraindicated for induction in women with a uterine scar because they increase the risk of uterine rupture. A mechanical method (balloon catheter) is usually preferred. (NICE NG207 1.2.17)",
     ],
   },
 ];
@@ -2127,7 +2127,7 @@ export const IOL_RISK_SECTIONS = [
 const IOL_BENEFIT_PROLONGED = {
   id: "iol_prolonged",
   name: "Reduces the risks of prolonged pregnancy",
-  source: "NICE NG207 §1.2",
+  source: "NICE NG207 1.2",
   plain: "Beyond 41+0 weeks the risks of stillbirth, neonatal death, neonatal unit admission and caesarean birth increase with time; induction is offered to avoid these risks. If induction has been offered for a different reason, that reason will have been discussed with you.",
 };
 
@@ -2136,13 +2136,13 @@ export const IOL_BENEFITS = {
     {
       id: "iol_sweep_natural",
       name: "Makes labour more likely to start on its own",
-      source: "NICE NG207 §1.3.1",
+      source: "NICE NG207 1.3.1",
       plain: "A sweep increases the chance that labour starts naturally, which can avoid the need for a formal induction with drugs or a balloon.",
     },
     {
       id: "iol_sweep_simple",
       name: "Simple and done at a routine visit",
-      source: "NICE NG207 §1.3.2",
+      source: "NICE NG207 1.3.2",
       plain: "It is performed during a vaginal examination at an antenatal appointment, with verbal consent, and can be repeated if labour does not start.",
     },
   ],
@@ -2151,7 +2151,7 @@ export const IOL_BENEFITS = {
     {
       id: "iol_pg_firstline",
       name: "First-line and effective at preparing the cervix",
-      source: "NICE NG207 §1.3.7",
+      source: "NICE NG207 1.3.7",
       plain: "Prostaglandins soften and open the cervix when it is not yet ready for labour (Bishop score 6 or less), allowing the waters to be broken and labour to be established.",
     },
   ],
@@ -2160,7 +2160,7 @@ export const IOL_BENEFITS = {
     {
       id: "iol_balloon_gentle",
       name: "Lower chance of hyperstimulation than drug methods",
-      source: "NICE NG207 §1.3.5",
+      source: "NICE NG207 1.3.5",
       plain: "Mechanical methods are less likely than prostaglandins to make the uterus contract too frequently, and are the usual choice after a previous caesarean because prostaglandins are contraindicated with a uterine scar.",
     },
   ],
@@ -2169,7 +2169,7 @@ export const IOL_BENEFITS = {
     {
       id: "iol_arm_establish",
       name: "Establishes labour once the cervix is ready",
-      source: "NICE NG207 §1.3.9",
+      source: "NICE NG207 1.3.9",
       plain: "When the cervix is favourable (Bishop score more than 6), breaking the waters and starting oxytocin is the recommended way to bring on contractions and establish labour.",
     },
   ],
@@ -2179,57 +2179,57 @@ export const IOL_PAGES = {
   membrane_sweep: {
     what: {
       heading: "Membrane sweep",
-      body: "A membrane sweep is a vaginal examination during which a finger is gently passed through the cervix to separate the membranes from the lower part of the womb. It is usually offered at antenatal visits from 39+0 weeks onwards.\n\nA sweep is not the same as a formal induction — it can make it more likely that labour will start on its own, without the need for additional drugs or mechanical methods.\n\nVerbal consent is obtained before the procedure. You can have more than one sweep if the first does not start labour. (NICE NG207 §1.3.1–1.3.3)",
+      body: "A membrane sweep is a vaginal examination during which a finger is gently passed through the cervix to separate the membranes from the lower part of the womb. It is usually offered at antenatal visits from 39+0 weeks onwards.\n\nA sweep is not the same as a formal induction — it can make it more likely that labour will start on its own, without the need for additional drugs or mechanical methods.\n\nVerbal consent is obtained before the procedure. You can have more than one sweep if the first does not start labour. (NICE NG207 1.3.1–1.3.3)",
     },
     why: {
       heading: "Why is this being offered?",
-      body: "A membrane sweep is offered to try to start labour naturally and reduce the chance that you will need a formal induction with drugs or a balloon.\n\nIt is usually offered from 39+0 weeks onwards in uncomplicated pregnancies, or earlier if there is a clinical reason to expedite labour. (NICE NG207 §1.3.2)",
+      body: "A membrane sweep is offered to try to start labour naturally and reduce the chance that you will need a formal induction with drugs or a balloon.\n\nIt is usually offered from 39+0 weeks onwards in uncomplicated pregnancies, or earlier if there is a clinical reason to expedite labour. (NICE NG207 1.3.2)",
     },
     alternatives: {
       heading: "Alternatives and your right to decline",
-      body: "You have the right to decline a membrane sweep, and your decision will be respected. The options remain open:\n\n• Waiting for labour to start naturally, with the offer of a sweep at a later visit\n• Formal induction of labour, discussed and booked in the usual way\n• Expectant management with additional monitoring if the pregnancy continues past 41+0 weeks\n\nYour usual antenatal care continues whatever you decide. (NICE NG207 §1.1.5)",
+      body: "You have the right to decline a membrane sweep, and your decision will be respected. The options remain open:\n\n• Waiting for labour to start naturally, with the offer of a sweep at a later visit\n• Formal induction of labour, discussed and booked in the usual way\n• Expectant management with additional monitoring if the pregnancy continues past 41+0 weeks\n\nYour usual antenatal care continues whatever you decide. (NICE NG207 1.1.5)",
     },
   },
   prostaglandin: {
     what: {
       heading: "Prostaglandin induction",
-      body: "A prostaglandin (vaginal dinoprostone tablet, gel, controlled-release pessary, or low-dose oral misoprostol) is given to help the cervix soften and open. It is the first-line method when the Bishop score is 6 or less.\n\nYour baby's heart rate and your contractions are monitored regularly. If hyperstimulation occurs (contractions that are too frequent or too long), the treatment is stopped and the pessary removed if possible. Hyperstimulation can be treated with a tocolytic medication.\n\nOnce the cervix is favourable, an amniotomy (breaking the waters) and oxytocin infusion may be needed to establish labour. (NICE NG207 §1.3.5–1.3.7)",
+      body: "A prostaglandin (vaginal dinoprostone tablet, gel, controlled-release pessary, or low-dose oral misoprostol) is given to help the cervix soften and open. It is the first-line method when the Bishop score is 6 or less.\n\nYour baby's heart rate and your contractions are monitored regularly. If hyperstimulation occurs (contractions that are too frequent or too long), the treatment is stopped and the pessary removed if possible. Hyperstimulation can be treated with a tocolytic medication.\n\nOnce the cervix is favourable, an amniotomy (breaking the waters) and oxytocin infusion may be needed to establish labour. (NICE NG207 1.3.5–1.3.7)",
     },
     why: {
       heading: "Why is this being recommended?",
-      body: "Prostaglandin is recommended as the first-line method of induction for women with a Bishop score of 6 or less and no contraindication to pharmacological induction. (NICE NG207 §1.3.7)\n\nThe reason for offering induction in your case will have been discussed with you separately — common reasons include pregnancy lasting beyond 41+0 weeks, prelabour rupture of the membranes, or other obstetric indications. (NICE NG207 §1.2)",
+      body: "Prostaglandin is recommended as the first-line method of induction for women with a Bishop score of 6 or less and no contraindication to pharmacological induction. (NICE NG207 1.3.7)\n\nThe reason for offering induction in your case will have been discussed with you separately — common reasons include pregnancy lasting beyond 41+0 weeks, prelabour rupture of the membranes, or other obstetric indications. (NICE NG207 1.2)",
     },
     alternatives: {
       heading: "Alternatives and your right to decline",
-      body: "You have the right to decide not to proceed with induction, to delay it, or to stop the process at any stage, even if the healthcare team disagrees with the decision. (NICE NG207 §1.1.5)\n\nThe alternatives will be discussed with you:\n\n• Expectant management: waiting, with additional fetal monitoring; the risks of continuing the pregnancy in your situation will be explained\n• A different method of induction, where one is suitable\n• Planned caesarean birth (NICE NG207 §1.2.18)\n\nYour decision will be respected and recorded in your notes.",
+      body: "You have the right to decide not to proceed with induction, to delay it, or to stop the process at any stage, even if the healthcare team disagrees with the decision. (NICE NG207 1.1.5)\n\nThe alternatives will be discussed with you:\n\n• Expectant management: waiting, with additional fetal monitoring; the risks of continuing the pregnancy in your situation will be explained\n• A different method of induction, where one is suitable\n• Planned caesarean birth (NICE NG207 1.2.18)\n\nYour decision will be respected and recorded in your notes.",
     },
   },
   balloon: {
     what: {
       heading: "Balloon catheter (mechanical induction)",
-      body: "A balloon catheter (sometimes a double balloon, or an osmotic cervical dilator) is placed through the cervix and inflated to gently stretch and ripen the cervix. It is left in for up to 12–24 hours.\n\nThe balloon usually falls out when the cervix has opened enough, after which an amniotomy and oxytocin infusion may be needed to establish labour.\n\nMechanical methods are less likely to cause uterine hyperstimulation than pharmacological methods, but there is a small risk of infection. (NICE NG207 §1.3.5, §1.3.8)",
+      body: "A balloon catheter (sometimes a double balloon, or an osmotic cervical dilator) is placed through the cervix and inflated to gently stretch and ripen the cervix. It is left in for up to 12–24 hours.\n\nThe balloon usually falls out when the cervix has opened enough, after which an amniotomy and oxytocin infusion may be needed to establish labour.\n\nMechanical methods are less likely to cause uterine hyperstimulation than pharmacological methods, but there is a small risk of infection. (NICE NG207 1.3.5, 1.3.8)",
     },
     why: {
       heading: "Why is this being recommended?",
-      body: "A mechanical method is offered when pharmacological methods (dinoprostone, misoprostol) are not suitable — for example, if there is a higher risk of hyperstimulation, or in women who have had a previous caesarean birth (because dinoprostone and misoprostol are contraindicated in women with a uterine scar).\n\nIt may also be offered when you choose a mechanical method over a pharmacological one. (NICE NG207 §1.2.17, §1.3.8)",
+      body: "A mechanical method is offered when pharmacological methods (dinoprostone, misoprostol) are not suitable — for example, if there is a higher risk of hyperstimulation, or in women who have had a previous caesarean birth (because dinoprostone and misoprostol are contraindicated in women with a uterine scar).\n\nIt may also be offered when you choose a mechanical method over a pharmacological one. (NICE NG207 1.2.17, 1.3.8)",
     },
     alternatives: {
       heading: "Alternatives and your right to decline",
-      body: "You have the right to decline mechanical induction, to delay it, or to stop the process at any stage. (NICE NG207 §1.1.5)\n\nThe alternatives will be discussed with you:\n\n• Expectant management: waiting, with additional fetal monitoring\n• A pharmacological method (dinoprostone or misoprostol), where suitable; not an option with a previous caesarean because of the uterine scar\n• Planned caesarean birth (NICE NG207 §1.2.18)\n\nYour decision will be respected and recorded in your notes.",
+      body: "You have the right to decline mechanical induction, to delay it, or to stop the process at any stage. (NICE NG207 1.1.5)\n\nThe alternatives will be discussed with you:\n\n• Expectant management: waiting, with additional fetal monitoring\n• A pharmacological method (dinoprostone or misoprostol), where suitable; not an option with a previous caesarean because of the uterine scar\n• Planned caesarean birth (NICE NG207 1.2.18)\n\nYour decision will be respected and recorded in your notes.",
     },
   },
   arm_oxytocin: {
     what: {
       heading: "ARM + oxytocin",
-      body: "When the cervix is favourable (Bishop score >6), induction is started by breaking the waters (artificial rupture of membranes — ARM) and starting an intravenous oxytocin infusion to bring on contractions.\n\nContinuous CTG monitoring is required during the oxytocin infusion because of the risk of hyperstimulation and fetal compromise.\n\nYou can choose to have the ARM and either delay or decline the oxytocin infusion, but this may mean labour takes longer and there may be an increased risk of infection for the baby. (NICE NG207 §1.3.9, §1.3.10)",
+      body: "When the cervix is favourable (Bishop score >6), induction is started by breaking the waters (artificial rupture of membranes — ARM) and starting an intravenous oxytocin infusion to bring on contractions.\n\nContinuous CTG monitoring is required during the oxytocin infusion because of the risk of hyperstimulation and fetal compromise.\n\nYou can choose to have the ARM and either delay or decline the oxytocin infusion, but this may mean labour takes longer and there may be an increased risk of infection for the baby. (NICE NG207 1.3.9, 1.3.10)",
     },
     why: {
       heading: "Why is this being recommended?",
-      body: "ARM and oxytocin is recommended as the method of induction once the cervix is favourable (Bishop score more than 6). (NICE NG207 §1.3.9)",
+      body: "ARM and oxytocin is recommended as the method of induction once the cervix is favourable (Bishop score more than 6). (NICE NG207 1.3.9)",
     },
     alternatives: {
       heading: "Alternatives and your right to decline",
-      body: "You have the right to decline, and you can stop the induction process at any stage. (NICE NG207 §1.1.5)\n\nThe alternatives will be discussed with you:\n\n• Having the ARM only and delaying or declining the oxytocin infusion, accepting that labour may take longer and there may be an increased risk of infection for the baby (NICE NG207 §1.3.10)\n• Expectant management: waiting, with additional fetal monitoring\n• Planned caesarean birth (NICE NG207 §1.2.18)\n\nYour decision will be respected and recorded in your notes.",
+      body: "You have the right to decline, and you can stop the induction process at any stage. (NICE NG207 1.1.5)\n\nThe alternatives will be discussed with you:\n\n• Having the ARM only and delaying or declining the oxytocin infusion, accepting that labour may take longer and there may be an increased risk of infection for the baby (NICE NG207 1.3.10)\n• Expectant management: waiting, with additional fetal monitoring\n• Planned caesarean birth (NICE NG207 1.2.18)\n\nYour decision will be respected and recorded in your notes.",
     },
   },
 };
@@ -2237,27 +2237,27 @@ export const IOL_PAGES = {
 export const IOL_FAQ = [
   {
     q: "Why are you offering induction?",
-    a: "The most common reasons are: pregnancy lasting beyond 41+0 weeks (where the risks of stillbirth, neonatal death, NICU admission and caesarean birth increase over time), prelabour rupture of the membranes, suspected fetal macrosomia, intrauterine fetal death, or other obstetric/medical reasons specific to you. Your doctor will explain the reason in your case. (NICE NG207 §1.2)",
+    a: "The most common reasons are: pregnancy lasting beyond 41+0 weeks (where the risks of stillbirth, neonatal death, NICU admission and caesarean birth increase over time), prelabour rupture of the membranes, suspected fetal macrosomia, intrauterine fetal death, or other obstetric/medical reasons specific to you. Your doctor will explain the reason in your case. (NICE NG207 1.2)",
   },
   {
     q: "Can induction fail?",
-    a: "Yes. Sometimes induction does not bring on labour, and a caesarean section is then needed. This is one of the things we discuss before starting. (NICE NG207 §1.1.4)",
+    a: "Yes. Sometimes induction does not bring on labour, and a caesarean section is then needed. This is one of the things we discuss before starting. (NICE NG207 1.1.4)",
   },
   {
     q: "What is hyperstimulation?",
-    a: "Hyperstimulation is when the uterus contracts too frequently or contractions last too long (defined as 5 or more contractions in 10 minutes for at least 20 minutes). This can lead to changes in the baby's heart rate. If it happens, the induction medication is stopped or the pessary removed, and a relaxing medication (tocolytic) can be given. (NICE NG207 §1.1.3, §1.3.5)",
+    a: "Hyperstimulation is when the uterus contracts too frequently or contractions last too long (defined as 5 or more contractions in 10 minutes for at least 20 minutes). This can lead to changes in the baby's heart rate. If it happens, the induction medication is stopped or the pessary removed, and a relaxing medication (tocolytic) can be given. (NICE NG207 1.1.3, 1.3.5)",
   },
   {
     q: "Will it be more painful than a normal labour?",
-    a: "Induced labour may be more painful than spontaneous labour. You will be offered the full range of pain relief — simple analgesia, labour in water (where suitable), and epidural. (NICE NG207 §1.1.3, §1.5.6–1.5.8)",
+    a: "Induced labour may be more painful than spontaneous labour. You will be offered the full range of pain relief — simple analgesia, labour in water (where suitable), and epidural. (NICE NG207 1.1.3, 1.5.6–1.5.8)",
   },
   {
     q: "I've had a previous caesarean — is induction safe?",
-    a: "Induction is possible but carries an increased risk of emergency caesarean birth and a small risk of uterine rupture. Prostaglandins (dinoprostone and misoprostol) are not used in women with a previous caesarean because they increase the rupture risk — a mechanical method (balloon catheter) is usually preferred. The risks will be discussed with you in detail. (NICE NG207 §1.2.17)",
+    a: "Induction is possible but carries an increased risk of emergency caesarean birth and a small risk of uterine rupture. Prostaglandins (dinoprostone and misoprostol) are not used in women with a previous caesarean because they increase the rupture risk — a mechanical method (balloon catheter) is usually preferred. The risks will be discussed with you in detail. (NICE NG207 1.2.17)",
   },
   {
     q: "Can I change my mind?",
-    a: "Yes — at any stage. You can decline induction at the outset, delay it, or stop the process once it has started. Your decision will be respected and recorded in your notes. (NICE NG207 §1.1.5)",
+    a: "Yes — at any stage. You can decline induction at the outset, delay it, or stop the process once it has started. Your decision will be respected and recorded in your notes. (NICE NG207 1.1.5)",
   },
 ];
 

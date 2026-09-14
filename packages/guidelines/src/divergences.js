@@ -39,7 +39,7 @@ export const DIVERGENCES = {
         status: "current",
         position:
           "Do not offer anti-D immunoglobulin prophylaxis for an ectopic pregnancy, miscarriage or threatened miscarriage up to and including 11+6 weeks.",
-        citation: "NG126 §1.18.1 · updated 17 June 2026",
+        citation: "NG126 1.18.1 · updated 17 June 2026",
       },
       {
         body: "BSH",
@@ -49,7 +49,7 @@ export const DIVERGENCES = {
         status: "current",
         position:
           "Give a minimum of 250 IU anti-D Ig for all ectopic pregnancies in previously non-sensitised RhD-negative women, whatever the mode of management.",
-        citation: "BSH, Anti-D Ig for prevention of HDFN (Transfusion Medicine 2014) §3.2",
+        citation: "BSH, Anti-D Ig for prevention of HDFN (Transfusion Medicine 2014) 3.2",
       },
       {
         body: "RCOG GTG22",
@@ -101,7 +101,7 @@ export const DIVERGENCES = {
         status: "current",
         position:
           "Do not offer anti-D for threatened miscarriage up to and including 11+6 weeks. From 12+0 to 12+6 weeks, consider at least 250 IU where bleeding is heavy or recurrent.",
-        citation: "NG126 §1.18.1 and §1.18.3",
+        citation: "NG126 1.18.1 and 1.18.3",
       },
       {
         body: "BSH",
@@ -111,7 +111,7 @@ export const DIVERGENCES = {
         status: "current",
         position:
           "Anti-D is not necessary where bleeding stops completely before 12 weeks, but give 250 IU where bleeding is heavy or repeated, or where there is associated abdominal pain, particularly as gestation approaches 12 weeks.",
-        citation: "BSH, Anti-D Ig for prevention of HDFN (Transfusion Medicine 2014) §3.2",
+        citation: "BSH, Anti-D Ig for prevention of HDFN (Transfusion Medicine 2014) 3.2",
       },
     ],
     agreed:
