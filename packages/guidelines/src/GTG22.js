@@ -101,6 +101,8 @@ export const GTG22_SECTIONS = [
     content: [
       { type: "alert", value: "Give anti-D Ig as soon as possible and always within 72 hours of a potentially sensitising event. If the 72-hour window is missed, a dose given up to 10 days after the event may still offer some protection — give it rather than not, and document why it was late." },
 
+      { type: "alert", value: "Early pregnancy is now the exception to the list below. NICE NG126 (updated June 2026) advises against anti-D for miscarriage, threatened miscarriage or ectopic pregnancy up to and including 11+6 weeks, including where the pregnancy is managed surgically. The first two events below are contested: the comparison at the end of this section sets out what each body says." },
+
       { type: "subheading", value: "Potentially sensitising events" },
       { type: "list", items: [
         "Miscarriage, threatened miscarriage, or intervention for miscarriage (medical or surgical evacuation) — give anti-D Ig at any gestation if evacuation is performed; for a continuing pregnancy with threatened miscarriage, give anti-D Ig only if bleeding is heavy, repeated, or associated with abdominal pain, particularly as gestation approaches or passes 12 weeks. Anti-D is not routinely needed for light, painless bleeding before 12 weeks in a continuing pregnancy.",
@@ -114,6 +116,9 @@ export const GTG22_SECTIONS = [
         "Intrauterine death",
         "Delivery — vaginal, instrumental, or caesarean",
       ]},
+
+      { type: "compare", id: "antid-ectopic-under-12" },
+      { type: "compare", id: "antid-threatened-heavy-bleeding" },
 
       { type: "subheading", value: "Dose by gestation" },
       { type: "table",
