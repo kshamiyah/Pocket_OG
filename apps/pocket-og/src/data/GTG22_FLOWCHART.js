@@ -39,9 +39,34 @@ export const GTG22_ANTID_FLOWCHART = {
     "event-gestation": {
       type: "decision",
       title: "Gestation at Time of the Event?",
+      text: "Early pregnancy loss is no longer treated like other sensitising events. Where the ultrasound gestation differs from the last menstrual period, use the ultrasound findings.",
       options: [
-        { label: "Before 20+0 weeks", next: "dose-early" },
+        { label: "Miscarriage, threatened miscarriage or ectopic, up to and including 11+6 weeks", sublabel: "NICE NG126, updated June 2026", next: "early-loss-none" },
+        { label: "Miscarriage or ectopic, 12+0 to 12+6 weeks", sublabel: "Medical or surgical management, or heavy bleeding", next: "early-loss-250" },
+        { label: "Any other sensitising event before 20+0 weeks", sublabel: "ECV, trauma, invasive procedure, APH", next: "dose-early" },
         { label: "20+0 weeks or later", next: "dose-late" },
+      ],
+    },
+
+    "early-loss-none": {
+      type: "end",
+      title: "No Anti-D: NICE NG126",
+      text: "NICE NG126 (updated June 2026) advises against anti-D prophylaxis for an ectopic pregnancy, miscarriage or threatened miscarriage up to and including 11+6 weeks, including where the pregnancy is managed surgically. This supersedes the archived GTG22 advice for this group.",
+      items: [
+        "Use the ultrasound gestation where it differs from the last menstrual period",
+        "Do not use a Kleihauer test to quantify feto-maternal haemorrhage in early pregnancy",
+        "Guidance differs here: BSH (2014) advises a minimum of 250 IU for all ectopic pregnancies whatever the management. Both positions are set out in the NG126 and GTG22 guides",
+      ],
+    },
+
+    "early-loss-250": {
+      type: "end",
+      title: "At Least 250 IU Anti-D Ig",
+      text: "From 12+0 to 12+6 weeks, NICE NG126 advises offering at least 250 IU (50 micrograms) where there is medical management or a surgical procedure for ectopic pregnancy or miscarriage, and considering it for threatened miscarriage with heavy or recurrent bleeding.",
+      items: [
+        "Give within 72 hours of the event",
+        "Do not use a Kleihauer test to quantify feto-maternal haemorrhage at this gestation",
+        "Discuss that anti-D is obtained from blood plasma but contains no blood cells, so she can make an informed choice",
       ],
     },
 

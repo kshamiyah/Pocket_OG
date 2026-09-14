@@ -4,6 +4,17 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.23.1",
+    date: "14/09/2026",
+    title: "Anti-D corrections after the NG126 update",
+    changes: [
+      { tag: "fixed", text: "The anti-D flowchart no longer walks you into contradicted guidance. Choosing a sensitising event before 20 weeks previously gave 250 IU for any indication, including miscarriage and ectopic pregnancy. It now branches: up to and including 11+6 weeks it gives NICE NG126's position that anti-D is not offered, surgical management included, and notes that BSH disagrees; from 12+0 to 12+6 weeks it gives at least 250 IU." },
+      { tag: "fixed", text: "Pearl corrected: anti-D under 12 weeks was said to differ \"from surgical management\", which is exactly what NG126 changed in June 2026. The rule now covers surgery too. Some trusts still give anti-D in theatre, RBH CG565 among them, so the pearl says to check local policy." },
+      { tag: "fixed", text: "Pearl corrected: \"any sensitising event needs anti-D\" was too broad for early pregnancy, and the Kleihauer advice now says from 20+0 weeks, since NG126 advises against using one in early pregnancy." },
+      { tag: "fixed", text: "Molar pregnancy: anti-D after evacuation is no longer described as being given \"as for any pregnancy loss\". The advice itself stands, since BSH asks for a minimum 250 IU for all molar pregnancies, but that is no longer the baseline for other early pregnancy loss." },
+    ],
+  },
+  {
     version: "1.23.0",
     date: "14/09/2026",
     title: "Guidance differs: when national bodies disagree",

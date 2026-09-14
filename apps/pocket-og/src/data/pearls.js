@@ -144,7 +144,7 @@ export const PEARLS = [
     id: "antid-72",
     topic: "Anti-D",
     pearl: "After a sensitising event, anti-D works best within 72 hours, but give it late rather than not at all.",
-    detail: "Any potential sensitising event in a RhD-negative woman (bleeding, trauma, ECV, procedures) needs anti-D, ideally within 72 hours. A Kleihauer quantifies the bleed and tells you whether more is required.",
+    detail: "A potentially sensitising event in a RhD-negative woman (bleeding, trauma, ECV, invasive procedure) needs anti-D, ideally within 72 hours. From 20+0 weeks, a Kleihauer quantifies the bleed and shows whether more than the standard dose is required. Early pregnancy is the exception: NICE NG126 (updated June 2026) advises against anti-D for miscarriage, threatened miscarriage or ectopic pregnancy up to and including 11+6 weeks.",
     gl: "GTG63",
     fc: "GTG63_ANTID", fcLabel: "Anti-D pathway",
   },
@@ -263,10 +263,10 @@ export const PEARLS = [
   },
   {
     id: "cg621-no-anti-d-early",
-    topic: "Medical management of miscarriage",
-    pearl: "Anti-D isn't given for medical management of miscarriage under 12 weeks.",
-    detail: "Below 12 weeks, the fetomaternal haemorrhage risk from medical management of miscarriage is considered too low to warrant anti-D — this differs from later gestations and from surgical management.",
-    gl: "CG621",
+    topic: "Anti-D in early pregnancy",
+    pearl: "Anti-D isn't offered for miscarriage or ectopic pregnancy up to and including 11+6 weeks, surgery included.",
+    detail: "NICE NG126 (updated June 2026) found no evidence of benefit below 12 weeks, and the rule now covers surgical management too, which is the change from earlier practice. Use the ultrasound gestation where it differs from the last menstrual period. Some trusts still give anti-D in theatre, RBH CG565 among them, so check local policy.",
+    gl: "NG126",
   },
   {
     id: "cg621-third-miscarriage-cytogenetics",

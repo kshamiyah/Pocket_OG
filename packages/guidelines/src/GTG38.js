@@ -74,7 +74,7 @@ export const GTG38_SECTIONS = [
     content: [
       { type: "alert", value: "Suction curettage is the method of choice for uterine evacuation of a complete mole, whatever the uterine size — avoid medical evacuation (prostaglandins/oxytocin) where possible, as it may increase the risk of embolisation of trophoblastic tissue and the need for chemotherapy." },
       { type: "list", items: [
-        "Anti-D prophylaxis is given following evacuation in Rh-negative women, as for any pregnancy loss",
+        "Anti-D prophylaxis is given following evacuation in RhD-negative women: BSH advises a minimum of 250 IU for all molar pregnancies, because the potential for sensitisation is significant. This is no longer the baseline for other early pregnancy loss, where NICE NG126 (updated June 2026) advises against anti-D up to and including 11+6 weeks",
         "Send all products of conception from any evacuation for histology — this is how most cases are actually diagnosed",
       ]},
       { type: "alert", value: "Register every confirmed case with one of the UK's specialist GTD screening centres (Charing Cross, Sheffield, or Dundee) for centralised hCG follow-up — this centralisation is what allows the UK's excellent outcomes for this rare disease group." },
