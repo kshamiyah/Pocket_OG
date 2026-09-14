@@ -27,6 +27,7 @@ export const NG126_SECTIONS = [
       "atypical presentation ectopic", "referral early pregnancy", "under 6 weeks bleeding",
       "ectopic pregnancy and miscarriage", "early pregnancy guideline",
     ],
+    flowchartId: "NG126_ASSESSMENT",
     content: [
       {
         type: "text",
@@ -87,6 +88,7 @@ export const NG126_SECTIONS = [
       "repeat scan 7 days", "repeat scan 14 days", "viability scan", "missed miscarriage diagnosis",
       "complete miscarriage", "ng126 ultrasound",
     ],
+    flowchartId: "NG126_VIABILITY",
     content: [
       {
         type: "text",
@@ -147,6 +149,7 @@ export const NG126_SECTIONS = [
       "double decidual sign", "empty uterus", "haemoperitoneum", "pouch of douglas",
       "heterotopic pregnancy", "ectopic ultrasound diagnosis", "ng126 ectopic signs",
     ],
+    flowchartId: "NG126_VIABILITY",
     content: [
       { type: "subheading", value: "Signs indicating a tubal ectopic pregnancy" },
       {
@@ -199,6 +202,7 @@ export const NG126_SECTIONS = [
       "50% fall", "hcg 1500", "trophoblastic proliferation", "serum progesterone",
       "ng126 pul", "hcg interpretation",
     ],
+    flowchartId: "NG126_PUL",
     content: [
       {
         type: "text",
@@ -242,6 +246,7 @@ export const NG126_SECTIONS = [
       "bleeding with previous miscarriage", "16 weeks progesterone", "prism",
       "ng126 threatened miscarriage",
     ],
+    flowchartId: "NG126_MISCARRIAGE",
     content: [
       {
         type: "list",
@@ -266,6 +271,7 @@ export const NG126_SECTIONS = [
       "manual vacuum aspiration", "mva", "surgical management of miscarriage", "smm",
       "urine pregnancy test 3 weeks", "ng126 miscarriage",
     ],
+    flowchartId: "NG126_MISCARRIAGE",
     content: [
       { type: "subheading", value: "Expectant management" },
       {
@@ -319,6 +325,7 @@ export const NG126_SECTIONS = [
       "hcg 1000", "hcg 1500", "hcg 5000", "35 mm adnexal mass", "days 2 4 7",
       "salpingectomy", "salpingotomy", "laparoscopy ectopic", "ng126 ectopic management",
     ],
+    flowchartId: "NG126_ECTOPIC",
     content: [
       { type: "subheading", value: "Expectant management" },
       {
@@ -392,6 +399,7 @@ export const NG126_SECTIONS = [
       "12+0 to 12+6", "250 iu anti-d", "rhd negative early pregnancy", "kleihauer",
       "ng126 anti-d", "anti-d 2026",
     ],
+    flowchartId: "NG126_ANTID",
     content: [
       {
         type: "alert",

@@ -3,21 +3,26 @@
 
 export const CALCULATOR_CONNECTIONS = {
   PUL: [
-    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623, step through the pathway" },
+    { type: "flowchart", id: "NG126_PUL", gl: "NG126", label: "Pregnancy of unknown location", sublabel: "NG126, two hCG measurements 48 hours apart" },
+    { type: "flowchart", id: "NG126_VIABILITY", gl: "NG126", label: "Ultrasound: location & viability", sublabel: "NG126, CRL and mean sac diameter thresholds" },
+    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway (local)", sublabel: "CG623, step through the pathway" },
     { type: "calculator", id: "ECTOPIC_DECISION", gl: "CG623", label: "Tubal ectopic, initial management", sublabel: "Calculator, expectant / MTX / surgery" },
   ],
   ECTOPIC_DECISION: [
-    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623, step through the pathway" },
+    { type: "flowchart", id: "NG126_ECTOPIC", gl: "NG126", label: "Tubal ectopic: expectant, medical or surgical", sublabel: "NG126, the same thresholds as this calculator" },
+    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway (local)", sublabel: "CG623, step through the pathway" },
     { type: "calculator", id: "MTX_SURVEILLANCE", gl: "CG623", label: "Post-methotrexate surveillance", sublabel: "Calculator, day 4 & day 7 hCG" },
     { type: "calculator", id: "EXPECTANT_SURVEILLANCE", gl: "CG623", label: "Expectant management, surveillance", sublabel: "Calculator, serial hCG days 2, 4, 7" },
   ],
   EXPECTANT_SURVEILLANCE: [
-    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623, step through the pathway" },
+    { type: "flowchart", id: "NG126_ECTOPIC", gl: "NG126", label: "Tubal ectopic: expectant, medical or surgical", sublabel: "NG126, expectant surveillance on days 2, 4 and 7" },
+    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway (local)", sublabel: "CG623, step through the pathway" },
     { type: "calculator", id: "ECTOPIC_DECISION", gl: "CG623", label: "Tubal ectopic, initial management", sublabel: "Calculator, expectant / MTX / surgery" },
     { type: "calculator", id: "MTX_SURVEILLANCE", gl: "CG623", label: "Post-methotrexate surveillance", sublabel: "Calculator, day 4 & day 7 hCG" },
   ],
   MTX_SURVEILLANCE: [
-    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623, step through the pathway" },
+    { type: "flowchart", id: "NG126_ECTOPIC", gl: "NG126", label: "Tubal ectopic: expectant, medical or surgical", sublabel: "NG126, hCG on days 4 and 7 after methotrexate" },
+    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway (local)", sublabel: "CG623, step through the pathway" },
     { type: "calculator", id: "ECTOPIC_DECISION", gl: "CG623", label: "Tubal ectopic, initial management", sublabel: "Calculator, expectant / MTX / surgery" },
     { type: "calculator", id: "EXPECTANT_SURVEILLANCE", gl: "CG623", label: "Expectant management, surveillance", sublabel: "Calculator, serial hCG days 2, 4, 7" },
   ],

@@ -4,6 +4,20 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.24.0",
+    date: "14/09/2026",
+    title: "Six national early pregnancy workflows",
+    changes: [
+      { tag: "new", text: "NICE NG126 now has its own flowcharts, so early pregnancy no longer depends on a local trust pathway: assessment and referral, ultrasound for location and viability, pregnancy of unknown location, management of miscarriage, tubal ectopic, and anti-D." },
+      { tag: "new", text: "Assessment and referral (§1.4): who goes straight to A&E, who needs immediate early pregnancy assessment, and who can be managed expectantly under 6 weeks, with the full symptom and sign lists and the reminder that about a third of ectopic pregnancies have no risk factors." },
+      { tag: "new", text: "Ultrasound (§1.5 and §1.6): heartbeat first, then crown to rump length, then mean sac diameter, with the 7.0 mm and 25.0 mm thresholds and the 7 day and 14 day rescan intervals." },
+      { tag: "new", text: "Pregnancy of unknown location (§1.8): two hCG measurements 48 hours apart, then the greater than 63% rise, greater than 50% fall, and everything in between." },
+      { tag: "new", text: "Miscarriage (§1.9 to §1.12): threatened miscarriage and progesterone, expectant management for 7 to 14 days first line, mifepristone then misoprostol for missed miscarriage, misoprostol alone for incomplete, and the surgical choice." },
+      { tag: "new", text: "Tubal ectopic (§1.14 to §1.17) mirrors the calculator exactly, so the flowchart and the calculator cannot drift apart. Anti-D (§1.18) carries the June 2026 rewrite, and notes where BSH disagrees." },
+      { tag: "improved", text: "The RBH miscarriage and ectopic flowcharts stay exactly where they are. They are now an optional local overlay rather than the only pathway available." },
+    ],
+  },
+  {
     version: "1.23.1",
     date: "14/09/2026",
     title: "Anti-D corrections after the NG126 update",
