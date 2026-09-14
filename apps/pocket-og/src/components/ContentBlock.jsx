@@ -1,5 +1,6 @@
 import { useState } from "react";
 import RichText from "./RichText";
+import CompareBlock from "./CompareBlock";
 import { highlightText } from "../utils/highlight";
 
 function MbrraceListItem({ item, rt }) {
@@ -79,5 +80,6 @@ export default function ContentBlock({ block, highlightTerms = [], inlineLinks =
       </table>
     </div>
   );
+  if (block.type === "compare") return <CompareBlock id={block.id} />;
   return null;
 }

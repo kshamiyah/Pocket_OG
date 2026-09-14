@@ -63,6 +63,19 @@ import { APPROACH_SECTIONS } from "../data/approaches";
 import { TOG_SECTIONS } from "../data/tog";
 import { TRIAL_SECTIONS } from "../data/trials";
 import { EXTRA_SEARCH_SECTIONS } from "./extraIndex";
+import { DIVERGENCES } from "@pocket-og/guidelines";
+
+// A "compare" block carries no text of its own: its words live in the
+// divergence dataset, so pull them in or the positions are unsearchable.
+function divergenceText(id) {
+  const d = DIVERGENCES[id];
+  if (!d) return [];
+  return [
+    d.question, d.scope, d.agreed, d.why,
+    ...(d.positions ?? []).flatMap(p => [p.body, p.position, p.citation]),
+    ...(d.local ?? []).flatMap(l => [l.body, l.position]),
+  ].filter(Boolean);
+}
 
 function escapeRe(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -219,6 +232,7 @@ export const SEARCH_INDEX = _WIKI.map(page => {
     if (b.type === "text" || b.type === "alert" || b.type === "subheading") return [b.value ?? ""];
     if (b.type === "list") return b.items;
     if (b.type === "table") return [...b.headers, ...b.rows.flat()];
+    if (b.type === "compare") return divergenceText(b.id);
     return [];
   }).join(" ").toLowerCase();
   const fallbackText = [page.title, page.condition, page.setting, ...page.tags].join(" ").toLowerCase();

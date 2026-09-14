@@ -1,4 +1,5 @@
 export { GUIDELINES, GL_COLORS } from "./guidelines.js";
+export { DIVERGENCES, DIVERGENCE_LIST } from "./divergences.js";
 export { classifyCTGEntry, combineFeatureGrades } from "./ctg.js";
 
 export { GL787_SECTIONS } from "./GL787.js";

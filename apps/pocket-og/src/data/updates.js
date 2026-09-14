@@ -4,6 +4,18 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.23.0",
+    date: "14/09/2026",
+    title: "Guidance differs: when national bodies disagree",
+    changes: [
+      { tag: "new", text: "\"Guidance differs\" cards show every body's position on a decision side by side, at equal weight, with each one's own citation and date. Positions are listed newest first and the card says so, because an unexplained order reads as a ranking. Pocket O&G does not tell you which guideline to follow." },
+      { tag: "new", text: "The first two cover anti-D in early pregnancy, where the disagreement is real and current: NICE NG126 (2026) does not offer anti-D for an ectopic pregnancy up to and including 11+6 weeks, while BSH (2014) gives at least 250 IU for all ectopic pregnancies whatever the management. The archived RCOG GTG22 position is shown alongside, marked archived." },
+      { tag: "new", text: "Each card names what the bodies agree on and why they differ, so a narrow difference does not read as wholesale disagreement, and states the scope (gestation and population), because many apparent conflicts are scope mismatches rather than real ones." },
+      { tag: "new", text: "Local trust guidance sits in its own block outside the national card, marked optional. On anti-D it shows that RBH CG565 and CG621 do not agree with each other." },
+      { tag: "improved", text: "Comparisons are searchable in their own right: try \"guidance differs\", \"conflicting\" or \"anti-d 12 weeks\"." },
+    ],
+  },
+  {
     version: "1.22.0",
     date: "13/09/2026",
     title: "NICE NG126: national early pregnancy guidance",

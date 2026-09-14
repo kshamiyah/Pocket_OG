@@ -397,6 +397,7 @@ export const NG126_SECTIONS = [
         type: "alert",
         value: "Do not offer anti-D immunoglobulin prophylaxis for an ectopic pregnancy, miscarriage or threatened miscarriage up to and including 11+6 weeks' gestation. Where the length of gestation measured on ultrasound differs from that calculated from the last menstrual period, use the ultrasound findings to guide management.",
       },
+      { type: "compare", id: "antid-ectopic-under-12" },
       {
         type: "list",
         items: [
@@ -406,6 +407,7 @@ export const NG126_SECTIONS = [
           "Do not use a Kleihauer test for quantifying feto-maternal haemorrhage",
         ],
       },
+      { type: "compare", id: "antid-threatened-heavy-bleeding" },
       {
         type: "text",
         value: "NICE reviewed the evidence and rewrote these recommendations in June 2026.",

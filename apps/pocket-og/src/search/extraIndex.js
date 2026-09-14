@@ -22,6 +22,7 @@ import { RESUSCITATION_DRUGS } from "../data/rx/resuscitation";
 import { DIABETES_DRUGS } from "../data/rx/diabetes";
 import { ANAEMIA_DRUGS } from "../data/rx/anaemia";
 import { MENTAL_HEALTH_DRUGS } from "../data/rx/mentalHealth";
+import { DIVERGENCE_LIST } from "@pocket-og/guidelines";
 
 const words = (s) => (s ? s.toLowerCase().match(/[a-z0-9]+/g) ?? [] : []);
 const uniq = (arr) => [...new Set(arr.filter(Boolean))];
@@ -102,8 +103,31 @@ export const CONSENT_SECTIONS = CONSENT_PROCEDURES.map(p => ({
   ],
 }));
 
+// ── Guidance differs ──────────────────────────────────────────────────────────
+// A divergence is findable in its own right, not only inside the guide it sits
+// in. The comparison renders inline in the expanded result via the `compare`
+// block, so no new navigation type is needed.
+export const DIVERGENCE_SECTIONS = DIVERGENCE_LIST.map(d => ({
+  id: `differs-${d.id}`,
+  gl: null,
+  source: d.positions[0]?.source ?? null,
+  condition: "Guidance differs",
+  setting: d.scope,
+  title: d.question,
+  tags: uniq([
+    "guidance differs", "differs", "difference", "conflict", "conflicting", "disagree",
+    "comparison", "compare", "which guideline",
+    ...d.positions.flatMap(p => [...words(p.body), ...words(p.source)]),
+    ...words(d.question),
+  ]),
+  content: [
+    { type: "compare", id: d.id },
+  ],
+}));
+
 export const EXTRA_SEARCH_SECTIONS = [
   ...CALCULATOR_SECTIONS,
   ...DRUG_SECTIONS,
   ...CONSENT_SECTIONS,
+  ...DIVERGENCE_SECTIONS,
 ];

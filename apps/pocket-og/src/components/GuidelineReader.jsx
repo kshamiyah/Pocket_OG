@@ -57,6 +57,7 @@ import {
   BGCS_VULVAL_SECTIONS,
   PHYSIOLOGY_SECTIONS,
 } from "@pocket-og/guidelines";
+import { DIVERGENCES } from "@pocket-og/guidelines";
 import { FLOWCHARTS } from "../data/flowcharts";
 import { GUIDELINE_KEYWORD_LINKS } from "../data/connections";
 import { glColors } from "../data/glColors";
@@ -151,6 +152,12 @@ function blockText(block) {
   if (block.type === "text" || block.type === "alert" || block.type === "subheading") return block.value ?? "";
   if (block.type === "list") return (block.items ?? []).join(" ");
   if (block.type === "table") return [...(block.headers ?? []), ...(block.rows ?? []).flat()].join(" ");
+  if (block.type === "compare") {
+    const d = DIVERGENCES[block.id];
+    if (!d) return "";
+    return [d.question, d.scope, ...(d.positions ?? []).map(p => `${p.body} ${p.position}`), d.agreed, d.why]
+      .filter(Boolean).join(" ");
+  }
   return "";
 }
 
