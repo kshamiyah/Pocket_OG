@@ -9,6 +9,7 @@ export const READER_AVAILABLE = new Set([
   "BASHH_HSV",
   "NG73",
   "NG126",
+  "NG207",
   "MBRRACE_SLMC2026",
   "MBRRACE_SLMC2025",
   "GTG5",

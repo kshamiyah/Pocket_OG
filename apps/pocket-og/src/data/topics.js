@@ -219,8 +219,8 @@ export const TOPICS = {
     id: "iol",
     title: "Induction of labour",
     subtitle: "Indications, methods & timing",
-    description: "Starting labour artificially, most often for post-maturity, reduced fetal movements, or a maternal or fetal indication that outweighs the risk of continuing (GL861).",
-    gl: "GL861",
+    description: "Starting labour artificially, most often for pregnancy beyond 41 weeks, prelabour rupture of membranes, or a maternal or fetal indication that outweighs the risk of continuing (NICE NG207).",
+    gl: "NG207",
     terms: [
       "iol", "induction", "induction of labour", "induction of labor",
       "labour induction", "labor induction",
@@ -229,43 +229,47 @@ export const TOPICS = {
       {
         heading: "Guides",
         entries: [
-          { type: "reader", id: "GL861", gl: "GL861", label: "Induction of labour & term PLRoM (local)", sublabel: "GL861: full guideline" },
-          { type: "reader", id: "GL861", sectionId: "gl861-iol-timing", gl: "GL861", label: "Timing by indication", sublabel: "GL861: timing table" },
-          { type: "reader", id: "GL861", sectionId: "gl861-crb", gl: "GL861", label: "Cervical ripening balloon", sublabel: "GL861: mechanical method" },
-          { type: "reader", id: "GL861", sectionId: "gl861-propess", gl: "GL861", label: "Propess / dinoprostone", sublabel: "GL861: prostaglandin method" },
+          { type: "reader", id: "NG207", gl: "NG207", label: "Inducing labour", sublabel: "NG207: full guideline" },
+          { type: "reader", id: "NG207", sectionId: "ng207-methods", gl: "NG207", label: "Methods by Bishop score", sublabel: "NG207: sweep, dinoprostone, misoprostol, mechanical, ARM" },
+          { type: "reader", id: "NG207", sectionId: "ng207-prolonged", gl: "NG207", label: "Pregnancy beyond 41 weeks", sublabel: "NG207: risks, monitoring, declining induction" },
+          { type: "reader", id: "NG207", sectionId: "ng207-prom", gl: "NG207", label: "Prelabour rupture of membranes", sublabel: "NG207: term & preterm" },
+          { type: "reader", id: "NG207", sectionId: "ng207-circumstances", gl: "NG207", label: "Specific circumstances", sublabel: "NG207: previous CS, breech, FGR, macrosomia" },
+          { type: "reader", id: "GL861", gl: "GL861", label: "Induction of labour & term PLRoM (local)", sublabel: "GL861: local pathway, includes antibiotic regimens" },
         ],
       },
       {
         heading: "Pathways",
         entries: [
-          { type: "flowchart", id: "GL861_IOL", gl: "GL861", label: "Induction of labour pathway", sublabel: "GL861 flowchart" },
-          { type: "flowchart", id: "GL861_TIMING", gl: "GL861", label: "Timing by indication", sublabel: "GL861 flowchart" },
+          { type: "flowchart", id: "GL861_IOL", gl: "GL861", label: "Induction of labour pathway (local)", sublabel: "GL861 flowchart" },
+          { type: "flowchart", id: "GL861_TIMING", gl: "GL861", label: "Timing by indication (local)", sublabel: "GL861 flowchart" },
         ],
       },
       {
         heading: "Drugs",
         entries: [
-          { type: "drug", id: "dinoprostone", gl: "GL861", label: "Dinoprostone (Propess)", sublabel: "Rx: prostaglandin ripening" },
-          { type: "drug", id: "oxytocin", gl: "GL861", label: "Oxytocin", sublabel: "Rx: after ARM" },
+          { type: "drug", id: "dinoprostone", gl: "NG207", label: "Dinoprostone (Propess)", sublabel: "Rx: prostaglandin ripening" },
+          { type: "drug", id: "oxytocin", gl: "NG207", label: "Oxytocin", sublabel: "Rx: after ARM" },
         ],
       },
       {
         heading: "Counsel",
         entries: [
-          { type: "consent", id: "IOL", gl: "GL861", label: "Induction of labour, counsel", sublabel: "Risks by method" },
+          { type: "consent", id: "IOL", gl: "NG207", label: "Induction of labour, counsel", sublabel: "Risks by method" },
         ],
       },
       {
         heading: "Evidence",
         entries: [
-          { type: "trial", id: "trial-arrive", gl: "GL861", label: "ARRIVE", sublabel: "Elective induction at 39 weeks" },
-          { type: "trial", id: "trial-big-baby", gl: "GL861", label: "Big Baby Trial", sublabel: "Induction at 38 weeks for suspected macrosomia" },
+          { type: "trial", id: "trial-arrive", gl: "NG207", label: "ARRIVE", sublabel: "Elective induction at 39 weeks" },
+          { type: "trial", id: "trial-big-baby", gl: "NG207", label: "Big Baby Trial", sublabel: "Induction at 38 weeks for suspected macrosomia" },
         ],
       },
       {
         heading: "Don't miss",
         entries: [
-          { type: "reader", id: "GL861", sectionId: "gl861-unsuccessful", gl: "GL861", label: "Unsuccessful induction / declining IOL", sublabel: "GL861: escalation & documentation" },
+          { type: "reader", id: "NG207", sectionId: "ng207-complications", gl: "NG207", label: "Hyperstimulation & unsuccessful induction", sublabel: "NG207: complications and cord prolapse" },
+          { type: "reader", id: "NG207", sectionId: "ng207-not-recommended", gl: "NG207", label: "Methods NICE does not recommend", sublabel: "NG207: including membrane sweeping myths" },
+          { type: "reader", id: "GL861", sectionId: "gl861-unsuccessful", gl: "GL861", label: "Unsuccessful induction, local escalation", sublabel: "GL861: escalation & documentation" },
         ],
       },
     ],

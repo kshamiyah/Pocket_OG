@@ -4,6 +4,20 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.27.0",
+    date: "15/09/2026",
+    title: "Induction of labour, from national guidance",
+    changes: [
+      { tag: "new", text: "NICE NG207 is now in the app as a full guide, so induction of labour no longer depends on a local trust guideline. It covers both halves of the old local pathway: induction, and prelabour rupture of membranes at term." },
+      { tag: "new", text: "Pregnancy beyond 41 weeks, with NICE's own table of when labour starts spontaneously by gestation, the risks discussed from 41+0 weeks, and what to offer a woman who declines induction, including monitoring from 42 weeks and the MBRRACE-UK stillbirth figures by ethnicity and deprivation." },
+      { tag: "new", text: "Methods by Bishop score: 6 or less leads to dinoprostone or low dose 25 microgram oral misoprostol, above 6 leads to amniotomy and oxytocin, and mechanical methods where pharmacological ones are unsuitable. Membrane sweeping is offered from 39+0 weeks." },
+      { tag: "new", text: "Prelabour rupture of membranes, term and preterm: expectant management for up to 24 hours at term, no induction before 34+0 weeks without another indication, and immediate induction or caesarean birth where group B streptococcus is positive." },
+      { tag: "new", text: "Specific circumstances (previous caesarean birth, breech, growth restriction, suspected macrosomia, maternal request), intrauterine fetal death including the mifepristone and prostaglandin regimen, outpatient induction, the methods NICE does not recommend, and complications including hyperstimulation, unsuccessful induction and avoiding cord prolapse." },
+      { tag: "new", text: "A \"Guidance differs\" card on the first method to use at a Bishop score of 6 or less. NG207 leads with dinoprostone or misoprostol and places a balloon second; the local guideline leads with the balloon. Both are shown, neither is ranked." },
+      { tag: "improved", text: "The local induction guideline stays exactly where it is. It is now an optional overlay rather than the only pathway, and it keeps the trust detail NG207 deliberately leaves out, including the antibiotic regimens for prelabour rupture of membranes, which NG207 does not state at all." },
+    ],
+  },
+  {
     version: "1.26.0",
     date: "15/09/2026",
     title: "Six national hypertension workflows",

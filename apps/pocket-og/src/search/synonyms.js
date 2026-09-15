@@ -221,6 +221,11 @@ export const SYNONYMS = {
   "hyperstimulation": ["propess","dinoprostone","terbutaline","induction","contractions","fhr"],
   "tachysystole": ["propess","contractions","induction","ctg"],
   "terbutaline": ["hyperstimulation","propess","tocolysis","uterine contractions"],
+  "sweep": ["membrane sweep","membrane sweeping","induction of labour","iol","39 weeks","vaginal examination"],
+  "prelabour rupture of membranes": ["prom","plrom","srom","term prom","pprom","rupture of membranes","ng207"],
+  "macrosomia": ["big baby","large for dates","lga","shoulder dystocia","induction of labour","estimated fetal weight"],
+  "outpatient induction": ["iol","induction of labour","propess","balloon","home","review plan"],
+  "intrauterine fetal death": ["iufd","stillbirth","mifepristone","misoprostol","induction of labour"],
   // Skin & wound
   "cellulitis": ["wound","skin infection","soft tissue","cellulitis","redness","erythema","infected wound","co-amoxiclav","flucloxacillin"],
   "skin infection": ["cellulitis","wound","soft tissue","erythema","infected wound"],

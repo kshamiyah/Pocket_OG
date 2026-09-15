@@ -121,6 +121,44 @@ export const DIVERGENCES = {
     local: [],
     lastReviewed: "14 September 2026",
   },
+
+  // National versus local rather than body versus body: NG207 is the only
+  // national voice on induction method, so `positions` holds one entry and the
+  // difference sits in the `local` block. That is what the local block is for.
+  "iol-first-method-bishop-6": {
+    id: "iol-first-method-bishop-6",
+    question: "First method offered for induction at a Bishop score of 6 or less",
+    scope: "Induction of labour · unfavourable cervix · no uterine scar",
+    positions: [
+      {
+        body: "NICE NG207",
+        gl: "NG207",
+        source: "NICE",
+        year: 2021,
+        status: "current",
+        position:
+          "Offer dinoprostone as vaginal tablet, vaginal gel or controlled-release vaginal delivery system, or low dose (25 microgram) oral misoprostol tablets. Consider a mechanical method such as a balloon catheter only if pharmacological methods are not suitable, for example a higher risk of or from hyperstimulation or a previous caesarean birth, or if she chooses a mechanical method.",
+        citation: "NG207 1.3.7 and 1.3.8",
+      },
+    ],
+    agreed:
+      "The Bishop score decides which method is offered first, a score above 6 leads to amniotomy and oxytocin, and a mechanical method is preferred where there is a uterine scar or a higher risk from hyperstimulation.",
+    why:
+      "NG207 places mechanical methods second because the evidence it reviewed did not show them to be more effective than pharmacological methods for an unfavourable cervix. Units that lead with a balloon do so on the basis of lower hyperstimulation rates and a pathway that suits outpatient induction.",
+    local: [
+      {
+        body: "RBH GL861",
+        gl: "GL861",
+        source: "RBH",
+        position:
+          "A Bishop score below 6 leads to a cervical ripening balloon as first line. Propess is second line, used where the balloon is contraindicated, staff are unable to insert it, the woman prefers it, or a balloon has been unsuccessful.",
+        citation: "GL861, induction of labour: assessment, CRB and Propess",
+      },
+    ],
+    localNote:
+      "This reverses the NG207 order. Both methods are recommended by NG207; the difference is which is offered first.",
+    lastReviewed: "15 September 2026",
+  },
 };
 
 // Stable list form for search indexing.
