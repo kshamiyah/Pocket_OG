@@ -541,14 +541,20 @@ export const GUIDELINE_KEYWORD_LINKS = {
     { phrase: "diabetes",      type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
   ],
 
-  // Phrases must occur in NG133's reader text or the link silently matches
-  // nothing. The matcher uses plain substring search with no word boundaries,
-  // so never use a bare "eclampsia": it would attach to the first
-  // "pre-eclampsia" instead. Checked against the rewritten sections.
+  // Two constraints, both learned the hard way:
+  //
+  // 1. The phrase must occur in the guide's reader text, or the link silently
+  //    matches nothing. The matcher is a plain substring search with no word
+  //    boundaries, so never use a bare "eclampsia": it would attach itself to
+  //    the first "pre-eclampsia" instead.
+  // 2. The phrase must occur in a text, alert or list block. ContentBlock
+  //    renders table headers and cells through hi() (highlight only), while
+  //    only those three types go through rt() (RichText), which draws the
+  //    links. A phrase that appears solely inside a table can never render.
+  //    "diabetes" and "antiphospholipid" were dropped for exactly that reason:
+  //    in NG133 they occur only in the aspirin risk-factor table.
   NG133: [
-    { phrase: "diabetes",                 type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
     { phrase: "fetal growth restriction", type: "reader", id: "GTG31", gl: "GTG31", label: "SGA & Fetal Growth Restriction" },
-    { phrase: "antiphospholipid",         type: "reader", id: "GTG17", gl: "GTG17", label: "Recurrent Miscarriage" },
     { phrase: "antenatal corticosteroids", type: "reader", id: "NG25", gl: "NG25", label: "Preterm Labour & Birth" },
     { phrase: "critical care",            type: "reader", id: "GTG56", gl: "GTG56", label: "Maternal Collapse in Pregnancy and the Puerperium" },
     { phrase: "breastfeeding",            type: "reader", id: "NG194", gl: "NG194", label: "Postnatal Care" },
