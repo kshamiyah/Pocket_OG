@@ -27,6 +27,7 @@ export const NG133_SECTIONS = [
     id: "ng133-overview", gl: "NG133", condition: "Hypertension in Pregnancy", setting: "Definitions & Thresholds",
     title: "Hypertension in Pregnancy — Definitions & Diagnostic Thresholds",
     tags: ["hypertension","PIH","pregnancy induced hypertension","gestational hypertension","pre-eclampsia","PET","severe pre-eclampsia","chronic hypertension","eclampsia","HELLP","definition","classification","severe","140/90","160/110","proteinuria","PCR","ACR","protein creatinine ratio","albumin creatinine ratio","30 mg/mmol","8 mg/mmol"],
+    flowchartId: "NG133_CLASSIFY",
     content: [
       { type: "alert", value: "NG133 recognises two degrees only: hypertension (140 mmHg systolic or higher, or 90 mmHg diastolic or higher) and severe hypertension (over 160 mmHg systolic or over 110 mmHg diastolic). It defines no mild or moderate band." },
       { type: "subheading", value: "Terms used in this guideline" },
@@ -92,6 +93,7 @@ export const NG133_SECTIONS = [
     id: "ng133-proteinuria", gl: "NG133", condition: "Hypertension in Pregnancy", setting: "Assessing Proteinuria",
     title: "Assessing Proteinuria in Hypertensive Disorders",
     tags: ["proteinuria","dipstick","automated reagent strip","protein creatinine ratio","PCR","albumin creatinine ratio","ACR","30 mg/mmol","8 mg/mmol","24 hour urine","first morning void","quantify"],
+    flowchartId: "NG133_CLASSIFY",
     content: [
       { type: "list", items: [
         "Interpret proteinuria in the context of a full clinical review of symptoms, signs and other investigations for pre-eclampsia (1.2.1)",
@@ -112,6 +114,7 @@ export const NG133_SECTIONS = [
     id: "ng133-chronic", gl: "NG133", condition: "Hypertension in Pregnancy", setting: "Chronic Hypertension",
     title: "Chronic Hypertension in Pregnancy",
     tags: ["chronic hypertension","pre-existing","ACE inhibitor","ARB","angiotensin","teratogenic","thiazide","diuretic","labetalol","nifedipine","methyldopa","target 135/85","aspirin","PLGF","timing of birth","37 weeks","postnatal","140/90"],
+    flowchartId: "NG133_ANTENATAL",
     content: [
       { type: "alert", value: "Stop antihypertensive treatment in women taking ACE inhibitors or ARBs if they become pregnant, preferably within 2 working days of notification, and offer alternatives (1.3.3)." },
       { type: "subheading", value: "Before and early in pregnancy" },
@@ -152,6 +155,7 @@ export const NG133_SECTIONS = [
     id: "ng133-gestational", gl: "NG133", condition: "Hypertension in Pregnancy", setting: "Gestational Hypertension",
     title: "Gestational Hypertension — Assessment & Management",
     tags: ["gestational hypertension","PIH","pregnancy induced hypertension","new hypertension","after 20 weeks","admission","labetalol","nifedipine","methyldopa","target 135/85","PLGF","timing of birth","37 weeks","postnatal","150/100","bed rest"],
+    flowchartId: "NG133_ANTENATAL",
     content: [
       { type: "alert", value: "Do not routinely admit women with gestational hypertension to hospital. Admit if blood pressure is severe, and if it then falls below 160/110 manage as for hypertension (table 1)." },
       { type: "list", items: [
@@ -191,6 +195,7 @@ export const NG133_SECTIONS = [
     id: "ng133-preeclampsia", gl: "NG133", condition: "Hypertension in Pregnancy", setting: "Pre-Eclampsia",
     title: "Pre-Eclampsia — Assessment, Treatment & Timing of Birth",
     tags: ["pre-eclampsia","PET","admission","fullPIERS","PREP-S","risk prediction","labetalol","nifedipine","methyldopa","target 135/85","timing of birth","34 weeks","37 weeks","corticosteroids","magnesium sulfate","table 2","table 3"],
+    flowchartId: "NG133_TIMING",
     content: [
       { type: "subheading", value: "Assessment" },
       { type: "list", items: [
@@ -265,6 +270,7 @@ export const NG133_SECTIONS = [
     id: "ng133-severe", gl: "NG133", condition: "Hypertension in Pregnancy", setting: "Severe Disease & Critical Care",
     title: "Severe Hypertension, Severe Pre-Eclampsia & Eclampsia",
     tags: ["severe hypertension","severe pre-eclampsia","eclampsia","magnesium sulfate","MgSO4","4 g","1 g/hour","Collaborative Eclampsia Trial","recurrent fits","diazepam","phenytoin","IV labetalol","hydralazine","fluid balance","80 ml/hour","volume expansion","HELLP","dexamethasone","critical care","level 2","level 3"],
+    flowchartId: "NG133_SEVERE",
     content: [
       { type: "subheading", value: "Magnesium sulfate" },
       { type: "list", items: [
@@ -306,6 +312,7 @@ export const NG133_SECTIONS = [
     id: "ng133-postnatal", gl: "NG133", condition: "Hypertension in Pregnancy", setting: "Postnatal Care & Follow-Up",
     title: "Postnatal Care, Antihypertensives & Follow-Up",
     tags: ["postnatal","after birth","enalapril","nifedipine","amlodipine","atenolol","labetalol","breastfeeding","ACE inhibitor","ARB","diuretic","African or Caribbean family origin","150/100","140/90","130/80","transfer to community","6 to 8 weeks","recurrence","cardiovascular risk"],
+    flowchartId: "NG133_POSTNATAL",
     content: [
       { type: "subheading", value: "Blood pressure after birth in pre-eclampsia" },
       { type: "list", items: [

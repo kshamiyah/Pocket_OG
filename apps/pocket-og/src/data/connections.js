@@ -40,6 +40,45 @@ export const CALCULATOR_CONNECTIONS = {
 // inlineLinks: { phrase, type, id, gl } — phrases in node.text that become tappable.
 export const FLOWCHART_NODE_CONNECTIONS = {
 
+  // ── Severe hypertension (NICE NG133) ────────────────────────────────
+  // The magnesium chart is reached from here rather than from a guide
+  // section: ng133-severe already spends its one flowchartId on this chart.
+  NG133_SEVERE: {
+    // "monitor" is an action node. Verified in the player: inlineLinks render
+    // on action nodes and on items, whatsNext does not. So the hand-off from
+    // here has to be an inline link, and whatsNext is reserved for the end
+    // nodes below.
+    "monitor": {
+      inlineLinks: [
+        { phrase: "magnesium pathway", type: "flowchart", id: "NG133_MAGNESIUM", gl: "NG133" },
+      ],
+    },
+    "level2": {
+      whatsNext: [
+        { type: "flowchart", id: "NG133_MAGNESIUM", gl: "NG133", label: "Magnesium sulfate: is it indicated?", sublabel: "NG133 1.8.1 to 1.8.5" },
+      ],
+    },
+    "level3": {
+      whatsNext: [
+        { type: "flowchart", id: "NG133_MAGNESIUM", gl: "NG133", label: "Magnesium sulfate: is it indicated?", sublabel: "NG133 1.8.1 to 1.8.5" },
+      ],
+    },
+  },
+
+  // ── Magnesium sulfate (NICE NG133) ──────────────────────────────────
+  NG133_MAGNESIUM: {
+    "further-dose": {
+      whatsNext: [
+        { type: "flowchart", id: "NG133_SEVERE", gl: "NG133", label: "Severe hypertension: immediate management", sublabel: "NG133 1.8, including the critical care levels" },
+      ],
+    },
+    "continue": {
+      whatsNext: [
+        { type: "flowchart", id: "NG133_TIMING", gl: "NG133", label: "Timing of birth", sublabel: "NG133 table 3" },
+      ],
+    },
+  },
+
   // ── Genital Herpes in Pregnancy (BASHH/RCOG 2024) ───────────────────
   BASHH_HSV_PREGNANCY: {
     "pprom-primary": {

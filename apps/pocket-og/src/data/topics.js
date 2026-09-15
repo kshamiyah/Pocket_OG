@@ -127,11 +127,17 @@ export const TOPICS = {
       {
         heading: "Pathways",
         entries: [
-          { type: "flowchart", id: "GL952_TRIAGE", gl: "GL952", label: "Triage: raised BP in pregnancy", sublabel: "GL952 flowchart" },
-          { type: "flowchart", id: "GL952_ACUTE", gl: "GL952", label: "Acute BP management", sublabel: "GL952 flowchart" },
-          { type: "flowchart", id: "GL952_SEVERE_LW", gl: "GL952", label: "Severe PET on labour ward", sublabel: "GL952 flowchart" },
-          { type: "flowchart", id: "GL952_POSTNATAL", gl: "GL952", label: "Postnatal hypertension", sublabel: "GL952 flowchart" },
-          { type: "flowchart", id: "GL952_POSTNATAL_WARD", gl: "GL952", label: "Postnatal ward round", sublabel: "GL952 flowchart" },
+          { type: "flowchart", id: "NG133_CLASSIFY", gl: "NG133", label: "Classification: which hypertensive disorder?", sublabel: "NG133: onset, then proteinuria or organ dysfunction" },
+          { type: "flowchart", id: "NG133_SEVERE", gl: "NG133", label: "Severe hypertension: immediate management", sublabel: "NG133 1.8: over 160/110, and critical care levels" },
+          { type: "flowchart", id: "NG133_MAGNESIUM", gl: "NG133", label: "Magnesium sulfate: is it indicated?", sublabel: "NG133 1.8.1 to 1.8.5: the eclampsia regimen" },
+          { type: "flowchart", id: "NG133_ANTENATAL", gl: "NG133", label: "Antenatal management by diagnosis", sublabel: "NG133 tables 1 and 2: targets and monitoring" },
+          { type: "flowchart", id: "NG133_TIMING", gl: "NG133", label: "Timing of birth", sublabel: "NG133 table 3: by diagnosis and gestation" },
+          { type: "flowchart", id: "NG133_POSTNATAL", gl: "NG133", label: "Postnatal BP & antihypertensives", sublabel: "NG133 1.9: enalapril first line" },
+          { type: "flowchart", id: "GL952_TRIAGE", gl: "GL952", label: "Triage: raised BP in pregnancy (local)", sublabel: "GL952 flowchart, includes MOWS and local escalation" },
+          { type: "flowchart", id: "GL952_ACUTE", gl: "GL952", label: "Acute BP management (local)", sublabel: "GL952 flowchart, includes MOWS and local escalation" },
+          { type: "flowchart", id: "GL952_SEVERE_LW", gl: "GL952", label: "Severe PET on labour ward (local)", sublabel: "GL952 flowchart, includes MOWS and local escalation" },
+          { type: "flowchart", id: "GL952_POSTNATAL", gl: "GL952", label: "Postnatal hypertension (local)", sublabel: "GL952 flowchart, includes MOWS and local escalation" },
+          { type: "flowchart", id: "GL952_POSTNATAL_WARD", gl: "GL952", label: "Postnatal ward round (local)", sublabel: "GL952 flowchart, includes MOWS and local escalation" },
         ],
       },
       {

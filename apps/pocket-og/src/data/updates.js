@@ -4,6 +4,20 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.26.0",
+    date: "15/09/2026",
+    title: "Six national hypertension workflows",
+    changes: [
+      { tag: "new", text: "NICE NG133 now has its own flowcharts, so hypertension no longer depends on a local trust pathway: classification, severe hypertension, magnesium sulfate, antenatal management by diagnosis, timing of birth, and postnatal blood pressure and antihypertensives." },
+      { tag: "new", text: "Classification (definitions and 1.2): when the hypertension started, then proteinuria or organ dysfunction, giving chronic hypertension, gestational hypertension or pre-eclampsia. It carries NICE's own thresholds, protein:creatinine 30 mg/mmol and albumin:creatinine 8 mg/mmol." },
+      { tag: "new", text: "Severe hypertension (1.8.6 to 1.8.14): treat immediately with labetalol, oral nifedipine or intravenous hydralazine, with BNF doses, then monitoring, the 80 ml/hour fluid limit, and the critical care level table." },
+      { tag: "new", text: "Magnesium sulfate (1.8.1 to 1.8.5): when it is indicated, the Collaborative Eclampsia Trial regimen of 4 g over 5 to 15 minutes then 1 g/hour for 24 hours, a further 2 g to 4 g for recurrent fits, and the rule against diazepam and phenytoin." },
+      { tag: "new", text: "Antenatal management by diagnosis (tables 1 and 2) and timing of birth (table 3), including the thresholds for planned early birth before 37 weeks." },
+      { tag: "new", text: "Postnatal (1.5.13 to 1.5.22 and 1.9): the monitoring schedule, when to start and when to reduce treatment, enalapril first line with nifedipine or amlodipine for women of African or Caribbean family origin, and the criteria for transfer to community care." },
+      { tag: "improved", text: "The RBH hypertension flowcharts stay exactly where they are. They are now an optional local overlay rather than the only pathway available, and they keep the trust detail the national charts deliberately leave out, such as the MOWS chart and local escalation timings." },
+    ],
+  },
+  {
     version: "1.25.0",
     date: "15/09/2026",
     title: "Hypertension in pregnancy rewritten from the source",
