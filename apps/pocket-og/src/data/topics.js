@@ -137,16 +137,16 @@ export const TOPICS = {
       {
         heading: "Drugs",
         entries: [
-          { type: "drug", id: "labetalol", gl: "GL952", label: "Labetalol", sublabel: "Rx: doses & routes" },
-          { type: "drug", id: "nifedipine", gl: "GL952", label: "Nifedipine", sublabel: "Rx: doses & routes" },
-          { type: "drug", id: "magnesium_sulphate", gl: "GL952", label: "Magnesium sulphate", sublabel: "Rx: seizure prophylaxis & treatment" },
+          { type: "drug", id: "labetalol", gl: "NG133", label: "Labetalol", sublabel: "Rx: doses & routes" },
+          { type: "drug", id: "nifedipine", gl: "NG133", label: "Nifedipine", sublabel: "Rx: doses & routes" },
+          { type: "drug", id: "magnesium_sulphate", gl: "NG133", label: "Magnesium sulphate", sublabel: "Rx: seizure prophylaxis & treatment" },
         ],
       },
       {
         heading: "Evidence",
         entries: [
-          { type: "trial", id: "trial-magpie", gl: "GL952", label: "Magpie", sublabel: "MgSO4 to prevent eclampsia" },
-          { type: "trial", id: "trial-aspre", gl: "GL952", label: "ASPRE", sublabel: "Aspirin to prevent preterm pre-eclampsia" },
+          { type: "trial", id: "trial-magpie", gl: "NG133", label: "Magpie", sublabel: "MgSO4 to prevent eclampsia" },
+          { type: "trial", id: "trial-aspre", gl: "NG133", label: "ASPRE", sublabel: "Aspirin to prevent preterm pre-eclampsia" },
         ],
       },
       {

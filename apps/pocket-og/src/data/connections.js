@@ -409,7 +409,7 @@ export const GUIDELINE_KEYWORD_LINKS = {
     { phrase: "resuscitative hysterotomy", type: "reader", id: "GTG56",   gl: "GTG56",   label: "Maternal Collapse in Pregnancy and the Puerperium" },
     { phrase: "Mental health conditions",  type: "reader", id: "CG192",   gl: "CG192",   label: "Perinatal Mental Health" },
     { phrase: "Cardiac disease",           type: "reader", id: "ESC_CVD", gl: "ESC_CVD", label: "Cardiac Disease in Pregnancy" },
-    { phrase: "pre-eclampsia",             type: "reader", id: "GL952",   gl: "GL952",   label: "Hypertension in Pregnancy" },
+    { phrase: "pre-eclampsia",             type: "reader", id: "NG133",   gl: "NG133",   label: "Hypertension in Pregnancy (NICE NG133)" },
     { phrase: "GTG52",                     type: "reader", id: "GTG52",   gl: "GTG52",   label: "Postpartum Haemorrhage" },
     { phrase: "GTG64",                     type: "reader", id: "GTG64",   gl: "GTG64",   label: "Maternal Sepsis (During & Following Pregnancy)" },
     { phrase: "GTG68",                     type: "reader", id: "GTG68",   gl: "GTG68",   label: "Epilepsy in Pregnancy" },
@@ -424,7 +424,7 @@ export const GUIDELINE_KEYWORD_LINKS = {
   ],
 
   GL861: [
-    { phrase: "pre-eclampsia",         type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "pre-eclampsia",         type: "reader", id: "NG133", gl: "NG133", label: "Hypertension in Pregnancy (NICE NG133)" },
     { phrase: "diabetes",              type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
     { phrase: "GDM",                   type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
     { phrase: "obstetric cholestasis", type: "reader", id: "GL880", gl: "GL880", label: "Intrahepatic Cholestasis of Pregnancy" },
@@ -441,18 +441,18 @@ export const GUIDELINE_KEYWORD_LINKS = {
   ],
 
   GL891: [
-    { phrase: "pre-eclampsia", type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "pre-eclampsia", type: "reader", id: "NG133", gl: "NG133", label: "Hypertension in Pregnancy (NICE NG133)" },
     { phrase: "hyperemesis",   type: "reader", id: "GTG69", gl: "GTG69", label: "Nausea & Vomiting of Pregnancy" },
     { phrase: "PPH",           type: "reader", id: "GTG52", gl: "GTG52", label: "Postpartum Haemorrhage" },
   ],
 
   GL983: [
-    { phrase: "pre-eclampsia",       type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "pre-eclampsia",       type: "reader", id: "NG133", gl: "NG133", label: "Hypertension in Pregnancy (NICE NG133)" },
     { phrase: "hyperemesis gravidarum", type: "reader", id: "GTG69", gl: "GTG69", label: "Nausea & Vomiting of Pregnancy" },
   ],
 
   GL880: [
-    { phrase: "pre-eclampsia",       type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "pre-eclampsia",       type: "reader", id: "NG133", gl: "NG133", label: "Hypertension in Pregnancy (NICE NG133)" },
     { phrase: "diabetes",            type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
     { phrase: "preterm birth",       type: "reader", id: "NG25",  gl: "NG25",  label: "Preterm Labour & Birth" },
     { phrase: "postpartum haemorrhage", type: "reader", id: "GTG52", gl: "GTG52", label: "Postpartum Haemorrhage" },
@@ -474,7 +474,7 @@ export const GUIDELINE_KEYWORD_LINKS = {
 
   QS22: [
     { phrase: "VTE",                  type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
-    { phrase: "pre-eclampsia",        type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "pre-eclampsia",        type: "reader", id: "NG133", gl: "NG133", label: "Hypertension in Pregnancy (NICE NG133)" },
     { phrase: "GDM",                  type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
     { phrase: "anaemia",              type: "reader", id: "GL783", gl: "GL783", label: "Iron Deficiency Anaemia" },
     { phrase: "Fetal growth restriction", type: "reader", id: "GTG31", gl: "GTG31", label: "SGA & Fetal Growth Restriction" },
@@ -484,7 +484,7 @@ export const GUIDELINE_KEYWORD_LINKS = {
 
   GTG57: [
     { phrase: "IOL",           type: "reader", id: "GL861", gl: "GL861", label: "Induction of Labour" },
-    { phrase: "pre-eclampsia", type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "pre-eclampsia", type: "reader", id: "NG133", gl: "NG133", label: "Hypertension in Pregnancy (NICE NG133)" },
     { phrase: "diabetes",      type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
     { phrase: "SGA",           type: "reader", id: "GTG31", gl: "GTG31", label: "SGA & Fetal Growth Restriction" },
   ],
@@ -506,7 +506,7 @@ export const GUIDELINE_KEYWORD_LINKS = {
   ],
 
   GTG52: [
-    { phrase: "pre-eclampsia",    type: "reader",    id: "GL952",    gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "pre-eclampsia",    type: "reader",    id: "NG133",    gl: "NG133", label: "Hypertension in Pregnancy (NICE NG133)" },
     { phrase: "VTE",              type: "reader",    id: "GL891",    gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
     { phrase: "chorioamnionitis", type: "reader",    id: "GL895",    gl: "GL895", label: "PPRoM" },
   ],
@@ -517,13 +517,13 @@ export const GUIDELINE_KEYWORD_LINKS = {
   ],
 
   NG25: [
-    { phrase: "pre-eclampsia",    type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "pre-eclampsia",    type: "reader", id: "NG133", gl: "NG133", label: "Hypertension in Pregnancy (NICE NG133)" },
     { phrase: "chorioamnionitis", type: "reader", id: "GL895", gl: "GL895", label: "PPRoM" },
     { phrase: "diabetes",         type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
   ],
 
   GTG31: [
-    { phrase: "pre-eclampsia", type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "pre-eclampsia", type: "reader", id: "NG133", gl: "NG133", label: "Hypertension in Pregnancy (NICE NG133)" },
     { phrase: "VTE",           type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
     { phrase: "anaemia",       type: "reader", id: "GL783", gl: "GL783", label: "Iron Deficiency Anaemia" },
     { phrase: "diabetes",      type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
@@ -537,16 +537,20 @@ export const GUIDELINE_KEYWORD_LINKS = {
 
   CG192: [
     { phrase: "VTE",           type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
-    { phrase: "pre-eclampsia", type: "reader", id: "GL952", gl: "GL952", label: "Hypertension in Pregnancy" },
+    { phrase: "pre-eclampsia", type: "reader", id: "NG133", gl: "NG133", label: "Hypertension in Pregnancy (NICE NG133)" },
     { phrase: "diabetes",      type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
   ],
 
+  // Phrases must occur in NG133's reader text or the link silently matches
+  // nothing. The matcher uses plain substring search with no word boundaries,
+  // so never use a bare "eclampsia": it would attach to the first
+  // "pre-eclampsia" instead. Checked against the rewritten sections.
   NG133: [
-    { phrase: "VTE",                      type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
     { phrase: "diabetes",                 type: "reader", id: "GL983", gl: "GL983", label: "Diabetes in Pregnancy" },
     { phrase: "fetal growth restriction", type: "reader", id: "GTG31", gl: "GTG31", label: "SGA & Fetal Growth Restriction" },
     { phrase: "antiphospholipid",         type: "reader", id: "GTG17", gl: "GTG17", label: "Recurrent Miscarriage" },
-    { phrase: "small for gestational age",type: "reader", id: "GTG31", gl: "GTG31", label: "SGA & Fetal Growth Restriction" },
-    { phrase: "postpartum haemorrhage",   type: "reader", id: "GTG52", gl: "GTG52", label: "Postpartum Haemorrhage" },
+    { phrase: "antenatal corticosteroids", type: "reader", id: "NG25", gl: "NG25", label: "Preterm Labour & Birth" },
+    { phrase: "critical care",            type: "reader", id: "GTG56", gl: "GTG56", label: "Maternal Collapse in Pregnancy and the Puerperium" },
+    { phrase: "breastfeeding",            type: "reader", id: "NG194", gl: "NG194", label: "Postnatal Care" },
   ],
 };
