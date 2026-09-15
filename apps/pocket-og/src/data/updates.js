@@ -4,6 +4,20 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.25.0",
+    date: "15/09/2026",
+    title: "Hypertension in pregnancy rewritten from the source",
+    changes: [
+      { tag: "fixed", text: "The NG133 guide has been rewritten directly from the NICE PDF. The previous version attributed a great deal to NG133 that the guideline does not contain: antihypertensive dose ladders, \"mild\" and \"moderate\" severity bands, white coat and masked hypertension, ABPM and HBPM confirmation, uric acid, uterine artery Doppler, PAPP-A, first-trimester screening, MCA Doppler, calcium supplementation and PlGF thresholds. All of it has been removed." },
+      { tag: "fixed", text: "NG133 recognises two degrees only: hypertension (140/90 or higher) and severe hypertension (over 160/110). The old mild and moderate bands came from CG107, which NG133 replaced in 2019." },
+      { tag: "fixed", text: "NG133 states no drug doses at all. Where a dose is needed it now comes from the BNF and says so, matching the app's own Rx formulary so the two cannot drift apart." },
+      { tag: "new", text: "Safety content that was missing is now in: do not use diazepam or phenytoin instead of magnesium; treat recurrent fits with a further 2 g to 4 g; loading over 5 to 15 minutes; no volume expansion unless hydralazine is used; maintenance fluids limited to 80 ml/hour; the MHRA warning on prolonged magnesium; and the critical care level table." },
+      { tag: "new", text: "Two whole chapters that were absent: assessing proteinuria (including the albumin:creatinine threshold of 8 mg/mmol), and intrapartum care (hourly blood pressure in labour, every 15 to 30 minutes if severe, and do not preload with intravenous fluids before an epidural)." },
+      { tag: "new", text: "Postnatal prescribing now follows NG133: offer enalapril, with nifedipine or amlodipine for women of African or Caribbean family origin, and atenolol or labetalol as second line. Recurrence figures are NICE's own rather than approximations." },
+      { tag: "improved", text: "The NG133 PDF is now bundled with the app, so it opens offline like the other guidelines." },
+    ],
+  },
+  {
     version: "1.24.0",
     date: "14/09/2026",
     title: "Six national early pregnancy workflows",
