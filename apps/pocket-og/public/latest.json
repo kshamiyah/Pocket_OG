@@ -1,6 +1,40 @@
 {
-  "updated": "2026-09-07",
+  "updated": "2026-09-20",
   "items": [
+    {
+      "id": "2026-09-mhra-wireless-ctg-rf-safety",
+      "date": "2026-09-17",
+      "kind": "safety",
+      "source": "MHRA",
+      "weight": "practice",
+      "title": "Wireless CTG: signal errors can produce misleading fetal heart traces",
+      "why": "Wireless CTG systems can display the wrong or incomplete fetal heart trace when signals cross over or drop out. On the labour ward, treat unexplained trace changes or loss of signal as a monitoring failure and promptly escalate for confirmation using a reliable alternative.",
+      "url": "https://www.gov.uk/drug-device-alerts/radiofrequency-rf-safety-considerations-for-wireless-cardiotocography-ctg-monitoring-systems-dsi-slash-2026-slash-012"
+    },
+    {
+      "id": "2026-09-mbrrace-maternal-deaths-2022-24",
+      "date": "2026-09-15",
+      "kind": "report",
+      "source": "RCOG",
+      "weight": "aware",
+      "title": "Maternal deaths rise, with thrombosis and suicide still prominent causes",
+      "why": "The latest maternal mortality report shows that thrombosis, heart disease and mental health conditions remain major causes of death, with widening ethnic inequalities. Use these findings at antenatal planning, postnatal handover and safeguarding discussions to keep risk recognition and escalation proactive.",
+      "url": "https://www.rcog.org.uk/news/rcog-reflects-on-the-latest-mbrrace-saving-lives-improving-mothers-care-report/",
+      "link": {
+        "type": "reader",
+        "id": "MBRRACE_SLMC2026"
+      }
+    },
+    {
+      "id": "2026-09-magnesium-neuroprotection-timing-study",
+      "date": "2026-09-15",
+      "kind": "research",
+      "source": "TRIAL",
+      "weight": "aware",
+      "title": "Only one in four high-risk preterm births followed magnesium within 24 hours",
+      "why": "Initial magnesium timing may be a poor predictor of when preterm birth will occur, although this single study does not establish a different dosing strategy. In threatened very preterm birth, use the local neuroprotection protocol and discuss ongoing eligibility if delivery timing changes.",
+      "url": "https://doi.org/10.1016/j.ajog.2026.09.005"
+    },
     {
       "id": "2026-09-metr-phase-two",
       "date": "2026-09-03",

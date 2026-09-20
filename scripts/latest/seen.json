@@ -41,7 +41,13 @@
     "2026-01-mhra-gabapentinoid-dependence-warnings",
     "https://www.gov.uk/drug-safety-update/improving-information-supplied-with-gabapentinoids-pregabalin-slash-gabapentin-benzodiazepines-and-z-drugs",
     "2026-09-metr-phase-two",
-    "https://www.rcog.org.uk/news/blog-advocating-for-our-future-workforce-in-the-medical-education-and-training-review/"
+    "https://www.rcog.org.uk/news/blog-advocating-for-our-future-workforce-in-the-medical-education-and-training-review/",
+    "2026-09-mhra-wireless-ctg-rf-safety",
+    "https://www.gov.uk/drug-device-alerts/radiofrequency-rf-safety-considerations-for-wireless-cardiotocography-ctg-monitoring-systems-dsi-slash-2026-slash-012",
+    "2026-09-mbrrace-maternal-deaths-2022-24",
+    "https://www.rcog.org.uk/news/rcog-reflects-on-the-latest-mbrrace-saving-lives-improving-mothers-care-report/",
+    "2026-09-magnesium-neuroprotection-timing-study",
+    "https://doi.org/10.1016/j.ajog.2026.09.005"
   ],
   "titles": [
     "Semaglutide linked to very rare sudden visual loss",
@@ -86,6 +92,9 @@
     "NICE recommends new treatment for recurrent or metastatic cervical cancer",
     "NICE updates CG122 on ovarian cancer recognition and initial management",
     "Class 2 recall of ChloraPrep 1mL applicators over sterility concern",
-    "O&G training review enters phase two with RCOG involvement"
+    "O&G training review enters phase two with RCOG involvement",
+    "Wireless CTG: signal errors can produce misleading fetal heart traces",
+    "Maternal deaths rise, with thrombosis and suicide still prominent causes",
+    "Only one in four high-risk preterm births followed magnesium within 24 hours"
   ]
 }
