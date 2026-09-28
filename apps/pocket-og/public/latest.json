@@ -2,16 +2,6 @@
   "updated": "2026-09-27",
   "items": [
     {
-      "id": "2026-07-ajog-misoprostol-expression-concern",
-      "date": "2026-07-28",
-      "kind": "trial",
-      "source": "TRIAL",
-      "weight": "aware",
-      "title": "Expression of concern raised over rectal misoprostol trial evidence",
-      "why": "An expression of concern now flags the evidence behind a randomised trial of rectal misoprostol in third-stage bleeding. If your unit uses this route, discuss the concern with the supervising team and do not rely on that trial alone when judging effectiveness.",
-      "url": "https://doi.org/10.1016/j.ajog.2026.07.025"
-    },
-    {
       "id": "2026-09-rcog-robotic-gynae-cancer-surgery",
       "date": "2026-09-16",
       "kind": "research",
