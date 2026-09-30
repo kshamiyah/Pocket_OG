@@ -51,7 +51,7 @@ export default function CompareBlock({ id }) {
             Guidance differs
           </span>
           <span className="ml-auto text-[10px] font-semibold text-yellow-900 tabular-nums">
-            {positions.length} sources
+            {positions.length} {positions.length === 1 ? "source" : "sources"}
           </span>
         </div>
 
