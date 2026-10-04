@@ -10,6 +10,7 @@ export const UPDATES = [
     changes: [
       { tag: "fixed", text: "Induction timing for intrahepatic cholestasis now follows RCOG GTG43 (June 2022), which matches the trust's own cholestasis guideline GL880: planned birth by 40+0 weeks for peak bile acids 19 to 39 µmol/l, at 38+0 to 39+0 weeks for 40 to 99 µmol/l, and at 35+0 to 36+0 weeks for 100 µmol/l or more. The local timing table previously gave 37+0 to 39+6 weeks for bile acids over 100, which is later than either guideline. Corrected in the timing table, the indications list and the timing flowchart." },
       { tag: "improved", text: "The local induction timing table no longer lists maternal age or full therapeutic anticoagulation. Neither has a national guideline giving a gestation for planned birth, so the table now holds only indications with a national source." },
+      { tag: "new", text: "Three national source documents added to the guideline library as PDFs: NICE NG3 (diabetes in pregnancy), RCOG GTG43 (intrahepatic cholestasis of pregnancy) and RCOG GTG37b (acute management of thromboembolic disease in pregnancy). Full guides written from them will follow." },
     ],
   },
   {
