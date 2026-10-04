@@ -1,6 +1,16 @@
 {
-  "updated": "2026-09-27",
+  "updated": "2026-10-04",
   "items": [
+    {
+      "id": "2026-03-impacted-fetal-head-caesarean-review",
+      "date": "2026-03",
+      "kind": "research",
+      "source": "TRIAL",
+      "weight": "aware",
+      "title": "Impacted fetal head: RCOG publishes second-edition evidence review",
+      "why": "The updated evidence review brings current thinking on impacted fetal head at caesarean birth into one place. Discuss the local manoeuvres and escalation plan during simulation, training and emergency caesarean briefings rather than relying on a single technique.",
+      "url": "https://doi.org/10.1111/1471-0528.70008"
+    },
     {
       "id": "2026-09-rcog-robotic-gynae-cancer-surgery",
       "date": "2026-09-16",
