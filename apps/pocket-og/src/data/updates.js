@@ -4,6 +4,15 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.27.1",
+    date: "04/10/2026",
+    title: "Cholestasis induction timing corrected",
+    changes: [
+      { tag: "fixed", text: "Induction timing for intrahepatic cholestasis now follows RCOG GTG43 (June 2022), which matches the trust's own cholestasis guideline GL880: planned birth by 40+0 weeks for peak bile acids 19 to 39 µmol/l, at 38+0 to 39+0 weeks for 40 to 99 µmol/l, and at 35+0 to 36+0 weeks for 100 µmol/l or more. The local timing table previously gave 37+0 to 39+6 weeks for bile acids over 100, which is later than either guideline. Corrected in the timing table, the indications list and the timing flowchart." },
+      { tag: "improved", text: "The local induction timing table no longer lists maternal age or full therapeutic anticoagulation. Neither has a national guideline giving a gestation for planned birth, so the table now holds only indications with a national source." },
+    ],
+  },
+  {
     version: "1.27.0",
     date: "15/09/2026",
     title: "Induction of labour, from national guidance",
