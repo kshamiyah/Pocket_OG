@@ -304,17 +304,14 @@ export const GL861_TIMING_FLOWCHART = {
       options: [
         { label: "Post-dates",                                next: "post-dates" },
         { label: "Reduced fetal movements (RFM)",             next: "rfm" },
-        { label: "Maternal age 40–44",                        next: "age-40-44" },
-        { label: "Maternal age ≥45",                          next: "age-45" },
         { label: "Pre-existing diabetes (Type 1 or 2)",       next: "dm-preexisting" },
         { label: "GDM, low risk",                            next: "gdm-low" },
         { label: "GDM, macrosomia or complications",         next: "gdm-macro" },
         { label: "Hypertension / Pre-eclampsia (PET)",        next: "pet" },
         { label: "Hypertension, non-proteinuric, outpatient",next: "htn-op" },
-        { label: "Obstetric cholestasis (bile acids >100)",   next: "icp" },
+        { label: "Obstetric cholestasis (ICP)",               next: "icp" },
         { label: "Raised PCR ≥30 with hypertension symptoms", next: "pcr" },
         { label: "IUGR / SGA, fetal growth restriction",    next: "iugr" },
-        { label: "Full therapeutic anticoagulation",          next: "anticoag" },
         { label: "APH (inpatient)",                           next: "aph" },
       ],
     },
@@ -336,22 +333,6 @@ export const GL861_TIMING_FLOWCHART = {
         "Refer to GTG57 (Reduced Fetal Movements) for full pathway",
         "Priority: discuss with senior — usually Priority 2",
       ],
-      next: "end",
-    },
-
-    "age-40-44": {
-      type: "action",
-      title: "Maternal Age 40–44",
-      text: "Recommend IOL at 40+0 weeks.",
-      items: ["Priority: 2"],
-      next: "end",
-    },
-
-    "age-45": {
-      type: "action",
-      title: "Maternal Age ≥45",
-      text: "Recommend IOL at 38+0 weeks.",
-      items: ["Priority: 2"],
       next: "end",
     },
 
@@ -417,10 +398,13 @@ export const GL861_TIMING_FLOWCHART = {
 
     "icp": {
       type: "action",
-      title: "Obstetric Cholestasis (Bile Acids >100)",
-      text: "Offer IOL at 37+0 to 39+6 weeks.",
+      title: "Intrahepatic Cholestasis of Pregnancy",
+      text: "Timing depends on the peak bile acid concentration (RCOG GTG43, matching GL880).",
       items: [
-        "Only applies when bile acids >100 µmol/l",
+        "Peak bile acids 19 to 39 µmol/l (mild): planned birth by 40+0",
+        "Peak bile acids 40 to 99 µmol/l (moderate): planned birth at 38+0 to 39+0",
+        "Peak bile acids 100 µmol/l or more (severe): planned birth at 35+0 to 36+0",
+        "If already past 35+0 to 36+0 with bile acids 100 or more, arrange IOL imminently (GL880)",
         "Priority: 2",
         "Refer to GL880 (Intrahepatic Cholestasis of Pregnancy)",
       ],
@@ -447,18 +431,6 @@ export const GL861_TIMING_FLOWCHART = {
         "Priority: 1 — do NOT book without explicit consultant agreement",
         "Gestation determined by severity, Doppler findings, and fetal wellbeing",
         "Contraindicated if fetal compromise already confirmed — arrange CS instead",
-      ],
-      next: "end",
-    },
-
-    "anticoag": {
-      type: "action",
-      title: "Full Therapeutic Anticoagulation",
-      text: "Offer IOL at 39+0 weeks.",
-      items: [
-        "Priority: 1",
-        "Plan anticoagulation bridging with haematology well in advance",
-        "Refer to GL891 (VTE in Pregnancy & Postnatal)",
       ],
       next: "end",
     },
