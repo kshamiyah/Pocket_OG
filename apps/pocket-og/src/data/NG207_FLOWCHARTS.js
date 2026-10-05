@@ -342,3 +342,189 @@ export const NG207_PROLONGED_FLOWCHART = {
 
   },
 };
+
+// The only dose here is NG207's own: oral mifepristone 200 mg for
+// intrauterine fetal death (1.2.31). NG207 leaves the prostaglandin choice
+// and dosage to clinical circumstances and national protocols.
+export const NG207_CIRCUMSTANCES_FLOWCHART = {
+  id: "NG207_CIRCUMSTANCES",
+  title: "Induction in Specific Circumstances",
+  subtitle: "NICE NG207 1.2.17 to 1.2.32",
+  startId: "which",
+  nodes: {
+
+    "which": {
+      type: "decision",
+      title: "Which Circumstance?",
+      options: [
+        { label: "Previous caesarean birth", sublabel: "1.2.17 to 1.2.19", next: "cs" },
+        { label: "Breech presentation", sublabel: "1.2.21, 1.2.22", next: "breech" },
+        { label: "Fetal growth restriction with confirmed fetal compromise", sublabel: "1.2.23", next: "fgr" },
+        { label: "Suspected fetal macrosomia", sublabel: "1.2.24, 1.2.25", next: "macro" },
+        { label: "Maternal request", sublabel: "1.2.20", next: "request" },
+        { label: "History of precipitate labour", sublabel: "1.2.26", next: "precipitate" },
+        { label: "Intrauterine fetal death", sublabel: "1.2.27 to 1.2.32", next: "iufd" },
+      ],
+    },
+
+    "cs": {
+      type: "end",
+      title: "Previous Caesarean Birth",
+      text: "Discuss methods of induction so she can make an informed decision (1.2.17).",
+      items: [
+        "Induction can lead to an increased risk of emergency caesarean birth, and a risk of uterine rupture",
+        "The suitability of mechanical methods, including the risk of infection",
+        "The marketing authorisations for dinoprostone and misoprostol contraindicate their use with a uterine scar, because they increase the risk of uterine rupture",
+        "The risks and consequences of caesarean birth, including short- and long-term morbidity",
+        "If birth needs to be expedited, offer a choice of induction of labour or planned caesarean birth, and record the discussion and plan (1.2.18)",
+        "She can choose neither, even when it may benefit her or her baby's health (1.2.19)",
+      ],
+    },
+
+    "breech": {
+      type: "decision",
+      title: "Do All Three Apply?",
+      text: "Induction is not generally recommended if the baby is breech (1.2.21). Consider it only if all of these apply (1.2.22): birth needs to be expedited; external cephalic version is unsuccessful, declined or contraindicated; and she chooses not to have a planned caesarean birth.",
+      options: [
+        { label: "Yes, all three", sublabel: "1.2.22", next: "breech-consider" },
+        { label: "No", sublabel: "1.2.21", next: "breech-not" },
+      ],
+    },
+
+    "breech-consider": {
+      type: "end",
+      title: "Consider Induction",
+      text: "Consider induction of labour, and discuss its benefits and risks with her (1.2.22).",
+    },
+
+    "breech-not": {
+      type: "end",
+      title: "Induction Not Generally Recommended",
+      text: "Induction of labour is not generally recommended if the baby is breech (1.2.21).",
+    },
+
+    "fgr": {
+      type: "end",
+      title: "Do Not Induce: Offer Caesarean Birth",
+      text: "Do not induce labour if there is fetal growth restriction with confirmed fetal compromise. Offer caesarean birth instead (1.2.23).",
+      items: [
+        "NG207 makes no recommendation on growth restriction without confirmed compromise",
+      ],
+    },
+
+    "macro": {
+      type: "decision",
+      title: "Does She Have Diabetes?",
+      text: "Pre-existing or gestational diabetes.",
+      options: [
+        { label: "No", sublabel: "1.2.24", next: "macro-no-dm" },
+        { label: "Yes, pre-existing or gestational", sublabel: "1.2.25", next: "macro-dm" },
+      ],
+    },
+
+    "macro-no-dm": {
+      type: "end",
+      title: "Suspected Macrosomia Without Diabetes",
+      text: "Discuss that the options for birth are expectant management, induction of labour or caesarean birth, and that the benefits and risks of induction compared with expectant management are uncertain (1.2.24).",
+      items: [
+        "With induction, the risk of shoulder dystocia is reduced",
+        "With induction, the risk of third- or fourth-degree perineal tears is increased",
+        "The risk of perinatal death, brachial plexus injury, or emergency caesarean birth is the same with either option",
+        "She will also need to consider the impact of induction on her birth experience and on her baby (1.1.3)",
+        "Respect her decision, and support recruitment into clinical trials if available (1.2.24)",
+      ],
+    },
+
+    "macro-dm": {
+      type: "end",
+      title: "Suspected Macrosomia With Diabetes",
+      text: "See the NICE guideline on diabetes in pregnancy, NG3 (1.2.25).",
+    },
+
+    "request": {
+      type: "end",
+      title: "Maternal Request",
+      text: "Consider a request for induction only after discussing the benefits and risks with her, taking her circumstances and preferences into account (1.2.20).",
+    },
+
+    "precipitate": {
+      type: "end",
+      title: "History of Precipitate Labour",
+      text: "Do not routinely offer induction of labour to avoid a birth unattended by healthcare professionals (1.2.26).",
+    },
+
+    "iufd": {
+      type: "decision",
+      title: "Intrauterine Fetal Death",
+      text: "Offer support to help her, her partner and family cope with the emotional and physical consequences, and information about specialist support (1.2.27).",
+      options: [
+        { label: "Ruptured membranes, infection or bleeding", sublabel: "1.2.29", next: "iufd-urgent" },
+        { label: "Physically well, membranes intact, no infection or bleeding", sublabel: "1.2.28", next: "iufd-choice" },
+      ],
+    },
+
+    "iufd-urgent": {
+      type: "end",
+      title: "Offer Immediate Induction or Caesarean Birth",
+      text: "With ruptured membranes, infection or bleeding, offer immediate induction of labour or caesarean birth (1.2.29).",
+      items: [
+        "If she chooses induction: monitor contractions, preferably by manual assessment, and provide one-to-one midwifery care (1.2.30)",
+        "Non-scarred uterus: oral mifepristone 200 mg then vaginal dinoprostone or oral or vaginal misoprostol, or a mechanical method (1.2.31)",
+        "Previous caesarean birth: discuss uterine rupture, mechanical methods and their infection risk, the contraindication to dinoprostone and misoprostol with a uterine scar, and the risks of caesarean birth (1.2.32)",
+      ],
+    },
+
+    "iufd-choice": {
+      type: "decision",
+      title: "What Does She Choose?",
+      text: "Discuss the options for birth (expectant management, induction of labour or caesarean birth) and respect her decision (1.2.28).",
+      options: [
+        { label: "Induction of labour", next: "iufd-scar" },
+        { label: "Expectant management or caesarean birth", next: "iufd-other" },
+      ],
+    },
+
+    "iufd-other": {
+      type: "end",
+      title: "Respect Her Decision",
+      text: "Respect her decision on expectant management or caesarean birth (1.2.28).",
+      items: [
+        "Continue to offer support and information about specialist support (1.2.27)",
+      ],
+    },
+
+    "iufd-scar": {
+      type: "decision",
+      title: "Has She Had a Previous Caesarean Birth?",
+      options: [
+        { label: "No: non-scarred uterus", sublabel: "1.2.31", next: "iufd-unscarred" },
+        { label: "Yes", sublabel: "1.2.32", next: "iufd-scarred" },
+      ],
+    },
+
+    "iufd-unscarred": {
+      type: "end",
+      title: "Induction: Non-Scarred Uterus",
+      text: "Offer oral mifepristone 200 mg followed by vaginal dinoprostone or oral or vaginal misoprostol, or a mechanical method of induction (1.2.31).",
+      items: [
+        "Base the choice and dosage of the prostaglandin on clinical circumstances and national protocols (1.2.31)",
+        "In November 2021 some uses of mifepristone, dinoprostone and misoprostol were off label",
+        "Monitor contractions, preferably by manual assessment, and provide one-to-one midwifery care (1.2.30)",
+      ],
+    },
+
+    "iufd-scarred": {
+      type: "end",
+      title: "Induction After a Previous Caesarean Birth",
+      text: "Discuss methods of induction so she can make an informed decision (1.2.32).",
+      items: [
+        "Induction can lead to a risk of uterine rupture",
+        "The suitability of mechanical methods, including the risk of infection",
+        "The marketing authorisations for dinoprostone and misoprostol contraindicate their use with a uterine scar, because they increase the risk of uterine rupture",
+        "The risks and consequences of caesarean birth, including short- and long-term morbidity",
+        "If induced: monitor contractions, preferably by manual assessment, and provide one-to-one midwifery care (1.2.30)",
+      ],
+    },
+
+  },
+};
