@@ -1,5 +1,7 @@
 # Goal: induction of labour fully national
 
+**Status: COMPLETE (5 Oct 2026).** All seven boxes built, reviewed and wired.
+
 Working checklist for the current goal. Any session picking this up: read
 `CLAUDE.md` and `HANDOVER.md` first, then take the first unticked box below.
 
@@ -44,7 +46,7 @@ review. Nothing is wired until it is approved.
 | 4 | `NG207_CIRCUMSTANCES`: previous caesarean, breech, FGR, macrosomia, IUFD | NG207 1.2.17 to 1.2.32 | [x] | [x] | [x] |
 | 5 | `NG207_COMPLICATIONS`: hyperstimulation, unsuccessful induction, cord prolapse | NG207 1.7.1 to 1.7.6 | [x] | [x] | [x] |
 | 6 | National IOL timing chart, replacing `GL861_TIMING` as the national route | NG207, NG3, NG133, GTG43, GTG57, GTG31, GTG63 | [x] | [x] | [x] |
-| 7 | Shelve GL861, `GL861_IOL`, `GL861_TIMING` and the divergence card; leak check finds no trace in the running app | Dr Shamiyah, 5 Oct 2026 | [x] | [ ] | [ ] |
+| 7 | Shelve GL861, `GL861_IOL`, `GL861_TIMING` and the divergence card; leak check finds no trace in the running app | Dr Shamiyah, 5 Oct 2026 | [x] | [x] | [x] |
 
 ## Log
 
@@ -133,3 +135,9 @@ review. Nothing is wired until it is approved.
   Known remaining text: the local GL895 PPROM triage chart's subtitle names GL861
   and its term arm carries GL861-derived steps; GL895 is outside this goal.
   Awaiting review.
+- 5 Oct 2026: box 7 approved. GOAL COMPLETE. Decisions recorded:
+  - The GL895 PPROM triage chart keeps its GL861-derived term arm and subtitle
+    for now; it is handled when PPROM gets its own national goal.
+  - Local guides are shelved topic by topic, as each national replacement is
+    finished, never all at once.
+  - Pull request opened to `main`.
