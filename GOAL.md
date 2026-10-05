@@ -39,7 +39,7 @@ review. Nothing is wired until it is approved.
 | # | Piece | Source | Built | Reviewed | Wired |
 |---|---|---|---|---|---|
 | 1 | `NG207_METHOD`: sweep, assessment, Bishop score to method | NG207 1.3, 1.5.1 to 1.5.4, 1.7.5, 1.7.6 | [x] | [x] | [x] |
-| 2 | `NG207_PROM`: term and preterm, GBS, the 24-hour point | NG207 1.2.10 to 1.2.16 | [x] | [ ] | [ ] |
+| 2 | `NG207_PROM`: term and preterm, GBS, the 24-hour point | NG207 1.2.10 to 1.2.16 | [x] | [x] | [x] |
 | 3 | `NG207_PROLONGED`: beyond 41 weeks, declining, monitoring from 42 | NG207 1.2.1 to 1.2.9 | [ ] | [ ] | [ ] |
 | 4 | `NG207_CIRCUMSTANCES`: previous caesarean, breech, FGR, macrosomia, IUFD | NG207 1.2.17 to 1.2.32 | [ ] | [ ] | [ ] |
 | 5 | `NG207_COMPLICATIONS`: hyperstimulation, unsuccessful induction, cord prolapse | NG207 1.7.1 to 1.7.6 | [ ] | [ ] | [ ] |
@@ -66,3 +66,8 @@ review. Nothing is wired until it is approved.
   reachable; 7 citations (1.2.10 to 1.2.16), all present in the PDF. No
   antibiotic regimens: NG207 defers to the NICE neonatal infection guideline.
   Awaiting review.
+- 5 Oct 2026: box 2 approved and wired: registry, Flow tab, `ng207-prom`
+  flowchartId, induction topic card, and a hand-off on every end node (term
+  induction routes to `NG207_METHOD`; preterm routes to NG25). Walked in the
+  app: term route, 24-hour decision, hand-off into the method chart. Next:
+  box 3, `NG207_PROLONGED`.

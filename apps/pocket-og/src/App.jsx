@@ -144,6 +144,7 @@ const FLOWCHART_LINKS = [
   { id: "NG133_TIMING",          gl: "NG133" },
   { id: "NG133_POSTNATAL",       gl: "NG133" },
   { id: "NG207_METHOD",          gl: "NG207" },
+  { id: "NG207_PROM",            gl: "NG207" },
   { id: "GTG42_SHOULDER",        gl: "GTG42" },
   { id: "GTG64_SEPSIS",          gl: "GTG64" },
   { id: "GTG27A_PAS",            gl: "GTG27A" },

@@ -444,6 +444,17 @@ export const FLOWCHART_NODE_CONNECTIONS = {
     "amniotomy":  { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
   },
 
+  // ── Prelabour rupture of membranes (NICE NG207) ─────────────────────
+  NG207_PROM: {
+    "term-iol":        { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" }, { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "term-gbs-pos":    { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" }, { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "term-wait":       { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "preterm-gbs-pos": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" }, { type: "reader", id: "NG25", gl: "NG25", label: "NG25: Preterm labour and birth", sublabel: "NICE, full guideline" } ] },
+    "preterm-shared":  { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" }, { type: "reader", id: "NG25", gl: "NG25", label: "NG25: Preterm labour and birth", sublabel: "NICE, full guideline" } ] },
+    "pre34-indicated": { whatsNext: [ { type: "reader", id: "NG25", gl: "NG25", label: "NG25: Preterm labour and birth", sublabel: "NICE, full guideline" } ] },
+    "pre34-expectant": { whatsNext: [ { type: "reader", id: "NG25", gl: "NG25", label: "NG25: Preterm labour and birth", sublabel: "NICE, full guideline" } ] },
+  },
+
 };
 
 // Keywords that become inline tappable links in the guideline reader.

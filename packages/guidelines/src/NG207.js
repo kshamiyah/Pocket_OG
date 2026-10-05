@@ -91,6 +91,7 @@ export const NG207_SECTIONS = [
 
   {
     id: "ng207-prom", gl: "NG207", condition: "Prelabour Rupture of Membranes", setting: "Term & Preterm",
+    flowchartId: "NG207_PROM",
     title: "Prelabour Rupture of Membranes: Term & Preterm",
     tags: ["prelabour rupture of membranes","PROM","PPROM","term PROM","SROM","37 weeks","34 weeks","expectant management","24 hours","group B streptococcus","GBS","antibiotics","neonatal infection"],
     content: [

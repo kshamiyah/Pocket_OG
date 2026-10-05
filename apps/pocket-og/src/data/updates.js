@@ -9,6 +9,7 @@ export const UPDATES = [
     title: "Induction of labour workflows, from NICE NG207",
     changes: [
       { tag: "new", text: "Choosing a method for induction of labour, as a step-through workflow built from NICE NG207: membrane sweeping from 39+0 weeks, the assessment before induction starts, then the Bishop score. 6 or less leads to dinoprostone or low dose 25 microgram oral misoprostol, or a mechanical method where pharmacological ones are unsuitable or she chooses one; above 6 leads to amniotomy and oxytocin. Every step cites its NG207 recommendation." },
+      { tag: "new", text: "Prelabour rupture of membranes, term and preterm, as a workflow from NICE NG207. Before 34+0 weeks: no induction without another obstetric indication. From 34+0 to 36+6: immediate induction or caesarean birth if group B streptococcus positive, otherwise a shared decision. At term: immediate induction or caesarean birth if group B streptococcus positive, otherwise a choice of expectant management for up to 24 hours or induction as soon as possible. NG207 gives no antibiotic regimens and refers to the NICE neonatal infection guideline." },
     ],
   },
   {
