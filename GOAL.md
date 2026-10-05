@@ -91,3 +91,18 @@ review. Nothing is wired until it is approved.
   Flow tab lists all five, and every end node across them has a hand-off.
   Next: box 6, the national timing chart. It draws on seven guidelines, so each
   row needs its own source check before it is built.
+- 5 Oct 2026: box 6 source research. Read from the source PDFs (not the app):
+  | Row | National source, verbatim sense | Local GL861 said |
+  |---|---|---|
+  | Post-dates | NG207 1.2.4: discuss induction from 41+0 | 40+7 (same gestation) |
+  | Reduced fetal movements | GTG57 (2026, key recs): no objective compromise, no indication to expedite [A]; expediting is individual, and after 39+0 does not appear to add risk [A]; audit: no uncomplicated RFM induced before 39 weeks | From 38+6 |
+  | Pre-existing diabetes, no complications | NG3 1.4.2: elective birth 37+0 to 38+6 | 37+0 to 38+6 (match) |
+  | Pre-existing diabetes with complications | NG3 1.4.3: consider before 37 weeks | (absent) |
+  | GDM | NG3 1.4.4: no later than 40+6 | 40+3 to 40+6 (local refinement) |
+  | GDM with complications | NG3 1.4.5: consider before 40+6 | 37 to 40 |
+  | Pre-eclampsia | NG133 table 3: before 34 and 34 to 36+6 surveillance unless 1.5.7 indications; from 37 initiate birth within 24 to 48 h | ASAP from 37+0 |
+  | Chronic or gestational hypertension, BP below 160/110 | NG133 1.3.14, 1.3.15, 1.4.7, 1.4.8: no planned birth before 37 weeks; after 37, timing agreed with a senior obstetrician | 40+0 to 40+6 |
+  | "Raised PCR 30 or more with symptoms" | No national row: with hypertension this is pre-eclampsia under NG133 | 39+0 to 40+6 |
+  | ICP | GTG43: mild, consider planned birth by 40 weeks or ongoing care; moderate, consider planned birth at 38 to 39 weeks; severe, consider at 35 to 36 weeks [A]; comorbidities may bring timing forward | Fixed in b8f487a, but worded as "planned birth at 38+0 to 39+0" and "35+0 to 36+0", tighter than GTG43 |
+  | APH | GTG63 13.1: compromise, deliver immediately; unexplained without compromise, senior obstetrician decides; before 37+0 settled, no evidence for elective early birth; after 37+0 minor or major APH, consider induction | Individualised |
+  | SGA / FGR | GTG31 2024 edition: source not obtainable here (Wiley and Europe PMC blocked; PubMed rate-limited). Blocked until the PDF is added. | Individualised |
