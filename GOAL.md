@@ -6,8 +6,10 @@ Working checklist for the current goal. Any session picking this up: read
 **Done means:** induction of labour runs on national guidance end to end. The
 NG207 guide has its five workflows, and the local GL861 timing table is replaced
 by a national timing chart in which every row names its national owner. GL861
-stays in the app as a local overlay (including its CRB-first ordering, which the
-`iol-first-method-bishop-6` divergence card depends on).
+and its two charts are then **shelved**: hidden from every surface of the app,
+but kept in the repo untouched so they can be put back by removing one line
+from the shelf list. The `iol-first-method-bishop-6` divergence card depends on
+GL861's CRB-first ordering, so it is shelved with it, not deleted.
 
 **Direction (Dr Shamiyah, 5 Oct 2026):** "I want to move away from all local
 guides." National guidance is the product. Nothing new is built on local
@@ -42,6 +44,7 @@ review. Nothing is wired until it is approved.
 | 4 | `NG207_CIRCUMSTANCES`: previous caesarean, breech, FGR, macrosomia, IUFD | NG207 1.2.17 to 1.2.32 | [ ] | [ ] | [ ] |
 | 5 | `NG207_COMPLICATIONS`: hyperstimulation, unsuccessful induction, cord prolapse | NG207 1.7.1 to 1.7.6 | [ ] | [ ] | [ ] |
 | 6 | National IOL timing chart, replacing `GL861_TIMING` as the national route | NG207, NG3, NG133, GTG43, GTG57, GTG31, GTG63 | [ ] | [ ] | [ ] |
+| 7 | Shelve GL861, `GL861_IOL`, `GL861_TIMING` and the divergence card; leak check finds no trace in the running app | Dr Shamiyah, 5 Oct 2026 | [ ] | [ ] | [ ] |
 
 ## Log
 
@@ -53,3 +56,9 @@ review. Nothing is wired until it is approved.
   `ng207-methods` flowchartId, induction topic card, end-node hand-offs to the
   NG207 guide). Checked in the app: Flow tab group, guide button, end-node
   hand-off all work. Version 1.28.0. Next: box 2, `NG207_PROM`.
+- 5 Oct 2026: decision on local guides: "I don't want it to show in the app, but
+  I want us to store all the summaries somewhere, to make it possible in the
+  future to just put back in." Added box 7 (the shelf). Knock-on: NG207 gives no
+  PROM antibiotic regimens, so none will show once GL861 is shelved. Open
+  question: shelve per topic as each national replacement completes, or all
+  local guides at once.
