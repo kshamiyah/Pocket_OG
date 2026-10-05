@@ -455,6 +455,13 @@ export const FLOWCHART_NODE_CONNECTIONS = {
     "pre34-expectant": { whatsNext: [ { type: "reader", id: "NG25", gl: "NG25", label: "NG25: Preterm labour and birth", sublabel: "NICE, full guideline" } ] },
   },
 
+  // ── Pregnancy beyond 41 weeks (NICE NG207) ──────────────────────────
+  NG207_PROLONGED: {
+    "iol":     { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" }, { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "monitor": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "await":   { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+  },
+
 };
 
 // Keywords that become inline tappable links in the guideline reader.

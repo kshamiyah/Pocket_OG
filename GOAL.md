@@ -40,7 +40,7 @@ review. Nothing is wired until it is approved.
 |---|---|---|---|---|---|
 | 1 | `NG207_METHOD`: sweep, assessment, Bishop score to method | NG207 1.3, 1.5.1 to 1.5.4, 1.7.5, 1.7.6 | [x] | [x] | [x] |
 | 2 | `NG207_PROM`: term and preterm, GBS, the 24-hour point | NG207 1.2.10 to 1.2.16 | [x] | [x] | [x] |
-| 3 | `NG207_PROLONGED`: beyond 41 weeks, declining, monitoring from 42 | NG207 1.2.1 to 1.2.9 | [x] | [ ] | [ ] |
+| 3 | `NG207_PROLONGED`: beyond 41 weeks, declining, monitoring from 42 | NG207 1.2.1 to 1.2.9 | [x] | [x] | [x] |
 | 4 | `NG207_CIRCUMSTANCES`: previous caesarean, breech, FGR, macrosomia, IUFD | NG207 1.2.17 to 1.2.32 | [ ] | [ ] | [ ] |
 | 5 | `NG207_COMPLICATIONS`: hyperstimulation, unsuccessful induction, cord prolapse | NG207 1.7.1 to 1.7.6 | [ ] | [ ] | [ ] |
 | 6 | National IOL timing chart, replacing `GL861_TIMING` as the national route | NG207, NG3, NG133, GTG43, GTG57, GTG31, GTG63 | [ ] | [ ] | [ ] |
@@ -74,3 +74,6 @@ review. Nothing is wired until it is approved.
 - 5 Oct 2026: box 3 built (`NG207_PROLONGED`, not yet wired). 8 nodes, all
   reachable; 11 citations (1.1.3, 1.1.5, 1.2.1 to 1.2.9), all present in the PDF.
   Awaiting review.
+- 5 Oct 2026: box 3 approved and wired. Flow tab lists all three NG207 charts;
+  the 41-week induction route hands off into `NG207_METHOD`. Next: box 4,
+  `NG207_CIRCUMSTANCES`.

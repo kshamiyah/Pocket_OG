@@ -53,6 +53,7 @@ export const NG207_SECTIONS = [
 
   {
     id: "ng207-prolonged", gl: "NG207", condition: "Induction of Labour", setting: "Pregnancy Beyond 41 Weeks",
+    flowchartId: "NG207_PROLONGED",
     title: "Pregnancy Lasting Longer Than 41 Weeks",
     tags: ["prolonged pregnancy","post dates","41 weeks","42 weeks","post term","stillbirth","neonatal death","NICU","expectant management","membrane sweep","fetal monitoring","MBRRACE","ethnicity","deprivation","dating scan"],
     content: [

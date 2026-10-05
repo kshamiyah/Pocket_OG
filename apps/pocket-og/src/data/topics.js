@@ -242,6 +242,7 @@ export const TOPICS = {
         entries: [
           { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: sweep, then Bishop score to method" },
           { type: "flowchart", id: "NG207_PROM", gl: "NG207", label: "Prelabour rupture of membranes", sublabel: "NG207: term and preterm, GBS, the 24-hour point" },
+          { type: "flowchart", id: "NG207_PROLONGED", gl: "NG207", label: "Pregnancy beyond 41 weeks", sublabel: "NG207: risks, her choice, monitoring from 42 weeks" },
           { type: "flowchart", id: "GL861_IOL", gl: "GL861", label: "Induction of labour pathway (local)", sublabel: "GL861 flowchart" },
           { type: "flowchart", id: "GL861_TIMING", gl: "GL861", label: "Timing by indication (local)", sublabel: "GL861 flowchart" },
         ],
