@@ -158,6 +158,7 @@ export const NG207_SECTIONS = [
 
   {
     id: "ng207-methods", gl: "NG207", condition: "Induction of Labour", setting: "Methods",
+    flowchartId: "NG207_METHOD",
     title: "Methods for Induction of Labour",
     tags: ["membrane sweep","sweep","bishop score","dinoprostone","misoprostol","25 microgram","balloon catheter","osmotic dilator","mechanical method","amniotomy","ARM","oxytocin","hyperstimulation","39 weeks","prostaglandin"],
     content: [

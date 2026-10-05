@@ -240,6 +240,7 @@ export const TOPICS = {
       {
         heading: "Pathways",
         entries: [
+          { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: sweep, then Bishop score to method" },
           { type: "flowchart", id: "GL861_IOL", gl: "GL861", label: "Induction of labour pathway (local)", sublabel: "GL861 flowchart" },
           { type: "flowchart", id: "GL861_TIMING", gl: "GL861", label: "Timing by indication (local)", sublabel: "GL861 flowchart" },
         ],

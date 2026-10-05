@@ -436,6 +436,14 @@ export const FLOWCHART_NODE_CONNECTIONS = {
     },
   },
 
+  // ── Induction of labour: choosing a method (NICE NG207) ─────────────
+  NG207_METHOD: {
+    "sweep":      { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "pharm":      { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "mechanical": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "amniotomy":  { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+  },
+
 };
 
 // Keywords that become inline tappable links in the guideline reader.

@@ -4,6 +4,14 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.28.0",
+    date: "05/10/2026",
+    title: "Induction of labour workflows, from NICE NG207",
+    changes: [
+      { tag: "new", text: "Choosing a method for induction of labour, as a step-through workflow built from NICE NG207: membrane sweeping from 39+0 weeks, the assessment before induction starts, then the Bishop score. 6 or less leads to dinoprostone or low dose 25 microgram oral misoprostol, or a mechanical method where pharmacological ones are unsuitable or she chooses one; above 6 leads to amniotomy and oxytocin. Every step cites its NG207 recommendation." },
+    ],
+  },
+  {
     version: "1.27.1",
     date: "04/10/2026",
     title: "Cholestasis induction timing corrected",
