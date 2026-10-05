@@ -478,6 +478,14 @@ export const FLOWCHART_NODE_CONNECTIONS = {
     "iufd-scarred": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
   },
 
+  // ── Induction of labour: complications (NICE NG207) ─────────────────
+  NG207_COMPLICATIONS: {
+    "hyper":             { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "unsuccessful-plan": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" }, { type: "reader", id: "NG192", gl: "NG192", label: "NG192: Caesarean birth", sublabel: "NICE, full guideline" } ] },
+    "cord":              { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "placenta":          { whatsNext: [ { type: "reader", id: "GTG27A", gl: "GTG27A", label: "GTG27a: Placenta praevia and accreta", sublabel: "RCOG, full guideline" } ] },
+  },
+
 };
 
 // Keywords that become inline tappable links in the guideline reader.

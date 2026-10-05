@@ -42,7 +42,7 @@ review. Nothing is wired until it is approved.
 | 2 | `NG207_PROM`: term and preterm, GBS, the 24-hour point | NG207 1.2.10 to 1.2.16 | [x] | [x] | [x] |
 | 3 | `NG207_PROLONGED`: beyond 41 weeks, declining, monitoring from 42 | NG207 1.2.1 to 1.2.9 | [x] | [x] | [x] |
 | 4 | `NG207_CIRCUMSTANCES`: previous caesarean, breech, FGR, macrosomia, IUFD | NG207 1.2.17 to 1.2.32 | [x] | [x] | [x] |
-| 5 | `NG207_COMPLICATIONS`: hyperstimulation, unsuccessful induction, cord prolapse | NG207 1.7.1 to 1.7.6 | [x] | [ ] | [ ] |
+| 5 | `NG207_COMPLICATIONS`: hyperstimulation, unsuccessful induction, cord prolapse | NG207 1.7.1 to 1.7.6 | [x] | [x] | [x] |
 | 6 | National IOL timing chart, replacing `GL861_TIMING` as the national route | NG207, NG3, NG133, GTG43, GTG57, GTG31, GTG63 | [ ] | [ ] | [ ] |
 | 7 | Shelve GL861, `GL861_IOL`, `GL861_TIMING` and the divergence card; leak check finds no trace in the running app | Dr Shamiyah, 5 Oct 2026 | [ ] | [ ] | [ ] |
 
@@ -87,3 +87,7 @@ review. Nothing is wired until it is approved.
 - 5 Oct 2026: box 5 built (`NG207_COMPLICATIONS`, not yet wired). 6 nodes, all
   reachable; 7 citations (1.3.5, 1.7.1 to 1.7.6), all present in the PDF. No
   tocolytic named: NG207 names none. Awaiting review.
+- 5 Oct 2026: box 5 approved and wired. All five NG207 workflows are live: the
+  Flow tab lists all five, and every end node across them has a hand-off.
+  Next: box 6, the national timing chart. It draws on seven guidelines, so each
+  row needs its own source check before it is built.

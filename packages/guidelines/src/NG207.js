@@ -271,6 +271,7 @@ export const NG207_SECTIONS = [
 
   {
     id: "ng207-complications", gl: "NG207", condition: "Induction of Labour", setting: "Complications",
+    flowchartId: "NG207_COMPLICATIONS",
     title: "Prevention & Management of Complications",
     tags: ["hyperstimulation","tachysystole","tocolysis","unsuccessful induction","failed induction","cord prolapse","low lying placenta","caesarean birth","rest period","expectant management"],
     content: [
