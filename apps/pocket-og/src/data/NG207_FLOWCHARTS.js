@@ -528,3 +528,75 @@ export const NG207_CIRCUMSTANCES_FLOWCHART = {
 
   },
 };
+
+// NG207 names no tocolytic and gives no dose. The hyperstimulation
+// definition is NG207's own, from its "terms used in this guideline".
+export const NG207_COMPLICATIONS_FLOWCHART = {
+  id: "NG207_COMPLICATIONS",
+  title: "Induction of Labour: Complications",
+  subtitle: "NICE NG207 1.7 · prevention and management",
+  startId: "which",
+  nodes: {
+
+    "which": {
+      type: "decision",
+      title: "Which Complication?",
+      options: [
+        { label: "Uterine hyperstimulation", sublabel: "1.7.1", next: "hyper" },
+        { label: "Unsuccessful induction", sublabel: "1.7.2 to 1.7.4", next: "unsuccessful" },
+        { label: "Avoiding cord prolapse", sublabel: "1.7.5", next: "cord" },
+        { label: "Low-lying placenta or placenta praevia", sublabel: "1.7.6", next: "placenta" },
+      ],
+    },
+
+    "hyper": {
+      type: "end",
+      title: "Uterine Hyperstimulation",
+      text: "Overactivity of the uterus as a result of induction: tachysystole (5 or more contractions per 10 minutes for at least 20 minutes) or hypersystole/hypertonicity (a contraction lasting at least 2 minutes), with or without fetal heart rate changes (NG207, terms used in this guideline).",
+      items: [
+        "Carry out a fetal assessment (1.7.1)",
+        "Give no more doses of medicines to induce labour, and remove any vaginal pessaries or delivery systems if possible (1.7.1)",
+        "Consider tocolysis (1.7.1)",
+        "Hyperstimulation caused by misoprostol may be more difficult to reverse (1.3.5)",
+      ],
+    },
+
+    "unsuccessful": {
+      type: "action",
+      title: "Unsuccessful Induction: Reassess",
+      text: "Discuss it with her and provide support. Fully reassess her condition and the pregnancy in general, and assess fetal wellbeing using antenatal cardiotocography interpretation (1.7.2).",
+      next: "unsuccessful-plan",
+    },
+
+    "unsuccessful-plan": {
+      type: "end",
+      title: "Agree a Plan With Her",
+      text: "Discuss and agree a plan for further management, including whether she would like further attempts at induction, taking into account the clinical circumstances and her preferences (1.7.3).",
+      items: [
+        "A rest period if clinically appropriate, then reassessment (1.7.4)",
+        "Expectant management (1.7.4)",
+        "Further attempts to induce labour (1.7.4)",
+        "Caesarean birth: see the NICE guideline on caesarean birth (1.7.4)",
+      ],
+    },
+
+    "cord": {
+      type: "end",
+      title: "Avoiding Cord Prolapse",
+      text: "Cord prolapse may occur if labour is induced. Take these precautions to avoid its adverse effects (1.7.5).",
+      items: [
+        "Before induction, abdominally assess the level and stability of the fetal head in the lower part of the uterus, at or near the pelvic brim",
+        "During the preliminary vaginal examination, palpate for umbilical cord presentation and avoid dislodging the baby's head",
+        "After the membranes rupture, if the presenting part is not stable and not well applied to the cervix: continuous cardiotocography, discuss the risks and benefits of induction with her, and if necessary consider caesarean birth",
+        "If the presenting part then stabilises and the cardiotocogram is normal, use intermittent auscultation unless there are clear indications for further cardiotocography",
+      ],
+    },
+
+    "placenta": {
+      type: "end",
+      title: "Check the Placental Site",
+      text: "Check there is no evidence of a low-lying placenta on previous scans before membrane sweeping and before induction of labour (1.7.6).",
+    },
+
+  },
+};
