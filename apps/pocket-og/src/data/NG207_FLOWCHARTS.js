@@ -253,3 +253,92 @@ export const NG207_PROM_FLOWCHART = {
 
   },
 };
+
+export const NG207_PROLONGED_FLOWCHART = {
+  id: "NG207_PROLONGED",
+  title: "Pregnancy Beyond 41 Weeks",
+  subtitle: "NICE NG207 1.2.1 to 1.2.9 · uncomplicated pregnancy",
+  startId: "spontaneous",
+  nodes: {
+
+    "spontaneous": {
+      type: "action",
+      title: "Uncomplicated Pregnancy: Spontaneous Labour First",
+      text: "Give women with uncomplicated pregnancies every opportunity to go into spontaneous labour (1.2.1). Explain that labour usually starts naturally before 42+0 weeks, based on the gestational age from the dating scan (1.2.2).",
+      items: [
+        "NG207 table 1: 82.8% of spontaneous labours have started by the end of 40+6 weeks, and 99.0% by the end of 41+6 weeks",
+      ],
+      next: "risks",
+    },
+
+    "risks": {
+      type: "action",
+      title: "Discuss the Risks Beyond 41+0 Weeks",
+      text: "Some risks of a pregnancy continuing beyond 41+0 weeks may increase over time (1.2.3).",
+      items: [
+        "Increased likelihood of caesarean birth",
+        "Increased likelihood of the baby needing admission to a neonatal intensive care unit",
+        "Increased likelihood of stillbirth and neonatal death",
+        "Induction from 41+0 weeks may reduce these risks, but she will also need to consider the impact of induction on her birth experience (1.2.4)",
+        "Be aware that, per the 2020 MBRRACE-UK perinatal mortality report, women from some minority ethnic backgrounds or living in deprived areas have an increased risk of stillbirth and may benefit from closer monitoring and additional support (1.2.5)",
+      ],
+      next: "decision",
+    },
+
+    "decision": {
+      type: "decision",
+      title: "What Does She Choose?",
+      options: [
+        { label: "Induction of labour from 41+0 weeks", sublabel: "1.2.4", next: "iol" },
+        { label: "Not to be induced", sublabel: "1.2.6 to 1.2.9", next: "decline" },
+      ],
+    },
+
+    "iol": {
+      type: "end",
+      title: "Induction of Labour",
+      text: "Go on to choose the method by Bishop score.",
+      items: [
+        "Explain what induction involves for her birth before it starts, and record her decision (1.1.3, 1.1.5)",
+      ],
+    },
+
+    "decline": {
+      type: "action",
+      title: "She Chooses Not to Be Induced",
+      text: "Discuss her options from this point on, for example expectant management or caesarean birth, and record her decision in her notes (1.2.6).",
+      next: "monitoring",
+    },
+
+    "monitoring": {
+      type: "decision",
+      title: "Additional Fetal Monitoring From 42 Weeks?",
+      text: "Discuss whether she would like additional fetal monitoring from 42 weeks (1.2.7). Advise that monitoring gives only a snapshot and cannot reliably predict changes after it ends, though it may help her decide on options for birth; and that adverse effects on the baby, including stillbirth, and when they might happen, cannot be reliably predicted or prevented even with monitoring.",
+      options: [
+        { label: "She would like monitoring", next: "monitor" },
+        { label: "She does not want monitoring", next: "await" },
+      ],
+    },
+
+    "monitor": {
+      type: "end",
+      title: "Additional Monitoring From 42 Weeks",
+      text: "Monitoring might consist of twice-weekly cardiotocography and ultrasound estimation of maximum amniotic pool depth (1.2.7).",
+      items: [
+        "Offer the chance to discuss her decision again at every subsequent review (1.2.8)",
+        "Advise her to contact her midwife or maternity unit if she changes her mind before the next appointment, or as soon as possible with concerns about the baby, such as reduced or altered fetal movements (1.2.9)",
+      ],
+    },
+
+    "await": {
+      type: "end",
+      title: "Awaiting Spontaneous Labour",
+      text: "Respect her decision and record it (1.2.6).",
+      items: [
+        "Offer the chance to discuss her decision again at every subsequent review (1.2.8)",
+        "Advise her to contact her midwife or maternity unit if she changes her mind before the next appointment, or as soon as possible with concerns about the baby, such as reduced or altered fetal movements (1.2.9)",
+      ],
+    },
+
+  },
+};
