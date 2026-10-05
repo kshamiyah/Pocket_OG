@@ -43,7 +43,7 @@ review. Nothing is wired until it is approved.
 | 3 | `NG207_PROLONGED`: beyond 41 weeks, declining, monitoring from 42 | NG207 1.2.1 to 1.2.9 | [x] | [x] | [x] |
 | 4 | `NG207_CIRCUMSTANCES`: previous caesarean, breech, FGR, macrosomia, IUFD | NG207 1.2.17 to 1.2.32 | [x] | [x] | [x] |
 | 5 | `NG207_COMPLICATIONS`: hyperstimulation, unsuccessful induction, cord prolapse | NG207 1.7.1 to 1.7.6 | [x] | [x] | [x] |
-| 6 | National IOL timing chart, replacing `GL861_TIMING` as the national route | NG207, NG3, NG133, GTG43, GTG57, GTG31, GTG63 | [ ] | [ ] | [ ] |
+| 6 | National IOL timing chart, replacing `GL861_TIMING` as the national route | NG207, NG3, NG133, GTG43, GTG57, GTG31, GTG63 | [x] | [ ] | [ ] |
 | 7 | Shelve GL861, `GL861_IOL`, `GL861_TIMING` and the divergence card; leak check finds no trace in the running app | Dr Shamiyah, 5 Oct 2026 | [ ] | [ ] | [ ] |
 
 ## Log
@@ -106,3 +106,14 @@ review. Nothing is wired until it is approved.
   | ICP | GTG43: mild, consider planned birth by 40 weeks or ongoing care; moderate, consider planned birth at 38 to 39 weeks; severe, consider at 35 to 36 weeks [A]; comorbidities may bring timing forward | Fixed in b8f487a, but worded as "planned birth at 38+0 to 39+0" and "35+0 to 36+0", tighter than GTG43 |
   | APH | GTG63 13.1: compromise, deliver immediately; unexplained without compromise, senior obstetrician decides; before 37+0 settled, no evidence for elective early birth; after 37+0 minor or major APH, consider induction | Individualised |
   | SGA / FGR | GTG31 2024 edition: source not obtainable here (Wiley and Europe PMC blocked; PubMed rate-limited). Blocked until the PDF is added. | Individualised |
+- 5 Oct 2026: GTG31 (2024, third edition) PDF supplied and added; Library entry
+  corrected from "February 2013". Its timing: SGA with FGR excluded, consider
+  birth at 39+0, by 39+6 [B]; late FGR, initiate from 37+0, complete by 37+6
+  [A]; early FGR, tertiary care. The app's existing GTG31 guide still says
+  "minor SGA: deliver at 37+0", which contradicts the 2024 edition (outside
+  this goal; flagged).
+- 5 Oct 2026: box 6 built (`IOL_TIMING`, `src/data/IOL_TIMING_FLOWCHART.js`, not
+  yet wired). 25 nodes, all reachable. Multi-source check: every NICE number
+  verified against its own PDF (NG3, NG133, NG207), no unsourced numbers, and
+  18 RCOG statements matched word for word in GTG57, GTG43, GTG31 and GTG63.
+  Awaiting review.
