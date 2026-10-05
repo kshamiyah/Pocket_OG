@@ -486,6 +486,26 @@ export const FLOWCHART_NODE_CONNECTIONS = {
     "placenta":          { whatsNext: [ { type: "reader", id: "GTG27A", gl: "GTG27A", label: "GTG27a: Placenta praevia and accreta", sublabel: "RCOG, full guideline" } ] },
   },
 
+  // ── Timing of planned birth by indication (national sources) ───────
+  // Only national guides that are readable in the app are linked. NG3 and
+  // GTG43 have no reader guide yet, and the GTG31 guide predates the 2024
+  // edition this chart follows, so those end nodes carry no hand-off.
+  IOL_TIMING: {
+    "postdates": { whatsNext: [ { type: "flowchart", id: "NG207_PROLONGED", gl: "NG207", label: "Pregnancy beyond 41 weeks", sublabel: "NG207: risks, her choice, monitoring" } ] },
+    "rfm": { whatsNext: [ { type: "reader", id: "GTG57", gl: "GTG57", label: "GTG57: Reduced fetal movements", sublabel: "RCOG, full guideline" } ] },
+    "pet": { whatsNext: [ { type: "flowchart", id: "NG133_TIMING", gl: "NG133", label: "Timing of birth in pre-eclampsia", sublabel: "NG133 table 3 and the early birth thresholds" } ] },
+    "chronic": { whatsNext: [ { type: "reader", id: "NG133", gl: "NG133", label: "NG133: Hypertension in pregnancy", sublabel: "NICE, full guideline" } ] },
+    "gestational": { whatsNext: [ { type: "reader", id: "NG133", gl: "NG133", label: "NG133: Hypertension in pregnancy", sublabel: "NICE, full guideline" } ] },
+    "severe": { whatsNext: [ { type: "flowchart", id: "NG133_SEVERE", gl: "NG133", label: "Severe hypertension", sublabel: "NG133 1.8: immediate management" } ] },
+    "aph-compromise": { whatsNext: [ { type: "reader", id: "GTG63", gl: "GTG63", label: "GTG63: Antepartum haemorrhage", sublabel: "RCOG, full guideline" } ] },
+    "aph-preterm": { whatsNext: [ { type: "reader", id: "GTG63", gl: "GTG63", label: "GTG63: Antepartum haemorrhage", sublabel: "RCOG, full guideline" } ] },
+    "aph-term": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" }, { type: "reader", id: "GTG63", gl: "GTG63", label: "GTG63: Antepartum haemorrhage", sublabel: "RCOG, full guideline" } ] },
+    "fgr-late": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" } ] },
+    "sga-only": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" } ] },
+    "dm-pre": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" } ] },
+    "gdm": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" } ] },
+  },
+
 };
 
 // Keywords that become inline tappable links in the guideline reader.

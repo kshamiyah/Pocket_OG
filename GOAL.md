@@ -43,7 +43,7 @@ review. Nothing is wired until it is approved.
 | 3 | `NG207_PROLONGED`: beyond 41 weeks, declining, monitoring from 42 | NG207 1.2.1 to 1.2.9 | [x] | [x] | [x] |
 | 4 | `NG207_CIRCUMSTANCES`: previous caesarean, breech, FGR, macrosomia, IUFD | NG207 1.2.17 to 1.2.32 | [x] | [x] | [x] |
 | 5 | `NG207_COMPLICATIONS`: hyperstimulation, unsuccessful induction, cord prolapse | NG207 1.7.1 to 1.7.6 | [x] | [x] | [x] |
-| 6 | National IOL timing chart, replacing `GL861_TIMING` as the national route | NG207, NG3, NG133, GTG43, GTG57, GTG31, GTG63 | [x] | [ ] | [ ] |
+| 6 | National IOL timing chart, replacing `GL861_TIMING` as the national route | NG207, NG3, NG133, GTG43, GTG57, GTG31, GTG63 | [x] | [x] | [x] |
 | 7 | Shelve GL861, `GL861_IOL`, `GL861_TIMING` and the divergence card; leak check finds no trace in the running app | Dr Shamiyah, 5 Oct 2026 | [ ] | [ ] | [ ] |
 
 ## Log
@@ -117,3 +117,9 @@ review. Nothing is wired until it is approved.
   verified against its own PDF (NG3, NG133, NG207), no unsourced numbers, and
   18 RCOG statements matched word for word in GTG57, GTG43, GTG31 and GTG63.
   Awaiting review.
+- 5 Oct 2026: box 6 approved and wired: registry, Flow tab (NG207 group),
+  induction topic card, hand-offs to NG207, NG133 and GTG57/GTG63 charts and
+  guides, and the two trials (ARRIVE, Gardosi 2025) now open `IOL_TIMING`
+  instead of `GL861_TIMING`. Their `relatedGl: ["GL861"]` is left for box 7.
+  Hand-off test now also fails if any hand-off routes to a local guide.
+  Next: box 7, the shelf.

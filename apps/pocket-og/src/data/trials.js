@@ -33,7 +33,7 @@ export const TRIAL_SECTIONS = [
       n: "6,106 women",
       design: "Multicentre RCT",
     },
-    flowchartId: "GL861_TIMING",
+    flowchartId: "IOL_TIMING",
     relatedGl: ["GL861"],
     tags: [
       "arrive", "elective induction", "induction at 39 weeks", "iol 39 weeks", "iol timing",
@@ -604,7 +604,7 @@ export const TRIAL_SECTIONS = [
       n: "2,893 women",
       design: "Multicentre open-label RCT",
     },
-    flowchartId: "GL861_TIMING",
+    flowchartId: "IOL_TIMING",
     relatedGl: ["GL861"],
     tags: [
       "big baby trial", "macrosomia", "large for gestational age", "lga", "suspected big baby",
