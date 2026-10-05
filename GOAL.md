@@ -39,7 +39,7 @@ review. Nothing is wired until it is approved.
 | # | Piece | Source | Built | Reviewed | Wired |
 |---|---|---|---|---|---|
 | 1 | `NG207_METHOD`: sweep, assessment, Bishop score to method | NG207 1.3, 1.5.1 to 1.5.4, 1.7.5, 1.7.6 | [x] | [x] | [x] |
-| 2 | `NG207_PROM`: term and preterm, GBS, the 24-hour point | NG207 1.2.10 to 1.2.16 | [ ] | [ ] | [ ] |
+| 2 | `NG207_PROM`: term and preterm, GBS, the 24-hour point | NG207 1.2.10 to 1.2.16 | [x] | [ ] | [ ] |
 | 3 | `NG207_PROLONGED`: beyond 41 weeks, declining, monitoring from 42 | NG207 1.2.1 to 1.2.9 | [ ] | [ ] | [ ] |
 | 4 | `NG207_CIRCUMSTANCES`: previous caesarean, breech, FGR, macrosomia, IUFD | NG207 1.2.17 to 1.2.32 | [ ] | [ ] | [ ] |
 | 5 | `NG207_COMPLICATIONS`: hyperstimulation, unsuccessful induction, cord prolapse | NG207 1.7.1 to 1.7.6 | [ ] | [ ] | [ ] |
@@ -62,3 +62,7 @@ review. Nothing is wired until it is approved.
   PROM antibiotic regimens, so none will show once GL861 is shelved. Open
   question: shelve per topic as each national replacement completes, or all
   local guides at once.
+- 5 Oct 2026: box 2 built (`NG207_PROM`, not yet wired). 13 nodes, all
+  reachable; 7 citations (1.2.10 to 1.2.16), all present in the PDF. No
+  antibiotic regimens: NG207 defers to the NICE neonatal infection guideline.
+  Awaiting review.

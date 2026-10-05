@@ -115,3 +115,141 @@ export const NG207_METHOD_FLOWCHART = {
 
   },
 };
+
+// NG207 gives no antibiotic regimens for prelabour rupture of membranes. It
+// refers to the NICE guideline on neonatal infection for intrapartum
+// antibiotics (1.2.12, 1.2.16), and this chart does the same.
+export const NG207_PROM_FLOWCHART = {
+  id: "NG207_PROM",
+  title: "Prelabour Rupture of Membranes",
+  subtitle: "NICE NG207 1.2.10 to 1.2.16 · term and preterm",
+  startId: "gestation",
+  nodes: {
+
+    "gestation": {
+      type: "decision",
+      title: "Gestation When the Membranes Ruptured?",
+      options: [
+        { label: "Before 34+0 weeks", sublabel: "1.2.10", next: "pre34" },
+        { label: "34+0 to 36+6 weeks", sublabel: "1.2.11, 1.2.12", next: "preterm-gbs" },
+        { label: "37+0 weeks or later (term)", sublabel: "1.2.13 to 1.2.16", next: "term-gbs" },
+      ],
+    },
+
+    "pre34": {
+      type: "decision",
+      title: "Is There Another Obstetric Indication?",
+      text: "Do not induce labour before 34+0 weeks unless there are additional obstetric indications, for example infection or fetal compromise (1.2.10).",
+      options: [
+        { label: "Yes, for example infection or fetal compromise", next: "pre34-indicated" },
+        { label: "No", next: "pre34-expectant" },
+      ],
+    },
+
+    "pre34-indicated": {
+      type: "end",
+      title: "Birth Decided by the Other Indication",
+      text: "The bar on induction before 34+0 weeks does not apply where there is an additional obstetric indication such as infection or fetal compromise (1.2.10).",
+      items: [
+        "NG207 does not set out the management of preterm birth: see the NICE guideline on preterm labour and birth",
+      ],
+    },
+
+    "pre34-expectant": {
+      type: "end",
+      title: "Expectant Management Until 37+0 Weeks",
+      text: "Do not induce. Offer expectant management until 37+0 weeks (1.2.10).",
+      items: [
+        "Reassess if infection or fetal compromise develops, as that is an additional obstetric indication (1.2.10)",
+        "NG207 does not set out the rest of preterm care: see the NICE guideline on preterm labour and birth",
+      ],
+    },
+
+    "preterm-gbs": {
+      type: "decision",
+      title: "Positive Group B Streptococcus Test?",
+      text: "A positive test at any time in the current pregnancy.",
+      options: [
+        { label: "Yes", sublabel: "1.2.12", next: "preterm-gbs-pos" },
+        { label: "No, or not tested", sublabel: "1.2.11", next: "preterm-shared" },
+      ],
+    },
+
+    "preterm-gbs-pos": {
+      type: "end",
+      title: "Offer Immediate Induction or Caesarean Birth",
+      text: "Preterm prelabour rupture of membranes after 34+0 weeks, before 37+0, with a positive group B streptococcus test at any time in this pregnancy: offer immediate induction of labour or caesarean birth (1.2.12).",
+      items: [
+        "See the NICE guidelines on neonatal infection and on preterm labour and birth (1.2.12)",
+        "NG207 gives no antibiotic regimen",
+      ],
+    },
+
+    "preterm-shared": {
+      type: "end",
+      title: "Shared Decision: Wait Until 37+0 or Induce",
+      text: "Discuss expectant management until 37+0 weeks or induction of labour, and make a shared decision (1.2.11).",
+      items: [
+        "Risks to her: for example sepsis, and the possible need for caesarean birth",
+        "Risks to the baby: for example sepsis, and problems relating to preterm birth",
+        "Local availability of neonatal intensive care",
+        "Her individual circumstances and preferences",
+      ],
+    },
+
+    "term-gbs": {
+      type: "decision",
+      title: "Positive Group B Streptococcus Test?",
+      text: "A positive test at any time in the current pregnancy.",
+      options: [
+        { label: "Yes", sublabel: "1.2.16", next: "term-gbs-pos" },
+        { label: "No, or not tested", sublabel: "1.2.13", next: "term-choice" },
+      ],
+    },
+
+    "term-gbs-pos": {
+      type: "end",
+      title: "Offer Immediate Induction or Caesarean Birth",
+      text: "Prelabour rupture of membranes at or after 37+0 weeks with a positive group B streptococcus test at any time in this pregnancy: offer immediate induction of labour or caesarean birth (1.2.16).",
+      items: [
+        "For intrapartum antibiotics, see the NICE guideline on neonatal infection (1.2.16). NG207 gives no regimen",
+      ],
+    },
+
+    "term-choice": {
+      type: "decision",
+      title: "Offer a Choice",
+      text: "Offer expectant management for up to 24 hours, or induction of labour as soon as possible. Discuss the benefits and risks of each, and take her circumstances and preferences into account (1.2.13).",
+      options: [
+        { label: "She chooses induction as soon as possible", next: "term-iol" },
+        { label: "She chooses expectant management", next: "term-expectant" },
+      ],
+    },
+
+    "term-expectant": {
+      type: "decision",
+      title: "Labour Not Started After About 24 Hours",
+      text: "If labour has not started naturally after approximately 24 hours, offer induction of labour (1.2.14).",
+      options: [
+        { label: "She accepts induction", sublabel: "1.2.14", next: "term-iol" },
+        { label: "She chooses to keep waiting", sublabel: "1.2.15", next: "term-wait" },
+      ],
+    },
+
+    "term-wait": {
+      type: "end",
+      title: "Respect Her Decision to Wait",
+      text: "Respect her decision if she chooses to wait for spontaneous labour beyond 24 hours, and discuss her options for birth from this point onwards (1.2.15).",
+    },
+
+    "term-iol": {
+      type: "end",
+      title: "Induction of Labour",
+      text: "Go on to choose the method by Bishop score.",
+      items: [
+        "Induction as soon as possible if that is her choice (1.2.13), or after approximately 24 hours of expectant management (1.2.14)",
+      ],
+    },
+
+  },
+};
