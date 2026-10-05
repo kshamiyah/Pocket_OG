@@ -146,6 +146,7 @@ const FLOWCHART_LINKS = [
   { id: "NG207_METHOD",          gl: "NG207" },
   { id: "NG207_PROM",            gl: "NG207" },
   { id: "NG207_PROLONGED",       gl: "NG207" },
+  { id: "NG207_CIRCUMSTANCES",   gl: "NG207" },
   { id: "GTG42_SHOULDER",        gl: "GTG42" },
   { id: "GTG64_SEPSIS",          gl: "GTG64" },
   { id: "GTG27A_PAS",            gl: "GTG27A" },

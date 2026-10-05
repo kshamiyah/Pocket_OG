@@ -462,6 +462,22 @@ export const FLOWCHART_NODE_CONNECTIONS = {
     "await":   { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
   },
 
+  // ── Induction in specific circumstances (NICE NG207) ────────────────
+  NG207_CIRCUMSTANCES: {
+    "cs": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" }, { type: "reader", id: "GTG45", gl: "GTG45", label: "GTG45: Birth after previous caesarean", sublabel: "RCOG, full guideline" } ] },
+    "breech-consider": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" }, { type: "reader", id: "GTG20B", gl: "GTG20B", label: "GTG20b: Breech presentation", sublabel: "RCOG, full guideline" } ] },
+    "breech-not": { whatsNext: [ { type: "reader", id: "GTG20B", gl: "GTG20B", label: "GTG20b: Breech presentation", sublabel: "RCOG, full guideline" } ] },
+    "fgr": { whatsNext: [ { type: "reader", id: "NG192", gl: "NG192", label: "NG192: Caesarean birth", sublabel: "NICE, full guideline" }, { type: "reader", id: "GTG31", gl: "GTG31", label: "GTG31: Small for gestational age fetus", sublabel: "RCOG, full guideline" } ] },
+    "macro-no-dm": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "macro-dm": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "request": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "precipitate": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "iufd-urgent": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "iufd-other": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "iufd-unscarred": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "iufd-scarred": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+  },
+
 };
 
 // Keywords that become inline tappable links in the guideline reader.

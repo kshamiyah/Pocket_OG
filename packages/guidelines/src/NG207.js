@@ -115,6 +115,7 @@ export const NG207_SECTIONS = [
 
   {
     id: "ng207-circumstances", gl: "NG207", condition: "Induction of Labour", setting: "Specific Circumstances",
+    flowchartId: "NG207_CIRCUMSTANCES",
     title: "Induction in Specific Circumstances",
     tags: ["previous caesarean","uterine scar","uterine rupture","VBAC","maternal request","breech","external cephalic version","ECV","fetal growth restriction","FGR","macrosomia","big baby","shoulder dystocia","precipitate labour","dinoprostone contraindicated"],
     content: [
@@ -141,6 +142,7 @@ export const NG207_SECTIONS = [
 
   {
     id: "ng207-iufd", gl: "NG207", condition: "Induction of Labour", setting: "Intrauterine Fetal Death",
+    flowchartId: "NG207_CIRCUMSTANCES",
     title: "Intrauterine Fetal Death",
     tags: ["intrauterine fetal death","IUFD","stillbirth","mifepristone","misoprostol","dinoprostone","previous caesarean","bereavement","support","one to one care","off label"],
     content: [
