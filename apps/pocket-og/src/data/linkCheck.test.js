@@ -3,6 +3,7 @@
 // and calculator connections. Run:  npx vitest run src/data/linkCheck.test.js
 import { test, expect } from "vitest";
 import { FLOWCHARTS } from "./flowcharts";
+import { SHELVED_FLOWCHARTS } from "./shelf";
 import { FLOWCHART_NODE_CONNECTIONS, CALCULATOR_CONNECTIONS } from "./connections";
 import { GUIDELINES } from "@pocket-og/guidelines";
 import * as GL from "@pocket-og/guidelines";
@@ -118,7 +119,9 @@ test("every guideline section flowchartId resolves", () => {
   for (const [name, val] of Object.entries(GL)) {
     if (!name.endsWith("_SECTIONS") || !Array.isArray(val)) continue;
     for (const section of val) {
-      if (section.flowchartId && !flowchartIds.has(section.flowchartId)) {
+      // A shelved guide (src/data/shelf.js) is stored, not served: its sections
+      // may point at its own shelved charts, which shelf.test.js checks are stored.
+      if (section.flowchartId && !flowchartIds.has(section.flowchartId) && !SHELVED_FLOWCHARTS.has(section.flowchartId)) {
         errors.push(`${name} · ${section.id}: flowchartId "${section.flowchartId}" not registered`);
       }
     }

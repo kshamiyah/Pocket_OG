@@ -30,6 +30,7 @@ import { TextScaleProvider } from "./context/TextScaleContext";
 import { loadCachedNews, saveCachedNews, fetchLatestNews, unseenNewsIds, recordNewsFeedItems } from "./data/latest";
 import { TOG_SECTIONS } from "./data/tog";
 import { TRIAL_SECTIONS } from "./data/trials";
+import { isShelvedGuide, isShelvedFlowchart } from "./data/shelf";
 
 import { READER_AVAILABLE } from "./data/readerAvailable";
 import { readDeepLink, clearDeepLinkParam } from "./utils/deepLink";
@@ -171,7 +172,7 @@ const FLOWCHART_LINKS = [
   { id: "PCOS2023_DIAGNOSIS", gl: "PCOS2023" },
   { id: "FSRH_EC_METHOD_CHOICE", gl: "FSRH_EC" },
   { id: "GTG38_GTD_PATHWAY", gl: "GTG38" },
-];
+].filter(l => !isShelvedFlowchart(l.id));
 
 const FLOWCHART_GROUPS = [
   { gl: "GL952", label: "Pre-Eclampsia / Hypertension" },
@@ -230,7 +231,7 @@ const FLOWCHART_GROUPS = [
   { gl: "FSRH_EC",   label: "Emergency Contraception" },
   { gl: "GTG38",     label: "Gestational Trophoblastic Disease" },
   { gl: "BSH_SCD",   label: "Sickle Cell Disease in Pregnancy" },
-];
+].filter(g => !isShelvedGuide(g.gl));
 
 export default function App() {
   const [inputValue, setInputValue] = useState(""); // what the user is typing
@@ -304,6 +305,8 @@ export default function App() {
   const fcSectionRefs = useRef({});
 
   const handleNavigate = ({ type, id }) => {
+    // Shelved local guides and charts (src/data/shelf.js) never open, including from deep links.
+    if ((type === "reader" && isShelvedGuide(id)) || (type === "flowchart" && isShelvedFlowchart(id))) return;
     if (type === "calculator") {
       setActiveFlowchartId(null);
       setActiveCalcScenario(id);
@@ -348,6 +351,7 @@ export default function App() {
   const filteredGuidelines = useMemo(() => {
     const q = glSearchQuery.toLowerCase().trim();
     return Object.values(GUIDELINES)
+      .filter(gl => !isShelvedGuide(gl.code))
       .filter(gl => glSourceFilter === "ALL" || gl.source === glSourceFilter)
       .filter(gl => !q || gl.label.toLowerCase().includes(q) || gl.code.toLowerCase().includes(q))
       .sort((a, b) => a.label.localeCompare(b.label));

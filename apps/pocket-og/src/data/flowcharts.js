@@ -1,3 +1,4 @@
+import { SHELVED_FLOWCHARTS } from "./shelf";
 import { GL861_IOL_FLOWCHART, GL861_TIMING_FLOWCHART } from "./GL861_FLOWCHART";
 import { GL895_ROM_TRIAGE_FLOWCHART } from "./GL895_FLOWCHART";
 import {
@@ -216,3 +217,6 @@ export const FLOWCHARTS = {
   FSRH_EC_METHOD_CHOICE: FSRH_EC_METHOD_CHOICE_FLOWCHART,
   GTG38_GTD_PATHWAY: GTG38_GTD_PATHWAY_FLOWCHART,
 };
+
+// Shelved local charts (src/data/shelf.js) stay in the repo but are not served.
+for (const id of SHELVED_FLOWCHARTS) delete FLOWCHARTS[id];

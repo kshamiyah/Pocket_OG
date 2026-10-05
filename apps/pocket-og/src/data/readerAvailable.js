@@ -1,4 +1,6 @@
-export const READER_AVAILABLE = new Set([
+import { isShelvedGuide } from "./shelf";
+
+const ALL_READER_AVAILABLE = new Set([
   "GL861", "GL952", "GL891", "GL983", "GL880", "GL787", "GL783", "GL895",
   "CG565", "CG621", "CG623", "QS22", "GTG57", "GTG63", "GTG67",
   "NG88", "NHSCSP20",
@@ -52,3 +54,6 @@ export const READER_AVAILABLE = new Set([
   "BGCS_VULVAL",
   "PHYSIOLOGY",
 ]);
+
+// Shelved local guides (src/data/shelf.js) never open in the reader.
+export const READER_AVAILABLE = new Set([...ALL_READER_AVAILABLE].filter(code => !isShelvedGuide(code)));

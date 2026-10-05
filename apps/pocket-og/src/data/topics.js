@@ -1,3 +1,4 @@
+import { isShelvedLink } from "./shelf";
 // Curated topic pages, surfaced as a card above search results when the query
 // matches one of the topic's terms. A topic page states no clinical facts of
 // its own: every row is a link into existing, cited content (guides,
@@ -907,6 +908,14 @@ const normalise = (q) =>
 
 // Exact match of the normalised query against a topic's terms. Deliberately
 // strict for now: the card should feel curated, not fuzzy.
+
+// Shelved local guides (src/data/shelf.js) are removed from every topic card.
+for (const topic of Object.values(TOPICS)) {
+  topic.sections = (topic.sections ?? [])
+    .map(sec => ({ ...sec, entries: (sec.entries ?? []).filter(e => !isShelvedLink(e)) }))
+    .filter(sec => sec.entries.length > 0);
+}
+
 export function topicForQuery(query) {
   const q = normalise(query);
   if (!q) return null;

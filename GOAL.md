@@ -44,7 +44,7 @@ review. Nothing is wired until it is approved.
 | 4 | `NG207_CIRCUMSTANCES`: previous caesarean, breech, FGR, macrosomia, IUFD | NG207 1.2.17 to 1.2.32 | [x] | [x] | [x] |
 | 5 | `NG207_COMPLICATIONS`: hyperstimulation, unsuccessful induction, cord prolapse | NG207 1.7.1 to 1.7.6 | [x] | [x] | [x] |
 | 6 | National IOL timing chart, replacing `GL861_TIMING` as the national route | NG207, NG3, NG133, GTG43, GTG57, GTG31, GTG63 | [x] | [x] | [x] |
-| 7 | Shelve GL861, `GL861_IOL`, `GL861_TIMING` and the divergence card; leak check finds no trace in the running app | Dr Shamiyah, 5 Oct 2026 | [ ] | [ ] | [ ] |
+| 7 | Shelve GL861, `GL861_IOL`, `GL861_TIMING` and the divergence card; leak check finds no trace in the running app | Dr Shamiyah, 5 Oct 2026 | [x] | [ ] | [ ] |
 
 ## Log
 
@@ -123,3 +123,13 @@ review. Nothing is wired until it is approved.
   instead of `GL861_TIMING`. Their `relatedGl: ["GL861"]` is left for box 7.
   Hand-off test now also fails if any hand-off routes to a local guide.
   Next: box 7, the shelf.
+- 5 Oct 2026: box 7 built. `src/data/shelf.js` lists shelved items; every data
+  source filters through it (reader, FLOWCHARTS, App lists and Library,
+  navigation and deep links, topics, connections, keyword links, pearls,
+  related-guideline links, search index, divergence card). Permanent test
+  `src/data/shelf.test.js` checks nothing shelved is reachable and everything
+  shelved is still stored; proven to fail when a filter is removed. In-app leak
+  check: 17 surfaces, no trace (the one hit was the search box echoing "GL861").
+  Known remaining text: the local GL895 PPROM triage chart's subtitle names GL861
+  and its term arm carries GL861-derived steps; GL895 is outside this goal.
+  Awaiting review.

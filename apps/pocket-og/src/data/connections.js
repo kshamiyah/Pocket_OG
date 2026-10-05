@@ -1,3 +1,4 @@
+import { isShelvedLink, SHELVED_FLOWCHARTS, SHELVED_GUIDES } from "./shelf";
 // Bidirectional link map between calculators, flowcharts, and consent pages.
 // Each entry defines what appears in "See also" / "What's next" blocks.
 
@@ -669,3 +670,20 @@ export const GUIDELINE_KEYWORD_LINKS = {
     { phrase: "breastfeeding",            type: "reader", id: "NG194", gl: "NG194", label: "Postnatal Care" },
   ],
 };
+
+// ── The shelf ──────────────────────────────────────────────────────────
+// Shelved local guides and charts (src/data/shelf.js) are stripped from every
+// link list here, so no chart, calculator or keyword ever routes to them.
+{
+  const prune = list => (Array.isArray(list) ? list.filter(l => !isShelvedLink(l)) : list);
+  for (const key of Object.keys(CALCULATOR_CONNECTIONS)) CALCULATOR_CONNECTIONS[key] = prune(CALCULATOR_CONNECTIONS[key]);
+  for (const id of SHELVED_FLOWCHARTS) delete FLOWCHART_NODE_CONNECTIONS[id];
+  for (const nodes of Object.values(FLOWCHART_NODE_CONNECTIONS)) {
+    for (const node of Object.values(nodes)) {
+      if (node.whatsNext) node.whatsNext = prune(node.whatsNext);
+      if (node.inlineLinks) node.inlineLinks = prune(node.inlineLinks);
+    }
+  }
+  for (const code of SHELVED_GUIDES) delete GUIDELINE_KEYWORD_LINKS[code];
+  for (const key of Object.keys(GUIDELINE_KEYWORD_LINKS)) GUIDELINE_KEYWORD_LINKS[key] = prune(GUIDELINE_KEYWORD_LINKS[key]);
+}

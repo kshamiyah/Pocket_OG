@@ -1,5 +1,6 @@
 import { DIVERGENCES } from "@pocket-og/guidelines";
 import { sourceColors } from "../data/glColors";
+import { isShelvedDivergence } from "../data/shelf";
 
 // "Guidance differs": one clinical decision on which bodies disagree.
 //
@@ -35,7 +36,7 @@ const STATUS = {
 
 export default function CompareBlock({ id }) {
   const d = DIVERGENCES[id];
-  if (!d) return null;
+  if (!d || isShelvedDivergence(id)) return null;
 
   // The ordering rule, applied here rather than trusted to the data.
   const positions = [...(d.positions ?? [])].sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
