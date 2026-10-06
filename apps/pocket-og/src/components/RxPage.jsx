@@ -107,6 +107,7 @@ function DetailCard({ children }) {
 }
 
 function DataRow({ label, value, valueClass = "text-gray-900", border = true }) {
+  if (value == null || value === "") return null;
   return (
     <div className={`flex items-center gap-4 px-4 py-3 ${border ? "border-b border-gray-50" : ""}`}>
       <span className="text-sm text-gray-400 w-28 shrink-0">{label}</span>

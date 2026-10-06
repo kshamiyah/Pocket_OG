@@ -12,6 +12,9 @@ import { PEARLS } from "./pearls";
 import { READER_AVAILABLE } from "./readerAvailable";
 import { SEARCH_INDEX } from "../search/engine";
 import * as GL861_CHARTS from "./GL861_FLOWCHART";
+import * as CG565_CHARTS from "./CG565_FLOWCHART";
+import * as CG621_CHARTS from "./CG621_FLOWCHART";
+import * as CG623_CHARTS from "./CG623_FLOWCHART";
 
 test("the shelf is not empty", () => {
   expect(SHELVED_GUIDES.size + SHELVED_FLOWCHARTS.size + SHELVED_DIVERGENCES.size).toBeGreaterThan(0);
@@ -22,7 +25,7 @@ test("shelved content is still stored, so it can be put back", () => {
     expect(GUIDELINES[code], `${code} registry entry`).toBeTruthy();
     expect(GL[`${code}_SECTIONS`]?.length, `${code} guide text`).toBeGreaterThan(0);
   }
-  const storedCharts = Object.values(GL861_CHARTS).map(c => c.id);
+  const storedCharts = [GL861_CHARTS, CG565_CHARTS, CG621_CHARTS, CG623_CHARTS].flatMap(m => Object.values(m)).map(c => c?.id);
   for (const id of SHELVED_FLOWCHARTS) expect(storedCharts, `${id} chart file`).toContain(id);
   for (const id of SHELVED_DIVERGENCES) expect(DIVERGENCES[id], `${id} divergence`).toBeTruthy();
 });

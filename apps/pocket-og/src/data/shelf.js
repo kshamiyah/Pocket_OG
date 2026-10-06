@@ -15,11 +15,18 @@
 
 export const SHELVED_GUIDES = new Set([
   "GL861", // Induction of labour & term PLRoM (RBH). National: NG207, IOL_TIMING. Shelved 5 Oct 2026.
+  "CG565", // First trimester miscarriage (RBH). National: NG126. Shelved 6 Oct 2026.
+  "CG621", // Medical management of miscarriage (RBH). National: NG126. Shelved 6 Oct 2026.
+  "CG623", // Ectopic pregnancy: medical management (RBH). National: NG126, GTG21. Shelved 6 Oct 2026.
 ]);
 
 export const SHELVED_FLOWCHARTS = new Set([
   "GL861_IOL",    // replaced by NG207_METHOD and NG207_PROM
   "GL861_TIMING", // replaced by IOL_TIMING
+  "CG565_TRIAGE",     // replaced by NG126_MISCARRIAGE
+  "CG621_OUTPATIENT", // replaced by NG126_MISCARRIAGE
+  "CG621_INPATIENT",  // replaced by NG126_MISCARRIAGE
+  "CG623_MTX",        // replaced by NG126_ECTOPIC
 ]);
 
 export const SHELVED_DIVERGENCES = new Set([

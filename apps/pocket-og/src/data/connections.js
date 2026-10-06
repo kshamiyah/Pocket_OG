@@ -6,26 +6,26 @@ export const CALCULATOR_CONNECTIONS = {
   PUL: [
     { type: "flowchart", id: "NG126_PUL", gl: "NG126", label: "Pregnancy of unknown location", sublabel: "NG126, two hCG measurements 48 hours apart" },
     { type: "flowchart", id: "NG126_VIABILITY", gl: "NG126", label: "Ultrasound: location & viability", sublabel: "NG126, CRL and mean sac diameter thresholds" },
-    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway (local)", sublabel: "CG623, step through the pathway" },
-    { type: "calculator", id: "ECTOPIC_DECISION", gl: "CG623", label: "Tubal ectopic, initial management", sublabel: "Calculator, expectant / MTX / surgery" },
+    { type: "flowchart", id: "NG126_ECTOPIC", gl: "NG126", label: "Tubal ectopic: expectant, medical or surgical", sublabel: "NICE NG126, step through the pathway" },
+    { type: "calculator", id: "ECTOPIC_DECISION", gl: "NG126", label: "Tubal ectopic, initial management", sublabel: "Calculator, expectant / MTX / surgery" },
   ],
   ECTOPIC_DECISION: [
     { type: "flowchart", id: "NG126_ECTOPIC", gl: "NG126", label: "Tubal ectopic: expectant, medical or surgical", sublabel: "NG126, the same thresholds as this calculator" },
-    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway (local)", sublabel: "CG623, step through the pathway" },
-    { type: "calculator", id: "MTX_SURVEILLANCE", gl: "CG623", label: "Post-methotrexate surveillance", sublabel: "Calculator, day 4 & day 7 hCG" },
-    { type: "calculator", id: "EXPECTANT_SURVEILLANCE", gl: "CG623", label: "Expectant management, surveillance", sublabel: "Calculator, serial hCG days 2, 4, 7" },
+    { type: "flowchart", id: "NG126_ECTOPIC", gl: "NG126", label: "Tubal ectopic: expectant, medical or surgical", sublabel: "NICE NG126, step through the pathway" },
+    { type: "calculator", id: "MTX_SURVEILLANCE", gl: "NG126", label: "Post-methotrexate surveillance", sublabel: "Calculator, day 4 & day 7 hCG" },
+    { type: "calculator", id: "EXPECTANT_SURVEILLANCE", gl: "NG126", label: "Expectant management, surveillance", sublabel: "Calculator, serial hCG days 2, 4, 7" },
   ],
   EXPECTANT_SURVEILLANCE: [
     { type: "flowchart", id: "NG126_ECTOPIC", gl: "NG126", label: "Tubal ectopic: expectant, medical or surgical", sublabel: "NG126, expectant surveillance on days 2, 4 and 7" },
-    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway (local)", sublabel: "CG623, step through the pathway" },
-    { type: "calculator", id: "ECTOPIC_DECISION", gl: "CG623", label: "Tubal ectopic, initial management", sublabel: "Calculator, expectant / MTX / surgery" },
-    { type: "calculator", id: "MTX_SURVEILLANCE", gl: "CG623", label: "Post-methotrexate surveillance", sublabel: "Calculator, day 4 & day 7 hCG" },
+    { type: "flowchart", id: "NG126_ECTOPIC", gl: "NG126", label: "Tubal ectopic: expectant, medical or surgical", sublabel: "NICE NG126, step through the pathway" },
+    { type: "calculator", id: "ECTOPIC_DECISION", gl: "NG126", label: "Tubal ectopic, initial management", sublabel: "Calculator, expectant / MTX / surgery" },
+    { type: "calculator", id: "MTX_SURVEILLANCE", gl: "NG126", label: "Post-methotrexate surveillance", sublabel: "Calculator, day 4 & day 7 hCG" },
   ],
   MTX_SURVEILLANCE: [
     { type: "flowchart", id: "NG126_ECTOPIC", gl: "NG126", label: "Tubal ectopic: expectant, medical or surgical", sublabel: "NG126, hCG on days 4 and 7 after methotrexate" },
-    { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway (local)", sublabel: "CG623, step through the pathway" },
-    { type: "calculator", id: "ECTOPIC_DECISION", gl: "CG623", label: "Tubal ectopic, initial management", sublabel: "Calculator, expectant / MTX / surgery" },
-    { type: "calculator", id: "EXPECTANT_SURVEILLANCE", gl: "CG623", label: "Expectant management, surveillance", sublabel: "Calculator, serial hCG days 2, 4, 7" },
+    { type: "flowchart", id: "NG126_ECTOPIC", gl: "NG126", label: "Tubal ectopic: expectant, medical or surgical", sublabel: "NICE NG126, step through the pathway" },
+    { type: "calculator", id: "ECTOPIC_DECISION", gl: "NG126", label: "Tubal ectopic, initial management", sublabel: "Calculator, expectant / MTX / surgery" },
+    { type: "calculator", id: "EXPECTANT_SURVEILLANCE", gl: "NG126", label: "Expectant management, surveillance", sublabel: "Calculator, serial hCG days 2, 4, 7" },
   ],
   VTE_RISK: [
     { type: "flowchart", id: "GL891_ANTENATAL", gl: "GL891", label: "Antenatal VTE pathway", sublabel: "GL891, risk assessment & prophylaxis" },
@@ -118,15 +118,15 @@ export const FLOWCHART_NODE_CONNECTIONS = {
   NG88_ED_ACUTE: {
     "resus-escalate": {
       whatsNext: [
-        { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623, if pregnancy-related bleeding" },
-        { type: "flowchart", id: "CG565_TRIAGE", gl: "CG565", label: "First-trimester miscarriage", sublabel: "CG565, if pregnancy-related bleeding" },
+        { type: "flowchart", id: "NG126_ECTOPIC", gl: "NG126", label: "Tubal ectopic: expectant, medical or surgical", sublabel: "NICE NG126, step through the pathway" },
+        { type: "flowchart", id: "NG126_MISCARRIAGE", gl: "NG126", label: "Miscarriage: expectant, medical or surgical", sublabel: "NICE NG126, step through the pathway" },
       ],
     },
     "preg": {
       whatsNext: [
-        { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623, step through the pathway" },
-        { type: "flowchart", id: "CG565_TRIAGE", gl: "CG565", label: "First-trimester miscarriage", sublabel: "CG565, step through the pathway" },
-        { type: "calculator", id: "PUL", gl: "CG623", label: "PUL calculator", sublabel: "Pregnancy of unknown location" },
+        { type: "flowchart", id: "NG126_ECTOPIC", gl: "NG126", label: "Tubal ectopic: expectant, medical or surgical", sublabel: "NICE NG126, step through the pathway" },
+        { type: "flowchart", id: "NG126_MISCARRIAGE", gl: "NG126", label: "Miscarriage: expectant, medical or surgical", sublabel: "NICE NG126, step through the pathway" },
+        { type: "calculator", id: "PUL", gl: "NG126", label: "PUL calculator", sublabel: "Pregnancy of unknown location" },
       ],
     },
     "pmb": {
@@ -277,10 +277,10 @@ export const FLOWCHART_NODE_CONNECTIONS = {
   CG623_MTX: {
     "end-monitoring": {
       whatsNext: [
-        { type: "calculator", id: "MTX_SURVEILLANCE", gl: "CG623", label: "Post-MTX surveillance calculator", sublabel: "Track your day 4 & day 7 hCG" },
+        { type: "calculator", id: "MTX_SURVEILLANCE", gl: "NG126", label: "Post-MTX surveillance calculator", sublabel: "Track your day 4 & day 7 hCG" },
       ],
       inlineLinks: [
-        { phrase: "Weekly βhCG until level <20 IU/L", type: "calculator", id: "MTX_SURVEILLANCE", gl: "CG623" },
+        { phrase: "Weekly βhCG until level <20 IU/L", type: "calculator", id: "MTX_SURVEILLANCE", gl: "NG126" },
       ],
     },
     "end-surgery": {
@@ -290,7 +290,7 @@ export const FLOWCHART_NODE_CONNECTIONS = {
     },
     "mtx-admin": {
       inlineLinks: [
-        { phrase: "Day 4 and Day 7", type: "calculator", id: "MTX_SURVEILLANCE", gl: "CG623" },
+        { phrase: "Day 4 and Day 7", type: "calculator", id: "MTX_SURVEILLANCE", gl: "NG126" },
       ],
     },
   },
@@ -357,7 +357,7 @@ export const FLOWCHART_NODE_CONNECTIONS = {
     "end-medical-missed": {
       whatsNext: [
         { type: "consent", id: "MED_MISC", gl: null, label: "Counsel, medical miscarriage", sublabel: "Mifepristone + Misoprostol" },
-        { type: "flowchart", id: "CG621_OUTPATIENT", gl: "CG621", label: "Medical management, outpatient", sublabel: "CG621, step through the pathway" },
+        { type: "flowchart", id: "NG126_MISCARRIAGE", gl: "NG126", label: "Miscarriage: expectant, medical or surgical", sublabel: "NICE NG126, step through the pathway" },
       ],
     },
   },
@@ -575,7 +575,7 @@ export const GUIDELINE_KEYWORD_LINKS = {
   ],
 
   CG565: [
-    { phrase: "ectopic",               type: "reader", id: "CG623", gl: "CG623", label: "Ectopic Pregnancy" },
+    { phrase: "ectopic",               type: "reader", id: "NG126", gl: "NG126", label: "Ectopic Pregnancy & Miscarriage (NICE NG126)" },
   ],
 
   CG623: [
@@ -641,8 +641,8 @@ export const GUIDELINE_KEYWORD_LINKS = {
 
   GTG17: [
     { phrase: "VTE",         type: "reader", id: "GL891", gl: "GL891", label: "VTE in Pregnancy & Postnatal" },
-    { phrase: "ectopic",     type: "reader", id: "CG623", gl: "CG623", label: "Ectopic Pregnancy" },
-    { phrase: "miscarriage", type: "reader", id: "CG565", gl: "CG565", label: "First Trimester Miscarriage" },
+    { phrase: "ectopic",     type: "reader", id: "NG126", gl: "NG126", label: "Ectopic Pregnancy & Miscarriage (NICE NG126)" },
+    { phrase: "miscarriage", type: "reader", id: "NG126", gl: "NG126", label: "Ectopic Pregnancy & Miscarriage (NICE NG126)" },
   ],
 
   CG192: [

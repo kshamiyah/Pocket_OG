@@ -286,7 +286,7 @@ export const TOPICS = {
     id: "ectopic",
     title: "Ectopic pregnancy",
     subtitle: "Expectant, medical & surgical management",
-    description: "A pregnancy outside the uterine cavity, usually tubal. NICE NG126 sets the national thresholds for expectant, medical and surgical management; RBH CG623 is the local methotrexate protocol.",
+    description: "A pregnancy outside the uterine cavity, usually tubal. NICE NG126 sets the national thresholds for expectant, medical and surgical management, with the methotrexate regimen from RCOG GTG21.",
     gl: "NG126",
     terms: [
       "ectopic", "ectopic pregnancy", "tubal ectopic", "methotrexate pregnancy",
@@ -308,29 +308,29 @@ export const TOPICS = {
       {
         heading: "Pathways",
         entries: [
-          { type: "flowchart", id: "CG623_MTX", gl: "CG623", label: "Ectopic pregnancy pathway", sublabel: "CG623 flowchart" },
+          { type: "flowchart", id: "NG126_ECTOPIC", gl: "NG126", label: "Tubal ectopic: expectant, medical or surgical", sublabel: "NICE NG126, step through the pathway" },
         ],
       },
       {
         heading: "Calculators",
         entries: [
-          { type: "calculator", id: "PUL", gl: "CG623", label: "PUL calculator", sublabel: "Pregnancy of unknown location" },
-          { type: "calculator", id: "ECTOPIC_DECISION", gl: "CG623", label: "Tubal ectopic, initial management", sublabel: "Expectant / MTX / surgery" },
-          { type: "calculator", id: "EXPECTANT_SURVEILLANCE", gl: "CG623", label: "Expectant management surveillance", sublabel: "Serial hCG days 2, 4, 7" },
-          { type: "calculator", id: "MTX_SURVEILLANCE", gl: "CG623", label: "Post-methotrexate surveillance", sublabel: "Day 4 & day 7 hCG" },
+          { type: "calculator", id: "PUL", gl: "NG126", label: "PUL calculator", sublabel: "Pregnancy of unknown location" },
+          { type: "calculator", id: "ECTOPIC_DECISION", gl: "NG126", label: "Tubal ectopic, initial management", sublabel: "Expectant / MTX / surgery" },
+          { type: "calculator", id: "EXPECTANT_SURVEILLANCE", gl: "NG126", label: "Expectant management surveillance", sublabel: "Serial hCG days 2, 4, 7" },
+          { type: "calculator", id: "MTX_SURVEILLANCE", gl: "NG126", label: "Post-methotrexate surveillance", sublabel: "Day 4 & day 7 hCG" },
         ],
       },
       {
         heading: "Drugs",
         entries: [
-          { type: "drug", id: "methotrexate", gl: "CG623", label: "Methotrexate", sublabel: "Rx: dose, contraindications, monitoring" },
+          { type: "drug", id: "methotrexate", gl: "NG126", label: "Methotrexate", sublabel: "Rx: dose, contraindications, monitoring" },
         ],
       },
       {
         heading: "Don't miss",
         entries: [
           { type: "reader", id: "CG623", sectionId: "ep-patientinfo", gl: "CG623", label: "Patient information for MTX", sublabel: "CG623: what to tell her before treatment" },
-          { type: "consent", id: "ECTOPIC", gl: "CG623", label: "Ectopic pregnancy, counsel", sublabel: "Methotrexate / surgery / expectant: benefits, risks & alternatives" },
+          { type: "consent", id: "ECTOPIC", gl: "NG126", label: "Ectopic pregnancy, counsel", sublabel: "Methotrexate / surgery / expectant: benefits, risks & alternatives" },
         ],
       },
     ],

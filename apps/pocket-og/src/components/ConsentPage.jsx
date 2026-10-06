@@ -180,12 +180,12 @@ const PROCEDURE_CONFIG = {
     patientFactors: ECTOPIC_PATIENT_FACTORS,
     getRiskSections: (ctx) => ECTOPIC_RISK_SECTIONS[ctx] ?? [],
     getBenefits: (ctx) => ECTOPIC_BENEFITS[ctx] ?? [],
-    benefitsNote: "Methotrexate figures verbatim from CG623; surgical and expectant framing from NICE NG126. Your scan and blood results decide which routes are open.",
+    benefitsNote: "Figures from RCOG GTG21 and RCOG patient information; surgical and expectant framing from NICE NG126. Your scan and blood results decide which routes are open.",
     comparisonSections: null,
     getPages: (ctx) => ECTOPIC_PAGES[ctx],
     faq: ECTOPIC_FAQ,
     getInstrument: () => null,
-    sourceLabel: "CG623 · NICE NG126",
+    sourceLabel: "NICE NG126 · RCOG GTG21",
   },
   LLETZ: {
     contextOptions: null,
@@ -817,13 +817,15 @@ function ComparisonRiskRow({ risk, labels }) {
 
 function FreqGroup({ risks, freqKey }) {
   if (!risks?.length) return null;
-  const f = FREQ[freqKey];
+  // Risks with no frequency band in their source still have to be shown:
+  // they go in a final group rather than being dropped.
+  const label = FREQ[freqKey]?.label ?? "Frequency not given";
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-2">
-        <span className={`w-2 h-2 rounded-full shrink-0 ${FREQ_DOT[freqKey]}`} />
+        <span className={`w-2 h-2 rounded-full shrink-0 ${FREQ_DOT[freqKey] ?? "bg-gray-200"}`} />
         <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.1em]">
-          {f.label} · {risks.length}
+          {label} · {risks.length}
         </p>
       </div>
       <div className="rounded-xl overflow-hidden bg-white border border-gray-100">
@@ -879,6 +881,7 @@ function RisksPage({ sections, comparisonSections, instrument, activeFactors }) 
       {FREQ_ORDER.map(key => (
         <FreqGroup key={key} risks={grouped[key]} freqKey={key} />
       ))}
+      <FreqGroup risks={grouped.__none} freqKey="__none" />
 
       {!showTabs && simpleItems.length > 0 && (
         <div className="mb-7">

@@ -4,6 +4,18 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.29.0",
+    date: "06/10/2026",
+    title: "Early pregnancy runs on national guidance only",
+    changes: [
+      { tag: "improved", text: "The three local early pregnancy guidelines (first trimester miscarriage, medical management of miscarriage, and ectopic pregnancy) and their four flowcharts are retired from the app, stored rather than deleted. NICE NG126 and its flowcharts now cover early pregnancy on their own, and every link that led to a local chart now opens the NG126 equivalent." },
+      { tag: "fixed", text: "Ectopic pregnancy counselling now uses national figures only. Second methotrexate dose: about 15 in 100, and surgery after methotrexate: about 7 in 100 (RCOG patient information), replacing local figures of 14 and 10 in 100. Methotrexate success: 65 to 95 in 100 (RCOG GTG21). Risk of another ectopic: 7 to 10 in 100 (RCOG patient information), replacing 10 to 20. Pain in the first few days, an early rise in hCG, and tubal rupture during follow-up are still explained, in the national sources' words, as no national body gives a figure for them." },
+      { tag: "fixed", text: "The methotrexate drug card is now built from RCOG GTG21 and NICE NG126 alone: 50 mg/m2 intramuscular, hCG on days 4 and 7, a second dose considered if the fall is under 15%, and GTG21's own list of contraindications." },
+      { tag: "fixed", text: "The Counsel tab could fail to open its list of procedures. Fixed." },
+      { tag: "fixed", text: "Counselling pages now show every risk. Risks without a published frequency were being silently left off the list; they now appear under \"Frequency not given\", including longer hospital stay and the antenatal corticosteroid risks." },
+    ],
+  },
+  {
     version: "1.28.0",
     date: "05/10/2026",
     title: "Induction of labour workflows, from NICE NG207",
