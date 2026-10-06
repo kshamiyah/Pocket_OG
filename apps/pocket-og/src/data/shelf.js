@@ -18,6 +18,7 @@ export const SHELVED_GUIDES = new Set([
   "CG565", // First trimester miscarriage (RBH). National: NG126. Shelved 6 Oct 2026.
   "CG621", // Medical management of miscarriage (RBH). National: NG126. Shelved 6 Oct 2026.
   "CG623", // Ectopic pregnancy: medical management (RBH). National: NG126, GTG21. Shelved 6 Oct 2026.
+  "GL787", // Obstetric antibiotics (RBH). No national equivalent by design: antibiotic choice follows each trust's policy. Rx cards rebuilt from NICE and BASHH. Shelved 6 Oct 2026.
 ]);
 
 export const SHELVED_FLOWCHARTS = new Set([

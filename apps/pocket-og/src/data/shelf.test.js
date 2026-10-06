@@ -60,3 +60,22 @@ test("shelved content cannot be reached from anywhere in the app", () => {
   expect(linksChecked).toBeGreaterThan(100);
   expect(leaks).toEqual([]);
 });
+
+test("national content never refers readers to a shelved local guide", () => {
+  const isLocal = gl => /^(GL|CG)\d/.test(gl ?? "");
+  const mentions = [];
+  let scanned = 0;
+  const scan = (where, v) => {
+    if (typeof v === "string") { scanned++; for (const code of SHELVED_GUIDES) if (new RegExp(`\\b${code}\\b`).test(v)) mentions.push(`${where}: "${code}" in "${v.slice(0, 80)}"`); }
+    else if (Array.isArray(v)) v.forEach(x => scan(where, x));
+    else if (v && typeof v === "object") Object.values(v).forEach(x => scan(where, x));
+  };
+  for (const [name, sections] of Object.entries(GL)) {
+    if (!name.endsWith("_SECTIONS") || !Array.isArray(sections)) continue;
+    for (const s of sections) if (!isLocal(s.gl) && !SHELVED_GUIDES.has(s.gl)) scan(`${name}.${s.id}`, s.content);
+  }
+  for (const [id, fc] of Object.entries(FLOWCHARTS)) if (!/^(GL|CG)\d/.test(id)) scan(`flowchart ${id}`, fc.nodes);
+  for (const p of PEARLS) scan(`pearl ${p.id}`, [p.pearl, p.detail]);
+  expect(scanned).toBeGreaterThan(1000);
+  expect(mentions).toEqual([]);
+});

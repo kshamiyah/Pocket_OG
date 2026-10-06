@@ -201,7 +201,7 @@ export const FLOWCHART_NODE_CONNECTIONS = {
         { phrase: "GL787", type: "reader", id: "GL787", gl: "GL787" },
       ],
       whatsNext: [
-        { type: "reader", id: "GL787", gl: "GL787", label: "GL787: Obstetric antibiotics", sublabel: "Empirical sepsis treatment" },
+        { type: "reader", id: "GTG64", gl: "GTG64", label: "GTG64: Maternal sepsis", sublabel: "RCOG, full guideline" },
         { type: "reader", id: "GL895", gl: "GL895", label: "GL895: PPRoM guideline", sublabel: "Full guideline text" },
       ],
     },

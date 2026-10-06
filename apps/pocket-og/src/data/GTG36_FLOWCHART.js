@@ -1,7 +1,7 @@
 // GTG36 — Prevention of Early-onset Neonatal Group B Streptococcal Disease
 // (RCOG Green-top Guideline No. 36, 3rd edition, September 2017).
 // Antenatal/intrapartum risk factor screen through to the neonatal
-// observation pathway (NICE NG195). Exact antibiotic doses are in GL787.
+// observation pathway (NICE NG195). Antibiotic doses follow local antimicrobial policy.
 
 export const GTG36_GBS_FLOWCHART = {
   id: "GTG36_GBS",
@@ -29,7 +29,7 @@ export const GTG36_GBS_FLOWCHART = {
     "offer-iap": {
       type: "action",
       title: "Offer Intrapartum Antibiotic Prophylaxis (IAP)",
-      text: "Counsel on the benefit, and on the right to decline. See GL787 for antibiotic choice and dosing (including penicillin allergy).",
+      text: "Counsel on the benefit, and on the right to decline. Antibiotic choice and dosing (including penicillin allergy) follow local antimicrobial policy; NICE NG195 table 1 sets out the national choice of agent.",
       items: [
         "GBS bacteriuria: treat the bacteriuria at diagnosis AND still offer IAP in labour",
         "Start as soon as labour is confirmed or membranes rupture — don't wait for established labour",

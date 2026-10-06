@@ -4,6 +4,16 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.30.0",
+    date: "06/10/2026",
+    title: "Antibiotics from national guidance only",
+    changes: [
+      { tag: "improved", text: "The local obstetric antibiotic guideline is retired from the app and stored. Which antibiotic to use is set by each trust's antimicrobial policy, and every antibiotic card now says so." },
+      { tag: "fixed", text: "Antibiotic doses now come from national guidelines only: nitrofurantoin, amoxicillin and cefalexin for lower UTI in pregnancy (NICE NG109), erythromycin for P-PROM (NICE NG25), and metronidazole and clindamycin for bacterial vaginosis (BASHH). Where national guidance names a drug without a dose (benzylpenicillin, gentamicin and intravenous metronidazole in labour, NICE NG195), the card refers you to local guidelines." },
+      { tag: "fixed", text: "Removed the co-amoxiclav card for caesarean prophylaxis: NICE NG192 advises against co-amoxiclav before skin incision, and NICE NG25 against it in P-PROM. Removed intravenous clindamycin for group B streptococcus in penicillin allergy: NICE NG195 names a cephalosporin, or vancomycin if the allergy is severe." },
+    ],
+  },
+  {
     version: "1.29.0",
     date: "06/10/2026",
     title: "Early pregnancy runs on national guidance only",

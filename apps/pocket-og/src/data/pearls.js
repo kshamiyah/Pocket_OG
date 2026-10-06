@@ -59,8 +59,8 @@ const ALL_PEARLS = [
     id: "pprom-abx",
     topic: "PPROM",
     pearl: "Erythromycin for PPROM, never co-amoxiclav.",
-    detail: "Erythromycin for 10 days (or until labour) prolongs pregnancy and reduces neonatal morbidity in preterm prelabour rupture of membranes. Co-amoxiclav is avoided because of the association with neonatal necrotising enterocolitis.",
-    gl: "GL895",
+    detail: "Offer oral erythromycin 250 mg four times a day for a maximum of 10 days, or until she is in established labour, as prophylaxis for intrauterine infection. Do not offer co-amoxiclav for this (NICE NG25 1.4.1, 1.4.3).",
+    gl: "NG25",
     drug: "erythromycin", drugLabel: "Erythromycin",
   },
   {
@@ -244,9 +244,10 @@ const ALL_PEARLS = [
   {
     id: "gl787-asymptomatic-bacteriuria",
     topic: "Asymptomatic bacteriuria",
-    pearl: "Asymptomatic bacteriuria in pregnancy is never truly harmless — always treat it.",
-    detail: "Untreated asymptomatic bacteriuria carries a real risk of pyelonephritis, preterm delivery and perinatal mortality in pregnancy, unlike in the non-pregnant population where it's often left alone.",
-    gl: "GL787",
+    pearl: "Asymptomatic bacteriuria in pregnancy is treated, guided by the culture result.",
+    detail: "For asymptomatic bacteriuria in pregnancy, choose nitrofurantoin, amoxicillin or cefalexin based on recent culture and susceptibility results. Avoid nitrofurantoin at term (NICE NG109, table 2).",
+    gl: "NG109",
+    drug: "nitrofurantoin", drugLabel: "Nitrofurantoin",
   },
   {
     id: "cg565-exclude-ectopic",
@@ -266,7 +267,7 @@ const ALL_PEARLS = [
     id: "cg621-no-anti-d-early",
     topic: "Anti-D in early pregnancy",
     pearl: "Anti-D isn't offered for miscarriage or ectopic pregnancy up to and including 11+6 weeks, surgery included.",
-    detail: "NICE NG126 (updated June 2026) found no evidence of benefit below 12 weeks, and the rule now covers surgical management too, which is the change from earlier practice. Use the ultrasound gestation where it differs from the last menstrual period. Some trusts still give anti-D in theatre, RBH CG565 among them, so check local policy.",
+    detail: "NICE NG126 (updated June 2026) found no evidence of benefit below 12 weeks, and the rule now covers surgical management too, which is the change from earlier practice. Use the ultrasound gestation where it differs from the last menstrual period. Some trusts still give anti-D in theatre, so check local policy.",
     gl: "NG126",
   },
   {
