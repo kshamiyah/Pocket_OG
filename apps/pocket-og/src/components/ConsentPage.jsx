@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef } from "react";
 import TabPageHeader from "./TabPageHeader";
+import AlphabetSidebar from "./AlphabetSidebar";
 import ShareButton from "./ShareButton";
 import { shareUrl as deepLinkUrl } from "../utils/deepLink";
 import { sourceColors, sourceFromLabel } from "../data/glColors";
