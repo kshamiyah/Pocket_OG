@@ -1,3 +1,4 @@
+import { isShelvedLink } from "./shelf";
 // Curated topic pages, surfaced as a card above search results when the query
 // matches one of the topic's terms. A topic page states no clinical facts of
 // its own: every row is a link into existing, cited content (guides,
@@ -240,6 +241,12 @@ export const TOPICS = {
       {
         heading: "Pathways",
         entries: [
+          { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: sweep, then Bishop score to method" },
+          { type: "flowchart", id: "NG207_PROM", gl: "NG207", label: "Prelabour rupture of membranes", sublabel: "NG207: term and preterm, GBS, the 24-hour point" },
+          { type: "flowchart", id: "NG207_PROLONGED", gl: "NG207", label: "Pregnancy beyond 41 weeks", sublabel: "NG207: risks, her choice, monitoring from 42 weeks" },
+          { type: "flowchart", id: "NG207_CIRCUMSTANCES", gl: "NG207", label: "Specific circumstances", sublabel: "NG207: previous CS, breech, FGR, macrosomia, IUFD" },
+          { type: "flowchart", id: "NG207_COMPLICATIONS", gl: "NG207", label: "Complications", sublabel: "NG207: hyperstimulation, unsuccessful induction, cord prolapse" },
+          { type: "flowchart", id: "IOL_TIMING", gl: "NG207", label: "Timing of planned birth by indication", sublabel: "National: NG207, NG3, NG133, GTG57, GTG43, GTG31, GTG63" },
           { type: "flowchart", id: "GL861_IOL", gl: "GL861", label: "Induction of labour pathway (local)", sublabel: "GL861 flowchart" },
           { type: "flowchart", id: "GL861_TIMING", gl: "GL861", label: "Timing by indication (local)", sublabel: "GL861 flowchart" },
         ],
@@ -901,6 +908,14 @@ const normalise = (q) =>
 
 // Exact match of the normalised query against a topic's terms. Deliberately
 // strict for now: the card should feel curated, not fuzzy.
+
+// Shelved local guides (src/data/shelf.js) are removed from every topic card.
+for (const topic of Object.values(TOPICS)) {
+  topic.sections = (topic.sections ?? [])
+    .map(sec => ({ ...sec, entries: (sec.entries ?? []).filter(e => !isShelvedLink(e)) }))
+    .filter(sec => sec.entries.length > 0);
+}
+
 export function topicForQuery(query) {
   const q = normalise(query);
   if (!q) return null;

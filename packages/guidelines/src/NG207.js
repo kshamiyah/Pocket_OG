@@ -53,6 +53,7 @@ export const NG207_SECTIONS = [
 
   {
     id: "ng207-prolonged", gl: "NG207", condition: "Induction of Labour", setting: "Pregnancy Beyond 41 Weeks",
+    flowchartId: "NG207_PROLONGED",
     title: "Pregnancy Lasting Longer Than 41 Weeks",
     tags: ["prolonged pregnancy","post dates","41 weeks","42 weeks","post term","stillbirth","neonatal death","NICU","expectant management","membrane sweep","fetal monitoring","MBRRACE","ethnicity","deprivation","dating scan"],
     content: [
@@ -91,6 +92,7 @@ export const NG207_SECTIONS = [
 
   {
     id: "ng207-prom", gl: "NG207", condition: "Prelabour Rupture of Membranes", setting: "Term & Preterm",
+    flowchartId: "NG207_PROM",
     title: "Prelabour Rupture of Membranes: Term & Preterm",
     tags: ["prelabour rupture of membranes","PROM","PPROM","term PROM","SROM","37 weeks","34 weeks","expectant management","24 hours","group B streptococcus","GBS","antibiotics","neonatal infection"],
     content: [
@@ -113,6 +115,7 @@ export const NG207_SECTIONS = [
 
   {
     id: "ng207-circumstances", gl: "NG207", condition: "Induction of Labour", setting: "Specific Circumstances",
+    flowchartId: "NG207_CIRCUMSTANCES",
     title: "Induction in Specific Circumstances",
     tags: ["previous caesarean","uterine scar","uterine rupture","VBAC","maternal request","breech","external cephalic version","ECV","fetal growth restriction","FGR","macrosomia","big baby","shoulder dystocia","precipitate labour","dinoprostone contraindicated"],
     content: [
@@ -139,6 +142,7 @@ export const NG207_SECTIONS = [
 
   {
     id: "ng207-iufd", gl: "NG207", condition: "Induction of Labour", setting: "Intrauterine Fetal Death",
+    flowchartId: "NG207_CIRCUMSTANCES",
     title: "Intrauterine Fetal Death",
     tags: ["intrauterine fetal death","IUFD","stillbirth","mifepristone","misoprostol","dinoprostone","previous caesarean","bereavement","support","one to one care","off label"],
     content: [
@@ -158,6 +162,7 @@ export const NG207_SECTIONS = [
 
   {
     id: "ng207-methods", gl: "NG207", condition: "Induction of Labour", setting: "Methods",
+    flowchartId: "NG207_METHOD",
     title: "Methods for Induction of Labour",
     tags: ["membrane sweep","sweep","bishop score","dinoprostone","misoprostol","25 microgram","balloon catheter","osmotic dilator","mechanical method","amniotomy","ARM","oxytocin","hyperstimulation","39 weeks","prostaglandin"],
     content: [
@@ -266,6 +271,7 @@ export const NG207_SECTIONS = [
 
   {
     id: "ng207-complications", gl: "NG207", condition: "Induction of Labour", setting: "Complications",
+    flowchartId: "NG207_COMPLICATIONS",
     title: "Prevention & Management of Complications",
     tags: ["hyperstimulation","tachysystole","tocolysis","unsuccessful induction","failed induction","cord prolapse","low lying placenta","caesarean birth","rest period","expectant management"],
     content: [

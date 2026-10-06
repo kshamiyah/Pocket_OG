@@ -1,5 +1,11 @@
 # Pocket O&G: handover
 
+> **Update 5 Oct 2026:** the induction of labour goal is complete. Read `GOAL.md`
+> for what was built (five NG207 workflows, the national timing chart `IOL_TIMING`)
+> and the shelf (`apps/pocket-og/src/data/shelf.js`), which hides local guides
+> topic by topic once their national replacement is finished. Sections 4, 5 and 7
+> below predate that work.
+
 Last updated 4 October 2026. Written for an agent picking up the national-guidance
 migration. Read this with `CLAUDE.md`, which holds the permanent house rules.
 

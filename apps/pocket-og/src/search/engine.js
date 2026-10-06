@@ -1,3 +1,4 @@
+import { isShelvedGuide, isShelvedDivergence } from "../data/shelf";
 import { SYNONYMS } from "./synonyms";
 import {
   GL952_SECTIONS, GL787_SECTIONS, GL895_SECTIONS, GL861_SECTIONS,
@@ -70,7 +71,7 @@ import { DIVERGENCES } from "@pocket-og/guidelines";
 // divergence dataset, so pull them in or the positions are unsearchable.
 function divergenceText(id) {
   const d = DIVERGENCES[id];
-  if (!d) return [];
+  if (!d || isShelvedDivergence(id)) return [];
   return [
     d.question, d.scope, d.agreed, d.why,
     ...(d.positions ?? []).flatMap(p => [p.body, p.position, p.citation]),
@@ -228,7 +229,10 @@ const _WIKI = [
   ...EXTRA_SEARCH_SECTIONS,
 ];
 
-export const SEARCH_INDEX = _WIKI.map(page => {
+// Shelved local guides and divergence cards (src/data/shelf.js) are not indexed.
+export const SEARCH_INDEX = _WIKI.filter(page =>
+  !isShelvedGuide(page.gl) && !(page.id?.startsWith("differs-") && isShelvedDivergence(page.id.slice("differs-".length)))
+).map(page => {
   const tagsLower = page.tags.map(t => t.toLowerCase());
   const searchableContent = page.content.flatMap(b => {
     if (b.type === "text" || b.type === "alert" || b.type === "subheading") return [b.value ?? ""];

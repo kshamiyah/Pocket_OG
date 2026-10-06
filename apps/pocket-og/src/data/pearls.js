@@ -12,8 +12,9 @@
 
 import { GUIDELINES } from "@pocket-og/guidelines";
 import { READER_AVAILABLE } from "./readerAvailable";
+import { isShelvedGuide, isShelvedFlowchart } from "./shelf";
 
-export const PEARLS = [
+const ALL_PEARLS = [
   {
     id: "aspirin-pet",
     topic: "Pre-eclampsia",
@@ -1473,6 +1474,9 @@ export const PEARLS = [
     gl: "NG25",
   },
 ];
+
+// Pearls drawn from shelved local guides (src/data/shelf.js) are not shown.
+export const PEARLS = ALL_PEARLS.filter(p => !isShelvedGuide(p.gl) && !isShelvedFlowchart(p.fc));
 
 // Build the ordered link buttons for a pearl: the specific target(s) first, then
 // the full guideline whenever a reader exists for its code.

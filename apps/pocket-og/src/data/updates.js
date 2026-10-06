@@ -4,6 +4,31 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.28.0",
+    date: "05/10/2026",
+    title: "Induction of labour workflows, from NICE NG207",
+    changes: [
+      { tag: "new", text: "Choosing a method for induction of labour, as a step-through workflow built from NICE NG207: membrane sweeping from 39+0 weeks, the assessment before induction starts, then the Bishop score. 6 or less leads to dinoprostone or low dose 25 microgram oral misoprostol, or a mechanical method where pharmacological ones are unsuitable or she chooses one; above 6 leads to amniotomy and oxytocin. Every step cites its NG207 recommendation." },
+      { tag: "new", text: "Prelabour rupture of membranes, term and preterm, as a workflow from NICE NG207. Before 34+0 weeks: no induction without another obstetric indication. From 34+0 to 36+6: immediate induction or caesarean birth if group B streptococcus positive, otherwise a shared decision. At term: immediate induction or caesarean birth if group B streptococcus positive, otherwise a choice of expectant management for up to 24 hours or induction as soon as possible. NG207 gives no antibiotic regimens and refers to the NICE neonatal infection guideline." },
+      { tag: "new", text: "Pregnancy beyond 41 weeks, as a workflow from NICE NG207: spontaneous labour first with NICE's own figures for when it starts, the risks from 41+0 weeks, then her choice. Induction hands on to the method workflow; declining leads to her options, whether she wants additional monitoring from 42 weeks with NICE's caveats on what it can and cannot tell her, and when to get in touch." },
+      { tag: "new", text: "Induction in specific circumstances, as a workflow from NICE NG207: previous caesarean birth, breech presentation, growth restriction with confirmed compromise, suspected macrosomia with or without diabetes, maternal request, precipitate labour, and intrauterine fetal death, including NICE's own mifepristone 200 mg regimen for a non-scarred uterus." },
+      { tag: "new", text: "Complications of induction, as a workflow from NICE NG207: uterine hyperstimulation with NICE's own definition and the three actions to take, unsuccessful induction and the four options to agree with her, the precautions against cord prolapse, and the placental site check before a sweep or induction." },
+      { tag: "new", text: "Timing of planned birth by indication, built only from national guidance, with each answer citing the guideline that owns it: NICE NG207 (beyond 41 weeks), RCOG GTG57 (reduced fetal movements), NICE NG3 (diabetes), NICE NG133 (hypertension and pre-eclampsia), RCOG GTG43 (cholestasis), RCOG GTG31 2024 (SGA and growth restriction) and RCOG GTG63 (antepartum haemorrhage). Where a guideline says \"consider\", so does the app." },
+      { tag: "improved", text: "Several timings now follow national guidance rather than the local table: no indication to expedite birth for reduced fetal movements without evidence of compromise; no fixed gestation after 37 weeks for chronic or gestational hypertension below 160/110, which is agreed with a senior obstetrician; and NG3's advice to consider birth before 37 weeks in type 1 or type 2 diabetes with complications, which the local table did not include." },
+      { tag: "improved", text: "Induction of labour now runs entirely on national guidance. The local induction guideline and its two flowcharts have been retired from the app and no longer appear in the Library, the Flow tab, search, topic cards or any link. They are stored, not deleted, so they can be restored. NICE NG207 gives no antibiotic regimens for prelabour rupture of membranes, so none are shown: follow your unit's antimicrobial policy." },
+    ],
+  },
+  {
+    version: "1.27.1",
+    date: "04/10/2026",
+    title: "Cholestasis induction timing corrected",
+    changes: [
+      { tag: "fixed", text: "Induction timing for intrahepatic cholestasis now follows RCOG GTG43 (June 2022), which matches the trust's own cholestasis guideline GL880: planned birth by 40+0 weeks for peak bile acids 19 to 39 µmol/l, at 38+0 to 39+0 weeks for 40 to 99 µmol/l, and at 35+0 to 36+0 weeks for 100 µmol/l or more. The local timing table previously gave 37+0 to 39+6 weeks for bile acids over 100, which is later than either guideline. Corrected in the timing table, the indications list and the timing flowchart." },
+      { tag: "improved", text: "The local induction timing table no longer lists maternal age or full therapeutic anticoagulation. Neither has a national guideline giving a gestation for planned birth, so the table now holds only indications with a national source." },
+      { tag: "new", text: "Three national source documents added to the guideline library as PDFs: NICE NG3 (diabetes in pregnancy), RCOG GTG43 (intrahepatic cholestasis of pregnancy) and RCOG GTG37b (acute management of thromboembolic disease in pregnancy). Full guides written from them will follow." },
+    ],
+  },
+  {
     version: "1.27.0",
     date: "15/09/2026",
     title: "Induction of labour, from national guidance",

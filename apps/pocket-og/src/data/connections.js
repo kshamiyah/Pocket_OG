@@ -1,3 +1,4 @@
+import { isShelvedLink, SHELVED_FLOWCHARTS, SHELVED_GUIDES } from "./shelf";
 // Bidirectional link map between calculators, flowcharts, and consent pages.
 // Each entry defines what appears in "See also" / "What's next" blocks.
 
@@ -436,6 +437,76 @@ export const FLOWCHART_NODE_CONNECTIONS = {
     },
   },
 
+  // ── Induction of labour: choosing a method (NICE NG207) ─────────────
+  NG207_METHOD: {
+    "sweep":      { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "pharm":      { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "mechanical": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "amniotomy":  { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+  },
+
+  // ── Prelabour rupture of membranes (NICE NG207) ─────────────────────
+  NG207_PROM: {
+    "term-iol":        { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" }, { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "term-gbs-pos":    { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" }, { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "term-wait":       { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "preterm-gbs-pos": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" }, { type: "reader", id: "NG25", gl: "NG25", label: "NG25: Preterm labour and birth", sublabel: "NICE, full guideline" } ] },
+    "preterm-shared":  { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" }, { type: "reader", id: "NG25", gl: "NG25", label: "NG25: Preterm labour and birth", sublabel: "NICE, full guideline" } ] },
+    "pre34-indicated": { whatsNext: [ { type: "reader", id: "NG25", gl: "NG25", label: "NG25: Preterm labour and birth", sublabel: "NICE, full guideline" } ] },
+    "pre34-expectant": { whatsNext: [ { type: "reader", id: "NG25", gl: "NG25", label: "NG25: Preterm labour and birth", sublabel: "NICE, full guideline" } ] },
+  },
+
+  // ── Pregnancy beyond 41 weeks (NICE NG207) ──────────────────────────
+  NG207_PROLONGED: {
+    "iol":     { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" }, { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "monitor": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "await":   { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+  },
+
+  // ── Induction in specific circumstances (NICE NG207) ────────────────
+  NG207_CIRCUMSTANCES: {
+    "cs": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" }, { type: "reader", id: "GTG45", gl: "GTG45", label: "GTG45: Birth after previous caesarean", sublabel: "RCOG, full guideline" } ] },
+    "breech-consider": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" }, { type: "reader", id: "GTG20B", gl: "GTG20B", label: "GTG20b: Breech presentation", sublabel: "RCOG, full guideline" } ] },
+    "breech-not": { whatsNext: [ { type: "reader", id: "GTG20B", gl: "GTG20B", label: "GTG20b: Breech presentation", sublabel: "RCOG, full guideline" } ] },
+    "fgr": { whatsNext: [ { type: "reader", id: "NG192", gl: "NG192", label: "NG192: Caesarean birth", sublabel: "NICE, full guideline" }, { type: "reader", id: "GTG31", gl: "GTG31", label: "GTG31: Small for gestational age fetus", sublabel: "RCOG, full guideline" } ] },
+    "macro-no-dm": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "macro-dm": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "request": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "precipitate": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "iufd-urgent": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "iufd-other": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "iufd-unscarred": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "iufd-scarred": { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+  },
+
+  // ── Induction of labour: complications (NICE NG207) ─────────────────
+  NG207_COMPLICATIONS: {
+    "hyper":             { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "unsuccessful-plan": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" }, { type: "reader", id: "NG192", gl: "NG192", label: "NG192: Caesarean birth", sublabel: "NICE, full guideline" } ] },
+    "cord":              { whatsNext: [ { type: "reader", id: "NG207", gl: "NG207", label: "NG207: Inducing labour", sublabel: "Full guideline, including methods and monitoring" } ] },
+    "placenta":          { whatsNext: [ { type: "reader", id: "GTG27A", gl: "GTG27A", label: "GTG27a: Placenta praevia and accreta", sublabel: "RCOG, full guideline" } ] },
+  },
+
+  // ── Timing of planned birth by indication (national sources) ───────
+  // Only national guides that are readable in the app are linked. NG3 and
+  // GTG43 have no reader guide yet, and the GTG31 guide predates the 2024
+  // edition this chart follows, so those end nodes carry no hand-off.
+  IOL_TIMING: {
+    "postdates": { whatsNext: [ { type: "flowchart", id: "NG207_PROLONGED", gl: "NG207", label: "Pregnancy beyond 41 weeks", sublabel: "NG207: risks, her choice, monitoring" } ] },
+    "rfm": { whatsNext: [ { type: "reader", id: "GTG57", gl: "GTG57", label: "GTG57: Reduced fetal movements", sublabel: "RCOG, full guideline" } ] },
+    "pet": { whatsNext: [ { type: "flowchart", id: "NG133_TIMING", gl: "NG133", label: "Timing of birth in pre-eclampsia", sublabel: "NG133 table 3 and the early birth thresholds" } ] },
+    "chronic": { whatsNext: [ { type: "reader", id: "NG133", gl: "NG133", label: "NG133: Hypertension in pregnancy", sublabel: "NICE, full guideline" } ] },
+    "gestational": { whatsNext: [ { type: "reader", id: "NG133", gl: "NG133", label: "NG133: Hypertension in pregnancy", sublabel: "NICE, full guideline" } ] },
+    "severe": { whatsNext: [ { type: "flowchart", id: "NG133_SEVERE", gl: "NG133", label: "Severe hypertension", sublabel: "NG133 1.8: immediate management" } ] },
+    "aph-compromise": { whatsNext: [ { type: "reader", id: "GTG63", gl: "GTG63", label: "GTG63: Antepartum haemorrhage", sublabel: "RCOG, full guideline" } ] },
+    "aph-preterm": { whatsNext: [ { type: "reader", id: "GTG63", gl: "GTG63", label: "GTG63: Antepartum haemorrhage", sublabel: "RCOG, full guideline" } ] },
+    "aph-term": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" }, { type: "reader", id: "GTG63", gl: "GTG63", label: "GTG63: Antepartum haemorrhage", sublabel: "RCOG, full guideline" } ] },
+    "fgr-late": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" } ] },
+    "sga-only": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" } ] },
+    "dm-pre": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" } ] },
+    "gdm": { whatsNext: [ { type: "flowchart", id: "NG207_METHOD", gl: "NG207", label: "Choosing a method", sublabel: "NG207: Bishop score to method" } ] },
+  },
+
 };
 
 // Keywords that become inline tappable links in the guideline reader.
@@ -599,3 +670,20 @@ export const GUIDELINE_KEYWORD_LINKS = {
     { phrase: "breastfeeding",            type: "reader", id: "NG194", gl: "NG194", label: "Postnatal Care" },
   ],
 };
+
+// ── The shelf ──────────────────────────────────────────────────────────
+// Shelved local guides and charts (src/data/shelf.js) are stripped from every
+// link list here, so no chart, calculator or keyword ever routes to them.
+{
+  const prune = list => (Array.isArray(list) ? list.filter(l => !isShelvedLink(l)) : list);
+  for (const key of Object.keys(CALCULATOR_CONNECTIONS)) CALCULATOR_CONNECTIONS[key] = prune(CALCULATOR_CONNECTIONS[key]);
+  for (const id of SHELVED_FLOWCHARTS) delete FLOWCHART_NODE_CONNECTIONS[id];
+  for (const nodes of Object.values(FLOWCHART_NODE_CONNECTIONS)) {
+    for (const node of Object.values(nodes)) {
+      if (node.whatsNext) node.whatsNext = prune(node.whatsNext);
+      if (node.inlineLinks) node.inlineLinks = prune(node.inlineLinks);
+    }
+  }
+  for (const code of SHELVED_GUIDES) delete GUIDELINE_KEYWORD_LINKS[code];
+  for (const key of Object.keys(GUIDELINE_KEYWORD_LINKS)) GUIDELINE_KEYWORD_LINKS[key] = prune(GUIDELINE_KEYWORD_LINKS[key]);
+}

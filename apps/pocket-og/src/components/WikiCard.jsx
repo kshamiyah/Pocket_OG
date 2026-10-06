@@ -3,6 +3,7 @@ import ContentBlock from "./ContentBlock";
 import { highlightText } from "../utils/highlight";
 import { glColors, sourceColors } from "../data/glColors";
 import { READER_AVAILABLE } from "../data/readerAvailable";
+import { isShelvedGuide } from "../data/shelf";
 
 const KIND_CTA = {
   calculator: { label: "Open calculator", sub: "Decision-support tool" },
@@ -16,7 +17,7 @@ export default function WikiCard({ page, isExpanded, onToggle, isFallback, query
   // Cards may carry an explicit `source` (e.g. TOG review cards, which aren't in
   // the guideline registry); fall back to resolving colour from the gl code.
   const col = page.source ? sourceColors(page.source) : glColors(page.gl);
-  const relatedGl = (page.relatedGl ?? []).map(code => GUIDELINES[code]).filter(Boolean);
+  const relatedGl = (page.relatedGl ?? []).filter(code => !isShelvedGuide(code)).map(code => GUIDELINES[code]).filter(Boolean);
 
   const metaParts = [
     page.setting,
