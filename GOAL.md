@@ -158,7 +158,7 @@ finished national replacement (NG126, NG133).
 
 | # | Topic | Local | National | Blockers / sweep needed |
 |---|---|---|---|---|
-| 1 | Early pregnancy **(shelved 6 Oct 2026, awaiting review)** | CG565, CG621, CG623 | NG126 (done) | Anti-D divergence cards carry a CG565 local block; PUL and ectopic calculators tagged CG623; methotrexate consent figures quoted "verbatim from CG623" |
+| 1 | Early pregnancy **(DONE: shelved and approved 6 Oct 2026)** | CG565, CG621, CG623 | NG126 (done) | Anti-D divergence cards carry a CG565 local block; PUL and ectopic calculators tagged CG623; methotrexate consent figures quoted "verbatim from CG623" |
 | 2 | Hypertension | GL952 | NG133 (done) | References in quickref, TOG, trials, topics, pearls |
 | 3 | Antibiotics | GL787 | none, by design | Pointer to trust antimicrobial policy. Rx antibiotic cards: shelve all local data, keep the drug and base its dosing on the BNF only (decision 6 Oct 2026). Blocked: bnf.nice.org.uk is denied by the environment's network policy |
 | 4 | Cholestasis | GL880 | GTG43 (PDF in repo) | Build the guide; GL880 already matches GTG43 |
@@ -199,3 +199,4 @@ the NG126 and GTG21 PDFs:
   the Counsel tab crashed on open (missing import, live since 20 Jul 2026), and
   consent risks without a frequency band were never rendered. Leak check: 18
   surfaces clean. 23 tests pass. Version 1.29.0. Awaiting review.
+- 6 Oct 2026: step 1 approved. Pull request opened.
