@@ -200,3 +200,24 @@ the NG126 and GTG21 PDFs:
   consent risks without a frequency band were never rendered. Leak check: 18
   surfaces clean. 23 tests pass. Version 1.29.0. Awaiting review.
 - 6 Oct 2026: step 1 approved. Pull request opened.
+
+## Step 2 research: antibiotics (6 Oct 2026)
+
+BNF is unreachable from this environment ("BNF is only available in the UK";
+geo-restricted, not a network setting). Agreed alternative: doses from national
+NICE and BASHH guidelines, which are BNF-aligned. Sources saved in
+apps/pocket-og/public/rx-sources/.
+
+| Card | National source | Finding |
+|---|---|---|
+| Nitrofurantoin | NICE NG109 table 2 | 100 mg MR twice daily (or 50 mg four times daily) for 7 days; avoid at term. No national prophylaxis dose |
+| Amoxicillin | NICE NG109 table 2 | 500 mg three times daily for 7 days, only if culture shows susceptibility |
+| Cefalexin | NICE NG109 table 2 | 500 mg twice daily for 7 days. No national prophylaxis dose |
+| Erythromycin | NICE NG25 1.4.1 | 250 mg four times daily, maximum 10 days or until established labour |
+| Metronidazole (oral) | BASHH BV 2012 | 400 mg twice daily 5 to 7 days, or 2 g single dose |
+| Clindamycin (oral) | BASHH BV 2012 | Alternative: 300 mg twice daily for 7 days |
+| Benzylpenicillin | NICE NG195 1.6.2 | National first choice for intrapartum antibiotics; NG195 gives no dose. GTG36 (cited by the card) unreachable (Wiley) |
+| Clindamycin IV for GBS with penicillin allergy | NICE NG195 table 1 | CONTRADICTED: NG195 names a cephalosporin (e.g. cefotaxime) or, if severe, vancomycin |
+| Gentamicin | NICE NG195 1.6.2, 1.6.3 | Named for chorioamnionitis with benzylpenicillin and metronidazole; once-daily dosing; no dose |
+| Metronidazole IV and PR | NICE NG195 table 1 | Named for chorioamnionitis; no dose. PR surgical prophylaxis: no national source |
+| Co-amoxiclav | NICE NG192 1.4.45; NG25 1.4.3 | CONTRADICTED: do not use before skin incision at caesarean; do not use for PPROM. Card cited NG192 for the opposite |
