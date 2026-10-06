@@ -166,3 +166,29 @@ finished national replacement (NG126, NG133).
 | 6 | Diabetes | GL983 | NG3 (PDF in repo) | DKA source still needed |
 | 7 | PPROM | GL895 | GTG73 + pre-24-week source | Both sources needed; GL895 chart also carries GL861-derived term arm |
 | 8 | Iron deficiency | GL783 | BSH guideline | Source needed |
+
+## Step 1 audit: early pregnancy (6 Oct 2026)
+
+Shelving CG565, CG621, CG623 is not a one-line change. Findings, checked against
+the NG126 and GTG21 PDFs:
+
+- **Calculators (PUL, ECTOPIC_DECISION, EXPECTANT_SURVEILLANCE,
+  MTX_SURVEILLANCE):** already sourced to NG126 and GTG21. Only the links that
+  open them are tagged `gl: "CG623"`. Fix: retag those links to NG126. No
+  clinical change.
+- **Methotrexate Rx card (`rx/cytotoxics.js`):** 50 mg/m2 IM, day 4 and 7 hCG,
+  repeat if fall under 15%, weekly to below 15 IU/L are all in GTG21 (section on
+  medical management, Appendix II). Fix: re-cite to GTG21; remove CG623-only
+  operational notes (trust cytotoxic policy, 1-hour rest).
+- **Ectopic consent page (`consent.js`, "verbatim from CG623"):** GTG21 supports
+  success 65 to 95% (app says 65 to 94) and second dose 3 to 27% (app says 14
+  in 100). Not found in GTG21: pain days 3 to 7 "up to 75 in 100", hCG rise
+  "up to 86 in 100", surgery after MTX "10 in 100", rupture "7 in 100",
+  laparoscopy complications "2 in 1,000", further treatment after salpingotomy
+  "up to 1 in 5". These are local or unsourced: replace with national figures
+  where one exists, otherwise state the risk without a number. Needs review.
+- **Anti-D divergence cards:** carry a CG565/CG621 local block. Fix: hide local
+  blocks belonging to shelved guides; the national positions stay.
+- **Charts:** CG565_TRIAGE, CG621_OUTPATIENT, CG621_INPATIENT, CG623_MTX shelved;
+  links to them repointed to the NG126 charts.
+- Then add CG565, CG621, CG623 to the shelf, extend the leak check.
