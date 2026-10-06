@@ -141,3 +141,28 @@ review. Nothing is wired until it is approved.
   - Local guides are shelved topic by topic, as each national replacement is
     finished, never all at once.
   - Pull request opened to `main`.
+
+---
+
+# Next goal (proposed, not started): every local guide shelved
+
+**Direction (Dr Shamiyah, 6 Oct 2026):** "Everything local needs to be shelved.
+Antibiotics are governed by local guidelines, not national." The end state is
+zero local guides visible in the app. Where no national guidance exists
+(antibiotics), the app points users to their own trust's policy instead.
+Shelving stays topic by topic: a local guide is shelved once its national
+replacement is finished, or, for antibiotics, once the pointer is in place.
+
+Progress at 6 Oct 2026: 11 local guides; 1 shelved (GL861); 4 more have a
+finished national replacement (NG126, NG133).
+
+| # | Topic | Local | National | Blockers / sweep needed |
+|---|---|---|---|---|
+| 1 | Early pregnancy | CG565, CG621, CG623 | NG126 (done) | Anti-D divergence cards carry a CG565 local block; PUL and ectopic calculators tagged CG623; methotrexate consent figures quoted "verbatim from CG623" |
+| 2 | Hypertension | GL952 | NG133 (done) | References in quickref, TOG, trials, topics, pearls |
+| 3 | Antibiotics | GL787 | none, by design | Pointer to trust antimicrobial policy; Rx antibiotic entries carry unsourced local claims ("local resistance ~50%") |
+| 4 | Cholestasis | GL880 | GTG43 (PDF in repo) | Build the guide; GL880 already matches GTG43 |
+| 5 | VTE | GL891 | GTG37a, GTG37b (PDFs in repo) | Build the guide |
+| 6 | Diabetes | GL983 | NG3 (PDF in repo) | DKA source still needed |
+| 7 | PPROM | GL895 | GTG73 + pre-24-week source | Both sources needed; GL895 chart also carries GL861-derived term arm |
+| 8 | Iron deficiency | GL783 | BSH guideline | Source needed |
