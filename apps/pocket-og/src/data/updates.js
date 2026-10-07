@@ -4,6 +4,15 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.39.0",
+    date: "07/10/2026",
+    title: "Endometriosis medicines, checked against NICE",
+    changes: [
+      { tag: "fixed", text: "Goserelin and leuprorelin are now shown for NICE NG73's use: 3 months before surgery for deep endometriosis involving the bowel, bladder or ureter. Dienogest is shown as a progestogen option for hormonal treatment. Every card adds NICE's fertility advice: hormonal treatment has no permanent effect on later fertility, and should not be offered to women trying to conceive." },
+      { tag: "new", text: "New cards for the GnRH antagonists NICE recommends after previous medical or surgical treatment: relugolix–estradiol–norethisterone (TA1057) and linzagolix with hormonal add-back (TA1067). Their doses follow the product information, so the cards refer to local guidelines." },
+    ],
+  },
+  {
     version: "1.38.0",
     date: "07/10/2026",
     title: "Diabetes drug cards from NICE NG3",
