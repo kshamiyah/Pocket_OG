@@ -4,6 +4,14 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.31.0",
+    date: "07/10/2026",
+    title: "Benzylpenicillin dose in labour, from the BNF",
+    changes: [
+      { tag: "fixed", text: "The benzylpenicillin card now gives the BNF dose for intrapartum prophylaxis against group B streptococcal infection: 3 g initially, then 1.5 g every 4 hours until birth, by slow intravenous injection or infusion. The BNF gives no dose for gentamicin or intravenous metronidazole in chorioamnionitis, so those cards still refer you to local guidelines. The other antibiotic doses were checked against the BNF and are unchanged." },
+    ],
+  },
+  {
     version: "1.30.0",
     date: "06/10/2026",
     title: "Antibiotics from national guidance only",

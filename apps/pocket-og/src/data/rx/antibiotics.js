@@ -8,10 +8,11 @@
 //   NICE NG192 (2021, updated 2024) caesarean birth, 1.4.43 to 1.4.45
 //   BASHH bacterial vaginosis guideline (2012)
 //
-// The BNF is not reachable from the build environment. Where a national
-// guideline names a drug but gives no dose, the card says so and refers to
-// local guidelines rather than show an unverified figure. Choice of
-// antibiotic is set by local antimicrobial policy.
+// BNF (checked 7 Oct 2026): benzylpenicillin's intrapartum GBS prophylaxis
+// dose is taken from the BNF. The BNF gives no dose for gentamicin or IV
+// metronidazole in chorioamnionitis or labour, so those cards still refer to
+// local guidelines rather than borrow a dose from another indication. Choice
+// of antibiotic is set by local antimicrobial policy.
 //
 // The previous local cards (from RBH GL787) are shelved, unchanged, in
 // antibiotics.local-shelved.js. Co-amoxiclav is not carried over: NG192
@@ -23,6 +24,7 @@ const NO_NATIONAL_DOSE = "Not given in national guidance: refer to local guideli
 const NG109 = { label: "NICE NG109: lower UTI, antimicrobial prescribing", href: "/rx-sources/NICE-NG109-UTI-lower-antimicrobial-prescribing.pdf" };
 const NG25  = { label: "NICE NG25: preterm labour and birth", href: "/rx-sources/NICE-NG25-preterm-labour-and-birth.pdf" };
 const NG195 = { label: "NICE NG195: neonatal infection, antibiotics", href: "/rx-sources/NICE-NG195-neonatal-infection-antibiotics.pdf" };
+const BNF_BENZYLPENICILLIN = { label: "BNF: benzylpenicillin sodium", href: "https://bnf.nice.org.uk/drugs/benzylpenicillin-sodium/" };
 const BASHH_BV = { label: "BASHH: bacterial vaginosis (2012)", href: "/rx-sources/BASHH-bacterial-vaginosis-2012.pdf" };
 
 export const ANTIBIOTICS = [
@@ -55,10 +57,11 @@ export const ANTIBIOTICS = [
     routes: [
       {
         type: "iv",
-        shortLabel: "IV: intrapartum antibiotics",
-        label: "IV: intrapartum antibiotics for neonatal infection",
-        dose: NO_NATIONAL_DOSE,
-        notes: "First choice when intrapartum antibiotics are given and there is no penicillin allergy. With chorioamnionitis: benzylpenicillin plus gentamicin plus metronidazole (NICE NG195 table 1).",
+        shortLabel: "IV: intrapartum GBS prophylaxis",
+        label: "IV: intrapartum group B streptococcal prophylaxis",
+        dose: "3 g initially, then 1.5 g",
+        frequency: "Every 4 hours until birth, by slow IV injection or IV infusion (BNF)",
+        notes: "BNF dose for intrapartum prophylaxis against group B streptococcal infection. First choice when intrapartum antibiotics are given and there is no penicillin allergy. With chorioamnionitis: benzylpenicillin plus gentamicin plus metronidazole (NICE NG195 table 1).",
       },
     ],
     cautions: [
@@ -66,7 +69,7 @@ export const ANTIBIOTICS = [
       "Severe penicillin allergy: NICE NG195 names vancomycin, or another antibiotic active against group B streptococcus based on sensitivity testing or local susceptibility data",
       LOCAL_POLICY,
     ],
-    sources: [NG195],
+    sources: [NG195, BNF_BENZYLPENICILLIN],
   },
   {
     id: "cefalexin",
