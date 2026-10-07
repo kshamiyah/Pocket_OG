@@ -160,7 +160,7 @@ finished national replacement (NG126, NG133).
 |---|---|---|---|---|
 | 1 | Early pregnancy **(DONE: shelved and approved 6 Oct 2026)** | CG565, CG621, CG623 | NG126 (done) | Anti-D divergence cards carry a CG565 local block; PUL and ectopic calculators tagged CG623; methotrexate consent figures quoted "verbatim from CG623" |
 | 2 | Hypertension | GL952 | NG133 (done) | References in quickref, TOG, trials, topics, pearls |
-| 3 | Antibiotics **(shelved 6 Oct 2026, awaiting review)** | GL787 | none, by design | Pointer to trust antimicrobial policy. Rx antibiotic cards: shelve all local data, keep the drug and base its dosing on the BNF only (decision 6 Oct 2026). Blocked: bnf.nice.org.uk is denied by the environment's network policy |
+| 3 | Antibiotics **(DONE: shelved and approved 7 Oct 2026; BNF cross-check pending, see below)** | GL787 | none, by design | Pointer to trust antimicrobial policy. Rx antibiotic cards: shelve all local data, keep the drug and base its dosing on the BNF only (decision 6 Oct 2026). Blocked: bnf.nice.org.uk is denied by the environment's network policy |
 | 4 | Cholestasis | GL880 | GTG43 (PDF in repo) | Build the guide; GL880 already matches GTG43 |
 | 5 | VTE | GL891 | GTG37a, GTG37b (PDFs in repo) | Build the guide |
 | 6 | Diabetes | GL983 | NG3 (PDF in repo) | DKA source still needed |
@@ -229,3 +229,6 @@ apps/pocket-og/public/rx-sources/.
   points to local antimicrobial policy. New permanent test: national content
   never names a shelved guide (it caught a CG565 mention left in a pearl).
   24 tests pass. Version 1.30.0. Awaiting review.
+- 7 Oct 2026: step 2 approved; PR #45 merged (1.30.0). BNF follow-up handed to a
+  local session (the BNF is UK-only): add BNF doses for benzylpenicillin,
+  gentamicin and IV metronidazole in labour, and cross-check the other six cards.
