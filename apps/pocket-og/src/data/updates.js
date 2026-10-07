@@ -4,6 +4,16 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.34.0",
+    date: "07/10/2026",
+    title: "Tocolysis and antenatal steroids, checked against NICE and RCOG",
+    changes: [
+      { tag: "fixed", text: "Nifedipine is NICE's first-line tocolytic (NICE NG25), and its card now has a tocolysis entry with NICE's gestations. NICE gives no tocolysis dose, so the card refers you to local guidelines. Atosiban is now shown as the alternative when nifedipine is contraindicated, not as first-line." },
+      { tag: "fixed", text: "The betamethasone card is now Antenatal corticosteroids. Dexamethasone comes first, as RCOG Green-top Guideline 74 recommends in the UK: 12 mg twice, 24 hours apart, or 6 mg four times, 12 hours apart. The card previously said every 6 hours. Betamethasone 12 mg twice, 24 hours apart, is the alternative. The card shows the NICE and RCOG gestation ranges side by side and adds NICE's criteria for a repeat course." },
+      { tag: "improved", text: "The indomethacin card is retired from the app and stored, as no national guideline recommends it for tocolysis." },
+    ],
+  },
+  {
     version: "1.33.0",
     date: "07/10/2026",
     title: "Uterotonics checked against NICE",

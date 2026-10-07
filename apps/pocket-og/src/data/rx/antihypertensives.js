@@ -217,6 +217,13 @@ export const ANTIHYPERTENSIVES = [
         maxDose: "30 mg per acute episode",
         notes: "Swallow whole — do NOT bite or crush. Onset 20–30 min. Switch to MR for ongoing control.",
       },
+      {
+        type: "oral",
+        shortLabel: "Oral: tocolysis",
+        label: "Oral: tocolysis in preterm labour",
+        dose: "Not given in national guidance: refer to local guidelines",
+        notes: "First-line tocolytic in NICE NG25, with intact membranes: consider at 24+0 to 25+6 weeks in suspected preterm labour, offer at 26+0 to 33+6 weeks in suspected or diagnosed preterm labour (1.8.2, 1.8.3). Off-label use. If nifedipine is contraindicated, offer an oxytocin receptor antagonist such as atosiban (1.8.4).",
+      },
     ],
     contraindications: ["Unstable angina (immediate-release)", "Concurrent IV magnesium sulphate — risk of profound hypotension"],
     cautions: [
@@ -228,6 +235,7 @@ export const ANTIHYPERTENSIVES = [
     sources: [
       { label: "BNF", href: "https://bnf.nice.org.uk/drugs/nifedipine/" },
       { label: "NICE NG133", href: "https://www.nice.org.uk/guidance/ng133" },
+      { label: "NICE NG25", href: "https://www.nice.org.uk/guidance/ng25" },
     ],
   },
   {

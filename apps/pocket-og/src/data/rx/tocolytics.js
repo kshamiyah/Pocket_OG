@@ -1,3 +1,9 @@
+// Tocolytics and antenatal corticosteroids, checked against national
+// guidance (7 Oct 2026): NICE NG25 (preterm labour and birth), RCOG Green-top
+// Guideline 74 (antenatal corticosteroids, 2022) and NICE NG3 (diabetes in
+// pregnancy). Nifedipine, NICE's first-line tocolytic, is on its card in
+// antihypertensives.js. Indomethacin is shelved in tocolytics.shelved.js.
+
 export const TOCOLYTICS = [
   {
     id: "atosiban",
@@ -7,12 +13,12 @@ export const TOCOLYTICS = [
     routes: [
       {
         type: "iv",
-        shortLabel: "IV — preterm labour",
-        label: "IV — preterm labour (24–33+6 weeks)",
+        shortLabel: "IV: preterm labour",
+        label: "IV: tocolysis when nifedipine is contraindicated",
         dose: "Phase 1: 6.75 mg bolus over 1 min → Phase 2: 18 mg/hr × 3 hr → Phase 3: 6 mg/hr up to 45 hr",
         frequency: "Three-phase infusion",
         maxDose: "330 mg per treatment course; maximum 3 courses",
-        notes: "Three-phase regimen: 1) 6.75 mg IV bolus over 1 min; 2) 18 mg/hr loading infusion for 3 hr; 3) 6 mg/hr maintenance for up to 45 hr. Maximum 3 courses. Licensed 24+0 to 33+6 weeks. Give betamethasone for fetal lung maturation alongside.",
+        notes: "NICE NG25 offers nifedipine first-line for tocolysis (1.8.2, 1.8.3) and oxytocin receptor antagonists such as atosiban if nifedipine is contraindicated (1.8.4). Do not offer betamimetics (1.8.5).",
       },
     ],
     contraindications: [
@@ -26,78 +32,53 @@ export const TOCOLYTICS = [
     cautions: [
       "Confirm gestational age and exclude fetal compromise before starting",
       "Monitor uterine contractions and fetal heart rate continuously",
-      "Inform neonatology team — arrange appropriate neonatal care",
-      "Always give betamethasone concurrently for fetal lung maturation",
+      "Before starting tocolysis, weigh: suspected or diagnosed preterm labour, features such as bleeding or infection that make stopping labour inadvisable, gestational age, the likely benefit of maternal corticosteroids, the availability of neonatal care, and the woman's preference (NICE NG25 1.8.1)",
     ],
-    pregnancySafety: "Licensed tocolytic for 24–33+6 weeks. Preferred first-line tocolytic in UK (NICE NG25). Does not cross placenta significantly.",
+    pregnancySafety: "Second-line tocolytic in NICE NG25: offered when nifedipine is contraindicated (1.8.4).",
     sources: [
       { label: "BNF", href: "https://bnf.nice.org.uk/drugs/atosiban/" },
       { label: "NICE NG25", href: "https://www.nice.org.uk/guidance/ng25" },
     ],
   },
   {
-    id: "indomethacin",
-    name: "Indomethacin",
-    class: "NSAID / COX inhibitor tocolytic",
-    color: "sky",
-    routes: [
-      {
-        type: "rectal",
-        shortLabel: "PR — preterm labour <32 wk",
-        label: "PR / Oral — preterm labour (before 32 weeks)",
-        dose: "100 mg loading; then 25–50 mg every 4–6 hr",
-        frequency: "Loading dose, then every 4–6 hr for maximum 48 hours",
-        maxDose: "200 mg/day; maximum treatment duration 48 hr",
-        notes: "Use ONLY before 32 weeks — increasing risk of premature ductus arteriosus closure and oligohydramnios after 32 weeks. Rectal suppository (100 mg) preferred; oral: 50–100 mg loading then 25 mg every 4–6 hr. Strictly limit to 48 hours.",
-      },
-    ],
-    contraindications: [
-      "Gestational age ≥32 weeks",
-      "Renal dysfunction",
-      "Oligohydramnios",
-      "Platelet dysfunction or coagulopathy",
-      "Peptic ulcer disease",
-    ],
-    cautions: [
-      "RESTRICT TO <32 WEEKS — risk of premature ductus arteriosus closure increases rapidly after 32 weeks",
-      "DO NOT exceed 48 hours of treatment",
-      "Monitor amniotic fluid volume if used beyond 24 hours",
-      "Doppler assessment of ductus arteriosus if used >48 hr or >28 weeks",
-    ],
-    pregnancySafety: "Only use before 32 weeks. Risk of premature ductus arteriosus closure and oligohydramnios increases with gestation and treatment duration.",
-    sources: [
-      { label: "BNF", href: "https://bnf.nice.org.uk/drugs/indometacin/" },
-    ],
-  },
-  {
     id: "betamethasone",
-    name: "Betamethasone",
-    class: "Corticosteroid — antenatal fetal lung maturation",
+    name: "Antenatal corticosteroids",
+    class: "Dexamethasone or betamethasone: fetal lung maturation",
     color: "sky",
     routes: [
       {
         type: "im",
-        shortLabel: "IM — antenatal steroids",
-        label: "IM — antenatal corticosteroids (fetal lung maturation)",
+        shortLabel: "IM dexamethasone (first choice)",
+        label: "IM dexamethasone: first choice in the UK",
+        dose: "24 mg dexamethasone phosphate per course",
+        frequency: "12 mg × 2 doses, 24 hr apart, or 6 mg × 4 doses, 12 hr apart",
+        maxDose: "No more than 2 courses in total (NICE NG25 1.9.5)",
+        notes: "RCOG Green-top Guideline 74 (2022) recommends dexamethasone in the UK.",
+      },
+      {
+        type: "im",
+        shortLabel: "IM betamethasone (alternative)",
+        label: "IM betamethasone: alternative",
         dose: "12 mg",
-        frequency: "Two doses, 24 hours apart",
-        maxDose: "24 mg (one course); single rescue course may be offered ≥7 days after first",
-        notes: "Offer to all women at risk of preterm delivery 24+0 to 34+6 weeks. Two doses of 12 mg IM given 24 hr apart. A single rescue course may be offered if >7 days since first course and <34 weeks. Do NOT give more than two courses total. Dexamethasone 6 mg IM every 6 hr × 4 doses is an alternative.",
+        frequency: "2 doses, 24 hr apart (24 mg per course)",
+        maxDose: "No more than 2 courses in total (NICE NG25 1.9.5)",
+        notes: "Betamethasone sodium phosphate/acetate mix, the alternative to dexamethasone (RCOG Green-top Guideline 74, 2022).",
       },
     ],
-    contraindications: [
-      "Active systemic infection without adequate antimicrobial cover",
-    ],
+    contraindications: [],
     cautions: [
-      "Monitor blood glucose closely — transient hyperglycaemia, especially in diabetics",
-      "Increase insulin doses in diabetic women during steroid course",
-      "Transient fetal heart rate variability changes expected",
-      "May temporarily mask clinical signs of infection",
+      "Gestation, NICE NG25: discuss at 22+0 to 23+6 weeks, offer at 24+0 to 33+6, consider at 34+0 to 35+6 (1.9.1 to 1.9.3)",
+      "Gestation, RCOG GTG74 (2022): discuss before 24+0 weeks, offer at 24+0 to 34+6, consider at 35+0 to 36+6",
+      "Repeat course: consider a single repeat course under 34+0 weeks if the first course was more than 7 days ago and birth is very likely in the next 48 hr (NICE NG25 1.9.4)",
+      "Systemic infection: balance the benefit for the baby against the risk of worsening the infection for the woman and her baby (RCOG GTG74)",
+      "Do not delay birth for steroids when the reason for birth is affecting the health of the woman or baby (RCOG GTG74)",
+      "Diabetes is not a contraindication. With insulin-treated diabetes, give additional insulin by an agreed protocol and monitor closely (NICE NG3 1.3.41, 1.3.42)",
     ],
-    pregnancySafety: "Strongly recommended 24–34+6 weeks for all women at risk of preterm delivery. Reduces respiratory distress syndrome (RDS), intraventricular haemorrhage (IVH), and neonatal mortality.",
+    pregnancySafety: "Offered when preterm birth is anticipated (preterm labour, P-PROM or planned preterm birth). A course given within 7 days before preterm birth reduces perinatal and neonatal death and respiratory distress syndrome (RCOG GTG74).",
     sources: [
-      { label: "BNF", href: "https://bnf.nice.org.uk/drugs/betamethasone/" },
+      { label: "RCOG GTG74", href: "/guidelines/BJOG - 2022 - Stock - Antenatal corticosteroids to reduce neonatal morbidity and mortality.pdf" },
       { label: "NICE NG25", href: "https://www.nice.org.uk/guidance/ng25" },
+      { label: "NICE NG3", href: "https://www.nice.org.uk/guidance/ng3" },
     ],
   },
 ];
