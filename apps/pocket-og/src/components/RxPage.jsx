@@ -73,7 +73,7 @@ const CATEGORY_COLOR = {
   "Mental Health":    "text-purple-500",
 };
 
-const ROUTE_LABEL = { oral: "Oral", iv: "IV", im: "IM", sc: "SC", sl: "SL", vag: "Vaginal", rectal: "Rectal", patch: "Patch", implant: "Implant", iud: "IUD/IUS", topical: "Topical" };
+const ROUTE_LABEL = { oral: "Oral", iv: "IV", im: "IM", sc: "SC", sl: "SL", vag: "Vaginal", rectal: "Rectal", patch: "Patch", implant: "Implant", iud: "IUD/IUS", topical: "Topical", neuraxial: "Neuraxial" };
 const ROUTE_COLOR = {
   oral:    "text-emerald-600",
   iv:      "text-amber-600",
@@ -86,6 +86,7 @@ const ROUTE_COLOR = {
   patch:   "text-violet-500",
   implant: "text-teal-600",
   iud:     "text-cyan-600",
+  neuraxial: "text-sky-600",
 };
 
 // ── Detail overlay ────────────────────────────────────────────────────────────
