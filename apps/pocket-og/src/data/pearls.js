@@ -69,7 +69,7 @@ const ALL_PEARLS = [
     pearl: "Antenatal corticosteroids buy the most for the baby between 24 and 34+6 weeks.",
     detail: "A course of betamethasone or dexamethasone accelerates fetal lung maturity and reduces respiratory distress, intraventricular haemorrhage and neonatal death when birth is anticipated within 7 days. Two doses, 24 hours apart.",
     gl: "NG25",
-    drug: "betamethasone", drugLabel: "Betamethasone",
+    drug: "betamethasone", drugLabel: "Antenatal corticosteroids",
   },
   {
     id: "mg-neuro",

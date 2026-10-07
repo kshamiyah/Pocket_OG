@@ -263,3 +263,13 @@ apps/pocket-og/public/rx-sources/.
   tranexamic acid) unchanged pending BNF / RCOG GTG52 (RCOG site blocked from
   the cloud today). The GTG52 guide text still says oxytocin "at delivery of
   anterior shoulder"; NG235 supersedes it. Version 1.33.0. Next: tocolytics.
+- 7 Oct 2026: Rx tocolytics checked against NICE NG25, RCOG GTG74 (2022) and
+  NICE NG3. Atosiban reframed as second-line (NG25 1.8.4); nifedipine card
+  gains a tocolysis entry (NG25 1.8.2, 1.8.3; no national dose, refer to local
+  guidelines). Betamethasone card became "Antenatal corticosteroids" (id kept
+  as betamethasone so links still work): dexamethasone first (GTG74; fixed
+  "6 mg every 6 hr" to 12 hr apart), betamethasone alternative, NICE and RCOG
+  gestation ranges side by side, NG25 repeat-course criteria, infection as a
+  balance not a contraindication. Indomethacin shelved in
+  rx/tocolytics.shelved.js (not in NG25). Atosiban dose unchanged pending
+  BNF. Version 1.34.0. Next: anticoagulants.

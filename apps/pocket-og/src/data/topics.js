@@ -411,7 +411,7 @@ export const TOPICS = {
         heading: "Drugs",
         entries: [
           { type: "drug", id: "erythromycin", gl: "NG25", label: "Erythromycin", sublabel: "Rx: PPROM antibiotic (NICE NG25)" },
-          { type: "drug", id: "betamethasone", gl: "NG25", label: "Betamethasone", sublabel: "Rx: antenatal corticosteroid" },
+          { type: "drug", id: "betamethasone", gl: "NG25", label: "Antenatal corticosteroids", sublabel: "Rx: dexamethasone or betamethasone" },
           { type: "drug", id: "atosiban", gl: "NG25", label: "Atosiban", sublabel: "Rx: tocolysis" },
           { type: "drug", id: "magnesium_sulphate", gl: "NG25", label: "Magnesium sulphate", sublabel: "Rx: fetal neuroprotection" },
         ],
