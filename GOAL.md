@@ -243,3 +243,12 @@ apps/pocket-og/public/rx-sources/.
   clindamycin dose for BV (app keeps BASHH). New check
   scripts/check-bnf-doses.mjs fails on zero. Version 1.31.0. Next: the other
   Rx files against the BNF, one file at a time.
+- 7 Oct 2026: Rx antihypertensives checked against NICE NG133 and NG25. NG133
+  gives no doses for the blood-pressure drugs, only magnesium and aspirin, so
+  those eight doses are unchanged until the BNF pages are saved locally.
+  Fixed: magnesium neuroprotection (NG25 1.10.4: 4 g over 15 min, then 1 g/hr
+  until birth or 24 hr; was 4 g over 30 min, no infusion); eclampsia loading
+  over 5 to 15 min and recurrent-fit dose (NG133 1.8.4); enalapril, captopril
+  and atenolol notes rewritten from NG133 1.9.4 to 1.9.7 and the MHRA note
+  (enalapril no longer marked as one to avoid in breastfeeding). Version 1.32.0. Next:
+  uterotonics.
