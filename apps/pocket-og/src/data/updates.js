@@ -4,6 +4,17 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.36.0",
+    date: "07/10/2026",
+    title: "Pain relief, checked against NICE",
+    changes: [
+      { tag: "fixed", text: "Codeine is no longer shown as usable while breastfeeding: NICE NG192 says not to offer codeine or co-codamol to women who are breastfeeding, and to warn about over-the-counter codeine." },
+      { tag: "new", text: "New cards for dihydrocodeine and co-dydramol, NICE's step-up from paracetamol after caesarean birth, and for remifentanil patient-controlled analgesia in labour (40 micrograms per bolus, 2-minute lockout, obstetric units only; NICE NG235)." },
+      { tag: "fixed", text: "Spinal morphine at caesarean is now up to 100 micrograms with fentanyl up to 15 micrograms, used only if diamorphine is unavailable; the diamorphine card adds intrathecal (up to 300 micrograms) and epidural (up to 3 mg) doses. Oral immediate-release morphine is the routine choice after a spinal or epidural, and the cards add NICE's monitoring advice (NICE NG192)." },
+      { tag: "improved", text: "Paracetamol and NSAIDs after caesarean are to be given together and regularly, not only when needed (NICE NG192). Statements without a national source have been removed from the pain relief cards." },
+    ],
+  },
+  {
     version: "1.35.0",
     date: "07/10/2026",
     title: "Aspirin and heparin, checked against NICE and RCOG",

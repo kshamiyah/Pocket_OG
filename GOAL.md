@@ -280,3 +280,12 @@ apps/pocket-og/public/rx-sources/.
   monitoring, over-170 kg and high prophylactic doses, renal dose reduction
   from GTG37a/b. Unsourced extras removed; contraindications kept pending
   BNF. Version 1.35.0. Next: analgesia.
+- 7 Oct 2026: Rx analgesia checked against NICE NG192, NG235, NG194 and
+  BASHH/RCOG HSV 2024. Codeine: not offered when breastfeeding (NG192
+  1.6.20, 1.6.27). New cards: dihydrocodeine/co-dydramol (NG192 1.6.19; no
+  national dose) and remifentanil PCA (NG235 1.6.21 to 1.6.24). Neuraxial
+  diamorphine and morphine doses from NG192 1.6.11 to 1.6.13 (new
+  "neuraxial" route type in RxPage); oral IR morphine routine after neuraxial
+  (1.6.15); PCA and neuraxial monitoring. Paracetamol + NSAID regularly
+  (1.6.18, 1.6.21). Unsourced extras removed; NSAID 30-week warning and
+  oral doses kept pending BNF. Version 1.36.0. Next: antiemetics.
