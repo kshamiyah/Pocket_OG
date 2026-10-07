@@ -232,3 +232,14 @@ apps/pocket-og/public/rx-sources/.
 - 7 Oct 2026: step 2 approved; PR #45 merged (1.30.0). BNF follow-up handed to a
   local session (the BNF is UK-only): add BNF doses for benzylpenicillin,
   gentamicin and IV metronidazole in labour, and cross-check the other six cards.
+- 7 Oct 2026: BNF follow-up done in a local session, from BNF pages saved by
+  hand into bnf-sources/ (gitignored; the BNF is UK-only and copyrighted).
+  Benzylpenicillin now carries the BNF intrapartum GBS prophylaxis dose (3 g,
+  then 1.5 g every 4 hours until birth); route renamed to GBS prophylaxis. The
+  BNF has no obstetric dose for gentamicin or IV metronidazole, so both still
+  refer to local guidelines. Cross-check: nitrofurantoin, amoxicillin,
+  cefalexin and erythromycin match the BNF; oral metronidazole for BV is
+  400–500 mg in the BNF (app keeps BASHH's 400 mg); the BNF has no oral
+  clindamycin dose for BV (app keeps BASHH). New check
+  scripts/check-bnf-doses.mjs fails on zero. Version 1.31.0. Next: the other
+  Rx files against the BNF, one file at a time.
