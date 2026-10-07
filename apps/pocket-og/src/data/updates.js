@@ -4,6 +4,16 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.32.0",
+    date: "07/10/2026",
+    title: "Magnesium and postnatal blood pressure, checked against NICE",
+    changes: [
+      { tag: "fixed", text: "Magnesium sulphate for fetal neuroprotection now follows NICE NG25: 4 g intravenously over 15 minutes, then 1 g per hour until birth or for 24 hours, whichever is sooner. Offer it at 24+0 to 29+6 weeks and consider it at 30+0 to 33+6 weeks. The card previously said 4 g over 30 minutes with no maintenance infusion." },
+      { tag: "fixed", text: "Magnesium sulphate for eclampsia: the loading dose is now given over 5 to 15 minutes (NICE NG133), and the card adds the dose for recurrent fits, a further 2 to 4 g over 5 to 15 minutes." },
+      { tag: "fixed", text: "The enalapril, captopril and atenolol cards now follow NICE NG133 for the postnatal period. Enalapril is first-line, and is no longer marked as one to avoid when breastfeeding. Captopril is an alternative, and atenolol is an add-on or swap when two medicines are not enough." },
+    ],
+  },
+  {
     version: "1.31.0",
     date: "07/10/2026",
     title: "Benzylpenicillin dose in labour, from the BNF",
