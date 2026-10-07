@@ -296,5 +296,5 @@ apps/pocket-og/public/rx-sources/.
   Dexamethasone shelved in rx/antiemetics.shelved.js; new cards:
   corticosteroids for HG, domperidone, thiamine. Found but not yet changed:
   pearl "gtg69-no-doxylamine-uk" contradicts GTG69; PUQE calculator says
-  Hartmann's first (GTG69: 0.9% saline with KCl) and metoclopramide max 5 days;
+  Hartmann's first (GTG69: 0.9% saline with KCl) and metoclopramide max 5 days (both since fixed, same version);
   GTG69 guide text is the 2016 edition. Version 1.37.0.
