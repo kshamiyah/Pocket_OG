@@ -12,6 +12,9 @@ import { PEARLS } from "./pearls";
 import { READER_AVAILABLE } from "./readerAvailable";
 import { SEARCH_INDEX } from "../search/engine";
 import * as GL861_CHARTS from "./GL861_FLOWCHART";
+import * as CG565_CHARTS from "./CG565_FLOWCHART";
+import * as CG621_CHARTS from "./CG621_FLOWCHART";
+import * as CG623_CHARTS from "./CG623_FLOWCHART";
 
 test("the shelf is not empty", () => {
   expect(SHELVED_GUIDES.size + SHELVED_FLOWCHARTS.size + SHELVED_DIVERGENCES.size).toBeGreaterThan(0);
@@ -22,7 +25,7 @@ test("shelved content is still stored, so it can be put back", () => {
     expect(GUIDELINES[code], `${code} registry entry`).toBeTruthy();
     expect(GL[`${code}_SECTIONS`]?.length, `${code} guide text`).toBeGreaterThan(0);
   }
-  const storedCharts = Object.values(GL861_CHARTS).map(c => c.id);
+  const storedCharts = [GL861_CHARTS, CG565_CHARTS, CG621_CHARTS, CG623_CHARTS].flatMap(m => Object.values(m)).map(c => c?.id);
   for (const id of SHELVED_FLOWCHARTS) expect(storedCharts, `${id} chart file`).toContain(id);
   for (const id of SHELVED_DIVERGENCES) expect(DIVERGENCES[id], `${id} divergence`).toBeTruthy();
 });
@@ -56,4 +59,23 @@ test("shelved content cannot be reached from anywhere in the app", () => {
 
   expect(linksChecked).toBeGreaterThan(100);
   expect(leaks).toEqual([]);
+});
+
+test("national content never refers readers to a shelved local guide", () => {
+  const isLocal = gl => /^(GL|CG)\d/.test(gl ?? "");
+  const mentions = [];
+  let scanned = 0;
+  const scan = (where, v) => {
+    if (typeof v === "string") { scanned++; for (const code of SHELVED_GUIDES) if (new RegExp(`\\b${code}\\b`).test(v)) mentions.push(`${where}: "${code}" in "${v.slice(0, 80)}"`); }
+    else if (Array.isArray(v)) v.forEach(x => scan(where, x));
+    else if (v && typeof v === "object") Object.values(v).forEach(x => scan(where, x));
+  };
+  for (const [name, sections] of Object.entries(GL)) {
+    if (!name.endsWith("_SECTIONS") || !Array.isArray(sections)) continue;
+    for (const s of sections) if (!isLocal(s.gl) && !SHELVED_GUIDES.has(s.gl)) scan(`${name}.${s.id}`, s.content);
+  }
+  for (const [id, fc] of Object.entries(FLOWCHARTS)) if (!/^(GL|CG)\d/.test(id)) scan(`flowchart ${id}`, fc.nodes);
+  for (const p of PEARLS) scan(`pearl ${p.id}`, [p.pearl, p.detail]);
+  expect(scanned).toBeGreaterThan(1000);
+  expect(mentions).toEqual([]);
 });

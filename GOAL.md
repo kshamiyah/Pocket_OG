@@ -141,3 +141,94 @@ review. Nothing is wired until it is approved.
   - Local guides are shelved topic by topic, as each national replacement is
     finished, never all at once.
   - Pull request opened to `main`.
+
+---
+
+# Next goal (proposed, not started): every local guide shelved
+
+**Direction (Dr Shamiyah, 6 Oct 2026):** "Everything local needs to be shelved.
+Antibiotics are governed by local guidelines, not national." The end state is
+zero local guides visible in the app. Where no national guidance exists
+(antibiotics), the app points users to their own trust's policy instead.
+Shelving stays topic by topic: a local guide is shelved once its national
+replacement is finished, or, for antibiotics, once the pointer is in place.
+
+Progress at 6 Oct 2026: 11 local guides; 1 shelved (GL861); 4 more have a
+finished national replacement (NG126, NG133).
+
+| # | Topic | Local | National | Blockers / sweep needed |
+|---|---|---|---|---|
+| 1 | Early pregnancy **(DONE: shelved and approved 6 Oct 2026)** | CG565, CG621, CG623 | NG126 (done) | Anti-D divergence cards carry a CG565 local block; PUL and ectopic calculators tagged CG623; methotrexate consent figures quoted "verbatim from CG623" |
+| 2 | Hypertension | GL952 | NG133 (done) | References in quickref, TOG, trials, topics, pearls |
+| 3 | Antibiotics **(DONE: shelved and approved 7 Oct 2026; BNF cross-check pending, see below)** | GL787 | none, by design | Pointer to trust antimicrobial policy. Rx antibiotic cards: shelve all local data, keep the drug and base its dosing on the BNF only (decision 6 Oct 2026). Blocked: bnf.nice.org.uk is denied by the environment's network policy |
+| 4 | Cholestasis | GL880 | GTG43 (PDF in repo) | Build the guide; GL880 already matches GTG43 |
+| 5 | VTE | GL891 | GTG37a, GTG37b (PDFs in repo) | Build the guide |
+| 6 | Diabetes | GL983 | NG3 (PDF in repo) | DKA source still needed |
+| 7 | PPROM | GL895 | GTG73 + pre-24-week source | Both sources needed; GL895 chart also carries GL861-derived term arm |
+| 8 | Iron deficiency | GL783 | BSH guideline | Source needed |
+
+## Step 1 audit: early pregnancy (6 Oct 2026)
+
+Shelving CG565, CG621, CG623 is not a one-line change. Findings, checked against
+the NG126 and GTG21 PDFs:
+
+- **Calculators (PUL, ECTOPIC_DECISION, EXPECTANT_SURVEILLANCE,
+  MTX_SURVEILLANCE):** already sourced to NG126 and GTG21. Only the links that
+  open them are tagged `gl: "CG623"`. Fix: retag those links to NG126. No
+  clinical change.
+- **Methotrexate Rx card (`rx/cytotoxics.js`):** 50 mg/m2 IM, day 4 and 7 hCG,
+  repeat if fall under 15%, weekly to below 15 IU/L are all in GTG21 (section on
+  medical management, Appendix II). Fix: re-cite to GTG21; remove CG623-only
+  operational notes (trust cytotoxic policy, 1-hour rest).
+- **Ectopic consent page (`consent.js`, "verbatim from CG623"):** GTG21 supports
+  success 65 to 95% (app says 65 to 94) and second dose 3 to 27% (app says 14
+  in 100). Not found in GTG21: pain days 3 to 7 "up to 75 in 100", hCG rise
+  "up to 86 in 100", surgery after MTX "10 in 100", rupture "7 in 100",
+  laparoscopy complications "2 in 1,000", further treatment after salpingotomy
+  "up to 1 in 5". These are local or unsourced: replace with national figures
+  where one exists, otherwise state the risk without a number. Needs review.
+- **Anti-D divergence cards:** carry a CG565/CG621 local block. Fix: hide local
+  blocks belonging to shelved guides; the national positions stay.
+- **Charts:** CG565_TRIAGE, CG621_OUTPATIENT, CG621_INPATIENT, CG623_MTX shelved;
+  links to them repointed to the NG126 charts.
+- Then add CG565, CG621, CG623 to the shelf, extend the leak check.
+- 6 Oct 2026: step 1 built. CG565, CG621, CG623 and their four charts on the
+  shelf; every link repointed to NG126; ectopic consent page, methotrexate card
+  and four pearls re-sourced to NG126, GTG21, GTG17, RCOG CA2 and the RCOG
+  patient leaflet (now in public/consent-sources). Found and fixed on the way:
+  the Counsel tab crashed on open (missing import, live since 20 Jul 2026), and
+  consent risks without a frequency band were never rendered. Leak check: 18
+  surfaces clean. 23 tests pass. Version 1.29.0. Awaiting review.
+- 6 Oct 2026: step 1 approved. Pull request opened.
+
+## Step 2 research: antibiotics (6 Oct 2026)
+
+BNF is unreachable from this environment ("BNF is only available in the UK";
+geo-restricted, not a network setting). Agreed alternative: doses from national
+NICE and BASHH guidelines, which are BNF-aligned. Sources saved in
+apps/pocket-og/public/rx-sources/.
+
+| Card | National source | Finding |
+|---|---|---|
+| Nitrofurantoin | NICE NG109 table 2 | 100 mg MR twice daily (or 50 mg four times daily) for 7 days; avoid at term. No national prophylaxis dose |
+| Amoxicillin | NICE NG109 table 2 | 500 mg three times daily for 7 days, only if culture shows susceptibility |
+| Cefalexin | NICE NG109 table 2 | 500 mg twice daily for 7 days. No national prophylaxis dose |
+| Erythromycin | NICE NG25 1.4.1 | 250 mg four times daily, maximum 10 days or until established labour |
+| Metronidazole (oral) | BASHH BV 2012 | 400 mg twice daily 5 to 7 days, or 2 g single dose |
+| Clindamycin (oral) | BASHH BV 2012 | Alternative: 300 mg twice daily for 7 days |
+| Benzylpenicillin | NICE NG195 1.6.2 | National first choice for intrapartum antibiotics; NG195 gives no dose. GTG36 (cited by the card) unreachable (Wiley) |
+| Clindamycin IV for GBS with penicillin allergy | NICE NG195 table 1 | CONTRADICTED: NG195 names a cephalosporin (e.g. cefotaxime) or, if severe, vancomycin |
+| Gentamicin | NICE NG195 1.6.2, 1.6.3 | Named for chorioamnionitis with benzylpenicillin and metronidazole; once-daily dosing; no dose |
+| Metronidazole IV and PR | NICE NG195 table 1 | Named for chorioamnionitis; no dose. PR surgical prophylaxis: no national source |
+| Co-amoxiclav | NICE NG192 1.4.45; NG25 1.4.3 | CONTRADICTED: do not use before skin incision at caesarean; do not use for PPROM. Card cited NG192 for the opposite |
+- 6 Oct 2026: step 2 built. GL787 on the shelf; Rx antibiotic cards rebuilt from
+  NICE NG109, NG25, NG195, NG192 and BASHH (20 doses and statements matched word
+  for word); doses NICE does not give say "refer to local guidelines"; old cards
+  stored in rx/antibiotics.local-shelved.js; co-amoxiclav and IV clindamycin for
+  GBS removed as contradicted by NICE. National text that said "see GL787" now
+  points to local antimicrobial policy. New permanent test: national content
+  never names a shelved guide (it caught a CG565 mention left in a pearl).
+  24 tests pass. Version 1.30.0. Awaiting review.
+- 7 Oct 2026: step 2 approved; PR #45 merged (1.30.0). BNF follow-up handed to a
+  local session (the BNF is UK-only): add BNF doses for benzylpenicillin,
+  gentamicin and IV metronidazole in labour, and cross-check the other six cards.

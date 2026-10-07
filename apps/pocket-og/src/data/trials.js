@@ -547,7 +547,7 @@ export const TRIAL_SECTIONS = [
       n: "4,153 women",
       design: "Multicentre double-blind placebo-controlled RCT",
     },
-    flowchartId: "CG565_TRIAGE",
+    flowchartId: "NG126_MISCARRIAGE",
     relatedGl: ["CG565", "CG621"],
     tags: [
       "prism", "progesterone", "threatened miscarriage", "early pregnancy bleeding", "vaginal progesterone",

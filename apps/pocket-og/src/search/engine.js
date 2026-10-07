@@ -75,7 +75,7 @@ function divergenceText(id) {
   return [
     d.question, d.scope, d.agreed, d.why,
     ...(d.positions ?? []).flatMap(p => [p.body, p.position, p.citation]),
-    ...(d.local ?? []).flatMap(l => [l.body, l.position]),
+    ...(d.local ?? []).filter(l => !isShelvedGuide(l.gl)).flatMap(l => [l.body, l.position]),
   ].filter(Boolean);
 }
 

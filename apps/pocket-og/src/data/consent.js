@@ -2671,8 +2671,12 @@ export const GBS_FAQ = [
 ];
 
 // ─── ECTOPIC PREGNANCY: TREATMENT CHOICE ─────────────────────────────────────
-// Sources: local guideline CG623 (Ectopic Pregnancy: Medical Management, 2025),
-// NICE NG126, RCOG GTG21. Methotrexate figures verbatim from CG623.
+// Sources: national only. NICE NG126; RCOG GTG21 (2016); RCOG Consent Advice
+// No. 2 (diagnostic laparoscopy, 2017); RCOG patient information "Ectopic
+// pregnancy" (published November 2017, links updated 2024), the RCOG's own
+// patient-facing figures. Local CG623 figures were removed on 6 Oct 2026 when
+// CG623 was shelved; where no national body gives a number, the risk is stated
+// in the national source's words without one.
 
 export const ECTOPIC_CONTEXT_OPTIONS = [
   { id: "methotrexate", label: "Methotrexate", description: "Injection, avoids surgery",  color: "text-orange-600",  dot: "bg-orange-500" },
@@ -2695,51 +2699,43 @@ export const ECTOPIC_RISK_SECTIONS = {
       risks: [
         {
           id: "ect_mtx_pain",
-          name: "Abdominal pain on days 3–7",
-          freq: "VERY_COMMON",
-          rate: "Up to 75 in 100",
-          source: "CG623",
-          plain: "Worsening abdominal pain on days 3–7 is common and thought to be due to tubal miscarriage; it usually lasts 4–12 hours. Attend the emergency department urgently if pain is severe or comes with dizziness or shoulder-tip pain.",
+          name: "Pain in the first few days",
+          freq: null,
+          rate: null,
+          source: "RCOG patient information",
+          plain: "Many women have some pain in the first few days after methotrexate. It usually settles with paracetamol or similar pain relief. Attend the emergency department urgently if pain is severe or comes with dizziness or shoulder-tip pain.",
         },
         {
           id: "ect_mtx_hcg_rise",
-          name: "Hormone level rises at first",
-          freq: "VERY_COMMON",
-          rate: "Up to 86 in 100",
-          source: "CG623",
-          plain: "The pregnancy hormone (bhCG) often rises between days 1 and 4 before falling. This is expected and does not mean the treatment has failed.",
-        },
-        {
-          id: "ect_mtx_bleeding",
-          name: "Vaginal bleeding",
-          freq: "VERY_COMMON",
+          name: "Hormone level may rise at first",
+          freq: null,
           rate: null,
-          source: "CG623",
-          plain: "Bleeding ranging from dark spotting to a heavier red loss can last from days to weeks. Contact the early pregnancy unit if it is heavy or concerning.",
+          source: "RCOG GTG21",
+          plain: "The pregnancy hormone (bhCG) can rise between days 1 and 4. Whether treatment is working is judged on the fall between the day 4 and day 7 blood tests.",
         },
         {
           id: "ect_mtx_second_dose",
           name: "Second dose of methotrexate needed",
-          freq: "COMMON",
-          rate: "14 in 100",
-          source: "CG623",
-          plain: "About 14 in 100 women need more than one dose, decided from the day 4 and day 7 blood tests.",
+          freq: "VERY_COMMON",
+          rate: "15 in 100",
+          source: "RCOG patient information",
+          plain: "Most women need only one injection, but about 15 in 100 need a second, decided from the day 4 and day 7 blood tests.",
         },
         {
           id: "ect_mtx_surgery",
           name: "Surgery needed after all",
           freq: "COMMON",
-          rate: "10 in 100",
-          source: "CG623",
-          plain: "About 10 in 100 women go on to need surgery, either because the hormone level does not fall as expected or because the tube ruptures.",
+          rate: "7 in 100",
+          source: "RCOG patient information",
+          plain: "About 7 in 100 women need surgery even after medical treatment.",
         },
         {
           id: "ect_mtx_rupture",
           name: "Tubal rupture during follow-up",
-          freq: "COMMON",
-          rate: "7 in 100",
-          source: "CG623",
-          plain: "While any pregnancy hormone remains, the tube can still rupture; the risk is about 7 in 100. Severe pain, dizziness, fainting or shoulder-tip pain need emergency review, day or night.",
+          freq: null,
+          rate: null,
+          source: "NICE NG126",
+          plain: "While any pregnancy hormone remains, the tube can still rupture. NICE found no difference in this risk between methotrexate and expectant management. Severe pain, dizziness, fainting or shoulder-tip pain need emergency review, day or night.",
         },
       ],
     },
@@ -2806,22 +2802,22 @@ export const ECTOPIC_BENEFITS = {
     {
       id: "ect_mtx_success",
       name: "Usually avoids an operation",
-      rate: "65–94 in 100",
+      rate: "65–95 in 100",
       detail: "success, single dose",
-      source: "CG623",
-      plain: "A single dose resolves the ectopic in 65–94 in 100 cases. About 14 in 100 women need a second dose, and about 10 in 100 need surgery.",
+      source: "RCOG GTG21",
+      plain: "Single-dose methotrexate succeeds in 65 to 95 in 100 cases; success varies with the starting hormone level. About 15 in 100 women need a second dose, and about 7 in 100 need surgery.",
     },
     {
       id: "ect_mtx_no_ga",
       name: "No surgery or general anaesthetic",
-      source: "CG623",
-      plain: "Treatment is a single injection into a muscle, with observation for up to an hour afterwards, avoiding an operation and anaesthetic.",
+      source: "RCOG GTG21",
+      plain: "Treatment is a single injection into a muscle, avoiding an operation and anaesthetic.",
     },
     {
       id: "ect_mtx_fertility",
       name: "Future fertility is preserved",
-      source: "CG623",
-      plain: "The tube is not removed. Tubal patency afterwards is about 80 in 100, and there is no difference in later fertility rates between medical and surgical treatment.",
+      source: "RCOG GTG21",
+      plain: "The tube is not removed. National guidance finds no difference in later fertility, the risk of another ectopic pregnancy, or tubal patency between the different treatments.",
     },
   ],
   surgery: [
@@ -2840,8 +2836,8 @@ export const ECTOPIC_BENEFITS = {
     {
       id: "ect_surg_fertility",
       name: "Fertility is usually unaffected",
-      source: "CG623",
-      plain: "Even when a tube is removed, most women conceive naturally afterwards, and there is no difference in later fertility rates between surgical and medical treatment. If the other tube is damaged, opening and preserving the tube (salpingotomy) can be considered.",
+      source: "RCOG GTG21",
+      plain: "National guidance finds no difference in later fertility between surgical and medical treatment. If the other tube is damaged, opening and preserving the tube (salpingotomy) can be considered.",
     },
   ],
   expectant: [
@@ -2864,11 +2860,11 @@ export const ECTOPIC_PAGES = {
   methotrexate: {
     what: {
       heading: "Methotrexate for Ectopic Pregnancy",
-      body: "Methotrexate is a medicine that stops the pregnancy tissue growing, allowing the body to absorb it.\n\nWhat happens\n\n• A single injection into a muscle, with the dose calculated from your height and weight.\n• You rest for up to an hour afterwards and are checked before going home.\n• Blood tests on day 4 and day 7 check the pregnancy hormone (bhCG) is falling; if it falls well, weekly tests continue until it is back to normal. The average follow-up is about 35 days.\n• A second dose is needed in about 14 in 100 women.\n\nDuring follow-up\n\n• Avoid alcohol and vitamins containing folic acid, as they interfere with the treatment.\n• Avoid sexual intercourse until the ectopic has resolved, and avoid strong sunlight.\n• Avoid pregnancy for 3 months after the injection because of a possible effect on a new pregnancy; use barrier contraception.",
+      body: "Methotrexate is a medicine that stops the pregnancy tissue growing, allowing the body to absorb it.\n\nWhat happens\n\n• A single injection into a muscle, with the dose calculated from your height and weight.\n• Blood tests on day 4 and day 7 check the pregnancy hormone (bhCG) is falling; if it falls well, weekly tests continue until it is back to normal.\n• A second dose is needed in about 15 in 100 women.\n\nDuring follow-up\n\n• Avoid alcohol and vitamins containing folic acid (folate) during treatment.\n• Avoid pregnancy for at least 3 months after the injection.\n\n(RCOG GTG21 · RCOG patient information)",
     },
     why: {
       heading: "Why is this an option for me?",
-      body: "Methotrexate is offered when the ectopic pregnancy is suitable for medical treatment:\n\n• No significant pain and no signs of rupture\n• The mass is smaller than 35 mm with no heartbeat seen\n• The pregnancy hormone is below 5,000 IU/L (below 1,500, watching and waiting may also be possible)\n• Normal blood tests, and you can attend the follow-up appointments\n\nIf these are not met, for example there is significant pain, a heartbeat, or a higher hormone level, surgery is the recommended option instead. (CG623 · NICE NG126)",
+      body: "Methotrexate is offered when the ectopic pregnancy is suitable for medical treatment:\n\n• No significant pain and no signs of rupture\n• The mass is smaller than 35 mm with no heartbeat seen\n• The pregnancy hormone is below 5,000 IU/L (below 1,500, watching and waiting may also be possible)\n• Normal blood tests, and you can attend the follow-up appointments\n\nIf these are not met, for example there is significant pain, a heartbeat, or a higher hormone level, surgery is the recommended option instead. (NICE NG126)",
     },
     alternatives: {
       heading: "Alternatives and your right to decline",
@@ -2882,7 +2878,7 @@ export const ECTOPIC_PAGES = {
     },
     why: {
       heading: "Why is this being recommended?",
-      body: "Surgery is the recommended option when:\n\n• There is significant pain or evidence of bleeding inside the abdomen\n• The mass is 35 mm or larger, or a heartbeat is seen in the ectopic\n• The pregnancy hormone is above 5,000 IU/L\n• Medical treatment has failed, or follow-up attendance would be difficult\n\nIt may also simply be your preference after hearing the options; between 1,500 and 5,000 IU/L, national guidance offers a choice between methotrexate and surgery. (CG623 · NICE NG126)",
+      body: "Surgery is the recommended option when:\n\n• There is significant pain or evidence of bleeding inside the abdomen\n• The mass is 35 mm or larger, or a heartbeat is seen in the ectopic\n• The pregnancy hormone is above 5,000 IU/L\n• Medical treatment has failed, or follow-up attendance would be difficult\n\nIt may also simply be your preference after hearing the options; between 1,500 and 5,000 IU/L, national guidance offers a choice between methotrexate and surgery. (NICE NG126)",
     },
     alternatives: {
       heading: "Alternatives and your right to decline",
@@ -2896,7 +2892,7 @@ export const ECTOPIC_PAGES = {
     },
     why: {
       heading: "Why is this an option for me?",
-      body: "Watching and waiting is considered when the ectopic appears to be resolving on its own:\n\n• You are well, with no significant pain\n• The ectopic is small and unruptured\n• The pregnancy hormone is low (below about 1,500 IU/L) and falling on repeat testing\n\nIn this situation many ectopics resolve without treatment, and monitoring simply confirms that is happening. (CG623 · NICE NG126)",
+      body: "Watching and waiting is considered when the ectopic appears to be resolving on its own:\n\n• You are well, with no significant pain\n• The ectopic is small and unruptured\n• The pregnancy hormone is low (below about 1,500 IU/L) and falling on repeat testing\n\nIn this situation many ectopics resolve without treatment, and monitoring simply confirms that is happening. (NICE NG126)",
     },
     alternatives: {
       heading: "Alternatives and your right to decline",
@@ -2912,15 +2908,15 @@ export const ECTOPIC_FAQ = [
   },
   {
     q: "Will this affect my chances of having a baby?",
-    a: "For most women, no. After methotrexate, the tube remains open in about 80 in 100 cases, and fertility rates are the same after medical and surgical treatment. Even after losing one tube, most women conceive naturally. (CG623)",
+    a: "National guidance finds no difference in later fertility, or in whether the tube stays open, between the different treatments. With expectant management or methotrexate, future fertility is likely to be the same either way. (RCOG GTG21 · NICE NG126)",
   },
   {
     q: "What are the chances it happens again?",
-    a: "The risk of another ectopic pregnancy is about 10–20 in 100. In your next pregnancy, contact the early pregnancy unit for an early scan to confirm the pregnancy is in the womb. (CG623)",
+    a: "The chance of another ectopic pregnancy is around 7–10 in 100, compared with about 1 in 90 in the general UK population. In your next pregnancy, contact the early pregnancy unit for an early scan to confirm the pregnancy is in the womb. (RCOG patient information)",
   },
   {
     q: "When can we try again?",
-    a: "After methotrexate, avoid pregnancy for 3 months because of a possible effect on a new pregnancy. After surgery or expectant management, your team will advise, often once you feel physically and emotionally ready and any follow-up is complete.",
+    a: "After methotrexate, wait at least 3 months before trying to conceive (RCOG GTG21). After surgery or expectant management, your team will advise, often once you feel physically and emotionally ready and any follow-up is complete.",
   },
   {
     q: "Which symptoms are an emergency?",
@@ -3248,9 +3244,14 @@ export const CONSENT_PROCEDURES = [
     id: "ECTOPIC",
     title: "Ectopic Pregnancy",
     subtypes: "Methotrexate · Surgery · Expectant",
-    source: "CG623 · NICE NG126",
+    source: "NICE NG126 · RCOG GTG21",
     color: { accent: "bg-orange-500", text: "text-orange-700" },
-    pdfs: [],
+    pdfs: [
+      { label: "NICE NG126", url: "/guidelines/ectopic-pregnancy-and-miscarriage-diagnosis-and-initial-management-pdf-66141662244037.pdf" },
+      { label: "RCOG GTG21", url: "/guidelines/BJOG - 2016 -  - Diagnosis and Management of Ectopic Pregnancy.pdf" },
+      { label: "RCOG CA2", file: "CA2.pdf" },
+      { label: "RCOG patient information", file: "RCOG-PI-ectopic-pregnancy.pdf" },
+    ],
   },
   {
     id: "LLETZ",

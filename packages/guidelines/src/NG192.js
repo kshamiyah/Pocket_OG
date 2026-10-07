@@ -97,7 +97,7 @@ export const NG192_SECTIONS = [
     ],
     content: [
       { type: "list", items: [
-        "Prophylactic antibiotics before skin incision — see GL787 for choice and timing; giving antibiotics before the incision (rather than after cord clamping) reduces maternal infection without evidence of fetal harm.",
+        "Prophylactic antibiotics before skin incision, choosing antibiotics effective against endometritis, urinary tract and wound infections, and not co-amoxiclav (1.4.43, 1.4.45); the agent follows local antimicrobial policy; giving antibiotics before the incision (rather than after cord clamping) reduces maternal infection without evidence of fetal harm.",
         "VTE risk assessment and thromboprophylaxis — see GL891; every caesarean birth is itself a VTE risk factor to score.",
         "Delay cord clamping for at least 60 seconds unless the baby needs immediate resuscitation — the same principle as vaginal birth applies at caesarean.",
         "Offer and facilitate early skin-to-skin contact between the woman and her baby as soon as it's practically possible in theatre.",

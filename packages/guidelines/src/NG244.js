@@ -59,7 +59,7 @@ export const NG244_SECTIONS = [
     content: [
       { type: "alert", value: "Acute asthma exacerbations in labour are uncommon, and well-controlled asthma is not a reason to plan anything other than a normal labour and birth — but a small number of drugs used around delivery need specific avoidance." },
       { type: "list", items: [
-        "Carboprost (a prostaglandin F2α analogue, used for postpartum haemorrhage — see GTG52/GL787) is contraindicated in asthma — it can precipitate severe, life-threatening bronchospasm. Choose an alternative second-line uterotonic.",
+        "Carboprost (a prostaglandin F2α analogue, used for postpartum haemorrhage — see GTG52) is contraindicated in asthma — it can precipitate severe, life-threatening bronchospasm. Choose an alternative second-line uterotonic.",
         "Ergometrine (including as Syntometrine) can also provoke bronchospasm, particularly alongside general anaesthesia — use with caution and prefer oxytocin-based regimens where asthma is a known issue.",
         "NSAIDs should be avoided in anyone with aspirin/NSAID-sensitive asthma — check sensitivity history before reaching for a NSAID for analgesia.",
         "Continue the woman's usual inhalers through labour — being nil by mouth or in established labour is not a reason to withhold them.",
