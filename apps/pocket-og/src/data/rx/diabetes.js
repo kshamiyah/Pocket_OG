@@ -1,3 +1,11 @@
+// Diabetes in pregnancy, checked against NICE NG3 (diabetes in pregnancy)
+// on 7 Oct 2026. NICE gives no insulin infusion regimen, so rates refer to
+// local guidelines. The previous cards, built from the local guideline RBH
+// GL983, are shelved in diabetes.local-shelved.js.
+
+const NG3 = { label: "NICE NG3", href: "https://www.nice.org.uk/guidance/ng3" };
+const NO_NATIONAL_DOSE = "Not given in national guidance: refer to local guidelines";
+
 export const DIABETES_DRUGS = [
   {
     id: "insulin_vrii",
@@ -7,51 +15,49 @@ export const DIABETES_DRUGS = [
     routes: [
       {
         type: "iv",
-        shortLabel: "IV — Algorithm 1 (most women)",
-        label: "IV infusion — Algorithm 1 (most women)",
-        dose: "0.2–4.0 units/hr, titrated by hourly CBG",
-        frequency: "target CBG 4.0–7.8 mmol/L; check hourly",
-        notes: "GL983: soluble insulin (e.g. Novorapid) 50 units in 50 mL 0.9% NaCl via infusion pump, alongside substrate solution (0.45% saline + 5% glucose + 0.15% KCl, or 5% glucose alone) at 50 mL/hr. Algorithms 2 (>80 units/day or uncontrolled on Alg 1) and 3 (specialist advice only) run higher rates per CBG band — see the full table in the Diabetes guide.",
+        shortLabel: "IV: labour and birth",
+        label: "IV dextrose and insulin infusion: labour and birth",
+        dose: NO_NATIONAL_DOSE,
+        frequency: "check capillary glucose hourly; keep between 4 and 7 mmol/L",
+        notes: "Consider from the onset of established labour in type 1 diabetes (NICE NG3 1.4.11). Use in any diabetes if capillary glucose is not kept between 4 and 7 mmol/L (1.4.12). Monitor capillary glucose every hour during labour and birth (1.4.10).",
       },
     ],
     contraindications: [],
     cautions: [
-      "STOP infusion 20 minutes if CBG <4.0 mmol/L, treat the hypo, recheck CBG in 10 minutes",
-      "Steroids: increase insulin 10–20% from administration and for the next 48 hours; continue VRII for 24 hours after the 2nd steroid dose",
-      "Add 10% dextrose alongside normal saline when BG ≤14 mmol/L (125 mL/hr, or 250 mL/hr if BG <7 mmol/L)",
-      "Intrapartum: continue long-acting insulin only alongside VRII; avoid short-acting if not eating normally",
-      "DKA is a real risk in Type 1, metformin-controlled and diet-controlled diabetics receiving steroids",
+      "Steroids for fetal lung maturation in insulin-treated diabetes: give additional insulin according to an agreed protocol and monitor closely (NICE NG3 1.3.42)",
+      "Pregnant women taking insulin should keep capillary glucose above 4 mmol/L (NICE NG3 1.3.6)",
+      "After birth, women with insulin-treated pre-existing diabetes should reduce their insulin immediately and monitor glucose to find the right dose (NICE NG3 1.6.1); hypoglycaemia risk is higher postnatally, especially when breastfeeding (1.6.2)",
     ],
-    pregnancySafety: "Insulin is the first-line pharmacological treatment for diabetes in pregnancy and does not cross the placenta in clinically significant amounts.",
+    pregnancySafety: "NICE NG3: rapid-acting insulin analogues (aspart and lispro) have advantages over soluble human insulin in pregnancy (1.3.12); isophane (NPH) insulin is the first choice for long-acting insulin (1.1.23).",
     sources: [
       { label: "BNF", href: "https://bnf.nice.org.uk/drugs/insulin-soluble-human/" },
-      { label: "RBH GL983", href: "/guidelines/GL983.pdf" },
+      NG3,
     ],
   },
   {
     id: "metformin",
     name: "Metformin",
-    class: "Biguanide — oral antidiabetic",
+    class: "Biguanide: oral antidiabetic",
     color: "pink",
     routes: [
       {
         type: "oral",
-        shortLabel: "Oral — diabetes in pregnancy",
+        shortLabel: "Oral: diabetes in pregnancy",
         label: "Oral",
         dose: "500 mg once or twice daily, increased in steps of 500 mg at intervals of ≥1 week",
         maxDose: "2 g/day (standard licensed maximum)",
         frequency: "with or after meals",
-        notes: "GL983: continue metformin until active labour or after ARM; discontinue if not eating in labour. May be started alongside insulin at GDM diagnosis if fasting BG ≥7.0 mmol/L, or considered if fasting BG 6.0–6.9 mmol/L with macrosomia or hydramnios.",
+        notes: "Gestational diabetes: offer metformin if glucose targets are not met with diet and exercise within 1 to 2 weeks (NICE NG3 1.2.19); add insulin if targets are still not met (1.2.21); offer insulin instead if metformin is contraindicated or unacceptable (1.2.20). If fasting glucose is 7.0 mmol/L or more at diagnosis, start insulin straight away, with or without metformin (1.2.22); consider the same at 6.0 to 6.9 mmol/L with complications such as macrosomia or hydramnios (1.2.23).",
       },
     ],
     cautions: [
-      "Discontinue if the woman is not eating normally in labour, or if DKA/acute illness develops",
+      "Discontinue if DKA or acute illness develops",
       "Renal function should be checked periodically per standard practice",
     ],
-    pregnancySafety: "Widely used in gestational and type 2 diabetes in pregnancy alongside insulin; crosses the placenta but is not teratogenic at standard doses.",
+    pregnancySafety: "NICE NG3: may be used as an adjunct or alternative to insulin before and during pregnancy when the likely benefits outweigh the potential for harm (1.1.21). After birth, women with type 2 diabetes who are breastfeeding can resume or continue metformin (1.6.4).",
     sources: [
       { label: "BNF", href: "https://bnf.nice.org.uk/drugs/metformin-hydrochloride/" },
-      { label: "RBH GL983", href: "/guidelines/GL983.pdf" },
+      NG3,
     ],
   },
 ];

@@ -4,6 +4,15 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.38.0",
+    date: "07/10/2026",
+    title: "Diabetes drug cards from NICE NG3",
+    changes: [
+      { tag: "fixed", text: "The insulin infusion card now follows NICE NG3: consider IV dextrose and insulin from established labour in type 1 diabetes, use it in any diabetes if glucose is not kept between 4 and 7 mmol/L, and check glucose hourly. The previous target of 4.0 to 7.8 mmol/L and the infusion algorithm came from a local guideline; that card is retired and stored, and infusion rates now refer to local guidelines." },
+      { tag: "fixed", text: "The metformin card now follows NICE NG3 for gestational diabetes (when to start metformin, when to add or switch to insulin) and for breastfeeding after birth. A local rule about stopping metformin in labour has been removed." },
+    ],
+  },
+  {
     version: "1.37.0",
     date: "07/10/2026",
     title: "Antiemetics, checked against RCOG Green-top Guideline 69",
