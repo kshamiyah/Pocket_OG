@@ -1230,11 +1230,12 @@ const ALL_PEARLS = [
     gl: "GTG69",
   },
   {
-    id: "gtg69-no-doxylamine-uk",
+    id: "gtg69-xonvea-licensed-uk",
     topic: "Hyperemesis gravidarum",
-    pearl: "Doxylamine isn't licensed in the UK for hyperemesis.",
-    detail: "Don't prescribe it, whatever US-based advice suggests — and avoid prolonged metoclopramide monotherapy (more than 5 days) without specialist review.",
+    pearl: "Doxylamine/pyridoxine (Xonvea®) is the only licensed treatment for NVP in the UK.",
+    detail: "RCOG GTG69 (2024) lists it first line, alongside antihistamines such as cyclizine and the phenothiazines. Metoclopramide is second line, and GTG69 advises it can be continued beyond 5 days in women it helps.",
     gl: "GTG69",
+    drug: "doxylamine-pyridoxine", drugLabel: "Doxylamine/Pyridoxine",
   },
   {
     id: "ng133-severe-htn-emergency",

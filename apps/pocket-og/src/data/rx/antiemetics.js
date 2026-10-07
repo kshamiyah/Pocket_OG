@@ -1,3 +1,13 @@
+// Antiemetics for nausea and vomiting in pregnancy (NVP) and hyperemesis
+// gravidarum (HG), checked against RCOG Green-top Guideline 69 (2024) on
+// 7 Oct 2026. Doses are from GTG69 Appendix III, "Recommended antiemetic
+// therapies and dosages", which groups drugs as first, second and third line.
+// The previous dexamethasone card is shelved in antiemetics.shelved.js.
+
+const GTG69 = { label: "RCOG GTG69 (2024)", href: "https://obgyn.onlinelibrary.wiley.com/doi/10.1111/1471-0528.17739" };
+const NO_NATIONAL_DOSE = "Not given in national guidance: refer to local guidelines";
+const ASK_REACTIONS = "Ask about previous adverse reactions to antiemetics; stop promptly if one occurs (RCOG GTG69)";
+
 export const ANTIEMETICS = [
   {
     id: "chlorpromazine",
@@ -8,21 +18,11 @@ export const ANTIEMETICS = [
     routes: [
       {
         type: "oral",
-        shortLabel: "Oral — refractory HG",
-        label: "Oral — refractory hyperemesis gravidarum",
+        shortLabel: "Oral / IM / IV",
+        label: "Oral, IM or IV: nausea and vomiting in pregnancy (first line)",
         dose: "10–25 mg",
         frequency: "every 4–6 hours",
-        maxDose: "100 mg/day",
-        notes: "Third-line agent for refractory HG. Very sedating — caution re driving. Use only when other antiemetics have failed.",
-      },
-      {
-        type: "im",
-        shortLabel: "IM — refractory HG",
-        label: "IM — refractory hyperemesis gravidarum",
-        dose: "25 mg",
-        frequency: "every 6–8 hours",
-        maxDose: "75 mg/day IM",
-        notes: "Deep IM injection. Risk of postural hypotension after IM dose — patient should be lying down. Rarely used; escalate to specialist if required.",
+        notes: "First-line antiemetic in RCOG GTG69 Appendix III (phenothiazine).",
       },
     ],
     contraindications: [
@@ -31,14 +31,48 @@ export const ANTIEMETICS = [
       "Phaeochromocytoma",
     ],
     cautions: [
-      "Highly sedating — warn about driving and operating machinery",
-      "Risk of extrapyramidal side effects (acute dystonia, akathisia)",
-      "Postural hypotension — particularly after IM administration",
-      "Rarely used in pregnancy now; seek specialist advice before use",
+      "Drug-induced extrapyramidal symptoms and oculogyric crises can occur with phenothiazines (RCOG GTG69)",
+      "Postural hypotension, particularly after IM administration",
+      ASK_REACTIONS,
     ],
-    pregnancySafety: "Limited data; use only when other antiemetics have failed and hospitalisation is required. Avoid near term (neonatal extrapyramidal effects).",
+    pregnancySafety: "First line for NVP and HG (RCOG GTG69). A Cochrane review reports no increased risk of congenital malformations with first-line antiemetics (GTG69).",
     sources: [
       { label: "BNF", href: "https://bnf.nice.org.uk/drugs/chlorpromazine-hydrochloride/" },
+      GTG69,
+    ],
+  },
+  {
+    id: "corticosteroids_hg",
+    name: "Corticosteroids for hyperemesis",
+    class: "Hydrocortisone, then prednisolone (third line)",
+    color: "amber",
+    iconColor: "#FF9F0A",
+    routes: [
+      {
+        type: "iv",
+        shortLabel: "IV hydrocortisone",
+        label: "IV hydrocortisone: refractory HG (third line)",
+        dose: "100 mg",
+        frequency: "twice daily",
+        notes: "Only once standard therapy, including IV fluids and regular antiemetics, has failed; give in addition to the antiemetics that were helping (RCOG GTG69).",
+      },
+      {
+        type: "oral",
+        shortLabel: "Oral prednisolone",
+        label: "Oral prednisolone: once improving",
+        dose: "40–50 mg",
+        frequency: "once daily, tapered by 5–10 mg per week to the lowest dose that controls symptoms",
+        notes: "Convert from IV hydrocortisone once clinical improvement occurs. In most cases prednisolone is continued until the gestation at which HG would have resolved; in some extreme cases until birth (RCOG GTG69).",
+      },
+    ],
+    contraindications: [],
+    cautions: [
+      "Monitor blood pressure and screen for gestational diabetes (RCOG GTG69)",
+    ],
+    pregnancySafety: "Third line for HG (RCOG GTG69). First-trimester corticosteroid use is not associated with an increase in congenital malformations overall, or in orofacial clefting, cardiac defects or hypospadias, though data are more limited than for other antiemetics (GTG69).",
+    sources: [
+      { label: "BNF", href: "https://bnf.nice.org.uk/drugs/prednisolone/" },
+      GTG69,
     ],
   },
   {
@@ -50,21 +84,11 @@ export const ANTIEMETICS = [
     routes: [
       {
         type: "oral",
-        shortLabel: "Oral",
-        label: "Oral — nausea and vomiting in pregnancy",
+        shortLabel: "Oral / IM / IV",
+        label: "Oral, IM or IV: nausea and vomiting in pregnancy (first line)",
         dose: "50 mg",
-        frequency: "up to 3 times daily",
-        maxDose: "150 mg/day",
-        notes: "First-line antiemetic in UK pregnancy. Can cause drowsiness. Take before activities likely to provoke nausea.",
-      },
-      {
-        type: "iv",
-        shortLabel: "IV / IM",
-        label: "IV / IM — when oral not tolerated",
-        dose: "50 mg",
-        frequency: "up to 3 times daily",
-        maxDose: "150 mg/day",
-        notes: "IV: give slowly over 3–5 min. Can be mixed with morphine for pain + nausea. Compatible with most IV fluids.",
+        frequency: "8-hourly",
+        notes: "First-line antiemetic in RCOG GTG69 Appendix III (H1 antihistamine).",
       },
     ],
     contraindications: [
@@ -72,45 +96,47 @@ export const ANTIEMETICS = [
       "Closed-angle glaucoma",
     ],
     cautions: [
-      "Drowsiness common — warn about driving",
       "Anticholinergic effects: dry mouth, blurred vision, urinary retention",
-      "Generally considered safe in all trimesters; longest track record of antiemetics in UK",
+      ASK_REACTIONS,
     ],
-    pregnancySafety: "First-line antiemetic in UK pregnancy. Extensive safety record across all trimesters.",
+    pregnancySafety: "First line for NVP and HG (RCOG GTG69). A Cochrane review reports no increased risk of congenital malformations with first-line antiemetics (GTG69).",
     sources: [
       { label: "BNF", href: "https://bnf.nice.org.uk/drugs/cyclizine/" },
+      GTG69,
     ],
   },
   {
-    id: "dexamethasone",
-    name: "Dexamethasone",
-    class: "Corticosteroid",
-    color: "amber",
-    iconColor: "#FF9F0A",
+    id: "domperidone",
+    name: "Domperidone",
+    class: "Dopamine antagonist",
+    color: "blue",
+    iconColor: "#0A84FF",
     routes: [
       {
-        type: "iv",
-        shortLabel: "IV — refractory HG",
-        label: "IV — refractory hyperemesis gravidarum",
-        dose: "4 mg",
-        frequency: "every 8 hours for 24–48 hours",
-        maxDose: "12 mg/day (initial phase)",
-        notes: "For refractory HG when other antiemetics have failed and patient is admitted. Follow with oral taper: 4 mg BD → 4 mg OD → 2 mg OD → stop over ~2 weeks. Avoid if possible before 10 weeks.",
+        type: "oral",
+        shortLabel: "Oral",
+        label: "Oral: nausea and vomiting in pregnancy (second line)",
+        dose: "10 mg",
+        frequency: "8-hourly",
+        notes: "Second-line antiemetic in RCOG GTG69 Appendix III.",
+      },
+      {
+        type: "rectal",
+        shortLabel: "PR",
+        label: "Rectal: nausea and vomiting in pregnancy (second line)",
+        dose: "30 mg",
+        frequency: "12-hourly",
+        notes: "Second-line antiemetic in RCOG GTG69 Appendix III.",
       },
     ],
-    contraindications: [
-      "Systemic infection (without appropriate cover)",
-      "Live vaccines within 3 months",
-    ],
+    contraindications: [],
     cautions: [
-      "Avoid before 10 weeks if possible — theoretical cleft palate risk (evidence weak but present)",
-      "Risk of adrenal suppression with prolonged use — taper dose",
-      "Monitor blood glucose — can precipitate gestational diabetes / worsen existing diabetes",
-      "Rebound vomiting on stopping — ensure adequate taper",
+      ASK_REACTIONS,
     ],
-    pregnancySafety: "Use only for refractory HG unresponsive to other antiemetics. Avoid in first trimester if possible. Monitor blood glucose closely.",
+    pregnancySafety: "Second line for NVP and HG (RCOG GTG69 Appendix III).",
     sources: [
-      { label: "BNF", href: "https://bnf.nice.org.uk/drugs/dexamethasone/" },
+      { label: "BNF", href: "https://bnf.nice.org.uk/drugs/domperidone/" },
+      GTG69,
     ],
   },
   {
@@ -123,11 +149,11 @@ export const ANTIEMETICS = [
       {
         type: "oral",
         shortLabel: "Oral",
-        label: "Oral — nausea and vomiting in pregnancy",
-        dose: "2 tablets (10 mg/10 mg each) at bedtime initially",
-        frequency: "titrate up if needed — see notes",
+        label: "Oral: nausea and vomiting in pregnancy (first line)",
+        dose: "20 mg/20 mg (2 tablets of 10 mg/10 mg) at night",
+        frequency: "if required, add 10 mg/10 mg in the morning and 10 mg/10 mg at lunchtime",
         maxDose: "4 tablets/day",
-        notes: "Modified-release tablets — swallow whole, do not crush or chew. Titration: start 2 tablets at bedtime; if symptoms persist, add 1 tablet on waking and/or 1 tablet mid-afternoon, to a maximum of 4 tablets/day (1 morning + 1 afternoon + 2 at bedtime).",
+        notes: "Doses from RCOG GTG69 Appendix III. Modified-release tablets: swallow whole, do not crush or chew.",
       },
     ],
     contraindications: [
@@ -135,14 +161,14 @@ export const ANTIEMETICS = [
       "Concurrent use of MAOIs (prolongs/intensifies antihistamine effects)",
     ],
     cautions: [
-      "Sedating — advise about driving and operating machinery",
       "Anticholinergic effects: dry mouth, blurred vision, urinary retention",
       "Caution in asthma, narrow-angle glaucoma, and bladder-outflow obstruction",
-      "Modified-release tablet — must be swallowed whole, not crushed or chewed",
+      ASK_REACTIONS,
     ],
-    pregnancySafety: "One of the best-established safety records of any antiemetic in pregnancy — decades of use (as Diclectin/Diclegis) with no teratogenic signal. RCOG GTG69 lists it among first-line options for nausea and vomiting of pregnancy; the only product specifically licensed for this indication in the UK.",
+    pregnancySafety: "First line for NVP and HG, and the only licensed treatment of NVP in the UK (RCOG GTG69).",
     sources: [
       { label: "BNF", href: "https://bnf.nice.org.uk/drugs/doxylamine-with-pyridoxine/" },
+      GTG69,
     ],
   },
   {
@@ -154,21 +180,12 @@ export const ANTIEMETICS = [
     routes: [
       {
         type: "oral",
-        shortLabel: "Oral",
-        label: "Oral — nausea and vomiting in pregnancy",
-        dose: "10 mg",
-        frequency: "up to 3 times daily",
-        maxDose: "30 mg/day (or 0.5 mg/kg/day)",
-        notes: "Maximum treatment duration 5 days — risk of tardive dyskinesia with prolonged use, especially in young women. Take 30 min before meals.",
-      },
-      {
-        type: "iv",
-        shortLabel: "IV / IM",
-        label: "IV / IM — when oral not tolerated",
-        dose: "10 mg",
-        frequency: "up to 3 times daily",
-        maxDose: "30 mg/day",
-        notes: "IV: give slowly over at least 3 min. Maximum treatment duration 5 days regardless of route.",
+        shortLabel: "Oral / IV / IM / SC",
+        label: "Oral, IV, IM or SC: nausea and vomiting in pregnancy (second line)",
+        dose: "5–10 mg",
+        frequency: "8-hourly",
+        maxDose: "30 mg in 24 hr or 0.5 mg/kg in 24 hr, whichever is lower (EMA, quoted in RCOG GTG69)",
+        notes: "Second line because of the risk of extrapyramidal effects. Give IV doses by slow bolus over at least 3 min. Can be used alone or with other antiemetics. The EMA advises a maximum of 5 days, but GTG69's authors advise it can be continued beyond 5 days in women who gain symptomatic relief (RCOG GTG69).",
       },
     ],
     contraindications: [
@@ -177,14 +194,14 @@ export const ANTIEMETICS = [
       "GI obstruction or perforation",
     ],
     cautions: [
-      "MAXIMUM 5 DAYS — risk of irreversible tardive dyskinesia with prolonged use",
-      "Risk of acute dystonic reactions (oculogyric crisis) — especially in young women; treat with procyclidine",
-      "Prokinetic effect — avoid in bowel obstruction",
-      "Generally considered second-line after cyclizine in pregnancy",
+      "Extrapyramidal disorders and tardive dyskinesia, particularly in young people (EMA review, quoted in RCOG GTG69)",
+      "IV: slow bolus over at least 3 min to reduce dystonic reactions (RCOG GTG69)",
+      ASK_REACTIONS,
     ],
-    pregnancySafety: "Considered safe in pregnancy; however, limit to 5 days maximum due to extrapyramidal risk. Second-line after cyclizine.",
+    pregnancySafety: "Safe and effective; second line because of extrapyramidal risk (RCOG GTG69).",
     sources: [
       { label: "BNF", href: "https://bnf.nice.org.uk/drugs/metoclopramide-hydrochloride/" },
+      GTG69,
     ],
   },
   {
@@ -197,20 +214,26 @@ export const ANTIEMETICS = [
       {
         type: "oral",
         shortLabel: "Oral",
-        label: "Oral — nausea and vomiting in pregnancy",
-        dose: "4–8 mg",
-        frequency: "2–3 times daily",
-        maxDose: "32 mg/day",
-        notes: "Well tolerated; causes constipation. Second-line in UK pregnancy — check local guideline. Some evidence of small increased risk of cardiac septal defects in first trimester (discuss with patient).",
+        label: "Oral: nausea and vomiting in pregnancy (second line)",
+        dose: "4 mg 8-hourly or 8 mg 12-hourly",
+        frequency: "8- or 12-hourly",
+        notes: "Second line: its use should not be discouraged if first-line antiemetics are ineffective (RCOG GTG69). May need laxatives if constipation develops.",
       },
       {
         type: "iv",
         shortLabel: "IV",
-        label: "IV — when oral not tolerated",
-        dose: "4 mg",
-        frequency: "every 4–6 hours",
-        maxDose: "16 mg/day IV",
-        notes: "IV: dilute and give over at least 15 min. Single IV doses >8 mg associated with QT prolongation — avoid in patients with cardiac risk factors.",
+        label: "IV: when oral not tolerated",
+        dose: "8 mg",
+        frequency: "over 15 min, 12-hourly",
+        notes: "Dose from RCOG GTG69 Appendix III.",
+      },
+      {
+        type: "rectal",
+        shortLabel: "PR",
+        label: "Rectal",
+        dose: "16 mg",
+        frequency: "daily",
+        notes: "Dose from RCOG GTG69 Appendix III.",
       },
     ],
     contraindications: [
@@ -218,14 +241,14 @@ export const ANTIEMETICS = [
       "Concurrent use of other QT-prolonging drugs",
     ],
     cautions: [
-      "Some studies suggest small increased risk of cardiac septal defects in first trimester — discuss with patient",
-      "QT prolongation risk with IV doses >8 mg or in patients with cardiac disease",
-      "Causes constipation — consider laxative if prolonged use",
-      "Second-line in UK; considered first-line in some other countries",
+      "First trimester: a very small increase in the absolute risk of orofacial clefting, about 3 more per 10 000 births (14 versus 11 per 10 000); balance against the risks of poorly managed HG (RCOG GTG69)",
+      "May need laxatives if constipation develops (RCOG GTG69)",
+      ASK_REACTIONS,
     ],
-    pregnancySafety: "Evidence of small increased risk of fetal cardiac defects in first trimester (several observational studies); risk-benefit discussion advised. Generally safe in second and third trimester.",
+    pregnancySafety: "Safe and effective second-line antiemetic (RCOG GTG69). Women can be reassured that the increase in absolute risk of orofacial clefting with first-trimester use is very small.",
     sources: [
       { label: "BNF", href: "https://bnf.nice.org.uk/drugs/ondansetron/" },
+      GTG69,
     ],
   },
   {
@@ -237,21 +260,27 @@ export const ANTIEMETICS = [
     routes: [
       {
         type: "oral",
-        shortLabel: "Oral",
-        label: "Oral — nausea and vomiting in pregnancy",
-        dose: "5–10 mg",
-        frequency: "2–3 times daily",
-        maxDose: "40 mg/day",
-        notes: "Take with food. Also available as 3 mg buccal tablet (Buccastem®) — dissolve between lip and gum. Useful if swallowing tablets difficult.",
+        shortLabel: "Oral / buccal",
+        label: "Oral or buccal: nausea and vomiting in pregnancy (first line)",
+        dose: "5–10 mg oral, or 3 mg buccal",
+        frequency: "6–8-hourly",
+        notes: "First-line antiemetic in RCOG GTG69 Appendix III (phenothiazine).",
       },
       {
         type: "im",
-        shortLabel: "IM",
-        label: "IM — when oral not tolerated",
+        shortLabel: "IM / IV",
+        label: "IM or IV: when oral not tolerated",
         dose: "12.5 mg",
-        frequency: "as needed (max 3 times daily)",
-        maxDose: "37.5 mg/day IM",
-        notes: "Deep IM injection into gluteal region. Onset 10–20 min. Do not give IV.",
+        frequency: "8-hourly",
+        notes: "Dose from RCOG GTG69 Appendix III.",
+      },
+      {
+        type: "rectal",
+        shortLabel: "PR",
+        label: "Rectal",
+        dose: "25 mg",
+        frequency: "daily",
+        notes: "Dose from RCOG GTG69 Appendix III.",
       },
     ],
     contraindications: [
@@ -260,14 +289,14 @@ export const ANTIEMETICS = [
       "Agranulocytosis",
     ],
     cautions: [
-      "Risk of extrapyramidal reactions — dystonia, akathisia; treat dystonia with procyclidine",
-      "Sedation common",
-      "Do not give intravenously",
-      "Avoid in epilepsy — lowers seizure threshold",
+      "Drug-induced extrapyramidal symptoms and oculogyric crises can occur with phenothiazines (RCOG GTG69)",
+      "Avoid in epilepsy: lowers seizure threshold",
+      ASK_REACTIONS,
     ],
-    pregnancySafety: "Considered safe in pregnancy; limited first-trimester data. Avoid near term — neonatal extrapyramidal effects reported.",
+    pregnancySafety: "First line for NVP and HG (RCOG GTG69). A Cochrane review reports no increased risk of congenital malformations with first-line antiemetics (GTG69).",
     sources: [
       { label: "BNF", href: "https://bnf.nice.org.uk/drugs/prochlorperazine/" },
+      GTG69,
     ],
   },
   {
@@ -279,21 +308,11 @@ export const ANTIEMETICS = [
     routes: [
       {
         type: "oral",
-        shortLabel: "Oral",
-        label: "Oral — nausea and vomiting in pregnancy",
-        dose: "25 mg at night",
-        frequency: "may increase to 25 mg twice daily if needed",
-        maxDose: "100 mg/day",
-        notes: "Sedating — particularly useful at night. Phenergan® 25 mg tablets. Drowsiness can be significant; advise about driving.",
-      },
-      {
-        type: "im",
-        shortLabel: "IM",
-        label: "IM — when oral not tolerated",
-        dose: "25 mg",
-        frequency: "as needed (max 4 times daily)",
-        maxDose: "100 mg/day IM",
-        notes: "Deep IM injection only — DO NOT give intravenously (risk of severe tissue necrosis). Onset 20 min.",
+        shortLabel: "Oral / IM / IV",
+        label: "Oral, IM or IV: nausea and vomiting in pregnancy (first line)",
+        dose: "12.5–25 mg",
+        frequency: "every 4–8 hours",
+        notes: "First-line antiemetic in RCOG GTG69 Appendix III (H1 antihistamine).",
       },
     ],
     contraindications: [
@@ -301,14 +320,47 @@ export const ANTIEMETICS = [
       "CNS depression / comatose states",
     ],
     cautions: [
-      "DO NOT give intravenously — risk of severe tissue necrosis at injection site",
-      "Highly sedating — advise about driving; useful at night",
+      "IV use: risk of severe tissue injury at the injection site",
       "Anticholinergic effects: dry mouth, blurred vision, urinary retention",
-      "Compatible with breastfeeding",
+      ASK_REACTIONS,
     ],
-    pregnancySafety: "Considered safe in pregnancy. Sedating effect can help patients sleep during severe nausea. IV route absolutely contraindicated.",
+    pregnancySafety: "First line for NVP and HG (RCOG GTG69). A Cochrane review reports no increased risk of congenital malformations with first-line antiemetics (GTG69).",
     sources: [
       { label: "BNF", href: "https://bnf.nice.org.uk/drugs/promethazine-hydrochloride/" },
+      GTG69,
+    ],
+  },
+  {
+    id: "thiamine",
+    name: "Thiamine (vitamin B1)",
+    class: "Vitamin: Wernicke's encephalopathy prevention",
+    color: "orange",
+    iconColor: "#FF9500",
+    routes: [
+      {
+        type: "oral",
+        shortLabel: "Oral",
+        label: "Oral: women admitted with vomiting",
+        dose: "100 mg",
+        frequency: "three times daily",
+        notes: "For all women admitted with vomiting or severely reduced dietary intake, especially before dextrose or parenteral nutrition (RCOG GTG69).",
+      },
+      {
+        type: "iv",
+        shortLabel: "IV (Pabrinex®)",
+        label: "IV: as part of vitamin B complex (Pabrinex®)",
+        dose: NO_NATIONAL_DOSE,
+        notes: "The IV alternative to oral thiamine, as part of vitamin B complex (RCOG GTG69). Give before dextrose or parenteral nutrition.",
+      },
+    ],
+    contraindications: [],
+    cautions: [
+      "Give before dextrose or parenteral nutrition, to prevent Wernicke's encephalopathy (RCOG GTG69)",
+    ],
+    pregnancySafety: "Recommended for all women admitted with vomiting or severely reduced dietary intake (RCOG GTG69).",
+    sources: [
+      { label: "BNF", href: "https://bnf.nice.org.uk/drugs/thiamine/" },
+      GTG69,
     ],
   },
 ];
