@@ -298,3 +298,11 @@ apps/pocket-og/public/rx-sources/.
   pearl "gtg69-no-doxylamine-uk" contradicts GTG69; PUQE calculator says
   Hartmann's first (GTG69: 0.9% saline with KCl) and metoclopramide max 5 days (both since fixed, same version);
   GTG69 guide text is the 2016 edition. Version 1.37.0.
+- 7 Oct 2026: Rx diabetes checked against NICE NG3. VRII card rebuilt from
+  NG3 1.4.10 to 1.4.12, 1.3.6, 1.3.42, 1.6.1, 1.6.2 (target 4 to 7, was
+  4.0 to 7.8 from GL983; rates refer to local guidelines until JBDS-IP is
+  available). Metformin notes from NG3 1.2.19 to 1.2.23, 1.1.21, 1.6.4; GL983
+  labour rule removed. GL983 versions of both cards stored in
+  rx/diabetes.local-shelved.js. Version 1.38.0. Next: endometriosis, mental
+  health, antivirals (NICE/BASHH reachable); resuscitation (GTG56) and anaemia
+  (BSH 2019) now have PDFs in sources/; contraception waits on FSRH PDFs.
