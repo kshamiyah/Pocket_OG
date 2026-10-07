@@ -252,3 +252,14 @@ apps/pocket-og/public/rx-sources/.
   and atenolol notes rewritten from NG133 1.9.4 to 1.9.7 and the MHRA note
   (enalapril no longer marked as one to avoid in breastfeeding). Version 1.32.0. Next:
   uterotonics.
+- 7 Oct 2026: Rx uterotonics checked against NICE NG235, NG207, NG126 and
+  NG88. Fixed: oxytocin third-stage timing, 5 unit slow IV option, carbetocin
+  at caesarean; carboprost second-line, interval not less than 15 min;
+  misoprostol PPH routes, missed miscarriage 48 hr after mifepristone,
+  incomplete miscarriage 600 micrograms, induction oral 25 micrograms;
+  ergometrine contraindications and antiemetic; tranexamic acid's place in
+  HMB. Unsourced extras removed. Doses with no national source (oxytocin
+  infusions, carboprost 250 micrograms, ergometrine IV, dinoprostone, oral
+  tranexamic acid) unchanged pending BNF / RCOG GTG52 (RCOG site blocked from
+  the cloud today). The GTG52 guide text still says oxytocin "at delivery of
+  anterior shoulder"; NG235 supersedes it. Version 1.33.0. Next: tocolytics.

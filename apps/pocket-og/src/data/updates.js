@@ -4,6 +4,17 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.33.0",
+    date: "07/10/2026",
+    title: "Uterotonics checked against NICE",
+    changes: [
+      { tag: "fixed", text: "Oxytocin for the third stage is now given immediately after the birth of the baby and before the cord is clamped, not at delivery of the anterior shoulder (NICE NG235). The card adds the 5 unit slow intravenous option, and notes that NICE offers carbetocin at caesarean birth." },
+      { tag: "fixed", text: "Carboprost is now second-line for postpartum haemorrhage, repeated no sooner than every 15 minutes up to 8 doses. Misoprostol for postpartum haemorrhage can be given sublingually or rectally. Ergometrine's contraindications and the antiemetic advice follow NICE NG235." },
+      { tag: "fixed", text: "Misoprostol for missed miscarriage is given 48 hours after mifepristone, and the card adds 600 micrograms for incomplete miscarriage (NICE NG126). For induction of labour it now shows NICE's low-dose 25 microgram oral tablets (NICE NG207), replacing a vaginal regimen NICE does not recommend." },
+      { tag: "fixed", text: "Tranexamic acid for heavy menstrual bleeding is now described as NICE NG88 places it: an option when the hormonal coil is declined or not suitable. Statements on the uterotonic cards that no national guideline supports have been removed." },
+    ],
+  },
+  {
     version: "1.32.0",
     date: "07/10/2026",
     title: "Magnesium and postnatal blood pressure, checked against NICE",
