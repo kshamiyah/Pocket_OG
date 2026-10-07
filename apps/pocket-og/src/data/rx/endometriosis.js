@@ -1,18 +1,31 @@
+// Endometriosis medicines, checked against NICE NG73 (endometriosis,
+// updated 2025) and NICE technology appraisals TA1057 and TA1067 on
+// 7 Oct 2026. NG73 sets when hormonal treatment is used but names no product
+// doses; doses without a national source are kept until checked against the
+// BNF, and the TAs refer to each product's summary of product characteristics.
+
+const NG73 = { label: "NICE NG73", href: "https://www.nice.org.uk/guidance/ng73" };
+const NO_NATIONAL_DOSE = "Not given in national guidance: refer to local guidelines";
+const FERTILITY = [
+  "Hormonal treatment can reduce pain and has no permanent negative effect on subsequent fertility (NICE NG73 1.4.5)",
+  "Do not offer hormonal treatment to women trying to conceive: it does not improve spontaneous pregnancy rates (NICE NG73 1.10.4)",
+];
+
 export const ENDOMETRIOSIS_DRUGS = [
   {
     id: "dienogest",
     name: "Dienogest",
-    class: "Progestogen — endometriosis-specific (Visanne®)",
+    class: "Progestogen (Visanne®)",
     color: "purple",
     routes: [
       {
         type: "oral",
-        shortLabel: "Oral — endometriosis",
-        label: "Oral — endometriosis pain and suppression",
+        shortLabel: "Oral: endometriosis",
+        label: "Oral: endometriosis-related pain",
         dose: "2 mg",
         frequency: "Once daily continuously",
-        maxDose: "2 mg/day — do not exceed",
-        notes: "Licensed in the UK specifically for endometriosis. Higher progestogen receptor selectivity than older progestogens. Start on day 1–5 of cycle. Take at the same time each day. Irregular bleeding is common in the first few months — counsel patients. Does not reliably prevent pregnancy — use additional contraception if needed. Can be used long-term.",
+        maxDose: "2 mg/day",
+        notes: "A progestogen. NICE NG73 offers hormonal treatment, for example the combined oral contraceptive pill or a progestogen, for suspected, confirmed or recurrent endometriosis (1.4.6), and suggests considering it after surgery to prolong the benefit (1.9.7). First-line pain relief is a short trial (for example 3 months) of paracetamol or an NSAID (1.4.2).",
       },
     ],
     contraindications: [
@@ -23,15 +36,14 @@ export const ENDOMETRIOSIS_DRUGS = [
       "Pregnancy",
     ],
     cautions: [
-      "Irregular vaginal bleeding common in first 3–6 months — counsel patients before starting",
-      "May reduce bone density with prolonged use — consider DEXA if long-term treatment",
-      "Not licensed as a contraceptive — additional contraception required",
+      ...FERTILITY,
+      "Not licensed as a contraceptive: additional contraception required",
       "Discontinue if jaundice or liver function deteriorates significantly",
     ],
-    pregnancySafety: "Contraindicated in pregnancy. Not licensed as a contraceptive — use additional contraception.",
+    pregnancySafety: "Contraindicated in pregnancy.",
     sources: [
-      { label: "BNF — Dienogest", href: "https://bnf.nice.org.uk/drugs/dienogest/" },
-      { label: "NICE NG73", href: "https://www.nice.org.uk/guidance/ng73" },
+      { label: "BNF: Dienogest", href: "https://bnf.nice.org.uk/drugs/dienogest/" },
+      NG73,
     ],
   },
   {
@@ -42,12 +54,11 @@ export const ENDOMETRIOSIS_DRUGS = [
     routes: [
       {
         type: "sc",
-        shortLabel: "SC implant — endometriosis",
-        label: "SC implant — endometriosis / pre-surgical",
+        shortLabel: "SC implant: before surgery",
+        label: "SC implant: before surgery for deep endometriosis",
         dose: "3.6 mg (monthly) or 10.8 mg (3-monthly)",
         frequency: "Monthly (3.6 mg) or every 12 weeks (10.8 mg)",
-        maxDose: "6 months without add-back; longer with add-back HRT",
-        notes: "Injected as a subcutaneous depot into the anterior abdominal wall. Initial flare in symptoms may occur in first 2–4 weeks (transient increase in oestrogen). Always offer add-back HRT to reduce menopausal side effects and protect bone density. Without add-back: maximum 6 months. With add-back: can continue beyond 6 months. Not contraceptive — use barrier contraception.",
+        notes: "NICE NG73 recommends considering 3 months of a GnRH agonist before surgery, as an adjunct, for deep endometriosis involving the bowel, bladder or ureter (1.9.5; off-label for some GnRH agonists).",
       },
     ],
     contraindications: [
@@ -56,17 +67,15 @@ export const ENDOMETRIOSIS_DRUGS = [
       "Previous hypersensitivity to GnRH analogues",
     ],
     cautions: [
-      "Offer add-back HRT (e.g. norethisterone 5 mg daily or combined HRT) from start of treatment",
-      "Without add-back: maximum treatment duration is 6 months due to bone density loss",
-      "Initial symptom flare in first 4 weeks — warn patient",
-      "Non-contraceptive — advise barrier contraception during treatment",
-      "Monitor bone density if prolonged treatment",
-      "Depression and mood changes reported",
+      ...FERTILITY,
+      "Add-back HRT (e.g. norethisterone 5 mg daily or combined HRT) from the start of treatment, to reduce menopausal effects and bone density loss",
+      "Without add-back: limit treatment to 6 months because of bone density loss",
+      "Non-contraceptive: advise barrier contraception during treatment",
     ],
-    pregnancySafety: "Contraindicated in pregnancy. Not contraceptive — use non-hormonal contraception.",
+    pregnancySafety: "Contraindicated in pregnancy.",
     sources: [
-      { label: "BNF — Goserelin", href: "https://bnf.nice.org.uk/drugs/goserelin/" },
-      { label: "NICE NG73", href: "https://www.nice.org.uk/guidance/ng73" },
+      { label: "BNF: Goserelin", href: "https://bnf.nice.org.uk/drugs/goserelin/" },
+      NG73,
     ],
   },
   {
@@ -77,12 +86,11 @@ export const ENDOMETRIOSIS_DRUGS = [
     routes: [
       {
         type: "im",
-        shortLabel: "IM depot — endometriosis",
-        label: "IM depot — endometriosis pain suppression",
+        shortLabel: "IM depot: before surgery",
+        label: "IM depot: before surgery for deep endometriosis",
         dose: "3.75 mg (monthly) or 11.25 mg (3-monthly)",
         frequency: "Monthly (3.75 mg) or every 3 months (11.25 mg)",
-        maxDose: "6 months without add-back; longer with add-back HRT",
-        notes: "IM injection of depot preparation. Add-back HRT should be co-prescribed from the start to reduce menopausal side effects and bone density loss. Without add-back: limit to 6 months. Same mechanism and effects as goserelin — choice between the two is based on patient preference and formulation availability.",
+        notes: "NICE NG73 recommends considering 3 months of a GnRH agonist before surgery, as an adjunct, for deep endometriosis involving the bowel, bladder or ureter (1.9.5; off-label for some GnRH agonists).",
       },
     ],
     contraindications: [
@@ -90,16 +98,64 @@ export const ENDOMETRIOSIS_DRUGS = [
       "Undiagnosed vaginal bleeding",
     ],
     cautions: [
-      "Offer add-back HRT from start of treatment to protect bone density",
-      "Without add-back: maximum 6 months",
-      "Initial symptom flare in first 2–4 weeks",
-      "Non-contraceptive — advise barrier contraception",
-      "Monitor for depression and mood changes",
+      ...FERTILITY,
+      "Add-back HRT from the start of treatment, to reduce menopausal effects and bone density loss",
+      "Without add-back: limit treatment to 6 months because of bone density loss",
+      "Non-contraceptive: advise barrier contraception",
     ],
-    pregnancySafety: "Contraindicated in pregnancy. Not contraceptive — use barrier contraception.",
+    pregnancySafety: "Contraindicated in pregnancy.",
     sources: [
-      { label: "BNF — Leuprorelin", href: "https://bnf.nice.org.uk/drugs/leuprorelin-acetate/" },
-      { label: "NICE NG73", href: "https://www.nice.org.uk/guidance/ng73" },
+      { label: "BNF: Leuprorelin", href: "https://bnf.nice.org.uk/drugs/leuprorelin-acetate/" },
+      NG73,
+    ],
+  },
+  {
+    id: "linzagolix",
+    name: "Linzagolix",
+    class: "GnRH antagonist, with hormonal add-back",
+    color: "purple",
+    routes: [
+      {
+        type: "oral",
+        shortLabel: "Oral: after previous treatment",
+        label: "Oral: symptoms of endometriosis after previous treatment",
+        dose: NO_NATIONAL_DOSE,
+        frequency: "with hormonal add-back therapy",
+        notes: "An option for treating symptoms of endometriosis in adults of reproductive age who have had medical or surgical treatment for their endometriosis (NICE TA1067, June 2025). Dosage is set out in the summary of product characteristics.",
+      },
+    ],
+    contraindications: [],
+    cautions: [
+      ...FERTILITY,
+    ],
+    pregnancySafety: "For adults of reproductive age who have had previous medical or surgical treatment (NICE TA1067).",
+    sources: [
+      { label: "NICE TA1067", href: "https://www.nice.org.uk/guidance/ta1067" },
+      NG73,
+    ],
+  },
+  {
+    id: "relugolix_ct",
+    name: "Relugolix–estradiol–norethisterone",
+    class: "GnRH antagonist combination therapy (relugolix CT)",
+    color: "purple",
+    routes: [
+      {
+        type: "oral",
+        shortLabel: "Oral: after previous treatment",
+        label: "Oral: symptoms of endometriosis after previous treatment",
+        dose: NO_NATIONAL_DOSE,
+        notes: "An option for treating symptoms of endometriosis in adults of reproductive age who have had medical or surgical treatment for endometriosis (NICE TA1057, April 2025). Dosage is set out in the summary of product characteristics.",
+      },
+    ],
+    contraindications: [],
+    cautions: [
+      ...FERTILITY,
+    ],
+    pregnancySafety: "For adults of reproductive age who have had previous medical or surgical treatment (NICE TA1057).",
+    sources: [
+      { label: "NICE TA1057", href: "https://www.nice.org.uk/guidance/ta1057" },
+      NG73,
     ],
   },
 ];

@@ -306,3 +306,9 @@ apps/pocket-og/public/rx-sources/.
   rx/diabetes.local-shelved.js. Version 1.38.0. Next: endometriosis, mental
   health, antivirals (NICE/BASHH reachable); resuscitation (GTG56) and anaemia
   (BSH 2019) now have PDFs in sources/; contraception waits on FSRH PDFs.
+- 7 Oct 2026: Rx endometriosis checked against NICE NG73, TA1057 and TA1067.
+  GnRH agonists reframed to NG73 1.9.5 (3 months before surgery for deep
+  endometriosis); dienogest as progestogen option (1.4.6, 1.9.7); fertility
+  points (1.4.5, 1.10.4) on every card; new relugolix CT and linzagolix cards
+  (TA doses defer to SmPC: refer to local guidelines). Add-back and 6-month
+  limit kept as cautions pending BNF. Version 1.39.0. Next: mental health.
