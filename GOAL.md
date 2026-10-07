@@ -289,3 +289,12 @@ apps/pocket-og/public/rx-sources/.
   (1.6.15); PCA and neuraxial monitoring. Paracetamol + NSAID regularly
   (1.6.18, 1.6.21). Unsourced extras removed; NSAID 30-week warning and
   oral doses kept pending BNF. Version 1.36.0. Next: antiemetics.
+- 7 Oct 2026: Rx antiemetics checked against RCOG GTG69 (2024; PDF in
+  sources/). All doses from Appendix III; first/second/third line per GTG69
+  (chlorpromazine was "third-line", now first). Ondansetron risk reworded to
+  orofacial clefting (3 per 10 000); metoclopramide may exceed 5 days.
+  Dexamethasone shelved in rx/antiemetics.shelved.js; new cards:
+  corticosteroids for HG, domperidone, thiamine. Found but not yet changed:
+  pearl "gtg69-no-doxylamine-uk" contradicts GTG69; PUQE calculator says
+  Hartmann's first (GTG69: 0.9% saline with KCl) and metoclopramide max 5 days;
+  GTG69 guide text is the 2016 edition. Version 1.37.0.

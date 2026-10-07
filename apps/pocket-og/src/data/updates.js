@@ -4,6 +4,16 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.37.0",
+    date: "07/10/2026",
+    title: "Antiemetics, checked against RCOG Green-top Guideline 69",
+    changes: [
+      { tag: "fixed", text: "Antiemetic doses and their order now follow RCOG Green-top Guideline 69 (2024). First line: cyclizine, doxylamine/pyridoxine, prochlorperazine, promethazine and chlorpromazine (previously shown as third line). Second line: metoclopramide, domperidone and ondansetron. Third line: corticosteroids." },
+      { tag: "fixed", text: "Ondansetron now gives GTG69's doses and its counselling point: a very small increase in orofacial clefting with first-trimester use, about 3 more per 10 000 births, to weigh against poorly managed hyperemesis. Metoclopramide can be continued beyond 5 days in women it helps, as GTG69 advises." },
+      { tag: "new", text: "New cards: corticosteroids for hyperemesis (IV hydrocortisone, then oral prednisolone tapered weekly), domperidone, and thiamine for all women admitted with vomiting. The dexamethasone card, which GTG69 does not support, is retired and stored." },
+    ],
+  },
+  {
     version: "1.36.0",
     date: "07/10/2026",
     title: "Pain relief, checked against NICE",
