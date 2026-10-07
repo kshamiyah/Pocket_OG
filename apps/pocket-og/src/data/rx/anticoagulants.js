@@ -1,18 +1,49 @@
+// Aspirin and low molecular weight heparins, checked against national
+// guidance (7 Oct 2026): NICE NG133 (aspirin for pre-eclampsia prevention),
+// RCOG Green-top Guideline 37a (reducing the risk of VTE, 2015; table 3 for
+// prophylactic doses) and 37b (acute management of VTE, 2015; tables 1a to 1c
+// for treatment doses).
+
+const GTG37A = { label: "RCOG GTG37a", href: "/guidelines/gtg-37a.pdf" };
+const GTG37B = { label: "RCOG GTG37b", href: "/guidelines/gtg-37b.pdf" };
+
+// Shared by all three LMWHs.
+const LMWH_CAUTIONS = [
+  "Labour or vaginal bleeding: no further injections; reassess on admission (RCOG GTG37a, GTG37b)",
+  "Prophylactic dose: avoid regional techniques if possible until at least 12 hr after the last dose (RCOG GTG37a)",
+  "Treatment dose: no regional technique until at least 24 hr after the last dose; stop 24 hr before planned birth (RCOG GTG37b)",
+  "No LMWH for 4 hr after spinal anaesthesia or after the epidural catheter is removed; do not remove the catheter within 12 hr of the last injection (RCOG GTG37a)",
+  "Elective caesarean on antenatal prophylaxis: give the prophylactic dose the day before, omit any morning dose on the day (RCOG GTG37a)",
+  "Platelet count: monitor only if previously exposed to unfractionated heparin (RCOG GTG37a); not routinely during treatment (RCOG GTG37b)",
+  "Reduce the dose if creatinine clearance is under 30 mL/min for enoxaparin and dalteparin, or under 20 mL/min for tinzaparin (RCOG GTG37a)",
+];
+
+const LMWH_CONTRAINDICATIONS = [
+  "Active major haemorrhage",
+  "Heparin-induced thrombocytopenia (HIT)",
+];
+
+const LMWH_SAFETY = "LMWHs are the agents of choice for antenatal and postnatal thromboprophylaxis (RCOG GTG37a). There is evidence that they do not cross the placenta (RCOG GTG37b), and they are safe in breastfeeding (RCOG GTG37a).";
+
+const PROPHYLAXIS_NOTE = "Dose by booking or most recent weight. No anti-Xa monitoring is needed for prophylaxis (RCOG GTG37a).";
+
+const TREATMENT_NOTE = "Dose by booking or early pregnancy weight. Routine peak anti-Xa measurement is not recommended, except under 50 kg or 90 kg and over, or with other complicating factors such as renal impairment or recurrent VTE (RCOG GTG37b).";
+
 export const ANTICOAGULANTS = [
   {
     id: "aspirin_prophylaxis",
     name: "Aspirin",
-    class: "Antiplatelet — pre-eclampsia prophylaxis",
+    class: "Antiplatelet: pre-eclampsia prophylaxis",
     color: "fuchsia",
     routes: [
       {
         type: "oral",
-        shortLabel: "Oral — pre-eclampsia prophylaxis",
-        label: "Oral — pre-eclampsia prophylaxis",
+        shortLabel: "Oral: pre-eclampsia prophylaxis",
+        label: "Oral: pre-eclampsia prophylaxis",
         dose: "75–150 mg",
-        frequency: "once daily from 12 weeks until delivery",
-        maxDose: "150 mg/day (prophylactic dose only)",
-        notes: "NICE NG133: offer 75–150 mg daily from 12 weeks if ≥1 high-risk or ≥2 moderate-risk factors for pre-eclampsia. Start before 16 weeks if possible. ASPRE trial: 150 mg at night reduces early-onset pre-eclampsia by ~62%. Take at night — evidence favours evening dosing. Stop at 36 weeks.",
+        frequency: "once daily from 12 weeks until the birth of the baby",
+        maxDose: "150 mg/day",
+        notes: "For women at high risk of pre-eclampsia (any one of: hypertensive disease in a previous pregnancy, chronic kidney disease, autoimmune disease such as SLE or antiphospholipid syndrome, type 1 or type 2 diabetes, chronic hypertension), or with more than 1 moderate risk factor (nulliparity, age 40 or older, pregnancy interval over 10 years, BMI 35 or more at first visit, family history of pre-eclampsia, multi-fetal pregnancy) (NICE NG133 1.1.2, 1.1.3).",
       },
     ],
     contraindications: [
@@ -21,12 +52,9 @@ export const ANTICOAGULANTS = [
       "Aspirin or NSAID hypersensitivity",
     ],
     cautions: [
-      "Stop at 36 weeks — increased bleeding risk at delivery",
-      "Evening (night) dosing has evidence of better efficacy",
-      "Do NOT use standard analgesic doses (≥300 mg) in pregnancy",
-      "PPI cover if GI symptoms develop",
+      "Do not use low molecular weight heparin to prevent hypertensive disorders of pregnancy (NICE NG133 1.1.4)",
     ],
-    pregnancySafety: "75–150 mg prophylactic dose is safe in pregnancy from 12 weeks. Stop at 36 weeks. Do not use anti-inflammatory doses.",
+    pregnancySafety: "Taken from 12 weeks until the birth of the baby (NICE NG133 1.1.2, 1.1.3).",
     sources: [
       { label: "BNF", href: "https://bnf.nice.org.uk/drugs/aspirin/" },
       { label: "NICE NG133", href: "https://www.nice.org.uk/guidance/ng133" },
@@ -40,38 +68,33 @@ export const ANTICOAGULANTS = [
     routes: [
       {
         type: "sc",
-        shortLabel: "SC — VTE prophylaxis",
-        label: "Subcutaneous — VTE prophylaxis",
-        dose: "<50 kg: 20 mg; 50–90 kg: 40 mg; 91–130 kg: 60 mg; 131–170 kg: 80 mg",
-        frequency: "once daily",
-        maxDose: "Weight-dependent — seek haematology if >170 kg",
-        notes: "Weight-based once-daily prophylactic dosing. SC injection into abdomen or thigh. Withhold ≥12 hr before planned regional anaesthesia or delivery. Resume 4 hr after spinal, or 6 hr after epidural removal.",
+        shortLabel: "SC: VTE prophylaxis",
+        label: "Subcutaneous: VTE prophylaxis",
+        dose: "<50 kg: 20 mg; 50–90 kg: 40 mg; 91–130 kg: 60 mg; 131–170 kg: 80 mg; >170 kg: 0.6 mg/kg/day",
+        frequency: "once daily (91 kg and over may be given in 2 divided doses)",
+        maxDose: "High prophylactic dose (50–90 kg): 40 mg 12-hourly",
+        notes: `${PROPHYLAXIS_NOTE} Doses from RCOG GTG37a table 3.`,
       },
       {
         type: "sc",
-        shortLabel: "SC — VTE treatment",
-        label: "Subcutaneous — VTE treatment (confirmed DVT/PE)",
-        dose: "1 mg/kg",
-        frequency: "twice daily",
-        maxDose: "Monitor anti-Xa levels if renal impairment or weight extremes",
-        notes: "For confirmed DVT or PE in pregnancy. Check anti-Xa levels 3–4 hr post-dose (target 0.6–1.0 IU/mL). Withhold ≥24 hr before regional anaesthesia. Ensure consultant haematologist/obstetric physician involvement.",
+        shortLabel: "SC: VTE treatment",
+        label: "Subcutaneous: VTE treatment (confirmed DVT/PE)",
+        dose: "<50 kg: 40 mg BD or 60 mg OD; 50–69 kg: 60 mg BD or 90 mg OD; 70–89 kg: 80 mg BD or 120 mg OD; 90–109 kg: 100 mg BD or 150 mg OD; 110–125 kg: 120 mg BD or 180 mg OD",
+        frequency: "twice daily or once daily",
+        maxDose: ">125 kg: discuss with haematologist",
+        notes: `${TREATMENT_NOTE} Doses from RCOG GTG37b table 1a.`,
       },
     ],
     contraindications: [
-      "Active major haemorrhage",
-      "Heparin-induced thrombocytopenia (HIT)",
+      ...LMWH_CONTRAINDICATIONS,
       "Severe thrombocytopenia (platelets <50 × 10⁹/L)",
     ],
-    cautions: [
-      "WITHHOLD ≥12 hr (prophylaxis) or ≥24 hr (treatment) before regional anaesthesia",
-      "Monitor platelet count if used >5 days — HIT risk",
-      "Anti-Xa monitoring in renal impairment, extremes of weight, or recurrent VTE",
-      "Does not cross placenta — safe in pregnancy",
-    ],
-    pregnancySafety: "LMWH of choice for VTE prophylaxis and treatment in pregnancy. Does not cross placenta. Safe for breastfeeding.",
+    cautions: LMWH_CAUTIONS,
+    pregnancySafety: LMWH_SAFETY,
     sources: [
       { label: "BNF", href: "https://bnf.nice.org.uk/drugs/enoxaparin-sodium/" },
-      { label: "RCOG GTG 37a", href: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/reducing-the-risk-of-venous-thromboembolism-during-pregnancy-and-the-puerperium-green-top-guideline-no-37a/" },
+      GTG37A,
+      GTG37B,
     ],
   },
   {
@@ -82,27 +105,30 @@ export const ANTICOAGULANTS = [
     routes: [
       {
         type: "sc",
-        shortLabel: "SC — VTE prophylaxis",
-        label: "Subcutaneous — VTE prophylaxis",
-        dose: "<50 kg: 2500 units; 50–90 kg: 5000 units; 91–130 kg: 7500 units; >130 kg: 10 000 units",
+        shortLabel: "SC: VTE prophylaxis",
+        label: "Subcutaneous: VTE prophylaxis",
+        dose: "<50 kg: 2500 units; 50–90 kg: 5000 units; 91–130 kg: 7500 units; 131–170 kg: 10 000 units; >170 kg: 75 units/kg/day",
         frequency: "once daily",
-        maxDose: "Weight-dependent — see local protocol",
-        notes: "Once-daily prophylactic dosing by weight band. Treatment dose: 100 units/kg BD. Withhold ≥12 hr (prophylaxis) or ≥24 hr (treatment) before regional anaesthesia.",
+        maxDose: "High prophylactic dose (50–90 kg): 5000 units 12-hourly",
+        notes: `${PROPHYLAXIS_NOTE} Doses from RCOG GTG37a table 3.`,
+      },
+      {
+        type: "sc",
+        shortLabel: "SC: VTE treatment",
+        label: "Subcutaneous: VTE treatment (confirmed DVT/PE)",
+        dose: "<50 kg: 5000 units BD or 10 000 units OD; 50–69 kg: 6000 units BD or 12 000 units OD; 70–89 kg: 8000 units BD or 16 000 units OD; 90–109 kg: 10 000 units BD or 20 000 units OD; 110–125 kg: 12 000 units BD or 24 000 units OD",
+        frequency: "twice daily or once daily",
+        maxDose: ">125 kg: discuss with haematologist",
+        notes: `${TREATMENT_NOTE} Doses from RCOG GTG37b table 1b.`,
       },
     ],
-    contraindications: [
-      "Active major haemorrhage",
-      "Heparin-induced thrombocytopenia (HIT)",
-    ],
-    cautions: [
-      "WITHHOLD ≥12 hr (prophylaxis) or ≥24 hr (treatment) before regional anaesthesia",
-      "Do not substitute doses directly with enoxaparin — different unit scales; use local conversion",
-      "Anti-Xa monitoring in renal impairment or weight extremes",
-    ],
-    pregnancySafety: "Safe in pregnancy. Alternative LMWH to enoxaparin. Does not cross placenta.",
+    contraindications: LMWH_CONTRAINDICATIONS,
+    cautions: LMWH_CAUTIONS,
+    pregnancySafety: LMWH_SAFETY,
     sources: [
       { label: "BNF", href: "https://bnf.nice.org.uk/drugs/dalteparin-sodium/" },
-      { label: "RCOG GTG 37a", href: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/reducing-the-risk-of-venous-thromboembolism-during-pregnancy-and-the-puerperium-green-top-guideline-no-37a/" },
+      GTG37A,
+      GTG37B,
     ],
   },
   {
@@ -113,26 +139,29 @@ export const ANTICOAGULANTS = [
     routes: [
       {
         type: "sc",
-        shortLabel: "SC — VTE prophylaxis / treatment",
-        label: "Subcutaneous — VTE prophylaxis / treatment",
-        dose: "Prophylaxis: 4500 units (50–90 kg); Treatment: 175 units/kg once daily",
+        shortLabel: "SC: VTE prophylaxis",
+        label: "Subcutaneous: VTE prophylaxis",
+        dose: "<50 kg: 3500 units; 50–90 kg: 4500 units; 91–130 kg: 7000 units; 131–170 kg: 9000 units; >170 kg: 75 units/kg/day",
+        frequency: "once daily (91 kg and over may be given in 2 divided doses)",
+        maxDose: "High prophylactic dose (50–90 kg): 4500 units 12-hourly",
+        notes: `${PROPHYLAXIS_NOTE} Doses from RCOG GTG37a table 3.`,
+      },
+      {
+        type: "sc",
+        shortLabel: "SC: VTE treatment",
+        label: "Subcutaneous: VTE treatment (confirmed DVT/PE)",
+        dose: "175 units/kg",
         frequency: "once daily",
-        maxDose: "Weight-dependent prophylaxis; 175 units/kg for treatment",
-        notes: "Prophylaxis doses: <50 kg → 3500 units OD; 50–90 kg → 4500 units OD; 91–130 kg → 7000 units OD; >130 kg → 9000 units OD. Treatment: 175 units/kg once daily (once-daily dosing for treatment, unlike enoxaparin which is BD). Withhold ≥24 hr before regional anaesthesia.",
+        notes: `${TREATMENT_NOTE} Dose from RCOG GTG37b table 1c.`,
       },
     ],
-    contraindications: [
-      "Active major haemorrhage",
-      "Heparin-induced thrombocytopenia (HIT)",
-    ],
-    cautions: [
-      "WITHHOLD ≥24 hr before regional anaesthesia (both prophylactic and treatment doses)",
-      "Treatment dosing is once daily — different from enoxaparin (twice daily); do not interchange without dose conversion",
-    ],
-    pregnancySafety: "Safe in pregnancy. Once-daily treatment dosing. Does not cross placenta.",
+    contraindications: LMWH_CONTRAINDICATIONS,
+    cautions: LMWH_CAUTIONS,
+    pregnancySafety: LMWH_SAFETY,
     sources: [
       { label: "BNF", href: "https://bnf.nice.org.uk/drugs/tinzaparin-sodium/" },
-      { label: "RCOG GTG 37a", href: "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/reducing-the-risk-of-venous-thromboembolism-during-pregnancy-and-the-puerperium-green-top-guideline-no-37a/" },
+      GTG37A,
+      GTG37B,
     ],
   },
 ];

@@ -4,6 +4,16 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.35.0",
+    date: "07/10/2026",
+    title: "Aspirin and heparin, checked against NICE and RCOG",
+    changes: [
+      { tag: "fixed", text: "Aspirin for pre-eclampsia prevention now continues until the birth of the baby, as NICE NG133 advises; the card previously said to stop at 36 weeks. It lists NICE's high and moderate risk factors." },
+      { tag: "fixed", text: "Treatment doses of enoxaparin and dalteparin now follow RCOG Green-top Guideline 37b's booking-weight bands, given twice or once daily, replacing per-kilogram doses. Routine anti-Xa and platelet monitoring is no longer advised, in line with RCOG." },
+      { tag: "fixed", text: "Heparin timings around birth follow RCOG Green-top Guideline 37a: 12 hours after a prophylactic dose or 24 hours after a treatment dose before a regional technique, and 4 hours after a spinal or epidural catheter removal before the next dose. The cards add the over-170 kg and high prophylactic doses and the dose reduction in renal impairment." },
+    ],
+  },
+  {
     version: "1.34.0",
     date: "07/10/2026",
     title: "Tocolysis and antenatal steroids, checked against NICE and RCOG",

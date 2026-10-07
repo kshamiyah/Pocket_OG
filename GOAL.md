@@ -273,3 +273,10 @@ apps/pocket-og/public/rx-sources/.
   balance not a contraindication. Indomethacin shelved in
   rx/tocolytics.shelved.js (not in NG25). Atosiban dose unchanged pending
   BNF. Version 1.34.0. Next: anticoagulants.
+- 7 Oct 2026: Rx anticoagulants checked against NICE NG133 and RCOG GTG37a
+  and GTG37b (2015). Aspirin until birth (was "stop at 36 weeks"); LMWH
+  treatment doses replaced with GTG37b booking-weight bands (were 1 mg/kg
+  and 100 units/kg BD); regional and post-spinal timings, platelet and anti-Xa
+  monitoring, over-170 kg and high prophylactic doses, renal dose reduction
+  from GTG37a/b. Unsourced extras removed; contraindications kept pending
+  BNF. Version 1.35.0. Next: analgesia.
