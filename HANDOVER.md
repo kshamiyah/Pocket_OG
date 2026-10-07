@@ -1,5 +1,9 @@
 # Pocket O&G: handover
 
+> **Update 7 Oct 2026:** BNF verification of the Rx tab has started. Read
+> section 8 first: how BNF pages are obtained (by hand, not fetched), the
+> per-file workflow, and the decisions made on the antibiotic cards.
+
 > **Update 5 Oct 2026:** the induction of labour goal is complete. Read `GOAL.md`
 > for what was built (five NG207 workflows, the national timing chart `IOL_TIMING`)
 > and the shelf (`apps/pocket-og/src/data/shelf.js`), which hides local guides
@@ -352,3 +356,77 @@ Reusable scripts from this session are in the session scratchpad: `check_ng207.m
    `packages/guidelines/src/` into `apps/pocket-og/public/guidelines/`, set `pdfPath`.
 5. Ask the user whether to build the national timing chart next or the NG207
    workflows. Both are ready to start, and they prefer to choose.
+
+---
+
+## 8. BNF verification of the Rx tab (7 Oct 2026)
+
+### Goal
+Every dose in the Rx tab is confirmed against the BNF, not just the
+antibiotics. That is about 80 drug cards across 15 files in
+`apps/pocket-og/src/data/rx/` (the Rx tab header says 76). Antibiotics are
+done; the rest are not started.
+
+### How BNF pages are obtained
+- The BNF (bnf.nice.org.uk) is UK-only. From Dr Shamiyah's Mac, `curl` gets
+  HTTP 403 "BNF is only available in the UK" even with the VPN off and a GB
+  (Vodafone) IP. Cause unknown: the address may be geolocated outside the UK,
+  or the site may refuse `curl`. Do not try to get round the block.
+- Instead, Dr Shamiyah saves each page in Chrome with **Save Page As (Cmd+S),
+  format "Web Page, HTML Only"**, default filename, straight into
+  **`bnf-sources/`** at the repo root. The app cannot read `~/Downloads`
+  (macOS privacy permissions), so save there directly.
+- `bnf-sources/` is gitignored: BNF content is copyrighted. Never commit it,
+  publish it, or paste long passages. Doses go into the app in our own words,
+  cited "(BNF)".
+- The saved HTML holds the full monograph, including collapsed sections
+  (pregnancy, breast feeding), and the page URL. It has no "last updated"
+  date, so the save date is the access date.
+- A link list for every Rx file, grouped in batches, was given in the
+  7 Oct session. About 60 links come from the cards' own `sources`; the rest
+  were written by hand and are unchecked (a few may 404: search the BNF and
+  save the right page).
+
+### Per-file workflow (agreed)
+One Rx file at a time, end to end:
+1. Dr Shamiyah saves that file's BNF pages into `bnf-sources/`.
+2. For each dose, report one of: matches BNF / BNF differs (show both) /
+   BNF has no entry for that indication.
+3. Change nothing until Dr Shamiyah approves. **Never adapt a dose from a
+   different indication.** If the BNF has no dose for the card's indication,
+   the card says "refer to local guidelines".
+4. Add each BNF-cited dose to `CHECKS` in `scripts/check-bnf-doses.mjs`
+   (run from the repo root with `node scripts/check-bnf-doses.mjs`). It
+   checks every figure in the app's dose against the BNF text under the same
+   indication, and fails on a missing page, a missing figure, or nothing
+   checked. It sits outside the app's eslint config.
+5. Tests, lint, build, check in `vite preview` with the service worker
+   cleared; What's New entry, version bump, `GOAL.md` log, commit, PR.
+
+Suggested order: uterotonics, antihypertensives, tocolytics, anticoagulants,
+analgesia, antiemetics, contraception, resuscitation, then anaemia,
+antivirals, cytotoxics, diabetes, endometriosis, mental health.
+
+### Done: antibiotics (PR #46, version 1.31.0, not yet merged)
+| Card | Decision |
+|---|---|
+| Benzylpenicillin | BNF dose added: 3 g initially, then 1.5 g every 4 hours until birth, slow IV injection or infusion. Route renamed "IV: intrapartum group B streptococcal prophylaxis" so it is not read as a chorioamnionitis dose |
+| Gentamicin | BNF has no obstetric indication: still "refer to local guidelines" |
+| Metronidazole IV | BNF has no obstetric or intrapartum indication: still "refer to local guidelines" |
+| Nitrofurantoin, amoxicillin, cefalexin (NG109), erythromycin (NG25) | Match the BNF; unchanged |
+| Metronidazole oral, BV | BNF says 400–500 mg; app keeps BASHH's 400 mg (decision: leave) |
+| Clindamycin oral, BV | BNF has no oral BV dose; app keeps BASHH (decision: leave). BNF gives the vaginal cream for 3 to 7 nights, the card's BASHH note says 7 days |
+
+Not done: the BNF pregnancy line for benzylpenicillin ("Not known to be
+harmful") was not added; it was not asked for.
+
+### Loose ends
+- Labetalol's card links to `/drugs/labetalol/`; the BNF slug is probably
+  `labetalol-hydrochloride`. Confirm from the saved page and fix the link.
+- No BNF page identified yet for Intralipid (search "lipid emulsion"). The
+  copper IUD has no monograph (non-hormonal contraceptives treatment summary).
+- Expect "BNF has no entry for that indication" for off-label obstetric uses
+  (for example misoprostol, carboprost, magnesium sulfate regimens).
+- An untracked duplicate of the GTG31 2024 PDF (filename with Unicode
+  hyphens) sits in `packages/guidelines/src/`; the tracked copy uses plain
+  hyphens. Safe to delete if identical.
