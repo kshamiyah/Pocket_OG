@@ -1,6 +1,20 @@
 {
-  "updated": "2026-09-27",
+  "updated": "2026-10-11",
   "items": [
+    {
+      "id": "2026-10-rcog-birth-choices-after-caesarean",
+      "date": "2026-10-06",
+      "kind": "report",
+      "source": "RCOG",
+      "weight": "aware",
+      "title": "VBAC counselling: RCOG updates birth choices after previous caesarean",
+      "why": "The updated resource supports balanced discussions about vaginal birth, VBAC and planned caesarean after a previous caesarean. Use it in antenatal counselling and consent conversations, while recognising that the in-app guide may reflect the older edition.",
+      "url": "https://www.rcog.org.uk/news/rcog-patient-information-on-birth-choices-after-previous-caesarean-birth-updated/",
+      "link": {
+        "type": "reader",
+        "id": "GTG45"
+      }
+    },
     {
       "id": "2026-09-rcog-robotic-gynae-cancer-surgery",
       "date": "2026-09-16",
