@@ -4,6 +4,14 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.40.0",
+    date: "13/10/2026",
+    title: "Easier to find Back in flowcharts",
+    changes: [
+      { tag: "improved", text: "The Back button in flowcharts now sits at the top of each step, next to the path you have taken, instead of in the bottom bar." },
+    ],
+  },
+  {
     version: "1.39.0",
     date: "07/10/2026",
     title: "Endometriosis medicines, checked against NICE",
