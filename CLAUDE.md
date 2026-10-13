@@ -18,6 +18,7 @@ An offline-first PWA reference for O&G trainees. Monorepo (npm workspaces):
 - `apps/pocket-og`: the app (React + Vite + Tailwind + vite-plugin-pwa).
 - `apps/ward-manager`: a separate tool; occasionally a source of logic to port.
 - `apps/handover`: standalone shift job-list PWA (QR/link handover); not linked from pocket-og.
+- `apps/ouh-guides`: OUH local guides as interactive pathways, built from pocket-og's own components so it can be merged into pocket-og later (see its README).
 - `packages/guidelines`: shared guideline content (`@pocket-og/guidelines`); handover does not use this package.
 
 **Content ethos:** hand-authored, drawn verbatim from national guidance
