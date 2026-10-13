@@ -19,7 +19,6 @@ export const OUH_GUIDES = [
     title: "GS69 Multiple Pregnancy and Birth Guideline",
     version: "v3.1",
     date: "December 2025",
-    note: "Review date 24 August 2026 has passed: check the current approved version",
     flowcharts: OUH_GS69_FLOWCHARTS,
   },
 ];

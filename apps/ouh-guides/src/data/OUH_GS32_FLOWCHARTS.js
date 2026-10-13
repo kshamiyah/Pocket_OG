@@ -529,20 +529,59 @@ const LATE_COMMON = [
 const DECLINE_NOTE = "If induction of labour or birth after 39+0 is declined: counsel that there is no increase in risk from birth or induction at this gestation and no evidence on how to monitor late SGA/FGR if pregnancy continues; agree an alternative monitoring plan (routine daily cCTGs are not supported by evidence)";
 const FMU_ALONGSIDE = "FMU review will be requested alongside DAU review in any case of abnormal Doppler";
 
+// Figures 3 and 4 share the same boxes. Risk factors (Table 7) only change the
+// outcome for EFW 3rd to 9th centile and the two ACGV boxes, so the chart asks
+// about them only on those branches. Figure 4's green ACGV box reads "EFW 10
+// 10th centile"; it is taken as 10th to 19th, matching Figure 3.
+// Steps 1 and 2 of Figures 3 and 4: what to check, with the categories the
+// figure uses for each.
+const LATE_MEASURES = [
+  { label: "Uterine artery PI", note: "Combined, at the 20-week anomaly scan", values: ["3.0 or more", "2.50 to 2.99", "below 2.5"] },
+  { label: "EFW", note: "Centile", values: ["below 1st", "1st to 2nd", "3rd to 9th", "10th or more"] },
+  { label: "AC", note: "Centile", values: ["below 10th", "10th or more"] },
+  { label: "ACGV", note: "From any previous scan: see the table at the top of the Viewpoint scan report", values: ["drop of 40 centiles or more", "drop of less than 40"] },
+  { label: "UmbA EDF", values: ["absent or reversed (AREDF)", "positive"] },
+  { label: "UmbA PI", note: "Assuming EDF positive", values: ["above 95th centile", "95th or below"] },
+  { label: "CPR", values: ["below 1.1", "1.1 or more"] },
+  { label: "Liquor MVP", values: ["below 2 cm", "2 cm or more"] },
+];
+
 function boxOptions(prefix) {
+  const rf = "Next: any risk factors (Table 7)?";
   return [
     { label: "UmbA AREDF", sublabel: "Irrespective of EFW or risk factors", next: `${prefix}-aredf` },
     { label: "EFW below the 1st centile", next: `${prefix}-urgent` },
     { label: "EFW below the 10th centile and any of: UmbA PI above the 95th centile, CPR below 1.1, current pre-eclampsia", next: `${prefix}-urgent` },
     { label: "EFW at or above the 10th centile but CPR below 1.1 and/or UmbA PI above the 95th centile", next: `${prefix}-doppler` },
     { label: "EFW 1st to 2nd centile", next: `${prefix}-efw12` },
-    { label: "EFW 3rd to 9th centile with risk factors", next: `${prefix}-efw12` },
-    { label: "EFW 3rd to 9th centile without risk factors", next: `${prefix}-39` },
+    { label: "EFW 3rd to 9th centile", sublabel: rf, next: `${prefix}-rf-efw` },
     { label: "Isolated AC below the 10th centile", next: `${prefix}-39` },
-    { label: "ACGV reduction of 40 centiles or more and EFW 10th to 19th centile with risk factors", next: `${prefix}-39` },
-    { label: "ACGV reduction of 40 centiles or more and either EFW 10th to 19th centile without risk factors, or EFW at or above the 20th centile with risk factors", next: `${prefix}-40` },
-    { label: "ACGV reduction of 40 centiles or more and EFW at or above the 20th centile without risk factors", next: `${prefix}-41` },
+    { label: "ACGV reduction of 40 centiles or more and EFW 10th to 19th centile", sublabel: rf, next: `${prefix}-rf-acgv-1019` },
+    { label: "ACGV reduction of 40 centiles or more and EFW at or above the 20th centile", sublabel: rf, next: `${prefix}-rf-acgv-20` },
   ];
+}
+
+const RF_TEXT = "Table 7 lists risk factors as they relate to timing of birth. It deliberately leaves out fetal Doppler abnormalities on the current scan, which the figure deals with.";
+const ACGV_NOTE = "Table 7 also lists an ACGV reduction of 40 centiles or more, which is the finding that brought you here. The guideline does not say whether it counts for this box. If it always counted, the box without risk factors could never apply, which suggests only the other factors are meant; this is not stated, so use clinical judgement.";
+
+function riskFactorNodes(prefix, figure, figPages) {
+  const sources = [page(21), ...figPages];
+  const ask = (title, extra, yes, no) => ({
+    type: "decision",
+    title,
+    text: extra ? `${RF_TEXT}\n\n${extra}` : RF_TEXT,
+    items: TABLE7_RISK_FACTORS,
+    sources,
+    options: [
+      { label: "One or more risk factors", next: yes },
+      { label: "No risk factors", next: no },
+    ],
+  });
+  return {
+    [`${prefix}-rf-efw`]: ask(`EFW 3rd to 9th Centile: Any Risk Factors? (${figure})`, null, `${prefix}-efw12`, `${prefix}-39`),
+    [`${prefix}-rf-acgv-1019`]: ask(`ACGV Drop, EFW 10th to 19th: Any Risk Factors? (${figure})`, ACGV_NOTE, `${prefix}-39`, `${prefix}-40`),
+    [`${prefix}-rf-acgv-20`]: ask(`ACGV Drop, EFW 20th or Above: Any Risk Factors? (${figure})`, ACGV_NOTE, `${prefix}-40`, `${prefix}-41`),
+  };
 }
 
 export const OUH_GS32_LATE_FGR = {
@@ -576,18 +615,19 @@ export const OUH_GS32_LATE_FGR = {
     "f3-check": {
       type: "action",
       title: "Check and Review",
-      text: "1) Check the combined uterine artery Doppler PI at the anomaly (20-week) scan: 3.0 or more / 2.50 to 2.99 / below 2.5.\n2) Review the 35+0 to 36+6 scan: EFW (below 1st / 1st to 2nd / 3rd to 9th / 10th or more), AC (below / at or above 10th), ACGV (40-centile drop or more / less, from any previous scan), UmbA EDF (AREDF / positive), UmbA PI (above / at or below 95th), CPR (below 1.1 / 1.1 or more), liquor MVP (below 2 cm / 2 cm or more).\n3) Any risk factors (Table 7)?",
-      items: TABLE7_RISK_FACTORS,
-      sources: [page(22), page(21)],
+      text: "From the anomaly scan and the 35+0 to 36+6 scan, note which applies for each. The next step uses them to choose the box.",
+      measures: LATE_MEASURES,
+      sources: [page(22)],
       next: "f3-box",
     },
     "f3-box": {
       type: "decision",
       title: "Which Box Applies? (Figure 3)",
-      text: "Risk factors are those in Table 7.",
-      sources: [page(22), page(21)],
+      text: "Risk factors (Table 7) only change the outcome for EFW 3rd to 9th centile and the ACGV boxes; for those, the next step asks about them.",
+      sources: [page(22)],
       options: boxOptions("f3"),
     },
+    ...riskFactorNodes("f3", "Figure 3", [page(22)]),
     "f3-aredf": {
       type: "end",
       title: "Urgent cCTG: Recommend Birth by Emergency Caesarean Section",
@@ -644,18 +684,19 @@ export const OUH_GS32_LATE_FGR = {
     "f4-check": {
       type: "action",
       title: "Check and Review",
-      text: "1) Check the combined uterine artery Doppler PI at the anomaly (20-week) scan: 3.0 or more / 2.50 to 2.99 / below 2.5.\n2) Review the 37+0 to 39+6 scan: EFW (below 1st / 1st to 2nd / 3rd to 9th / 10th or more), AC (below / at or above 10th), ACGV (40-centile drop or more / less, from any previous scan), UmbA EDF (AREDF / positive), UmbA PI (above / at or below 95th), CPR (below 1.1 / 1.1 or more), liquor MVP (below 2 cm / 2 cm or more).\n3) Any risk factors (Table 7)?",
-      items: TABLE7_RISK_FACTORS,
-      sources: [page(23), page(21)],
+      text: "From the anomaly scan and the 37+0 to 39+6 scan, note which applies for each. The next step uses them to choose the box.",
+      measures: LATE_MEASURES,
+      sources: [page(23)],
       next: "f4-box",
     },
     "f4-box": {
       type: "decision",
       title: "Which Box Applies? (Figure 4)",
-      text: "Risk factors are those in Table 7.",
-      sources: [page(23), page(21)],
+      text: "Risk factors (Table 7) only change the outcome for EFW 3rd to 9th centile and the ACGV boxes; for those, the next step asks about them.",
+      sources: [page(23)],
       options: boxOptions("f4"),
     },
+    ...riskFactorNodes("f4", "Figure 4", [page(23)]),
     "f4-aredf": {
       type: "end",
       title: "Urgent cCTG: Recommend Birth by Emergency Caesarean Section",
