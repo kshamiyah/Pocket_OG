@@ -20,6 +20,7 @@ export default function HomeSplash({ theme, onThemeToggle, onBrowse }) {
             OUH Guides
           </h1>
           <p className="mt-3 text-base text-gray-400 leading-relaxed">Oxford local O&amp;G pathways</p>
+          <p className="mt-1.5 text-xs text-gray-400">Built by Khalid Shamiyah</p>
           <button
             type="button"
             onClick={onBrowse}
@@ -32,21 +33,6 @@ export default function HomeSplash({ theme, onThemeToggle, onBrowse }) {
           </button>
         </div>
       </div>
-
-      <p
-        className="shrink-0 text-center text-xs text-gray-400 px-5"
-        style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
-      >
-        Built by{" "}
-        <a
-          href="https://drshamiyah.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline underline-offset-2 hover:text-gray-600 transition-colors"
-        >
-          Khalid Shamiyah
-        </a>
-      </p>
     </div>
   );
 }
