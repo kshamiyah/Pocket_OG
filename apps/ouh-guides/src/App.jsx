@@ -3,16 +3,20 @@ import FlowchartPlayer from "../../pocket-og/src/components/FlowchartPlayer";
 import TabPageHeader from "../../pocket-og/src/components/TabPageHeader";
 import { glColors } from "../../pocket-og/src/data/glColors";
 import { OUH_GUIDES, OUH_FLOWCHARTS } from "./data/guides";
+import HomeSplash from "./HomeSplash";
 
 // Same theme key as Pocket O&G, so a user's light/dark choice carries over
 // if this app is ever served alongside it.
 const THEME_KEY = "pocketog_theme_v1";
 
-function initialFlowchart() {
-  try {
-    const id = new URLSearchParams(window.location.search).get("fc");
-    return id && OUH_FLOWCHARTS[id] ? id : null;
-  } catch { return null; }
+// The URL is the source of truth for where the user is, so the phone's back
+// gesture and shared links work: "/" is the welcome screen, "?guides" the
+// guide list, "?fc=<id>" a chart (over the list).
+function readUrl() {
+  const q = new URLSearchParams(window.location.search);
+  const fc = q.get("fc");
+  const activeId = fc && OUH_FLOWCHARTS[fc] ? fc : null;
+  return { view: activeId || q.has("guides") ? "list" : "home", activeId };
 }
 
 export default function App() {
@@ -27,13 +31,30 @@ export default function App() {
   }, [theme]);
   const toggleTheme = () => setTheme(t => (t === "dark" ? "light" : "dark"));
 
-  const [activeId, setActiveId] = useState(initialFlowchart);
-  const open = id => {
-    setActiveId(id);
-    try { window.history.replaceState(null, "", id ? `?fc=${encodeURIComponent(id)}` : window.location.pathname); } catch { /* ignore */ }
+  const [route, setRoute] = useState(readUrl);
+  useEffect(() => {
+    const onPop = () => setRoute(readUrl());
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+  // Forward moves push a history entry; going back pops it, or (if the user
+  // arrived on this screen by a link) replaces it with the parent screen.
+  const go = search => {
+    window.history.pushState({ inApp: true }, "", search);
+    setRoute(readUrl());
+  };
+  const back = parent => {
+    if (window.history.state?.inApp) { window.history.back(); return; }
+    window.history.replaceState(null, "", parent);
+    setRoute(readUrl());
   };
 
-  const active = activeId ? OUH_FLOWCHARTS[activeId] : null;
+  const open = id => go(`?fc=${encodeURIComponent(id)}`);
+  const active = route.activeId ? OUH_FLOWCHARTS[route.activeId] : null;
+
+  if (route.view === "home") {
+    return <HomeSplash theme={theme} onThemeToggle={toggleTheme} onBrowse={() => go("?guides")} />;
+  }
 
   return (
     <div className="min-h-screen bg-white pb-16">
@@ -43,12 +64,23 @@ export default function App() {
           flowchart={active}
           gl={active.gl}
           theme={glColors(active.gl)}
-          onClose={() => open(null)}
+          onClose={() => back("?guides")}
           appName="OUH Guides"
         />
       )}
 
-      <div className="max-w-lg mx-auto">
+      <div className="max-w-lg mx-auto relative">
+        <button
+          type="button"
+          onClick={() => back(window.location.pathname)}
+          className="absolute left-5 inline-flex items-center gap-1 pl-2 pr-3 py-1.5 rounded-full border border-gray-200 bg-white text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 active:scale-95 transition-all"
+          style={{ top: "max(1rem, env(safe-area-inset-top))" }}
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Home
+        </button>
         <TabPageHeader
           title="OUH Guides"
           subtitle="Oxford University Hospitals local guidelines"
