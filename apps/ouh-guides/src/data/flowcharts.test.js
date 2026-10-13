@@ -135,22 +135,25 @@ test("liquor volume follows Figure 2", () => {
 
 test("late FGR timing of birth follows every box of Figures 3 and 4", () => {
   const F = "OUH_GS32_LATE_FGR";
-  const fig3 = {
-    "UmbA AREDF": "f3-aredf",
-    "EFW below the 1st": "f3-urgent",
-    "EFW below the 10th centile and any": "f3-urgent",
-    "EFW at or above the 10th centile but": "f3-doppler",
-    "EFW 1st to 2nd": "f3-efw12",
-    "EFW 3rd to 9th centile with": "f3-efw12",
-    "EFW 3rd to 9th centile without": "f3-39",
-    "Isolated AC": "f3-39",
-    "ACGV reduction of 40 centiles or more and EFW 10th to 19th centile with": "f3-39",
-    "ACGV reduction of 40 centiles or more and either": "f3-40",
-    "ACGV reduction of 40 centiles or more and EFW at or above the 20th centile without": "f3-41",
-  };
-  for (const [box, out] of Object.entries(fig3)) {
-    expect(walk(F, ["35+0", box])).toBe(out);
-    expect(walk(F, ["37+0", box])).toBe(out.replace("f3", "f4"));
+  // Each box of the figure as a path: the finding, then (only where Table 7
+  // changes the outcome) the risk factor answer.
+  const fig3 = [
+    [["UmbA AREDF"], "f3-aredf"],
+    [["EFW below the 1st"], "f3-urgent"],
+    [["EFW below the 10th centile and any"], "f3-urgent"],
+    [["EFW at or above the 10th centile but"], "f3-doppler"],
+    [["EFW 1st to 2nd"], "f3-efw12"],
+    [["EFW 3rd to 9th", "One or more"], "f3-efw12"],
+    [["EFW 3rd to 9th", "No risk"], "f3-39"],
+    [["Isolated AC"], "f3-39"],
+    [["ACGV reduction of 40 centiles or more and EFW 10th to 19th", "One or more"], "f3-39"],
+    [["ACGV reduction of 40 centiles or more and EFW 10th to 19th", "No risk"], "f3-40"],
+    [["ACGV reduction of 40 centiles or more and EFW at or above the 20th", "One or more"], "f3-40"],
+    [["ACGV reduction of 40 centiles or more and EFW at or above the 20th", "No risk"], "f3-41"],
+  ];
+  for (const [picks, out] of fig3) {
+    expect(walk(F, ["35+0", ...picks])).toBe(out);
+    expect(walk(F, ["37+0", ...picks])).toBe(out.replace("f3", "f4"));
   }
   const n = OUH_FLOWCHARTS[F].nodes;
   expect(n["f3-urgent"].text).toMatch(/before 37\+0/);
@@ -162,8 +165,18 @@ test("late FGR timing of birth follows every box of Figures 3 and 4", () => {
   for (const id of ["f4-urgent", "f4-doppler", "f4-efw12"]) expect(n[id].text).toMatch(/Recommend urgent birth/);
   expect(n["f4-39"].text).not.toMatch(/Rescan/);
   expect(n["f4-40"].text).toMatch(/unless birth is planned before this/);
-  // Table 7 lists the ACGV fall itself; the risk factor list is shown, the clinician picks the box.
-  expect(n["f3-check"].items.join(" ")).toMatch(/ACGV reduction of 40 centiles/);
+  // Risk factors are asked only where they change the outcome, never up front.
+  expect(n["f3-check"].items).toBeUndefined();
+  for (const id of ["f3-check", "f4-check"]) {
+    expect(n[id].measures.map(m => m.label)).toEqual(["Uterine artery PI", "EFW", "AC", "ACGV", "UmbA EDF", "UmbA PI", "CPR", "Liquor MVP"]);
+  }
+  expect(n["f4-box"].options.filter(o => o.next.includes("-rf-")).length).toBe(3);
+  // Table 7 lists the ACGV fall itself; the ACGV questions say the guideline is silent on it rather than deciding.
+  for (const id of ["f3-rf-acgv-1019", "f4-rf-acgv-20"]) {
+    expect(n[id].items.join(" ")).toMatch(/ACGV reduction of 40 centiles/);
+    expect(n[id].text).toMatch(/does not say whether it counts/);
+  }
+  expect(n["f4-rf-efw"].text).not.toMatch(/does not say/);
 });
 
 test("multiple pregnancy follows GS69", () => {

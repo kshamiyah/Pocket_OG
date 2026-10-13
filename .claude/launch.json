@@ -12,6 +12,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "preview", "-w", "apps/pocket-og", "--", "--port", "4173", "--strictPort"],
       "port": 4173
+    },
+    {
+      "name": "ouh-guides-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview", "-w", "apps/ouh-guides", "--", "--port", "4174", "--strictPort"],
+      "port": 4174
     }
   ]
 }

@@ -5,6 +5,7 @@ import CTGFeaturePicker from "./CTGFeaturePicker";
 import { FLOWCHART_NODE_CONNECTIONS } from "../data/connections";
 import { glColors } from "../data/glColors";
 import ShareButton from "./ShareButton";
+import SourceViewer from "./SourceViewer";
 import { shareUrl as deepLinkUrl } from "../utils/deepLink";
 
 const NODE_STYLES = {
@@ -22,6 +23,8 @@ const END_STYLE_OVERRIDES = {
   "end-mlu":          { badge: "bg-teal-100 text-teal-700", icon: "✓", bar: "bg-teal-500" },
 };
 
+const IMAGE_SOURCE = /\.(jpe?g|png|webp)$/i;
+
 function getSublabelItems(sublabel) {
   if (Array.isArray(sublabel)) return sublabel.filter(Boolean);
   if (typeof sublabel !== "string") return [];
@@ -34,6 +37,7 @@ function getSublabelItems(sublabel) {
 export default function FlowchartPlayer({ flowchart, gl, theme, onClose, pdfUrl, onNavigate, appName = "Pocket O&G" }) {
   const [currentId, setCurrentId] = useState(flowchart.startId);
   const [history, setHistory] = useState([]); // [{ nodeId, label }]
+  const [viewingSource, setViewingSource] = useState(null);
 
   const node = flowchart.nodes[currentId];
   const styles = END_STYLE_OVERRIDES[currentId] ?? NODE_STYLES[node.type] ?? NODE_STYLES.action;
@@ -106,23 +110,37 @@ export default function FlowchartPlayer({ flowchart, gl, theme, onClose, pdfUrl,
         >×</button>
       </div>
 
-      {/* Path trail */}
+      {/* Back + path trail: sticky above the content, aligned with its column */}
       {history.length > 0 && (
-        <div className="shrink-0 px-4 py-2 border-b border-gray-50 overflow-x-auto">
-          <div className="flex gap-1.5 items-center min-w-max">
-            {history.map((h, i) => (
-              <span key={i} className="flex items-center gap-1.5">
-                {h.label && (
-                  <span className="px-2 py-0.5 rounded-full bg-gray-100 text-xs text-gray-500 whitespace-nowrap">
-                    {h.label}
+        <div className="shrink-0 px-4 py-2 border-b border-gray-100">
+          <div className="max-w-lg mx-auto flex items-center gap-2">
+            <button
+              onClick={goBack}
+              aria-label="Go back one step"
+              className="shrink-0 inline-flex items-center gap-1 pl-2 pr-3 py-1.5 rounded-full border border-gray-200 bg-white text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 active:scale-95 transition-all"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
+            <div className="flex-1 min-w-0 overflow-x-auto">
+              <div className="flex gap-1.5 items-center min-w-max">
+                {history.map((h, i) => (
+                  <span key={i} className="flex items-center gap-1.5">
+                    {h.label && (
+                      <span className="px-2 py-0.5 rounded-full bg-gray-100 text-xs text-gray-500 whitespace-nowrap">
+                        {h.label}
+                      </span>
+                    )}
+                    <span className="text-gray-300 text-xs">›</span>
                   </span>
-                )}
-                <span className="text-gray-300 text-xs">›</span>
-              </span>
-            ))}
-            <span className="px-2 py-0.5 rounded-full bg-teal-50 text-xs text-teal-600 font-medium whitespace-nowrap">
-              Step {stepNum}
-            </span>
+                ))}
+                <span className="px-2 py-0.5 rounded-full bg-teal-50 text-xs text-teal-600 font-medium whitespace-nowrap">
+                  Step {stepNum}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -169,7 +187,28 @@ export default function FlowchartPlayer({ flowchart, gl, theme, onClose, pdfUrl,
             </ul>
           )}
 
-          {/* Source citations: each opens the cited page (image or PDF) */}
+          {/* Measures: what to check, each with the categories the chart uses */}
+          {node.measures?.length > 0 && (
+            <div className="mb-4 rounded-2xl border border-gray-100 divide-y divide-gray-100">
+              {node.measures.map((m, i) => (
+                <div key={i} className="px-3.5 py-2.5 flex flex-col sm:flex-row sm:items-start gap-1.5 sm:gap-3">
+                  <div className="sm:w-32 shrink-0 sm:pt-0.5">
+                    <p className="text-sm font-semibold text-gray-900 leading-snug">{m.label}</p>
+                    {m.note && <p className="text-[11px] text-gray-400 leading-snug mt-0.5">{m.note}</p>}
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {m.values.map((v, j) => (
+                      <span key={j} className="px-2 py-0.5 rounded-md border border-gray-200 bg-gray-50 text-xs text-gray-600 whitespace-nowrap">
+                        {v}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Source citations: each opens the cited page (images in-app, PDFs in a new tab) */}
           {node.sources?.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-1.5">
               {node.sources.map((s, i) => (
@@ -178,6 +217,7 @@ export default function FlowchartPlayer({ flowchart, gl, theme, onClose, pdfUrl,
                   href={s.href}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={IMAGE_SOURCE.test(s.href) ? e => { e.preventDefault(); setViewingSource(s); } : undefined}
                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-100 text-xs text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors"
                 >
                   <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -283,15 +323,7 @@ export default function FlowchartPlayer({ flowchart, gl, theme, onClose, pdfUrl,
       </div>
 
       {/* Sticky bottom nav */}
-      <div className="shrink-0 border-t border-gray-100 px-4 py-3 flex justify-between items-center">
-        <button
-          onClick={goBack}
-          disabled={history.length === 0}
-          aria-label="Go back one step"
-          className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        >
-          <span>←</span> Back
-        </button>
+      <div className="shrink-0 border-t border-gray-100 px-4 py-3 flex justify-end items-center">
         <button
           onClick={restart}
           aria-label="Restart flowchart from beginning"
@@ -300,6 +332,8 @@ export default function FlowchartPlayer({ flowchart, gl, theme, onClose, pdfUrl,
           ↺ Restart
         </button>
       </div>
+
+      <SourceViewer source={viewingSource} onClose={() => setViewingSource(null)} />
 
     </div>
   );

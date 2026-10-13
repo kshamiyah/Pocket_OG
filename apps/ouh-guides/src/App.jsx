@@ -55,14 +55,7 @@ export default function App() {
           theme={theme}
           onThemeToggle={toggleTheme}
         />
-
-        <div className="mx-5 mt-4 mb-5 rounded-2xl border border-green-100 bg-green-50 px-4 py-3">
-          <p className="text-xs text-green-700 leading-relaxed">
-            Local OUH guidance, laid out as interactive pathways. Each step cites the guideline page it comes from.
-            Decision aid only: clinical responsibility remains with the treating clinician. Check the current approved
-            version on the OUH intranet before relying on it.
-          </p>
-        </div>
+        <div className="h-5" />
 
         {OUH_GUIDES.map(guide => {
           const col = glColors(guide.code);
