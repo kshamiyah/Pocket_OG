@@ -33,6 +33,10 @@ export const SOURCE_COLORS = {
   BGCS:     { badge: "bg-zinc-100 text-zinc-700",      border: "border-zinc-200",    conditionColor: "text-zinc-500",    icon: "text-zinc-500",    accent: "bg-zinc-500",    solid: "bg-zinc-700",    solidHover: "hover:bg-zinc-800",    text: "text-zinc-700",    bg: "bg-zinc-50" },
   REVIEW:   { badge: "bg-stone-100 text-stone-700",    border: "border-stone-200",   conditionColor: "text-stone-500",   icon: "text-stone-500",   accent: "bg-stone-500",   solid: "bg-stone-600",   solidHover: "hover:bg-stone-700",   text: "text-stone-700",   bg: "bg-stone-50" },
   MHRA:     { badge: "bg-red-50 text-red-700",         border: "border-red-100",     conditionColor: "text-red-500",     icon: "text-red-500",     accent: "bg-red-500",     solid: "bg-red-600",     solidHover: "hover:bg-red-700",     text: "text-red-700",     bg: "bg-red-50" },
+  // Local trust guides published in their own apps (e.g. apps/ouh-guides).
+  // Not in SOURCE_ORDER, so they stay out of Pocket O&G's legend and filters
+  // until a local app is merged in.
+  OUH:      { badge: "bg-green-50 text-green-700",     border: "border-green-100",   conditionColor: "text-green-600",   icon: "text-green-600",   accent: "bg-green-500",   solid: "bg-green-600",   solidHover: "hover:bg-green-700",   text: "text-green-700",   bg: "bg-green-50" },
   REPORT:   { badge: "bg-amber-50 text-amber-800",     border: "border-amber-100",   conditionColor: "text-amber-600",   icon: "text-amber-600",   accent: "bg-amber-500",   solid: "bg-amber-600",   solidHover: "hover:bg-amber-700",   text: "text-amber-800",   bg: "bg-amber-50" },
 };
 
@@ -58,6 +62,7 @@ export const SOURCE_LABELS = {
   MHRA: "MHRA",
   REPORT: "National report",
   REVIEW: "Peer-reviewed review literature",
+  OUH: "OUH: Oxford University Hospitals local guideline",
 };
 
 // Hex equivalents (the -500 shades) for places that can't use Tailwind classes
@@ -67,6 +72,7 @@ export const SOURCE_HEX = {
   BASHH: "#d946ef", NHSCSP: "#64748b", MBRRACE: "#6366f1",
   TOG: "#ec4899", TRIAL: "#06b6d4", UKKA: "#10b981", ESC: "#f43f5e",
   ESHRE: "#a855f7",
+  OUH: "#22c55e",
   BHIVA: "#f97316",
   FSRH: "#84cc16",
   BSH: "#0ea5e9",
@@ -104,5 +110,6 @@ export function sourceFromLabel(label = "") {
 // guidelines but ARE a source key (e.g. "TOG") theme by that source directly;
 // anything else falls through to the neutral default.
 export function glColors(gl) {
-  return sourceColors(GUIDELINES[gl]?.source ?? gl);
+  // Codes not in the registry may carry their source as a prefix ("OUH-GS32").
+  return sourceColors(GUIDELINES[gl]?.source ?? (SOURCE_COLORS[gl] ? gl : String(gl ?? "").split("-")[0]));
 }

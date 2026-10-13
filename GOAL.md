@@ -312,3 +312,10 @@ apps/pocket-og/public/rx-sources/.
   points (1.4.5, 1.10.4) on every card; new relugolix CT and linzagolix cards
   (TA doses defer to SmPC: refer to local guidelines). Add-back and 6-month
   limit kept as cautions pending BNF. Version 1.39.0. Next: mental health.
+- 13 Oct 2026: New app apps/ouh-guides ("OUH Guides"): OUH GS32 v3.2 and GS69
+  v3.1 as Pocket O&G-format flowcharts, rules checked against the PDFs (two
+  passes; corrected the source JSON: EFW < 3rd, ACGV risk counting, missing
+  Figure 3 Doppler box, bicornuate PTL referral, MCMA schedule). Ambiguities
+  left as in the guideline. Pocket O&G gains source-page chips on flowchart
+  nodes and an OUH source colour (not in SOURCE_ORDER). Mental health Rx check
+  paused awaiting choices.

@@ -31,7 +31,7 @@ function getSublabelItems(sublabel) {
     .filter(Boolean);
 }
 
-export default function FlowchartPlayer({ flowchart, gl, theme, onClose, pdfUrl, onNavigate }) {
+export default function FlowchartPlayer({ flowchart, gl, theme, onClose, pdfUrl, onNavigate, appName = "Pocket O&G" }) {
   const [currentId, setCurrentId] = useState(flowchart.startId);
   const [history, setHistory] = useState([]); // [{ nodeId, label }]
 
@@ -94,7 +94,7 @@ export default function FlowchartPlayer({ flowchart, gl, theme, onClose, pdfUrl,
         )}
         <ShareButton
           title={flowchart.title}
-          text={`${flowchart.title}${flowchart.subtitle ? ` (${flowchart.subtitle})` : ""} — flowchart via Pocket O&G`}
+          text={`${flowchart.title}${flowchart.subtitle ? ` (${flowchart.subtitle})` : ""} — flowchart via ${appName}`}
           url={deepLinkUrl("flowchart", flowchart.id)}
           label="Share flowchart"
           dark
@@ -167,6 +167,26 @@ export default function FlowchartPlayer({ flowchart, gl, theme, onClose, pdfUrl,
                 </li>
               ))}
             </ul>
+          )}
+
+          {/* Source citations: each opens the cited page (image or PDF) */}
+          {node.sources?.length > 0 && (
+            <div className="mb-4 flex flex-wrap gap-1.5">
+              {node.sources.map((s, i) => (
+                <a
+                  key={i}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-100 text-xs text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors"
+                >
+                  <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  {s.label}
+                </a>
+              ))}
+            </div>
           )}
 
           {/* Decision options */}
