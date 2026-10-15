@@ -173,7 +173,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
           className={`${INPUT} text-2xl font-semibold tabular-nums tracking-wide ${gest.digits.length >= 2 && !gest.valid ? "border-red-400 dark:border-red-700" : ""}`} />
         <p className={`${TYPE_META} mt-1`}>
           {gest.digits.length < 2 ? "Weeks then days, e.g. 3 9 4."
-            : !gest.valid ? (gest.d > 6 ? "Days must be 0 to 6." : "Weeks must be 22 to 44.")
+            : !gest.valid ? (gest.d > 6 ? "Days must be 0 to 6." : gest.w < 22 ? "Earliest is 22+0." : "Latest is 43+0.")
             : gest.digits.length === 2 ? `${gest.w}+0. Add a digit for the days.` : `${gest.w}+${gest.d} weeks.`}
         </p>
       </div>

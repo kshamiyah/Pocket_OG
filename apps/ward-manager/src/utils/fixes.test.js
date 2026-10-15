@@ -175,6 +175,9 @@ describe("typed gestation", () => {
   it("rejects impossible values", () => {
     expect(gestFromDigits("397").valid).toBe(false)
     expect(gestFromDigits("214").valid).toBe(false)
+    expect(gestFromDigits("430").valid).toBe(true)
+    expect(gestFromDigits("431").valid).toBe(false)
+    expect(gestFromDigits("44").valid).toBe(false)
     expect(gestFromDigits("3").valid).toBe(false)
   })
 })
