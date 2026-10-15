@@ -172,12 +172,13 @@ describe("typed gestation", () => {
   it("ignores the plus sign and extra digits", () => {
     expect(gestFromDigits("39+45")).toMatchObject({ digits: "394", w: 39, d: 4 })
   })
-  it("rejects impossible values", () => {
-    expect(gestFromDigits("397").valid).toBe(false)
-    expect(gestFromDigits("214").valid).toBe(false)
-    expect(gestFromDigits("430").valid).toBe(true)
-    expect(gestFromDigits("431").valid).toBe(false)
-    expect(gestFromDigits("44").valid).toBe(false)
-    expect(gestFromDigits("3").valid).toBe(false)
+  it("refuses digits that would make an impossible gestation", () => {
+    expect(gestFromDigits("397").digits).toBe("39")   // day 7 refused
+    expect(gestFromDigits("21").digits).toBe("2")     // 21 weeks refused
+    expect(gestFromDigits("44").digits).toBe("4")     // 44 weeks refused
+    expect(gestFromDigits("5").digits).toBe("")       // 5x weeks impossible
+    expect(gestFromDigits("431").digits).toBe("43")   // only 43+0
+    expect(gestFromDigits("430")).toMatchObject({ w: 43, d: 0, valid: true })
+    expect(gestFromDigits("4").valid).toBe(false)
   })
 })

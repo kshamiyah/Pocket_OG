@@ -50,7 +50,18 @@ export function parityShort(p) {
  * (letters, "+") is ignored. Valid range 22+0 to 43+0.
  */
 export function gestFromDigits(input) {
-  const digits = String(input ?? "").replace(/\D/g, "").slice(0, 3);
+  // Keep a digit only if the gestation can still end up between 22+0 and
+  // 43+0, so an impossible value can never be typed in the first place.
+  const possible = d => {
+    if (d.length >= 1 && !"234".includes(d[0])) return false;
+    if (d.length >= 2) { const w = Number(d.slice(0, 2)); if (w < 22 || w > 43) return false; }
+    if (d.length === 3) { const day = Number(d[2]); if (day > 6 || (d.startsWith("43") && day > 0)) return false; }
+    return true;
+  };
+  let digits = "";
+  for (const ch of String(input ?? "").replace(/\D/g, "")) {
+    if (digits.length < 3 && possible(digits + ch)) digits += ch;
+  }
   if (digits.length < 2) return { digits, w: null, d: null, valid: false };
   const w = Number(digits.slice(0, 2));
   const d = digits.length === 3 ? Number(digits[2]) : 0;
