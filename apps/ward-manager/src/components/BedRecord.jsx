@@ -6,10 +6,19 @@ import {
   BTN, BTN_PRIMARY, BTN_SECONDARY, CARD, CHIP_ON, CTG_BOX, INPUT, TYPE_DISPLAY, TYPE_META, TYPE_UI_SM,
 } from "../ui/styles";
 import { IconBack, IconTick } from "../ui/icons";
-import { fmtAge, hhmm } from "../utils/time";
+import { fmtAge, clock } from "../utils/time";
 import {
-  ANALGESIA, LIQUOR_SHORT, STAGES, STAGE_SHORT, currentOxytocin, newId, obsStatus, parityShort, sortedVEs, stageLabel, stationLabel,
+  ANALGESIA, LIQUOR_SHORT, PERSISTENT_FLAGS, STAGES, STAGE_SHORT, currentOxytocin, newId, obsStatus, parityShort, sortedVEs, stageLabel, stationLabel,
 } from "../utils/bedModel";
+
+// Labels for the "recorded as done" list, so a mistaken Given or Done can be taken back.
+const DONE_LABEL = {
+  gbsAntibioticsStarted: "GBS antibiotics given",
+  neonatalTeamAlerted: "Neonatal team alerted",
+  mgso4Given: "MgSO4 given",
+  corticosteroidsConfirmed: "Steroids confirmed",
+  tocolysisOffered: "Tocolysis offered",
+};
 
 const TASK_QUICK = ["Repeat FBC", "Group & Save", "Clotting screen", "Senior review", "Repeat CTG", "Antibiotics due", "Consent form", "IV access", "Urine dip"];
 
@@ -51,7 +60,7 @@ function ObsPanel({ bed, now, onUpdate }) {
             <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${it.done ? "bg-emerald-500" : "border-2 border-gray-400 dark:border-gray-600"}`} />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-gray-900 dark:text-white">{it.label}{shown(it) ? ` · ${shown(it)} ${it.unit}` : ""}</p>
-              <p className={TYPE_META}>{it.at ? `${hhmm(it.at)} (${fmtAge(now - it.at)} ago)` : "Not recorded"}</p>
+              <p className={TYPE_META}>{it.at ? `${clock(it.at)} (${fmtAge(now - it.at)} ago)` : "Not recorded"}</p>
             </div>
             <SmallBtn onClick={() => { setOpen(open === it.key ? null : it.key); setV1(""); setV2(""); }}>Value</SmallBtn>
             <SmallBtn onClick={() => onUpdate({ observations: { ...obs, [it.key]: new Date().toISOString() } }, `${it.label} done`)}>Done</SmallBtn>
@@ -61,7 +70,8 @@ function ObsPanel({ bed, now, onUpdate }) {
               <input autoFocus type="number" inputMode={it.type === "float" ? "decimal" : "numeric"} value={v1} onChange={e => setV1(e.target.value)}
                 placeholder={it.type === "bp" ? "Systolic" : `${it.label} (${it.unit})`} className={`${INPUT} flex-1`} aria-label={it.type === "bp" ? "Systolic" : it.label} />
               {it.type === "bp" && <input type="number" inputMode="numeric" value={v2} onChange={e => setV2(e.target.value)} placeholder="Diastolic" className={`${INPUT} flex-1`} aria-label="Diastolic" />}
-              <button type="button" onClick={() => saveValue(it)} className={`${BTN} ${BTN_PRIMARY} px-4`} aria-label="Save value"><IconTick /></button>
+              <button type="button" onClick={() => saveValue(it)} disabled={it.type === "bp" ? !(v1 && v2) : !v1}
+                className={`${BTN} ${BTN_PRIMARY} px-4`} aria-label="Save value"><IconTick /></button>
             </div>
           )}
         </div>
@@ -128,7 +138,7 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
               className="w-11 h-11 -ml-2 rounded-full flex items-center justify-center text-claude-700 dark:text-claude-400 active:scale-95"><IconBack /></button>
             <div className="flex-1 min-w-0">
               <h2 className={TYPE_DISPLAY}>Bed {bed.bedNumber}</h2>
-              <p className={`${TYPE_META} mt-0.5`}>{parityShort(bed.parity)} · {bed.gestation} · {stageLabel(bed)}{bed.admissionTime ? ` · admitted ${hhmm(bed.admissionTime)}` : ""}</p>
+              <p className={`${TYPE_META} mt-0.5`}>{parityShort(bed.parity)} · {bed.gestation} · {stageLabel(bed)}{bed.admissionTime ? ` · admitted ${clock(bed.admissionTime)}` : ""}</p>
             </div>
             <button type="button" onClick={onEdit} className="min-h-11 px-3 text-sm font-semibold text-claude-700 dark:text-claude-400">Edit</button>
           </div>
@@ -147,14 +157,27 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
             {t.alerts.length ? <AlertList alerts={t.alerts} onFix={onFix} /> : (
               <p className="rounded-xl border px-3 py-2.5 text-sm bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-400">All clear. No active alerts.</p>
             )}
+            {Object.values(PERSISTENT_FLAGS).some(f => bed[f.field]) && (
+              <div>
+                <Label>Recorded as done</Label>
+                <div className="space-y-1.5">
+                  {Object.values(PERSISTENT_FLAGS).filter(f => bed[f.field]).map(f => (
+                    <div key={f.field} className={`${CARD} px-3 py-2 flex items-center justify-between gap-3`}>
+                      <span className="text-sm text-gray-800 dark:text-gray-200">{DONE_LABEL[f.field] ?? f.field}</span>
+                      <SmallBtn onClick={() => onUpdate({ [f.field]: false }, `${DONE_LABEL[f.field] ?? "Item"} taken back`)}>Not done</SmallBtn>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             {!bed.delivery && (
               <div>
                 <Label hint="NICE NG235 §1.1">Stage</Label>
                 <div className="flex flex-wrap gap-1.5">
                   {STAGES.map(s => <Chip key={s} on={bed.labourStage === s} onClick={() => onStage(s)}>{STAGE_SHORT[s]}</Chip>)}
                 </div>
-                {bed.labourStage === "Active second stage" && bed.pushingStartTime && <p className={`${TYPE_META} mt-1.5`}>Pushing since {hhmm(bed.pushingStartTime)} ({fmtAge(now - new Date(bed.pushingStartTime).getTime())})</p>}
-                {bed.labourStage === "Passive second stage" && bed.passiveStartTime && <p className={`${TYPE_META} mt-1.5`}>Fully dilated since {hhmm(bed.passiveStartTime)} ({fmtAge(now - new Date(bed.passiveStartTime).getTime())})</p>}
+                {bed.labourStage === "Active second stage" && bed.pushingStartTime && <p className={`${TYPE_META} mt-1.5`}>Pushing since {clock(bed.pushingStartTime)} ({fmtAge(now - new Date(bed.pushingStartTime).getTime())})</p>}
+                {bed.labourStage === "Passive second stage" && bed.passiveStartTime && <p className={`${TYPE_META} mt-1.5`}>Fully dilated since {clock(bed.passiveStartTime)} ({fmtAge(now - new Date(bed.passiveStartTime).getTime())})</p>}
               </div>
             )}
             <div>
@@ -164,14 +187,14 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
             {bed.modeOfOnset === "Induced" && (
               <div className={`${CARD} px-3 py-2.5 space-y-0.5`}>
                 <p className="text-sm font-semibold text-gray-900 dark:text-white">Induction · {bed.inductionMethod ?? "method not recorded"}</p>
-                <p className={TYPE_META}>{bed.inductionStartTime ? `Started ${hhmm(bed.inductionStartTime)} (${fmtAge(now - new Date(bed.inductionStartTime).getTime())} ago)` : "Start time not recorded"}</p>
+                <p className={TYPE_META}>{bed.inductionStartTime ? `Started ${clock(bed.inductionStartTime)} (${fmtAge(now - new Date(bed.inductionStartTime).getTime())} ago)` : "Start time not recorded"}</p>
                 {(bed.iolReasons ?? []).length > 0 && <p className={TYPE_META}>{bed.iolReasons.join(", ")}</p>}
               </div>
             )}
             {bed.delivery ? (
               <div className="rounded-xl border px-3 py-2.5 bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 flex items-start gap-3">
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400">{bed.delivery.mode} at {hhmm(bed.delivery.time)}</p>
+                  <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400">{bed.delivery.mode} at {clock(bed.delivery.time)}</p>
                   <p className="text-xs text-emerald-700 dark:text-emerald-400/80">{bed.delivery.ebl != null ? `EBL ${bed.delivery.ebl} mL` : "EBL not recorded"}{bed.delivery.notes ? ` · ${bed.delivery.notes}` : ""}</p>
                 </div>
                 <SmallBtn onClick={onOpenDelivery}>Edit</SmallBtn>
@@ -191,14 +214,14 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
               <div key={v.id} className={`${CARD} px-3 py-2.5 flex items-center gap-3`}>
                 <span className="text-2xl font-semibold tabular-nums text-gray-900 dark:text-white w-14">{v.dilation}<span className="text-xs font-normal text-gray-500"> cm</span></span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{hhmm(v.time)} <span className={TYPE_META}>({fmtAge(now - new Date(v.time).getTime())} ago)</span></p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{clock(v.time)} <span className={TYPE_META}>({fmtAge(now - new Date(v.time).getTime())} ago)</span></p>
                   <p className={TYPE_META}>
-                    Station {stationLabel(v.station)} · {v.membranes ?? "?"}{v.membranesTime ? ` ${hhmm(v.membranesTime)}` : ""}{v.liquor ? ` · ${LIQUOR_SHORT[v.liquor] ?? v.liquor}` : ""}{v.contractions != null ? ` · ${v.contractions} in 10` : ""}
+                    {v.station != null ? `Station ${stationLabel(v.station)} · ` : ""}{v.presentation && v.presentation !== "Cephalic" ? `${v.presentation} · ` : ""}{v.membranes ?? "Membranes not recorded"}{v.membranesTime ? ` ${clock(v.membranesTime)}` : ""}{v.liquor ? ` · ${LIQUOR_SHORT[v.liquor] ?? v.liquor}` : ""}{v.contractions != null ? ` · ${v.contractions} in 10` : ""}
                   </p>
                 </div>
                 <div className="flex flex-col gap-1">
                   <SmallBtn onClick={() => onOpenVE(v)}>Edit</SmallBtn>
-                  <SmallBtn tone="red" onClick={() => onUpdate({ ves: (bed.ves ?? []).filter(x => x.id !== v.id) }, `VE ${hhmm(v.time)} deleted`)}>Delete</SmallBtn>
+                  <SmallBtn tone="red" onClick={() => onUpdate({ ves: (bed.ves ?? []).filter(x => x.id !== v.id) }, `VE ${clock(v.time)} deleted`)}>Delete</SmallBtn>
                 </div>
               </div>
             ))}
@@ -213,14 +236,14 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
               <div key={c.id} className={`${CARD} px-3 py-2.5 flex items-start gap-3`}>
                 <div className="flex-1 min-w-0 space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{hhmm(c.time)}</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{clock(c.time)}</span>
                     <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded border capitalize ${CTG_BOX[c.classification] ?? ""}`}>{c.classification}</span>
                   </div>
                   <p className={TYPE_META}>{c.baselineHR != null ? ctgSummary(c) : "Logged as normal"}</p>
                 </div>
                 <div className="flex flex-col gap-1">
                   <SmallBtn onClick={() => onOpenCTG(c)}>Edit</SmallBtn>
-                  <SmallBtn tone="red" onClick={() => onUpdate({ ctgLog: (bed.ctgLog ?? []).filter(x => x.id !== c.id) }, `CTG ${hhmm(c.time)} deleted`)}>Delete</SmallBtn>
+                  <SmallBtn tone="red" onClick={() => onUpdate({ ctgLog: (bed.ctgLog ?? []).filter(x => x.id !== c.id) }, `CTG ${clock(c.time)} deleted`)}>Delete</SmallBtn>
                 </div>
               </div>
             ))}
@@ -236,12 +259,12 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
               <div className={`${CARD} px-3 py-2.5 flex items-center gap-3`}>
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">{oxy ? `${oxy.dose} mU/min` : "Not running"}</p>
-                  {oxy && <p className={TYPE_META}>Last change {hhmm(oxy.lastIncrementTime ?? oxy.startTime)} ({fmtAge(now - new Date(oxy.lastIncrementTime ?? oxy.startTime).getTime())} ago)</p>}
+                  {oxy && <p className={TYPE_META}>Last change {clock(oxy.lastIncrementTime ?? oxy.startTime)} ({fmtAge(now - new Date(oxy.lastIncrementTime ?? oxy.startTime).getTime())} ago)</p>}
                 </div>
                 <SmallBtn onClick={onOpenOxy}>{oxy ? "Change dose" : "Start"}</SmallBtn>
               </div>
               {(bed.oxytocinLog ?? []).length > 1 && (
-                <p className={`${TYPE_META} mt-1.5`}>History: {(bed.oxytocinLog ?? []).map(o => `${o.dose} at ${hhmm(o.lastIncrementTime ?? o.startTime)}`).join(", ")}</p>
+                <p className={`${TYPE_META} mt-1.5`}>History: {(bed.oxytocinLog ?? []).map(o => `${o.dose} at ${clock(o.lastIncrementTime ?? o.startTime)}`).join(", ")}</p>
               )}
             </div>
           </>

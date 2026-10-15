@@ -2,7 +2,7 @@ import { useState } from "react";
 import Sheet from "../ui/Sheet";
 import { Label, Stepper, WhenPicker } from "../ui/atoms";
 import { BTN, BTN_PRIMARY } from "../ui/styles";
-import { hhmm, resolveWhen } from "../utils/time";
+import { clock, resolveWhen } from "../utils/time";
 import { currentOxytocin, newId } from "../utils/bedModel";
 
 const PROTOCOL = [
@@ -27,7 +27,7 @@ export default function OxySheet({ bed, onSave, onClose }) {
         </button>
       }>
       {current && (
-        <p className="text-sm text-gray-700 dark:text-gray-300">Current: <b>{current.dose} mU/min</b> since {hhmm(current.lastIncrementTime ?? current.startTime)}</p>
+        <p className="text-sm text-gray-700 dark:text-gray-300">Current: <b>{current.dose} mU/min</b> since {clock(current.lastIncrementTime ?? current.startTime)}</p>
       )}
       <div>
         <Label>Dose (mU/min)</Label>

@@ -7,7 +7,7 @@ import { classifyCTGEntry } from "../utils/wardAlerts";
 import { newId } from "../utils/bedModel";
 import { CTG_DESC } from "../utils/ctgText";
 
-export default function CTGSheet({ bed, editCTG = null, onSave, onClose }) {
+export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, onClose }) {
   const log = bed.ctgLog ?? [];
   // Quick "CTG normal" entries carry no features, so look back for the last full review.
   const prev = (editCTG ? log.filter(e => e.id !== editCTG.id) : log).filter(e => e.baselineHR != null).at(-1) ?? null;
@@ -20,7 +20,7 @@ export default function CTGSheet({ bed, editCTG = null, onSave, onClose }) {
   const [dec, setDec] = useState(editCTG?.decelerations ?? "none");
   const [decMin, setDecMin] = useState(editCTG?.decelerationMinutes ?? 0);
   const [accel, setAccel] = useState(editCTG?.accelerations ?? true);
-  const [ctx, setCtx] = useState(editCTG?.contractionsPerTen ?? 3);
+  const [ctx, setCtx] = useState(editCTG?.contractionsPerTen ?? null); // optional, never guessed
 
   const entry = { baselineHR: hr, variability: vari, variabilityMinutes: varMin, decelerations: dec, decelerationMinutes: decMin, accelerations: accel, contractionsPerTen: ctx };
   const cat = useMemo(() => classifyCTGEntry(entry, prevHR), [hr, vari, varMin, dec, decMin, accel, ctx, prevHR]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -40,6 +40,7 @@ export default function CTGSheet({ bed, editCTG = null, onSave, onClose }) {
           {editCTG ? "Save changes" : `Log ${cat} CTG`}
         </button>
       }>
+      {notice && <p className="text-sm font-semibold text-claude-800 dark:text-claude-300">{notice}</p>}
       <div className={`rounded-xl border px-3 py-2.5 ${CTG_BOX[cat]}`}>
         <p className="text-base font-semibold capitalize">{cat}</p>
         <p className="text-sm opacity-90 leading-snug">{CTG_DESC[cat]}</p>
@@ -90,8 +91,8 @@ export default function CTGSheet({ bed, editCTG = null, onSave, onClose }) {
       </div>
 
       <div>
-        <Label hint={ctx >= 5 ? "tachysystole: see NG229" : undefined}>Contractions in 10 min</Label>
-        <ChipRow small value={ctx} onChange={setCtx} options={[0, 1, 2, 3, 4, 5, 6, 7]} />
+        <Label hint={ctx >= 5 ? "tachysystole: see NG229" : "optional"}>Contractions in 10 min</Label>
+        <ChipRow small value={ctx} onChange={v => setCtx(ctx === v ? null : v)} options={[0, 1, 2, 3, 4, 5, 6, 7]} />
       </div>
 
       <WhenPicker label="Time of review" value={when} onChange={setWhen} />

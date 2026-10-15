@@ -2,10 +2,10 @@ import Sheet from "../ui/Sheet";
 import { Chip, Label } from "../ui/atoms";
 import { ALERT_BOX, BTN, BTN_CONCERN, BTN_OK, BTN_SECONDARY, SEV_TEXT, TYPE_META } from "../ui/styles";
 import { IconTick, IconChevron } from "../ui/icons";
-import { fmtAge, hhmm } from "../utils/time";
+import { fmtAge, clock } from "../utils/time";
 import {
   STAGES, STAGE_SHORT, LIQUOR_SHORT, capitalise, currentOxytocin, fixLabel, lastCTG, lastVE, obsStatus, obsTracked,
-  parityShort, stageLabel, stationLabel,
+  parityShort, stageLabel, veFindings, membraneStatus,
 } from "../utils/bedModel";
 import { tidy } from "../utils/triage";
 
@@ -56,7 +56,7 @@ export default function BedSheet({ bed, t, now, onClose, onCTGNormal, onCTGConce
     return (
       <Sheet open onClose={onClose} title={`Bed ${bed.bedNumber}`} sub={sub}>
         <div className="rounded-xl border px-3 py-2.5 bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800">
-          <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400">{d.mode} at {hhmm(d.time)}</p>
+          <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400">{d.mode} at {clock(d.time)}</p>
           <p className="text-xs text-emerald-700 dark:text-emerald-400/80">{d.ebl != null ? `EBL ${d.ebl} mL` : "EBL not recorded"}{d.notes ? ` · ${d.notes}` : ""}</p>
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -74,13 +74,15 @@ export default function BedSheet({ bed, t, now, onClose, onCTGNormal, onCTGConce
       {t.shown.length ? <AlertList alerts={t.shown} onFix={onFix} /> : (
         <div className="rounded-xl border px-3 py-2.5 bg-gray-50 dark:bg-gray-900/60 border-gray-200 dark:border-gray-800">
           <p className="text-sm text-gray-700 dark:text-gray-300">
-            Nothing due.{t.next ? <> Next: <span className="font-semibold">{t.next.label} {hhmm(t.next.at)}</span> (in {fmtAge(t.next.at - now)})</> : null}
+            Nothing due.{t.next ? <> Next: <span className="font-semibold">{t.next.label} {clock(t.next.at)}</span> (in {fmtAge(t.next.at - now)})</> : null}
           </p>
         </div>
       )}
 
       <div className="grid grid-cols-2 gap-2">
-        <button type="button" onClick={onCTGNormal} className={`${BTN} ${BTN_OK} min-h-14 text-base`}><IconTick /> CTG normal</button>
+        {ctg && ctg.classification !== "normal"
+          ? <button type="button" onClick={onCTGNormal} className={`${BTN} ${BTN_OK} min-h-14 text-base`}>CTG review</button>
+          : <button type="button" onClick={onCTGNormal} className={`${BTN} ${BTN_OK} min-h-14 text-base`}><IconTick /> CTG normal</button>}
         <button type="button" onClick={onCTGConcern} className={`${BTN} ${BTN_CONCERN} min-h-14 text-base`}>CTG concern</button>
         <button type="button" onClick={onVE} className={`${BTN} ${BTN_SECONDARY} min-h-14 text-base`}>VE</button>
         <button type="button" onClick={onObs} className={`${BTN} ${BTN_SECONDARY} min-h-14 text-base`}><IconTick /> Obs done</button>
@@ -95,12 +97,12 @@ export default function BedSheet({ bed, t, now, onClose, onCTGNormal, onCTGConce
       </div>
 
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
-        <Fact k="Last VE">{ve ? `${ve.dilation} cm · station ${stationLabel(ve.station)} · ${hhmm(ve.time)} (${fmtAge(now - new Date(ve.time).getTime())} ago)` : "None recorded"}</Fact>
-        <Fact k="Last CTG">{ctg ? `${capitalise(ctg.classification)} · ${hhmm(ctg.time)} (${fmtAge(now - new Date(ctg.time).getTime())} ago)` : "Not logged"}</Fact>
+        <Fact k="Last VE">{ve ? `${veFindings(ve)} · ${clock(ve.time)} (${fmtAge(now - new Date(ve.time).getTime())} ago)` : "None recorded"}</Fact>
+        <Fact k="Last CTG">{ctg ? `${capitalise(ctg.classification)} · ${clock(ctg.time)} (${fmtAge(now - new Date(ctg.time).getTime())} ago)` : "Not logged"}</Fact>
         {obsTracked(bed) && <Fact k="Obs">{obs.map(o => `${o.letter} ${o.done ? "✓" : "due"}`).join("   ")}</Fact>}
-        <Fact k="Membranes">{ve?.membranes ?? "Not recorded"}{ve?.membranes && ve.membranes !== "Intact" && ve.membranesTime ? ` ${hhmm(ve.membranesTime)}` : ""}{ve?.liquor ? ` · ${LIQUOR_SHORT[ve.liquor] ?? ve.liquor}` : ""}</Fact>
-        {oxy && <Fact k="Oxytocin">{oxy.dose} mU/min since {hhmm(oxy.lastIncrementTime ?? oxy.startTime)}</Fact>}
-        {bed.modeOfOnset === "Induced" && <Fact k="IOL">{[bed.inductionMethod, bed.inductionStartTime ? `started ${hhmm(bed.inductionStartTime)}` : null].filter(Boolean).join(" · ") || "Induced"}</Fact>}
+        <Fact k="Membranes">{(() => { const m = membraneStatus(bed); return m.status ? `${m.status}${m.time ? ` ${clock(m.time)}` : ""}${m.liquor ? ` · ${LIQUOR_SHORT[m.liquor] ?? m.liquor}` : ""}` : "Not recorded"; })()}</Fact>
+        {oxy && <Fact k="Oxytocin">{oxy.dose} mU/min since {clock(oxy.lastIncrementTime ?? oxy.startTime)}</Fact>}
+        {bed.modeOfOnset === "Induced" && <Fact k="IOL">{[bed.inductionMethod, bed.inductionStartTime ? `started ${clock(bed.inductionStartTime)}` : null].filter(Boolean).join(" · ") || "Induced"}</Fact>}
       </dl>
 
       <div className="grid grid-cols-2 gap-2">

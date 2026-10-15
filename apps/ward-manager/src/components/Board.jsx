@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { fmtAge, hhmm, MIN } from "../utils/time";
-import { lastVE, obsStatus, obsTracked, parityShort, stageLabel, currentOxytocin, doctorLabel } from "../utils/bedModel";
+import { fmtAge, clock, MIN } from "../utils/time";
+import { lastVE, obsStatus, obsTracked, parityShort, stageLabel, currentOxytocin, doctorLabel, malpresentation } from "../utils/bedModel";
 import { shortLabel } from "../utils/triage";
 import { iolEntryTier } from "../utils/iolPriority";
 import {
@@ -51,7 +51,7 @@ export function BedRow({ bed, t, now, onOpen, flash }) {
   } else if (t.next) {
     side = (
       <>
-        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t.next.label} {hhmm(t.next.at)}</span>
+        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t.next.label} {clock(t.next.at)}</span>
         <span className={TYPE_META}>in {fmtAge(t.next.at - now)}</span>
       </>
     );
@@ -61,7 +61,7 @@ export function BedRow({ bed, t, now, onOpen, flash }) {
 
   let status;
   if (bed.delivery) {
-    status = <span className="text-sm text-gray-700 dark:text-gray-300">{bed.delivery.mode} {hhmm(bed.delivery.time)}{bed.delivery.ebl != null ? ` · EBL ${bed.delivery.ebl} mL` : ""}</span>;
+    status = <span className="text-sm text-gray-700 dark:text-gray-300">{bed.delivery.mode} {clock(bed.delivery.time)}{bed.delivery.ebl != null ? ` · EBL ${bed.delivery.ebl} mL` : ""}</span>;
   } else if (bed.labourStage === "Active second stage" && bed.pushingStartTime) {
     status = <><span className="text-sm text-gray-700 dark:text-gray-300">Pushing</span><span className={TYPE_META}>{fmtAge(now - new Date(bed.pushingStartTime).getTime())}</span></>;
   } else {
@@ -89,6 +89,7 @@ export function BedRow({ bed, t, now, onOpen, flash }) {
           <span className={TYPE_META}>{parityShort(bed.parity)} · {bed.gestation}</span>
           {bed.modeOfOnset === "Induced" && <Tag tone="claude">IOL</Tag>}
           {bed.modeOfOnset === "PPROM" && <Tag tone="claude">PPROM</Tag>}
+          {!bed.delivery && malpresentation(bed) && <Tag tone="claude">{malpresentation(bed)}</Tag>}
           {flags.slice(0, 2).map(f => <Tag key={f}>{f}</Tag>)}
           {flags.length > 2 && <Tag>+{flags.length - 2}</Tag>}
         </span>
@@ -137,7 +138,7 @@ export default function Board({
     `${summary.women} ${summary.women === 1 ? "woman" : "women"}`,
     summary.urgent ? `${summary.urgent} need you` : null,
     summary.warning ? `${summary.warning} due soon` : null,
-    summary.nextAt ? `next ${hhmm(summary.nextAt)}` : null,
+    summary.nextAt ? `next ${clock(summary.nextAt)}` : null,
   ].filter(Boolean);
 
   return (

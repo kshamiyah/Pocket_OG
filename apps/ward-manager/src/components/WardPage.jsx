@@ -14,9 +14,9 @@ import Sheet from "../ui/Sheet";
 import UndoToast from "../ui/UndoToast";
 import { ChipRow, Label } from "../ui/atoms";
 import { BTN, BTN_DANGER, BTN_SECONDARY, TYPE_META } from "../ui/styles";
-import { addVE, doctorLabel, editVE as applyEditVE, fixAlert, newId, setStage, stampObs, STAGE_SHORT } from "../utils/bedModel";
+import { addVE, doctorLabel, editVE as applyEditVE, fixAlert, lastCTG, newId, setStage, stampObs, STAGE_SHORT } from "../utils/bedModel";
 import { triageWard, wardSummary } from "../utils/triage";
-import { hhmm } from "../utils/time";
+import { clock } from "../utils/time";
 import { getThemePref, isDarkResolved, setThemePref, watchSystemTheme } from "../utils/theme";
 
 // Storage keys are unchanged so boards already on a phone carry over.
@@ -45,6 +45,7 @@ export default function WardPage({ shift, onEndShift }) {
   const [themePref, setThemePrefState] = useState(getThemePref);
   const [dark, setDark] = useState(() => isDarkResolved());
   const [confirmEnd, setConfirmEnd] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(null);
   const toastTimer = useRef(null);
   const flashTimer = useRef(null);
 
@@ -106,6 +107,12 @@ export default function WardPage({ shift, onEndShift }) {
   // ── Actions ──────────────────────────────────────────────────────────
   const ctgNormal = bedId => {
     const bed = beds[bedId];
+    // A one-tap "normal" must not quietly replace an abnormal review: ask for the features.
+    const prev = lastCTG(bed);
+    if (prev && prev.classification !== "normal") {
+      setSheet({ type: "ctg", bedId, notice: `The last CTG (${clock(prev.time)}) was ${prev.classification}. Record the features to log this review.` });
+      return;
+    }
     updateBed(bedId, { ctgLog: [...(bed.ctgLog ?? []), { id: newId("ctg"), time: iso(), classification: "normal", quick: true }] }, `Normal CTG logged · Bed ${bed.bedNumber}`);
     closeSheet();
   };
@@ -201,7 +208,7 @@ export default function WardPage({ shift, onEndShift }) {
         onRound={startRound}
         onHandover={() => setSheet({ type: "handover" })}
         onToggleTheme={toggleTheme}
-        onMenu={() => { setConfirmEnd(false); setSheet({ type: "menu" }); }}
+        onMenu={() => { setConfirmEnd(false); setConfirmClear(null); setSheet({ type: "menu" }); }}
         iolView={
           <IOLQueue queue={iolQueue} now={now}
             onAdd={() => setSheet({ type: "iol" })}
@@ -250,7 +257,7 @@ export default function WardPage({ shift, onEndShift }) {
           onRemove={() => removeBed(sb.id)} />
       )}
       {sheet?.type === "ve" && sb && <VESheet key={sheet.edit?.id ?? "new"} bed={sb} editVE={sheet.edit ?? null} onClose={closeSheet} onSave={(ve, stageTo) => saveVE(sb.id, ve, stageTo, !!sheet.edit)} />}
-      {sheet?.type === "ctg" && sb && <CTGSheet key={sheet.edit?.id ?? "new"} bed={sb} editCTG={sheet.edit ?? null} onClose={closeSheet} onSave={e => saveCTG(sb.id, e, !!sheet.edit)} />}
+      {sheet?.type === "ctg" && sb && <CTGSheet key={sheet.edit?.id ?? "new"} bed={sb} editCTG={sheet.edit ?? null} notice={sheet.notice} onClose={closeSheet} onSave={e => saveCTG(sb.id, e, !!sheet.edit)} />}
       {sheet?.type === "oxy" && sb && <OxySheet bed={sb} onClose={closeSheet} onSave={e => saveOxy(sb.id, e)} />}
       {sheet?.type === "delivery" && sb && <DeliverySheet bed={sb} onClose={closeSheet} onSave={r => saveDelivery(sb.id, r)} />}
       {sheet?.type === "edit" && sb && (
@@ -269,15 +276,25 @@ export default function WardPage({ shift, onEndShift }) {
         }} />
       )}
       {sheet?.type === "menu" && (
-        <Sheet open onClose={closeSheet} title="Shift" sub={shift ? `${doctorLabel(shift.doctorName)} · until ${hhmm(shift.shiftEnd)}` : undefined}>
+        <Sheet open onClose={closeSheet} title="Shift" sub={shift ? `${doctorLabel(shift.doctorName)} · until ${clock(shift.shiftEnd)}` : undefined}>
           <div>
             <Label>Appearance</Label>
             <ChipRow small value={themePref} onChange={p => { setThemePrefState(p); setDark(setThemePref(p)); }}
               options={[{ value: "system", label: "Match phone" }, { value: "light", label: "Day" }, { value: "dark", label: "Night" }]} />
           </div>
-          <button type="button" disabled={!Object.keys(beds).length} onClick={() => { commit("Board cleared", {}); closeSheet(); }} className={`${BTN} ${BTN_SECONDARY} w-full`}>
-            Clear the board
-          </button>
+          {confirmClear !== "ask" ? (
+            <button type="button" disabled={!Object.keys(beds).length} onClick={() => setConfirmClear("ask")} className={`${BTN} ${BTN_SECONDARY} w-full`}>
+              Clear the board
+            </button>
+          ) : (
+            <div className="space-y-2">
+              <p className={`${TYPE_META} text-center`}>This removes all {Object.keys(beds).length} women from this phone.</p>
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" onClick={() => setConfirmClear(null)} className={`${BTN} ${BTN_SECONDARY}`}>Keep them</button>
+                <button type="button" onClick={() => { commit("Board cleared", {}); setConfirmClear(null); closeSheet(); }} className={`${BTN} bg-red-600 text-white`}>Clear board</button>
+              </div>
+            </div>
+          )}
           {!confirmEnd ? (
             <button type="button" onClick={() => setConfirmEnd(true)} className={`${BTN} ${BTN_DANGER} w-full`}>End shift</button>
           ) : (

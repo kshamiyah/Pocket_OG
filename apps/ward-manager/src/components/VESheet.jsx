@@ -2,24 +2,28 @@ import { useState } from "react";
 import Sheet from "../ui/Sheet";
 import { ChipRow, DilationGrid, Label, WhenPicker } from "../ui/atoms";
 import { BTN, BTN_PRIMARY, TYPE_META } from "../ui/styles";
-import { hhmm, resolveWhen, whenFromISO } from "../utils/time";
+import { clock, resolveWhen, whenFromISO } from "../utils/time";
 import { LIQUORS, LIQUOR_SHORT, MEMBRANES, STAGE_SHORT, lastVE, newId, stationLabel, suggestedStage } from "../utils/bedModel";
 
 function prevRuptureTime(bed) {
   const ves = bed.ves ?? [];
   for (let i = ves.length - 1; i >= 0; i--) if (ves[i].membranesTime) return ves[i].membranesTime;
-  return null;
+  return bed.membranesTime ?? null; // recorded at admission
 }
+
+const toggle = (cur, set) => v => set(cur === v ? null : v);
 
 export default function VESheet({ bed, editVE = null, onSave, onClose }) {
   const last = editVE ? null : lastVE(bed);
   const base = editVE ?? last;
   const [dil, setDil] = useState(editVE?.dilation ?? null);
   const [when, setWhen] = useState(editVE ? whenFromISO(editVE.time) : { minsAgo: 0 });
-  const [station, setStation] = useState(base?.station ?? 0);
-  const [memb, setMemb] = useState(base?.membranes ?? "Intact");
-  const [liquor, setLiquor] = useState(base?.liquor ?? "Clear");
-  const [cx, setCx] = useState(base?.contractions ?? 3);
+  // Station and contractions are findings of this examination, so they are never
+  // copied from the last VE. Membranes, liquor and presentation carry over.
+  const [station, setStation] = useState(editVE ? editVE.station ?? null : null);
+  const [memb, setMemb] = useState(base?.membranes ?? bed.membranes ?? "Intact");
+  const [liquor, setLiquor] = useState(base?.liquor ?? bed.liquor ?? "Clear");
+  const [cx, setCx] = useState(editVE ? editVE.contractions ?? null : null);
   const [pres, setPres] = useState(base?.presentation ?? "Cephalic");
   const [more, setMore] = useState(!!editVE || !last);
   const [romWhen, setRomWhen] = useState(editVE?.membranesTime ? whenFromISO(editVE.membranesTime) : null);
@@ -27,7 +31,8 @@ export default function VESheet({ bed, editVE = null, onSave, onClose }) {
 
   const veISO = resolveWhen(when);
   const prevRom = prevRuptureTime(bed);
-  const newlyRuptured = memb !== "Intact" && !(base && base.membranes === memb && (editVE ? editVE.membranesTime : prevRom));
+  const priorMemb = base?.membranes ?? bed.membranes ?? "Intact";
+  const newlyRuptured = memb !== "Intact" && !(priorMemb === memb && (editVE ? editVE.membranesTime : prevRom));
   const romISO = memb === "Intact" ? null
     : romWhen ? resolveWhen(romWhen)
     : editVE?.membranesTime ?? (newlyRuptured ? veISO : prevRom ?? veISO);
@@ -50,16 +55,14 @@ export default function VESheet({ bed, editVE = null, onSave, onClose }) {
   };
 
   const carry = [
-    memb === "Intact" ? "Intact" : `${memb}${romISO ? ` ${hhmm(romISO)}` : ""} · ${LIQUOR_SHORT[liquor] ?? liquor}`,
-    `station ${stationLabel(station)}`,
-    `${cx} in 10`,
-    pres !== "Cephalic" ? pres : null,
+    memb === "Intact" ? "Membranes intact" : `${memb}${romISO ? ` ${clock(romISO)}` : ""} · ${LIQUOR_SHORT[liquor] ?? liquor}`,
+    pres,
   ].filter(Boolean).join(" · ");
 
   return (
     <Sheet open onClose={onClose}
       title={`${editVE ? "Edit VE" : "VE"} · Bed ${bed.bedNumber}`}
-      sub={last ? `Last: ${last.dilation} cm at ${hhmm(last.time)} · NICE NG235 §1.4.1` : "NICE NG235 §1.4.1"}
+      sub={last ? `Last: ${last.dilation} cm at ${clock(last.time)} · NICE NG235 §1.4.1` : "NICE NG235 §1.4.1"}
       footer={
         <button type="button" onClick={save} disabled={!canSave} className={`${BTN} ${BTN_PRIMARY} w-full min-h-[3.25rem] text-base`}>
           {dil == null ? "Tap a dilation" : `${editVE ? "Save changes" : "Save VE"} · ${dil} cm`}
@@ -78,6 +81,15 @@ export default function VESheet({ bed, editVE = null, onSave, onClose }) {
         </button>
       )}
 
+      <div>
+        <Label hint="optional">Station</Label>
+        <ChipRow small options={[-3, -2, -1, 0, 1, 2, 3]} value={station} onChange={toggle(station, setStation)} label={stationLabel} />
+      </div>
+      <div>
+        <Label hint={cx > 5 ? "over 5 in 10: see NG235 §1.5.7" : "optional"}>Contractions in 10 min</Label>
+        <ChipRow small options={[1, 2, 3, 4, 5, 6, 7, 8]} value={cx} onChange={toggle(cx, setCx)} />
+      </div>
+
       {!more ? (
         <div className="rounded-xl bg-gray-100 dark:bg-gray-900 px-3 py-2.5 flex items-center justify-between gap-3">
           <p className="text-sm text-gray-700 dark:text-gray-300 min-w-0">Same as last: <span className="font-semibold text-gray-900 dark:text-white">{carry}</span></p>
@@ -85,10 +97,6 @@ export default function VESheet({ bed, editVE = null, onSave, onClose }) {
         </div>
       ) : (
         <>
-          <div>
-            <Label>Station</Label>
-            <ChipRow small options={[-3, -2, -1, 0, 1, 2, 3]} value={station} onChange={setStation} label={stationLabel} />
-          </div>
           <div>
             <Label>Membranes</Label>
             <ChipRow small options={MEMBRANES} value={memb} onChange={setMemb} />
@@ -105,10 +113,6 @@ export default function VESheet({ bed, editVE = null, onSave, onClose }) {
             </>
           )}
           <div>
-            <Label hint={cx > 5 ? "over 5 in 10: see NG235 §1.5.7" : undefined}>Contractions in 10 min</Label>
-            <ChipRow small options={[1, 2, 3, 4, 5, 6, 7, 8]} value={cx} onChange={setCx} />
-          </div>
-          <div>
             <Label>Presentation</Label>
             <ChipRow small options={["Cephalic", "Breech", "Other"]} value={pres} onChange={setPres} />
           </div>
@@ -116,7 +120,7 @@ export default function VESheet({ bed, editVE = null, onSave, onClose }) {
       )}
 
       <WhenPicker label="Time of VE" value={when} onChange={setWhen} />
-      {editVE && <p className={TYPE_META}>Editing the VE from {hhmm(editVE.time)}.</p>}
+      {editVE && <p className={TYPE_META}>Editing the VE from {clock(editVE.time)}.</p>}
     </Sheet>
   );
 }

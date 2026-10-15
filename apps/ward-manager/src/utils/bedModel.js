@@ -51,6 +51,31 @@ export function stationLabel(s) {
   return s > 0 ? `+${s}` : String(s);
 }
 
+/** "7 cm, station -1, breech" with unrecorded findings left out. */
+export function veFindings(ve) {
+  return [
+    `${ve.dilation} cm`,
+    ve.station != null ? `station ${stationLabel(ve.station)}` : null,
+    ve.presentation && ve.presentation !== "Cephalic" ? ve.presentation.toLowerCase() : null,
+  ].filter(Boolean).join(", ");
+}
+
+/** Current membrane status: from the latest VE that recorded it, else from admission. */
+export function membraneStatus(bed) {
+  const ves = sortedVEs(bed);
+  const v = [...ves].reverse().find(x => x.membranes);
+  const status = v?.membranes ?? bed.membranes ?? null;
+  const time = [...ves].reverse().find(x => x.membranesTime)?.membranesTime ?? bed.membranesTime ?? null;
+  const liquor = v ? v.liquor ?? null : bed.liquor ?? null;
+  return { status, time: status && status !== "Intact" ? time : null, liquor: status && status !== "Intact" ? liquor : null };
+}
+
+/** Last recorded non-cephalic presentation, for the board tag. */
+export function malpresentation(bed) {
+  const ve = lastVE(bed);
+  return ve?.presentation && ve.presentation !== "Cephalic" ? ve.presentation : null;
+}
+
 export function sortedVEs(bed) {
   return [...(bed.ves ?? [])].sort((a, b) => new Date(a.time) - new Date(b.time));
 }
@@ -141,6 +166,12 @@ export function stampObs(bed, iso, keys = ["lastPulse", "lastBP", "lastTemp"]) {
 
 export function setStage(bed, stage, iso) {
   const u = { labourStage: stage };
+  const idx = STAGES.indexOf(stage);
+  // Going back a stage clears the start times of the later stages, so re-entering
+  // them later starts a fresh clock instead of reusing the mistaken one.
+  if (idx < 1) u.activeFirstStageStartTime = null;
+  if (idx < 2) u.passiveStartTime = null;
+  if (idx < 3) u.pushingStartTime = null;
   if (stage === "Active first stage" && !bed.activeFirstStageStartTime) u.activeFirstStageStartTime = iso;
   if (stage === "Passive second stage" && !bed.passiveStartTime) u.passiveStartTime = iso;
   if (stage === "Active second stage" && !bed.pushingStartTime) u.pushingStartTime = iso;

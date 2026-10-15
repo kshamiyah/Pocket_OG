@@ -10,6 +10,9 @@ import {
 
 const WEEK_CHIPS = [34, 35, 36, 37, 38, 39, 40, 41, 42];
 
+// IOL queue indications that imply a risk flag, so admitting from the queue keeps it.
+const IOL_FLAG = { "GDM": "Diabetic-GDM", "Pre-eclampsia": "Hypertensive", "Severe pre-eclampsia": "Hypertensive" };
+
 function parseGest(g) {
   const m = /^(\d+)\+(\d)$/.exec(g ?? "");
   return m ? { w: +m[1], d: +m[2] } : { w: null, d: 0 };
@@ -38,7 +41,9 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
   const [memb, setMemb] = useState("Intact");
   const [liquor, setLiquor] = useState("Clear");
   const [analgesia, setAnalgesia] = useState(edit ? bed.analgesia ?? "None" : "None");
-  const [flags, setFlags] = useState(edit ? bed.riskFlags ?? [] : []);
+  const [flags, setFlags] = useState(edit ? bed.riskFlags ?? []
+    : iolEntry ? [...new Set((iolEntry.indications ?? []).map(i => IOL_FLAG[i]).filter(Boolean))] : []);
+  const [romWhen, setRomWhen] = useState({ minsAgo: 0 });
   const [veDil, setVeDil] = useState(null);
   const [veWhen, setVeWhen] = useState({ minsAgo: 0 });
   const [admWhen, setAdmWhen] = useState({ minsAgo: 0 });
@@ -48,7 +53,10 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
   const free = Array.from({ length: 12 }, (_, i) => String(i + 1)).filter(n => !used.has(n));
   const trimmed = String(num ?? "").trim();
   const clash = trimmed && used.has(trimmed) && !(edit && trimmed === String(bed.bedNumber));
-  const ready = trimmed && !clash && parity && weeks && stage;
+  const effMemb = onset === "PPROM" && memb === "Intact" ? "SROM" : memb;
+  const ruptured = !edit && effMemb !== "Intact";
+  const romISO = ruptured ? resolveWhen(romWhen) : null;
+  const ready = trimmed && !clash && parity && weeks && stage && (!ruptured || !!romISO);
   const parityOptions = edit && bed.parity && !PARITIES.includes(bed.parity) ? [...PARITIES, bed.parity] : PARITIES;
 
   const save = () => {
@@ -68,11 +76,12 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
     const admISO = resolveWhen(admWhen) ?? new Date().toISOString();
     const veISO = veDil != null ? resolveWhen(veWhen) ?? admISO : null;
     const stageTime = veISO ?? admISO;
-    const membranes = onset === "PPROM" && memb === "Intact" ? "SROM" : memb;
+    const membranes = effMemb;
+    // Station and contractions are left unrecorded rather than guessed.
     const ves = veDil != null ? [{
-      id: newId("ve"), time: veISO, dilation: veDil, station: 0, presentation: "Cephalic",
-      membranes, membranesTime: membranes !== "Intact" ? stageTime : null,
-      liquor: membranes !== "Intact" ? liquor : null, contractions: 3,
+      id: newId("ve"), time: veISO, dilation: veDil, station: null, presentation: "Cephalic",
+      membranes, membranesTime: ruptured ? romISO : null,
+      liquor: ruptured ? liquor : null, contractions: null,
     }] : [];
     onSave({
       id: newId("bed"), bedNumber: trimmed, admissionTime: admISO,
@@ -84,7 +93,8 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
       activeFirstStageStartTime: stage === "Active first stage" ? stageTime : null,
       passiveStartTime: stage === "Passive second stage" ? stageTime : null,
       pushingStartTime: stage === "Active second stage" ? stageTime : null,
-      armTime: membranes === "AROM" ? stageTime : null,
+      armTime: membranes === "AROM" ? romISO : null,
+      membranes, membranesTime: ruptured ? romISO : null, liquor: ruptured ? liquor : null,
       oxytocinStartTime: null,
       ves, oxytocinLog: [], ctgLog: [], observations: {},
     });
@@ -163,9 +173,12 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
           {!edit && (
             <div>
               <Label>Membranes</Label>
-              <ChipRow small options={MEMBRANES} value={onset === "PPROM" && memb === "Intact" ? "SROM" : memb} onChange={setMemb} />
-              {(memb !== "Intact" || onset === "PPROM") && (
-                <div className="mt-2"><ChipRow small options={LIQUORS} value={liquor} onChange={setLiquor} label={o => LIQUOR_SHORT[o]} /></div>
+              <ChipRow small options={MEMBRANES} value={effMemb} onChange={setMemb} />
+              {ruptured && (
+                <div className="mt-2 space-y-3">
+                  <ChipRow small options={LIQUORS} value={liquor} onChange={setLiquor} label={o => LIQUOR_SHORT[o]} />
+                  <WhenPicker label={`Time of ${effMemb}`} value={romWhen} onChange={setRomWhen} presets={[0, 60, 120, 240]} />
+                </div>
               )}
             </div>
           )}

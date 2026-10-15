@@ -1,8 +1,8 @@
 // Plain-text ward handover, ordered by bed number.
 
 import { computeAlerts } from "./wardAlerts";
-import { fmtAge, hhmm } from "./time";
-import { doctorLabel, lastVE, parityShort, stageLabel, stationLabel } from "./bedModel";
+import { clock, fmtAge } from "./time";
+import { currentOxytocin, doctorLabel, lastVE, membraneStatus, parityShort, stageLabel, veFindings } from "./bedModel";
 import { tidy } from "./triage";
 
 function isPreterm(g) {
@@ -19,7 +19,7 @@ export function generateHandover(beds, shift, now = Date.now()) {
   const heading = shift
     ? `${doctorLabel(shift.doctorName).toUpperCase()} · ${String(shift.shiftType ?? "").toUpperCase()} SHIFT`
     : "LABOUR WARD HANDOVER";
-  const lines = [heading, `${date}  ${hhmm(now)}`, ""];
+  const lines = [heading, `${date}  ${clock(now, now)}`, ""];
 
   if (!bedList.length) lines.push("No patients on board.");
 
@@ -28,31 +28,58 @@ export function generateHandover(beds, shift, now = Date.now()) {
     const pt = isPreterm(bed.gestation) ? " [PRETERM]" : "";
     lines.push(`BED ${bed.bedNumber}  ${parityShort(bed.parity)}  ${bed.gestation ?? "?"}${pt}  ${stageLabel(bed)}`);
 
+    // Background that matters whether or not she has delivered.
+    const background = [
+      ...(bed.riskFlags ?? []),
+      bed.modeOfOnset && bed.modeOfOnset !== "Spontaneous" ? bed.modeOfOnset : null,
+      bed.modeOfOnset === "Induced" && bed.inductionMethod ? `${bed.inductionMethod}${bed.inductionStartTime ? ` from ${clock(bed.inductionStartTime, now)}` : ""}` : null,
+      bed.analgesia && bed.analgesia !== "None" ? bed.analgesia : null,
+    ].filter(Boolean);
+    const done = [
+      bed.gbsAntibioticsStarted && "GBS antibiotics ✓",
+      bed.neonatalTeamAlerted && "Neonatal team ✓",
+      bed.corticosteroidsConfirmed && "Steroids ✓",
+      bed.mgso4Given && "MgSO4 ✓",
+      bed.tocolysisOffered && "Tocolysis offered ✓",
+    ].filter(Boolean);
+    const tasks = (bed.tasks ?? []).filter(x => !x.done);
+
     if (bed.delivery) {
       const dl = bed.delivery;
       const pph = dl.ebl >= 1000 ? " (major PPH)" : dl.ebl >= 500 ? " (PPH 500+)" : "";
-      lines.push(`${dl.mode} · ${hhmm(dl.time)}${dl.ebl != null ? ` · EBL ${dl.ebl} mL${pph}` : ""}`);
-      const done = [
-        bed.neonatalTeamAlerted && "Neonatal ✓",
-        bed.corticosteroidsConfirmed && "Steroids ✓",
-        bed.mgso4Given && "MgSO4 ✓",
-      ].filter(Boolean);
+      lines.push(`${dl.mode} · ${clock(dl.time, now)}${dl.ebl != null ? ` · EBL ${dl.ebl} mL${pph}` : " · EBL not recorded"}`);
+      if (background.length) lines.push(background.join(" · "));
       if (done.length) lines.push(done.join(" · "));
       if (dl.notes) lines.push(`Notes: ${dl.notes}`);
+      if (tasks.length) lines.push(`To do: ${tasks.map(x => x.text).join(", ")}`);
       lines.push("");
       continue;
     }
 
     const ve = lastVE(bed);
     if (ve) {
-      const cx = ve.contractions != null ? ` · ${ve.contractions}cx/10` : "";
-      lines.push(`VE: ${ve.dilation}cm / ${stationLabel(ve.station)} / ${ve.presentation ?? "Ceph"} at ${hhmm(ve.time)} (${fmtAge(now - new Date(ve.time).getTime())} ago)${cx}`);
+      const cx = ve.contractions != null ? ` · ${ve.contractions} in 10` : "";
+      lines.push(`VE: ${veFindings(ve)} at ${clock(ve.time, now)} (${fmtAge(now - new Date(ve.time).getTime())} ago)${cx}`);
     } else {
       lines.push("VE: none recorded");
     }
-    if (bed.labourStage === "Active second stage" && bed.pushingStartTime) {
-      lines.push(`Pushing since ${hhmm(bed.pushingStartTime)}`);
+
+    // Membranes: from the latest VE that recorded them, else from admission.
+    const { status: memb, time: romTime, liquor } = membraneStatus(bed);
+    if (memb && memb !== "Intact") {
+      lines.push(`Membranes: ${memb}${romTime ? ` ${clock(romTime, now)} (${fmtAge(now - new Date(romTime).getTime())} ago)` : ""}${liquor ? `, ${liquor.toLowerCase()}` : ""}`);
+    } else if (memb === "Intact") {
+      lines.push("Membranes: intact");
     }
+
+    if (bed.labourStage === "Active second stage" && bed.pushingStartTime) {
+      lines.push(`Pushing since ${clock(bed.pushingStartTime, now)}`);
+    } else if (bed.labourStage === "Passive second stage" && bed.passiveStartTime) {
+      lines.push(`Fully dilated since ${clock(bed.passiveStartTime, now)}`);
+    }
+
+    const oxy = currentOxytocin(bed);
+    if (oxy) lines.push(`Oxytocin ${oxy.dose} mU/min since ${clock(oxy.lastIncrementTime ?? oxy.startTime, now)}`);
 
     const obs = bed.observations ?? {};
     const obsParts = [
@@ -60,30 +87,24 @@ export function generateHandover(beds, shift, now = Date.now()) {
       obs.pulseValue && `P${obs.pulseValue}`,
       obs.tempValue && `T${obs.tempValue}°C`,
       obs.bglValue && `BGL ${obs.bglValue}`,
-      bed.analgesia && bed.analgesia !== "None" && bed.analgesia,
     ].filter(Boolean);
     if (obsParts.length) lines.push(obsParts.join(" | "));
 
+    if (background.length) lines.push(background.join(" · "));
+    if (done.length) lines.push(done.join(" · "));
     const ctg = (bed.ctgLog ?? []).at(-1);
-    const flagParts = [
-      ...(bed.riskFlags ?? []),
-      bed.gbsAntibioticsStarted && "IAP ✓",
-      bed.tocolysisOffered && "Tocolysis offered ✓",
-      ctg && `CTG ${ctg.classification} ${hhmm(ctg.time)}`,
-    ].filter(Boolean);
-    if (flagParts.length) lines.push(flagParts.join(" · "));
+    if (ctg) lines.push(`CTG ${ctg.classification} at ${clock(ctg.time, now)}`);
 
     computeAlerts(bed, now)
       .filter(a => a.severity === "urgent" || a.severity === "warning")
       .forEach(a => lines.push(`${a.severity === "urgent" ? "!!" : "!"} ${tidy(a.title)}`));
 
-    const tasks = (bed.tasks ?? []).filter(x => !x.done);
     if (tasks.length) lines.push(`To do: ${tasks.map(x => x.text).join(", ")}`);
     lines.push("");
   }
 
   if (shift?.shiftStart && shift?.shiftEnd) {
-    lines.push(DIV, `Shift: ${hhmm(shift.shiftStart)} to ${hhmm(shift.shiftEnd)}`);
+    lines.push(DIV, `Shift: ${clock(shift.shiftStart, now)} to ${clock(shift.shiftEnd, now)}`);
   }
   lines.push(DIV, "PocketSuite · Not a substitute for clinical judgement");
   return lines.join("\n");

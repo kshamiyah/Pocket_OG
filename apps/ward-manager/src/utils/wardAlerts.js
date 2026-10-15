@@ -57,9 +57,14 @@ export function computeAlerts(bed, now = Date.now()) {
   const isHypertensive = flags.includes("Hypertensive");
   const isGBSPos = flags.includes("GBS+");
   const isGBSPending = flags.includes("GBS pending");
-  const membranesTime = findMembranesTime(ves);
-  const membranesRuptured = lastVE?.membranes === "SROM" || lastVE?.membranes === "AROM";
-  const lastLiquor = lastVE?.liquor ?? null;
+  // Membrane status comes from the VEs. Only when no VE has recorded membranes yet
+  // does it fall back to what was recorded at admission (bed.membranes, etc.).
+  const vesKnowMembranes = ves.some(v => v.membranes);
+  const membranes = vesKnowMembranes ? (lastVE?.membranes ?? null) : (bed.membranes ?? null);
+  const membranesTime = findMembranesTime(ves)
+    ?? (!vesKnowMembranes && (membranes === "SROM" || membranes === "AROM") ? bed.membranesTime ?? null : null);
+  const membranesRuptured = membranes === "SROM" || membranes === "AROM";
+  const lastLiquor = vesKnowMembranes ? (lastVE?.liquor ?? null) : (bed.liquor ?? lastVE?.liquor ?? null);
   const hasMeconium = lastLiquor === "Thin meconium" || lastLiquor === "Thick meconium";
 
   const gestWks = parseGestWeeks(bed.gestation);

@@ -45,3 +45,15 @@ export function whenFromISO(iso, now = Date.now()) {
   const daysAgo = Math.max(0, Math.round((today - day) / 86400000));
   return { clock: `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`, daysAgo };
 }
+
+/** "14:05", or "14:05 yesterday" / "09:10 tomorrow" / "14:05 12 Oct" when not today. */
+export function clock(t, now = Date.now()) {
+  if (t == null) return "--:--";
+  const d = new Date(t), n = new Date(now);
+  const day = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const diff = Math.round((day(d) - day(n)) / 86400000);
+  if (diff === 0) return hhmm(t);
+  if (diff === -1) return `${hhmm(t)} yesterday`;
+  if (diff === 1) return `${hhmm(t)} tomorrow`;
+  return `${hhmm(t)} ${d.getDate()} ${d.toLocaleString("en-GB", { month: "short" })}`;
+}

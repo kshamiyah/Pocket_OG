@@ -3,7 +3,7 @@ import Sheet from "../ui/Sheet";
 import { Chip, Label, Stepper, WhenPicker } from "../ui/atoms";
 import { BTN, BTN_PRIMARY, BTN_SECONDARY, CARD, INPUT, TYPE_META } from "../ui/styles";
 import { IconInfo, IconPlus } from "../ui/icons";
-import { fmtAge, hhmm, resolveWhen, whenFromISO } from "../utils/time";
+import { fmtAge, clock, resolveWhen, whenFromISO } from "../utils/time";
 import { IOL_IND, iolEntryTier, sortIOLQueue } from "../utils/iolPriority";
 import { newId } from "../utils/bedModel";
 
@@ -105,7 +105,7 @@ export default function IOLQueue({ queue, now, onAdd, onEdit, onAdmit, onRemove 
                 <span className="text-lg font-semibold text-gray-900 dark:text-white">{e.initials}</span>
                 <span className={TYPE_META}>{e.gestWeeks}+{e.gestDays ?? 0}</span>
                 <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded ${tier.badge}`}>{tier.label}</span>
-                <span className={`${TYPE_META} ml-auto`}>{hhmm(e.addedAt)} · {fmtAge(now - new Date(e.addedAt).getTime())} ago</span>
+                <span className={`${TYPE_META} ml-auto`}>{clock(e.addedAt)} · {fmtAge(now - new Date(e.addedAt).getTime())} ago</span>
               </div>
               <p className={`text-xs font-medium ${tier.text}`}>{tier.action}</p>
               <p className="text-sm text-gray-700 dark:text-gray-300">{e.indications.join(" · ")}</p>

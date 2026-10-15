@@ -70,7 +70,7 @@ The **IOL queue** (NICE NG207 priority order) sits in its own tab, with admit-to
 | CTG pathological (last entry) | NICE NG229 §1.4 | Urgent |
 | CTG review overdue: normal (> 60 min) | NICE NG229 §1.3.2 | Info |
 
-**219 tests** covering the rules, triage and bed helpers: `npm test -w apps/ward-manager`
+**229 tests** covering the rules, triage and bed helpers: `npm test -w apps/ward-manager`
 
 ## CTG classification (NICE NG229 §1.4)
 
@@ -88,7 +88,7 @@ Overall: ≥ 1 Red or ≥ 2 Amber = **Pathological** · 1 Amber = **Suspicious**
 ```bash
 npm install
 npm run dev -w apps/ward-manager   # http://localhost:5173
-npm test -w apps/ward-manager      # 219 tests
+npm test -w apps/ward-manager      # 229 tests
 ```
 
 ## Data storage

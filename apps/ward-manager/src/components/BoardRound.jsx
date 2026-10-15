@@ -1,8 +1,8 @@
 import { AlertList } from "./BedSheet";
 import { BTN, BTN_OK, BTN_PRIMARY, BTN_SECONDARY, CARD, TYPE_META, TYPE_OVERLINE } from "../ui/styles";
 import { IconBack, IconTick } from "../ui/icons";
-import { fmtAge, hhmm } from "../utils/time";
-import { LIQUOR_SHORT, capitalise, lastCTG, lastVE, parityShort, stageLabel, stationLabel } from "../utils/bedModel";
+import { fmtAge, clock } from "../utils/time";
+import { LIQUOR_SHORT, capitalise, lastCTG, lastVE, membraneStatus, parityShort, stageLabel, veFindings } from "../utils/bedModel";
 
 /** Step through each woman in bed order, confirming or updating as you go. */
 export default function BoardRound({ ids, index, beds, triage, updated, now, onIndex, onExit, onVE, onCTGNormal, onMore, onFix, onHandover }) {
@@ -47,19 +47,19 @@ export default function BoardRound({ ids, index, beds, triage, updated, now, onI
                 <dt className="text-gray-500 dark:text-gray-400">Stage</dt>
                 <dd className="text-gray-900 dark:text-gray-100">{stageLabel(bed)}{bed.labourStage === "Active second stage" && bed.pushingStartTime ? `, ${fmtAge(now - new Date(bed.pushingStartTime).getTime())}` : ""}</dd>
                 <dt className="text-gray-500 dark:text-gray-400">Last VE</dt>
-                <dd className="text-gray-900 dark:text-gray-100">{(() => { const v = lastVE(bed); return v ? `${v.dilation} cm, station ${stationLabel(v.station)}, ${hhmm(v.time)} (${fmtAge(now - new Date(v.time).getTime())} ago)` : "None"; })()}</dd>
+                <dd className="text-gray-900 dark:text-gray-100">{(() => { const v = lastVE(bed); return v ? `${veFindings(v)}, ${clock(v.time)} (${fmtAge(now - new Date(v.time).getTime())} ago)` : "None"; })()}</dd>
                 <dt className="text-gray-500 dark:text-gray-400">CTG</dt>
-                <dd className="text-gray-900 dark:text-gray-100">{(() => { const c = lastCTG(bed); return c ? `${capitalise(c.classification)} at ${hhmm(c.time)}` : "Not logged"; })()}</dd>
+                <dd className="text-gray-900 dark:text-gray-100">{(() => { const c = lastCTG(bed); return c ? `${capitalise(c.classification)} at ${clock(c.time)}` : "Not logged"; })()}</dd>
                 <dt className="text-gray-500 dark:text-gray-400">Other</dt>
                 <dd className="text-gray-900 dark:text-gray-100">{[
                   bed.analgesia !== "None" ? bed.analgesia : null,
                   ...(bed.riskFlags ?? []),
                   bed.modeOfOnset !== "Spontaneous" ? bed.modeOfOnset : null,
-                  (() => { const v = lastVE(bed); return v?.membranes ? `${v.membranes}${v.liquor ? `, ${LIQUOR_SHORT[v.liquor] ?? v.liquor}` : ""}` : null; })(),
+                  (() => { const m = membraneStatus(bed); return m.status ? `${m.status}${m.liquor ? `, ${LIQUOR_SHORT[m.liquor] ?? m.liquor}` : ""}` : null; })(),
                 ].filter(Boolean).join(" · ") || "Nothing else"}</dd>
               </dl>
               {t && <AlertList alerts={t.shown} onFix={id => onFix(bed.id, id)} />}
-              {t && !t.shown.length && t.next && <p className={TYPE_META}>Next: {t.next.label} {hhmm(t.next.at)} (in {fmtAge(t.next.at - now)})</p>}
+              {t && !t.shown.length && t.next && <p className={TYPE_META}>Next: {t.next.label} {clock(t.next.at)} (in {fmtAge(t.next.at - now)})</p>}
             </div>
             <div className="grid grid-cols-3 gap-2">
               <button type="button" onClick={() => onVE(bed.id)} className={`${BTN} ${BTN_SECONDARY}`}>VE</button>

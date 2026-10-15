@@ -4,9 +4,10 @@ import { BTN, BTN_PRIMARY, CARD, INPUT, TYPE_DISPLAY, TYPE_EYEBROW, TYPE_META } 
 
 const DOCTOR_KEY = "pocket_suite_doctor";
 
+// Shifts are usually set up shortly before an 08:00 or 20:00 start.
 function detectShiftType() {
   const h = new Date().getHours();
-  return h >= 20 || h < 8 ? "night" : "day";
+  return h >= 19 || h < 7 ? "night" : "day";
 }
 
 function addHours(h) {
