@@ -5,10 +5,9 @@ import { BTN, BTN_PRIMARY, INPUT, TYPE_META } from "../ui/styles";
 import { resolveWhen, whenFromISO } from "../utils/time";
 import {
   ANALGESIA, BIRTH_MODES, BIRTH_SHORT, IND_METHODS, IOL_REASONS, LIQUORS, LIQUOR_SHORT, MEMBRANES, ONSETS, PARITIES, RISK_FLAGS,
-  STAGES, STAGE_SHORT, newId, parityNum, parityShort,
+  STAGES, STAGE_SHORT, gestFromDigits, newId, parityNum, parityShort,
 } from "../utils/bedModel";
 
-const WEEK_CHIPS = [34, 35, 36, 37, 38, 39, 40, 41, 42];
 
 // IOL queue indications that imply a risk flag, so admitting from the queue keeps it.
 const IOL_FLAG = { "GDM": "Diabetic-GDM", "Pre-eclampsia": "Hypertensive", "Severe pre-eclampsia": "Hypertensive" };
@@ -30,9 +29,11 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
   const [parity, setParity] = useState(edit ? bed.parity : null);
   const [customParity, setCustomParity] = useState(edit && !!bed.parity && !PARITIES.includes(bed.parity));
   const [prevBirths, setPrevBirths] = useState(edit ? bed.prevBirths ?? [] : []);
-  const [weeks, setWeeks] = useState(g0.w);
-  const [days, setDays] = useState(g0.d);
-  const [otherWeeks, setOtherWeeks] = useState(g0.w != null && !WEEK_CHIPS.includes(g0.w));
+  // Gestation is typed as digits on the number keypad: 3, 9, 4 → 39+4.
+  const [gestDigits, setGestDigits] = useState(g0.w != null ? `${g0.w}${g0.d ?? 0}` : "");
+  const gest = gestFromDigits(gestDigits);
+  const weeks = gest.valid ? gest.w : null;
+  const days = gest.valid ? gest.d : 0;
   const [stage, setStage] = useState(edit ? bed.labourStage : iolEntry ? "Latent" : null);
   const [onset, setOnset] = useState(edit ? bed.modeOfOnset ?? "Spontaneous" : iolEntry ? "Induced" : "Spontaneous");
   const [indMethod, setIndMethod] = useState(edit ? bed.inductionMethod ?? "Dinoprostone" : "Dinoprostone");
@@ -164,18 +165,17 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
       </div>
 
       <div>
-        <Label hint="weeks, then days">Gestation</Label>
-        {!otherWeeks ? (
-          <div className="flex flex-wrap gap-1.5">
-            {WEEK_CHIPS.map(w => <Chip key={w} on={weeks === w} onClick={() => setWeeks(w)}>{w}</Chip>)}
-            <Chip on={false} onClick={() => { setOtherWeeks(true); setWeeks(w => w ?? 33); }}>Other</Chip>
-          </div>
-        ) : (
-          <Stepper value={weeks ?? 33} onChange={setWeeks} min={22} max={44} format={w => `${w} weeks`} />
-        )}
-        <div className="flex flex-wrap gap-1.5 mt-2">
-          {[0, 1, 2, 3, 4, 5, 6].map(d => <Chip key={d} small on={days === d} onClick={() => setDays(d)}>+{d}</Chip>)}
-        </div>
+        <Label hint="type 394 for 39+4">Gestation</Label>
+        <input id="admit-gestation" type="text" inputMode="numeric" autoComplete="off" aria-label="Gestation"
+          value={gest.digits.length === 3 ? `${gest.digits.slice(0, 2)}+${gest.digits[2]}` : gest.digits}
+          onChange={e => setGestDigits(gestFromDigits(e.target.value).digits)}
+          placeholder="39+4"
+          className={`${INPUT} text-2xl font-semibold tabular-nums tracking-wide ${gest.digits.length >= 2 && !gest.valid ? "border-red-400 dark:border-red-700" : ""}`} />
+        <p className={`${TYPE_META} mt-1`}>
+          {gest.digits.length < 2 ? "Weeks then days, e.g. 3 9 4."
+            : !gest.valid ? (gest.d > 6 ? "Days must be 0 to 6." : "Weeks must be 22 to 44.")
+            : gest.digits.length === 2 ? `${gest.w}+0. Add a digit for the days.` : `${gest.w}+${gest.d} weeks.`}
+        </p>
       </div>
 
       <div>

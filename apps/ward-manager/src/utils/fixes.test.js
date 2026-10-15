@@ -2,7 +2,7 @@
 
 import { describe, it, expect } from "vitest"
 import { computeAlerts } from "./wardAlerts.js"
-import { setStage, veFindings, malpresentation, parityNum, parityShort, parityWithHistory } from "./bedModel.js"
+import { setStage, veFindings, malpresentation, parityNum, parityShort, parityWithHistory, gestFromDigits } from "./bedModel.js"
 import { clock } from "./time.js"
 import { generateHandover } from "./handoverText.js"
 
@@ -161,5 +161,20 @@ describe("parity and previous births", () => {
   it("puts the history in the handover", () => {
     const b = bed({ parity: "Para 2", prevBirths: ["SVD", "Emergency CS"] })
     expect(generateHandover({ b1: b }, null, NOW)).toMatch(/P2 \(SVD, Em CS\)/)
+  })
+})
+
+describe("typed gestation", () => {
+  it("reads 394 as 39+4 and 39 as 39+0", () => {
+    expect(gestFromDigits("394")).toMatchObject({ w: 39, d: 4, valid: true })
+    expect(gestFromDigits("39")).toMatchObject({ w: 39, d: 0, valid: true })
+  })
+  it("ignores the plus sign and extra digits", () => {
+    expect(gestFromDigits("39+45")).toMatchObject({ digits: "394", w: 39, d: 4 })
+  })
+  it("rejects impossible values", () => {
+    expect(gestFromDigits("397").valid).toBe(false)
+    expect(gestFromDigits("214").valid).toBe(false)
+    expect(gestFromDigits("3").valid).toBe(false)
   })
 })

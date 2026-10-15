@@ -45,6 +45,18 @@ export function parityShort(p) {
   return p.replace("Para ", "P");
 }
 
+/**
+ * Gestation typed as digits: "394" → 39+4, "39" → 39+0. Anything else
+ * (letters, "+") is ignored. Valid range 22+0 to 44+6.
+ */
+export function gestFromDigits(input) {
+  const digits = String(input ?? "").replace(/\D/g, "").slice(0, 3);
+  if (digits.length < 2) return { digits, w: null, d: null, valid: false };
+  const w = Number(digits.slice(0, 2));
+  const d = digits.length === 3 ? Number(digits[2]) : 0;
+  return { digits, w, d, valid: w >= 22 && w <= 44 && d <= 6 };
+}
+
 /** "Para 4" → 4; null if unknown. */
 export function parityNum(p) {
   const m = /Para (\d+)/.exec(p ?? "");
