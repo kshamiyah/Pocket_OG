@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { CHIP, CHIP_SM, CHIP_ON, CHIP_OFF, INPUT, TYPE_OVERLINE } from "./styles";
 import { resolveWhen } from "../utils/time";
 
@@ -43,16 +43,63 @@ export function MultiChipRow({ options, values, onChange, small = true }) {
 }
 
 /** 0 to 10 cm circles. */
+/**
+ * Dilation as a ruler: one slim strip 0 to 10 cm. Tap a number or slide a
+ * thumb along it; the readout above shows the value. Vertical scrolling still
+ * works when a swipe starts on the strip. Tapping the selected number again
+ * passes the same value back, so a caller can treat it as "clear".
+ */
 export function DilationGrid({ value, onChange }) {
+  const track = useRef(null);
+  const drag = useRef(null);
+  const at = clientX => {
+    const r = track.current.getBoundingClientRect();
+    return Math.max(0, Math.min(10, Math.floor(((clientX - r.left) / r.width) * 11)));
+  };
+  const down = e => {
+    const i = at(e.clientX);
+    drag.current = { start: i, last: i, moved: false, wasSelected: i === value };
+    track.current.setPointerCapture?.(e.pointerId);
+    if (i !== value) onChange(i);
+  };
+  const move = e => {
+    const d = drag.current; if (!d) return;
+    const i = at(e.clientX);
+    if (i !== d.last) { d.last = i; d.moved = true; onChange(i); }
+  };
+  const up = () => {
+    const d = drag.current; drag.current = null;
+    if (d && !d.moved && d.wasSelected) onChange(d.start);
+  };
+  const key = e => {
+    const step = e.key === "ArrowRight" || e.key === "ArrowUp" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowDown" ? -1 : 0;
+    if (!step) return;
+    e.preventDefault();
+    onChange(Math.max(0, Math.min(10, (value ?? (step > 0 ? -1 : 11)) + step)));
+  };
   return (
-    <div className="grid grid-cols-6 gap-1.5">
-      {Array.from({ length: 11 }, (_, i) => (
-        <button key={i} type="button" onClick={() => onChange(i)} aria-pressed={value === i}
-          aria-label={`${i} centimetres`}
-          className={`aspect-square rounded-full border text-lg font-semibold tabular-nums transition-colors active:scale-95 ${value === i ? CHIP_ON : CHIP_OFF}`}>
-          {i}
-        </button>
-      ))}
+    <div>
+      <p className="text-center mb-2 tabular-nums">
+        {value == null
+          ? <span className="text-sm text-gray-400">Tap or slide</span>
+          : <span className="text-3xl font-semibold text-gray-900 dark:text-white">{value}<span className="text-base font-normal text-gray-500"> cm</span></span>}
+      </p>
+      <div ref={track} role="slider" tabIndex={0} aria-label="Dilation in centimetres"
+        aria-valuemin={0} aria-valuemax={10} aria-valuenow={value ?? undefined} aria-valuetext={value == null ? "not set" : `${value} cm`}
+        onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={() => { drag.current = null; }} onKeyDown={key}
+        className="relative grid grid-cols-11 h-12 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/60 overflow-hidden select-none touch-pan-y cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-claude-500/40">
+        {Array.from({ length: 11 }, (_, i) => {
+          const sel = value === i;
+          const below = value != null && i < value;
+          return (
+            <span key={i} data-cm={i}
+              className={`relative flex items-end justify-center pb-1.5 text-sm font-semibold tabular-nums ${i ? "border-l border-gray-200 dark:border-gray-800" : ""} ${sel ? "bg-claude-600 text-white" : below ? "bg-claude-100 dark:bg-claude-950/50 text-claude-800 dark:text-claude-300" : "text-gray-500 dark:text-gray-400"}`}>
+              <span aria-hidden="true" className={`absolute top-0 left-1/2 w-px ${i % 5 === 0 ? "h-3" : "h-2"} ${sel ? "bg-white/70" : "bg-gray-300 dark:bg-gray-700"}`} />
+              {i}
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 }

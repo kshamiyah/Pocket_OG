@@ -228,7 +228,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
           {!edit && (
             <>
               <div>
-                <Label hint="if handed over">Last VE (cm)</Label>
+                <Label hint="if handed over">Last VE</Label>
                 <DilationGrid value={veDil} onChange={v => setVeDil(veDil === v ? null : v)} />
               </div>
               {veDil != null && <WhenPicker label="Time of that VE" value={veWhen} onChange={setVeWhen} presets={[0, 30, 60, 120, 240]} />}

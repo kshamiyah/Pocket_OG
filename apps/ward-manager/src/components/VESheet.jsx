@@ -65,11 +65,11 @@ export default function VESheet({ bed, editVE = null, onSave, onClose }) {
       sub={last ? `Last: ${last.dilation} cm at ${clock(last.time)} · NICE NG235 §1.4.1` : "NICE NG235 §1.4.1"}
       footer={
         <button type="button" onClick={save} disabled={!canSave} className={`${BTN} ${BTN_PRIMARY} w-full min-h-[3.25rem] text-base`}>
-          {dil == null ? "Tap a dilation" : `${editVE ? "Save changes" : "Save VE"} · ${dil} cm`}
+          {dil == null ? "Set the dilation" : `${editVE ? "Save changes" : "Save VE"} · ${dil} cm`}
         </button>
       }>
       <div>
-        <Label hint="tap one">Dilation (cm)</Label>
+        <Label>Dilation</Label>
         <DilationGrid value={dil} onChange={setDil} />
       </div>
 
