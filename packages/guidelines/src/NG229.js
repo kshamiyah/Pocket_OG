@@ -8,10 +8,8 @@
 //                 15–25 min; abnormal <5 for >50 min, >25 for >25 min, or sinusoidal.
 // Management/escalation wording is taken from NG229 1.5.
 //
-// NB: ward-manager's numeric classifyCTGEntry (ctg.js) still uses coarser
-//     operational bands (>160 abnormal; >25 cut at 10 min) and a local ≥20 bpm
-//     rising-baseline prompt that is NOT an NG229 number. Reconcile ctg.js +
-//     ward-manager tests with this table when ward-manager is next worked on.
+// ward-manager's classifyCTGEntry (ctg.js) now uses these NG229 bands. Its
+// ≥20 bpm rising-baseline prompt remains a LOCAL threshold, not an NG229 number.
 
 export const NG229_SECTIONS = [
   {

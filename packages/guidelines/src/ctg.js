@@ -8,11 +8,11 @@
 //   "amber"  = non-reassuring
 //   "red"    = abnormal
 //
-// ⚠ The baseline upper band (>160 treated as abnormal) and the increased-
-//   variability timing (>10 min) below are the operational thresholds carried
-//   over from the original engine; they are flagged for verbatim verification
-//   against the NG229 PDF in the pocket-og reader. Keep this file, the reader
-//   (NG229.js) and the flowchart (NG229_FLOWCHART.js) in lockstep when updating.
+// Bands follow the NG229 feature table (see NG229.js): baseline 161–180 is
+// non-reassuring and above 180 abnormal; variability over 25 bpm is
+// non-reassuring for 15–25 min and abnormal beyond 25 min. The ≥20 bpm rising-
+// baseline prompt is a LOCAL threshold, not an NG229 number. Keep this file,
+// the reader (NG229.js) and the flowchart (NG229_FLOWCHART.js) in lockstep.
 
 // Overall categorisation rule: combine the three individual feature grades.
 export function combineFeatureGrades(grades) {
@@ -30,9 +30,9 @@ export function classifyCTGEntry(entry, prevBaselineHR = null) {
   // Baseline HR
   const hr   = entry.baselineHR ?? 140;
   const rise = prevBaselineHR != null ? hr - prevBaselineHR : 0;
-  if (hr < 100 || hr > 160)        features.push("red");
+  if (hr < 100 || hr > 180)        features.push("red");
   // ≥20 bpm rise is a local clinical threshold; NICE NG229 1.4 scores absolute range only
-  else if (hr < 110 || rise >= 20) features.push("amber");
+  else if (hr < 110 || hr > 160 || rise >= 20) features.push("amber");
   else                              features.push("white");
 
   // Variability
@@ -40,7 +40,7 @@ export function classifyCTGEntry(entry, prevBaselineHR = null) {
   const vMin = entry.variabilityMinutes ?? 0;
   if (v === "sinusoidal")     features.push("red");
   else if (v === "<5")        features.push(vMin > 50 ? "red" : vMin >= 30 ? "amber" : "white");
-  else if (v === ">25")       features.push(vMin > 10 ? "red" : "amber");
+  else if (v === ">25")       features.push(vMin > 25 ? "red" : vMin >= 15 ? "amber" : "white");
   else                        features.push("white");
 
   // Decelerations

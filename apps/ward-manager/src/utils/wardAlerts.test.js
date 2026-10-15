@@ -235,51 +235,6 @@ describe("Passive second stage limits", () => {
   })
 })
 
-// ─── Second stage — active pushing limits (NICE NG235 §1.6.5–1.6.6) ──────────
-
-describe("Active pushing limits", () => {
-  const pushBed = (parity, analgesia, minutesIn) => ({
-    parity,
-    gestation:   "39+2",
-    labourStage: "Active second stage",
-    analgesia,
-    riskFlags:   [],
-    ves:         [{ time: t(1 * HOUR), dilation: 10 }],
-    oxytocinLog: [],
-    observations: { lastPulse: t(30*MIN), lastBP: t(30*MIN), lastTemp: t(30*MIN) },
-    pushingStartTime: t(minutesIn * MIN),
-  })
-
-  // Nullip + epidural → 2h
-  it("nullip + epidural — no alert at 1h 59m", () => {
-    expect(hasNot(computeAlerts(pushBed("Para 0", "Epidural", 119), NOW), "pushing-limit")).toBe(true)
-  })
-  it("nullip + epidural — fires urgent at exactly 2h", () => {
-    expect(has(computeAlerts(pushBed("Para 0", "Epidural", 120), NOW), "pushing-limit")).toBe(true)
-  })
-
-  // Nullip no epidural → 1h
-  it("nullip no epidural — no alert at 59m", () => {
-    expect(hasNot(computeAlerts(pushBed("Para 0", "None", 59), NOW), "pushing-limit")).toBe(true)
-  })
-  it("nullip no epidural — fires urgent at exactly 1h", () => {
-    expect(has(computeAlerts(pushBed("Para 0", "None", 60), NOW), "pushing-limit")).toBe(true)
-  })
-
-  // Multip + epidural → 1h
-  it("multip + epidural — fires urgent at exactly 1h", () => {
-    expect(has(computeAlerts(pushBed("Para 1", "Epidural", 60), NOW), "pushing-limit")).toBe(true)
-  })
-
-  // Multip no epidural → 30min
-  it("multip no epidural — no alert at 29m", () => {
-    expect(hasNot(computeAlerts(pushBed("Para 1", "None", 29), NOW), "pushing-limit")).toBe(true)
-  })
-  it("multip no epidural — fires urgent at exactly 30m", () => {
-    expect(has(computeAlerts(pushBed("Para 1", "None", 30), NOW), "pushing-limit")).toBe(true)
-  })
-})
-
 // ─── Preterm bundle (NICE NG25) ───────────────────────────────────────────────
 
 describe("Preterm — neonatal team alert (< 34 weeks)", () => {
@@ -300,45 +255,62 @@ describe("Preterm — neonatal team alert (< 34 weeks)", () => {
   })
 })
 
-describe("Preterm — MgSO4 neuroprotection (< 30 weeks)", () => {
+describe("Preterm — MgSO4 neuroprotection (NG25 1.10.2–1.10.3)", () => {
   const pretermBed = (gestation, overrides = {}) => ({
     parity: "Para 0", gestation, labourStage: "Active first stage",
     analgesia: "None", riskFlags: [], ves: [], oxytocinLog: [], observations: {},
     neonatalTeamAlerted: true, corticosteroidsConfirmed: true,
     ...overrides,
   })
+  const mg = alerts => alerts.find(a => a.id === "preterm-mgso4")
 
-  it("fires urgent at 29+6", () => {
-    expect(has(computeAlerts(pretermBed("29+6"), NOW), "preterm-mgso4")).toBe(true)
+  it("offer (urgent) at 29+6", () => {
+    expect(mg(computeAlerts(pretermBed("29+6"), NOW))?.severity).toBe("urgent")
   })
-  it("no alert at 30+0", () => {
-    expect(hasNot(computeAlerts(pretermBed("30+0"), NOW), "preterm-mgso4")).toBe(true)
+  it("consider (warning) at 30+0 in established labour", () => {
+    expect(mg(computeAlerts(pretermBed("30+0"), NOW))?.severity).toBe("warning")
+  })
+  it("consider (warning) at 33+6", () => {
+    expect(mg(computeAlerts(pretermBed("33+6"), NOW))?.severity).toBe("warning")
+  })
+  it("no alert at 34+0", () => {
+    expect(hasNot(computeAlerts(pretermBed("34+0"), NOW), "preterm-mgso4")).toBe(true)
+  })
+  it("no 'consider' prompt at 31+0 in the latent phase", () => {
+    expect(hasNot(computeAlerts(pretermBed("31+0", { labourStage: "Latent" }), NOW), "preterm-mgso4")).toBe(true)
   })
   it("no alert when MgSO4 already given", () => {
     expect(hasNot(computeAlerts(pretermBed("28+0", { mgso4Given: true }), NOW), "preterm-mgso4")).toBe(true)
   })
 })
 
-describe("Preterm — corticosteroids (< 34+6)", () => {
+describe("Preterm — corticosteroids (NG25 1.9.2–1.9.3)", () => {
   const pretermBed = (gestation, overrides = {}) => ({
     parity: "Para 0", gestation, labourStage: "Active first stage",
     analgesia: "None", riskFlags: [], ves: [], oxytocinLog: [], observations: {},
     neonatalTeamAlerted: true, mgso4Given: true,
     ...overrides,
   })
+  const st = alerts => alerts.find(a => a.id === "preterm-steroids")
 
-  it("fires urgent at 34+5", () => {
-    expect(has(computeAlerts(pretermBed("34+5"), NOW), "preterm-steroids")).toBe(true)
+  it("offer (urgent) at 33+6", () => {
+    expect(st(computeAlerts(pretermBed("33+6"), NOW))?.severity).toBe("urgent")
   })
-  it("no alert at 34+6", () => {
-    expect(hasNot(computeAlerts(pretermBed("34+6"), NOW), "preterm-steroids")).toBe(true)
+  it("consider (warning) at 34+0", () => {
+    expect(st(computeAlerts(pretermBed("34+0"), NOW))?.severity).toBe("warning")
+  })
+  it("consider (warning) at 35+6", () => {
+    expect(st(computeAlerts(pretermBed("35+6"), NOW))?.severity).toBe("warning")
+  })
+  it("no alert at 36+0", () => {
+    expect(hasNot(computeAlerts(pretermBed("36+0"), NOW), "preterm-steroids")).toBe(true)
   })
   it("no alert when steroids confirmed", () => {
     expect(hasNot(computeAlerts(pretermBed("32+0", { corticosteroidsConfirmed: true }), NOW), "preterm-steroids")).toBe(true)
   })
 })
 
-describe("Preterm — tocolysis (28–33+6, active labour)", () => {
+describe("Preterm — tocolysis (NG25 1.8.1–1.8.4: intact membranes, under 34+0)", () => {
   const pretermBed = (gestation, overrides = {}) => ({
     parity: "Para 0", gestation, labourStage: "Active first stage",
     analgesia: "None", riskFlags: [], ves: [], oxytocinLog: [], observations: {},
@@ -355,8 +327,15 @@ describe("Preterm — tocolysis (28–33+6, active labour)", () => {
   it("no alert below 28 weeks (too early for tocolysis benefit)", () => {
     expect(hasNot(computeAlerts(pretermBed("27+6"), NOW), "preterm-tocolysis")).toBe(true)
   })
-  it("no alert in latent phase", () => {
-    expect(hasNot(computeAlerts(pretermBed("30+0", { labourStage: "Latent" }), NOW), "preterm-tocolysis")).toBe(true)
+  it("fires in suspected preterm labour (latent phase)", () => {
+    expect(has(computeAlerts(pretermBed("30+0", { labourStage: "Latent" }), NOW), "preterm-tocolysis")).toBe(true)
+  })
+  it("no alert once membranes have ruptured", () => {
+    const bed = pretermBed("30+0", { ves: [{ time: t(HOUR), dilation: 4, membranes: "SROM", membranesTime: t(HOUR) }] })
+    expect(hasNot(computeAlerts(bed, NOW), "preterm-tocolysis")).toBe(true)
+  })
+  it("no alert in the second stage", () => {
+    expect(hasNot(computeAlerts(pretermBed("30+0", { labourStage: "Active second stage" }), NOW), "preterm-tocolysis")).toBe(true)
   })
   it("no alert when tocolysis already offered", () => {
     expect(hasNot(computeAlerts(pretermBed("30+0", { tocolysisOffered: true }), NOW), "preterm-tocolysis")).toBe(true)
@@ -402,7 +381,7 @@ describe("PROM duration alerts", () => {
   })
 })
 
-// ─── GBS+ intrapartum antibiotics (GL787) ────────────────────────────────────
+// ─── GBS+ intrapartum antibiotics (GL787, RCOG GTG36: from onset of labour or ROM) ─
 
 describe("GBS+ antibiotic prophylaxis", () => {
   const gbsBed = (overrides = {}) => ({
@@ -420,8 +399,18 @@ describe("GBS+ antibiotic prophylaxis", () => {
     expect(hasNot(computeAlerts(gbsBed({ gbsAntibioticsStarted: true }), NOW), "gbs-iap")).toBe(true)
   })
 
-  it("no alert when membranes intact", () => {
+  it("fires in established labour even with intact membranes", () => {
     const bed = gbsBed({ ves: [{ time: t(1*HOUR), dilation: 5, membranes: "Intact" }] })
+    expect(has(computeAlerts(bed, NOW), "gbs-iap")).toBe(true)
+  })
+
+  it("fires in spontaneous latent labour", () => {
+    const bed = gbsBed({ labourStage: "Latent", modeOfOnset: "Spontaneous", ves: [{ time: t(1*HOUR), dilation: 2, membranes: "Intact" }] })
+    expect(has(computeAlerts(bed, NOW), "gbs-iap")).toBe(true)
+  })
+
+  it("no alert for an induction still latent with intact membranes (not yet in labour)", () => {
+    const bed = gbsBed({ labourStage: "Latent", modeOfOnset: "Induced", ves: [{ time: t(1*HOUR), dilation: 1, membranes: "Intact" }] })
     expect(hasNot(computeAlerts(bed, NOW), "gbs-iap")).toBe(true)
   })
 
@@ -624,40 +613,28 @@ describe("Oliguria", () => {
   })
 })
 
-// ─── Active first stage duration (NICE NG235 §1.5.1) ─────────────────────────
+// ─── Established first stage duration (NICE NG235 1.8.36) ────────────────────
+// First labours are unlikely to last over 18 h; subsequent labours over 12 h.
 
-describe("Active first stage duration", () => {
+describe("Established first stage duration", () => {
   const activePhaseBed = (parity, hoursIn) => activeBed({
     parity,
     activeFirstStageStartTime: t(hoursIn * HOUR),
   })
 
-  // Nulliparous: 12h limit
-  it("nullip — no alert at 10h 59m", () => {
-    expect(hasNot(computeAlerts(activePhaseBed("Para 0", 10.98), NOW), "active-phase-limit")).toBe(true)
+  it("nullip — no alert at 17h 59m", () => {
+    expect(hasNot(computeAlerts(activePhaseBed("Para 0", 17.98), NOW), "active-phase-limit")).toBe(true)
   })
-  it("nullip — fires warning at 11h (1h before limit)", () => {
-    expect(has(computeAlerts(activePhaseBed("Para 0", 11), NOW), "active-phase-limit-soon")).toBe(true)
+  it("nullip — warning at 18h", () => {
+    const a = computeAlerts(activePhaseBed("Para 0", 18), NOW).find(x => x.id === "active-phase-limit")
+    expect(a?.severity).toBe("warning")
   })
-  it("nullip — fires urgent at exactly 12h", () => {
-    expect(has(computeAlerts(activePhaseBed("Para 0", 12), NOW), "active-phase-limit")).toBe(true)
+  it("multip — no alert at 11h 59m", () => {
+    expect(hasNot(computeAlerts(activePhaseBed("Para 1", 11.98), NOW), "active-phase-limit")).toBe(true)
   })
-  it("nullip — limit alert is urgent not warning", () => {
-    const alert = computeAlerts(activePhaseBed("Para 0", 13), NOW).find(a => a.id === "active-phase-limit")
-    expect(alert?.severity).toBe("urgent")
+  it("multip — warning at 12h", () => {
+    expect(has(computeAlerts(activePhaseBed("Para 1", 12), NOW), "active-phase-limit")).toBe(true)
   })
-
-  // Multiparous: 10h limit
-  it("multip — no alert at 8h 59m", () => {
-    expect(hasNot(computeAlerts(activePhaseBed("Para 1", 8.98), NOW), "active-phase-limit")).toBe(true)
-  })
-  it("multip — fires warning at 9h (1h before limit)", () => {
-    expect(has(computeAlerts(activePhaseBed("Para 1", 9), NOW), "active-phase-limit-soon")).toBe(true)
-  })
-  it("multip — fires urgent at exactly 10h", () => {
-    expect(has(computeAlerts(activePhaseBed("Para 1", 10), NOW), "active-phase-limit")).toBe(true)
-  })
-
   it("no alert when activeFirstStageStartTime not set", () => {
     const bed = activeBed({ activeFirstStageStartTime: null })
     expect(hasNot(computeAlerts(bed, NOW), "active-phase-limit")).toBe(true)
@@ -707,7 +684,9 @@ describe("classifyCTGEntry — baseline HR", () => {
   it("109 bpm — suspicious (AMBER baseline)", () => expect(entry(109)).toBe("suspicious"))
   it("100 bpm — suspicious", () => expect(entry(100)).toBe("suspicious"))
   it("99 bpm — pathological (RED baseline)", () => expect(entry(99)).toBe("pathological"))
-  it("161 bpm — pathological", () => expect(entry(161)).toBe("pathological"))
+  it("161 bpm — suspicious (NG229: 161–180 non-reassuring)", () => expect(entry(161)).toBe("suspicious"))
+  it("180 bpm — suspicious", () => expect(entry(180)).toBe("suspicious"))
+  it("181 bpm — pathological (NG229: above 180 abnormal)", () => expect(entry(181)).toBe("pathological"))
   it("rise ≥ 20 bpm from previous — suspicious", () => expect(entry(155, 135)).toBe("suspicious"))
   it("rise = 19 bpm — still normal", () => expect(entry(154, 135)).toBe("normal"))
   it("rise ≥ 20 but HR still in normal range — suspicious (1 amber: baseline)", () =>
@@ -725,8 +704,10 @@ describe("classifyCTGEntry — variability", () => {
   it("<5 bpm for 30 min — AMBER → suspicious", () => expect(entry("<5", 30)).toBe("suspicious"))
   it("<5 bpm for 50 min — AMBER → suspicious", () => expect(entry("<5", 50)).toBe("suspicious"))
   it("<5 bpm for 51 min — RED → pathological", () => expect(entry("<5", 51)).toBe("pathological"))
-  it(">25 bpm for ≤ 10 min — AMBER → suspicious", () => expect(entry(">25", 10)).toBe("suspicious"))
-  it(">25 bpm for 11 min — RED → pathological", () => expect(entry(">25", 11)).toBe("pathological"))
+  it(">25 bpm for under 15 min — reassuring (NG229)", () => expect(entry(">25", 14)).toBe("normal"))
+  it(">25 bpm for 15 min — AMBER → suspicious", () => expect(entry(">25", 15)).toBe("suspicious"))
+  it(">25 bpm for 25 min — AMBER → suspicious", () => expect(entry(">25", 25)).toBe("suspicious"))
+  it(">25 bpm for 26 min — RED → pathological", () => expect(entry(">25", 26)).toBe("pathological"))
   it("sinusoidal — RED → pathological", () => expect(entry("sinusoidal", 0)).toBe("pathological"))
 })
 
@@ -932,7 +913,9 @@ describe("CTG — normal review overdue", () => {
   })
 })
 
-// ─── Active second stage pushing time (NICE NG235 §1.6.2) ───────────────────────
+// ─── Active second stage (NICE NG235 1.9.25–1.9.28) ─────────────────────────────
+// Nulliparous: reassess at 1 h of pushing, senior review if birth not imminent at 2 h.
+// Parous: reassess at 30 min, senior review at 1 h. The same with or without an epidural.
 
 function pushBed(parity, pushingMinutes, overrides = {}) {
   return activeBed({
@@ -944,57 +927,44 @@ function pushBed(parity, pushingMinutes, overrides = {}) {
   })
 }
 
-describe("Second stage pushing time — nulliparous (Para 0)", () => {
-  it("no alert before 45 min", () => {
-    const alerts = computeAlerts(pushBed("Para 0", 30), NOW)
-    expect(hasNot(alerts, "pushing-warning")).toBe(true)
-    expect(hasNot(alerts, "pushing-urgent")).toBe(true)
-  })
-
-  it("warning alert at 45 min", () => {
-    const alerts = computeAlerts(pushBed("Para 0", 45), NOW)
-    expect(has(alerts, "pushing-warning")).toBe(true)
-    expect(hasNot(alerts, "pushing-urgent")).toBe(true)
-  })
-
-  it("warning alert at 59 min", () => {
-    const alerts = computeAlerts(pushBed("Para 0", 59), NOW)
-    expect(has(alerts, "pushing-warning")).toBe(true)
-    expect(hasNot(alerts, "pushing-urgent")).toBe(true)
-  })
-
-  it("urgent alert at 60 min", () => {
-    const alerts = computeAlerts(pushBed("Para 0", 60), NOW)
-    expect(has(alerts, "pushing-urgent")).toBe(true)
-    expect(hasNot(alerts, "pushing-warning")).toBe(true)
-  })
-
-  it("urgent alert at 90 min", () => {
-    expect(has(computeAlerts(pushBed("Para 0", 90), NOW), "pushing-urgent")).toBe(true)
-  })
+describe("Active second stage — nulliparous (1.9.25, 1.9.27)", () => {
+  for (const analgesia of ["None", "Epidural"]) {
+    it(`${analgesia}: nothing at 59 min`, () => {
+      const a = computeAlerts(pushBed("Para 0", 59, { analgesia }), NOW)
+      expect(hasNot(a, "pushing-reassess") && hasNot(a, "pushing-senior-review")).toBe(true)
+    })
+    it(`${analgesia}: reassess (warning) at 1 h`, () => {
+      const a = computeAlerts(pushBed("Para 0", 60, { analgesia }), NOW)
+      expect(has(a, "pushing-reassess")).toBe(true)
+      expect(hasNot(a, "pushing-senior-review")).toBe(true)
+    })
+    it(`${analgesia}: senior review (urgent) at 2 h`, () => {
+      const a = computeAlerts(pushBed("Para 0", 120, { analgesia }), NOW)
+      expect(a.find(x => x.id === "pushing-senior-review")?.severity).toBe("urgent")
+      expect(hasNot(a, "pushing-reassess")).toBe(true)
+    })
+  }
 })
 
-describe("Second stage pushing time — multiparous (Para 1)", () => {
-  it("no alert before 20 min", () => {
-    const alerts = computeAlerts(pushBed("Para 1", 15), NOW)
-    expect(hasNot(alerts, "pushing-warning")).toBe(true)
-    expect(hasNot(alerts, "pushing-urgent")).toBe(true)
+describe("Active second stage — parous (1.9.26, 1.9.28)", () => {
+  for (const analgesia of ["None", "Epidural"]) {
+    it(`${analgesia}: nothing at 29 min`, () => {
+      const a = computeAlerts(pushBed("Para 1", 29, { analgesia }), NOW)
+      expect(hasNot(a, "pushing-reassess") && hasNot(a, "pushing-senior-review")).toBe(true)
+    })
+    it(`${analgesia}: reassess at 30 min`, () => {
+      expect(has(computeAlerts(pushBed("Para 1", 30, { analgesia }), NOW), "pushing-reassess")).toBe(true)
+    })
+    it(`${analgesia}: senior review at 1 h`, () => {
+      expect(has(computeAlerts(pushBed("Para 1", 60, { analgesia }), NOW), "pushing-senior-review")).toBe(true)
+    })
+  }
+  it("Para 2+ treated as parous", () => {
+    expect(has(computeAlerts(pushBed("Para 2+", 60), NOW), "pushing-senior-review")).toBe(true)
   })
-
-  it("warning alert at 20 min", () => {
-    const alerts = computeAlerts(pushBed("Para 1", 20), NOW)
-    expect(has(alerts, "pushing-warning")).toBe(true)
-    expect(hasNot(alerts, "pushing-urgent")).toBe(true)
-  })
-
-  it("urgent alert at 30 min", () => {
-    const alerts = computeAlerts(pushBed("Para 1", 30), NOW)
-    expect(has(alerts, "pushing-urgent")).toBe(true)
-    expect(hasNot(alerts, "pushing-warning")).toBe(true)
-  })
-
-  it("Para 2+ treated same as multiparous", () => {
-    expect(has(computeAlerts(pushBed("Para 2+", 30), NOW), "pushing-urgent")).toBe(true)
+  it("only one pushing alert at a time (no duplicate rules)", () => {
+    const a = computeAlerts(pushBed("Para 0", 130, { analgesia: "None" }), NOW)
+    expect(a.filter(x => x.id.startsWith("pushing")).length).toBe(1)
   })
 })
 

@@ -104,3 +104,45 @@ describe("handover", () => {
     expect(text).toMatch(/To do: Repeat Hb/)
   })
 })
+
+describe("slow progress (NICE NG235 1.8.42, 1.8.45)", () => {
+  const active = (ves, startHoursAgo) => bed({
+    labourStage: "Active first stage",
+    activeFirstStageStartTime: t(startHoursAgo * HOUR),
+    ves,
+  })
+
+  it("ignores the latent-phase VE when she has just become active", () => {
+    const b = active([
+      { time: t(6 * HOUR), dilation: 3 },          // latent
+      { time: t(10 * MIN), dilation: 4 },          // first active VE
+    ], 0.25)
+    expect(has(computeAlerts(b, NOW), "slow-progress")).toBe(false)
+  })
+
+  it("catches no change at a VE taken 2 hours later, even a minute early", () => {
+    const b = active([
+      { time: t(2 * HOUR - MIN), dilation: 5 },
+      { time: t(0), dilation: 5 },
+    ], 3)
+    expect(has(computeAlerts(b, NOW), "slow-progress")).toBe(true)
+  })
+
+  it("flags less than 2 cm over 4 hours", () => {
+    const b = active([
+      { time: t(4 * HOUR), dilation: 4 },
+      { time: t(2.5 * HOUR), dilation: 5 },
+      { time: t(0), dilation: 5.5 },
+    ], 5)
+    expect(has(computeAlerts(b, NOW), "slow-progress")).toBe(true)
+  })
+
+  it("clears once progress is adequate again", () => {
+    const b = active([
+      { time: t(6 * HOUR), dilation: 4 },
+      { time: t(4 * HOUR), dilation: 4.5 },
+      { time: t(0), dilation: 8 },
+    ], 7)
+    expect(has(computeAlerts(b, NOW), "slow-progress")).toBe(false)
+  })
+})

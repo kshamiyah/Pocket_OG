@@ -23,12 +23,19 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
   const [ctx, setCtx] = useState(editCTG?.contractionsPerTen ?? null); // optional, never guessed
 
   const entry = { baselineHR: hr, variability: vari, variabilityMinutes: varMin, decelerations: dec, decelerationMinutes: decMin, accelerations: accel, contractionsPerTen: ctx };
-  const cat = useMemo(() => classifyCTGEntry(entry, prevHR), [hr, vari, varMin, dec, decMin, accel, ctx, prevHR]); // eslint-disable-line react-hooks/exhaustive-deps
+  const autoCat = useMemo(() => classifyCTGEntry(entry, prevHR), [hr, vari, varMin, dec, decMin, accel, ctx, prevHR]); // eslint-disable-line react-hooks/exhaustive-deps
+  // The clinician may judge a trace pathological on the whole picture even when
+  // the features grade lower; the app never downgrades.
+  const [override, setOverride] = useState(!!editCTG?.clinicianOverride);
+  const cat = override ? "pathological" : autoCat;
   const iso = resolveWhen(when);
   const rise = prevHR != null ? hr - prevHR : 0;
   const hrTone = hr < 100 || hr > 160 ? "text-red-600 dark:text-red-400" : hr < 110 ? "text-claude-700 dark:text-claude-400" : "";
 
-  const save = () => iso && onSave({ id: editCTG?.id ?? newId("ctg"), time: iso, ...entry, classification: cat });
+  const save = () => iso && onSave({
+    id: editCTG?.id ?? newId("ctg"), time: iso, ...entry, classification: cat,
+    autoClassification: autoCat, clinicianOverride: override && autoCat !== "pathological",
+  });
 
   return (
     <Sheet open onClose={onClose}
@@ -45,6 +52,13 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
         <p className="text-base font-semibold capitalize">{cat}</p>
         <p className="text-sm opacity-90 leading-snug">{CTG_DESC[cat]}</p>
       </div>
+      {autoCat !== "pathological" && (
+        <button type="button" onClick={() => setOverride(o => !o)} aria-pressed={override}
+          className={`w-full text-left rounded-xl border px-3 py-2.5 flex items-center gap-3 transition-colors ${override ? "bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-900" : "bg-gray-50 dark:bg-gray-900/60 border-gray-200 dark:border-gray-800"}`}>
+          <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center text-[11px] font-bold ${override ? "bg-red-600 border-red-600 text-white" : "border-gray-300 dark:border-gray-600"}`}>{override ? "✓" : ""}</span>
+          <span className="text-sm text-gray-800 dark:text-gray-200">I judge this trace pathological <span className="text-gray-500 dark:text-gray-400">(features grade it {autoCat})</span></span>
+        </button>
+      )}
 
       <div>
         <Label hint={prevHR != null ? `last ${prevHR} bpm${rise >= 20 ? `, up ${rise}` : ""}` : undefined}>Baseline (bpm)</Label>
@@ -64,8 +78,9 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
         )}
         {vari === ">25" && (
           <div className="flex flex-wrap gap-1.5 mt-2">
-            <Chip small on={varMin <= 10} onClick={() => setVarMin(5)}>Up to 10 min</Chip>
-            <Chip small on={varMin > 10} onClick={() => setVarMin(15)}>Over 10 min</Chip>
+            <Chip small on={varMin < 15} onClick={() => setVarMin(10)}>Under 15 min</Chip>
+            <Chip small on={varMin >= 15 && varMin <= 25} onClick={() => setVarMin(20)}>15 to 25 min</Chip>
+            <Chip small on={varMin > 25} onClick={() => setVarMin(30)}>Over 25 min</Chip>
           </div>
         )}
       </div>

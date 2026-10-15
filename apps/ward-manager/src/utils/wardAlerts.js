@@ -42,7 +42,6 @@ export function computeAlerts(bed, now = Date.now()) {
 
   const ves = [...(bed.ves ?? [])].sort((a, b) => new Date(a.time) - new Date(b.time));
   const lastVE = ves.length > 0 ? ves[ves.length - 1] : null;
-  const prevVE = ves.length > 1 ? ves[ves.length - 2] : null;
   const oxyLog = bed.oxytocinLog ?? [];
   const currentOx = oxyLog.length > 0 ? oxyLog[oxyLog.length - 1] : null;
   const obs = bed.observations ?? {};
@@ -85,59 +84,77 @@ export function computeAlerts(bed, now = Date.now()) {
     });
   }
 
-  // ─── Preterm — MgSO4 neuroprotection (< 30 weeks) ───────────────────
+  // ─── Preterm — MgSO4 neuroprotection (NICE NG25 1.10.2–1.10.3) ───────
+  // Offer 24+0 to 29+6; consider 30+0 to 33+6 in established preterm labour.
+  const inEstablishedLabour = bed.labourStage === "Active first stage"
+    || bed.labourStage === "Passive second stage" || bed.labourStage === "Active second stage";
   if (isPreterm && gestWks < 30 && !bed.mgso4Given) {
     alerts.push({
       id: "preterm-mgso4",
       severity: "urgent",
-      title: `MgSO4 neuroprotection — ${gest} weeks`,
-      body: "Offer IV magnesium sulphate if delivery expected within 24 h: 4 g loading dose over 15 min, then 1 g/hr maintenance until delivery or 24 h. Reduces risk of cerebral palsy.",
-      citation: "NICE NG25 §1.6.1 [2022]",
+      title: `MgSO4 neuroprotection: offer (${gest})`,
+      body: "Offer IV magnesium sulfate for neuroprotection in established preterm labour or planned birth within 24 h (24+0 to 29+6). Regimen per NG25 1.10.4.",
+      citation: "NICE NG25 1.10.2 [2015]",
+    });
+  } else if (isPreterm && gestWks < 34 && inEstablishedLabour && !bed.mgso4Given) {
+    alerts.push({
+      id: "preterm-mgso4",
+      severity: "warning",
+      title: `MgSO4 neuroprotection: consider (${gest})`,
+      body: "Consider IV magnesium sulfate for neuroprotection in established preterm labour or planned birth within 24 h (30+0 to 33+6).",
+      citation: "NICE NG25 1.10.3 [2015]",
     });
   }
 
-  // ─── Preterm — antenatal corticosteroids (< 34+6) ───────────────────
-  if (isPreterm && gestWks < 34 + 6 / 7 && !bed.corticosteroidsConfirmed) {
+  // ─── Preterm — antenatal corticosteroids (NICE NG25 1.9.2–1.9.3) ─────
+  // Offer 24+0 to 33+6; consider 34+0 to 35+6.
+  if (isPreterm && gestWks < 34 && !bed.corticosteroidsConfirmed) {
     alerts.push({
       id: "preterm-steroids",
       severity: "urgent",
-      title: `Antenatal corticosteroids — confirm given (${gest})`,
-      body: "Offer betamethasone 12 mg IM, repeat after 24 h if delivery expected within 7 days and gestation < 34+6. Document if already given or not indicated.",
-      citation: "NICE NG25 §1.7.1 [2022]",
+      title: `Antenatal corticosteroids: offer, confirm given (${gest})`,
+      body: "Offer maternal corticosteroids in suspected, diagnosed or established preterm labour or P-PROM (24+0 to 33+6). Document if already given or not indicated.",
+      citation: "NICE NG25 1.9.2 [2015, amended 2019]",
+    });
+  } else if (isPreterm && gestWks < 36 && !bed.corticosteroidsConfirmed) {
+    alerts.push({
+      id: "preterm-steroids",
+      severity: "warning",
+      title: `Antenatal corticosteroids: consider (${gest})`,
+      body: "Consider maternal corticosteroids in suspected, diagnosed or established preterm labour or P-PROM (34+0 to 35+6). Discuss benefits and risks.",
+      citation: "NICE NG25 1.9.3 [2015]",
     });
   }
 
-  // ─── Preterm — tocolysis consideration (28–33+6, active labour) ─────
-  if (isPreterm && gestWks >= 28 && gestWks < 34 && bed.labourStage === "Active first stage" && !bed.tocolysisOffered) {
+  // ─── Preterm — tocolysis (NICE NG25 1.8.1–1.8.4) ─────────────────────
+  // Nifedipine is offered at 26+0 to 33+6 (considered at 24+0 to 25+6) with
+  // intact membranes in suspected or diagnosed preterm labour.
+  const membranesIntactNow = !membranesRuptured;
+  if (isPreterm && gestWks < 34 && membranesIntactNow && !bed.tocolysisOffered
+      && (bed.labourStage === "Latent" || bed.labourStage === "Active first stage")) {
     alerts.push({
       id: "preterm-tocolysis",
       severity: "warning",
-      title: `Consider tocolysis — active preterm labour (${gest})`,
-      body: "Offer tocolysis (nifedipine 20 mg oral, repeat after 30 min if needed, or atosiban) to allow corticosteroids to work and/or facilitate in utero transfer to appropriate unit.",
-      citation: "NICE NG25 §1.8.1–1.8.2 [2022]",
+      title: `Tocolysis: offer or record decision (${gest})`,
+      body: "Intact membranes in suspected or diagnosed preterm labour. Weigh the NG25 1.8.1 factors (bleeding, infection, gestation, steroid benefit, neonatal cot availability, her preference).",
+      citation: "NICE NG25 1.8.1, 1.8.4 [2015, amended 2022]",
     });
   }
 
-  // ─── Active first stage duration (NICE NG235 §1.5.1) ───────────────────
+  // ─── Established first stage duration (NICE NG235 1.8.36) ──────────────
+  // First labours last on average 8 h and are unlikely to last over 18 h;
+  // second and subsequent labours average 5 h and are unlikely to last over 12 h.
   if (bed.activeFirstStageStartTime && bed.labourStage === "Active first stage") {
-    const limit      = isNullip ? 12 * HOUR : 10 * HOUR;
-    const limitLabel = isNullip ? "12 hours" : "10 hours";
+    const limit      = isNullip ? 18 * HOUR : 12 * HOUR;
+    const limitLabel = isNullip ? "18 hours" : "12 hours";
     const ms = now - new Date(bed.activeFirstStageStartTime).getTime();
     if (ms >= limit) {
       alerts.push({
         id: "active-phase-limit",
-        severity: "urgent",
-        title: `Active first stage > ${limitLabel} (${formatAge(ms)})`,
-        body: `Active labour has exceeded ${limitLabel} for ${isNullip ? "nulliparous" : "multiparous"} woman. Senior/consultant review required. Assess for CPD and consider caesarean section if no progress despite augmentation.`,
-        citation: "NICE NG235 §1.5.1 [2023]",
-      });
-    } else if (ms >= limit - HOUR) {
-      alerts.push({
-        id: "active-phase-limit-soon",
         severity: "warning",
-        title: `Active first stage approaching ${limitLabel} limit`,
-        body: `${formatAge(limit - ms)} remaining. Review progress and plan escalation if no change.`,
-        citation: "NICE NG235 §1.5.1 [2023]",
+        title: `Established first stage over ${limitLabel} (${formatAge(ms)})`,
+        body: `${isNullip ? "First" : "Second and subsequent"} labours are unlikely to last over ${limitLabel}. Review progress against the delay criteria (NG235 1.8.41 to 1.8.42).`,
+        citation: "NICE NG235 1.8.36 [2007]",
       });
     }
   }
@@ -225,40 +242,39 @@ export function computeAlerts(bed, now = Date.now()) {
     }
   }
 
-  // ─── Slow progress ───────────────────────────────────────────────────
-  // Check 1: consecutive VEs ≥2h apart
-  if (bed.labourStage === "Active first stage" && lastVE && prevVE) {
-    const diffHours = (new Date(lastVE.time) - new Date(prevVE.time)) / HOUR;
-    if (diffHours >= 2 && lastVE.dilation >= prevVE.dilation) {
-      const rate = (lastVE.dilation - prevVE.dilation) / diffHours;
-      if (rate < 0.5) {
-        alerts.push({
-          id: "slow-progress",
-          severity: "urgent",
-          title: "Slow labour progress",
-          body: `Progress ${rate === 0 ? "0 cm" : `${rate.toFixed(1)} cm/hr`}${rate === 0 ? ` in ${diffHours.toFixed(1)}h — no cervical change` : " — below the 0.5 cm/hr threshold"}. If membranes intact, offer ARM then reassess after 2h. If still < 1 cm progress, offer oxytocin augmentation.`,
-          citation: "NICE NG235 §1.5.1–1.5.4 [2023]",
-        });
-      }
-    }
-  }
-  // Check 2: overall progress from first active-stage VE (catches multi-VE slow drift)
-  if (bed.labourStage === "Active first stage" && bed.activeFirstStageStartTime && lastVE && !alerts.find(a => a.id === "slow-progress")) {
-    const firstActiveVE = ves.find(ve => new Date(ve.time) >= new Date(bed.activeFirstStageStartTime));
-    if (firstActiveVE && firstActiveVE !== lastVE) {
-      const totalHours = (new Date(lastVE.time) - new Date(firstActiveVE.time)) / HOUR;
-      if (totalHours >= 2 && lastVE.dilation >= firstActiveVE.dilation) {
-        const overallRate = (lastVE.dilation - firstActiveVE.dilation) / totalHours;
-        if (overallRate < 0.5) {
-          alerts.push({
-            id: "slow-progress",
-            severity: "urgent",
-            title: "Slow labour progress",
-            body: `Overall progress ${overallRate === 0 ? "0 cm" : `${overallRate.toFixed(1)} cm/hr`} over ${totalHours.toFixed(1)}h in active stage — below the 0.5 cm/hr threshold. Review membranes, augmentation, and CPD.`,
-            citation: "NICE NG235 §1.5.1–1.5.4 [2023]",
-          });
-        }
-      }
+  // ─── Slow progress (NICE NG235 1.8.42, 1.8.45) ──────────────────────────
+  // Only examinations in the established first stage count (a latent-phase VE
+  // would make a woman look slow the moment she becomes active). A 5-minute
+  // tolerance stops a VE taken "2 hours later" being missed by seconds.
+  const TOL = 5 * MIN;
+  const activeStart = bed.activeFirstStageStartTime ? new Date(bed.activeFirstStageStartTime).getTime() - TOL : null;
+  const activeVEs = activeStart == null ? ves : ves.filter(ve => new Date(ve.time).getTime() >= activeStart);
+  if (bed.labourStage === "Active first stage" && activeVEs.length >= 2) {
+    const last = activeVEs[activeVEs.length - 1];
+    const prev = activeVEs[activeVEs.length - 2];
+    const lastT = new Date(last.time).getTime();
+    // Check 1: consecutive VEs about 2 h or more apart, less than 1 cm per 2 h.
+    const gap = lastT - new Date(prev.time).getTime();
+    const rate = (last.dilation - prev.dilation) / (gap / HOUR);
+    // Check 2: less than 2 cm over about 4 h (latest active VE at least 4 h earlier).
+    const earlier = [...activeVEs].reverse().find(ve => lastT - new Date(ve.time).getTime() >= 4 * HOUR - TOL);
+    const gain4h = earlier ? last.dilation - earlier.dilation : null;
+    if (gap >= 2 * HOUR - TOL && rate < 0.5) {
+      alerts.push({
+        id: "slow-progress",
+        severity: "urgent",
+        title: "Slow labour progress",
+        body: `${(last.dilation - prev.dilation)} cm in ${formatAge(gap)} between examinations. Diagnose delay if progress is less than 1 cm 2 hours after delay is suspected; consider amniotomy if membranes intact, and obstetric review.`,
+        citation: "NICE NG235 1.8.45 [2007]",
+      });
+    } else if (gain4h != null && gain4h < 2) {
+      alerts.push({
+        id: "slow-progress",
+        severity: "urgent",
+        title: "Slow labour progress",
+        body: `${gain4h} cm in ${formatAge(lastT - new Date(earlier.time).getTime())}. Less than 2 cm in 4 hours suggests delay: assess all aspects of progress and re-examine in 2 hours.`,
+        citation: "NICE NG235 1.8.42 [2007]",
+      });
     }
   }
 
@@ -332,36 +348,6 @@ export function computeAlerts(bed, now = Date.now()) {
     }
   }
 
-  // ─── Second stage — active pushing limit ────────────────────────────
-  if (bed.labourStage === "Active second stage" && bed.pushingStartTime) {
-    let limit;
-    if (isNullip && hasRegionalAnalgesia) limit = 2 * HOUR;
-    else if (isNullip) limit = 1 * HOUR;
-    else if (!isNullip && hasRegionalAnalgesia) limit = 1 * HOUR;
-    else limit = 30 * MIN;
-
-    const ms = now - new Date(bed.pushingStartTime).getTime();
-    const limitLabel = limit === 30 * MIN ? "30 minutes" : limit === HOUR ? "1 hour" : "2 hours";
-
-    if (ms >= limit) {
-      alerts.push({
-        id: "pushing-limit",
-        severity: "urgent",
-        title: `Active pushing limit reached (${formatAge(ms)})`,
-        body: `${limitLabel} active pushing ${hasRegionalAnalgesia ? "with regional analgesia" : "without epidural"}. Senior review required — consider instrumental delivery.`,
-        citation: "NICE NG235 §1.6.5–1.6.6 [2023]",
-      });
-    } else if (ms >= limit - 15 * MIN) {
-      alerts.push({
-        id: "pushing-limit-soon",
-        severity: "warning",
-        title: "Active pushing limit approaching",
-        body: `${formatAge(limit - ms)} until ${limitLabel} limit. Alert senior if not progressing.`,
-        citation: "NICE NG235 §1.6.5–1.6.6 [2023]",
-      });
-    }
-  }
-
   // ─── PROM duration alerts ────────────────────────────────────────────
   if (membranesTime) {
     const ms = now - new Date(membranesTime).getTime();
@@ -393,13 +379,16 @@ export function computeAlerts(bed, now = Date.now()) {
   }
 
   // ─── GBS+ — antibiotics required ────────────────────────────────────
-  if (isGBSPos && membranesRuptured && !bed.gbsAntibioticsStarted && !alerts.find(a => a.id === "prom-18h" || a.id === "prom-24h")) {
+  // Start as soon as labour is confirmed or membranes rupture (RCOG GTG36).
+  // An induction still in the latent phase with intact membranes is not yet labour.
+  const inLabour = inEstablishedLabour || (bed.labourStage === "Latent" && bed.modeOfOnset !== "Induced");
+  if (isGBSPos && (membranesRuptured || inLabour) && !bed.gbsAntibioticsStarted && !alerts.find(a => a.id === "prom-18h" || a.id === "prom-24h")) {
     alerts.push({
       id: "gbs-iap",
       severity: "urgent",
       title: "GBS+ — IV antibiotic prophylaxis required",
-      body: "Offer IV benzylpenicillin 3g stat, then 1.5g every 4 hours until delivery. If penicillin-allergic: clindamycin 900 mg IV 8-hourly.",
-      citation: "GL787 · NICE NG235 §1.2.12 [2023]",
+      body: "Start intrapartum antibiotic prophylaxis from onset of labour or rupture of membranes. Regimen per GL787: IV benzylpenicillin 3 g stat, then 1.5 g 4-hourly until birth; penicillin allergy: IV teicoplanin 10 mg/kg stat, then 10 mg/kg 12-hourly.",
+      citation: "GL787 · RCOG GTG36",
     });
   }
 
@@ -567,32 +556,32 @@ export function computeAlerts(bed, now = Date.now()) {
     }
   }
 
-  // ─── Active second stage pushing time ────────────────────────────────
+  // ─── Active second stage (NICE NG235 1.9.25–1.9.28) ───────────────────
+  // Same timings with or without an epidural: reassess after 1 h of active
+  // pushing (nulliparous) or 30 min (parous); senior review if birth is not
+  // imminent after 2 h (nulliparous) or 1 h (parous).
   if (bed.labourStage === "Active second stage" && bed.pushingStartTime) {
-    const pushMs     = now - new Date(bed.pushingStartTime).getTime();
-    const isNullipara = bed.parity === "Para 0";
-    const warnMs     = isNullipara ? 45 * MIN : 20 * MIN;
-    const urgentMs   = isNullipara ? 60 * MIN : 30 * MIN;
-
-    if (pushMs >= urgentMs) {
+    const pushMs   = now - new Date(bed.pushingStartTime).getTime();
+    const reassess = isNullip ? HOUR : 30 * MIN;
+    const review   = isNullip ? 2 * HOUR : HOUR;
+    const cite     = isNullip
+      ? (hasRegionalAnalgesia ? "NICE NG235 1.9.27 [2023]" : "NICE NG235 1.9.25 [2023]")
+      : (hasRegionalAnalgesia ? "NICE NG235 1.9.28 [2023]" : "NICE NG235 1.9.26 [2023]");
+    if (pushMs >= review) {
       alerts.push({
-        id: "pushing-urgent",
+        id: "pushing-senior-review",
         severity: "urgent",
-        title: `Active pushing ${formatAge(pushMs)} — senior review`,
-        body: isNullipara
-          ? `Nulliparous — pushing for ${formatAge(pushMs)}. NICE NG235 recommends offering instrumental assessment after 1 h active pushing with no birth.`
-          : `Multiparous — pushing for ${formatAge(pushMs)}. Consider instrumental assessment after 30 min active pushing.`,
-        citation: "NICE NG235 §1.6.2 [2023]",
+        title: `Pushing ${formatAge(pushMs)}: senior review if birth not imminent`,
+        body: `Birth not imminent after ${isNullip ? "2 hours" : "1 hour"} of pushing: refer for senior review and a decision on place and mode of birth.`,
+        citation: cite,
       });
-    } else if (pushMs >= warnMs) {
+    } else if (pushMs >= reassess) {
       alerts.push({
-        id: "pushing-warning",
+        id: "pushing-reassess",
         severity: "warning",
-        title: `Active pushing ${formatAge(pushMs)}`,
-        body: isNullipara
-          ? `Approaching 1-hour limit. Document fetal position, descent, and progress.`
-          : `Approaching 30-min assessment point. Review progress and maternal position.`,
-        citation: "NICE NG235 §1.6.2 [2023]",
+        title: `Pushing ${formatAge(pushMs)}: reassess progress`,
+        body: `After ${isNullip ? "1 hour" : "30 minutes"} of active pushing, reassess progress, contractions and maternal and fetal wellbeing. If no progress, offer VE and consider amniotomy if membranes intact; if still no progress, diagnose delay and escalate for senior review.`,
+        citation: cite,
       });
     }
   }

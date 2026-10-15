@@ -42,14 +42,13 @@ The **IOL queue** (NICE NG207 priority order) sits in its own tab, with admit-to
 | VE overdue (> 4 h active first stage) | NICE NG235 §1.4.1 | Urgent |
 | VE due soon (> 3.5 h) | NICE NG235 §1.4.1 | Warning |
 | Latent phase reassessment (> 4 h) | NICE NG235 §1.3.3 | Warning |
-| Slow progress (< 0.5 cm/hr over ≥ 2 h) | NICE NG235 §1.5.1–1.5.4 | Urgent |
+| Slow progress: under 1 cm in 2 h, or under 2 cm in 4 h (established first stage VEs only) | NICE NG235 1.8.42, 1.8.45 | Urgent |
+| Established first stage over 18 h (first labour) or 12 h (subsequent) | NICE NG235 1.8.36 | Warning |
 | Uterine hyperstimulation (> 5 ctx/10 min) | NICE NG235 §1.5.7 | Urgent |
 | Oxytocin increment due (> 30 min) | NICE NG235 §1.5.6 | Warning |
 | Oxytocin at maximum dose (≥ 20 mU/min) | NICE NG235 §1.5.6 | Urgent |
-| Active pushing: nulliparous warning (≥ 45 min) | NICE NG235 §1.6.2 | Warning |
-| Active pushing: nulliparous urgent (≥ 60 min) | NICE NG235 §1.6.2 | Urgent |
-| Active pushing: multiparous warning (≥ 20 min) | NICE NG235 §1.6.2 | Warning |
-| Active pushing: multiparous urgent (≥ 30 min) | NICE NG235 §1.6.2 | Urgent |
+| Active pushing: reassess progress (nulliparous 1 h, parous 30 min; with or without epidural) | NICE NG235 1.9.25–1.9.28 | Warning |
+| Active pushing: senior review if birth not imminent (nulliparous 2 h, parous 1 h) | NICE NG235 1.9.25–1.9.28 | Urgent |
 | Maternal pulse overdue (> 1 h active labour) | NICE NG235 §1.4.5 | Info |
 | BP overdue (> 4 h; > 1 h if hypertensive) | NICE NG235 §1.4.5 | Info / Urgent |
 | Temperature overdue (> 4 h) | NICE NG235 §1.4.5 | Info |
@@ -58,37 +57,37 @@ The **IOL queue** (NICE NG207 priority order) sits in its own tab, with admit-to
 | Oliguria (< 30 mL/hr) | NICE NG235 §1.4.5 | Urgent |
 | BGL overdue: diabetic (> 1 h) | GL983 | Urgent |
 | BGL outside target (< 4.0 or > 7.0 mmol/L) | GL983 | Urgent |
-| GBS IAP due | GL787 | Urgent |
+| GBS IAP due from onset of labour or rupture of membranes | GL787, RCOG GTG36 | Urgent |
 | Ruptured membranes > 18 h (GBS+) | GL787 | Urgent |
 | Preterm: alert neonatal team (< 34 weeks) | NICE NG25 §1.1.4 | Urgent |
-| Preterm: MgSO4 neuroprotection (< 30 weeks) | NICE NG25 §1.6.1 | Urgent |
-| Preterm: corticosteroids (< 34+6) | NICE NG25 §1.7.1 | Urgent |
-| Preterm: consider tocolysis (28–33+6) | NICE NG25 §1.8 | Warning |
+| Preterm: MgSO4 offer (to 29+6) / consider (30+0 to 33+6, established labour) | NICE NG25 1.10.2–1.10.3 | Urgent / Warning |
+| Preterm: corticosteroids offer (to 33+6) / consider (34+0 to 35+6) | NICE NG25 1.9.2–1.9.3 | Urgent / Warning |
+| Preterm: tocolysis, intact membranes, under 34+0 | NICE NG25 1.8.1–1.8.4 | Warning |
 | Continuous CTG not documented | NICE NG229 §1.3.2 | Info |
 | CTG suspicious (last entry) | NICE NG229 §1.4 | Warning |
 | CTG suspicious ≥ 30 min without follow-up | NICE NG229 §1.4 | Urgent |
 | CTG pathological (last entry) | NICE NG229 §1.4 | Urgent |
 | CTG review overdue: normal (> 60 min) | NICE NG229 §1.3.2 | Info |
 
-**229 tests** covering the rules, triage and bed helpers: `npm test -w apps/ward-manager`
+**241 tests** covering the rules, triage and bed helpers: `npm test -w apps/ward-manager`
 
 ## CTG classification (NICE NG229 §1.4)
 
 `classifyCTGEntry(entry, prevBaselineHR?)` classifies each feature as White / Amber / Red:
 
-- **Baseline HR**: 110–160 bpm = White; 100–109 or rise ≥ 20 bpm = Amber; < 100 or > 160 bpm = Red
-- **Variability**: 5–25 bpm = White; < 5 bpm for 30–50 min = Amber; < 5 bpm > 50 min = Red; sinusoidal = Red; > 25 bpm ≤ 10 min = Amber; > 25 bpm > 10 min = Red
+- **Baseline HR**: 110–160 bpm = White; 100–109 or 161–180 bpm = Amber; < 100 or > 180 bpm = Red. A rise of 20 bpm or more is also Amber (local threshold, not NG229)
+- **Variability**: 5–25 bpm = White; < 5 bpm for 30–50 min = Amber; < 5 bpm > 50 min = Red; sinusoidal = Red; > 25 bpm for 15–25 min = Amber; > 25 bpm for over 25 min = Red
 - **Decelerations**: None / Early = White; Variable (concerning) < 30 min = Amber; Variable ≥ 30 min / Late / Prolonged = Red
 - **Contractions**: ≤ 5/10 min = White; > 5/10 min = Amber
 
-Overall: ≥ 1 Red or ≥ 2 Amber = **Pathological** · 1 Amber = **Suspicious** · All White = **Normal**
+Overall: ≥ 1 Red or ≥ 2 Amber = **Pathological** · 1 Amber = **Suspicious** · All White = **Normal**. The clinician can judge a trace pathological on the whole picture; the app records this as a clinician decision and never downgrades.
 
 ## Local development
 
 ```bash
 npm install
 npm run dev -w apps/ward-manager   # http://localhost:5173
-npm test -w apps/ward-manager      # 229 tests
+npm test -w apps/ward-manager      # 241 tests
 ```
 
 ## Data storage

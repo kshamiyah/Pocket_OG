@@ -8,8 +8,7 @@ import { combineFeatureGrades } from "@pocket-og/guidelines";
 // NG229: baseline non-reassuring 100–109 or 161–180, abnormal <100 or >180;
 // variability non-reassuring <5 for 30–50 min or >25 for 15–25 min, abnormal
 // <5 for >50 min or >25 for >25 min or sinusoidal.
-// NB: ward-manager's numeric classifyCTGEntry (ctg.js) still uses coarser
-// operational bands (>160 abnormal, >25/>10 min) — reconcile when next touched.
+// ward-manager's classifyCTGEntry (ctg.js) uses the same NG229 bands.
 
 const GRADE = {
   white: { label: "Reassuring",     chip: "bg-emerald-600 text-white", dot: "bg-emerald-500", text: "text-emerald-700" },
