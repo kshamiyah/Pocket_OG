@@ -2,7 +2,7 @@
 
 import { describe, it, expect } from "vitest"
 import { computeAlerts } from "./wardAlerts.js"
-import { setStage, veFindings, malpresentation } from "./bedModel.js"
+import { setStage, veFindings, malpresentation, parityNum, parityShort, parityWithHistory } from "./bedModel.js"
 import { clock } from "./time.js"
 import { generateHandover } from "./handoverText.js"
 
@@ -144,5 +144,22 @@ describe("slow progress (NICE NG235 1.8.42, 1.8.45)", () => {
       { time: t(0), dilation: 8 },
     ], 7)
     expect(has(computeAlerts(b, NOW), "slow-progress")).toBe(false)
+  })
+})
+
+describe("parity and previous births", () => {
+  it("reads exact and older parity values", () => {
+    expect(parityNum("Para 5")).toBe(5)
+    expect(parityShort("Para 3+")).toBe("P3+")
+    expect(parityNum(null)).toBeNull()
+  })
+  it("shows the birth history beside parity, skipping unrecorded births", () => {
+    expect(parityWithHistory(bed({ parity: "Para 2", prevBirths: ["SVD", "Emergency CS"] }))).toBe("P2 (SVD, Em CS)")
+    expect(parityWithHistory(bed({ parity: "Para 2", prevBirths: [null, "Instrumental"] }))).toBe("P2 (Instr)")
+    expect(parityWithHistory(bed({ parity: "Para 1" }))).toBe("P1")
+  })
+  it("puts the history in the handover", () => {
+    const b = bed({ parity: "Para 2", prevBirths: ["SVD", "Emergency CS"] })
+    expect(generateHandover({ b1: b }, null, NOW)).toMatch(/P2 \(SVD, Em CS\)/)
   })
 })

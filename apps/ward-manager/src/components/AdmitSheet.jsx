@@ -4,8 +4,8 @@ import { Chip, ChipRow, DilationGrid, Label, MultiChipRow, Stepper, WhenPicker }
 import { BTN, BTN_PRIMARY, INPUT, TYPE_META } from "../ui/styles";
 import { resolveWhen, whenFromISO } from "../utils/time";
 import {
-  ANALGESIA, IND_METHODS, IOL_REASONS, LIQUORS, LIQUOR_SHORT, MEMBRANES, ONSETS, PARITIES, RISK_FLAGS,
-  STAGES, STAGE_SHORT, newId, parityShort,
+  ANALGESIA, BIRTH_MODES, BIRTH_SHORT, IND_METHODS, IOL_REASONS, LIQUORS, LIQUOR_SHORT, MEMBRANES, ONSETS, PARITIES, RISK_FLAGS,
+  STAGES, STAGE_SHORT, newId, parityNum, parityShort,
 } from "../utils/bedModel";
 
 const WEEK_CHIPS = [34, 35, 36, 37, 38, 39, 40, 41, 42];
@@ -28,6 +28,8 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
 
   const [num, setNum] = useState(edit ? bed.bedNumber : "");
   const [parity, setParity] = useState(edit ? bed.parity : null);
+  const [customParity, setCustomParity] = useState(edit && !!bed.parity && !PARITIES.includes(bed.parity));
+  const [prevBirths, setPrevBirths] = useState(edit ? bed.prevBirths ?? [] : []);
   const [weeks, setWeeks] = useState(g0.w);
   const [days, setDays] = useState(g0.d);
   const [otherWeeks, setOtherWeeks] = useState(g0.w != null && !WEEK_CHIPS.includes(g0.w));
@@ -60,7 +62,16 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
   const ruptured = !edit && effMemb !== "Intact";
   const romISO = ruptured ? resolveWhen(romWhen) : null;
   const ready = trimmed && !clash && parity && weeks && stage && (!ruptured || !!romISO);
-  const parityOptions = edit && bed.parity && !PARITIES.includes(bed.parity) ? [...PARITIES, bed.parity] : PARITIES;
+  const nBirths = Math.min(parityNum(parity) ?? (parity === "Para 3+" ? 3 : 0), 10);
+  const births = prevBirths.slice(0, nBirths);
+  const setBirth = (i, mode) => {
+    const next = Array.from({ length: nBirths }, (_, k) => births[k] ?? null);
+    next[i] = next[i] === mode ? null : mode;
+    setPrevBirths(next);
+    // A caesarean in the history is the "Previous LSCS" risk flag.
+    if (mode.endsWith("CS") && next[i] && !flags.includes("Previous LSCS")) setFlags(f => [...f, "Previous LSCS"]);
+  };
+  const ORD = ["1st", "2nd", "3rd"];
 
   const save = () => {
     if (!ready) return;
@@ -69,7 +80,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
     const iolISO = induced ? resolveWhen(iolWhen) : null;
     if (edit) {
       onSave({
-        bedNumber: trimmed, parity, gestation, labourStage: stage, modeOfOnset: onset, analgesia, riskFlags: flags,
+        bedNumber: trimmed, parity, prevBirths: births, gestation, labourStage: stage, modeOfOnset: onset, analgesia, riskFlags: flags,
         inductionMethod: induced ? indMethod : null,
         iolReasons: induced ? iolReasons : [],
         inductionStartTime: induced ? iolISO ?? bed.inductionStartTime ?? null : null,
@@ -88,7 +99,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
     }] : [];
     onSave({
       id: newId("bed"), bedNumber: trimmed, admissionTime: admISO,
-      parity, gestation, modeOfOnset: onset,
+      parity, prevBirths: births, gestation, modeOfOnset: onset,
       inductionMethod: induced ? indMethod : null,
       iolReasons: induced ? iolReasons : [],
       inductionStartTime: iolISO,
@@ -128,7 +139,28 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
 
       <div>
         <Label>Parity</Label>
-        <ChipRow options={parityOptions} value={parity} onChange={setParity} label={parityShort} />
+        <div className="flex flex-wrap gap-1.5">
+          {PARITIES.map(p => <Chip key={p} on={!customParity && parity === p} onClick={() => { setCustomParity(false); setParity(p); }}>{parityShort(p)}</Chip>)}
+          <Chip on={customParity} onClick={() => { if (!customParity) setParity("Para 4"); setCustomParity(true); }}>Custom</Chip>
+        </div>
+        {customParity && (
+          <div className="mt-2">
+            <Stepper value={parityNum(parity) ?? 4} onChange={n => setParity(`Para ${n}`)} min={4} max={15} format={n => `P${n}`} />
+          </div>
+        )}
+        {nBirths > 0 && (
+          <div className="mt-3 space-y-2">
+            <Label hint="optional">Previous births</Label>
+            {Array.from({ length: nBirths }, (_, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className={`${TYPE_META} w-8 shrink-0`}>{i < 3 ? ORD[i] : `${i + 1}th`}</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {BIRTH_MODES.map(m => <Chip key={m} small on={births[i] === m} onClick={() => setBirth(i, m)}>{BIRTH_SHORT[m]}</Chip>)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div>

@@ -8,7 +8,7 @@ import {
 import { IconBack, IconTick } from "../ui/icons";
 import { fmtAge, clock } from "../utils/time";
 import {
-  ANALGESIA, LIQUOR_SHORT, PERSISTENT_FLAGS, STAGES, STAGE_SHORT, currentOxytocin, newId, obsStatus, parityShort, sortedVEs, stageLabel, stampObs, stationLabel,
+  ANALGESIA, LIQUOR_SHORT, PERSISTENT_FLAGS, STAGES, STAGE_SHORT, currentOxytocin, newId, obsStatus, parityWithHistory, sortedVEs, stageLabel, stampObs, stationLabel,
 } from "../utils/bedModel";
 
 // Labels for the "recorded as done" list, so a mistaken Given or Done can be taken back.
@@ -138,7 +138,7 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
               className="w-11 h-11 -ml-2 rounded-full flex items-center justify-center text-claude-700 dark:text-claude-400 active:scale-95"><IconBack /></button>
             <div className="flex-1 min-w-0">
               <h2 className={TYPE_DISPLAY}>Bed {bed.bedNumber}</h2>
-              <p className={`${TYPE_META} mt-0.5`}>{parityShort(bed.parity)} · {bed.gestation} · {stageLabel(bed)}{bed.admissionTime ? ` · admitted ${clock(bed.admissionTime)}` : ""}</p>
+              <p className={`${TYPE_META} mt-0.5`}>{parityWithHistory(bed)} · {bed.gestation} · {stageLabel(bed)}{bed.admissionTime ? ` · admitted ${clock(bed.admissionTime)}` : ""}</p>
             </div>
             <button type="button" onClick={onEdit} className="min-h-11 px-3 text-sm font-semibold text-claude-700 dark:text-claude-400">Edit</button>
           </div>

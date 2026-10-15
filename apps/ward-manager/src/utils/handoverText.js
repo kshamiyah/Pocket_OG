@@ -2,7 +2,7 @@
 
 import { computeAlerts } from "./wardAlerts";
 import { clock, fmtAge } from "./time";
-import { currentOxytocin, doctorLabel, lastVE, membraneStatus, parityShort, stageLabel, veFindings } from "./bedModel";
+import { currentOxytocin, doctorLabel, lastVE, membraneStatus, parityWithHistory, stageLabel, veFindings } from "./bedModel";
 import { tidy } from "./triage";
 
 function isPreterm(g) {
@@ -26,7 +26,7 @@ export function generateHandover(beds, shift, now = Date.now()) {
   for (const bed of bedList) {
     lines.push(DIV);
     const pt = isPreterm(bed.gestation) ? " [PRETERM]" : "";
-    lines.push(`BED ${bed.bedNumber}  ${parityShort(bed.parity)}  ${bed.gestation ?? "?"}${pt}  ${stageLabel(bed)}`);
+    lines.push(`BED ${bed.bedNumber}  ${parityWithHistory(bed)}  ${bed.gestation ?? "?"}${pt}  ${stageLabel(bed)}`);
 
     // Background that matters whether or not she has delivered.
     const background = [

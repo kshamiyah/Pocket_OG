@@ -17,7 +17,11 @@ export const STAGE_HINT = {
   "Active second stage": "active 2nd stage",
 };
 
-export const PARITIES = ["Para 0", "Para 1", "Para 2", "Para 3+"];
+// Exact parity; higher numbers come from the Custom stepper. Older boards may
+// hold "Para 3+" or "Para 2+", which still display.
+export const PARITIES = ["Para 0", "Para 1", "Para 2", "Para 3"];
+export const BIRTH_MODES = ["SVD", "Instrumental", "Emergency CS", "Elective CS"];
+export const BIRTH_SHORT = { SVD: "SVD", Instrumental: "Instr", "Emergency CS": "Em CS", "Elective CS": "El CS" };
 export const RISK_FLAGS = ["GBS+", "GBS pending", "Diabetic-T1", "Diabetic-T2", "Diabetic-GDM", "VBAC", "Previous LSCS", "Hypertensive"];
 export const ANALGESIA = ["None", "Entonox", "Pethidine", "Epidural", "Remifentanil PCA"];
 export const ONSETS = ["Spontaneous", "Induced", "PPROM"];
@@ -39,6 +43,23 @@ export const IOL_REASONS = [
 export function parityShort(p) {
   if (!p) return "P?";
   return p.replace("Para ", "P");
+}
+
+/** "Para 4" → 4; null if unknown. */
+export function parityNum(p) {
+  const m = /Para (\d+)/.exec(p ?? "");
+  return m ? Number(m[1]) : null;
+}
+
+/** Previous births in order, short form: "SVD, Em CS". Empty if none recorded. */
+export function birthHistory(bed) {
+  return (bed.prevBirths ?? []).filter(Boolean).map(b => BIRTH_SHORT[b] ?? b).join(", ");
+}
+
+/** "P2 (SVD, Em CS)" when the births are recorded, else "P2". */
+export function parityWithHistory(bed) {
+  const h = birthHistory(bed);
+  return h ? `${parityShort(bed.parity)} (${h})` : parityShort(bed.parity);
 }
 
 export function stageLabel(bed) {

@@ -2,7 +2,7 @@ import { AlertList } from "./BedSheet";
 import { BTN, BTN_OK, BTN_PRIMARY, BTN_SECONDARY, CARD, TYPE_META, TYPE_OVERLINE } from "../ui/styles";
 import { IconBack, IconTick } from "../ui/icons";
 import { fmtAge, clock } from "../utils/time";
-import { LIQUOR_SHORT, capitalise, lastCTG, lastVE, membraneStatus, parityShort, stageLabel, veFindings } from "../utils/bedModel";
+import { LIQUOR_SHORT, capitalise, lastCTG, lastVE, membraneStatus, parityWithHistory, stageLabel, veFindings } from "../utils/bedModel";
 
 /** Step through each woman in bed order, confirming or updating as you go. */
 export default function BoardRound({ ids, index, beds, triage, updated, now, onIndex, onExit, onVE, onCTGNormal, onMore, onFix, onHandover }) {
@@ -41,7 +41,7 @@ export default function BoardRound({ ids, index, beds, triage, updated, now, onI
             <div className={`${CARD} flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-3`}>
               <div className="flex items-baseline gap-2 flex-wrap">
                 <span className="text-3xl font-semibold text-gray-900 dark:text-white">Bed {bed.bedNumber}</span>
-                <span className="text-base text-gray-500 dark:text-gray-400">{parityShort(bed.parity)} · {bed.gestation}</span>
+                <span className="text-base text-gray-500 dark:text-gray-400">{parityWithHistory(bed)} · {bed.gestation}</span>
               </div>
               <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
                 <dt className="text-gray-500 dark:text-gray-400">Stage</dt>
