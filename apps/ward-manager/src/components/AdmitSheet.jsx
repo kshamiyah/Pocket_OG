@@ -51,6 +51,8 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
   const [veDil, setVeDil] = useState(null);
   const [veWhen, setVeWhen] = useState({ minsAgo: 0 });
   const [admWhen, setAdmWhen] = useState({ minsAgo: 0 });
+  // Admission time defaults to now; the picker only appears if asked for.
+  const [admEarlier, setAdmEarlier] = useState(false);
   const [more, setMore] = useState(edit || !!iolEntry);
 
   const used = new Set(existingNumbers.map(String));
@@ -232,7 +234,14 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
                 <DilationGrid value={veDil} onChange={v => setVeDil(veDil === v ? null : v)} />
               </div>
               {veDil != null && <WhenPicker label="Time of that VE" value={veWhen} onChange={setVeWhen} presets={[0, 30, 60, 120, 240]} />}
-              <WhenPicker label="Admission time" value={admWhen} onChange={setAdmWhen} presets={[0, 30, 60, 120]} />
+              {admEarlier ? (
+                <WhenPicker label="Admission time" value={admWhen} onChange={setAdmWhen} presets={[0, 30, 60, 120]} />
+              ) : (
+                <button type="button" onClick={() => setAdmEarlier(true)}
+                  className="min-h-10 text-sm font-semibold text-claude-700 dark:text-claude-400">
+                  + Admitted earlier? Set admission time
+                </button>
+              )}
             </>
           )}
         </>
