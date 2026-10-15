@@ -51,6 +51,9 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
 
   const used = new Set(existingNumbers.map(String));
   const free = Array.from({ length: 12 }, (_, i) => String(i + 1)).filter(n => !used.has(n));
+  // One row of quick bed chips (the lowest free numbers); anything else is typed.
+  const quick = [...new Set([...(edit ? [String(bed.bedNumber)] : []), ...free])].slice(0, 5);
+  const [custom, setCustom] = useState(edit && !quick.includes(String(bed.bedNumber)));
   const trimmed = String(num ?? "").trim();
   const clash = trimmed && used.has(trimmed) && !(edit && trimmed === String(bed.bedNumber));
   const effMemb = onset === "PPROM" && memb === "Intact" ? "SROM" : memb;
@@ -112,12 +115,14 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
       }>
       <div>
         <Label hint={free.length ? "free beds" : undefined}>Bed</Label>
-        <div className="flex flex-wrap gap-1.5">
-          {free.map(n => <Chip key={n} on={trimmed === n} onClick={() => setNum(n)}>{n}</Chip>)}
-          {edit && !free.includes(String(bed.bedNumber)) && <Chip on={trimmed === String(bed.bedNumber)} onClick={() => setNum(bed.bedNumber)}>{bed.bedNumber}</Chip>}
+        <div className="grid grid-cols-[repeat(5,minmax(0,1fr))_auto] gap-1.5">
+          {quick.map(n => <Chip key={n} className="px-0" on={!custom && trimmed === n} onClick={() => { setCustom(false); setNum(n); }}>{n}</Chip>)}
+          <Chip on={custom} onClick={() => { if (!custom) setNum(""); setCustom(true); }}>Custom</Chip>
         </div>
-        <input value={num} onChange={e => setNum(e.target.value)} placeholder="Or type a bed, e.g. 14 or Pool"
-          className={`${INPUT} mt-2`} aria-label="Bed" maxLength={12} />
+        {custom && (
+          <input autoFocus value={num} onChange={e => setNum(e.target.value)} placeholder="Type a bed, e.g. 14, Pool or HDU"
+            className={`${INPUT} mt-2`} aria-label="Bed" maxLength={12} />
+        )}
         <p className={`${TYPE_META} mt-1`}>Bed number only. No patient identifiers are stored.</p>
       </div>
 
