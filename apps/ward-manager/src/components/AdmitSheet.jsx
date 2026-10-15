@@ -10,6 +10,12 @@ import {
 } from "../utils/bedModel";
 
 
+// Shorter stage names so the four fit one row on Admit.
+const ADMIT_STAGE = { "Latent": "Latent", "Active first stage": "Active", "Passive second stage": "Passive 2nd", "Active second stage": "Pushing" };
+
+const ONSET_SHORT = { Spontaneous: "Spont", Induced: "IOL", PPROM: "PPROM" };
+const LIQUOR_TINY = { "Clear": "Clear", "Thin meconium": "Mec thin", "Thick meconium": "Mec thick", "Blood-stained": "Blood", "Absent": "Absent" };
+
 // IOL queue indications that imply a risk flag, so admitting from the queue keeps it.
 const IOL_FLAG = { "GDM": "Diabetic-GDM", "Pre-eclampsia": "Hypertensive", "Severe pre-eclampsia": "Hypertensive" };
 
@@ -120,8 +126,8 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
 
   const title = edit ? `Edit Bed ${bed.bedNumber}` : iolEntry ? `Admit ${iolEntry.initials} from IOL queue` : "Admit";
   return (
-    <Sheet open onClose={onClose} title={title}
-      sub={edit ? "Change details. VE, CTG and obs history stay as they are." : "Bed, parity, gestation and stage, then onset and membranes. More details is optional."}
+    <Sheet open dense onClose={onClose} title={title}
+      sub={edit ? "VE, CTG and obs history stay as they are." : "No names or identifiers. More details is optional."}
       footer={
         <button type="button" onClick={save} disabled={!ready} className={`${BTN} ${BTN_PRIMARY} w-full min-h-[3.25rem] text-base`}>
           {!ready ? (clash ? `Bed ${trimmed} is already on the board` : "Pick bed, parity, gestation and stage")
@@ -129,23 +135,22 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
         </button>
       }>
       <div>
-        <Label hint={free.length ? "free beds" : undefined}>Bed</Label>
+        <Label tight hint={free.length ? "free beds" : undefined}>Bed</Label>
         <div className="grid grid-cols-[repeat(5,minmax(0,1fr))_auto] gap-1.5">
-          {quick.map(n => <Chip key={n} className="px-0" on={!custom && trimmed === n} onClick={() => { setCustom(false); setNum(n); }}>{n}</Chip>)}
-          <Chip on={custom} onClick={() => { if (!custom) setNum(""); setCustom(true); }}>Custom</Chip>
+          {quick.map(n => <Chip key={n} small className="px-0 text-sm" on={!custom && trimmed === n} onClick={() => { setCustom(false); setNum(n); }}>{n}</Chip>)}
+          <Chip small className="text-sm" on={custom} onClick={() => { if (!custom) setNum(""); setCustom(true); }}>Custom</Chip>
         </div>
         {custom && (
           <input autoFocus value={num} onChange={e => setNum(e.target.value)} placeholder="Type a bed, e.g. 14, Pool or HDU"
             className={`${INPUT} mt-2`} aria-label="Bed" maxLength={12} />
         )}
-        <p className={`${TYPE_META} mt-1`}>Bed number only. No patient identifiers are stored.</p>
       </div>
 
       <div>
-        <Label>Parity</Label>
+        <Label tight>Parity</Label>
         <div className="flex flex-wrap gap-1.5">
-          {PARITIES.map(p => <Chip key={p} on={!customParity && parity === p} onClick={() => { setCustomParity(false); setParity(p); }}>{parityShort(p)}</Chip>)}
-          <Chip on={customParity} onClick={() => { if (!customParity) setParity("Para 4"); setCustomParity(true); }}>Custom</Chip>
+          {PARITIES.map(p => <Chip key={p} small className="text-sm min-w-[3rem]" on={!customParity && parity === p} onClick={() => { setCustomParity(false); setParity(p); }}>{parityShort(p)}</Chip>)}
+          <Chip small className="text-sm" on={customParity} onClick={() => { if (!customParity) setParity("Para 4"); setCustomParity(true); }}>Custom</Chip>
         </div>
         {customParity && (
           <div className="mt-2">
@@ -153,8 +158,8 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
           </div>
         )}
         {nBirths > 0 && (
-          <div className="mt-3 space-y-2">
-            <Label hint="optional">Previous births</Label>
+          <div className="mt-2 space-y-1.5">
+            <Label tight hint="optional">Previous births</Label>
             {Array.from({ length: nBirths }, (_, i) => (
               <div key={i} className="flex items-center gap-2">
                 <span className={`${TYPE_META} w-8 shrink-0`}>{i < 3 ? ORD[i] : `${i + 1}th`}</span>
@@ -168,52 +173,65 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
       </div>
 
       <div>
-        <Label hint="type 394 for 39+4">Gestation</Label>
+        <Label tight hint="type 394 for 39+4">Gestation</Label>
         <input id="admit-gestation" type="text" inputMode="numeric" autoComplete="off" aria-label="Gestation"
           value={gest.digits.length === 3 ? `${gest.digits.slice(0, 2)}+${gest.digits[2]}` : gest.digits}
           onChange={e => setGestDigits(gestFromDigits(e.target.value).digits)}
           placeholder="39+4"
-          className={`${INPUT} text-2xl font-semibold tabular-nums tracking-wide ${gest.digits.length >= 2 && !gest.valid ? "border-red-400 dark:border-red-700" : ""}`} />
-        <p className={`${TYPE_META} mt-1`}>
-          {gest.digits.length < 2 ? "Weeks then days, e.g. 3 9 4. Between 22+0 and 43+0."
-            : !gest.valid ? "Between 22+0 and 43+0."
-            : gest.digits.length === 2 ? `${gest.w}+0. Add a digit for the days.` : `${gest.w}+${gest.d} weeks.`}
-        </p>
+          className={`${INPUT} !h-10 text-lg font-semibold tabular-nums tracking-wide ${gest.digits.length >= 2 && !gest.valid ? "border-red-400 dark:border-red-700" : ""}`} />
+        {/* Only speak up when the entry is unfinished; the hint above covers the rest. */}
+        {gest.digits.length > 0 && gest.digits.length < 3 && (
+          <p className={`${TYPE_META} mt-1`}>{gest.digits.length === 1 ? "Between 22+0 and 43+0." : `${gest.w}+0 unless you add the days.`}</p>
+        )}
       </div>
 
       <div>
-        <Label hint={edit ? undefined : "as handed over"}>Stage</Label>
-        <ChipRow options={STAGES} value={stage} onChange={setStage} label={s => STAGE_SHORT[s]} />
+        <Label tight hint={edit ? undefined : "as handed over"}>Stage</Label>
+        <div className="grid grid-cols-4 gap-1.5">
+          {STAGES.map(st => <Chip key={st} small className="px-0 whitespace-nowrap" on={stage === st} onClick={() => setStage(st)}>{ADMIT_STAGE[st] ?? STAGE_SHORT[st]}</Chip>)}
+        </div>
       </div>
 
-      <div>
-        <Label>Onset</Label>
-        <ChipRow small options={ONSETS} value={onset} onChange={setOnset} />
+      {/* Onset and membranes side by side, so the main form fits one screen. */}
+      <div className={`grid gap-3 ${edit ? "grid-cols-1" : "grid-cols-2"}`}>
+        <div>
+          <Label tight>Onset</Label>
+          <div className="grid grid-cols-3 gap-1">
+            {ONSETS.map(o => <Chip key={o} small className="px-0 whitespace-nowrap !text-[11px]" on={onset === o} onClick={() => setOnset(o)}>{ONSET_SHORT[o] ?? o}</Chip>)}
+          </div>
+        </div>
+        {!edit && (
+          <div>
+            <Label tight>Membranes</Label>
+            <div className="grid grid-cols-3 gap-1">
+              {MEMBRANES.map(m => <Chip key={m} small className="px-0 whitespace-nowrap !text-[11px]" on={effMemb === m} onClick={() => setMemb(m)}>{m}</Chip>)}
+            </div>
+          </div>
+        )}
       </div>
+      {ruptured && (
+        <>
+          <div>
+            <Label tight>Liquor</Label>
+            <div className="grid grid-cols-5 gap-1">
+              {LIQUORS.map(l => <Chip key={l} small className="px-0 whitespace-nowrap !text-[11px]" on={liquor === l} onClick={() => setLiquor(l)}>{LIQUOR_TINY[l] ?? LIQUOR_SHORT[l]}</Chip>)}
+            </div>
+          </div>
+          <WhenPicker tight label={`Time of ${effMemb}`} value={romWhen} onChange={setRomWhen} presets={[0, 60, 120, 240]} />
+        </>
+      )}
       {onset === "Induced" && (
         <>
           <div>
-            <Label>Induction method</Label>
+            <Label tight>Induction method</Label>
             <ChipRow small options={IND_METHODS} value={indMethod} onChange={setIndMethod} />
           </div>
           <div>
-            <Label>Indication</Label>
+            <Label tight>Indication</Label>
             <MultiChipRow options={[...new Set([...IOL_REASONS, ...iolReasons])]} values={iolReasons} onChange={setIolReasons} />
           </div>
-          <WhenPicker label="IOL started" value={iolWhen} onChange={setIolWhen} presets={[0, 60, 120, 240]} />
+          <WhenPicker tight label="IOL started" value={iolWhen} onChange={setIolWhen} presets={[0, 60, 120, 240]} />
         </>
-      )}
-      {!edit && (
-        <div>
-          <Label>Membranes</Label>
-          <ChipRow small options={MEMBRANES} value={effMemb} onChange={setMemb} />
-          {ruptured && (
-            <div className="mt-2 space-y-3">
-              <ChipRow small options={LIQUORS} value={liquor} onChange={setLiquor} label={o => LIQUOR_SHORT[o]} />
-              <WhenPicker label={`Time of ${effMemb}`} value={romWhen} onChange={setRomWhen} presets={[0, 60, 120, 240]} />
-            </div>
-          )}
-        </div>
       )}
       {!more ? (
         <button type="button" onClick={() => setMore(true)}
@@ -223,19 +241,19 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
       ) : (
         <>
           <div>
-            <Label>Analgesia</Label>
+            <Label tight>Analgesia</Label>
             <ChipRow small options={ANALGESIA} value={analgesia} onChange={setAnalgesia} />
           </div>
           <RiskPicker values={flags} onChange={setFlags} />
           {!edit && (
             <>
               <div>
-                <Label hint="if handed over">Last VE</Label>
+                <Label tight hint="if handed over">Last VE</Label>
                 <DilationGrid value={veDil} onChange={v => setVeDil(veDil === v ? null : v)} />
               </div>
-              {veDil != null && <WhenPicker label="Time of that VE" value={veWhen} onChange={setVeWhen} presets={[0, 30, 60, 120, 240]} />}
+              {veDil != null && <WhenPicker tight label="Time of that VE" value={veWhen} onChange={setVeWhen} presets={[0, 30, 60, 120, 240]} />}
               {admEarlier ? (
-                <WhenPicker label="Admission time" value={admWhen} onChange={setAdmWhen} presets={[0, 30, 60, 120]} />
+                <WhenPicker tight label="Admission time" value={admWhen} onChange={setAdmWhen} presets={[0, 30, 60, 120]} />
               ) : (
                 <button type="button" onClick={() => setAdmEarlier(true)}
                   className="min-h-10 text-sm font-semibold text-claude-700 dark:text-claude-400">

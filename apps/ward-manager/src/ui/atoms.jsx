@@ -2,9 +2,9 @@ import { useRef, useState } from "react";
 import { CHIP, CHIP_SM, CHIP_ON, CHIP_OFF, INPUT, TYPE_OVERLINE } from "./styles";
 import { resolveWhen } from "../utils/time";
 
-export function Label({ children, hint }) {
+export function Label({ children, hint, tight = false }) {
   return (
-    <div className="flex items-baseline justify-between gap-2 mb-2">
+    <div className={`flex items-baseline justify-between gap-2 ${tight ? "mb-1" : "mb-2"}`}>
       <span className={TYPE_OVERLINE}>{children}</span>
       {hint && <span className="text-xs text-gray-400 dark:text-gray-500">{hint}</span>}
     </div>
@@ -122,13 +122,13 @@ export function Stepper({ value, onChange, min, max, step = 1, bigStep, format =
  * When did it happen? "Now" and minutes-ago chips, or an exact clock time
  * today or yesterday. Future times are refused (value resolves to null).
  */
-export function WhenPicker({ value, onChange, presets = [0, 10, 20, 30, 60], label = "When" }) {
+export function WhenPicker({ value, onChange, presets = [0, 10, 20, 30, 60], label = "When", tight = false }) {
   const exact = value?.clock != null;
   const [open, setOpen] = useState(exact);
   const resolved = resolveWhen(value);
   return (
     <div>
-      <Label>{label}</Label>
+      <Label tight={tight}>{label}</Label>
       <div className="flex flex-wrap gap-1.5">
         {presets.map(m => (
           <Chip key={m} small on={!exact && value?.minsAgo === m} onClick={() => { setOpen(false); onChange({ minsAgo: m }); }}>
@@ -141,7 +141,7 @@ export function WhenPicker({ value, onChange, presets = [0, 10, 20, 30, 60], lab
             const d = new Date();
             onChange({ clock: `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`, daysAgo: 0 });
           }
-        }}>Exact time</Chip>
+        }}>{tight ? "Exact" : "Exact time"}</Chip>
       </div>
       {open && exact && (
         <div className="mt-2 flex gap-2 items-center">

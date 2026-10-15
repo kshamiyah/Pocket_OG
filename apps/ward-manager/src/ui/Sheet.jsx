@@ -5,7 +5,7 @@ import { IconX } from "./icons";
  * Bottom sheet in Handover's style. Rendered only while open so closed sheets
  * leave nothing in the page.
  */
-export default function Sheet({ open, onClose, title, sub, children, footer, label }) {
+export default function Sheet({ open, onClose, title, sub, children, footer, label, dense = false }) {
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -24,7 +24,7 @@ export default function Sheet({ open, onClose, title, sub, children, footer, lab
           <div className="h-1 w-10 rounded-full bg-gray-200 dark:bg-gray-800" />
         </div>
         {(title || sub) && (
-          <div className="shrink-0 px-5 pb-3 flex items-start gap-3 border-b border-gray-200 dark:border-gray-800">
+          <div className={`shrink-0 px-5 ${dense ? "pb-2" : "pb-3"} flex items-start gap-3 border-b border-gray-200 dark:border-gray-800`}>
             <div className="flex-1 min-w-0">
               {title && <h2 className="text-lg font-semibold leading-snug text-gray-900 dark:text-white">{title}</h2>}
               {sub && <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-0.5">{sub}</p>}
@@ -35,7 +35,7 @@ export default function Sheet({ open, onClose, title, sub, children, footer, lab
             </button>
           </div>
         )}
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 py-4 space-y-5">{children}</div>
+        <div className={`flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 ${dense ? "pt-2.5 pb-3 space-y-3" : "py-4 space-y-5"}`}>{children}</div>
         {footer && (
           <div className="shrink-0 px-5 pt-3 border-t border-gray-200 dark:border-gray-800 space-y-2"
             style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}>
