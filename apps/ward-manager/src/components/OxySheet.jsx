@@ -4,12 +4,12 @@ import { Label, Stepper, WhenPicker } from "../ui/atoms";
 import { BTN, BTN_PRIMARY, BTN_SECONDARY } from "../ui/styles";
 import { clock, resolveWhen } from "../utils/time";
 import { currentOxytocin, newId } from "../utils/bedModel";
+import { getUnitSettings } from "../data/unitSettings";
 
 const PROTOCOL = [
   "Increase no more often than every 30 min, until 3 to 4 contractions in 10 min (NG235 1.8.54)",
   "More than 4 in 10 min: reduce or stop until 4 or fewer (NG235 1.8.55)",
   "Pathological CTG: stop immediately and get urgent obstetric or senior midwife review (NG235 1.8.56)",
-  "Starting dose, step size and the 20 mU/min maximum are local protocol: verify",
 ];
 
 export default function OxySheet({ bed, onSave, onHold, onClose }) {
@@ -18,6 +18,7 @@ export default function OxySheet({ bed, onSave, onHold, onClose }) {
   const [when, setWhen] = useState({ minsAgo: 0 });
   const iso = resolveWhen(when);
   const held = !!bed.oxytocinHeld;
+  const max = getUnitSettings().oxytocinMax;
 
   return (
     <Sheet open onClose={onClose} title={`Oxytocin · Bed ${bed.bedNumber}`} sub="NICE NG235 1.8.54 to 1.8.56 · local protocol for doses"
@@ -49,12 +50,13 @@ export default function OxySheet({ bed, onSave, onHold, onClose }) {
       )}
       <div>
         <Label>Dose (mU/min)</Label>
-        <Stepper value={dose} onChange={setDose} min={1} max={20} valueClass={dose >= 20 ? "text-red-600 dark:text-red-400" : ""} />
-        {dose >= 20 && <p className="text-xs font-semibold text-red-600 dark:text-red-400 text-center mt-1.5">Local maximum: escalate to the registrar.</p>}
+        <Stepper value={dose} onChange={setDose} min={1} max={max} valueClass={dose >= max ? "text-red-600 dark:text-red-400" : ""} />
+        {dose >= max && <p className="text-xs font-semibold text-red-600 dark:text-red-400 text-center mt-1.5">Unit maximum: escalate to the registrar.</p>}
       </div>
       <WhenPicker label="Time of change" value={when} onChange={setWhen} />
       <ul className="rounded-xl border bg-claude-50 dark:bg-claude-950/30 border-claude-200 dark:border-claude-800 px-3 py-2.5 space-y-1">
         {PROTOCOL.map(p => <li key={p} className="text-xs text-claude-900 dark:text-claude-200 leading-snug">{p}</li>)}
+        <li className="text-xs text-claude-900 dark:text-claude-200 leading-snug">Starting dose and step size are local protocol; maximum {max} mU/min is a unit setting</li>
       </ul>
     </Sheet>
   );

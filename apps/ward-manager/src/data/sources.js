@@ -172,6 +172,14 @@ export const SOURCES = {
     "url": "https://www.nice.org.uk/guidance/ng235/chapter/Recommendations#ng235-1_9_28",
     "text": "For a multiparous woman with an epidural:\n• birth would be expected to take place within 2 hours of the start of the active second stage in most women, but be aware that these women may have had a passive stage of up to 1 hour after full dilatation before commencing active pushing (see recommendation 1.9.10)\n• after 30 minutes of active pushing, reassess clinical picture, including progress, contractions, and maternal and fetal wellbeing:\n• if there are signs of progress (in terms of rotation or descent of the presenting part), encourage the woman to continue pushing\n• if there are no signs of progress, offer vaginal examination and consider amniotomy if the membranes are intact; if there is still no progress, diagnose delay and escalate for senior review\n• if birth is not imminent after 1 hour of pushing, refer the woman for a senior review and decision on place and mode of birth. [2007, amended 2023]"
   },
+  "NG229 1.2.9": {
+    "issuer": "NICE",
+    "doc": "NG229",
+    "docTitle": "Fetal monitoring in labour",
+    "rec": "Recommendation 1.2.9",
+    "url": "https://www.nice.org.uk/guidance/ng229/chapter/Recommendations#ng229-1_2_9",
+    "text": "Offer women with a low risk of complications, fetal heart rate monitoring with intermittent auscultation when in established first stage of labour. Do this as follows:\n• use either a Pinard stethoscope or doppler ultrasound\n• carry out intermittent auscultation immediately after a palpated contraction for at least 1 minute, repeated at least once every 15 minutes, and record it as a single rate\n• record accelerations and decelerations, if heard\n• palpate and record the maternal pulse hourly, or more often if there are any concerns, to ensure differentiation between the maternal and fetal heartbeats\n• if no fetal heartbeat is detected, offer urgent real-time ultrasound assessment to check fetal viability. [2017, amended 2026]"
+  },
   "NG229 1.3.2": {
     "issuer": "NICE",
     "doc": "NG229",

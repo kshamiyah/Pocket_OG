@@ -3,6 +3,8 @@
 // checks that every alert id the engine can raise is listed here.
 //
 // sources: keys into SOURCES (src/data/sources.js, verbatim text).
+// settings: keys into UNIT_SETTINGS (src/data/unitSettings.js) that change
+//          this rule; the page shows what this phone is set to.
 // local:   the part of the rule that is a local or app choice, not a national
 //          number. Shown as "Local, verify against your protocol" (or "App
 //          design choice" in the Scope group).
@@ -61,10 +63,10 @@ export const RULES = [
   },
   {
     id: "preterm-neonatal", group: "Preterm", title: "Neonatal team",
-    when: "Under 34+0 and the neonatal team not yet informed.",
+    when: "Under the unit's gestation (default 34+0) and the neonatal team not yet informed.",
     then: "Inform the neonatal team. Tap Done to clear.",
-    severity: "Urgent", alertIds: ["preterm-neonatal"], sources: [],
-    local: "34+0 cut-off is local practice; no national number.",
+    severity: "Urgent", alertIds: ["preterm-neonatal"], sources: [], settings: ["neonatalTeamUnderWk"],
+    local: "The gestation cut-off is a unit setting; no national number.",
   },
 
   // ── Antibiotics and membranes ──────────────────────────────────────────
@@ -84,9 +86,9 @@ export const RULES = [
   },
   {
     id: "prom-48h", group: "Antibiotics and membranes", title: "Membranes ruptured 48 hours",
-    when: "Membranes ruptured 48 hours or more, not GBS+, antibiotics not yet given.",
+    when: "Membranes ruptured for the unit's time (default 48 hours, as GL787), not GBS+, antibiotics not yet given.",
     then: "Antibiotic prophylaxis indicated per GL787.",
-    severity: "Urgent", alertIds: ["prom-48h"], sources: ["GL787 PROM"],
+    severity: "Urgent", alertIds: ["prom-48h"], sources: ["GL787 PROM"], settings: ["promAntibioticH"],
   },
   {
     id: "prom-24h", group: "Antibiotics and membranes", title: "Prelabour rupture of membranes at term: 24 hours",
@@ -95,11 +97,11 @@ export const RULES = [
     severity: "Urgent", alertIds: ["prom-24h"], sources: ["NG235 1.7.6", "NG235 1.7.7"],
   },
   {
-    id: "prom-18h", group: "Antibiotics and membranes", title: "Membranes ruptured 16 and 18 hours",
-    when: "Membranes ruptured 16 hours (warning) or 18 hours (urgent).",
+    id: "prom-18h", group: "Antibiotics and membranes", title: "Membranes ruptured: review",
+    when: "Membranes ruptured for the unit's review time (default 18 hours; warning 2 hours earlier).",
     then: "Review GBS status and signs of infection.",
-    severity: "Warning at 16 h, urgent at 18 h", alertIds: ["prom-16h", "prom-18h"], sources: ["GL787 PROM"],
-    local: "16 h and 18 h are local review points. Neither NG195 nor GL787 uses an 18 hour threshold; GL787 gives 48 hours for antibiotics at term.",
+    severity: "Warning, then urgent", alertIds: ["prom-16h", "prom-18h"], sources: ["GL787 PROM"], settings: ["promReviewH"],
+    local: "The review time is a unit setting. Neither NG195 nor GL787 uses an 18 hour threshold; GL787 gives 48 hours for antibiotics at term.",
   },
   {
     id: "gbs-pending", group: "Antibiotics and membranes", title: "GBS result pending",
@@ -111,9 +113,10 @@ export const RULES = [
   {
     id: "meconium", group: "Antibiotics and membranes", title: "Meconium",
     when: "Thick or thin meconium recorded at a VE or on admission.",
-    then: "Risk assessment, offer continuous CTG; thick meconium also prompts neonatal support at birth.",
+    then: "Continuous CTG (mandatory or offered, per unit setting); thick meconium also prompts neonatal support at birth.",
     severity: "Urgent (thick), warning (thin)", alertIds: ["mec-thick", "mec-thin"],
-    sources: ["NG235 1.8.33", "NG229 1.3.8", "NG229 1.3.11"],
+    sources: ["NG235 1.8.33", "NG229 1.3.8", "NG229 1.3.11"], settings: ["meconiumCTGMandatory"],
+    local: "Making continuous CTG mandatory with meconium is a unit choice. NICE says offer it and support the woman's choice (NG229 1.3.11).",
   },
   {
     id: "liquor-blood", group: "Antibiotics and membranes", title: "Blood-stained liquor",
@@ -132,10 +135,10 @@ export const RULES = [
   // ── Labour progress ────────────────────────────────────────────────────
   {
     id: "latent-reassess", group: "Labour progress", title: "Latent phase reassessment",
-    when: "Latent for 4 hours since admission (or since induction started).",
+    when: "Latent for the unit's interval (default 4 hours) since admission, or since induction started.",
     then: "Reassess to confirm or exclude established labour.",
-    severity: "Warning", alertIds: ["latent-reassess"], sources: ["NG235 1.8.1"],
-    local: "The 4 hour interval is local; NG235 1.8.1 gives the definition of established labour only.",
+    severity: "Warning", alertIds: ["latent-reassess"], sources: ["NG235 1.8.1"], settings: ["latentReassessH"],
+    local: "The interval is a unit setting; NG235 1.8.1 gives the definition of established labour only.",
   },
   {
     id: "ve-4h", group: "Labour progress", title: "Vaginal examination every 4 hours",
@@ -203,10 +206,10 @@ export const RULES = [
   },
   {
     id: "oxytocin-max", group: "Oxytocin and contractions", title: "Oxytocin at maximum",
-    when: "Dose 20 mU/min or more.",
+    when: "Dose at or above the unit maximum (default 20 mU/min).",
     then: "Escalate to registrar or consultant.",
-    severity: "Urgent", alertIds: ["oxytocin-max"], sources: [],
-    local: "20 mU/min maximum, starting dose and step size are local protocol.",
+    severity: "Urgent", alertIds: ["oxytocin-max"], sources: [], settings: ["oxytocinMax"],
+    local: "The maximum is a unit setting; starting dose and step size are local protocol.",
   },
 
   // ── CTG ────────────────────────────────────────────────────────────────
@@ -225,24 +228,25 @@ export const RULES = [
   },
   {
     id: "ctg-suspicious", group: "Fetal monitoring (CTG)", title: "Suspicious CTG",
-    when: "Latest CTG suspicious, any stage. Becomes urgent if not reassessed within 30 minutes.",
+    when: "Latest CTG suspicious, any stage. Becomes urgent if not reassessed within the unit's interval (default 30 minutes).",
     then: "Full risk assessment and conservative measures; urgent review if other risk factors.",
     severity: "Warning, then urgent", alertIds: ["ctg-suspicious", "ctg-suspicious-overdue"],
-    sources: ["NG229 1.5.5", "NG229 1.5.6"],
-    local: "The 30 minute reassessment interval is local; NG229 does not set a time.",
+    sources: ["NG229 1.5.5", "NG229 1.5.6"], settings: ["suspiciousRecheckMin"],
+    local: "The reassessment interval is a unit setting; NG229 does not set a time.",
   },
   {
-    id: "ctg-indicated", group: "Fetal monitoring (CTG)", title: "Continuous CTG indicated, not logged",
-    when: "Established labour or oxytocin running, no CTG logged, and any indication: previous CS, hypertension, diabetes, ROM 24 h+ before established labour, non-cephalic, over 42+0, meconium, blood-stained liquor, pyrexia, pulse over 120, raised BP, delay, epidural, oxytocin.",
+    id: "ctg-indicated", group: "Fetal monitoring (CTG)", title: "Continuous CTG, not logged",
+    when: "Established labour or oxytocin running and no CTG logged. By default this applies to every woman (unit setting). With that setting off, only when there is an indication: previous CS, hypertension, diabetes, ROM 24 h+ before established labour, non-cephalic, over 42+0, meconium, blood-stained liquor, pyrexia, pulse over 120, raised BP, delay, epidural, oxytocin.",
     then: "Log a CTG review.",
-    severity: "Info", alertIds: ["ctg-not-documented"], sources: ["NG229 1.3.2", "NG229 1.3.3", "NG229 1.3.8"],
-    local: "Preterm, GBS+, GBS pending and PPROM are added as local indications; they are not NG229 indications.",
+    severity: "Info", alertIds: ["ctg-not-documented"], sources: ["NG229 1.2.9", "NG229 1.3.2", "NG229 1.3.3", "NG229 1.3.8"],
+    settings: ["ctgForAll", "ctgLocalIndications"],
+    local: "Continuous CTG for everyone is a unit choice: NICE offers intermittent auscultation to women at low risk (NG229 1.2.9). Preterm, GBS+, GBS pending and PPROM can be added as local indications; they are not NG229 indications.",
   },
   {
     id: "ctg-hourly", group: "Fetal monitoring (CTG)", title: "Hourly CTG review",
-    when: "Continuous CTG indicated, established labour or oxytocin, and an hour since the last review.",
+    when: "On continuous CTG (everyone by default, see above), established labour or oxytocin, and an hour since the last review.",
     then: "Hourly assessment with a fresh-eyes review.",
-    severity: "Info", alertIds: ["ctg-review-due"], sources: ["NG229 1.3.5", "NG229 1.3.6"],
+    severity: "Info", alertIds: ["ctg-review-due"], sources: ["NG229 1.3.5", "NG229 1.3.6"], settings: ["ctgForAll"],
   },
 
   // ── Maternal observations ──────────────────────────────────────────────
@@ -282,10 +286,10 @@ export const RULES = [
   },
   {
     id: "oliguria", group: "Maternal observations", title: "Low urine output",
-    when: "Recorded urine output under 30 mL per hour.",
+    when: "Recorded urine output under the unit threshold (default 30 mL per hour).",
     then: "Escalate.",
-    severity: "Urgent", alertIds: ["oliguria"], sources: [],
-    local: "30 mL/h is a local threshold.",
+    severity: "Urgent", alertIds: ["oliguria"], sources: [], settings: ["oliguriaMlH"],
+    local: "The threshold is a unit setting.",
   },
 
   // ── Diabetes ───────────────────────────────────────────────────────────
@@ -295,7 +299,7 @@ export const RULES = [
     then: "Keep 4 to 7 mmol/L; IV dextrose and insulin if not maintained (local VRII protocol).",
     severity: "Urgent", alertIds: ["bgl-due", "bgl-never", "bgl-low", "bgl-high"],
     sources: ["NG3 1.4.10", "NG3 1.4.12", "GL983 intrapartum"],
-    local: "GL983 starts 2-hourly glucose for type 2 diabetes on metformin or diet; the app prompts hourly for every diabetic flag (NG3).",
+    local: "Hourly for every diabetic flag, by choice, following NG3. GL983 allows 2-hourly for type 2 diabetes on metformin or diet with glucose at or below 7.",
   },
 
   // ── After birth ────────────────────────────────────────────────────────

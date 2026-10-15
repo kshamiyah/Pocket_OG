@@ -51,15 +51,17 @@ Local guideline text (GL787, GL983) and the RCOG GTG52 summary are read from `@p
 
 What runs when:
 
-- **Any stage of labour, including latent and induction**: a logged suspicious or pathological CTG is acted on. The "CTG not logged" and hourly review prompts start in established labour or once oxytocin is running.
+- **Any stage of labour, including latent and induction**: a logged suspicious or pathological CTG is acted on. The "CTG not logged" and hourly review prompts start in established labour or once oxytocin is running (for every woman by default; a unit setting).
 - **Under 28+0**: a note says labour progress and CTG rules are not applied. Preterm (NG25 lower bands), antibiotic and maternal observation alerts still run.
 - **After birth**: maternal observations, low BP or temperature (NG255 table 1) and PPH (GTG52) continue; a woman with an active alert returns to "Needs you now".
 - **Oxytocin** can be stopped or held. Pathological CTG on oxytocin raises "stop oxytocin" (NG235 1.8.56); there is no "increase" prompt while held, in the second stage, with 5 or more contractions in 10, or with an abnormal CTG.
 - **Observations**: marking a check done without a value clears the old value, so an abnormal reading does not linger.
 
-Numbers that are local choices rather than national guidance are marked as local on the Rules and sources page (for example the 18 h ROM review, oliguria under 30 mL/h, oxytocin 20 mU/min maximum, latent 4 h reassessment, suspicious CTG 30 min recheck).
+Numbers that are local choices rather than national guidance are marked as local on the Rules and sources page.
 
-**285 tests** covering the rules, triage, bed helpers and the catalogue: `npm test -w apps/ward-manager`
+**Unit settings** (menu) let each unit set those local choices: continuous CTG for everyone in established labour (default on; NICE offers intermittent auscultation at low risk), extra CTG indications, meconium CTG mandatory, suspicious CTG recheck, latent reassessment, ROM review and antibiotic hours, neonatal team gestation, oxytocin maximum and oliguria threshold. Definitions and defaults live in `src/data/unitSettings.js`; values are stored on the phone (`pocketog_suite_unit_v1`, only changed values). Each Rules and sources card that a setting affects shows what this phone is set to and whether it differs from the app default.
+
+**295 tests** covering the rules, triage, bed helpers and the catalogue: `npm test -w apps/ward-manager`
 
 ## CTG classification (NICE NG229 1.4.12, 1.4.32)
 
@@ -77,7 +79,7 @@ Overall: 1 red or 2 or more amber = **pathological**; 1 amber = **suspicious**; 
 ```bash
 npm install
 npm run dev -w apps/ward-manager   # http://localhost:5173
-npm test -w apps/ward-manager      # 285 tests
+npm test -w apps/ward-manager      # 295 tests
 ```
 
 ## Data storage

@@ -4,6 +4,7 @@ import { BTN, BTN_PRIMARY, BTN_SECONDARY, CARD, INPUT, TYPE_DISPLAY, TYPE_META, 
 import { IconBack, IconChevron } from "../ui/icons";
 import { RULES, RULE_FOR_ALERT, RULE_GROUPS } from "../data/ruleCatalogue";
 import { SOURCES, SOURCES_ACCESSED } from "../data/sources";
+import { UNIT_SETTINGS, formatSetting, getUnitSettings } from "../data/unitSettings";
 
 const DISCLAIMER = "Decision aid only. Clinical responsibility remains with the treating clinician.";
 
@@ -24,7 +25,31 @@ function SourceChip({ k, onSource }) {
   );
 }
 
-function RuleBody({ rule, onSource }) {
+/** What this phone is set to, for rules a unit can change. */
+function SettingLines({ keys, onSettings }) {
+  const unit = getUnitSettings();
+  const defs = keys.map(k => UNIT_SETTINGS.find(s => s.key === k)).filter(Boolean);
+  return (
+    <div className="rounded-lg px-2.5 py-2 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 space-y-1">
+      {defs.map(s => {
+        const v = unit[s.key];
+        return (
+          <p key={s.key} className="text-xs leading-snug text-gray-700 dark:text-gray-300">
+            <span className="font-semibold">This phone: </span>{s.label} <span className="font-semibold">{formatSetting(s, v)}</span>
+            {v === s.default ? " (app default)" : <span className="font-semibold text-amber-700 dark:text-amber-400"> (changed from {formatSetting(s, s.default)})</span>}
+          </p>
+        );
+      })}
+      {onSettings && (
+        <button type="button" onClick={onSettings} className="min-h-8 text-xs font-semibold text-claude-700 dark:text-claude-400 underline decoration-dotted underline-offset-2">
+          Change in unit settings
+        </button>
+      )}
+    </div>
+  );
+}
+
+function RuleBody({ rule, onSource, onSettings }) {
   return (
     <div className="space-y-2">
       <p className="text-sm text-gray-800 dark:text-gray-200 leading-snug"><span className="font-semibold">When: </span>{rule.when}</p>
@@ -35,6 +60,7 @@ function RuleBody({ rule, onSource }) {
           <span className="font-semibold">{rule.group === "Scope" ? "App design choice: " : "Local, verify against your protocol: "}</span>{rule.local.replace(/^App scope decision:?\s*/, "")}
         </p>
       )}
+      {rule.settings?.length > 0 && <SettingLines keys={rule.settings} onSettings={onSettings} />}
       {rule.sources.length > 0 && (
         <div className="flex flex-wrap gap-1.5 pt-0.5">
           {rule.sources.map(k => <SourceChip key={k} k={k} onSource={onSource} />)}
@@ -71,20 +97,20 @@ export function SourceSheet({ sourceKey, onClose }) {
 }
 
 /** Pop-up for one alert: the rule behind it and its sources. */
-export function RuleSheet({ alertId, onSource, onAll, onClose }) {
+export function RuleSheet({ alertId, onSource, onAll, onSettings, onClose }) {
   const rule = RULE_FOR_ALERT[alertId];
   if (!rule) return null;
   return (
     <Sheet open onClose={onClose} title={rule.title} sub={`Rule behind this alert · ${rule.group}`}
       footer={<button type="button" onClick={onAll} className={`${BTN} ${BTN_SECONDARY} w-full`}>All rules and sources</button>}>
-      <RuleBody rule={rule} onSource={onSource} />
+      <RuleBody rule={rule} onSource={onSource} onSettings={onSettings} />
       <p className={TYPE_META}>{DISCLAIMER}</p>
     </Sheet>
   );
 }
 
 /** Full-screen list of every rule the board applies, grouped by topic. */
-export default function RulesPage({ onClose, onSource }) {
+export default function RulesPage({ onClose, onSource, onSettings }) {
   const [q, setQ] = useState("");
   const shown = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -118,7 +144,7 @@ export default function RulesPage({ onClose, onSource }) {
       <div className="max-w-lg mx-auto px-5 py-4 space-y-6" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 2rem)" }}>
         {!q && (
           <p className="text-sm text-gray-700 dark:text-gray-300 leading-snug">
-            Every alert the board can raise, what sets it off, and the guideline it comes from. Tap a source to read the exact wording and open the page it was taken from. Amber notes mark numbers that are local choices rather than national guidance.
+            Every alert the board can raise, what sets it off, and the guideline it comes from. Tap a source to read the exact wording and open the page it was taken from. Amber notes mark numbers that are local choices rather than national guidance; where your unit can set them, the card shows what this phone is set to.
           </p>
         )}
         {RULE_GROUPS.map(g => {
@@ -130,7 +156,7 @@ export default function RulesPage({ onClose, onSource }) {
               {rules.map(r => (
                 <article key={r.id} className={`${CARD} px-3.5 py-3 space-y-2`}>
                   <h4 className="text-base font-semibold text-gray-900 dark:text-white leading-snug">{r.title}</h4>
-                  <RuleBody rule={r} onSource={onSource} />
+                  <RuleBody rule={r} onSource={onSource} onSettings={onSettings} />
                 </article>
               ))}
             </section>

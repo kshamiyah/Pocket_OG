@@ -4,6 +4,7 @@
 // @pocket-og/guidelines package so the pocket-og CTG Classifier and this engine
 // stay in lockstep. Re-exported here so existing imports keep working.
 export { classifyCTGEntry } from "@pocket-og/guidelines";
+import { getUnitSettings } from "../data/unitSettings.js";
 
 const MIN = 60 * 1000;
 const HOUR = 60 * MIN;
@@ -34,7 +35,9 @@ function parseGestWeeks(str) {
   return null;
 }
 
-export function computeAlerts(bed, now = Date.now()) {
+// `unit` holds the unit's local choices (src/data/unitSettings.js); tests pass
+// their own, the app uses what this phone has saved.
+export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // After birth only maternal safety rules run (observations, sepsis, PPH);
   // labour, CTG and preterm rules stop.
   const delivered = !!bed.delivery;
@@ -90,8 +93,8 @@ export function computeAlerts(bed, now = Date.now()) {
   // Oxytocin is running unless the last entry stopped it (dose 0).
   const oxyRunning = !!currentOx && !currentOx.stopped && currentOx.dose > 0;
 
-  // ─── Preterm — neonatal team (< 34 weeks) ───────────────────────────
-  if (!delivered && isPreterm && gestWks < 34 && !bed.neonatalTeamAlerted) {
+  // ─── Preterm — neonatal team (unit setting, default under 34 weeks) ─
+  if (!delivered && isPreterm && gestWks < unit.neonatalTeamUnderWk && !bed.neonatalTeamAlerted) {
     alerts.push({
       id: "preterm-neonatal",
       severity: "urgent",
@@ -264,13 +267,13 @@ export function computeAlerts(bed, now = Date.now()) {
       const sinceLabel = bed.modeOfOnset === "Induced" && bed.inductionStartTime
         ? "since IOL started"
         : "since admission";
-      if (ms >= 4 * HOUR) {
+      if (ms >= unit.latentReassessH * HOUR) {
         alerts.push({
           id: "latent-reassess",
           severity: "warning",
           title: "Latent phase — reassess now",
           body: `${formatAge(ms)} ${sinceLabel}. Offer reassessment to confirm or exclude established labour (regular contractions and progressive dilatation from 4 cm).`,
-          citation: "Local interval (verify) · NG235 1.8.1",
+          citation: `${unit.latentReassessH} h unit setting · NG235 1.8.1`,
         });
       }
     }
@@ -350,12 +353,12 @@ export function computeAlerts(bed, now = Date.now()) {
     });
   }
   if (oxyRunning) {
-    if (currentOx.dose >= 20) {
+    if (currentOx.dose >= unit.oxytocinMax) {
       alerts.push({
         id: "oxytocin-max",
         severity: "urgent",
         title: "Oxytocin at maximum dose",
-        body: `Current dose ${currentOx.dose} mU/min, at or above the 20 mU/min maximum used locally. Escalate to registrar or consultant.`,
+        body: `Current dose ${currentOx.dose} mU/min, at or above the unit maximum of ${unit.oxytocinMax} mU/min. Escalate to registrar or consultant.`,
         citation: "Local protocol (verify)",
       });
     } else {
@@ -410,12 +413,12 @@ export function computeAlerts(bed, now = Date.now()) {
     const ms = now - new Date(membranesTime).getTime();
     // GL787 (term PROM): prophylaxis indicated if GBS positive, ROM 48 h or
     // more, or maternal pyrexia over 38°C. GBS+ is covered by gbs-iap below.
-    if (ms >= 48 * HOUR && !isGBSPos && !bed.gbsAntibioticsStarted) {
+    if (ms >= unit.promAntibioticH * HOUR && !isGBSPos && !bed.gbsAntibioticsStarted) {
       alerts.push({
         id: "prom-48h",
         severity: "urgent",
         title: `Membranes ruptured ${formatAge(ms)}: antibiotic prophylaxis indicated`,
-        body: "ROM 48 hours or more: intrapartum antibiotic prophylaxis is indicated (GL787). Regimen: IV benzylpenicillin 3 g stat, then 1.5 g 4-hourly until delivered; penicillin allergy: IV teicoplanin 10 mg/kg stat, then 12-hourly.",
+        body: `ROM ${unit.promAntibioticH} hours or more (unit setting; GL787 says 48): intrapartum antibiotic prophylaxis is indicated. Regimen: IV benzylpenicillin 3 g stat, then 1.5 g 4-hourly until delivered; penicillin allergy: IV teicoplanin 10 mg/kg stat, then 12-hourly.`,
         citation: "GL787 (local)",
       });
     }
@@ -427,21 +430,21 @@ export function computeAlerts(bed, now = Date.now()) {
         body: `Prelabour rupture of membranes for > 24h without established labour. Offer induction of labour.${isGBSPos ? " GBS+ — offer immediate induction with IV benzylpenicillin." : isGBSPending ? " GBS result pending — check and commence antibiotics if positive." : ""}`,
         citation: isGBSPos ? "NICE NG235 1.7.7 [2023] · GL787" : "NICE NG235 1.7.7 [2023]",
       });
-    } else if (ms >= 18 * HOUR) {
+    } else if (ms >= unit.promReviewH * HOUR) {
       alerts.push({
         id: "prom-18h",
         severity: "urgent",
-        title: `Membranes ruptured > 18 hours (${formatAge(ms)})`,
+        title: `Membranes ruptured over ${unit.promReviewH} hours (${formatAge(ms)})`,
         body: `${isGBSPending ? "GBS result pending: obtain it urgently. " : "Review GBS status. "}Antibiotics if GBS positive, ROM 48 hours or more, or pyrexia over 38°C (GL787); in preterm labour (NG195 1.6.1).`,
-        citation: "18 h is a local threshold (verify): not in NG195 or GL787",
+        citation: `${unit.promReviewH} h is a unit setting: not in NG195 or GL787`,
       });
-    } else if (ms >= 16 * HOUR) {
+    } else if (ms >= (unit.promReviewH - 2) * HOUR) {
       alerts.push({
         id: "prom-16h",
         severity: "warning",
-        title: `Membranes ruptured ${formatAge(ms)} — approaching 18h`,
+        title: `Membranes ruptured ${formatAge(ms)} — approaching ${unit.promReviewH}h`,
         body: `Review GBS status${isGBSPending ? " (result pending: check now)" : ""} and signs of infection.`,
-        citation: "Local threshold (verify)",
+        citation: "Unit setting",
       });
     }
   }
@@ -483,21 +486,24 @@ export function computeAlerts(bed, now = Date.now()) {
   }
 
   // ─── Liquor / meconium (NICE NG235 1.8.20, 1.8.33) ───────────────────────
+  const mecCTG = unit.meconiumCTGMandatory
+    ? "Continuous CTG (unit policy: mandatory with meconium)."
+    : "Offer continuous CTG; the monitoring method is her choice (NG229 1.3.11).";
   if (labourRules && lastLiquor === "Thick meconium") {
     alerts.push({
       id: "mec-thick",
       severity: "urgent",
       title: "Significant meconium — continuous CTG, notify neonatology",
-      body: "Consider the character of the meconium. Offer continuous CTG and obstetric-led care; staff trained in advanced neonatal life support may be needed at birth.",
-      citation: "NICE NG235 1.8.33 [2023] · NG229 1.3.8",
+      body: `${mecCTG} Obstetric-led care; staff trained in advanced neonatal life support may be needed at birth.`,
+      citation: unit.meconiumCTGMandatory ? "NICE NG235 1.8.33 [2023] · NG229 1.3.8 · unit setting" : "NICE NG235 1.8.33 [2023] · NG229 1.3.8",
     });
   } else if (labourRules && lastLiquor === "Thin meconium") {
     alerts.push({
       id: "mec-thin",
       severity: "warning",
-      title: "Thin meconium — discuss continuous CTG",
-      body: "Meconium present: full risk assessment, and offer continuous CTG; the monitoring method is her choice (NG229 1.3.11).",
-      citation: "NICE NG235 1.8.33 [2023] · NG229 1.3.8",
+      title: unit.meconiumCTGMandatory ? "Thin meconium — continuous CTG" : "Thin meconium — discuss continuous CTG",
+      body: `${mecCTG} Full risk assessment; escalate if the CTG becomes suspicious or pathological.`,
+      citation: unit.meconiumCTGMandatory ? "NICE NG235 1.8.33 [2023] · NG229 1.3.8 · unit setting" : "NICE NG235 1.8.33 [2023] · NG229 1.3.8",
     });
   }
 
@@ -734,13 +740,13 @@ export function computeAlerts(bed, now = Date.now()) {
   }
 
   // ─── Urine output ────────────────────────────────────────────────────
-  if (obs.urineOutput !== undefined && obs.urineOutput < 30) {
+  if (obs.urineOutput !== undefined && obs.urineOutput < unit.oliguriaMlH) {
     alerts.push({
       id: "oliguria",
       severity: "urgent",
       title: "Oliguria",
-      body: `Urine output ${obs.urineOutput} mL/hr — below 30 mL/hr threshold. Escalate to medical team.`,
-      citation: "Local threshold (verify)",
+      body: `Urine output ${obs.urineOutput} mL/hr — below the unit threshold of ${unit.oliguriaMlH} mL/hr. Escalate to medical team.`,
+      citation: "Unit setting",
     });
   }
 
@@ -769,22 +775,23 @@ export function computeAlerts(bed, now = Date.now()) {
       alerts.some(a => a.id === "slow-progress") && "Delay",
       bed.analgesia === "Epidural" && "Epidural",
       (oxyRunning || bed.oxytocinStartTime) && "Oxytocin",
-      // Local additions (not NG229 indications)
-      isPreterm && `Preterm (${gest})`,
-      isGBSPos && "GBS+",
-      isGBSPending && "GBS pending",
-      bed.modeOfOnset === "PPROM" && "PPROM",
+      // Local additions (not NG229 indications), a unit setting
+      unit.ctgLocalIndications && isPreterm && `Preterm (${gest})`,
+      unit.ctgLocalIndications && isGBSPos && "GBS+",
+      unit.ctgLocalIndications && isGBSPending && "GBS pending",
+      unit.ctgLocalIndications && bed.modeOfOnset === "PPROM" && "PPROM",
     ].filter(Boolean);
-    const needsContinuousCTG = ctgReasons.length > 0;
+    // Unit setting: continuous CTG for everyone in established labour.
+    const needsContinuousCTG = unit.ctgForAll || ctgReasons.length > 0;
     const ctgClockRuns = inEstablishedLabour || oxyRunning;
 
     if (ctgClockRuns && needsContinuousCTG && !lastCTG) {
       alerts.push({
         id: "ctg-not-documented",
         severity: "info",
-        title: "Continuous CTG indicated — not yet documented",
-        body: `Indication: ${ctgReasons.join(", ")}. Log a CTG review to track fetal wellbeing.`,
-        citation: "NICE NG229 1.3.2, 1.3.3, 1.3.8 [2022]",
+        title: "Continuous CTG — not yet documented",
+        body: `${ctgReasons.length ? `Indication: ${ctgReasons.join(", ")}.` : "Unit policy: continuous CTG in established labour."} Log a CTG review to track fetal wellbeing.`,
+        citation: ctgReasons.length ? "NICE NG229 1.3.2, 1.3.3, 1.3.8 [2022]" : "Unit setting",
       });
     }
 
@@ -799,21 +806,22 @@ export function computeAlerts(bed, now = Date.now()) {
           citation: "NICE NG229 1.5.7, 1.5.8 [2022]",
         });
       } else if (lastCTG.classification === "suspicious") {
-        if (msCTG >= 30 * MIN) {
+        const recheck = unit.suspiciousRecheckMin * MIN;
+        if (msCTG >= recheck) {
           alerts.push({
             id: "ctg-suspicious-overdue",
             severity: "urgent",
             title: `Suspicious CTG — not reassessed (${formatAge(msCTG)} ago)`,
-            body: "Not reassessed within 30 minutes (local interval). Full risk assessment, conservative measures; urgent obstetric or senior midwife review if there are other risk factors such as slow progress, sepsis or meconium.",
-            citation: "NICE NG229 1.5.5, 1.5.6 · 30 min local",
+            body: `Not reassessed within ${unit.suspiciousRecheckMin} minutes (unit setting). Full risk assessment, conservative measures; urgent obstetric or senior midwife review if there are other risk factors such as slow progress, sepsis or meconium.`,
+            citation: `NICE NG229 1.5.5, 1.5.6 · ${unit.suspiciousRecheckMin} min unit setting`,
           });
         } else {
           alerts.push({
             id: "ctg-suspicious",
             severity: "warning",
-            title: `Suspicious CTG — reassess within ${formatAge(30 * MIN - msCTG)}`,
+            title: `Suspicious CTG — reassess within ${formatAge(recheck - msCTG)}`,
             body: `Full risk assessment with maternal observations and conservative measures. Accelerations make acidosis unlikely. Logged ${formatAge(msCTG)} ago.`,
-            citation: "NICE NG229 1.5.5, 1.5.6 · 30 min local",
+            citation: `NICE NG229 1.5.5, 1.5.6 · ${unit.suspiciousRecheckMin} min unit setting`,
           });
         }
       } else if (ctgClockRuns && needsContinuousCTG && msCTG >= 60 * MIN) {

@@ -5,6 +5,7 @@ import { computeAlerts } from "./wardAlerts.js"
 import { currentOxytocin, fixAlert, stampObs } from "./bedModel.js"
 import { triageBed } from "./triage.js"
 import { generateHandover } from "./handoverText.js"
+import { UNIT_DEFAULTS } from "../data/unitSettings.js"
 
 const MIN  = 60 * 1000
 const HOUR = 60 * MIN
@@ -192,5 +193,47 @@ describe("ROM 48 hours: antibiotics (GL787)", () => {
   })
   it("clears once antibiotics are given", () => {
     expect(ids(rom(50, { gbsAntibioticsStarted: true }))).not.toContain("prom-48h")
+  })
+})
+
+describe("unit settings change the local thresholds", () => {
+  const U = o => ({ ...UNIT_DEFAULTS, ...o })
+  const run = (b, o) => computeAlerts(b, NOW, U(o)).map(a => a.id)
+  it("suspicious CTG recheck interval", () => {
+    const b = bed({ ctgLog: [ctg("suspicious", 25)] })
+    expect(run(b, {})).toContain("ctg-suspicious")
+    expect(run(b, { suspiciousRecheckMin: 20 })).toContain("ctg-suspicious-overdue")
+  })
+  it("latent reassessment interval", () => {
+    const b = bed({ admissionTime: t(5 * HOUR) })
+    expect(run(b, {})).toContain("latent-reassess")
+    expect(run(b, { latentReassessH: 6 })).not.toContain("latent-reassess")
+  })
+  it("ROM review and antibiotic hours", () => {
+    const b = active({ membranes: "SROM", membranesTime: t(13 * HOUR) })
+    expect(run(b, {})).not.toContain("prom-18h")
+    expect(run(b, { promReviewH: 12 })).toContain("prom-18h")
+    expect(run(b, { promAntibioticH: 12 })).toContain("prom-48h")
+  })
+  it("neonatal team gestation", () => {
+    const b = active({ gestation: "35+0" })
+    expect(run(b, {})).not.toContain("preterm-neonatal")
+    expect(run(b, { neonatalTeamUnderWk: 36 })).toContain("preterm-neonatal")
+  })
+  it("oxytocin maximum", () => {
+    const b = active({ oxytocinLog: [{ id: "o", startTime: t(HOUR), dose: 16, lastIncrementTime: t(10 * MIN) }] })
+    expect(run(b, {})).not.toContain("oxytocin-max")
+    expect(run(b, { oxytocinMax: 16 })).toContain("oxytocin-max")
+  })
+  it("oliguria threshold", () => {
+    const b = active({ observations: { lastPulse: t(10 * MIN), lastBP: t(10 * MIN), lastTemp: t(10 * MIN), urineOutput: 35 } })
+    expect(run(b, {})).not.toContain("oliguria")
+    expect(run(b, { oliguriaMlH: 40 })).toContain("oliguria")
+  })
+  it("meconium wording follows the setting", () => {
+    const b = active({ membranes: "SROM", membranesTime: t(HOUR), liquor: "Thin meconium" })
+    const body = o => computeAlerts(b, NOW, U(o)).find(a => a.id === "mec-thin").body
+    expect(body({})).toMatch(/mandatory/)
+    expect(body({ meconiumCTGMandatory: false })).toMatch(/her choice/)
   })
 })

@@ -14,6 +14,10 @@
 
 import { describe, it, expect } from "vitest"
 import { computeAlerts, classifyCTGEntry } from "./wardAlerts.js"
+import { UNIT_DEFAULTS } from "../data/unitSettings.js"
+
+// NICE-only fetal monitoring: continuous CTG only when an indication applies.
+const NICE_CTG = { ...UNIT_DEFAULTS, ctgForAll: false }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -827,9 +831,14 @@ const pathologicalCTG = (minsAgo) => ({
 })
 
 describe("CTG — continuous monitoring indication", () => {
-  it("no ctg-not-documented alert when patient has no indication and no CTG", () => {
+  it("NICE-only setting: no ctg-not-documented alert when patient has no indication and no CTG", () => {
     const bed = ctgBed()
-    expect(hasNot(computeAlerts(bed, NOW), "ctg-not-documented")).toBe(true)
+    expect(hasNot(computeAlerts(bed, NOW, NICE_CTG), "ctg-not-documented")).toBe(true)
+  })
+
+  it("default unit setting: every woman in established labour is on CTG", () => {
+    const bed = ctgBed()
+    expect(has(computeAlerts(bed, NOW), "ctg-not-documented")).toBe(true)
   })
 
   it("fires ctg-not-documented (info) for epidural patient with no CTG", () => {
@@ -905,9 +914,14 @@ describe("CTG — suspicious", () => {
 })
 
 describe("CTG — normal review overdue", () => {
-  it("no ctg-review-due for non-indicated patient even if 90 min since CTG", () => {
+  it("NICE-only setting: no ctg-review-due for non-indicated patient even if 90 min since CTG", () => {
     const bed = ctgBed({ ctgLog: [normalCTG(90)] })
-    expect(hasNot(computeAlerts(bed, NOW), "ctg-review-due")).toBe(true)
+    expect(hasNot(computeAlerts(bed, NOW, NICE_CTG), "ctg-review-due")).toBe(true)
+  })
+
+  it("default unit setting: hourly CTG review for everyone in established labour", () => {
+    const bed = ctgBed({ ctgLog: [normalCTG(61)] })
+    expect(has(computeAlerts(bed, NOW), "ctg-review-due")).toBe(true)
   })
 
   it("fires ctg-review-due (info) for indicated patient at 60+ min since normal CTG", () => {
@@ -1068,12 +1082,12 @@ describe("Liquor alerts", () => {
     expect(has(computeAlerts(bed, NOW), "ctg-not-documented")).toBe(true)
   })
 
-  it("clear liquor does not trigger CTG by itself", () => {
+  it("clear liquor does not trigger CTG by itself (NICE-only setting)", () => {
     const bed = activeBed({
       ves: [{ time: t(1 * HOUR), dilation: 5, liquor: "Clear" }],
       ctgLog: [],
     })
-    expect(hasNot(computeAlerts(bed, NOW), "ctg-not-documented")).toBe(true)
+    expect(hasNot(computeAlerts(bed, NOW, NICE_CTG), "ctg-not-documented")).toBe(true)
   })
 })
 

@@ -5,6 +5,7 @@ import { describe, it, expect } from "vitest"
 import { readFileSync } from "node:fs"
 import { RULES, RULE_FOR_ALERT, RULE_GROUPS } from "./ruleCatalogue.js"
 import { SOURCES } from "./sources.js"
+import { UNIT_SETTINGS } from "./unitSettings.js"
 
 const engine = readFileSync(new URL("../utils/wardAlerts.js", import.meta.url), "utf8")
 const engineIds = [...new Set([...engine.matchAll(/id: "([a-z0-9-]+)"/g)].map(m => m[1]))]
@@ -35,5 +36,10 @@ describe("rule catalogue", () => {
   it("uses no em dashes in the app's own wording", () => {
     const own = RULES.flatMap(r => [r.title, r.when, r.then, r.local ?? ""])
     expect(own.filter(x => x.includes("—"))).toEqual([])
+  })
+  it("every unit setting is shown on at least one rule, and every rule setting exists", () => {
+    const used = new Set(RULES.flatMap(r => r.settings ?? []))
+    expect(UNIT_SETTINGS.map(x => x.key).filter(k => !used.has(k))).toEqual([])
+    expect([...used].filter(k => !UNIT_SETTINGS.some(x => x.key === k))).toEqual([])
   })
 })

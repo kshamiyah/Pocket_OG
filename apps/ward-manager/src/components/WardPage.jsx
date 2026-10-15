@@ -11,6 +11,8 @@ import BoardRound from "./BoardRound";
 import HandoverSheet from "./HandoverSheet";
 import IOLQueue, { IOLEntrySheet } from "./IOLQueue";
 import RulesPage, { RuleSheet, SourceSheet } from "./Rules";
+import UnitSettings from "./UnitSettings";
+import { changedSettings, saveUnitSettings } from "../data/unitSettings";
 import Sheet from "../ui/Sheet";
 import { RulesContext } from "../ui/rulesContext";
 import UndoToast from "../ui/UndoToast";
@@ -46,6 +48,10 @@ export default function WardPage({ shift, onEndShift }) {
   const [ruleAlert, setRuleAlert] = useState(null);
   const [sourceKey, setSourceKey] = useState(null);
   const rulesCtx = useMemo(() => ({ openRule: id => setRuleAlert(id) }), []);
+  // Unit settings change the engine's local thresholds; bumping the version
+  // re-runs triage with the new values.
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [unitVersion, setUnitVersion] = useState(0);
   const [recordId, setRecordId] = useState(null);  // full record overlay
   const [round, setRound] = useState(null);        // { ids, index, updated:Set }
   const [toast, setToast] = useState(null);        // { message, snapshot? }
@@ -68,7 +74,7 @@ export default function WardPage({ shift, onEndShift }) {
   useEffect(() => watchSystemTheme(setDark), []);
   useEffect(() => () => { clearTimeout(toastTimer.current); clearTimeout(flashTimer.current); }, []);
 
-  const rows = useMemo(() => triageWard(beds, now), [beds, now]);
+  const rows = useMemo(() => triageWard(beds, now), [beds, now, unitVersion]); // eslint-disable-line react-hooks/exhaustive-deps
   const summary = useMemo(() => wardSummary(rows), [rows]);
   const triage = useMemo(() => Object.fromEntries(rows.map(r => [r.bed.id, r.t])), [rows]);
 
@@ -296,9 +302,14 @@ export default function WardPage({ shift, onEndShift }) {
             <ChipRow small value={themePref} onChange={p => { setThemePrefState(p); setDark(setThemePref(p)); }}
               options={[{ value: "system", label: "Match phone" }, { value: "light", label: "Day" }, { value: "dark", label: "Night" }]} />
           </div>
-          <button type="button" onClick={() => { closeSheet(); setRulesOpen(true); }} className={`${BTN} ${BTN_SECONDARY} w-full`}>
-            Rules and sources
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button type="button" onClick={() => { closeSheet(); setRulesOpen(true); }} className={`${BTN} ${BTN_SECONDARY} whitespace-nowrap`}>
+              Rules and sources
+            </button>
+            <button type="button" onClick={() => { closeSheet(); setSettingsOpen(true); }} className={`${BTN} ${BTN_SECONDARY} whitespace-nowrap`}>
+              Unit settings{changedSettings().length ? ` (${changedSettings().length})` : ""}
+            </button>
+          </div>
           {confirmClear !== "ask" ? (
             <button type="button" disabled={!Object.keys(beds).length} onClick={() => setConfirmClear("ask")} className={`${BTN} ${BTN_SECONDARY} w-full`}>
               Clear the board
@@ -332,9 +343,14 @@ export default function WardPage({ shift, onEndShift }) {
           bottom={round ? "calc(env(safe-area-inset-bottom) + 9rem)" : recordBed ? "calc(env(safe-area-inset-bottom) + 1.25rem)" : undefined} />
       )}
 
-      {rulesOpen && <RulesPage onClose={() => setRulesOpen(false)} onSource={setSourceKey} />}
+      {rulesOpen && <RulesPage onClose={() => setRulesOpen(false)} onSource={setSourceKey} onSettings={() => setSettingsOpen(true)} />}
+      {settingsOpen && (
+        <UnitSettings onClose={() => setSettingsOpen(false)}
+          onSave={draft => { saveUnitSettings(draft); setUnitVersion(v => v + 1); setSettingsOpen(false); showToast("Unit settings saved"); }} />
+      )}
       {ruleAlert && (
         <RuleSheet alertId={ruleAlert} onSource={setSourceKey} onClose={() => setRuleAlert(null)}
+          onSettings={() => { setRuleAlert(null); setSheet(null); setSettingsOpen(true); }}
           onAll={() => { setRuleAlert(null); setSheet(null); setRulesOpen(true); }} />
       )}
       {sourceKey && <SourceSheet sourceKey={sourceKey} onClose={() => setSourceKey(null)} />}
