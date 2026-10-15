@@ -44,7 +44,7 @@ function Row({ label, effect, on, onToggle }) {
 }
 
 /** Risks page, pushed in over the Admit or Edit sheet like a tab. */
-function RisksPage({ values, onChange, onClose, closing, onClosed }) {
+function RisksPage({ values, onChange, onClose, closing, onClosed, backLabel }) {
   const [q, setQ] = useState("");
   const toggle = v => onChange(values.includes(v) ? values.filter(x => x !== v) : [...values, v]);
   const custom = values.filter(v => !RISK_FLAGS.includes(v));
@@ -58,7 +58,7 @@ function RisksPage({ values, onChange, onClose, closing, onClosed }) {
   const addTyped = () => { if (canAdd) onChange([...values, typed]); setQ(""); };
 
   return (
-    <SubPage title="Risks" sub={values.length ? `${values.length} ticked` : "None ticked"} backLabel="Admit"
+    <SubPage title="Risks" sub={values.length ? `${values.length} ticked` : "None ticked"} backLabel={backLabel}
       onClose={onClose} closing={closing} onClosed={onClosed}
       headerExtra={<>
         <input id="risk-search" type="search" value={q} onChange={e => setQ(e.target.value)} maxLength={40}
@@ -94,7 +94,7 @@ function RisksPage({ values, onChange, onClose, closing, onClosed }) {
 }
 
 /** Risks row on the Admit sheet: one tap opens the risks page. */
-export default function RiskPicker({ values, onChange }) {
+export default function RiskPicker({ values, onChange, backLabel = "Admit" }) {
   const sp = useSubPage();
   const toggle = v => onChange(values.filter(x => x !== v));
   return (
@@ -117,7 +117,7 @@ export default function RiskPicker({ values, onChange }) {
           ))}
         </div>
       )}
-      {sp.page && <RisksPage values={values} onChange={onChange} onClose={sp.close} closing={sp.closing} onClosed={sp.closed} />}
+      {sp.page && <RisksPage backLabel={backLabel} values={values} onChange={onChange} onClose={sp.close} closing={sp.closing} onClosed={sp.closed} />}
     </div>
   );
 }

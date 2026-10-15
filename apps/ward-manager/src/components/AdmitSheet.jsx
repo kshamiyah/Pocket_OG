@@ -281,7 +281,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
             <Label tight>Analgesia</Label>
             <ChipRow small options={ANALGESIA} value={analgesia} onChange={setAnalgesia} />
           </div>
-          <RiskPicker values={flags} onChange={setFlags} />
+          <RiskPicker values={flags} onChange={setFlags} backLabel={edit ? "Edit" : "Admit"} />
           {!edit && (
             <>
               <div>

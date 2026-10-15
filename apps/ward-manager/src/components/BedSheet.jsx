@@ -78,7 +78,7 @@ function Fact({ k, children }) {
   );
 }
 
-export default function BedSheet({ bed, t, now, onClose, onCTGNormal, onCTGConcern, onVE, onObs, onFix, onStage, onDelivered, onOxy, onRecord, onRemove }) {
+export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGNormal, onCTGConcern, onVE, onObs, onFix, onStage, onDelivered, onOxy, onRecord, onRemove }) {
   if (!bed) return null;
   const ve = lastVE(bed);
   const ctg = lastCTG(bed);
@@ -86,10 +86,15 @@ export default function BedSheet({ bed, t, now, onClose, onCTGNormal, onCTGConce
   const sub = [parityWithHistory(bed), bed.gestation, stageLabel(bed), ...(bed.riskFlags ?? []).map(riskShort), bed.analgesia !== "None" ? bed.analgesia : null]
     .filter(Boolean).join(" · ");
 
+  const editBtn = onEdit && (
+    <button type="button" onClick={onEdit}
+      className="shrink-0 min-h-9 px-3 rounded-full bg-gray-100 dark:bg-gray-900 text-sm font-semibold text-claude-700 dark:text-claude-400 active:scale-95">Edit</button>
+  );
+
   if (bed.delivery) {
     const d = bed.delivery;
     return (
-      <Sheet open onClose={onClose} title={`Bed ${bed.bedNumber}`} sub={sub}>
+      <Sheet open onClose={onClose} title={`Bed ${bed.bedNumber}`} sub={sub} action={editBtn}>
         {t.shown.length > 0 && <AlertList alerts={t.shown} onFix={onFix} limit={2} />}
         <div className="rounded-xl border px-3 py-2.5 bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800">
           <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400">{d.mode} at {clock(d.time)}</p>
@@ -106,7 +111,7 @@ export default function BedSheet({ bed, t, now, onClose, onCTGNormal, onCTGConce
 
   const obs = obsStatus(bed, now);
   return (
-    <Sheet open onClose={onClose} title={`Bed ${bed.bedNumber}`} sub={sub}>
+    <Sheet open onClose={onClose} title={`Bed ${bed.bedNumber}`} sub={sub} action={editBtn}>
       {t.shown.length ? <AlertList alerts={t.shown} onFix={onFix} limit={2} /> : (
         <div className="rounded-xl border px-3 py-2.5 bg-gray-50 dark:bg-gray-900/60 border-gray-200 dark:border-gray-800">
           <p className="text-sm text-gray-700 dark:text-gray-300">

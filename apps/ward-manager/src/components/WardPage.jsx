@@ -189,9 +189,10 @@ export default function WardPage({ shift, onEndShift }) {
     setTab("board");
     closeSheet();
   };
-  const editDetails = (bedId, updates) => {
+  const editDetails = (bedId, updates, back) => {
     updateBed(bedId, updates, `Bed ${updates.bedNumber} details saved`);
-    closeSheet();
+    // Opened from the bed card: go back to it, so the change is visible.
+    if (back === "bed") setSheet({ type: "bed", bedId }); else closeSheet();
   };
   const removeBed = bedId => {
     const bed = beds[bedId];
@@ -265,6 +266,7 @@ export default function WardPage({ shift, onEndShift }) {
 
       {sheet?.type === "bed" && sb && (
         <BedSheet bed={sb} t={triage[sb.id]} now={now} onClose={closeSheet}
+          onEdit={() => setSheet({ type: "edit", bedId: sb.id, back: "bed" })}
           onCTGNormal={() => ctgNormal(sb.id)}
           onCTGConcern={() => setSheet({ type: "ctg", bedId: sb.id })}
           onVE={() => setSheet({ type: "ve", bedId: sb.id })}
@@ -281,7 +283,9 @@ export default function WardPage({ shift, onEndShift }) {
       {sheet?.type === "oxy" && sb && <OxySheet bed={sb} onClose={closeSheet} onSave={e => saveOxy(sb.id, e)} onHold={h => holdOxy(sb.id, h)} />}
       {sheet?.type === "delivery" && sb && <DeliverySheet bed={sb} onClose={closeSheet} onSave={r => saveDelivery(sb.id, r)} />}
       {sheet?.type === "edit" && sb && (
-        <AdmitSheet mode="edit" bed={sb} existingNumbers={Object.values(beds).map(b => b.bedNumber)} onClose={closeSheet} onSave={u => editDetails(sb.id, u)} />
+        <AdmitSheet mode="edit" bed={sb} existingNumbers={Object.values(beds).map(b => b.bedNumber)}
+          onClose={sheet.back === "bed" ? () => setSheet({ type: "bed", bedId: sb.id }) : closeSheet}
+          onSave={u => editDetails(sb.id, u, sheet.back)} />
       )}
       {sheet?.type === "admit" && (
         <AdmitSheet mode={sheet.entry ? "iol" : "new"} iolEntry={sheet.entry ?? null}

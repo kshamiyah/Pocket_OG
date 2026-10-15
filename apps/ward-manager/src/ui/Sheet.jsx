@@ -5,7 +5,7 @@ import { IconX } from "./icons";
  * Bottom sheet in Handover's style. Rendered only while open so closed sheets
  * leave nothing in the page.
  */
-export default function Sheet({ open, onClose, title, sub, children, footer, label, dense = false }) {
+export default function Sheet({ open, onClose, title, sub, children, footer, label, dense = false, action = null }) {
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -29,6 +29,7 @@ export default function Sheet({ open, onClose, title, sub, children, footer, lab
               {title && <h2 className="text-lg font-semibold leading-snug text-gray-900 dark:text-white">{title}</h2>}
               {sub && <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-0.5">{sub}</p>}
             </div>
+            {action}
             <button type="button" onClick={onClose} aria-label="Close"
               className="w-9 h-9 shrink-0 rounded-full bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 flex items-center justify-center active:scale-95">
               <IconX />
