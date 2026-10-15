@@ -121,7 +121,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
   const title = edit ? `Edit Bed ${bed.bedNumber}` : iolEntry ? `Admit ${iolEntry.initials} from IOL queue` : "Admit";
   return (
     <Sheet open onClose={onClose} title={title}
-      sub={edit ? "Change details. VE, CTG and obs history stay as they are." : "Bed, parity, gestation and stage. Everything else is optional."}
+      sub={edit ? "Change details. VE, CTG and obs history stay as they are." : "Bed, parity, gestation and stage, then onset and membranes. More details is optional."}
       footer={
         <button type="button" onClick={save} disabled={!ready} className={`${BTN} ${BTN_PRIMARY} w-full min-h-[3.25rem] text-base`}>
           {!ready ? (clash ? `Bed ${trimmed} is already on the board` : "Pick bed, parity, gestation and stage")
@@ -186,42 +186,42 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
         <ChipRow options={STAGES} value={stage} onChange={setStage} label={s => STAGE_SHORT[s]} />
       </div>
 
+      <div>
+        <Label>Onset</Label>
+        <ChipRow small options={ONSETS} value={onset} onChange={setOnset} />
+      </div>
+      {onset === "Induced" && (
+        <>
+          <div>
+            <Label>Induction method</Label>
+            <ChipRow small options={IND_METHODS} value={indMethod} onChange={setIndMethod} />
+          </div>
+          <div>
+            <Label>Indication</Label>
+            <MultiChipRow options={[...new Set([...IOL_REASONS, ...iolReasons])]} values={iolReasons} onChange={setIolReasons} />
+          </div>
+          <WhenPicker label="IOL started" value={iolWhen} onChange={setIolWhen} presets={[0, 60, 120, 240]} />
+        </>
+      )}
+      {!edit && (
+        <div>
+          <Label>Membranes</Label>
+          <ChipRow small options={MEMBRANES} value={effMemb} onChange={setMemb} />
+          {ruptured && (
+            <div className="mt-2 space-y-3">
+              <ChipRow small options={LIQUORS} value={liquor} onChange={setLiquor} label={o => LIQUOR_SHORT[o]} />
+              <WhenPicker label={`Time of ${effMemb}`} value={romWhen} onChange={setRomWhen} presets={[0, 60, 120, 240]} />
+            </div>
+          )}
+        </div>
+      )}
       {!more ? (
         <button type="button" onClick={() => setMore(true)}
           className="w-full min-h-12 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 text-sm font-semibold text-claude-700 dark:text-claude-400">
-          More details (optional): onset, membranes, analgesia, risks, last VE
+          More details (optional): analgesia, risks, last VE
         </button>
       ) : (
         <>
-          <div>
-            <Label>Onset</Label>
-            <ChipRow small options={ONSETS} value={onset} onChange={setOnset} />
-          </div>
-          {onset === "Induced" && (
-            <>
-              <div>
-                <Label>Induction method</Label>
-                <ChipRow small options={IND_METHODS} value={indMethod} onChange={setIndMethod} />
-              </div>
-              <div>
-                <Label>Indication</Label>
-                <MultiChipRow options={[...new Set([...IOL_REASONS, ...iolReasons])]} values={iolReasons} onChange={setIolReasons} />
-              </div>
-              <WhenPicker label="IOL started" value={iolWhen} onChange={setIolWhen} presets={[0, 60, 120, 240]} />
-            </>
-          )}
-          {!edit && (
-            <div>
-              <Label>Membranes</Label>
-              <ChipRow small options={MEMBRANES} value={effMemb} onChange={setMemb} />
-              {ruptured && (
-                <div className="mt-2 space-y-3">
-                  <ChipRow small options={LIQUORS} value={liquor} onChange={setLiquor} label={o => LIQUOR_SHORT[o]} />
-                  <WhenPicker label={`Time of ${effMemb}`} value={romWhen} onChange={setRomWhen} presets={[0, 60, 120, 240]} />
-                </div>
-              )}
-            </div>
-          )}
           <div>
             <Label>Analgesia</Label>
             <ChipRow small options={ANALGESIA} value={analgesia} onChange={setAnalgesia} />
