@@ -4,32 +4,35 @@ import { lastVE, obsStatus, obsTracked, parityShort, riskShort, stageLabel, curr
 import { shortLabel } from "../utils/triage";
 import { iolEntryTier } from "../utils/iolPriority";
 import {
-  CARD, CARD_DUE, CARD_URGENT, ICON_BTN, SEV_BAR, SEV_TEXT, TYPE_DISPLAY, TYPE_META, TYPE_OVERLINE,
+  CARD, CARD_DUE, CARD_URGENT, ICON_BTN, TYPE_DISPLAY, TYPE_META, TYPE_OVERLINE,
   BTN, BTN_PRIMARY, BTN_SECONDARY, CHIP_ON, TYPE_UI_SM, TYPE_CAPTION,
 } from "../ui/styles";
 import { IconClipboard, IconMoon, IconMore, IconPlus, IconRound, IconSun } from "../ui/icons";
 
 const CARD_FOR = { urgent: CARD_URGENT, warning: CARD_DUE, ok: CARD, delivered: CARD };
 
-function ObsDots({ bed, now }) {
-  return (
-    <span className="inline-flex gap-2" aria-label="Observations">
-      {obsStatus(bed, now).map(o => (
-        <span key={o.key} className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-500 dark:text-gray-400">
-          <span className={`w-2 h-2 rounded-full border ${o.done ? "bg-emerald-500 border-emerald-500" : "border-gray-400 dark:border-gray-600"}`} />
-          {o.letter}
-        </span>
-      ))}
-    </span>
-  );
+function Tag({ children, tone = "gray" }) {
+  const cls = {
+    claude: "bg-claude-100 dark:bg-claude-950/40 text-claude-800 dark:text-claude-300",
+    amber: "bg-claude-50 dark:bg-claude-950/30 text-claude-700 dark:text-claude-400 ring-1 ring-inset ring-claude-300 dark:ring-claude-800",
+    gray: "bg-gray-200/70 dark:bg-gray-800 text-gray-600 dark:text-gray-300",
+  }[tone];
+  return <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded whitespace-nowrap ${cls}`}>{children}</span>;
 }
 
-function Tag({ children, tone = "gray" }) {
-  const cls = tone === "claude"
-    ? "bg-claude-100 dark:bg-claude-950/40 text-claude-800 dark:text-claude-300"
-    : "bg-gray-200/70 dark:bg-gray-800 text-gray-600 dark:text-gray-300";
-  return <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded ${cls}`}>{children}</span>;
-}
+// Bed number badge, coloured by how much the woman needs you.
+const BADGE = {
+  urgent: "bg-red-600 text-white",
+  warning: "bg-claude-500 text-white",
+  ok: "bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-100",
+  delivered: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300",
+};
+// The one thing on the right: what she needs, or what is next.
+const PILL = {
+  urgent: "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300",
+  warning: "bg-claude-50 dark:bg-claude-950/40 text-claude-800 dark:text-claude-300",
+  info: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300",
+};
 
 export function BedRow({ bed, t, now, onOpen, flash }) {
   const ve = lastVE(bed);
@@ -37,83 +40,79 @@ export function BedRow({ bed, t, now, onOpen, flash }) {
   const flags = (bed.riskFlags ?? []).filter(f => f !== "Non-cephalic");
   const oxy = currentOxytocin(bed);
   const todo = (bed.tasks ?? []).filter(x => !x.done).length;
+  const obsDue = obsTracked(bed) ? obsStatus(bed, now).filter(o => !o.done).map(o => o.letter) : [];
+  const ago = iso => fmtAge(now - new Date(iso).getTime());
 
   let side;
-  if (t.tier === "delivered") {
-    side = <span className={TYPE_META}>Delivered</span>;
-  } else if (t.top) {
+  if (t.top) {
     const rest = t.shown.length - 1;
     side = (
       <>
-        <span className={`text-sm font-semibold leading-tight ${SEV_TEXT[t.top.severity]}`}>{shortLabel(t.top)}</span>
+        <span className={`text-xs font-semibold leading-tight px-2 py-1 rounded-lg ${PILL[t.top.severity] ?? PILL.info}`}>{shortLabel(t.top)}</span>
         {rest > 0 && <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500">+{rest} more</span>}
       </>
     );
+  } else if (t.tier === "delivered") {
+    side = <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Delivered</span>;
   } else if (t.next) {
     side = (
       <>
-        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t.next.label} {clock(t.next.at)}</span>
-        <span className={TYPE_META}>in {fmtAge(t.next.at - now)}</span>
+        <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{t.next.label} {clock(t.next.at)}</span>
+        <span className="text-[11px] text-gray-500 dark:text-gray-400">in {fmtAge(t.next.at - now)}</span>
       </>
     );
   } else {
-    side = <span className={TYPE_META}>Nothing due</span>;
+    side = <span className="text-xs text-gray-500 dark:text-gray-400">Nothing due</span>;
   }
 
+  // Line 1: where she is in labour, in one clean phrase.
   let status;
   if (bed.delivery) {
-    status = <span className="text-sm text-gray-700 dark:text-gray-300">{bed.delivery.mode} {clock(bed.delivery.time)}{bed.delivery.ebl != null ? ` · EBL ${bed.delivery.ebl} mL` : ""}</span>;
+    status = <>{bed.delivery.mode} <span className="font-normal text-gray-500 dark:text-gray-400">{clock(bed.delivery.time)}{bed.delivery.ebl != null ? ` · EBL ${bed.delivery.ebl} mL` : ""}</span></>;
   } else if (bed.labourStage === "Active second stage" && bed.pushingStartTime) {
-    status = <><span className="text-sm text-gray-700 dark:text-gray-300">Pushing</span><span className={TYPE_META}>{fmtAge(now - new Date(bed.pushingStartTime).getTime())}</span></>;
+    status = <>Pushing <span className="font-normal text-gray-500 dark:text-gray-400">· {ago(bed.pushingStartTime)}</span></>;
   } else {
-    status = (
-      <>
-        <span className="text-sm text-gray-700 dark:text-gray-300">{stageLabel(bed)}</span>
-        {ve ? (
-          <>
-            <span className="text-gray-300 dark:text-gray-700">·</span>
-            <span className="text-base font-semibold tabular-nums text-gray-900 dark:text-white">{ve.dilation}<span className="text-xs font-normal text-gray-500"> cm</span></span>
-            <span className={TYPE_META}>{fmtAge(now - new Date(ve.time).getTime())} ago</span>
-          </>
-        ) : <span className={TYPE_META}>· no VE</span>}
-      </>
-    );
+    status = <>{stageLabel(bed)}{ve
+      ? <> · <span className="tabular-nums">{ve.dilation} cm</span> <span className="font-normal text-gray-500 dark:text-gray-400">{ago(ve.time)}</span></>
+      : <span className="font-normal text-gray-500 dark:text-gray-400"> · no VE</span>}</>;
   }
 
+  const longName = String(bed.bedNumber).length > 2;
   return (
     <button type="button" onClick={() => onOpen(bed.id)} data-bed={bed.bedNumber}
-      className={`${CARD_FOR[t.tier]} w-full text-left flex items-stretch overflow-hidden active:scale-[0.99] transition-transform ${flash ? "animate-row-flash" : ""} ${t.tier === "delivered" ? "opacity-70" : ""}`}>
-      <span className={`w-1 shrink-0 ${SEV_BAR[t.tier] ?? "bg-transparent"}`} />
-      <span className="flex-1 min-w-0 px-3 py-2.5 flex flex-col gap-0.5">
-        <span className="flex items-baseline gap-2 flex-wrap">
-          <span className="text-base font-semibold text-gray-900 dark:text-white">Bed {bed.bedNumber}</span>
-          <span className={TYPE_META}>{parityShort(bed.parity)} · {bed.gestation}</span>
+      className={`${CARD_FOR[t.tier]} w-full text-left flex items-center gap-3 px-2.5 py-2.5 active:scale-[0.99] transition-transform ${flash ? "animate-row-flash" : ""} ${t.tier === "delivered" ? "opacity-80" : ""}`}>
+      <span aria-label={`Bed ${bed.bedNumber}`}
+        className={`shrink-0 h-11 min-w-11 px-1.5 rounded-lg flex items-center justify-center font-bold tabular-nums ${longName ? "text-xs" : "text-lg"} ${BADGE[t.tier]}`}>
+        {bed.bedNumber}
+      </span>
+      <span className="flex-1 min-w-0 flex flex-col gap-1">
+        <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">{status}</span>
+        <span className="flex items-center gap-1 flex-wrap">
+          <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mr-0.5 whitespace-nowrap">{parityShort(bed.parity)} · {bed.gestation}</span>
           {bed.modeOfOnset === "Induced" && <Tag tone="claude">IOL</Tag>}
           {bed.modeOfOnset === "PPROM" && <Tag tone="claude">PPROM</Tag>}
           {!bed.delivery && malpresentation(bed) && <Tag tone="claude">{malpresentation(bed)}</Tag>}
+          {oxy && <Tag tone="claude">Oxy {oxy.dose}{bed.oxytocinHeld ? " held" : ""}</Tag>}
+          {obsDue.length > 0 && <Tag tone="amber">Obs due {obsDue.join("")}</Tag>}
           {flags.slice(0, 2).map(f => <Tag key={f}>{riskShort(f)}</Tag>)}
           {flags.length > 2 && <Tag>+{flags.length - 2}</Tag>}
+          {todo > 0 && <Tag tone="amber">{todo} to do</Tag>}
         </span>
-        <span className="flex items-baseline gap-1.5 flex-wrap">{status}</span>
-        {!bed.delivery && (obsTracked(bed) || oxy || todo > 0) && (
-          <span className="flex items-center gap-3 mt-0.5">
-            {obsTracked(bed) && <ObsDots bed={bed} now={now} />}
-            {oxy && <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Oxy {oxy.dose}{bed.oxytocinHeld ? " held" : ""}</span>}
-            {todo > 0 && <span className="text-[11px] font-semibold text-claude-700 dark:text-claude-400">{todo} to do</span>}
-          </span>
-        )}
       </span>
-      <span className="shrink-0 max-w-[42%] pr-3 py-2.5 flex flex-col items-end justify-center text-right gap-0.5">{side}</span>
+      <span className="shrink-0 max-w-[38%] flex flex-col items-end gap-1 text-right">{side}</span>
     </button>
   );
 }
 
-function Section({ title, count, children }) {
+const SECTION_DOT = { urgent: "bg-red-600", warning: "bg-claude-500", ok: "bg-gray-400 dark:bg-gray-600" };
+
+function Section({ title, count, tone = "ok", children }) {
   return (
     <section className="space-y-1.5">
-      <div className="flex items-center justify-between px-1">
-        <span className={TYPE_OVERLINE}>{title}</span>
-        <span className={TYPE_OVERLINE}>{count}</span>
+      <div className="flex items-center gap-2 px-1">
+        <span className={`w-2 h-2 rounded-full ${SECTION_DOT[tone]}`} aria-hidden="true" />
+        <span className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">{title}</span>
+        <span className="text-[11px] font-semibold px-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 tabular-nums">{count}</span>
       </div>
       {children}
     </section>
@@ -138,7 +137,7 @@ export default function Board({
   const summaryBits = [
     `${summary.women} ${summary.women === 1 ? "woman" : "women"}`,
     summary.delivered ? `${summary.delivered} delivered` : null,
-    summary.urgent ? `${summary.urgent} need you` : null,
+    summary.urgent ? `${summary.urgent} ${summary.urgent === 1 ? "needs" : "need"} you` : null,
     summary.warning ? `${summary.warning} due soon` : null,
     summary.nextAt ? `next ${clock(summary.nextAt)}` : null,
   ].filter(Boolean);
@@ -205,17 +204,17 @@ export default function Board({
               <>
                 <p className={`${TYPE_OVERLINE} px-1`}>{summaryBits.join(" · ")}</p>
                 {urgent.length > 0 && (
-                  <Section title="Needs you now" count={urgent.length}>
+                  <Section title="Needs you now" tone="urgent" count={urgent.length}>
                     {urgent.map(r => <BedRow key={r.bed.id} {...r} now={now} onOpen={onOpenBed} flash={flashId === r.bed.id} />)}
                   </Section>
                 )}
                 {due.length > 0 && (
-                  <Section title="Due soon" count={due.length}>
+                  <Section title="Due soon" tone="warning" count={due.length}>
                     {due.map(r => <BedRow key={r.bed.id} {...r} now={now} onOpen={onOpenBed} flash={flashId === r.bed.id} />)}
                   </Section>
                 )}
                 {ok.length > 0 && (
-                  <Section title="On track" count={ok.length}>
+                  <Section title="On track" tone="ok" count={ok.length}>
                     {ok.map(r => <BedRow key={r.bed.id} {...r} now={now} onOpen={onOpenBed} flash={flashId === r.bed.id} />)}
                   </Section>
                 )}
