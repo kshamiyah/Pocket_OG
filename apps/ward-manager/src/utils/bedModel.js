@@ -90,9 +90,11 @@ export function lastCTG(bed) {
   return log.length ? log[log.length - 1] : null;
 }
 
+/** The running oxytocin entry, or null if never started or stopped (dose 0). */
 export function currentOxytocin(bed) {
   const log = bed.oxytocinLog ?? [];
-  return log.length ? log[log.length - 1] : null;
+  const last = log.length ? log[log.length - 1] : null;
+  return last && !last.stopped && last.dose > 0 ? last : null;
 }
 
 export function isDiabetic(bed) {
@@ -158,9 +160,22 @@ export function deleteVE(bed, id) {
   return { ves: (bed.ves ?? []).filter(v => v.id !== id) };
 }
 
+// The value each time stamp belongs to. A check stamped "done" without a value
+// replaces the old reading, so an abnormal value does not linger after a
+// normal re-check.
+const OBS_VALUES = {
+  lastPulse: ["pulseValue"],
+  lastBP: ["bpSystolic", "bpDiastolic"],
+  lastTemp: ["tempValue"],
+  lastBGL: ["bglValue"],
+};
+
 export function stampObs(bed, iso, keys = ["lastPulse", "lastBP", "lastTemp"]) {
   const observations = { ...(bed.observations ?? {}) };
-  keys.forEach(k => { observations[k] = iso; });
+  keys.forEach(k => {
+    observations[k] = iso;
+    (OBS_VALUES[k] ?? []).forEach(v => { delete observations[v]; });
+  });
   return { observations };
 }
 
@@ -185,6 +200,9 @@ export const PERSISTENT_FLAGS = {
   "preterm-mgso4": { field: "mgso4Given", label: "Given" },
   "preterm-steroids": { field: "corticosteroidsConfirmed", label: "Given" },
   "preterm-tocolysis": { field: "tocolysisOffered", label: "Offered" },
+  "iap-preterm": { field: "gbsAntibioticsStarted", label: "Given" },
+  "prom-48h": { field: "gbsAntibioticsStarted", label: "Given" },
+  "pph": { field: "pphReviewed", label: "Reviewed" },
 };
 export const OBS_STAMP = {
   "pulse-never": "lastPulse", "pulse-due": "lastPulse",

@@ -8,8 +8,11 @@ import {
   parityShort, stageLabel, veFindings, membraneStatus,
 } from "../utils/bedModel";
 import { tidy } from "../utils/triage";
+import { useRules } from "../ui/rulesContext";
+import { RULE_FOR_ALERT } from "../data/ruleCatalogue";
 
 export function AlertList({ alerts, onFix }) {
+  const { openRule } = useRules();
   if (!alerts.length) return null;
   return (
     <div className="space-y-1.5">
@@ -19,7 +22,14 @@ export function AlertList({ alerts, onFix }) {
           <div key={a.id} className={`rounded-xl border px-3 py-2.5 flex items-center gap-3 ${ALERT_BOX[a.severity]}`}>
             <div className="flex-1 min-w-0">
               <p className={`text-sm font-semibold leading-snug ${SEV_TEXT[a.severity]}`}>{tidy(a.title)}</p>
-              <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">{a.citation}</p>
+              {openRule && RULE_FOR_ALERT[a.id] ? (
+                <button type="button" onClick={() => openRule(a.id)} aria-label={`Source for this alert: ${a.citation}`}
+                  className="text-left text-[11px] font-semibold text-claude-700 dark:text-claude-400 mt-0.5 underline decoration-dotted underline-offset-2 active:opacity-70">
+                  {a.citation}
+                </button>
+              ) : (
+                <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">{a.citation}</p>
+              )}
             </div>
             {fix && onFix && (
               <button type="button" onClick={() => onFix(a.id)}
@@ -55,6 +65,7 @@ export default function BedSheet({ bed, t, now, onClose, onCTGNormal, onCTGConce
     const d = bed.delivery;
     return (
       <Sheet open onClose={onClose} title={`Bed ${bed.bedNumber}`} sub={sub}>
+        {t.shown.length > 0 && <AlertList alerts={t.shown} onFix={onFix} />}
         <div className="rounded-xl border px-3 py-2.5 bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800">
           <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400">{d.mode} at {clock(d.time)}</p>
           <p className="text-xs text-emerald-700 dark:text-emerald-400/80">{d.ebl != null ? `EBL ${d.ebl} mL` : "EBL not recorded"}{d.notes ? ` · ${d.notes}` : ""}</p>
@@ -101,7 +112,7 @@ export default function BedSheet({ bed, t, now, onClose, onCTGNormal, onCTGConce
         <Fact k="Last CTG">{ctg ? `${capitalise(ctg.classification)} · ${clock(ctg.time)} (${fmtAge(now - new Date(ctg.time).getTime())} ago)` : "Not logged"}</Fact>
         {obsTracked(bed) && <Fact k="Obs">{obs.map(o => `${o.letter} ${o.done ? "✓" : "due"}`).join("   ")}</Fact>}
         <Fact k="Membranes">{(() => { const m = membraneStatus(bed); return m.status ? `${m.status}${m.time ? ` ${clock(m.time)}` : ""}${m.liquor ? ` · ${LIQUOR_SHORT[m.liquor] ?? m.liquor}` : ""}` : "Not recorded"; })()}</Fact>
-        {oxy && <Fact k="Oxytocin">{oxy.dose} mU/min since {clock(oxy.lastIncrementTime ?? oxy.startTime)}</Fact>}
+        {oxy && <Fact k="Oxytocin">{oxy.dose} mU/min since {clock(oxy.lastIncrementTime ?? oxy.startTime)}{bed.oxytocinHeld ? ", held" : ""}</Fact>}
         {bed.modeOfOnset === "Induced" && <Fact k="IOL">{[bed.inductionMethod, bed.inductionStartTime ? `started ${clock(bed.inductionStartTime)}` : null].filter(Boolean).join(" · ") || "Induced"}</Fact>}
       </dl>
 

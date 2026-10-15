@@ -20,10 +20,12 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
   const [dec, setDec] = useState(editCTG?.decelerations ?? "none");
   const [decMin, setDecMin] = useState(editCTG?.decelerationMinutes ?? 0);
   const [accel, setAccel] = useState(editCTG?.accelerations ?? true);
-  const [ctx, setCtx] = useState(editCTG?.contractionsPerTen ?? null); // optional, never guessed
+  // Contractions are the 4th NG229 feature: required, never guessed or carried over.
+  const [ctx, setCtx] = useState(editCTG?.contractionsPerTen ?? null);
+  const [hypertonus, setHypertonus] = useState(!!editCTG?.hypertonus);
 
-  const entry = { baselineHR: hr, variability: vari, variabilityMinutes: varMin, decelerations: dec, decelerationMinutes: decMin, accelerations: accel, contractionsPerTen: ctx };
-  const autoCat = useMemo(() => classifyCTGEntry(entry, prevHR), [hr, vari, varMin, dec, decMin, accel, ctx, prevHR]); // eslint-disable-line react-hooks/exhaustive-deps
+  const entry = { baselineHR: hr, variability: vari, variabilityMinutes: varMin, decelerations: dec, decelerationMinutes: decMin, accelerations: accel, contractionsPerTen: ctx, hypertonus };
+  const autoCat = useMemo(() => classifyCTGEntry(entry, prevHR), [hr, vari, varMin, dec, decMin, accel, ctx, hypertonus, prevHR]); // eslint-disable-line react-hooks/exhaustive-deps
   // The clinician may judge a trace pathological on the whole picture even when
   // the features grade lower; the app never downgrades.
   const [override, setOverride] = useState(!!editCTG?.clinicianOverride);
@@ -32,7 +34,8 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
   const rise = prevHR != null ? hr - prevHR : 0;
   const hrTone = hr < 100 || hr > 160 ? "text-red-600 dark:text-red-400" : hr < 110 ? "text-claude-700 dark:text-claude-400" : "";
 
-  const save = () => iso && onSave({
+  const ready = !!iso && ctx != null;
+  const save = () => ready && onSave({
     id: editCTG?.id ?? newId("ctg"), time: iso, ...entry, classification: cat,
     autoClassification: autoCat, clinicianOverride: override && autoCat !== "pathological",
   });
@@ -42,9 +45,9 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
       title={`${editCTG ? "Edit CTG review" : "CTG review"} · Bed ${bed.bedNumber}`}
       sub="NICE NG229 · Fetal monitoring in labour"
       footer={
-        <button type="button" onClick={save} disabled={!iso}
+        <button type="button" onClick={save} disabled={!ready}
           className={`${BTN} w-full min-h-[3.25rem] text-base ${cat === "pathological" ? "bg-red-600 text-white" : BTN_PRIMARY}`}>
-          {editCTG ? "Save changes" : `Log ${cat} CTG`}
+          {ctx == null ? "Record contractions to log" : editCTG ? "Save changes" : `Log ${cat} CTG`}
         </button>
       }>
       {notice && <p className="text-sm font-semibold text-claude-800 dark:text-claude-300">{notice}</p>}
@@ -106,8 +109,11 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
       </div>
 
       <div>
-        <Label hint={ctx >= 5 ? "tachysystole: see NG229" : "optional"}>Contractions in 10 min</Label>
-        <ChipRow small value={ctx} onChange={v => setCtx(ctx === v ? null : v)} options={[0, 1, 2, 3, 4, 5, 6, 7]} />
+        <Label hint={ctx >= 5 || hypertonus ? "amber feature (NG229 1.4.12)" : "required"}>Contractions in 10 min</Label>
+        <ChipRow small value={ctx} onChange={setCtx} options={[0, 1, 2, 3, 4, 5, 6, 7]} />
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          <Chip small on={hypertonus} onClick={() => setHypertonus(h => !h)}>Hypertonus</Chip>
+        </div>
       </div>
 
       <WhenPicker label="Time of review" value={when} onChange={setWhen} />

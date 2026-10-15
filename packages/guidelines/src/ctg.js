@@ -14,7 +14,7 @@
 // baseline prompt is a LOCAL threshold, not an NG229 number. Keep this file,
 // the reader (NG229.js) and the flowchart (NG229_FLOWCHART.js) in lockstep.
 
-// Overall categorisation rule: combine the three individual feature grades.
+// Overall categorisation rule (NG229 1.4.32): combine the individual feature grades.
 export function combineFeatureGrades(grades) {
   const reds = grades.filter(g => g === "red").length;
   const ambers = grades.filter(g => g === "amber").length;
@@ -24,6 +24,7 @@ export function combineFeatureGrades(grades) {
 }
 
 // Numeric/structured entry → overall category (used by the ward-manager engine).
+// Scores all 4 NG229 features: baseline, variability, decelerations, contractions.
 export function classifyCTGEntry(entry, prevBaselineHR = null) {
   const features = [];
 
@@ -49,6 +50,12 @@ export function classifyCTGEntry(entry, prevBaselineHR = null) {
   if (d === "none" || d === "early" || d === "variable") features.push("white");
   else if (d === "variable-concerning") features.push(dMin >= 30 ? "red" : "amber");
   else if (d === "late" || d === "prolonged") features.push("red");
+  else features.push("white");
+
+  // Contractions (NG229 1.4.12): 5 or more in 10 minutes, or hypertonus, is amber.
+  // An unrecorded count scores white here; the CTG sheet asks for it.
+  const cx = entry.contractionsPerTen;
+  if ((typeof cx === "number" && cx >= 5) || entry.hypertonus) features.push("amber");
   else features.push("white");
 
   return combineFeatureGrades(features);

@@ -8,7 +8,7 @@ import {
 import { IconBack, IconTick } from "../ui/icons";
 import { fmtAge, clock } from "../utils/time";
 import {
-  ANALGESIA, LIQUOR_SHORT, PERSISTENT_FLAGS, STAGES, STAGE_SHORT, currentOxytocin, newId, obsStatus, parityShort, sortedVEs, stageLabel, stationLabel,
+  ANALGESIA, LIQUOR_SHORT, PERSISTENT_FLAGS, STAGES, STAGE_SHORT, currentOxytocin, newId, obsStatus, parityShort, sortedVEs, stageLabel, stampObs, stationLabel,
 } from "../utils/bedModel";
 
 // Labels for the "recorded as done" list, so a mistaken Given or Done can be taken back.
@@ -63,7 +63,7 @@ function ObsPanel({ bed, now, onUpdate }) {
               <p className={TYPE_META}>{it.at ? `${clock(it.at)} (${fmtAge(now - it.at)} ago)` : "Not recorded"}</p>
             </div>
             <SmallBtn onClick={() => { setOpen(open === it.key ? null : it.key); setV1(""); setV2(""); }}>Value</SmallBtn>
-            <SmallBtn onClick={() => onUpdate({ observations: { ...obs, [it.key]: new Date().toISOString() } }, `${it.label} done`)}>Done</SmallBtn>
+            <SmallBtn onClick={() => onUpdate(stampObs(bed, new Date().toISOString(), [it.key]), `${it.label} done`)}>Done</SmallBtn>
           </div>
           {open === it.key && (
             <div className="flex gap-2 mt-2">
@@ -258,13 +258,13 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
               <Label hint="NG235 §1.5.6">Oxytocin</Label>
               <div className={`${CARD} px-3 py-2.5 flex items-center gap-3`}>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{oxy ? `${oxy.dose} mU/min` : "Not running"}</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{oxy ? `${oxy.dose} mU/min${bed.oxytocinHeld ? ", held" : ""}` : "Not running"}</p>
                   {oxy && <p className={TYPE_META}>Last change {clock(oxy.lastIncrementTime ?? oxy.startTime)} ({fmtAge(now - new Date(oxy.lastIncrementTime ?? oxy.startTime).getTime())} ago)</p>}
                 </div>
-                <SmallBtn onClick={onOpenOxy}>{oxy ? "Change dose" : "Start"}</SmallBtn>
+                <SmallBtn onClick={onOpenOxy}>{oxy ? "Change" : "Start"}</SmallBtn>
               </div>
               {(bed.oxytocinLog ?? []).length > 1 && (
-                <p className={`${TYPE_META} mt-1.5`}>History: {(bed.oxytocinLog ?? []).map(o => `${o.dose} at ${clock(o.lastIncrementTime ?? o.startTime)}`).join(", ")}</p>
+                <p className={`${TYPE_META} mt-1.5`}>History: {(bed.oxytocinLog ?? []).map(o => `${o.stopped ? "stopped" : o.dose} at ${clock(o.lastIncrementTime ?? o.startTime)}`).join(", ")}</p>
               )}
             </div>
           </>

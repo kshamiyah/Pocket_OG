@@ -164,9 +164,14 @@ describe("Slow progress — threshold 0.5 cm/hr", () => {
 // ─── Hyperstimulation (NICE NG235 §1.5.7) ────────────────────────────────────
 
 describe("Uterine hyperstimulation", () => {
-  it("no alert at 5 contractions/10min", () => {
-    const bed = activeBed({ ves: [{ time: t(1 * HOUR), dilation: 5, contractions: 5 }] })
+  it("no alert at 4 contractions/10min", () => {
+    const bed = activeBed({ ves: [{ time: t(1 * HOUR), dilation: 5, contractions: 4 }] })
     expect(hasNot(computeAlerts(bed, NOW), "hyperstim")).toBe(true)
+  })
+
+  it("fires at 5 contractions/10min (NG229 1.4.14: 5 or more)", () => {
+    const bed = activeBed({ ves: [{ time: t(1 * HOUR), dilation: 5, contractions: 5 }] })
+    expect(has(computeAlerts(bed, NOW), "hyperstim")).toBe(true)
   })
 
   it("fires urgent at 6 contractions/10min", () => {
@@ -200,14 +205,14 @@ describe("Oxytocin", () => {
   })
 })
 
-// ─── Second stage — passive limits (NICE NG235 §1.6.3) ───────────────────────
+// ─── Second stage — passive limits (NICE NG235 1.6.34 with epidural, 1.9.8 without) ─
 
 describe("Passive second stage limits", () => {
-  const passiveBed = (parity, minutesIn) => ({
+  const passiveBed = (parity, minutesIn, analgesia = "Epidural") => ({
     parity,
     gestation:   "39+2",
     labourStage: "Passive second stage",
-    analgesia:   "None",
+    analgesia,
     riskFlags:   [],
     ves:         [{ time: t(1 * HOUR), dilation: 10 }],
     oxytocinLog: [],
@@ -215,7 +220,11 @@ describe("Passive second stage limits", () => {
     passiveStartTime: t(minutesIn * MIN),
   })
 
-  // Nulliparous: 2h limit
+  it("no epidural: further assessment after 1 h, whatever the parity (1.9.8)", () => {
+    expect(has(computeAlerts(passiveBed("Para 0", 60, "None"), NOW), "passive-limit")).toBe(true)
+  })
+
+  // Nulliparous with epidural: up to 2h delay
   it("nullip — no alert at 1h 59m", () => {
     expect(hasNot(computeAlerts(passiveBed("Para 0", 119), NOW), "passive-limit")).toBe(true)
   })
@@ -324,8 +333,11 @@ describe("Preterm — tocolysis (NG25 1.8.1–1.8.4: intact membranes, under 34+
   it("no alert at 34+0 (beyond window)", () => {
     expect(hasNot(computeAlerts(pretermBed("34+0"), NOW), "preterm-tocolysis")).toBe(true)
   })
-  it("no alert below 28 weeks (too early for tocolysis benefit)", () => {
-    expect(hasNot(computeAlerts(pretermBed("27+6"), NOW), "preterm-tocolysis")).toBe(true)
+  it("still offered under 28 weeks (NG25 1.8.4: 26+0 to 33+6)", () => {
+    expect(has(computeAlerts(pretermBed("27+6", { labourStage: "Latent" }), NOW), "preterm-tocolysis")).toBe(true)
+  })
+  it("no alert below 24 weeks", () => {
+    expect(hasNot(computeAlerts(pretermBed("23+5", { labourStage: "Latent" }), NOW), "preterm-tocolysis")).toBe(true)
   })
   it("fires in suspected preterm labour (latent phase)", () => {
     expect(has(computeAlerts(pretermBed("30+0", { labourStage: "Latent" }), NOW), "preterm-tocolysis")).toBe(true)
@@ -414,7 +426,7 @@ describe("GBS+ antibiotic prophylaxis", () => {
     expect(hasNot(computeAlerts(bed, NOW), "gbs-iap")).toBe(true)
   })
 
-  it("no gbs-iap when prom-18h already firing (avoids duplicate antibiotics prompt)", () => {
+  it("gbs-iap still fires alongside prom-18h (the antibiotics prompt is never hidden)", () => {
     const bed = gbsBed({
       ves: [{
         time: t(18 * HOUR),
@@ -423,7 +435,7 @@ describe("GBS+ antibiotic prophylaxis", () => {
         membranesTime: t(18 * HOUR),
       }],
     })
-    expect(hasNot(computeAlerts(bed, NOW), "gbs-iap")).toBe(true)
+    expect(has(computeAlerts(bed, NOW), "gbs-iap")).toBe(true)
     expect(has(computeAlerts(bed, NOW), "prom-18h")).toBe(true)
   })
 })
@@ -726,23 +738,20 @@ describe("classifyCTGEntry — decelerations", () => {
   it("prolonged deceleration — RED → pathological", () => expect(entry("prolonged", 0)).toBe("pathological"))
 })
 
-// Contractions (tachysystole) are no longer part of CTG feature scoring per NICE NG229 §1.4
-// — they trigger a separate hyperstimulation alert instead.
-describe("classifyCTGEntry — contractions do NOT influence classification", () => {
-  const entry = (contractionsPerTen) =>
+// Contractions are the 4th CTG feature (NICE NG229 1.4.12, 1.4.32):
+// 5 or more in 10 minutes, or hypertonus, scores amber.
+describe("classifyCTGEntry: contractions (NG229 1.4.12)", () => {
+  const entry = (contractionsPerTen, extra = {}) =>
     classifyCTGEntry({ baselineHR: 140, variability: "5-25", variabilityMinutes: 0,
                        decelerations: "none", decelerationMinutes: 0,
-                       accelerations: true, contractionsPerTen })
+                       accelerations: true, contractionsPerTen, ...extra })
 
-  it("4 contractions/10 min — normal (unchanged)", () => expect(entry(4)).toBe("normal"))
-  it("5 contractions/10 min — still normal (not amber; handled by hyperstim alert)", () => expect(entry(5)).toBe("normal"))
-  it("6 contractions/10 min alone — still normal", () => expect(entry(6)).toBe("normal"))
-  it("6 contractions + reduced variability → suspicious (amber from variability, not ctx)", () =>
-    expect(classifyCTGEntry({
-      baselineHR: 140, variability: "<5", variabilityMinutes: 35,
-      decelerations: "none", decelerationMinutes: 0,
-      accelerations: true, contractionsPerTen: 6,
-    })).toBe("suspicious"))
+  it("4 in 10 min: normal", () => expect(entry(4)).toBe("normal"))
+  it("not recorded: scored white", () => expect(entry(null)).toBe("normal"))
+  it("5 in 10 min: amber, so suspicious", () => expect(entry(5)).toBe("suspicious"))
+  it("hypertonus: amber, so suspicious", () => expect(entry(3, { hypertonus: true })).toBe("suspicious"))
+  it("6 in 10 min plus reduced variability: 2 ambers, so pathological", () =>
+    expect(entry(6, { variability: "<5", variabilityMinutes: 35 })).toBe("pathological"))
 })
 
 describe("classifyCTGEntry — overall formula", () => {

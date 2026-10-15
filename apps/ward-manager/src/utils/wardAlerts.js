@@ -35,8 +35,9 @@ function parseGestWeeks(str) {
 }
 
 export function computeAlerts(bed, now = Date.now()) {
-  // P1-1: Delivered patients generate no intrapartum alerts
-  if (bed.delivery) return [];
+  // After birth only maternal safety rules run (observations, sepsis, PPH);
+  // labour, CTG and preterm rules stop.
+  const delivered = !!bed.delivery;
 
   const alerts = [];
 
@@ -49,7 +50,8 @@ export function computeAlerts(bed, now = Date.now()) {
   const ctgLog = bed.ctgLog ?? [];
   const lastCTG = ctgLog.length > 0 ? ctgLog[ctgLog.length - 1] : null;
 
-  const hasRegionalAnalgesia = bed.analgesia === "Epidural" || bed.analgesia === "Remifentanil PCA";
+  // Remifentanil PCA is not regional analgesia.
+  const hasRegionalAnalgesia = bed.analgesia === "Epidural";
   const isNullip = bed.parity === "Para 0";
   const flags = bed.riskFlags ?? [];
   const isDiabetic = flags.some(f => f.startsWith("Diabetic"));
@@ -70,17 +72,32 @@ export function computeAlerts(bed, now = Date.now()) {
   const isPreterm = gestWks !== null && gestWks < 37;
   const gest = bed.gestation ?? "";
 
-  // P1-2: Alerts not supported below 28 weeks — clinical logic is different
-  if (gestWks !== null && gestWks < 28) return [];
+  // Under 28+0 the labour-progress and CTG rules are not validated, so they are
+  // switched off and a visible note says so. Preterm, antibiotic and maternal
+  // safety rules still run.
+  const under28 = gestWks !== null && gestWks < 28;
+  const labourRules = !delivered && !under28;
+  if (under28 && !delivered) {
+    alerts.push({
+      id: "under-28",
+      severity: "info",
+      title: `Under 28+0 (${gest}): labour progress and CTG rules are not applied`,
+      body: "Individualised care with senior and neonatal input. Preterm, antibiotic and maternal observation alerts still run.",
+      citation: "Local (app scope)",
+    });
+  }
+
+  // Oxytocin is running unless the last entry stopped it (dose 0).
+  const oxyRunning = !!currentOx && !currentOx.stopped && currentOx.dose > 0;
 
   // ─── Preterm — neonatal team (< 34 weeks) ───────────────────────────
-  if (isPreterm && gestWks < 34 && !bed.neonatalTeamAlerted) {
+  if (!delivered && isPreterm && gestWks < 34 && !bed.neonatalTeamAlerted) {
     alerts.push({
       id: "preterm-neonatal",
       severity: "urgent",
       title: `Preterm ${gest} — alert neonatal team`,
       body: "Ensure NICU/neonatologist notified. Confirm delivery in appropriate setting with resuscitation team present.",
-      citation: "NICE NG25 §1.1.4 [2022]",
+      citation: "Local practice",
     });
   }
 
@@ -88,7 +105,15 @@ export function computeAlerts(bed, now = Date.now()) {
   // Offer 24+0 to 29+6; consider 30+0 to 33+6 in established preterm labour.
   const inEstablishedLabour = bed.labourStage === "Active first stage"
     || bed.labourStage === "Passive second stage" || bed.labourStage === "Active second stage";
-  if (isPreterm && gestWks < 30 && !bed.mgso4Given) {
+  if (!delivered && isPreterm && gestWks >= 23 && gestWks < 24 && !bed.mgso4Given) {
+    alerts.push({
+      id: "preterm-mgso4",
+      severity: "warning",
+      title: `MgSO4 neuroprotection: discuss (${gest})`,
+      body: "Discuss IV magnesium sulfate for neuroprotection in established preterm labour or planned birth within 24 h (23+0 to 23+6), in the context of her individual circumstances.",
+      citation: "NICE NG25 1.10.1 [2019]",
+    });
+  } else if (!delivered && isPreterm && gestWks >= 24 && gestWks < 30 && !bed.mgso4Given) {
     alerts.push({
       id: "preterm-mgso4",
       severity: "urgent",
@@ -96,7 +121,7 @@ export function computeAlerts(bed, now = Date.now()) {
       body: "Offer IV magnesium sulfate for neuroprotection in established preterm labour or planned birth within 24 h (24+0 to 29+6). Regimen per NG25 1.10.4.",
       citation: "NICE NG25 1.10.2 [2015]",
     });
-  } else if (isPreterm && gestWks < 34 && inEstablishedLabour && !bed.mgso4Given) {
+  } else if (!delivered && isPreterm && gestWks >= 30 && gestWks < 34 && inEstablishedLabour && !bed.mgso4Given) {
     alerts.push({
       id: "preterm-mgso4",
       severity: "warning",
@@ -108,7 +133,15 @@ export function computeAlerts(bed, now = Date.now()) {
 
   // ─── Preterm — antenatal corticosteroids (NICE NG25 1.9.2–1.9.3) ─────
   // Offer 24+0 to 33+6; consider 34+0 to 35+6.
-  if (isPreterm && gestWks < 34 && !bed.corticosteroidsConfirmed) {
+  if (!delivered && isPreterm && gestWks >= 22 && gestWks < 24 && !bed.corticosteroidsConfirmed) {
+    alerts.push({
+      id: "preterm-steroids",
+      severity: "warning",
+      title: `Antenatal corticosteroids: discuss (${gest})`,
+      body: "Discuss maternal corticosteroids with the woman and the multidisciplinary team in the context of her individual circumstances (22+0 to 23+6).",
+      citation: "NICE NG25 1.9.1 [2015, amended 2022]",
+    });
+  } else if (!delivered && isPreterm && gestWks >= 24 && gestWks < 34 && !bed.corticosteroidsConfirmed) {
     alerts.push({
       id: "preterm-steroids",
       severity: "urgent",
@@ -116,7 +149,7 @@ export function computeAlerts(bed, now = Date.now()) {
       body: "Offer maternal corticosteroids in suspected, diagnosed or established preterm labour or P-PROM (24+0 to 33+6). Document if already given or not indicated.",
       citation: "NICE NG25 1.9.2 [2015, amended 2019]",
     });
-  } else if (isPreterm && gestWks < 36 && !bed.corticosteroidsConfirmed) {
+  } else if (!delivered && isPreterm && gestWks >= 34 && gestWks < 36 && !bed.corticosteroidsConfirmed) {
     alerts.push({
       id: "preterm-steroids",
       severity: "warning",
@@ -130,7 +163,7 @@ export function computeAlerts(bed, now = Date.now()) {
   // Nifedipine is offered at 26+0 to 33+6 (considered at 24+0 to 25+6) with
   // intact membranes in suspected or diagnosed preterm labour.
   const membranesIntactNow = !membranesRuptured;
-  if (isPreterm && gestWks < 34 && membranesIntactNow && !bed.tocolysisOffered
+  if (!delivered && isPreterm && gestWks >= 24 && gestWks < 34 && membranesIntactNow && !bed.tocolysisOffered
       && (bed.labourStage === "Latent" || bed.labourStage === "Active first stage")) {
     alerts.push({
       id: "preterm-tocolysis",
@@ -141,6 +174,7 @@ export function computeAlerts(bed, now = Date.now()) {
     });
   }
 
+  if (labourRules) {
   // ─── Established first stage duration (NICE NG235 1.8.36) ──────────────
   // First labours last on average 8 h and are unlikely to last over 18 h;
   // second and subsequent labours average 5 h and are unlikely to last over 12 h.
@@ -159,7 +193,7 @@ export function computeAlerts(bed, now = Date.now()) {
     }
   }
 
-  // ─── ARM reassessment at 2h (NICE NG235 §1.5.3–1.5.4) ──────────────────
+  // ─── ARM reassessment at 2h (NICE NG235 1.8.48–1.8.50) ─────────────────
   // Checks both VE absence AND inadequate contractions post-ARM
   if (bed.armTime && bed.labourStage === "Active first stage") {
     const ms = now - new Date(bed.armTime).getTime();
@@ -170,8 +204,8 @@ export function computeAlerts(bed, now = Date.now()) {
           id: "arm-reassess",
           severity: "warning",
           title: `Reassess 2h after ARM (${formatAge(ms)} ago)`,
-          body: "No VE recorded since ARM. If contractions still inadequate at 2h post-ARM, offer oxytocin augmentation.",
-          citation: "NICE NG235 §1.5.3–1.5.4 [2023]",
+          body: "Repeat vaginal examination 2 hours after amniotomy. If there is no progress, diagnose delay and transfer to obstetric-led care for review and consideration of oxytocin.",
+          citation: "NICE NG235 1.8.48, 1.8.49 [2023]",
         });
       } else {
         const lastPostARM = vesAfterARM[vesAfterARM.length - 1];
@@ -180,8 +214,8 @@ export function computeAlerts(bed, now = Date.now()) {
             id: "arm-cx-inadequate",
             severity: "warning",
             title: `ARM ${formatAge(ms)} ago — contractions still inadequate (${lastPostARM.contractions}/10 min)`,
-            body: `Post-ARM VE shows < 3 contractions/10 min. Consider offering oxytocin augmentation to establish effective labour.`,
-            citation: "NICE NG235 §1.5.3–1.5.4 [2023]",
+            body: `Post-ARM VE shows fewer than 3 contractions in 10 min (local threshold). Obstetric review should include consideration of oxytocin.`,
+            citation: "NICE NG235 1.8.50 [2023] · under 3 in 10 local",
           });
         }
       }
@@ -195,8 +229,8 @@ export function computeAlerts(bed, now = Date.now()) {
         id: "ve-never",
         severity: "urgent",
         title: "No VE recorded",
-        body: "Offer vaginal examination on admission to active labour.",
-        citation: "NICE NG235 §1.4.1 [2023]",
+        body: "No vaginal examination recorded in the established first stage. Offer 4-hourly VE.",
+        citation: "NICE NG235 1.8.19 [2007]",
       });
     } else {
       const ms = now - new Date(lastVE.time).getTime();
@@ -205,16 +239,16 @@ export function computeAlerts(bed, now = Date.now()) {
           id: "ve-overdue",
           severity: "urgent",
           title: `VE overdue (${formatAge(ms)} ago)`,
-          body: "Offer 4-hourly vaginal examination in active first stage of labour.",
-          citation: "NICE NG235 §1.4.1 [2023]",
+          body: "Offer 4-hourly vaginal examination in the established first stage of labour.",
+          citation: "NICE NG235 1.8.19 [2007]",
         });
       } else if (ms >= 3.5 * HOUR) {
         alerts.push({
           id: "ve-due-soon",
           severity: "warning",
           title: "VE due in 30 min",
-          body: "Approaching 4-hour vaginal examination interval.",
-          citation: "NICE NG235 §1.4.1 [2023]",
+          body: "Approaching the 4-hour vaginal examination interval.",
+          citation: "NICE NG235 1.8.19 · 30 min warning local",
         });
       }
     }
@@ -235,8 +269,8 @@ export function computeAlerts(bed, now = Date.now()) {
           id: "latent-reassess",
           severity: "warning",
           title: "Latent phase — reassess now",
-          body: `${formatAge(ms)} ${sinceLabel}. Offer reassessment to confirm or exclude active labour.`,
-          citation: "NICE NG235 §1.3.3 [2023]",
+          body: `${formatAge(ms)} ${sinceLabel}. Offer reassessment to confirm or exclude established labour (regular contractions and progressive dilatation from 4 cm).`,
+          citation: "Local interval (verify) · NG235 1.8.1",
         });
       }
     }
@@ -290,60 +324,83 @@ export function computeAlerts(bed, now = Date.now()) {
       ? { count: lastVE.contractions, from: "VE" }
       : { count: lastCTG.contractionsPerTen, from: "CTG" };
   })();
-  if (latestCxSource && latestCxSource.count > 5) {
+  const tooManyContractions = !!latestCxSource && latestCxSource.count >= 5;
+  if (tooManyContractions) {
     alerts.push({
       id: "hyperstim",
       severity: "urgent",
-      title: "Uterine hyperstimulation",
-      body: `${latestCxSource.count} contractions/10 min recorded (${latestCxSource.from}). Stop or reduce oxytocin. Consider terbutaline 250 mcg SC if hyperstimulation persists.`,
-      citation: "NICE NG235 §1.5.7 [2023]",
+      title: `${latestCxSource.count} contractions in 10 min${oxyRunning ? ": reduce or stop oxytocin" : ""}`,
+      body: oxyRunning
+        ? `Recorded on the ${latestCxSource.from}. Reduce or stop the oxytocin until she is having 4 or fewer contractions in 10 minutes. Full risk assessment and measures to reduce contraction frequency.`
+        : `Recorded on the ${latestCxSource.from}. 5 or more in 10 minutes: full risk assessment and measures to reduce contraction frequency.`,
+      citation: oxyRunning ? "NICE NG235 1.8.55 [2023] · NG229 1.4.14 [2022]" : "NICE NG229 1.4.14 [2022]",
     });
   }
 
-  // ─── Oxytocin increment due ──────────────────────────────────────────
-  if (currentOx) {
+  // ─── Oxytocin (NICE NG235 1.8.54–1.8.56) ─────────────────────────────
+  const ctgAbnormal = lastCTG && (lastCTG.classification === "suspicious" || lastCTG.classification === "pathological");
+  const inSecondStage = bed.labourStage === "Passive second stage" || bed.labourStage === "Active second stage";
+  if (oxyRunning && lastCTG?.classification === "pathological") {
+    alerts.push({
+      id: "oxytocin-stop-pathological",
+      severity: "urgent",
+      title: "Pathological CTG: stop oxytocin",
+      body: "Oxytocin must be discontinued immediately if the CTG is pathological, and urgent obstetrician or senior midwife review sought. Record the stop in the oxytocin log.",
+      citation: "NICE NG235 1.8.56 [2023]",
+    });
+  }
+  if (oxyRunning) {
     if (currentOx.dose >= 20) {
       alerts.push({
         id: "oxytocin-max",
         severity: "urgent",
         title: "Oxytocin at maximum dose",
-        body: `Current dose ${currentOx.dose} mU/min — at or above maximum (20 mU/min). Escalate to registrar / consultant.`,
-        citation: "NICE NG235 §1.5.6 [2023]",
+        body: `Current dose ${currentOx.dose} mU/min, at or above the 20 mU/min maximum used locally. Escalate to registrar or consultant.`,
+        citation: "Local protocol (verify)",
       });
     } else {
       const msSinceIncrement = now - new Date(currentOx.lastIncrementTime).getTime();
-      if (msSinceIncrement >= 30 * MIN) {
+      // No "increase" prompt while the dose is held, contractions are 5 or more,
+      // the CTG is abnormal, or she is in the second stage (1.8.54 is first stage).
+      const incrementSafe = !bed.oxytocinHeld && !tooManyContractions && !ctgAbnormal && !inSecondStage;
+      if (incrementSafe && msSinceIncrement >= 30 * MIN) {
         alerts.push({
           id: "oxytocin-increment",
           severity: "warning",
           title: `Oxytocin increment due (${formatAge(msSinceIncrement)} ago)`,
-          body: `Increase by 1–2 mU/min if contractions < 4/10 min. Current dose ${currentOx.dose} mU/min. Increment every 30 min minimum. Target 3–4 contractions/10 min, each 40–60 sec.`,
-          citation: "NICE NG235 §1.5.6 [2023]",
+          body: `Time between increments no more frequent than every 30 minutes; increase until 3 to 4 contractions in 10 minutes. Current dose ${currentOx.dose} mU/min.`,
+          citation: "NICE NG235 1.8.54 [2023]",
         });
       }
     }
   }
 
   // ─── Second stage — passive limit ────────────────────────────────────
+  // With regional analgesia pushing may be delayed 1 h (parous) or up to 2 h
+  // (nulliparous), then actively encouraged (NG235 1.6.34). Without an epidural,
+  // offer further assessment after 1 h if there is no urge to push (NG235 1.9.8).
   if (bed.labourStage === "Passive second stage" && bed.passiveStartTime) {
-    const limit = isNullip ? 2 * HOUR : 1 * HOUR;
+    const limit = hasRegionalAnalgesia && isNullip ? 2 * HOUR : 1 * HOUR;
     const ms = now - new Date(bed.passiveStartTime).getTime();
-    const limitLabel = isNullip ? "2 hours" : "1 hour";
+    const limitLabel = limit === 2 * HOUR ? "2 hours" : "1 hour";
+    const passiveCite = hasRegionalAnalgesia ? "NICE NG235 1.6.34 [2023]" : "NICE NG235 1.9.8 [2007]";
     if (ms >= limit) {
       alerts.push({
         id: "passive-limit",
         severity: "urgent",
         title: `Passive second stage limit reached (${formatAge(ms)})`,
-        body: `${limitLabel} passive second stage for ${isNullip ? "nulliparous" : "multiparous"} woman. Encourage active pushing if no urge, or reassess for descent.`,
-        citation: "NICE NG235 §1.6.3 [2023]",
+        body: hasRegionalAnalgesia
+          ? `${limitLabel} since full dilatation with an epidural (${isNullip ? "nulliparous" : "parous"}). Actively encourage her to push during contractions.`
+          : `1 hour since full dilatation without an urge to push. Offer further assessment.`,
+        citation: passiveCite,
       });
     } else if (ms >= limit - 15 * MIN) {
       alerts.push({
         id: "passive-limit-soon",
         severity: "warning",
         title: `Passive second stage limit approaching`,
-        body: `${formatAge(limit - ms)} until ${limitLabel} limit. Prepare to encourage pushing.`,
-        citation: "NICE NG235 §1.6.3 [2023]",
+        body: `${formatAge(limit - ms)} until the ${limitLabel} point.`,
+        citation: passiveCite,
       });
     }
   }
@@ -351,94 +408,116 @@ export function computeAlerts(bed, now = Date.now()) {
   // ─── PROM duration alerts ────────────────────────────────────────────
   if (membranesTime) {
     const ms = now - new Date(membranesTime).getTime();
-    if (ms >= 24 * HOUR && bed.labourStage === "Latent") {
+    // GL787 (term PROM): prophylaxis indicated if GBS positive, ROM 48 h or
+    // more, or maternal pyrexia over 38°C. GBS+ is covered by gbs-iap below.
+    if (ms >= 48 * HOUR && !isGBSPos && !bed.gbsAntibioticsStarted) {
+      alerts.push({
+        id: "prom-48h",
+        severity: "urgent",
+        title: `Membranes ruptured ${formatAge(ms)}: antibiotic prophylaxis indicated`,
+        body: "ROM 48 hours or more: intrapartum antibiotic prophylaxis is indicated (GL787). Regimen: IV benzylpenicillin 3 g stat, then 1.5 g 4-hourly until delivered; penicillin allergy: IV teicoplanin 10 mg/kg stat, then 12-hourly.",
+        citation: "GL787 (local)",
+      });
+    }
+    if (ms >= 24 * HOUR && bed.labourStage === "Latent" && gestWks !== null && gestWks >= 37) {
       alerts.push({
         id: "prom-24h",
         severity: "urgent",
         title: "PROM > 24 hours — offer induction",
         body: `Prelabour rupture of membranes for > 24h without established labour. Offer induction of labour.${isGBSPos ? " GBS+ — offer immediate induction with IV benzylpenicillin." : isGBSPending ? " GBS result pending — check and commence antibiotics if positive." : ""}`,
-        citation: "NICE NG235 §1.2.11 [2023]",
+        citation: isGBSPos ? "NICE NG235 1.7.7 [2023] · GL787" : "NICE NG235 1.7.7 [2023]",
       });
     } else if (ms >= 18 * HOUR) {
       alerts.push({
         id: "prom-18h",
         severity: "urgent",
         title: `Membranes ruptured > 18 hours (${formatAge(ms)})`,
-        body: `Increased GBS risk. ${isGBSPending ? "GBS result pending — obtain result urgently and " : "Review GBS status. "}Offer IV benzylpenicillin 3g stat then 1.5g every 4h until delivery if GBS+ or risk factors present.`,
-        citation: "NICE NG235 §1.2.9 [2023] · GL787",
+        body: `${isGBSPending ? "GBS result pending: obtain it urgently. " : "Review GBS status. "}Antibiotics if GBS positive, ROM 48 hours or more, or pyrexia over 38°C (GL787); in preterm labour (NG195 1.6.1).`,
+        citation: "18 h is a local threshold (verify): not in NG195 or GL787",
       });
     } else if (ms >= 16 * HOUR) {
       alerts.push({
         id: "prom-16h",
         severity: "warning",
         title: `Membranes ruptured ${formatAge(ms)} — approaching 18h`,
-        body: `Review GBS status${isGBSPending ? " (result pending — check now)" : ""}. Prepare for intrapartum antibiotic prophylaxis if GBS+ or risk factors.`,
-        citation: "NICE NG235 §1.2.9 [2023] · GL787",
+        body: `Review GBS status${isGBSPending ? " (result pending: check now)" : ""} and signs of infection.`,
+        citation: "Local threshold (verify)",
       });
     }
   }
 
+  } // end labourRules (progress, oxytocin, second stage, PROM)
+
   // ─── GBS+ — antibiotics required ────────────────────────────────────
-  // Start as soon as labour is confirmed or membranes rupture (RCOG GTG36).
-  // An induction still in the latent phase with intact membranes is not yet labour.
+  // NICE NG195 1.6.1: offer antibiotics during labour for GBS this pregnancy
+  // or preterm labour; 1.6.4: first dose as soon as possible after labour starts.
+  // An induction still latent with intact membranes is not yet labour.
   const inLabour = inEstablishedLabour || (bed.labourStage === "Latent" && bed.modeOfOnset !== "Induced");
-  if (isGBSPos && (membranesRuptured || inLabour) && !bed.gbsAntibioticsStarted && !alerts.find(a => a.id === "prom-18h" || a.id === "prom-24h")) {
+  if (!delivered && isGBSPos && (membranesRuptured || inLabour) && !bed.gbsAntibioticsStarted) {
     alerts.push({
       id: "gbs-iap",
       severity: "urgent",
       title: "GBS+ — IV antibiotic prophylaxis required",
-      body: "Start intrapartum antibiotic prophylaxis from onset of labour or rupture of membranes. Regimen per GL787: IV benzylpenicillin 3 g stat, then 1.5 g 4-hourly until birth; penicillin allergy: IV teicoplanin 10 mg/kg stat, then 10 mg/kg 12-hourly.",
-      citation: "GL787 · RCOG GTG36",
+      body: "Give the first dose as soon as possible after labour starts (or membranes rupture) and continue until birth. Regimen per GL787: IV benzylpenicillin 3 g stat, then 1.5 g 4-hourly; penicillin allergy: IV teicoplanin 10 mg/kg stat, then 10 mg/kg 12-hourly.",
+      citation: "NICE NG195 1.6.1, 1.6.4 [2021] · GL787",
+    });
+  } else if (!delivered && isPreterm && !isGBSPos && inLabour && !bed.gbsAntibioticsStarted) {
+    alerts.push({
+      id: "iap-preterm",
+      severity: "urgent",
+      title: `Preterm labour (${gest}): offer intrapartum antibiotics`,
+      body: "Offer antibiotics during labour to women in preterm labour, first dose as soon as possible after labour starts. Choice of antibiotic per NG195 table 1 and local policy.",
+      citation: "NICE NG195 1.6.1, 1.6.4 [2021]",
     });
   }
 
   // ─── GBS pending — remind to check result after rupture ─────────────
-  if (isGBSPending && membranesRuptured && !isGBSPos && !alerts.find(a => a.id.startsWith("prom-"))) {
+  if (!delivered && isGBSPending && membranesRuptured && !isGBSPos && !alerts.find(a => a.id.startsWith("prom-"))) {
     alerts.push({
       id: "gbs-pending-rupture",
       severity: "warning",
       title: "GBS result pending — membranes ruptured",
       body: "Obtain GBS result urgently. If positive, commence IV benzylpenicillin 3g stat then 1.5g every 4h until delivery.",
-      citation: "GL787 · NICE NG235 §1.2.12 [2023]",
+      citation: "GL787 (local)",
     });
   }
 
-  // ─── Liquor / meconium (NICE NG235 §1.7) ────────────────────────────────
-  if (lastLiquor === "Thick meconium") {
+  // ─── Liquor / meconium (NICE NG235 1.8.20, 1.8.33) ───────────────────────
+  if (labourRules && lastLiquor === "Thick meconium") {
     alerts.push({
       id: "mec-thick",
       severity: "urgent",
       title: "Significant meconium — continuous CTG, notify neonatology",
-      body: "Thick/dark green meconium-stained liquor. Continuous CTG is mandatory. Inform neonatology now. Expedite delivery if fetal compromise evident.",
-      citation: "NICE NG235 §1.7.1 [2023]",
+      body: "Consider the character of the meconium. Offer continuous CTG and obstetric-led care; staff trained in advanced neonatal life support may be needed at birth.",
+      citation: "NICE NG235 1.8.33 [2023] · NG229 1.3.8",
     });
-  } else if (lastLiquor === "Thin meconium") {
+  } else if (labourRules && lastLiquor === "Thin meconium") {
     alerts.push({
       id: "mec-thin",
       severity: "warning",
-      title: "Thin meconium — continuous CTG recommended",
-      body: "Light meconium staining noted. Continuous CTG is recommended. Escalate if CTG becomes suspicious or pathological.",
-      citation: "NICE NG235 §1.7.1 [2023]",
+      title: "Thin meconium — discuss continuous CTG",
+      body: "Meconium present: full risk assessment, and offer continuous CTG; the monitoring method is her choice (NG229 1.3.11).",
+      citation: "NICE NG235 1.8.33 [2023] · NG229 1.3.8",
     });
   }
 
-  if (lastLiquor === "Blood-stained") {
+  if (labourRules && lastLiquor === "Blood-stained") {
     alerts.push({
       id: "liquor-blood",
       severity: "warning",
       title: "Blood-stained liquor — assess for abruption / vasa praevia",
       body: "Blood-stained amniotic fluid may indicate placental abruption or vasa praevia. Review fetal heart rate and escalate to senior if concerned.",
-      citation: "NICE NG235 §1.7.2 [2023]",
+      citation: "NICE NG235 1.8.20 [2023]",
     });
   }
 
-  if (lastLiquor === "Absent") {
+  if (labourRules && lastLiquor === "Absent") {
     alerts.push({
       id: "liquor-absent",
       severity: "warning",
       title: "No liquor draining post-rupture — assess for oligohydramnios",
       body: "Absent liquor after membrane rupture may indicate oligohydramnios and cord compression risk. Consider CTG and senior review.",
-      citation: "NICE NG235 §1.7.3 [2023]",
+      citation: "Local practice",
     });
   }
 
@@ -454,16 +533,16 @@ export function computeAlerts(bed, now = Date.now()) {
       id: "temp-38",
       severity: "urgent",
       title: `Pyrexia ${temp}°C — probable intrauterine infection`,
-      body: "Temperature ≥ 38.0°C in labour. Escalate to obstetric consultant immediately. Commence broad-spectrum IV antibiotics per local protocol. Consider expediting delivery.",
-      citation: "NICE NG235 §1.4.6 [2023]",
+      body: "38°C or above is a transfer trigger and an indication for continuous CTG. If chorioamnionitis is suspected, offer IV antibiotics as soon as infection is suspected. Senior review; consider sepsis.",
+      citation: "NICE NG235 1.8.20 · NG229 1.3.8 · NG195 1.6.1, 1.6.4",
     });
   } else if (temp !== null && temp >= 37.5) {
     alerts.push({
       id: "temp-375",
       severity: "warning",
       title: `Temperature ${temp}°C — possible infection`,
-      body: "Temperature 37.5–37.9°C in labour. Repeat in 1 hour. Review clinical picture for chorioamnionitis (fetal tachycardia, uterine tenderness, offensive liquor).",
-      citation: "NICE NG235 §1.4.6 [2023]",
+      body: "Repeat in 1 hour: 37.5°C or above on 2 readings 1 hour apart is a transfer trigger. Look for signs of chorioamnionitis.",
+      citation: "NICE NG235 1.8.20 [2023]",
     });
   }
 
@@ -472,8 +551,8 @@ export function computeAlerts(bed, now = Date.now()) {
       id: "tachycardia",
       severity: "urgent",
       title: `Maternal tachycardia — pulse ${pulse} bpm`,
-      body: "Pulse > 120 bpm. Assess for haemorrhage, sepsis, pulmonary embolism, or pain. Escalate to senior clinician.",
-      citation: "NICE NG235 §1.4.5 [2023]",
+      body: "Pulse over 120 bpm (NG235 1.8.20: over 120 on 2 occasions 15 to 30 minutes apart). Assess for haemorrhage, sepsis, pulmonary embolism, or pain. Escalate to senior clinician.",
+      citation: "NICE NG235 1.8.20 [2023]",
     });
   }
 
@@ -483,8 +562,8 @@ export function computeAlerts(bed, now = Date.now()) {
         id: "bp-severe",
         severity: "urgent",
         title: `Severe hypertension — BP ${bpSys}/${bpDia} mmHg`,
-        body: "BP ≥ 160/110 mmHg — urgent antihypertensive treatment required within 30–60 min. Give labetalol 200 mg oral or nifedipine MR 10 mg. Aim < 150/100. Involve obstetric consultant.",
-        citation: "NICE NG133 §1.5 [2023] · NICE NG235 §1.4.5",
+        body: "Severe hypertension (a single reading of 160/110 or more). Treat urgently per NG133 and local protocol; involve the obstetric consultant. Measure BP every 15 to 30 minutes until below 160/110.",
+        citation: "NICE NG235 1.8.20 [2023] · NG133 1.7.3",
       });
     } else if (bpSys >= 140 || bpDia >= 90) {
       alerts.push({
@@ -492,9 +571,9 @@ export function computeAlerts(bed, now = Date.now()) {
         severity: isHypertensive ? "urgent" : "warning",
         title: `Hypertension — BP ${bpSys}/${bpDia} mmHg`,
         body: isHypertensive
-          ? `BP ≥ 140/90 in known hypertensive patient. Review antihypertensive regime. Target < 135/85.`
-          : `New BP ≥ 140/90 in labour. Assess for pre-eclampsia (proteinuria, headache, visual disturbance). Repeat in 15–30 min.`,
-        citation: "NICE NG133 §1.4 [2023] · NICE NG235 §1.4.5",
+          ? `BP 140/90 or more in a woman with known hypertension. Hourly BP in labour; review treatment.`
+          : `New BP 140/90 or more in labour. Repeat in 15 to 30 minutes (2 consecutive raised readings is a transfer trigger); assess for pre-eclampsia.`,
+        citation: "NICE NG235 1.8.20 [2023] · NG133 1.7.3",
       });
     }
   }
@@ -505,29 +584,73 @@ export function computeAlerts(bed, now = Date.now()) {
         id: "bgl-low",
         severity: "urgent",
         title: `Hypoglycaemia — BGL ${bgl} mmol/L`,
-        body: "Blood glucose < 4.0 mmol/L. Give 150 mL of 10% glucose IV or sugary drink if tolerated. Recheck in 15 min. Adjust VRII.",
-        citation: "GL983 §Intrapartum [2023]",
+        body: "Below the 4 to 7 mmol/L target for labour. Treat hypoglycaemia per local protocol (GL983) and recheck.",
+        citation: "NICE NG3 1.4.10, 1.4.12 · GL983",
       });
     } else if (bgl > 7.0) {
       alerts.push({
         id: "bgl-high",
         severity: "urgent",
         title: `Hyperglycaemia — BGL ${bgl} mmol/L`,
-        body: `Blood glucose ${bgl} mmol/L — above VRII target range (4.0–7.0 mmol/L). Increase VRII rate. Recheck in 1 hour.`,
-        citation: "GL983 §Intrapartum [2023]",
+        body: `Above the 4 to 7 mmol/L target for labour. IV dextrose and insulin if not maintained (NG3 1.4.12); adjust per GL983. Recheck hourly.`,
+        citation: "NICE NG3 1.4.10, 1.4.12 · GL983",
       });
     }
   }
 
-  // ─── Maternal observations ───────────────────────────────────────────
-  if (bed.labourStage !== "Latent") {
+  // ─── Low BP / temperature: sepsis risk (NICE NG255 table 1) ──────────
+  // Thresholds are the NG255 risk criteria for people who are or have recently
+  // been pregnant with suspected sepsis. Low BP also prompts thinking about bleeding.
+  if (bpSys !== null && bpSys <= 90) {
+    alerts.push({
+      id: "bp-low",
+      severity: "urgent",
+      title: `Low BP — systolic ${bpSys} mmHg`,
+      body: "Systolic 90 mmHg or less is a high-risk criterion for severe illness or death from sepsis (NG255 table 1). Consider haemorrhage and sepsis; urgent senior review.",
+      citation: "NICE NG255 1.5.1–1.5.2, table 1",
+    });
+  } else if (bpSys !== null && bpSys <= 100) {
+    alerts.push({
+      id: "bp-low",
+      severity: "warning",
+      title: `Low-normal BP — systolic ${bpSys} mmHg`,
+      body: "Systolic 91 to 100 mmHg is a moderate to high risk criterion if sepsis is suspected (NG255 table 1). Review the whole picture.",
+      citation: "NICE NG255 1.5.1–1.5.2, table 1",
+    });
+  }
+  if (temp !== null && temp < 36) {
+    alerts.push({
+      id: "temp-low",
+      severity: "warning",
+      title: `Low temperature ${temp}°C`,
+      body: "Temperature below 36°C is a moderate to high risk criterion if sepsis is suspected (NG255 table 1).",
+      citation: "NICE NG255 1.5.1–1.5.2, table 1",
+    });
+  }
+
+  // ─── PPH after birth ─────────────────────────────────────────────────
+  if (delivered && bed.delivery.ebl != null && bed.delivery.ebl >= 500 && !bed.pphReviewed) {
+    const major = bed.delivery.ebl > 1000;
+    alerts.push({
+      id: "pph",
+      severity: major ? "urgent" : "warning",
+      title: `${major ? "Major" : "Minor"} PPH: EBL ${bed.delivery.ebl} mL`,
+      body: major
+        ? "Major PPH (more than 1000 mL). Follow the PPH protocol; repeat observations and reassess ongoing loss."
+        : "Minor PPH (500 to 1000 mL). Repeat observations and reassess ongoing loss.",
+      citation: "RCOG GTG52",
+    });
+  }
+
+  // ─── Maternal observations due (NICE NG235 1.8.19; NG133 1.7.3) ──────
+  if (!delivered && bed.labourStage !== "Latent") {
     if (obs.lastPulse) {
       const ms = now - new Date(obs.lastPulse).getTime();
       if (ms >= HOUR) {
-        alerts.push({ id: "pulse-due", severity: "info", title: "Maternal pulse check due", body: `Last recorded ${formatAge(ms)} ago. Hourly pulse in active labour.`, citation: "NICE NG235 §1.4.5 [2023]" });
+        alerts.push({ id: "pulse-due", severity: "info", title: "Maternal pulse check due", body: `Last recorded ${formatAge(ms)} ago. Hourly pulse in active labour.`, citation: "NICE NG235 1.8.19 [2007]" });
       }
     } else {
-      alerts.push({ id: "pulse-never", severity: "info", title: "Pulse not recorded", body: "Hourly maternal pulse required in active labour.", citation: "NICE NG235 §1.4.5 [2023]" });
+      alerts.push({ id: "pulse-never", severity: "info", title: "Pulse not recorded", body: "Hourly maternal pulse required in active labour.", citation: "NICE NG235 1.8.19 [2007]" });
     }
 
     if (obs.lastBP) {
@@ -539,20 +662,20 @@ export function computeAlerts(bed, now = Date.now()) {
           severity: isHypertensive ? "urgent" : "info",
           title: isHypertensive ? "BP check overdue (hypertensive patient)" : "BP check due",
           body: isHypertensive ? `Hourly BP required. Last ${formatAge(ms)} ago.` : `4-hourly BP in active labour. Last ${formatAge(ms)} ago.`,
-          citation: "NICE NG235 §1.4.5 [2023]",
+          citation: isHypertensive ? "NICE NG133 1.7.3 [2019]" : "NICE NG235 1.8.19 [2007]",
         });
       }
     } else {
-      alerts.push({ id: "bp-never", severity: isHypertensive ? "urgent" : "info", title: "BP not recorded", body: isHypertensive ? "Hourly BP required (hypertensive patient)." : "4-hourly BP required in active labour.", citation: "NICE NG235 §1.4.5 [2023]" });
+      alerts.push({ id: "bp-never", severity: isHypertensive ? "urgent" : "info", title: "BP not recorded", body: isHypertensive ? "Hourly BP required (hypertensive patient)." : "4-hourly BP required in active labour.", citation: "NICE NG235 1.8.19 [2007]" });
     }
 
     if (obs.lastTemp) {
       const ms = now - new Date(obs.lastTemp).getTime();
       if (ms >= 4 * HOUR) {
-        alerts.push({ id: "temp-due", severity: "info", title: "Temperature check due", body: `4-hourly temperature in active labour. Last ${formatAge(ms)} ago.`, citation: "NICE NG235 §1.4.5 [2023]" });
+        alerts.push({ id: "temp-due", severity: "info", title: "Temperature check due", body: `4-hourly temperature in active labour. Last ${formatAge(ms)} ago.`, citation: "NICE NG235 1.8.19 [2007]" });
       }
     } else {
-      alerts.push({ id: "temp-never", severity: "info", title: "Temperature not recorded", body: "4-hourly temperature required in active labour.", citation: "NICE NG235 §1.4.5 [2023]" });
+      alerts.push({ id: "temp-never", severity: "info", title: "Temperature not recorded", body: "4-hourly temperature required in active labour.", citation: "NICE NG235 1.8.19 [2007]" });
     }
   }
 
@@ -560,7 +683,7 @@ export function computeAlerts(bed, now = Date.now()) {
   // Same timings with or without an epidural: reassess after 1 h of active
   // pushing (nulliparous) or 30 min (parous); senior review if birth is not
   // imminent after 2 h (nulliparous) or 1 h (parous).
-  if (bed.labourStage === "Active second stage" && bed.pushingStartTime) {
+  if (labourRules && bed.labourStage === "Active second stage" && bed.pushingStartTime) {
     const pushMs   = now - new Date(bed.pushingStartTime).getTime();
     const reassess = isNullip ? HOUR : 30 * MIN;
     const review   = isNullip ? 2 * HOUR : HOUR;
@@ -587,7 +710,7 @@ export function computeAlerts(bed, now = Date.now()) {
   }
 
   // ─── Diabetic BGL ────────────────────────────────────────────────────
-  if (isDiabetic) {
+  if (isDiabetic && !delivered) {
     if (obs.lastBGL) {
       const ms = now - new Date(obs.lastBGL).getTime();
       if (ms >= HOUR) {
@@ -595,8 +718,8 @@ export function computeAlerts(bed, now = Date.now()) {
           id: "bgl-due",
           severity: "urgent",
           title: `BGL check due (${formatAge(ms)} ago)`,
-          body: "Hourly blood glucose in active labour. Target 4.0–7.0 mmol/L. Start VRII if outside target range.",
-          citation: "GL983 §Intrapartum [2023]",
+          body: "Monitor capillary plasma glucose every hour during labour and birth; maintain 4 to 7 mmol/L. IV dextrose and insulin if not maintained.",
+          citation: "NICE NG3 1.4.10, 1.4.12 · GL983",
         });
       }
     } else {
@@ -604,8 +727,8 @@ export function computeAlerts(bed, now = Date.now()) {
         id: "bgl-never",
         severity: "urgent",
         title: "BGL not recorded (diabetic patient)",
-        body: "Hourly blood glucose required. Target 4.0–7.0 mmol/L. Start VRII if outside target range.",
-        citation: "GL983 §Intrapartum [2023]",
+        body: "Hourly capillary glucose in labour; maintain 4 to 7 mmol/L.",
+        citation: "NICE NG3 1.4.10, 1.4.12 · GL983",
       });
     }
   }
@@ -617,41 +740,51 @@ export function computeAlerts(bed, now = Date.now()) {
       severity: "urgent",
       title: "Oliguria",
       body: `Urine output ${obs.urineOutput} mL/hr — below 30 mL/hr threshold. Escalate to medical team.`,
-      citation: "NICE NG235 §1.4.5 [2023]",
+      citation: "Local threshold (verify)",
     });
   }
 
-  // ─── CTG monitoring (NICE NG229, Dec 2022) ───────────────────────────────
-  const needsContinuousCTG = !!(
-    flags.some(f => f === "VBAC" || f === "Previous LSCS") ||
-    isDiabetic || isHypertensive || isGBSPos || isGBSPending || isPreterm ||
-    bed.analgesia === "Epidural" ||
-    bed.modeOfOnset === "PPROM" ||
-    bed.oxytocinStartTime ||
-    hasMeconium
-  );
+  // ─── CTG monitoring (NICE NG229) ──────────────────────────────────────
+  // A logged classification is acted on in any stage of labour, including
+  // latent and induction. The "not logged" and hourly-review prompts apply once
+  // she is in established labour or on oxytocin (continuous CTG territory).
+  if (labourRules) {
+    const presentation = [...ves].reverse().find(v => v.presentation)?.presentation;
+    const romMs = membranesRuptured && membranesTime ? now - new Date(membranesTime).getTime() : 0;
+    const ctgReasons = [
+      // NG229 1.3.2 antenatal maternal risk factors
+      (flags.includes("VBAC") || flags.includes("Previous LSCS")) && "Previous CS",
+      isHypertensive && "Hypertension",
+      isDiabetic && "Diabetes",
+      romMs >= 24 * HOUR && !inEstablishedLabour && "ROM 24h+",
+      // NG229 1.3.3 antenatal fetal risk factors
+      presentation && presentation !== "Cephalic" && "Non-cephalic",
+      gestWks !== null && gestWks >= 42 && "Over 42+0",
+      // NG229 1.3.8 intrapartum risk factors
+      hasMeconium && "Meconium",
+      lastLiquor === "Blood-stained" && "Blood-stained liquor",
+      temp !== null && temp >= 38 && "Pyrexia",
+      pulse !== null && pulse > 120 && "Pulse over 120",
+      bpSys !== null && bpDia !== null && (bpSys >= 140 || bpDia >= 90) && "Raised BP",
+      alerts.some(a => a.id === "slow-progress") && "Delay",
+      bed.analgesia === "Epidural" && "Epidural",
+      (oxyRunning || bed.oxytocinStartTime) && "Oxytocin",
+      // Local additions (not NG229 indications)
+      isPreterm && `Preterm (${gest})`,
+      isGBSPos && "GBS+",
+      isGBSPending && "GBS pending",
+      bed.modeOfOnset === "PPROM" && "PPROM",
+    ].filter(Boolean);
+    const needsContinuousCTG = ctgReasons.length > 0;
+    const ctgClockRuns = inEstablishedLabour || oxyRunning;
 
-  if (bed.labourStage && bed.labourStage !== "Latent") {
-    if (needsContinuousCTG && !lastCTG) {
-      const reasons = [
-        flags.includes("VBAC") && "VBAC",
-        flags.includes("Previous LSCS") && "Previous CS",
-        isDiabetic && "Diabetes",
-        isHypertensive && "Hypertension",
-        isPreterm && `Preterm (${gest})`,
-        isGBSPos && "GBS+",
-        isGBSPending && "GBS pending",
-        bed.analgesia === "Epidural" && "Epidural",
-        bed.oxytocinStartTime && "Oxytocin",
-        bed.modeOfOnset === "PPROM" && "PPROM",
-        hasMeconium && "Meconium",
-      ].filter(Boolean).join(", ");
+    if (ctgClockRuns && needsContinuousCTG && !lastCTG) {
       alerts.push({
         id: "ctg-not-documented",
         severity: "info",
         title: "Continuous CTG indicated — not yet documented",
-        body: `Indication: ${reasons}. Log a CTG review to track fetal wellbeing.`,
-        citation: "NICE NG229 §1.3.2 [2022]",
+        body: `Indication: ${ctgReasons.join(", ")}. Log a CTG review to track fetal wellbeing.`,
+        citation: "NICE NG229 1.3.2, 1.3.3, 1.3.8 [2022]",
       });
     }
 
@@ -661,9 +794,9 @@ export function computeAlerts(bed, now = Date.now()) {
         alerts.push({
           id: "ctg-pathological",
           severity: "urgent",
-          title: `Pathological CTG — immediate action (${formatAge(msCTG)} ago)`,
-          body: "≥2 non-reassuring features OR ≥1 abnormal feature. Immediate senior/consultant review. Consider fetal scalp stimulation → if no acceleration, proceed to FBS or expedite birth.",
-          citation: "NICE NG229 §1.5.3 [2022]",
+          title: `Pathological CTG — urgent review (${formatAge(msCTG)} ago)`,
+          body: "Urgent review by an obstetrician and a senior midwife. Exclude acute events (cord prolapse, abruption, uterine rupture). Full risk assessment with maternal observations; conservative measures. If still pathological, consider expediting birth.",
+          citation: "NICE NG229 1.5.7, 1.5.8 [2022]",
         });
       } else if (lastCTG.classification === "suspicious") {
         if (msCTG >= 30 * MIN) {
@@ -671,25 +804,25 @@ export function computeAlerts(bed, now = Date.now()) {
             id: "ctg-suspicious-overdue",
             severity: "urgent",
             title: `Suspicious CTG — not reassessed (${formatAge(msCTG)} ago)`,
-            body: "Suspicious CTG must be reassessed within 30 minutes. Conservative measures: reposition, IV fluids, reduce/stop oxytocin. Escalate to senior if persisting.",
-            citation: "NICE NG229 §1.5.2 [2022]",
+            body: "Not reassessed within 30 minutes (local interval). Full risk assessment, conservative measures; urgent obstetric or senior midwife review if there are other risk factors such as slow progress, sepsis or meconium.",
+            citation: "NICE NG229 1.5.5, 1.5.6 · 30 min local",
           });
         } else {
           alerts.push({
             id: "ctg-suspicious",
             severity: "warning",
             title: `Suspicious CTG — reassess within ${formatAge(30 * MIN - msCTG)}`,
-            body: `1 non-reassuring feature. Conservative measures: reposition, IV fluids, reduce/stop oxytocin. Logged ${formatAge(msCTG)} ago.`,
-            citation: "NICE NG229 §1.5.2 [2022]",
+            body: `Full risk assessment with maternal observations and conservative measures. Accelerations make acidosis unlikely. Logged ${formatAge(msCTG)} ago.`,
+            citation: "NICE NG229 1.5.5, 1.5.6 · 30 min local",
           });
         }
-      } else if (needsContinuousCTG && msCTG >= 60 * MIN) {
+      } else if (ctgClockRuns && needsContinuousCTG && msCTG >= 60 * MIN) {
         alerts.push({
           id: "ctg-review-due",
           severity: "info",
-          title: `CTG documentation overdue (${formatAge(msCTG)} ago)`,
-          body: "Hourly CTG classification documentation recommended for continuous fetal monitoring.",
-          citation: "NICE NG229 §1.4 [2022]",
+          title: `Hourly CTG review due (${formatAge(msCTG)} ago)`,
+          body: "Full assessment of the woman and baby every hour, with a fresh-eyes review by another clinician.",
+          citation: "NICE NG229 1.3.5, 1.3.6 [2022]",
         });
       }
     }

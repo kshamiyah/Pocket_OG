@@ -97,7 +97,7 @@ export function BedRow({ bed, t, now, onOpen, flash }) {
         {!bed.delivery && (obsTracked(bed) || oxy || todo > 0) && (
           <span className="flex items-center gap-3 mt-0.5">
             {obsTracked(bed) && <ObsDots bed={bed} now={now} />}
-            {oxy && <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Oxy {oxy.dose}</span>}
+            {oxy && <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Oxy {oxy.dose}{bed.oxytocinHeld ? " held" : ""}</span>}
             {todo > 0 && <span className="text-[11px] font-semibold text-claude-700 dark:text-claude-400">{todo} to do</span>}
           </span>
         )}
@@ -121,7 +121,7 @@ function Section({ title, count, children }) {
 
 export default function Board({
   rows, summary, now, shift, dark, flashId, iolQueue, tab, onTab,
-  onOpenBed, onAdmit, onRound, onHandover, onToggleTheme, onMenu, iolView,
+  onOpenBed, onAdmit, onRound, onHandover, onToggleTheme, onMenu, onRules, iolView,
 }) {
   const [showDelivered, setShowDelivered] = useState(false);
   const urgent = rows.filter(r => r.t.tier === "urgent");
@@ -136,6 +136,7 @@ export default function Board({
 
   const summaryBits = [
     `${summary.women} ${summary.women === 1 ? "woman" : "women"}`,
+    summary.delivered ? `${summary.delivered} delivered` : null,
     summary.urgent ? `${summary.urgent} need you` : null,
     summary.warning ? `${summary.warning} due soon` : null,
     summary.nextAt ? `next ${clock(summary.nextAt)}` : null,
@@ -228,7 +229,9 @@ export default function Board({
                 )}
                 <p className={`${TYPE_CAPTION} text-center leading-relaxed pt-2`}>
                   Decision aid only. Clinical responsibility remains with the treating clinician.<br />
-                  NICE NG235 · NG229 · NG25 · GL983 · GL787
+                  <button type="button" onClick={onRules} className="min-h-9 px-2 font-semibold text-claude-700 dark:text-claude-400 underline decoration-dotted underline-offset-2">
+                    Rules and sources: NICE NG235 · NG229 · NG25 · NG195 · NG255 · local
+                  </button>
                 </p>
               </>
             )}

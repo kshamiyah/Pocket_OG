@@ -10,7 +10,9 @@ import AdmitSheet from "./AdmitSheet";
 import BoardRound from "./BoardRound";
 import HandoverSheet from "./HandoverSheet";
 import IOLQueue, { IOLEntrySheet } from "./IOLQueue";
+import RulesPage, { RuleSheet, SourceSheet } from "./Rules";
 import Sheet from "../ui/Sheet";
+import { RulesContext } from "../ui/rulesContext";
 import UndoToast from "../ui/UndoToast";
 import { ChipRow, Label } from "../ui/atoms";
 import { BTN, BTN_DANGER, BTN_SECONDARY, TYPE_META } from "../ui/styles";
@@ -38,6 +40,12 @@ export default function WardPage({ shift, onEndShift }) {
   const [now, setNow] = useState(() => Date.now());
   const [tab, setTab] = useState("board");
   const [sheet, setSheet] = useState(null);        // { type, bedId?, edit?, entry? }
+  // Rules and sources: the full page, a rule pop-up for one alert, and the
+  // source pop-up. These layer above whatever is open underneath.
+  const [rulesOpen, setRulesOpen] = useState(false);
+  const [ruleAlert, setRuleAlert] = useState(null);
+  const [sourceKey, setSourceKey] = useState(null);
+  const rulesCtx = useMemo(() => ({ openRule: id => setRuleAlert(id) }), []);
   const [recordId, setRecordId] = useState(null);  // full record overlay
   const [round, setRound] = useState(null);        // { ids, index, updated:Set }
   const [toast, setToast] = useState(null);        // { message, snapshot? }
@@ -152,7 +160,12 @@ export default function WardPage({ shift, onEndShift }) {
   };
   const saveOxy = (bedId, entry) => {
     const bed = beds[bedId]; const log = bed.oxytocinLog ?? [];
-    updateBed(bedId, { oxytocinLog: [...log, entry], ...(log.length ? {} : { oxytocinStartTime: entry.startTime }) }, `Oxytocin ${entry.dose} mU/min · Bed ${bed.bedNumber}`);
+    const msg = entry.stopped ? "Oxytocin stopped" : `Oxytocin ${entry.dose} mU/min`;
+    updateBed(bedId, { oxytocinLog: [...log, entry], oxytocinHeld: false, ...(log.length ? {} : { oxytocinStartTime: entry.startTime }) }, `${msg} · Bed ${bed.bedNumber}`);
+    closeSheet();
+  };
+  const holdOxy = (bedId, held) => {
+    updateBed(bedId, { oxytocinHeld: held }, `Oxytocin ${held ? "held at current dose" : "hold released"} · Bed ${beds[bedId].bedNumber}`);
     closeSheet();
   };
   const saveDelivery = (bedId, record) => {
@@ -199,7 +212,7 @@ export default function WardPage({ shift, onEndShift }) {
   const recordBed = recordId ? beds[recordId] : null;
 
   return (
-    <>
+    <RulesContext.Provider value={rulesCtx}>
       <Board
         rows={rows} summary={summary} now={now} shift={shift} dark={dark} flashId={flashId}
         iolQueue={iolQueue} tab={tab} onTab={setTab}
@@ -209,6 +222,7 @@ export default function WardPage({ shift, onEndShift }) {
         onHandover={() => setSheet({ type: "handover" })}
         onToggleTheme={toggleTheme}
         onMenu={() => { setConfirmEnd(false); setConfirmClear(null); setSheet({ type: "menu" }); }}
+        onRules={() => setRulesOpen(true)}
         iolView={
           <IOLQueue queue={iolQueue} now={now}
             onAdd={() => setSheet({ type: "iol" })}
@@ -258,7 +272,7 @@ export default function WardPage({ shift, onEndShift }) {
       )}
       {sheet?.type === "ve" && sb && <VESheet key={sheet.edit?.id ?? "new"} bed={sb} editVE={sheet.edit ?? null} onClose={closeSheet} onSave={(ve, stageTo) => saveVE(sb.id, ve, stageTo, !!sheet.edit)} />}
       {sheet?.type === "ctg" && sb && <CTGSheet key={sheet.edit?.id ?? "new"} bed={sb} editCTG={sheet.edit ?? null} notice={sheet.notice} onClose={closeSheet} onSave={e => saveCTG(sb.id, e, !!sheet.edit)} />}
-      {sheet?.type === "oxy" && sb && <OxySheet bed={sb} onClose={closeSheet} onSave={e => saveOxy(sb.id, e)} />}
+      {sheet?.type === "oxy" && sb && <OxySheet bed={sb} onClose={closeSheet} onSave={e => saveOxy(sb.id, e)} onHold={h => holdOxy(sb.id, h)} />}
       {sheet?.type === "delivery" && sb && <DeliverySheet bed={sb} onClose={closeSheet} onSave={r => saveDelivery(sb.id, r)} />}
       {sheet?.type === "edit" && sb && (
         <AdmitSheet mode="edit" bed={sb} existingNumbers={Object.values(beds).map(b => b.bedNumber)} onClose={closeSheet} onSave={u => editDetails(sb.id, u)} />
@@ -282,6 +296,9 @@ export default function WardPage({ shift, onEndShift }) {
             <ChipRow small value={themePref} onChange={p => { setThemePrefState(p); setDark(setThemePref(p)); }}
               options={[{ value: "system", label: "Match phone" }, { value: "light", label: "Day" }, { value: "dark", label: "Night" }]} />
           </div>
+          <button type="button" onClick={() => { closeSheet(); setRulesOpen(true); }} className={`${BTN} ${BTN_SECONDARY} w-full`}>
+            Rules and sources
+          </button>
           {confirmClear !== "ask" ? (
             <button type="button" disabled={!Object.keys(beds).length} onClick={() => setConfirmClear("ask")} className={`${BTN} ${BTN_SECONDARY} w-full`}>
               Clear the board
@@ -314,6 +331,13 @@ export default function WardPage({ shift, onEndShift }) {
         <UndoToast message={toast?.message} onUndo={toast?.snapshot ? undo : null}
           bottom={round ? "calc(env(safe-area-inset-bottom) + 9rem)" : recordBed ? "calc(env(safe-area-inset-bottom) + 1.25rem)" : undefined} />
       )}
-    </>
+
+      {rulesOpen && <RulesPage onClose={() => setRulesOpen(false)} onSource={setSourceKey} />}
+      {ruleAlert && (
+        <RuleSheet alertId={ruleAlert} onSource={setSourceKey} onClose={() => setRuleAlert(null)}
+          onAll={() => { setRuleAlert(null); setSheet(null); setRulesOpen(true); }} />
+      )}
+      {sourceKey && <SourceSheet sourceKey={sourceKey} onClose={() => setSourceKey(null)} />}
+    </RulesContext.Provider>
   );
 }

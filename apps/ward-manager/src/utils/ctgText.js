@@ -1,9 +1,10 @@
 // Wording follows the classification rule in @pocket-og/guidelines (combineFeatureGrades):
-// pathological = 1 abnormal feature, or 2 or more non-reassuring features.
+// NG229 1.4.32 scores 4 features (contractions, baseline, variability, decelerations);
+// pathological = 1 red feature, or 2 or more amber features.
 export const CTG_DESC = {
-  normal: "All features reassuring. Continue monitoring.",
-  suspicious: "1 non-reassuring feature. Conservative measures, reassess in 30 min.",
-  pathological: "1 abnormal feature, or 2 or more non-reassuring features. Immediate senior review, consider FBS.",
+  normal: "All 4 features white (reassuring). Continue CTG and hourly review.",
+  suspicious: "1 amber feature. Full risk assessment and conservative measures; reassess (30 min locally).",
+  pathological: "1 red feature, or 2 or more amber features. Urgent obstetric and senior midwife review.",
 };
 
 export function ctgSummary(e) {
@@ -18,6 +19,7 @@ export function ctgSummary(e) {
     "variable-concerning": `Concerning variable (${e.decelerationMinutes >= 30 ? "30m+" : "under 30m"})`,
     late: "Late decels", prolonged: "Prolonged decel",
   }[e.decelerations] ?? e.decelerations;
-  return [`HR ${e.baselineHR}`, vari, dec, e.accelerations ? "Accels present" : "No accels",
+  const cx = e.contractionsPerTen != null ? `${e.contractionsPerTen} in 10${e.hypertonus ? ", hypertonus" : ""}` : e.hypertonus ? "Hypertonus" : null;
+  return [`HR ${e.baselineHR}`, vari, dec, e.accelerations ? "Accels present" : "No accels", cx,
     e.clinicianOverride ? `clinician judged pathological (features: ${e.autoClassification})` : null].filter(Boolean).join(" · ");
 }

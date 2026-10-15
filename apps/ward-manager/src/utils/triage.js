@@ -19,6 +19,12 @@ const SHORT = {
   "preterm-mgso4": "MgSO4",
   "preterm-steroids": "Steroids",
   "preterm-tocolysis": "Tocolysis?",
+  "under-28": "Under 28 weeks",
+  "iap-preterm": "Preterm antibiotics",
+  "oxytocin-stop-pathological": "Stop oxytocin",
+  "bp-low": "Low BP",
+  "temp-low": "Low temp",
+  "pph": "PPH",
   "active-phase-limit": "Long 1st stage",
   "arm-reassess": "Post-ARM review",
   "arm-cx-inadequate": "Contractions post-ARM",
@@ -34,6 +40,7 @@ const SHORT = {
   "passive-limit-soon": "Passive limit soon",
   "pushing-reassess": "Reassess pushing",
   "pushing-senior-review": "Senior review",
+  "prom-48h": "ROM 48h: antibiotics",
   "prom-24h": "ROM over 24h",
   "prom-18h": "ROM over 18h",
   "prom-16h": "ROM 16h+",
@@ -109,12 +116,13 @@ export function nextDue(bed, now = Date.now(), alertsNow = computeAlerts(bed, no
  * shown: alerts for the board and bed panel (routine obs reminders removed)
  */
 export function triageBed(bed, now = Date.now()) {
-  if (bed.delivery) return { tier: "delivered", alerts: [], shown: [], top: null, next: null, urgent: 0, warning: 0 };
   const alerts = computeAlerts(bed, now);
   const shown = alerts.filter(a => !(OBS_IDS.has(a.id) && a.severity === "info"));
   const urgent = shown.filter(a => a.severity === "urgent").length;
   const warning = shown.filter(a => a.severity === "warning").length;
-  const tier = urgent ? "urgent" : warning ? "warning" : "ok";
+  // A delivered woman stays in the delivered list unless a postnatal alert
+  // (PPH, abnormal observations) needs attention.
+  const tier = urgent ? "urgent" : warning ? "warning" : bed.delivery ? "delivered" : "ok";
   return { tier, alerts, shown, top: shown[0] ?? null, next: nextDue(bed, now, alerts), urgent, warning };
 }
 
@@ -134,12 +142,12 @@ export function triageWard(beds, now = Date.now()) {
 }
 
 export function wardSummary(rows) {
-  const live = rows.filter(r => r.t.tier !== "delivered");
+  const live = rows.filter(r => !r.bed.delivery);
   const nexts = live.map(r => r.t.next?.at).filter(Boolean).sort((a, b) => a - b);
   return {
     women: live.length,
-    urgent: live.filter(r => r.t.tier === "urgent").length,
-    warning: live.filter(r => r.t.tier === "warning").length,
+    urgent: rows.filter(r => r.t.tier === "urgent").length,
+    warning: rows.filter(r => r.t.tier === "warning").length,
     delivered: rows.length - live.length,
     nextAt: nexts[0] ?? null,
   };

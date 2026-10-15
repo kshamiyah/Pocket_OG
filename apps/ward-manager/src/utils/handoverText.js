@@ -46,11 +46,14 @@ export function generateHandover(beds, shift, now = Date.now()) {
 
     if (bed.delivery) {
       const dl = bed.delivery;
-      const pph = dl.ebl >= 1000 ? " (major PPH)" : dl.ebl >= 500 ? " (PPH 500+)" : "";
+      const pph = dl.ebl > 1000 ? " (major PPH)" : dl.ebl >= 500 ? " (minor PPH)" : "";
       lines.push(`${dl.mode} · ${clock(dl.time, now)}${dl.ebl != null ? ` · EBL ${dl.ebl} mL${pph}` : " · EBL not recorded"}`);
       if (background.length) lines.push(background.join(" · "));
       if (done.length) lines.push(done.join(" · "));
       if (dl.notes) lines.push(`Notes: ${dl.notes}`);
+      computeAlerts(bed, now)
+        .filter(a => a.severity === "urgent" || a.severity === "warning")
+        .forEach(a => lines.push(`${a.severity === "urgent" ? "!!" : "!"} ${tidy(a.title)}`));
       if (tasks.length) lines.push(`To do: ${tasks.map(x => x.text).join(", ")}`);
       lines.push("");
       continue;
@@ -79,7 +82,7 @@ export function generateHandover(beds, shift, now = Date.now()) {
     }
 
     const oxy = currentOxytocin(bed);
-    if (oxy) lines.push(`Oxytocin ${oxy.dose} mU/min since ${clock(oxy.lastIncrementTime ?? oxy.startTime, now)}`);
+    if (oxy) lines.push(`Oxytocin ${oxy.dose} mU/min since ${clock(oxy.lastIncrementTime ?? oxy.startTime, now)}${bed.oxytocinHeld ? " (held)" : ""}`);
 
     const obs = bed.observations ?? {};
     const obsParts = [
