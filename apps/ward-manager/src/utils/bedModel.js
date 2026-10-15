@@ -22,7 +22,62 @@ export const STAGE_HINT = {
 export const PARITIES = ["Para 0", "Para 1", "Para 2", "Para 3"];
 export const BIRTH_MODES = ["SVD", "Instrumental", "Emergency CS", "Elective CS"];
 export const BIRTH_SHORT = { SVD: "SVD", Instrumental: "Instr", "Emergency CS": "Em CS", "Elective CS": "El CS" };
-export const RISK_FLAGS = ["GBS+", "GBS pending", "Diabetic-T1", "Diabetic-T2", "Diabetic-GDM", "VBAC", "Previous LSCS", "Hypertensive"];
+// Risk flags, grouped for the Admit dropdown. `value` is what is stored (older
+// values are kept so existing boards still work); `effect` says what the flag
+// does in the app: "alert" raises its own alert, "CTG" counts as a continuous
+// CTG indication, "handover" is recorded for handover only.
+export const RISK_GROUPS = [
+  { group: "Infection and GBS", items: [
+    { value: "GBS+", label: "GBS positive this pregnancy", short: "GBS+", effect: "alert" },
+    { value: "GBS previous", label: "GBS in a previous baby or pregnancy", short: "GBS prev", effect: "alert" },
+    { value: "GBS pending", label: "GBS result pending", short: "GBS pending", effect: "alert" },
+    { value: "Infection suspected", label: "Suspected chorioamnionitis or sepsis", short: "Infection", effect: "alert" },
+  ] },
+  { group: "Diabetes", items: [
+    { value: "Diabetic-T1", label: "Type 1 diabetes", short: "T1DM", effect: "alert" },
+    { value: "Diabetic-T2", label: "Type 2 diabetes", short: "T2DM", effect: "alert" },
+    { value: "Diabetic-GDM", label: "Gestational diabetes on medication", short: "GDM (meds)", effect: "alert" },
+    { value: "Diabetic-GDM diet", label: "Gestational diabetes, diet only", short: "GDM (diet)", effect: "alert" },
+  ] },
+  { group: "Blood pressure", items: [
+    { value: "Hypertensive", label: "Hypertension on medication", short: "HTN", effect: "alert" },
+    { value: "Pre-eclampsia", label: "Pre-eclampsia", short: "PET", effect: "alert" },
+  ] },
+  { group: "Uterus", items: [
+    { value: "Previous LSCS", label: "Previous caesarean", short: "Prev CS", effect: "CTG" },
+    { value: "Other uterine scar", label: "Other full-thickness uterine scar", short: "Uterine scar", effect: "CTG" },
+  ] },
+  { group: "Baby", items: [
+    { value: "FGR", label: "Growth restriction or high-risk SGA", short: "FGR/SGA", effect: "CTG" },
+    { value: "Reduced fetal movements", label: "Reduced movements in the 24 h before labour", short: "RFM", effect: "CTG" },
+    { value: "Non-cephalic", label: "Breech or other non-cephalic", short: "Breech", effect: "CTG" },
+    { value: "Liquor volume", label: "Polyhydramnios or anhydramnios", short: "Poly/anhydram", effect: "CTG" },
+  ] },
+  { group: "Bleeding", items: [
+    { value: "APH", label: "Antepartum or fresh bleeding", short: "Bleeding", effect: "alert" },
+  ] },
+  { group: "For handover", items: [
+    { value: "Twins", label: "Twins", short: "Twins", effect: "handover" },
+    { value: "BMI 40+", label: "BMI 40 or more", short: "BMI 40+", effect: "handover" },
+    { value: "Previous PPH", label: "Previous PPH", short: "Prev PPH", effect: "handover" },
+    { value: "Previous shoulder dystocia", label: "Previous shoulder dystocia", short: "Prev SD", effect: "handover" },
+    { value: "Previous OASI", label: "Previous 3rd or 4th degree tear", short: "Prev OASI", effect: "handover" },
+  ] },
+];
+const RISK_BY_VALUE = Object.fromEntries(RISK_GROUPS.flatMap(g => g.items).map(i => [i.value, i]));
+// Older stored values that are no longer offered.
+RISK_BY_VALUE["VBAC"] = { value: "VBAC", label: "VBAC", short: "VBAC", effect: "CTG" };
+export const RISK_FLAGS = Object.keys(RISK_BY_VALUE);
+
+/** Display label for a stored risk value; typed "Other" risks show as typed. */
+export function riskLabel(v) { return RISK_BY_VALUE[v]?.label ?? v; }
+export function riskShort(v) { return RISK_BY_VALUE[v]?.short ?? v; }
+export function riskEffect(v) { return RISK_BY_VALUE[v]?.effect ?? "handover"; }
+
+export function isHypertensiveBed(bed) {
+  const f = bed.riskFlags ?? [];
+  return f.includes("Hypertensive") || f.includes("Pre-eclampsia");
+}
 export const ANALGESIA = ["None", "Entonox", "Pethidine", "Epidural", "Remifentanil PCA"];
 export const ONSETS = ["Spontaneous", "Induced", "PPROM"];
 export const IND_METHODS = ["Dinoprostone", "Balloon", "Misoprostol", "ARM+Synto"];
@@ -118,7 +173,8 @@ export function membraneStatus(bed) {
 /** Last recorded non-cephalic presentation, for the board tag. */
 export function malpresentation(bed) {
   const ve = lastVE(bed);
-  return ve?.presentation && ve.presentation !== "Cephalic" ? ve.presentation : null;
+  if (ve?.presentation) return ve.presentation !== "Cephalic" ? ve.presentation : null;
+  return (bed.riskFlags ?? []).includes("Non-cephalic") ? "Breech" : null;
 }
 
 export function sortedVEs(bed) {
@@ -148,7 +204,7 @@ export function isDiabetic(bed) {
 
 /** Obs the board tracks as dots, with the refresh interval in minutes. */
 export function obsItems(bed) {
-  const hypertensive = (bed.riskFlags ?? []).includes("Hypertensive");
+  const hypertensive = isHypertensiveBed(bed);
   return [
     { key: "lastPulse", letter: "P", label: "Pulse", unit: "bpm", limit: 60, valueKey: "pulseValue", type: "int" },
     { key: "lastBP", letter: "B", label: "BP", unit: "mmHg", limit: hypertensive ? 60 : 240, type: "bp" },
@@ -248,6 +304,8 @@ export const PERSISTENT_FLAGS = {
   "iap-preterm": { field: "gbsAntibioticsStarted", label: "Given" },
   "prom-48h": { field: "gbsAntibioticsStarted", label: "Given" },
   "pph": { field: "pphReviewed", label: "Reviewed" },
+  "infection-suspected": { field: "gbsAntibioticsStarted", label: "Given" },
+  "aph": { field: "bleedingReviewed", label: "Reviewed" },
 };
 export const OBS_STAMP = {
   "pulse-never": "lastPulse", "pulse-due": "lastPulse",

@@ -2,7 +2,7 @@ import { AlertList } from "./BedSheet";
 import { BTN, BTN_OK, BTN_PRIMARY, BTN_SECONDARY, CARD, TYPE_META, TYPE_OVERLINE } from "../ui/styles";
 import { IconBack, IconTick } from "../ui/icons";
 import { fmtAge, clock } from "../utils/time";
-import { LIQUOR_SHORT, capitalise, lastCTG, lastVE, membraneStatus, parityWithHistory, stageLabel, veFindings } from "../utils/bedModel";
+import { LIQUOR_SHORT, capitalise, lastCTG, lastVE, membraneStatus, parityWithHistory, riskShort, stageLabel, veFindings } from "../utils/bedModel";
 
 /** Step through each woman in bed order, confirming or updating as you go. */
 export default function BoardRound({ ids, index, beds, triage, updated, now, onIndex, onExit, onVE, onCTGNormal, onMore, onFix, onHandover }) {
@@ -53,7 +53,7 @@ export default function BoardRound({ ids, index, beds, triage, updated, now, onI
                 <dt className="text-gray-500 dark:text-gray-400">Other</dt>
                 <dd className="text-gray-900 dark:text-gray-100">{[
                   bed.analgesia !== "None" ? bed.analgesia : null,
-                  ...(bed.riskFlags ?? []),
+                  ...(bed.riskFlags ?? []).map(riskShort),
                   bed.modeOfOnset !== "Spontaneous" ? bed.modeOfOnset : null,
                   (() => { const m = membraneStatus(bed); return m.status ? `${m.status}${m.liquor ? `, ${LIQUOR_SHORT[m.liquor] ?? m.liquor}` : ""}` : null; })(),
                 ].filter(Boolean).join(" · ") || "Nothing else"}</dd>

@@ -25,6 +25,8 @@ const SHORT = {
   "bp-low": "Low BP",
   "temp-low": "Low temp",
   "pph": "PPH",
+  "infection-suspected": "Antibiotics now",
+  "aph": "Bleeding",
   "active-phase-limit": "Long 1st stage",
   "arm-reassess": "Post-ARM review",
   "arm-cx-inadequate": "Contractions post-ARM",

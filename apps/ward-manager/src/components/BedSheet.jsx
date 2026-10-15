@@ -5,7 +5,7 @@ import { IconTick, IconChevron } from "../ui/icons";
 import { fmtAge, clock } from "../utils/time";
 import {
   STAGES, STAGE_SHORT, LIQUOR_SHORT, capitalise, currentOxytocin, fixLabel, lastCTG, lastVE, obsStatus, obsTracked,
-  parityWithHistory, stageLabel, veFindings, membraneStatus,
+  parityWithHistory, riskShort, stageLabel, veFindings, membraneStatus,
 } from "../utils/bedModel";
 import { tidy } from "../utils/triage";
 import { useRules } from "../ui/rulesContext";
@@ -58,7 +58,7 @@ export default function BedSheet({ bed, t, now, onClose, onCTGNormal, onCTGConce
   const ve = lastVE(bed);
   const ctg = lastCTG(bed);
   const oxy = currentOxytocin(bed);
-  const sub = [parityWithHistory(bed), bed.gestation, stageLabel(bed), ...(bed.riskFlags ?? []), bed.analgesia !== "None" ? bed.analgesia : null]
+  const sub = [parityWithHistory(bed), bed.gestation, stageLabel(bed), ...(bed.riskFlags ?? []).map(riskShort), bed.analgesia !== "None" ? bed.analgesia : null]
     .filter(Boolean).join(" · ");
 
   if (bed.delivery) {

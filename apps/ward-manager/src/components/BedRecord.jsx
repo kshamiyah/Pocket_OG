@@ -8,17 +8,22 @@ import {
 import { IconBack, IconTick } from "../ui/icons";
 import { fmtAge, clock } from "../utils/time";
 import {
-  ANALGESIA, LIQUOR_SHORT, PERSISTENT_FLAGS, STAGES, STAGE_SHORT, currentOxytocin, newId, obsStatus, parityWithHistory, sortedVEs, stageLabel, stampObs, stationLabel,
+  ANALGESIA, LIQUOR_SHORT, PERSISTENT_FLAGS, STAGES, STAGE_SHORT, currentOxytocin, isHypertensiveBed, newId, obsStatus, parityWithHistory, sortedVEs, stageLabel, stampObs, stationLabel,
 } from "../utils/bedModel";
 
 // Labels for the "recorded as done" list, so a mistaken Given or Done can be taken back.
 const DONE_LABEL = {
-  gbsAntibioticsStarted: "GBS antibiotics given",
+  gbsAntibioticsStarted: "Intrapartum antibiotics given",
+  pphReviewed: "PPH reviewed",
+  bleedingReviewed: "Bleeding reviewed",
   neonatalTeamAlerted: "Neonatal team alerted",
   mgso4Given: "MgSO4 given",
   corticosteroidsConfirmed: "Steroids confirmed",
   tocolysisOffered: "Tocolysis offered",
 };
+
+// Several alerts share one field (any intrapartum antibiotics), so list each field once.
+const DONE_FIELDS = [...new Set(Object.values(PERSISTENT_FLAGS).map(f => f.field))];
 
 const TASK_QUICK = ["Repeat FBC", "Group & Save", "Clotting screen", "Senior review", "Repeat CTG", "Antibiotics due", "Consent form", "IV access", "Urine dip"];
 
@@ -51,7 +56,7 @@ function ObsPanel({ bed, now, onUpdate }) {
   return (
     <div className="space-y-3">
       <p className={TYPE_META}>
-        Pulse hourly · BP {(bed.riskFlags ?? []).includes("Hypertensive") ? "hourly (hypertensive)" : "4-hourly"} · Temp 4-hourly
+        Pulse hourly · BP {isHypertensiveBed(bed) ? "hourly (hypertensive)" : "4-hourly"} · Temp 4-hourly
         {items.some(i => i.key === "lastBGL") ? " · BGL hourly" : ""}. Tap Done to stamp the time, or add a value.
       </p>
       {items.map(it => (
@@ -157,14 +162,14 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
             {t.alerts.length ? <AlertList alerts={t.alerts} onFix={onFix} /> : (
               <p className="rounded-xl border px-3 py-2.5 text-sm bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-400">All clear. No active alerts.</p>
             )}
-            {Object.values(PERSISTENT_FLAGS).some(f => bed[f.field]) && (
+            {DONE_FIELDS.some(f => bed[f]) && (
               <div>
                 <Label>Recorded as done</Label>
                 <div className="space-y-1.5">
-                  {Object.values(PERSISTENT_FLAGS).filter(f => bed[f.field]).map(f => (
-                    <div key={f.field} className={`${CARD} px-3 py-2 flex items-center justify-between gap-3`}>
-                      <span className="text-sm text-gray-800 dark:text-gray-200">{DONE_LABEL[f.field] ?? f.field}</span>
-                      <SmallBtn onClick={() => onUpdate({ [f.field]: false }, `${DONE_LABEL[f.field] ?? "Item"} taken back`)}>Not done</SmallBtn>
+                  {DONE_FIELDS.filter(f => bed[f]).map(f => (
+                    <div key={f} className={`${CARD} px-3 py-2 flex items-center justify-between gap-3`}>
+                      <span className="text-sm text-gray-800 dark:text-gray-200">{DONE_LABEL[f] ?? f}</span>
+                      <SmallBtn onClick={() => onUpdate({ [f]: false }, `${DONE_LABEL[f] ?? "Item"} taken back`)}>Not done</SmallBtn>
                     </div>
                   ))}
                 </div>

@@ -58,8 +58,14 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   const isNullip = bed.parity === "Para 0";
   const flags = bed.riskFlags ?? [];
   const isDiabetic = flags.some(f => f.startsWith("Diabetic"));
-  const isHypertensive = flags.includes("Hypertensive");
-  const isGBSPos = flags.includes("GBS+");
+  const isHypertensive = flags.includes("Hypertensive") || flags.includes("Pre-eclampsia");
+  // NG195 1.6.1: GBS this pregnancy, or in a previous baby or pregnancy, both
+  // call for antibiotics in labour.
+  const isGBSThisPregnancy = flags.includes("GBS+");
+  const isGBSPrevious = flags.includes("GBS previous");
+  const isGBSPos = isGBSThisPregnancy || isGBSPrevious;
+  const isInfection = flags.includes("Infection suspected");
+  const hasBleeding = flags.includes("APH");
   const isGBSPending = flags.includes("GBS pending");
   // Membrane status comes from the VEs. Only when no VE has recorded membranes yet
   // does it fall back to what was recorded at admission (bed.membranes, etc.).
@@ -456,21 +462,44 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // or preterm labour; 1.6.4: first dose as soon as possible after labour starts.
   // An induction still latent with intact membranes is not yet labour.
   const inLabour = inEstablishedLabour || (bed.labourStage === "Latent" && bed.modeOfOnset !== "Induced");
-  if (!delivered && isGBSPos && (membranesRuptured || inLabour) && !bed.gbsAntibioticsStarted) {
+  // Suspected chorioamnionitis or sepsis: antibiotics as soon as infection is
+  // suspected (NG195 1.6.4). Broad-spectrum treatment also covers GBS (GL787:
+  // IAP not required if already on antibiotics for chorioamnionitis).
+  if (!delivered && isInfection && !bed.gbsAntibioticsStarted) {
+    alerts.push({
+      id: "infection-suspected",
+      severity: "urgent",
+      title: "Suspected chorioamnionitis or sepsis: IV antibiotics now",
+      body: "Give the first dose as soon as infection is suspected and continue until birth. Regimen per local policy (GL787 treats maternal pyrexia over 38°C as intra-amniotic infection). Offer continuous CTG; senior review; assess sepsis risk (NG255).",
+      citation: "NICE NG195 1.6.1, 1.6.4 · NG229 1.3.2, 1.3.8 · GL787",
+    });
+  }
+  if (!delivered && isGBSPos && !isInfection && (membranesRuptured || inLabour) && !bed.gbsAntibioticsStarted) {
     alerts.push({
       id: "gbs-iap",
       severity: "urgent",
-      title: "GBS+ — IV antibiotic prophylaxis required",
+      title: isGBSThisPregnancy ? "GBS+ — IV antibiotic prophylaxis required" : "Previous GBS — IV antibiotic prophylaxis required",
       body: "Give the first dose as soon as possible after labour starts (or membranes rupture) and continue until birth. Regimen per GL787: IV benzylpenicillin 3 g stat, then 1.5 g 4-hourly; penicillin allergy: IV teicoplanin 10 mg/kg stat, then 10 mg/kg 12-hourly.",
       citation: "NICE NG195 1.6.1, 1.6.4 [2021] · GL787",
     });
-  } else if (!delivered && isPreterm && !isGBSPos && inLabour && !bed.gbsAntibioticsStarted) {
+  } else if (!delivered && isPreterm && !isGBSPos && !isInfection && inLabour && !bed.gbsAntibioticsStarted) {
     alerts.push({
       id: "iap-preterm",
       severity: "urgent",
       title: `Preterm labour (${gest}): offer intrapartum antibiotics`,
       body: "Offer antibiotics during labour to women in preterm labour, first dose as soon as possible after labour starts. Choice of antibiotic per NG195 table 1 and local policy.",
       citation: "NICE NG195 1.6.1, 1.6.4 [2021]",
+    });
+  }
+
+  // ─── Bleeding (NICE NG235 1.8.20; NG229 1.3.2, 1.3.8) ────────────────
+  if (!delivered && hasBleeding && !bed.bleedingReviewed) {
+    alerts.push({
+      id: "aph",
+      severity: "urgent",
+      title: "Bleeding: urgent obstetric review",
+      body: "Fresh red bleeding is a transfer trigger and antepartum haemorrhage an obstetric emergency (NG235 1.8.20). Urgent obstetric review; offer continuous CTG. Tap Reviewed once seen; the flag stays for handover.",
+      citation: "NICE NG235 1.8.20 · NG229 1.3.2, 1.3.8",
     });
   }
 
@@ -760,11 +789,18 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     const ctgReasons = [
       // NG229 1.3.2 antenatal maternal risk factors
       (flags.includes("VBAC") || flags.includes("Previous LSCS")) && "Previous CS",
+      flags.includes("Other uterine scar") && "Uterine scar",
       isHypertensive && "Hypertension",
-      isDiabetic && "Diabetes",
+      // NG229 lists gestational diabetes only when it needs medication.
+      flags.some(f => f.startsWith("Diabetic") && f !== "Diabetic-GDM diet") && "Diabetes",
+      hasBleeding && "Bleeding",
+      isInfection && "Suspected infection",
       romMs >= 24 * HOUR && !inEstablishedLabour && "ROM 24h+",
       // NG229 1.3.3 antenatal fetal risk factors
-      presentation && presentation !== "Cephalic" && "Non-cephalic",
+      ((presentation && presentation !== "Cephalic") || (!presentation && flags.includes("Non-cephalic"))) && "Non-cephalic",
+      flags.includes("FGR") && "FGR/SGA",
+      flags.includes("Reduced fetal movements") && "Reduced movements",
+      flags.includes("Liquor volume") && "Poly/anhydramnios",
       gestWks !== null && gestWks >= 42 && "Over 42+0",
       // NG229 1.3.8 intrapartum risk factors
       hasMeconium && "Meconium",

@@ -1,10 +1,11 @@
 import { useState } from "react";
 import Sheet from "../ui/Sheet";
+import RiskPicker from "./RiskPicker";
 import { Chip, ChipRow, DilationGrid, Label, MultiChipRow, Stepper, WhenPicker } from "../ui/atoms";
 import { BTN, BTN_PRIMARY, INPUT, TYPE_META } from "../ui/styles";
 import { resolveWhen, whenFromISO } from "../utils/time";
 import {
-  ANALGESIA, BIRTH_MODES, BIRTH_SHORT, IND_METHODS, IOL_REASONS, LIQUORS, LIQUOR_SHORT, MEMBRANES, ONSETS, PARITIES, RISK_FLAGS,
+  ANALGESIA, BIRTH_MODES, BIRTH_SHORT, IND_METHODS, IOL_REASONS, LIQUORS, LIQUOR_SHORT, MEMBRANES, ONSETS, PARITIES,
   STAGES, STAGE_SHORT, gestFromDigits, newId, parityNum, parityShort,
 } from "../utils/bedModel";
 
@@ -223,12 +224,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
             <Label>Analgesia</Label>
             <ChipRow small options={ANALGESIA} value={analgesia} onChange={setAnalgesia} />
           </div>
-          <div>
-            <Label>Risk flags</Label>
-            <MultiChipRow options={RISK_FLAGS} values={flags} onChange={setFlags} />
-            {flags.includes("GBS+") && <p className="text-xs font-semibold text-claude-700 dark:text-claude-400 mt-1.5">GBS+: IV benzylpenicillin in labour (GL787).</p>}
-            {flags.some(f => f.startsWith("Diabetic")) && <p className="text-xs font-semibold text-claude-700 dark:text-claude-400 mt-1">Diabetic: hourly BGL (GL983).</p>}
-          </div>
+          <RiskPicker values={flags} onChange={setFlags} />
           {!edit && (
             <>
               <div>

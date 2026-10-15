@@ -237,3 +237,43 @@ describe("unit settings change the local thresholds", () => {
     expect(body({ meconiumCTGMandatory: false })).toMatch(/her choice/)
   })
 })
+
+describe("new risk flags", () => {
+  const NICE = { ...UNIT_DEFAULTS, ctgForAll: false }
+  const reasons = b => computeAlerts(b, NOW, NICE).find(a => a.id === "ctg-not-documented")?.body ?? ""
+  it("GBS in a previous baby prompts antibiotics like GBS+ (NG195 1.6.1)", () => {
+    const a = computeAlerts(active({ riskFlags: ["GBS previous"] }), NOW).find(x => x.id === "gbs-iap")
+    expect(a?.severity).toBe("urgent")
+    expect(a.title).toMatch(/Previous GBS/)
+  })
+  it("suspected infection asks for antibiotics now and replaces the GBS prompt", () => {
+    const a = ids(active({ riskFlags: ["GBS+", "Infection suspected"] }))
+    expect(a).toContain("infection-suspected")
+    expect(a).not.toContain("gbs-iap")
+  })
+  it("one Given clears the infection prompt", () => {
+    const b = active({ riskFlags: ["Infection suspected"] })
+    expect(ids({ ...b, ...fixAlert(b, "infection-suspected", t(0)) })).not.toContain("infection-suspected")
+  })
+  it("bleeding raises an urgent review that Reviewed clears", () => {
+    const b = active({ riskFlags: ["APH"] })
+    expect(sev(b, "aph")).toBe("urgent")
+    expect(ids({ ...b, ...fixAlert(b, "aph", t(0)) })).not.toContain("aph")
+  })
+  it("baby and uterine risks count as CTG indications; diet-only GDM does not", () => {
+    expect(reasons(active({ riskFlags: ["FGR"] }))).toMatch(/FGR/)
+    expect(reasons(active({ riskFlags: ["Reduced fetal movements"] }))).toMatch(/Reduced movements/)
+    expect(reasons(active({ riskFlags: ["Other uterine scar"] }))).toMatch(/Uterine scar/)
+    expect(reasons(active({ riskFlags: ["Non-cephalic"], ves: [] }))).toMatch(/Non-cephalic/)
+    expect(ids({ ...active({ riskFlags: ["Diabetic-GDM diet"] }) })).toContain("bgl-never")
+    expect(computeAlerts(active({ riskFlags: ["Diabetic-GDM diet"] }), NOW, NICE).map(a => a.id)).not.toContain("ctg-not-documented")
+  })
+  it("pre-eclampsia gets hourly BP like hypertension", () => {
+    const b = active({ riskFlags: ["Pre-eclampsia"], observations: { lastPulse: t(10 * MIN), lastBP: t(70 * MIN), lastTemp: t(10 * MIN) } })
+    expect(sev(b, "bp-due")).toBe("urgent")
+  })
+  it("handover-only risks raise nothing", () => {
+    const base = ids(active())
+    expect(ids(active({ riskFlags: ["Twins", "BMI 40+", "My own note"] }))).toEqual(base)
+  })
+})

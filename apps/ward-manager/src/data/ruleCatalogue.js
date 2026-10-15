@@ -72,10 +72,24 @@ export const RULES = [
   // ── Antibiotics and membranes ──────────────────────────────────────────
   {
     id: "gbs-iap", group: "Antibiotics and membranes", title: "GBS: intrapartum antibiotics",
-    when: "GBS+ flag, in labour or membranes ruptured, antibiotics not yet given. An induction still latent with intact membranes is not yet labour.",
+    when: "GBS positive this pregnancy, or GBS in a previous baby or pregnancy; in labour or membranes ruptured; antibiotics not yet given. An induction still latent with intact membranes is not yet labour.",
     then: "First dose as soon as possible, continue until birth. Regimen from GL787. Never hidden by the PROM alerts.",
     severity: "Urgent", alertIds: ["gbs-iap"],
     sources: ["NG195 1.6.1", "NG195 1.6.4", "GL787 GBS"],
+  },
+  {
+    id: "infection-suspected", group: "Antibiotics and membranes", title: "Suspected chorioamnionitis or sepsis",
+    when: "Risk flag \"Suspected chorioamnionitis or sepsis\" ticked and antibiotics not yet given.",
+    then: "IV antibiotics now, first dose as soon as infection is suspected; continuous CTG; senior review. Replaces the GBS and preterm antibiotic prompts, since broad-spectrum treatment covers GBS (GL787).",
+    severity: "Urgent", alertIds: ["infection-suspected"],
+    sources: ["NG195 1.6.1", "NG195 1.6.4", "NG229 1.3.2", "NG229 1.3.8", "GL787 GBS", "GL787 PROM"],
+  },
+  {
+    id: "aph", group: "Antibiotics and membranes", title: "Bleeding",
+    when: "Risk flag \"Antepartum or fresh bleeding\" ticked and not yet reviewed.",
+    then: "Urgent obstetric review and continuous CTG. Tap Reviewed once seen; the flag stays for handover and as a CTG indication.",
+    severity: "Urgent", alertIds: ["aph"],
+    sources: ["NG235 1.8.20", "NG229 1.3.2", "NG229 1.3.8"],
   },
   {
     id: "iap-preterm", group: "Antibiotics and membranes", title: "Preterm labour: intrapartum antibiotics",
@@ -236,7 +250,7 @@ export const RULES = [
   },
   {
     id: "ctg-indicated", group: "Fetal monitoring (CTG)", title: "Continuous CTG, not logged",
-    when: "Established labour or oxytocin running and no CTG logged. By default this applies to every woman (unit setting). With that setting off, only when there is an indication: previous CS, hypertension, diabetes, ROM 24 h+ before established labour, non-cephalic, over 42+0, meconium, blood-stained liquor, pyrexia, pulse over 120, raised BP, delay, epidural, oxytocin.",
+    when: "Established labour or oxytocin running and no CTG logged. By default this applies to every woman (unit setting). With that setting off, only when there is an indication: previous CS or other uterine scar, hypertension, diabetes (not diet-only GDM), bleeding, suspected infection, ROM 24 h+ before established labour, non-cephalic, growth restriction, reduced movements, poly- or anhydramnios, over 42+0, meconium, blood-stained liquor, pyrexia, pulse over 120, raised BP, delay, epidural, oxytocin.",
     then: "Log a CTG review.",
     severity: "Info", alertIds: ["ctg-not-documented"], sources: ["NG229 1.2.9", "NG229 1.3.2", "NG229 1.3.3", "NG229 1.3.8"],
     settings: ["ctgForAll", "ctgLocalIndications"],

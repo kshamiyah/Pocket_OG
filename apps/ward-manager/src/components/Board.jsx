@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { fmtAge, clock, MIN } from "../utils/time";
-import { lastVE, obsStatus, obsTracked, parityShort, stageLabel, currentOxytocin, doctorLabel, malpresentation } from "../utils/bedModel";
+import { lastVE, obsStatus, obsTracked, parityShort, riskShort, stageLabel, currentOxytocin, doctorLabel, malpresentation } from "../utils/bedModel";
 import { shortLabel } from "../utils/triage";
 import { iolEntryTier } from "../utils/iolPriority";
 import {
@@ -33,7 +33,8 @@ function Tag({ children, tone = "gray" }) {
 
 export function BedRow({ bed, t, now, onOpen, flash }) {
   const ve = lastVE(bed);
-  const flags = bed.riskFlags ?? [];
+  // The breech tag already shows malpresentation, so the flag is not repeated.
+  const flags = (bed.riskFlags ?? []).filter(f => f !== "Non-cephalic");
   const oxy = currentOxytocin(bed);
   const todo = (bed.tasks ?? []).filter(x => !x.done).length;
 
@@ -90,7 +91,7 @@ export function BedRow({ bed, t, now, onOpen, flash }) {
           {bed.modeOfOnset === "Induced" && <Tag tone="claude">IOL</Tag>}
           {bed.modeOfOnset === "PPROM" && <Tag tone="claude">PPROM</Tag>}
           {!bed.delivery && malpresentation(bed) && <Tag tone="claude">{malpresentation(bed)}</Tag>}
-          {flags.slice(0, 2).map(f => <Tag key={f}>{f}</Tag>)}
+          {flags.slice(0, 2).map(f => <Tag key={f}>{riskShort(f)}</Tag>)}
           {flags.length > 2 && <Tag>+{flags.length - 2}</Tag>}
         </span>
         <span className="flex items-baseline gap-1.5 flex-wrap">{status}</span>

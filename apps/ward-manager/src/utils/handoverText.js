@@ -2,7 +2,7 @@
 
 import { computeAlerts } from "./wardAlerts";
 import { clock, fmtAge } from "./time";
-import { currentOxytocin, doctorLabel, lastVE, membraneStatus, parityWithHistory, stageLabel, veFindings } from "./bedModel";
+import { currentOxytocin, doctorLabel, lastVE, membraneStatus, parityWithHistory, riskLabel, stageLabel, veFindings } from "./bedModel";
 import { tidy } from "./triage";
 
 function isPreterm(g) {
@@ -30,13 +30,14 @@ export function generateHandover(beds, shift, now = Date.now()) {
 
     // Background that matters whether or not she has delivered.
     const background = [
-      ...(bed.riskFlags ?? []),
+      ...(bed.riskFlags ?? []).map(riskLabel),
       bed.modeOfOnset && bed.modeOfOnset !== "Spontaneous" ? bed.modeOfOnset : null,
       bed.modeOfOnset === "Induced" && bed.inductionMethod ? `${bed.inductionMethod}${bed.inductionStartTime ? ` from ${clock(bed.inductionStartTime, now)}` : ""}` : null,
       bed.analgesia && bed.analgesia !== "None" ? bed.analgesia : null,
     ].filter(Boolean);
     const done = [
-      bed.gbsAntibioticsStarted && "GBS antibiotics ✓",
+      bed.gbsAntibioticsStarted && "Intrapartum antibiotics ✓",
+      bed.bleedingReviewed && "Bleeding reviewed ✓",
       bed.neonatalTeamAlerted && "Neonatal team ✓",
       bed.corticosteroidsConfirmed && "Steroids ✓",
       bed.mgso4Given && "MgSO4 ✓",
