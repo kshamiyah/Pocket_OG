@@ -5,6 +5,7 @@ import BedRecord from "./BedRecord";
 import VESheet from "./VESheet";
 import CTGSheet from "./CTGSheet";
 import OxySheet from "./OxySheet";
+import ObsSheet from "./ObsSheet";
 import DeliverySheet from "./DeliverySheet";
 import AdmitSheet from "./AdmitSheet";
 import BoardRound from "./BoardRound";
@@ -18,7 +19,7 @@ import { RulesContext } from "../ui/rulesContext";
 import UndoToast from "../ui/UndoToast";
 import { ChipRow, Label } from "../ui/atoms";
 import { BTN, BTN_DANGER, BTN_SECONDARY, TYPE_META } from "../ui/styles";
-import { addVE, doctorLabel, editVE as applyEditVE, fixAlert, lastCTG, newId, setStage, stampObs, STAGE_SHORT } from "../utils/bedModel";
+import { addVE, doctorLabel, editVE as applyEditVE, fixAlert, fixLabel, lastCTG, newId, setStage, STAGE_SHORT } from "../utils/bedModel";
 import { triageWard, wardSummary } from "../utils/triage";
 import { clock } from "../utils/time";
 import { getThemePref, isDarkResolved, setThemePref, watchSystemTheme } from "../utils/theme";
@@ -116,6 +117,10 @@ export default function WardPage({ shift, onEndShift }) {
   };
 
   const closeSheet = () => setSheet(null);
+  // A sheet opened from a bed card returns to that card when it closes, so the
+  // result is visible and the next action is one tap away.
+  const finish = () => (sheet?.from === "bed" && sheet.bedId ? setSheet({ type: "bed", bedId: sheet.bedId }) : closeSheet());
+  const onCard = sheet?.type === "bed";
   const iso = () => new Date().toISOString();
 
   // ── Actions ──────────────────────────────────────────────────────────
@@ -124,26 +129,22 @@ export default function WardPage({ shift, onEndShift }) {
     // A one-tap "normal" must not quietly replace an abnormal review: ask for the features.
     const prev = lastCTG(bed);
     if (prev && prev.classification !== "normal") {
-      setSheet({ type: "ctg", bedId, notice: `The last CTG (${clock(prev.time)}) was ${prev.classification}. Record the features to log this review.` });
+      setSheet({ type: "ctg", bedId, from: onCard ? "bed" : undefined, notice: `The last CTG (${clock(prev.time)}) was ${prev.classification}. Record the features to log this review.` });
       return;
     }
     updateBed(bedId, { ctgLog: [...(bed.ctgLog ?? []), { id: newId("ctg"), time: iso(), classification: "normal", quick: true }] }, `Normal CTG logged · Bed ${bed.bedNumber}`);
-    closeSheet();
-  };
-  const obsDone = bedId => {
-    const bed = beds[bedId];
-    updateBed(bedId, stampObs(bed, iso()), `Obs done · Bed ${bed.bedNumber}`);
-    closeSheet();
+    if (!onCard) closeSheet();
   };
   const fix = (bedId, alertId) => {
     const bed = beds[bedId];
     const label = { "gbs-iap": "GBS antibiotics given", "preterm-neonatal": "Neonatal team alerted", "preterm-steroids": "Steroids confirmed", "preterm-mgso4": "MgSO4 given", "preterm-tocolysis": "Tocolysis offered" }[alertId] ?? "Done";
-    updateBed(bedId, fixAlert(bed, alertId, iso()), `${label} · Bed ${bed.bedNumber}`);
+    const reviewed = fixLabel(alertId) === "Reviewed";
+    updateBed(bedId, fixAlert(bed, alertId, iso(), doctorLabel(shift?.doctorName)), `${reviewed ? "Reviewed" : label} · Bed ${bed.bedNumber}`);
   };
   const changeStage = (bedId, stage, keepOpen = false) => {
     const bed = beds[bedId]; if (bed.labourStage === stage) return;
     updateBed(bedId, setStage(bed, stage, iso()), `Bed ${bed.bedNumber}: ${STAGE_SHORT[stage]}`);
-    if (!keepOpen) closeSheet();
+    if (!keepOpen && !onCard) closeSheet();
   };
   const saveVE = (bedId, ve, stageTo, editing) => {
     const bed = beds[bedId];
@@ -151,33 +152,33 @@ export default function WardPage({ shift, onEndShift }) {
     if (editing) updates = applyEditVE(bed, ve);
     else {
       const r = addVE(bed, ve);
-      if (r.duplicate) { closeSheet(); showToast("That VE is already saved"); return; }
+      if (r.duplicate) { finish(); showToast("That VE is already saved"); return; }
       updates = r.updates;
     }
     if (stageTo) Object.assign(updates, setStage(bed, stageTo, ve.time));
     updateBed(bedId, updates, `${editing ? "VE updated" : `VE ${ve.dilation} cm saved`} · Bed ${bed.bedNumber}${stageTo ? ` · ${STAGE_SHORT[stageTo]}` : ""}`);
-    closeSheet();
+    finish();
   };
   const saveCTG = (bedId, entry, editing) => {
     const bed = beds[bedId]; const log = bed.ctgLog ?? [];
     updateBed(bedId, { ctgLog: editing ? log.map(e => (e.id === entry.id ? entry : e)) : [...log, entry] },
       `${editing ? "CTG updated" : `${entry.classification[0].toUpperCase()}${entry.classification.slice(1)} CTG logged`} · Bed ${bed.bedNumber}`);
-    closeSheet();
+    finish();
   };
   const saveOxy = (bedId, entry) => {
     const bed = beds[bedId]; const log = bed.oxytocinLog ?? [];
     const msg = entry.stopped ? "Oxytocin stopped" : `Oxytocin ${entry.dose} mU/min`;
     updateBed(bedId, { oxytocinLog: [...log, entry], oxytocinHeld: false, ...(log.length ? {} : { oxytocinStartTime: entry.startTime }) }, `${msg} · Bed ${bed.bedNumber}`);
-    closeSheet();
+    finish();
   };
   const holdOxy = (bedId, held) => {
     updateBed(bedId, { oxytocinHeld: held }, `Oxytocin ${held ? "held at current dose" : "hold released"} · Bed ${beds[bedId].bedNumber}`);
-    closeSheet();
+    finish();
   };
   const saveDelivery = (bedId, record) => {
     const bed = beds[bedId];
     updateBed(bedId, { delivery: record }, `Bed ${bed.bedNumber} delivered · ${record.mode}`);
-    closeSheet();
+    finish();
     if (round) setRound(r => {
       const ids = r.ids.filter(id => id !== bedId);
       return { ...r, ids, index: Math.min(r.index, ids.length) };
@@ -268,20 +269,23 @@ export default function WardPage({ shift, onEndShift }) {
         <BedSheet bed={sb} t={triage[sb.id]} now={now} onClose={closeSheet}
           onEdit={() => setSheet({ type: "edit", bedId: sb.id, back: "bed" })}
           onCTGNormal={() => ctgNormal(sb.id)}
-          onCTGConcern={() => setSheet({ type: "ctg", bedId: sb.id })}
-          onVE={() => setSheet({ type: "ve", bedId: sb.id })}
-          onObs={() => obsDone(sb.id)}
+          onCTGConcern={() => setSheet({ type: "ctg", bedId: sb.id, from: "bed" })}
+          onVE={() => setSheet({ type: "ve", bedId: sb.id, from: "bed" })}
+          onObs={() => setSheet({ type: "obs", bedId: sb.id, from: "bed" })}
           onFix={id => fix(sb.id, id)}
           onStage={s => changeStage(sb.id, s)}
-          onDelivered={() => setSheet({ type: "delivery", bedId: sb.id })}
-          onOxy={() => setSheet({ type: "oxy", bedId: sb.id })}
+          onDelivered={() => setSheet({ type: "delivery", bedId: sb.id, from: "bed" })}
+          onOxy={() => setSheet({ type: "oxy", bedId: sb.id, from: "bed" })}
           onRecord={() => { setRecordId(sb.id); closeSheet(); }}
           onRemove={() => removeBed(sb.id)} />
       )}
-      {sheet?.type === "ve" && sb && <VESheet key={sheet.edit?.id ?? "new"} bed={sb} editVE={sheet.edit ?? null} onClose={closeSheet} onSave={(ve, stageTo) => saveVE(sb.id, ve, stageTo, !!sheet.edit)} />}
-      {sheet?.type === "ctg" && sb && <CTGSheet key={sheet.edit?.id ?? "new"} bed={sb} editCTG={sheet.edit ?? null} notice={sheet.notice} onClose={closeSheet} onSave={e => saveCTG(sb.id, e, !!sheet.edit)} />}
-      {sheet?.type === "oxy" && sb && <OxySheet bed={sb} onClose={closeSheet} onSave={e => saveOxy(sb.id, e)} onHold={h => holdOxy(sb.id, h)} />}
-      {sheet?.type === "delivery" && sb && <DeliverySheet bed={sb} onClose={closeSheet} onSave={r => saveDelivery(sb.id, r)} />}
+      {sheet?.type === "ve" && sb && <VESheet key={sheet.edit?.id ?? "new"} bed={sb} editVE={sheet.edit ?? null} onClose={finish} onSave={(ve, stageTo) => saveVE(sb.id, ve, stageTo, !!sheet.edit)} />}
+      {sheet?.type === "ctg" && sb && <CTGSheet key={sheet.edit?.id ?? "new"} bed={sb} editCTG={sheet.edit ?? null} notice={sheet.notice} onClose={finish} onSave={e => saveCTG(sb.id, e, !!sheet.edit)} />}
+      {sheet?.type === "oxy" && sb && <OxySheet bed={sb} onClose={finish} onSave={e => saveOxy(sb.id, e)} onHold={h => holdOxy(sb.id, h)} />}
+      {sheet?.type === "delivery" && sb && <DeliverySheet bed={sb} onClose={finish} onSave={r => saveDelivery(sb.id, r)} />}
+      {sheet?.type === "obs" && sb && (
+        <ObsSheet bed={sb} onClose={finish} onSave={(u, msg) => { updateBed(sb.id, u, `${msg} · Bed ${sb.bedNumber}`); finish(); }} />
+      )}
       {sheet?.type === "edit" && sb && (
         <AdmitSheet mode="edit" bed={sb} existingNumbers={Object.values(beds).map(b => b.bedNumber)}
           onClose={sheet.back === "bed" ? () => setSheet({ type: "bed", bedId: sb.id }) : closeSheet}
@@ -342,8 +346,9 @@ export default function WardPage({ shift, onEndShift }) {
       )}
 
       {/* Hidden while a sheet is open so it never covers controls; it returns when the sheet closes. */}
-      {!sheet && (
+      {(!sheet || sheet.type === "bed") && (
         <UndoToast message={toast?.message} onUndo={toast?.snapshot ? undo : null}
+          top={sheet?.type === "bed" ? "calc(env(safe-area-inset-top) + 0.75rem)" : null}
           bottom={round ? "calc(env(safe-area-inset-bottom) + 9rem)" : recordBed ? "calc(env(safe-area-inset-bottom) + 1.25rem)" : undefined} />
       )}
 

@@ -5,6 +5,7 @@
 // stay in lockstep. Re-exported here so existing imports keep working.
 export { classifyCTGEntry } from "@pocket-og/guidelines";
 import { getUnitSettings } from "../data/unitSettings.js";
+import { obsValueAt } from "./bedModel.js";
 
 const MIN = 60 * 1000;
 const HOUR = 60 * MIN;
@@ -64,7 +65,11 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   const isGBSThisPregnancy = flags.includes("GBS+");
   const isGBSPrevious = flags.includes("GBS previous");
   const isGBSPos = isGBSThisPregnancy || isGBSPrevious;
-  const isInfection = flags.includes("Infection suspected");
+  // A temperature of 38°C or more starts the infection pathway too (NG235
+  // 1.8.20; GL787 treats maternal pyrexia over 38°C as intra-amniotic infection).
+  const tempNow = obs.tempValue ? parseFloat(obs.tempValue) : null;
+  const isFever = !delivered && tempNow !== null && tempNow >= 38;
+  const isInfection = flags.includes("Infection suspected") || isFever;
   const hasBleeding = flags.includes("APH");
   const isGBSPending = flags.includes("GBS pending");
   // Membrane status comes from the VEs. Only when no VE has recorded membranes yet
@@ -172,13 +177,19 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // Nifedipine is offered at 26+0 to 33+6 (considered at 24+0 to 25+6) with
   // intact membranes in suspected or diagnosed preterm labour.
   const membranesIntactNow = !membranesRuptured;
+  // NG25 1.8.1: bleeding or infection may mean stopping labour is contraindicated.
+  const tocolysisCaution = isInfection || flags.includes("APH");
   if (!delivered && isPreterm && gestWks >= 24 && gestWks < 34 && membranesIntactNow && !bed.tocolysisOffered
       && (bed.labourStage === "Latent" || bed.labourStage === "Active first stage")) {
     alerts.push({
       id: "preterm-tocolysis",
       severity: "warning",
-      title: `Tocolysis: offer or record decision (${gest})`,
-      body: "Intact membranes in suspected or diagnosed preterm labour. Weigh the NG25 1.8.1 factors (bleeding, infection, gestation, steroid benefit, neonatal cot availability, her preference).",
+      title: tocolysisCaution
+        ? `Tocolysis: ${isInfection ? "infection" : "bleeding"} may contraindicate it (${gest})`
+        : `Tocolysis: offer or record decision (${gest})`,
+      body: tocolysisCaution
+        ? "Suspected infection or bleeding may suggest stopping labour is contraindicated (NG25 1.8.1). Record the decision with senior input."
+        : "Intact membranes in suspected or diagnosed preterm labour. Weigh the NG25 1.8.1 factors (bleeding, infection, gestation, steroid benefit, neonatal cot availability, her preference).",
       citation: "NICE NG25 1.8.1, 1.8.4 [2015, amended 2022]",
     });
   }
@@ -327,17 +338,18 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     const veHasCx  = lastVE  && typeof lastVE.contractions       === "number";
     const ctgHasCx = lastCTG && typeof lastCTG.contractionsPerTen === "number";
     if (!veHasCx && !ctgHasCx) return null;
-    if (veHasCx && !ctgHasCx)  return { count: lastVE.contractions, from: "VE" };
-    if (!veHasCx && ctgHasCx)  return { count: lastCTG.contractionsPerTen, from: "CTG" };
+    if (veHasCx && !ctgHasCx)  return { count: lastVE.contractions, from: "VE", time: lastVE.time };
+    if (!veHasCx && ctgHasCx)  return { count: lastCTG.contractionsPerTen, from: "CTG", time: lastCTG.time };
     return new Date(lastVE.time) >= new Date(lastCTG.time)
-      ? { count: lastVE.contractions, from: "VE" }
-      : { count: lastCTG.contractionsPerTen, from: "CTG" };
+      ? { count: lastVE.contractions, from: "VE", time: lastVE.time }
+      : { count: lastCTG.contractionsPerTen, from: "CTG", time: lastCTG.time };
   })();
   const tooManyContractions = !!latestCxSource && latestCxSource.count >= 5;
   if (tooManyContractions) {
     alerts.push({
       id: "hyperstim",
       severity: "urgent",
+      since: latestCxSource.time,
       title: `${latestCxSource.count} contractions in 10 min${oxyRunning ? ": reduce or stop oxytocin" : ""}`,
       body: oxyRunning
         ? `Recorded on the ${latestCxSource.from}. Reduce or stop the oxytocin until she is having 4 or fewer contractions in 10 minutes. Full risk assessment and measures to reduce contraction frequency.`
@@ -353,6 +365,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     alerts.push({
       id: "oxytocin-stop-pathological",
       severity: "urgent",
+      since: lastCTG.time,
       title: "Pathological CTG: stop oxytocin",
       body: "Oxytocin must be discontinued immediately if the CTG is pathological, and urgent obstetrician or senior midwife review sought. Record the stop in the oxytocin log.",
       citation: "NICE NG235 1.8.56 [2023]",
@@ -371,7 +384,10 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       const msSinceIncrement = now - new Date(currentOx.lastIncrementTime).getTime();
       // No "increase" prompt while the dose is held, contractions are 5 or more,
       // the CTG is abnormal, or she is in the second stage (1.8.54 is first stage).
-      const incrementSafe = !bed.oxytocinHeld && !tooManyContractions && !ctgAbnormal && !inSecondStage;
+      // NG235 1.8.54: increase until 3 to 4 in 10, so no prompt once 3 or more
+      // are recorded, and none without a CTG on record to judge it by.
+      const atTarget = !!latestCxSource && latestCxSource.count >= 3;
+      const incrementSafe = !bed.oxytocinHeld && !tooManyContractions && !atTarget && !ctgAbnormal && !inSecondStage && !!lastCTG;
       if (incrementSafe && msSinceIncrement >= 30 * MIN) {
         alerts.push({
           id: "oxytocin-increment",
@@ -439,7 +455,8 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     } else if (ms >= unit.promReviewH * HOUR) {
       alerts.push({
         id: "prom-18h",
-        severity: "urgent",
+        // A review prompt at a local threshold, not an emergency.
+        severity: "warning",
         title: `Membranes ruptured over ${unit.promReviewH} hours (${formatAge(ms)})`,
         body: `${isGBSPending ? "GBS result pending: obtain it urgently. " : "Review GBS status. "}Antibiotics if GBS positive, ROM 48 hours or more, or pyrexia over 38°C (GL787); in preterm labour (NG195 1.6.1).`,
         citation: `${unit.promReviewH} h is a unit setting: not in NG195 or GL787`,
@@ -465,12 +482,16 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // Suspected chorioamnionitis or sepsis: antibiotics as soon as infection is
   // suspected (NG195 1.6.4). Broad-spectrum treatment also covers GBS (GL787:
   // IAP not required if already on antibiotics for chorioamnionitis).
-  if (!delivered && isInfection && !bed.gbsAntibioticsStarted) {
+  // Its own "Given": GBS prophylaxis (benzylpenicillin) does not cover it.
+  if (!delivered && isInfection && !bed.broadAntibioticsStarted) {
     alerts.push({
       id: "infection-suspected",
       severity: "urgent",
-      title: "Suspected chorioamnionitis or sepsis: IV antibiotics now",
-      body: "Give the first dose as soon as infection is suspected and continue until birth. Regimen per local policy (GL787 treats maternal pyrexia over 38°C as intra-amniotic infection). Offer continuous CTG; senior review; assess sepsis risk (NG255).",
+      title: isFever && !flags.includes("Infection suspected")
+        ? `Pyrexia ${tempNow}°C: assess for chorioamnionitis or sepsis`
+        : "Suspected chorioamnionitis or sepsis: IV antibiotics now",
+      body: "If infection is suspected, give the first dose of IV antibiotics as soon as it is suspected and continue until birth; GBS prophylaxis does not cover this. Regimen per local policy (GL787 treats maternal pyrexia over 38°C as intra-amniotic infection). Offer continuous CTG; senior review; assess sepsis risk (NG255).",
+      since: isFever ? obs.tempAt ?? obs.lastTemp : undefined,
       citation: "NICE NG195 1.6.1, 1.6.4 · NG229 1.3.2, 1.3.8 · GL787",
     });
   }
@@ -562,20 +583,29 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   const bpDia = obs.bpDiastolic ? parseFloat(obs.bpDiastolic) : null;
   const temp  = obs.tempValue   ? parseFloat(obs.tempValue)   : null;
   const bgl   = obs.bglValue    ? parseFloat(obs.bglValue)    : null;
+  const rr    = obs.rrValue     ? parseFloat(obs.rrValue)     : null;
+  // Each value keeps alerting until a newer value replaces it, and says how old it is.
+  const valueSince = name => obsValueAt(obs, name);
+  const valueAge = name => { const at = valueSince(name); return at ? now - new Date(at).getTime() : null; };
+  const aged = name => { const ms = valueAge(name); return ms != null && ms >= 5 * MIN ? ` (${formatAge(ms)} ago)` : ""; };
 
+  // While the infection prompt is up it carries the temperature; afterwards
+  // the pyrexia alert stays until a newer temperature replaces it.
   if (temp !== null && temp >= 38.0) {
-    alerts.push({
-      id: "temp-38",
-      severity: "urgent",
-      title: `Pyrexia ${temp}°C — probable intrauterine infection`,
-      body: "38°C or above is a transfer trigger and an indication for continuous CTG. If chorioamnionitis is suspected, offer IV antibiotics as soon as infection is suspected. Senior review; consider sepsis.",
-      citation: "NICE NG235 1.8.20 · NG229 1.3.8 · NG195 1.6.1, 1.6.4",
-    });
+    if (!isInfection || bed.broadAntibioticsStarted) {
+      alerts.push({
+        id: "temp-38",
+        severity: "urgent",
+        title: `Pyrexia ${temp}°C${aged("temp")} — probable intrauterine infection`, since: valueSince("temp"),
+        body: "38°C or above is a transfer trigger and an indication for continuous CTG. If chorioamnionitis is suspected, offer IV antibiotics as soon as infection is suspected. Senior review; consider sepsis.",
+        citation: "NICE NG235 1.8.20 · NG229 1.3.8 · NG195 1.6.1, 1.6.4",
+      });
+    }
   } else if (temp !== null && temp >= 37.5) {
     alerts.push({
       id: "temp-375",
       severity: "warning",
-      title: `Temperature ${temp}°C — possible infection`,
+      title: `Temperature ${temp}°C${aged("temp")} — possible infection`, since: valueSince("temp"),
       body: "Repeat in 1 hour: 37.5°C or above on 2 readings 1 hour apart is a transfer trigger. Look for signs of chorioamnionitis.",
       citation: "NICE NG235 1.8.20 [2023]",
     });
@@ -585,7 +615,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     alerts.push({
       id: "tachycardia",
       severity: "urgent",
-      title: `Maternal tachycardia — pulse ${pulse} bpm`,
+      title: `Maternal tachycardia — pulse ${pulse} bpm${aged("pulse")}`, since: valueSince("pulse"),
       body: "Pulse over 120 bpm (NG235 1.8.20: over 120 on 2 occasions 15 to 30 minutes apart). Assess for haemorrhage, sepsis, pulmonary embolism, or pain. Escalate to senior clinician.",
       citation: "NICE NG235 1.8.20 [2023]",
     });
@@ -596,7 +626,11 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       alerts.push({
         id: "bp-severe",
         severity: "urgent",
-        title: `Severe hypertension — BP ${bpSys}/${bpDia} mmHg`,
+        // NG133 1.7.3: every 15 to 30 minutes until below 160/110.
+        title: (valueAge("bp") ?? 0) >= 30 * MIN
+          ? `Severe BP ${bpSys}/${bpDia}${aged("bp")} — recheck now`
+          : `Severe hypertension — BP ${bpSys}/${bpDia} mmHg${aged("bp")}`,
+        since: valueSince("bp"),
         body: "Severe hypertension (a single reading of 160/110 or more). Treat urgently per NG133 and local protocol; involve the obstetric consultant. Measure BP every 15 to 30 minutes until below 160/110.",
         citation: "NICE NG235 1.8.20 [2023] · NG133 1.7.3",
       });
@@ -604,7 +638,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       alerts.push({
         id: "bp-elevated",
         severity: isHypertensive ? "urgent" : "warning",
-        title: `Hypertension — BP ${bpSys}/${bpDia} mmHg`,
+        title: `Hypertension — BP ${bpSys}/${bpDia} mmHg${aged("bp")}`, since: valueSince("bp"),
         body: isHypertensive
           ? `BP 140/90 or more in a woman with known hypertension. Hourly BP in labour; review treatment.`
           : `New BP 140/90 or more in labour. Repeat in 15 to 30 minutes (2 consecutive raised readings is a transfer trigger); assess for pre-eclampsia.`,
@@ -618,7 +652,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       alerts.push({
         id: "bgl-low",
         severity: "urgent",
-        title: `Hypoglycaemia — BGL ${bgl} mmol/L`,
+        title: `Hypoglycaemia — BGL ${bgl} mmol/L${aged("bgl")}`, since: valueSince("bgl"),
         body: "Below the 4 to 7 mmol/L target for labour. Treat hypoglycaemia per local protocol (GL983) and recheck.",
         citation: "NICE NG3 1.4.10, 1.4.12 · GL983",
       });
@@ -626,7 +660,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       alerts.push({
         id: "bgl-high",
         severity: "urgent",
-        title: `Hyperglycaemia — BGL ${bgl} mmol/L`,
+        title: `Hyperglycaemia — BGL ${bgl} mmol/L${aged("bgl")}`, since: valueSince("bgl"),
         body: `Above the 4 to 7 mmol/L target for labour. IV dextrose and insulin if not maintained (NG3 1.4.12); adjust per GL983. Recheck hourly.`,
         citation: "NICE NG3 1.4.10, 1.4.12 · GL983",
       });
@@ -640,7 +674,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     alerts.push({
       id: "bp-low",
       severity: "urgent",
-      title: `Low BP — systolic ${bpSys} mmHg`,
+      title: `Low BP — systolic ${bpSys} mmHg${aged("bp")}`, since: valueSince("bp"),
       body: "Systolic 90 mmHg or less is a high-risk criterion for severe illness or death from sepsis (NG255 table 1). Consider haemorrhage and sepsis; urgent senior review.",
       citation: "NICE NG255 1.5.1–1.5.2, table 1",
     });
@@ -648,7 +682,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     alerts.push({
       id: "bp-low",
       severity: "warning",
-      title: `Low-normal BP — systolic ${bpSys} mmHg`,
+      title: `Low-normal BP — systolic ${bpSys} mmHg${aged("bp")}`, since: valueSince("bp"),
       body: "Systolic 91 to 100 mmHg is a moderate to high risk criterion if sepsis is suspected (NG255 table 1). Review the whole picture.",
       citation: "NICE NG255 1.5.1–1.5.2, table 1",
     });
@@ -657,9 +691,39 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     alerts.push({
       id: "temp-low",
       severity: "warning",
-      title: `Low temperature ${temp}°C`,
+      title: `Low temperature ${temp}°C${aged("temp")}`, since: valueSince("temp"),
       body: "Temperature below 36°C is a moderate to high risk criterion if sepsis is suspected (NG255 table 1).",
       citation: "NICE NG255 1.5.1–1.5.2, table 1",
+    });
+  }
+
+  // ─── Respiratory rate (NICE NG255 table 1; NG235 1.8.20) ─────────────
+  if (rr !== null && rr < 9) {
+    alerts.push({
+      id: "rr-low",
+      severity: "urgent",
+      title: `Respiratory rate ${rr}/min${aged("rr")}`,
+      body: "Below 9 on 2 readings 15 to 30 minutes apart is a transfer trigger (NG235 1.8.20). Assess now.",
+      citation: "NICE NG235 1.8.20 [2023]",
+      since: valueSince("rr"),
+    });
+  } else if (rr !== null && rr >= 25) {
+    alerts.push({
+      id: "rr-high",
+      severity: "urgent",
+      title: `Respiratory rate ${rr}/min${aged("rr")}`,
+      body: "25 or more is a high-risk criterion for severe illness or death from sepsis (NG255 table 1). Senior review.",
+      citation: "NICE NG255 1.5.1–1.5.2, table 1",
+      since: valueSince("rr"),
+    });
+  } else if (rr !== null && rr >= 21) {
+    alerts.push({
+      id: "rr-high",
+      severity: "warning",
+      title: `Respiratory rate ${rr}/min${aged("rr")}`,
+      body: "21 to 24 is a moderate to high risk criterion if sepsis is suspected (NG255 table 1); over 21 on 2 readings 15 to 30 minutes apart is a transfer trigger (NG235 1.8.20). Repeat.",
+      citation: "NICE NG255 table 1 · NG235 1.8.20",
+      since: valueSince("rr"),
     });
   }
 
@@ -711,6 +775,15 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       }
     } else {
       alerts.push({ id: "temp-never", severity: "info", title: "Temperature not recorded", body: "4-hourly temperature required in active labour.", citation: "NICE NG235 1.8.19 [2007]" });
+    }
+
+    if (obs.lastRR) {
+      const ms = now - new Date(obs.lastRR).getTime();
+      if (ms >= 4 * HOUR) {
+        alerts.push({ id: "rr-due", severity: "info", title: "Respiratory rate due", body: `4-hourly respiratory rate in active labour. Last ${formatAge(ms)} ago.`, citation: "NICE NG235 1.8.19 [2007]" });
+      }
+    } else {
+      alerts.push({ id: "rr-never", severity: "info", title: "Respiratory rate not recorded", body: "4-hourly respiratory rate required in active labour.", citation: "NICE NG235 1.8.19 [2007]" });
     }
   }
 
@@ -824,7 +897,8 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     if (ctgClockRuns && needsContinuousCTG && !lastCTG) {
       alerts.push({
         id: "ctg-not-documented",
-        severity: "info",
+        // With a NICE (or local) indication, a missing CTG is due, not background.
+        severity: ctgReasons.length ? "warning" : "info",
         title: "Continuous CTG — not yet documented",
         body: `${ctgReasons.length ? `Indication: ${ctgReasons.join(", ")}.` : "Unit policy: continuous CTG in established labour."} Log a CTG review to track fetal wellbeing.`,
         citation: ctgReasons.length ? "NICE NG229 1.3.2, 1.3.3, 1.3.8 [2022]" : "Unit setting",
@@ -837,6 +911,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
         alerts.push({
           id: "ctg-pathological",
           severity: "urgent",
+          since: lastCTG.time,
           title: `Pathological CTG — urgent review (${formatAge(msCTG)} ago)`,
           body: "Urgent review by an obstetrician and a senior midwife. Exclude acute events (cord prolapse, abruption, uterine rupture). Full risk assessment with maternal observations; conservative measures. If still pathological, consider expediting birth.",
           citation: "NICE NG229 1.5.7, 1.5.8 [2022]",
@@ -873,7 +948,26 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   }
 
   const order = { urgent: 0, warning: 1, info: 2 };
-  return alerts.sort((a, b) => order[a.severity] - order[b.severity]);
+  return alerts.sort((a, b) => order[a.severity] - order[b.severity] || alertTier(a.id) - alertTier(b.id));
+}
+
+// Clinical priority within a severity, so the most dangerous problem is always
+// on top: 0 = deteriorating now (bleeding, severe BP, pathological CTG, sepsis
+// signs); 1 = treatment or decision due; 2 = timing reminders.
+// Tier 0 in order of urgency, so a woman bleeding heavily outranks one whose
+// only problem is a fever. The order is an app choice, shown on the Rules page.
+const TIER_0 = [
+  "pph", "aph", "bp-low", "ctg-pathological", "oxytocin-stop-pathological", "bp-severe", "rr-low",
+  "infection-suspected", "temp-38", "rr-high", "tachycardia", "hyperstim", "bgl-low", "mec-thick", "liquor-blood",
+];
+const TIER_2 = new Set([
+  "ve-overdue", "ve-never", "ve-due-soon", "bp-due", "bp-never", "pulse-due", "pulse-never", "temp-due", "temp-never",
+  "rr-due", "rr-never", "bgl-due", "bgl-never", "prom-18h", "prom-16h", "latent-reassess", "ctg-review-due",
+  "ctg-not-documented", "oxytocin-increment", "passive-limit-soon", "active-phase-limit", "under-28",
+]);
+export function alertTier(id) {
+  const i = TIER_0.indexOf(id);
+  return i >= 0 ? i / 100 : TIER_2.has(id) ? 2 : 1;
 }
 
 export function bedStatusColor(alerts) {

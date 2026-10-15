@@ -8,12 +8,13 @@ import {
 import { IconBack, IconTick } from "../ui/icons";
 import { fmtAge, clock } from "../utils/time";
 import {
-  ANALGESIA, LIQUOR_SHORT, PERSISTENT_FLAGS, STAGES, STAGE_SHORT, currentOxytocin, isHypertensiveBed, newId, obsStatus, parityWithHistory, sortedVEs, stageLabel, stampObs, stationLabel,
+  ANALGESIA, LIQUOR_SHORT, PERSISTENT_FLAGS, STAGES, STAGE_SHORT, currentOxytocin, isHypertensiveBed, newId, obsStatus, parityWithHistory, recordObs, sortedVEs, stageLabel, stampObs, stationLabel,
 } from "../utils/bedModel";
 
 // Labels for the "recorded as done" list, so a mistaken Given or Done can be taken back.
 const DONE_LABEL = {
   gbsAntibioticsStarted: "Intrapartum antibiotics given",
+  broadAntibioticsStarted: "Antibiotics for suspected infection given",
   pphReviewed: "PPH reviewed",
   bleedingReviewed: "Bleeding reviewed",
   neonatalTeamAlerted: "Neonatal team alerted",
@@ -46,10 +47,7 @@ function ObsPanel({ bed, now, onUpdate }) {
     : obs[it.valueKey] ?? null;
 
   const saveValue = it => {
-    const u = { ...obs, [it.key]: new Date().toISOString() };
-    if (it.type === "bp") { if (v1) u.bpSystolic = v1; if (v2) u.bpDiastolic = v2; }
-    else if (v1) u[it.valueKey] = v1;
-    onUpdate({ observations: u }, `${it.label} recorded`);
+    onUpdate(recordObs(bed, new Date().toISOString(), { [it.name]: it.type === "bp" ? [v1, v2] : v1 }), `${it.label} recorded`);
     setOpen(null); setV1(""); setV2("");
   };
 

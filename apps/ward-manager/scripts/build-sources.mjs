@@ -63,6 +63,7 @@ out["NG255 table 1"] = {
     "Blood pressure. High risk: Systolic blood pressure 90 mmHg or less or systolic blood pressure more than 40mmHg below normal. Moderate to high risk: Systolic blood pressure 91 to 100 mmHg",
     "Circulation and hydration. High risk: Raised heart rate: more than 130 beats per minute. Moderate to high risk: Raised heart rate: 100 to 130 beats per minute or new-onset arrhythmia",
     "Temperature. High risk: none. Moderate to high risk: Tympanic temperature less than 36°C",
+    "Respiratory. High risk: Raised respiratory rate: 25 breaths per minute or more. Moderate to high risk: Raised respiratory rate: 21 to 24 breaths per minute",
   ].join("\n"),
 };
 

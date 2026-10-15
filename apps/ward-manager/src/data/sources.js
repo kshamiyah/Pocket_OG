@@ -410,7 +410,7 @@ export const SOURCES = {
     "docTitle": "Suspected sepsis in pregnant or recently pregnant people",
     "rec": "Table 1 (rows used)",
     "url": "https://www.nice.org.uk/guidance/ng255/chapter/Evaluating-risk-level",
-    "text": "Criteria for stratification of risk of severe illness or death from sepsis in people who are or have recently been pregnant\nBlood pressure. High risk: Systolic blood pressure 90 mmHg or less or systolic blood pressure more than 40mmHg below normal. Moderate to high risk: Systolic blood pressure 91 to 100 mmHg\nCirculation and hydration. High risk: Raised heart rate: more than 130 beats per minute. Moderate to high risk: Raised heart rate: 100 to 130 beats per minute or new-onset arrhythmia\nTemperature. High risk: none. Moderate to high risk: Tympanic temperature less than 36°C"
+    "text": "Criteria for stratification of risk of severe illness or death from sepsis in people who are or have recently been pregnant\nBlood pressure. High risk: Systolic blood pressure 90 mmHg or less or systolic blood pressure more than 40mmHg below normal. Moderate to high risk: Systolic blood pressure 91 to 100 mmHg\nCirculation and hydration. High risk: Raised heart rate: more than 130 beats per minute. Moderate to high risk: Raised heart rate: 100 to 130 beats per minute or new-onset arrhythmia\nTemperature. High risk: none. Moderate to high risk: Tympanic temperature less than 36°C\nRespiratory. High risk: Raised respiratory rate: 25 breaths per minute or more. Moderate to high risk: Raised respiratory rate: 21 to 24 breaths per minute"
   },
   "GL787 GBS": {
     "issuer": "Local",

@@ -206,10 +206,11 @@ export function isDiabetic(bed) {
 export function obsItems(bed) {
   const hypertensive = isHypertensiveBed(bed);
   return [
-    { key: "lastPulse", letter: "P", label: "Pulse", unit: "bpm", limit: 60, valueKey: "pulseValue", type: "int" },
-    { key: "lastBP", letter: "B", label: "BP", unit: "mmHg", limit: hypertensive ? 60 : 240, type: "bp" },
-    { key: "lastTemp", letter: "T", label: "Temp", unit: "°C", limit: 240, valueKey: "tempValue", type: "float" },
-    ...(isDiabetic(bed) ? [{ key: "lastBGL", letter: "G", label: "BGL", unit: "mmol/L", limit: 60, valueKey: "bglValue", type: "float" }] : []),
+    { key: "lastPulse", name: "pulse", letter: "P", label: "Pulse", unit: "bpm", limit: 60, valueKey: "pulseValue", type: "int" },
+    { key: "lastBP", name: "bp", letter: "B", label: "BP", unit: "mmHg", limit: hypertensive ? 60 : 240, type: "bp" },
+    { key: "lastTemp", name: "temp", letter: "T", label: "Temp", unit: "°C", limit: 240, valueKey: "tempValue", type: "float" },
+    { key: "lastRR", name: "rr", letter: "R", label: "Resp rate", unit: "/min", limit: 240, valueKey: "rrValue", type: "int" },
+    ...(isDiabetic(bed) ? [{ key: "lastBGL", name: "bgl", letter: "G", label: "BGL", unit: "mmol/L", limit: 60, valueKey: "bglValue", type: "float" }] : []),
   ];
 }
 
@@ -261,23 +262,46 @@ export function deleteVE(bed, id) {
   return { ves: (bed.ves ?? []).filter(v => v.id !== id) };
 }
 
-// The value each time stamp belongs to. A check stamped "done" without a value
-// replaces the old reading, so an abnormal value does not linger after a
-// normal re-check.
-const OBS_VALUES = {
-  lastPulse: ["pulseValue"],
-  lastBP: ["bpSystolic", "bpDiastolic"],
-  lastTemp: ["tempValue"],
-  lastBGL: ["bglValue"],
+// Observation values and the time each was taken. Stamping a check as done
+// never deletes a value: an abnormal reading keeps alerting (with its age)
+// until a newer value replaces it, so a one-tap "done" cannot hide it.
+const OBS_FIELDS = {
+  pulse: { stamp: "lastPulse", values: ["pulseValue"], at: "pulseAt" },
+  bp: { stamp: "lastBP", values: ["bpSystolic", "bpDiastolic"], at: "bpAt" },
+  temp: { stamp: "lastTemp", values: ["tempValue"], at: "tempAt" },
+  rr: { stamp: "lastRR", values: ["rrValue"], at: "rrAt" },
+  bgl: { stamp: "lastBGL", values: ["bglValue"], at: "bglAt" },
 };
 
-export function stampObs(bed, iso, keys = ["lastPulse", "lastBP", "lastTemp"]) {
+export function stampObs(bed, iso, keys = ["lastPulse", "lastBP", "lastTemp", "lastRR"]) {
   const observations = { ...(bed.observations ?? {}) };
-  keys.forEach(k => {
-    observations[k] = iso;
-    (OBS_VALUES[k] ?? []).forEach(v => { delete observations[v]; });
-  });
+  keys.forEach(k => { if (!observations[k] || observations[k] < iso) observations[k] = iso; });
   return { observations };
+}
+
+/**
+ * Record observation values taken at `iso`, e.g. { pulse: "92", bp: ["150", "95"], temp: "37.4" }.
+ * Each value replaces the stored one only if it is at least as recent.
+ */
+export function recordObs(bed, iso, entries) {
+  const observations = { ...(bed.observations ?? {}) };
+  for (const [name, raw] of Object.entries(entries)) {
+    const f = OBS_FIELDS[name];
+    const vals = Array.isArray(raw) ? raw : [raw];
+    if (!f || vals.some(v => v == null || String(v).trim() === "")) continue;
+    if (!observations[f.stamp] || observations[f.stamp] < iso) observations[f.stamp] = iso;
+    const prevAt = observations[f.at] ?? observations[f.stamp];
+    if (prevAt && prevAt > iso && observations[f.values[0]] != null) continue;
+    f.values.forEach((k, i) => { observations[k] = String(vals[i]).trim(); });
+    observations[f.at] = iso;
+  }
+  return { observations };
+}
+
+/** When a value was taken: its own time, or (older boards) its check stamp. */
+export function obsValueAt(obs, name) {
+  const f = OBS_FIELDS[name];
+  return obs?.[f.at] ?? obs?.[f.stamp] ?? null;
 }
 
 export function setStage(bed, stage, iso) {
@@ -304,25 +328,44 @@ export const PERSISTENT_FLAGS = {
   "iap-preterm": { field: "gbsAntibioticsStarted", label: "Given" },
   "prom-48h": { field: "gbsAntibioticsStarted", label: "Given" },
   "pph": { field: "pphReviewed", label: "Reviewed" },
-  "infection-suspected": { field: "gbsAntibioticsStarted", label: "Given" },
+  "infection-suspected": { field: "broadAntibioticsStarted", label: "Given" },
   "aph": { field: "bleedingReviewed", label: "Reviewed" },
 };
 export const OBS_STAMP = {
   "pulse-never": "lastPulse", "pulse-due": "lastPulse",
   "bp-never": "lastBP", "bp-due": "lastBP",
   "temp-never": "lastTemp", "temp-due": "lastTemp",
+  "rr-never": "lastRR", "rr-due": "lastRR",
   "bgl-never": "lastBGL", "bgl-due": "lastBGL",
+};
+
+/**
+ * Alerts a clinician can mark "Reviewed" (minutes the alert stays quiet). It
+ * returns after the window if the problem is still there, or at once if a newer
+ * record (a new CTG, a new obs value) arrives. Severe BP and pathological CTG
+ * use 30 min: NG133 1.7.3 (BP every 15 to 30 min) and a prompt re-review.
+ */
+export const REVIEW_MIN = {
+  "ctg-pathological": 30, "oxytocin-stop-pathological": 15, "ctg-suspicious-overdue": 30, "hyperstim": 30,
+  "bp-severe": 30, "bp-elevated": 60, "bp-low": 30, "tachycardia": 30, "temp-38": 60, "temp-375": 60, "temp-low": 60,
+  "rr-high": 30, "rr-low": 15, "bgl-low": 30, "bgl-high": 30, "oliguria": 60, "oxytocin-max": 60,
+  "slow-progress": 120, "active-phase-limit": 240, "arm-reassess": 120, "arm-cx-inadequate": 120, "latent-reassess": 240,
+  "passive-limit": 60, "pushing-reassess": 30, "pushing-senior-review": 60,
+  "prom-24h": 240, "prom-18h": 240, "prom-16h": 120, "gbs-pending-rupture": 240,
+  "mec-thick": 240, "mec-thin": 240, "liquor-blood": 60, "liquor-absent": 240,
 };
 
 export function fixLabel(alertId) {
   if (PERSISTENT_FLAGS[alertId]) return PERSISTENT_FLAGS[alertId].label;
   if (OBS_STAMP[alertId]) return "Done";
+  if (REVIEW_MIN[alertId]) return "Reviewed";
   return null;
 }
 
-export function fixAlert(bed, alertId, iso) {
+export function fixAlert(bed, alertId, iso, by = null) {
   if (PERSISTENT_FLAGS[alertId]) return { [PERSISTENT_FLAGS[alertId].field]: true };
   if (OBS_STAMP[alertId]) return stampObs(bed, iso, [OBS_STAMP[alertId]]);
+  if (REVIEW_MIN[alertId]) return { reviews: { ...(bed.reviews ?? {}), [alertId]: { at: iso, by } } };
   return {};
 }
 

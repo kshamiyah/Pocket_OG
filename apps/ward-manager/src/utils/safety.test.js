@@ -2,8 +2,8 @@
 
 import { describe, it, expect } from "vitest"
 import { computeAlerts } from "./wardAlerts.js"
-import { currentOxytocin, fixAlert, stampObs } from "./bedModel.js"
-import { triageBed } from "./triage.js"
+import { currentOxytocin, fixAlert, recordObs, stampObs } from "./bedModel.js"
+import { applyReviews, compareTriage, triageBed, triageWard } from "./triage.js"
 import { generateHandover } from "./handoverText.js"
 import { UNIT_DEFAULTS } from "../data/unitSettings.js"
 
@@ -104,18 +104,37 @@ describe("after birth: maternal safety alerts continue", () => {
   })
 })
 
-describe("stale observation values", () => {
-  it("a re-check stamped done clears the old abnormal value", () => {
-    const b = active({ observations: { lastPulse: t(2 * HOUR), pulseValue: "130", lastBP: t(10 * MIN), lastTemp: t(10 * MIN) } })
-    expect(ids(b)).toContain("tachycardia")
-    const after = { ...b, ...stampObs(b, t(0), ["lastPulse"]) }
-    expect(ids(after)).not.toContain("tachycardia")
+describe("observation values are never erased by a one-tap check", () => {
+  const withBP = () => active({ observations: { lastPulse: t(10 * MIN), lastTemp: t(10 * MIN), lastRR: t(10 * MIN), lastBP: t(40 * MIN), bpSystolic: "165", bpDiastolic: "112", bpAt: t(40 * MIN) } })
+  it("stamping obs done keeps a severe BP alerting", () => {
+    const b = withBP()
+    const after = { ...b, ...stampObs(b, t(0)) }
+    expect(after.observations.bpSystolic).toBe("165")
+    expect(ids(after)).toContain("bp-severe")
   })
-  it("the 'Done' fix on a due alert also clears the old value", () => {
-    const b = active({ observations: { lastPulse: t(2 * HOUR), pulseValue: "130", lastBP: t(10 * MIN), lastTemp: t(10 * MIN) } })
-    const after = { ...b, ...fixAlert(b, "pulse-due", t(0)) }
-    expect(after.observations.pulseValue).toBeUndefined()
+  it("the alert says how old the reading is and asks for a recheck after 30 min (NG133 1.7.3)", () => {
+    const a = computeAlerts(withBP(), NOW).find(x => x.id === "bp-severe")
+    expect(a.title).toMatch(/40m ago/)
+    expect(a.title).toMatch(/recheck now/)
   })
+  it("a newer normal value replaces it", () => {
+    const b = withBP()
+    const after = { ...b, ...recordObs(b, t(0), { bp: ["138", "88"] }) }
+    expect(ids(after)).not.toContain("bp-severe")
+  })
+  it("a backdated value does not overwrite a newer one", () => {
+    const b = withBP()
+    const after = { ...b, ...recordObs(b, t(60 * MIN), { bp: ["120", "80"] }) }
+    expect(after.observations.bpSystolic).toBe("165")
+  })
+})
+
+describe("respiratory rate (NG255 table 1; NG235 1.8.20)", () => {
+  const rrBed = v => active({ observations: { lastPulse: t(10 * MIN), lastBP: t(10 * MIN), lastTemp: t(10 * MIN), lastRR: t(10 * MIN), rrValue: v, rrAt: t(10 * MIN) } })
+  it("25 or more is urgent", () => expect(sev(rrBed("26"), "rr-high")).toBe("urgent"))
+  it("21 to 24 is a warning", () => expect(sev(rrBed("22"), "rr-high")).toBe("warning"))
+  it("under 9 is urgent", () => expect(sev(rrBed("8"), "rr-low")).toBe("urgent"))
+  it("16 is not flagged", () => expect(ids(rrBed("16")).filter(i => i.startsWith("rr-"))).toEqual([]))
 })
 
 describe("oxytocin stop, hold and safety (NG235 1.8.54 to 1.8.56)", () => {
@@ -132,8 +151,9 @@ describe("oxytocin stop, hold and safety (NG235 1.8.54 to 1.8.56)", () => {
     expect(computeAlerts(b, NOW).find(a => a.id === "hyperstim").title).toMatch(/reduce or stop oxytocin/)
   })
   it("no increment prompt while the dose is held", () => {
-    expect(ids(active({ oxytocinLog: [ox(6)] }))).toContain("oxytocin-increment")
-    expect(ids(active({ oxytocinLog: [ox(6)], oxytocinHeld: true }))).not.toContain("oxytocin-increment")
+    const n = [ctg("normal", 10)]
+    expect(ids(active({ oxytocinLog: [ox(6)], ctgLog: n }))).toContain("oxytocin-increment")
+    expect(ids(active({ oxytocinLog: [ox(6)], ctgLog: n, oxytocinHeld: true }))).not.toContain("oxytocin-increment")
   })
   it("a stopped infusion is not running", () => {
     const b = active({ oxytocinLog: [ox(6, 90), ox(0, 30, { stopped: true })], ctgLog: [ctg("pathological")] })
@@ -275,5 +295,70 @@ describe("new risk flags", () => {
   it("handover-only risks raise nothing", () => {
     const base = ids(active())
     expect(ids(active({ riskFlags: ["Twins", "BMI 40+", "My own note"] }))).toEqual(base)
+  })
+})
+
+describe("the most dangerous problem comes first", () => {
+  it("severe BP outranks the ROM review and an overdue VE", () => {
+    const b = active({
+      riskFlags: ["Pre-eclampsia"], membranes: "SROM", membranesTime: t(20 * HOUR),
+      ves: [{ id: "v", time: t(5 * HOUR), dilation: 7 }],
+      observations: { lastPulse: t(10 * MIN), lastTemp: t(10 * MIN), lastRR: t(10 * MIN), lastBP: t(10 * MIN), bpSystolic: "165", bpDiastolic: "112", bpAt: t(10 * MIN) },
+    })
+    expect(computeAlerts(b, NOW)[0].id).toBe("bp-severe")
+  })
+  it("a major PPH is not last in Needs you now", () => {
+    const pph = bed({ id: "p", bedNumber: "2", delivery: { time: t(HOUR), mode: "SVD", ebl: 1200 } })
+    const busy = active({ id: "x", bedNumber: "1", ves: [{ id: "v", time: t(5 * HOUR), dilation: 4 }], riskFlags: ["GBS+"] })
+    const order = triageWard({ p: pph, x: busy }, NOW).map(r => r.bed.bedNumber)
+    expect(order[0]).toBe("2")
+  })
+  it("a major PPH leads a busy ward of urgent women", () => {
+    const pph = bed({ id: "p", bedNumber: "2", delivery: { time: t(HOUR), mode: "SVD", ebl: 1200 } })
+    const sbp = active({ id: "s", bedNumber: "4", riskFlags: ["Pre-eclampsia"],
+      observations: { lastPulse: t(10 * MIN), lastTemp: t(10 * MIN), lastRR: t(10 * MIN), lastBP: t(10 * MIN), bpSystolic: "165", bpDiastolic: "112", bpAt: t(10 * MIN) } })
+    const path = active({ id: "c", bedNumber: "1", ctgLog: [ctg("pathological", 10, { baselineHR: 170 })] })
+    const fever = active({ id: "f", bedNumber: "3", observations: { lastPulse: t(10 * MIN), lastBP: t(10 * MIN), lastRR: t(10 * MIN), lastTemp: t(10 * MIN), temp: "38.2", tempAt: t(10 * MIN) } })
+    const order = triageWard({ f: fever, s: sbp, c: path, p: pph }, NOW).map(r => r.bed.bedNumber)
+    expect(order[0]).toBe("2")
+    expect(order.indexOf("3")).toBeGreaterThan(order.indexOf("4"))
+  })
+  it("compareTriage is exported for the board", () => expect(typeof compareTriage).toBe("function"))
+})
+
+describe("Reviewed: urgent alerts can be acknowledged", () => {
+  const path = (minsAgo = 10) => active({ ctgLog: [ctg("pathological", minsAgo, { baselineHR: 170 })] })
+  it("offers Reviewed on a pathological CTG", () => {
+    expect(fixAlert(path(), "ctg-pathological", t(0), "Dr S").reviews["ctg-pathological"]).toEqual({ at: t(0), by: "Dr S" })
+  })
+  it("quietens it for 30 minutes, out of Needs you now", () => {
+    const b = { ...path(), ...fixAlert(path(), "ctg-pathological", t(5 * MIN), "Dr S") }
+    const r = triageBed(b, NOW)
+    const a = r.alerts.find(x => x.id === "ctg-pathological")
+    expect(a.severity).toBe("info")
+    expect(a.reviewed.by).toBe("Dr S")
+    expect(r.tier).not.toBe("urgent")
+  })
+  it("comes back after the window if still present", () => {
+    const b = { ...path(60), ...fixAlert(path(60), "ctg-pathological", t(40 * MIN)) }
+    expect(applyReviews(computeAlerts(b, NOW), b, NOW).find(x => x.id === "ctg-pathological").severity).toBe("urgent")
+  })
+  it("comes back at once when a newer pathological CTG is logged", () => {
+    const b0 = path(30)
+    const b = { ...b0, ...fixAlert(b0, "ctg-pathological", t(20 * MIN)), ctgLog: [...b0.ctgLog, { id: "c2", time: t(5 * MIN), classification: "pathological" }] }
+    expect(applyReviews(computeAlerts(b, NOW), b, NOW).find(x => x.id === "ctg-pathological").severity).toBe("urgent")
+  })
+  it("the handover says it was reviewed", () => {
+    const b = { ...path(), ...fixAlert(path(), "ctg-pathological", t(5 * MIN), "Dr S") }
+    expect(generateHandover({ b1: b }, null, NOW)).toMatch(/reviewed .* by Dr S/)
+  })
+})
+
+describe("fever and the infection pathway (NG195 1.6.1, 1.6.4; NG25 1.8.1)", () => {
+  const febrile = o => bed({ gestation: "33+2", labourStage: "Latent", observations: { lastTemp: t(10 * MIN), tempValue: "38.2", tempAt: t(10 * MIN) }, ...o })
+  it("38.2°C raises the infection prompt", () => expect(sev(febrile(), "infection-suspected")).toBe("urgent"))
+  it("GBS prophylaxis given does not silence it", () => expect(ids(febrile({ gbsAntibioticsStarted: true }))).toContain("infection-suspected"))
+  it("tocolysis prompt warns that infection may contraindicate it", () => {
+    expect(computeAlerts(febrile(), NOW).find(a => a.id === "preterm-tocolysis").title).toMatch(/infection may contraindicate/)
   })
 })

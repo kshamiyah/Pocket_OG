@@ -201,11 +201,18 @@ describe("Oxytocin", () => {
     expect(hasNot(computeAlerts(bed, NOW), "oxytocin-increment")).toBe(true)
   })
 
-  it("fires oxytocin-increment warning at exactly 30m", () => {
+  it("fires oxytocin-increment warning at exactly 30m (with a CTG on record)", () => {
     const bed = activeBed({
       oxytocinLog: [{ dose: 10, lastIncrementTime: t(30 * MIN) }],
+      ctgLog: [{ id: "c", time: t(10 * MIN), classification: "normal" }],
     })
     expect(has(computeAlerts(bed, NOW), "oxytocin-increment")).toBe(true)
+  })
+  it("no increment prompt without a CTG, or once 3 or more contractions are recorded (NG235 1.8.54)", () => {
+    const base = { oxytocinLog: [{ dose: 10, lastIncrementTime: t(40 * MIN) }] }
+    expect(hasNot(computeAlerts(activeBed(base), NOW), "oxytocin-increment")).toBe(true)
+    const atTarget = activeBed({ ...base, ctgLog: [{ id: "c", time: t(10 * MIN), classification: "normal", contractionsPerTen: 3 }] })
+    expect(hasNot(computeAlerts(atTarget, NOW), "oxytocin-increment")).toBe(true)
   })
 })
 
@@ -458,10 +465,16 @@ describe("Temperature thresholds (NICE NG235 §1.4.6)", () => {
   it("fires temp-375 warning at 37.5°C", () => {
     expect(has(computeAlerts(tempBed(37.5), NOW), "temp-375")).toBe(true)
   })
-  it("fires temp-38 urgent at 38.0°C", () => {
-    expect(has(computeAlerts(tempBed(38.0), NOW), "temp-38")).toBe(true)
+  it("at 38.0°C the infection pathway fires, carrying the temperature", () => {
+    const a = computeAlerts(tempBed(38.0), NOW).find(x => x.id === "infection-suspected")
+    expect(a?.severity).toBe("urgent")
+    expect(a.title).toMatch(/38/)
   })
-  it("at 38°C only temp-38 fires (not temp-375 as well)", () => {
+  it("once antibiotics are given, temp-38 stays until a newer temperature", () => {
+    const b = { ...tempBed(38.0), broadAntibioticsStarted: true }
+    expect(has(computeAlerts(b, NOW), "temp-38")).toBe(true)
+  })
+  it("at 38°C temp-375 does not fire as well", () => {
     const alerts = computeAlerts(tempBed(38.0), NOW)
     expect(hasNot(alerts, "temp-375")).toBe(true)
   })
@@ -841,10 +854,10 @@ describe("CTG — continuous monitoring indication", () => {
     expect(has(computeAlerts(bed, NOW), "ctg-not-documented")).toBe(true)
   })
 
-  it("fires ctg-not-documented (info) for epidural patient with no CTG", () => {
+  it("fires ctg-not-documented as due (warning) for epidural patient with no CTG", () => {
     const bed = ctgBed({ analgesia: "Epidural" })
     const a = computeAlerts(bed, NOW).find(b => b.id === "ctg-not-documented")
-    expect(a?.severity).toBe("info")
+    expect(a?.severity).toBe("warning")
   })
 
   it("fires ctg-not-documented for oxytocin patient", () => {

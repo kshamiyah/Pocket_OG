@@ -28,11 +28,16 @@ export function AlertList({ alerts, onFix, limit = null, compact = false }) {
   return (
     <div className="space-y-1.5">
       {visible.map(a => {
-        const fix = fixLabel(a.id);
+        const fix = a.reviewed ? null : fixLabel(a.id);
         return (
           <div key={a.id} className={`rounded-xl border px-3 ${compact ? "py-2" : "py-2.5"} flex items-center gap-2.5 ${ALERT_BOX[a.severity]}`}>
             <div className="flex-1 min-w-0">
               <p className={`text-sm font-semibold leading-snug ${SEV_TEXT[a.severity]}`}>{tidy(a.title)}</p>
+              {a.reviewed && (
+                <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">
+                  Reviewed {clock(a.reviewed.at)}{a.reviewed.by ? ` by ${a.reviewed.by}` : ""} · returns {clock(a.reviewed.until)} if still present
+                </p>
+              )}
               {compact ? null : openRule && RULE_FOR_ALERT[a.id] ? (
                 <button type="button" onClick={() => openRule(a.id)} aria-label={`Source for this alert: ${a.citation}`}
                   className="text-left text-[11px] font-semibold text-claude-700 dark:text-claude-400 mt-0.5 underline decoration-dotted underline-offset-2 active:opacity-70">
@@ -85,7 +90,7 @@ const TONE = {
 const TILE_ALERTS = {
   ve: { red: ["ve-overdue", "ve-never", "slow-progress"], amber: ["ve-due-soon", "arm-reassess", "arm-cx-inadequate", "active-phase-limit"] },
   ctg: { red: ["ctg-pathological", "ctg-suspicious-overdue", "oxytocin-stop-pathological"], amber: ["ctg-suspicious", "ctg-review-due", "ctg-not-documented"] },
-  obs: { red: ["tachycardia", "bp-severe", "bp-low", "temp-38", "bgl-low", "bgl-high", "bgl-due", "bgl-never", "oliguria"], amber: ["bp-elevated", "temp-375", "temp-low", "pulse-due", "pulse-never", "bp-due", "bp-never", "temp-due", "temp-never"] },
+  obs: { red: ["tachycardia", "bp-severe", "bp-low", "temp-38", "rr-low", "bgl-low", "bgl-high", "bgl-due", "bgl-never", "oliguria"], amber: ["bp-elevated", "temp-375", "temp-low", "rr-high", "pulse-due", "pulse-never", "bp-due", "bp-never", "temp-due", "temp-never", "rr-due", "rr-never"] },
   oxy: { red: ["hyperstim", "oxytocin-max", "oxytocin-stop-pathological"], amber: ["oxytocin-increment"] },
   memb: { red: ["mec-thick", "liquor-blood", "prom-48h", "prom-24h", "prom-18h"], amber: ["mec-thin", "liquor-absent", "prom-16h", "gbs-pending-rupture"] },
 };
@@ -146,6 +151,9 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGNormal, on
   const ago = iso => fmtAge(now - new Date(iso).getTime());
   const memb = membraneStatus(bed);
   const obsDue = obs.filter(o => !o.done);
+  // An abnormal value outranks "done": the tile names it until a newer value replaces it.
+  const obsAbnormal = t.alerts.find(a => TILE_ALERTS.obs.red.includes(a.id) && !a.id.startsWith("bgl-d") && !a.id.startsWith("bgl-n"))
+    ?? t.alerts.find(a => ["bp-elevated", "temp-375", "temp-low", "rr-high"].includes(a.id));
   const CTG_WORD = { normal: "Normal", suspicious: "Susp.", pathological: "Path." };
   return (
     <Sheet open onClose={onClose} title={`Bed ${bed.bedNumber}`} sub={sub} action={editBtn}>
@@ -155,9 +163,9 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGNormal, on
           value={ve ? `${ve.dilation} cm` : "None"} meta={ve ? `${ago(ve.time)} ago` : "tap to log"} />
         <Tile label="CTG" tone={toneFor("ctg", t.alerts)} onClick={onCTGConcern} ariaLabel="CTG review"
           value={ctg ? CTG_WORD[ctg.classification] ?? capitalise(ctg.classification) : "None"} meta={ctg ? `${ago(ctg.time)} ago` : "not logged"} />
-        <Tile label="Obs" tone={obsTracked(bed) ? toneFor("obs", t.alerts) : "ok"} onClick={onObs} ariaLabel="Mark obs done"
-          value={!obsTracked(bed) ? "—" : obsDue.length ? `${obsDue.length} due` : "Done"}
-          meta={obsTracked(bed) ? obs.map(o => `${o.letter}${o.done ? "✓" : "·"}`).join(" ") : "from active labour"} />
+        <Tile label="Obs" tone={toneFor("obs", t.alerts)} onClick={onObs} ariaLabel="Record obs"
+          value={obsAbnormal ? "Check" : !obsTracked(bed) ? "—" : obsDue.length ? `${obsDue.length} due` : "Done"}
+          meta={obsAbnormal ? shortLabel(obsAbnormal) : obsTracked(bed) ? obs.map(o => `${o.letter}${o.done ? "✓" : "·"}`).join(" ") : "tap to record"} />
         {oxy ? (
           <Tile label="Oxytocin" tone={toneFor("oxy", t.alerts)} onClick={onOxy} ariaLabel="Oxytocin"
             value={`${oxy.dose} mU`} meta={bed.oxytocinHeld ? "held" : `since ${clock(oxy.lastIncrementTime ?? oxy.startTime)}`} />

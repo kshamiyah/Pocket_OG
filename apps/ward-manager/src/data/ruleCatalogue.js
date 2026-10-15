@@ -32,6 +32,20 @@ export const RULES = [
     local: "App scope decision: the labour timings and CTG categories here are written for later gestations. Care is individualised with senior and neonatal input.",
   },
   {
+    id: "scope-reviewed", group: "Scope", title: "Marking an alert Reviewed",
+    when: "An urgent or due alert with no Given or Done action (for example pathological CTG, severe BP, pyrexia, ROM review) is marked Reviewed.",
+    then: "It drops out of Needs you now, shows who reviewed it and when, and returns after a set time if still present (30 minutes for severe BP and pathological CTG) or at once if a newer CTG or obs value arrives. The handover lists it as reviewed.",
+    severity: "n/a", alertIds: [], sources: ["NG133 1.7.3", "NG229 1.5.7"],
+    local: "App design choice: the return times are app defaults.",
+  },
+  {
+    id: "scope-order", group: "Scope", title: "Which problem comes first",
+    when: "Several alerts at once, or several women needing you.",
+    then: "Urgent before due before info. Within that: active bleeding (PPH, antepartum bleed), low BP, pathological CTG, severe BP, then signs of sepsis, then treatments due, then timing reminders (VE, obs, CTG review). Women are ordered by their single most dangerous problem.",
+    severity: "n/a", alertIds: [], sources: [],
+    local: "App design choice: the order is the app's, for review by your unit.",
+  },
+  {
     id: "scope-delivered", group: "Scope", title: "After birth",
     when: "Delivery recorded.",
     then: "Labour, CTG, preterm and antibiotic prompts stop. Maternal observation, sepsis and PPH alerts continue, and a woman with an active alert moves back up the board.",
@@ -57,7 +71,7 @@ export const RULES = [
   {
     id: "preterm-tocolysis", group: "Preterm", title: "Tocolysis",
     when: "24+0 to 33+6, membranes intact, latent or established first stage, decision not yet recorded.",
-    then: "Offer tocolysis or record the decision, weighing the NG25 1.8.1 factors.",
+    then: "Offer tocolysis or record the decision, weighing the NG25 1.8.1 factors. With suspected infection or bleeding the prompt says it may be contraindicated.",
     severity: "Warning", alertIds: ["preterm-tocolysis"],
     sources: ["NG25 1.8.1", "NG25 1.8.4"],
   },
@@ -79,7 +93,7 @@ export const RULES = [
   },
   {
     id: "infection-suspected", group: "Antibiotics and membranes", title: "Suspected chorioamnionitis or sepsis",
-    when: "Risk flag \"Suspected chorioamnionitis or sepsis\" ticked and antibiotics not yet given.",
+    when: "Risk flag \"Suspected chorioamnionitis or sepsis\" ticked, or a temperature of 38°C or more recorded, and antibiotics for infection not yet given. GBS prophylaxis does not count.",
     then: "IV antibiotics now, first dose as soon as infection is suspected; continuous CTG; senior review. Replaces the GBS and preterm antibiotic prompts, since broad-spectrum treatment covers GBS (GL787).",
     severity: "Urgent", alertIds: ["infection-suspected"],
     sources: ["NG195 1.6.1", "NG195 1.6.4", "NG229 1.3.2", "NG229 1.3.8", "GL787 GBS", "GL787 PROM"],
@@ -114,7 +128,7 @@ export const RULES = [
     id: "prom-18h", group: "Antibiotics and membranes", title: "Membranes ruptured: review",
     when: "Membranes ruptured for the unit's review time (default 18 hours; warning 2 hours earlier).",
     then: "Review GBS status and signs of infection.",
-    severity: "Warning, then urgent", alertIds: ["prom-16h", "prom-18h"], sources: ["GL787 PROM"], settings: ["promReviewH"],
+    severity: "Warning", alertIds: ["prom-16h", "prom-18h"], sources: ["GL787 PROM"], settings: ["promReviewH"],
     local: "The review time is a unit setting. Neither NG195 nor GL787 uses an 18 hour threshold; GL787 gives 48 hours for antibiotics at term.",
   },
   {
@@ -214,7 +228,7 @@ export const RULES = [
   },
   {
     id: "oxytocin-increment", group: "Oxytocin and contractions", title: "Oxytocin dose review",
-    when: "First stage, 30 minutes since the last change, and none of: dose held, 5 or more contractions in 10, suspicious or pathological CTG.",
+    when: "First stage, 30 minutes since the last change, a CTG on record, and none of: dose held, 3 or more contractions in 10 already (the target), suspicious or pathological CTG.",
     then: "Review whether to increase towards 3 to 4 contractions in 10 minutes.",
     severity: "Warning", alertIds: ["oxytocin-increment"], sources: ["NG235 1.8.54"],
   },
@@ -252,7 +266,7 @@ export const RULES = [
     id: "ctg-indicated", group: "Fetal monitoring (CTG)", title: "Continuous CTG, not logged",
     when: "Established labour or oxytocin running and no CTG logged. By default this applies to every woman (unit setting). With that setting off, only when there is an indication: previous CS or other uterine scar, hypertension, diabetes (not diet-only GDM), bleeding, suspected infection, ROM 24 h+ before established labour, non-cephalic, growth restriction, reduced movements, poly- or anhydramnios, over 42+0, meconium, blood-stained liquor, pyrexia, pulse over 120, raised BP, delay, epidural, oxytocin.",
     then: "Log a CTG review.",
-    severity: "Info", alertIds: ["ctg-not-documented"], sources: ["NG229 1.2.9", "NG229 1.3.2", "NG229 1.3.3", "NG229 1.3.8"],
+    severity: "Warning with an indication, otherwise info", alertIds: ["ctg-not-documented"], sources: ["NG229 1.2.9", "NG229 1.3.2", "NG229 1.3.3", "NG229 1.3.8"],
     settings: ["ctgForAll", "ctgLocalIndications"],
     local: "Continuous CTG for everyone is a unit choice: NICE offers intermittent auscultation to women at low risk (NG229 1.2.9). Preterm, GBS+, GBS pending and PPROM can be added as local indications; they are not NG229 indications.",
   },
@@ -266,9 +280,9 @@ export const RULES = [
   // ── Maternal observations ──────────────────────────────────────────────
   {
     id: "obs-due", group: "Maternal observations", title: "Routine observations",
-    when: "Established labour: pulse hourly; BP and temperature 4-hourly (BP hourly if hypertensive).",
-    then: "Shown as P / B / T dots on the board. A check marked done without a value clears the old reading.",
-    severity: "Info (BP urgent if hypertensive)", alertIds: ["pulse-due", "pulse-never", "bp-due", "bp-never", "temp-due", "temp-never"],
+    when: "Established labour: pulse hourly; BP, temperature and respiratory rate 4-hourly (BP hourly if hypertensive).",
+    then: "Shown as \"Obs due\" on the board. Recorded values stay on the board, with their age, until a newer value replaces them; marking obs done never erases a value.",
+    severity: "Info (BP urgent if hypertensive)", alertIds: ["pulse-due", "pulse-never", "bp-due", "bp-never", "temp-due", "temp-never", "rr-due", "rr-never"],
     sources: ["NG235 1.8.19", "NG133 1.7.3"],
   },
   {
@@ -288,7 +302,7 @@ export const RULES = [
   {
     id: "bp-high", group: "Maternal observations", title: "Raised blood pressure",
     when: "160/110 or more (urgent). 140/90 or more (urgent if known hypertensive, otherwise warning).",
-    then: "Treat severe hypertension urgently per protocol; BP every 15 to 30 minutes until below 160/110.",
+    then: "Treat severe hypertension urgently per protocol; BP every 15 to 30 minutes until below 160/110. After 30 minutes without a new reading the alert asks for a recheck.",
     severity: "Urgent / warning", alertIds: ["bp-severe", "bp-elevated"], sources: ["NG235 1.8.20", "NG133 1.7.3"],
   },
   {
@@ -297,6 +311,14 @@ export const RULES = [
     then: "Consider sepsis and haemorrhage; senior review.",
     severity: "Urgent / warning", alertIds: ["bp-low", "temp-low"],
     sources: ["NG255 1.5.1", "NG255 1.5.2", "NG255 table 1"],
+  },
+  {
+    id: "rr", group: "Maternal observations", title: "Respiratory rate",
+    when: "25 or more, or under 9 (urgent); 21 to 24 (warning).",
+    then: "Senior review; consider sepsis. Repeat a borderline reading.",
+    severity: "Urgent / warning", alertIds: ["rr-high", "rr-low"],
+    sources: ["NG255 table 1", "NG235 1.8.20"],
+    local: "NG235 asks for 2 readings 15 to 30 minutes apart; the app alerts on the first so it is repeated.",
   },
   {
     id: "oliguria", group: "Maternal observations", title: "Low urine output",

@@ -3,11 +3,21 @@
 import { computeAlerts } from "./wardAlerts";
 import { clock, fmtAge } from "./time";
 import { currentOxytocin, doctorLabel, lastVE, membraneStatus, parityWithHistory, riskLabel, stageLabel, veFindings } from "./bedModel";
-import { tidy } from "./triage";
+import { applyReviews, tidy } from "./triage";
 
 function isPreterm(g) {
   const m = /^(\d+)\+(\d)$/.exec(g ?? "") || /^(\d+)w$/.exec(g ?? "");
   return m ? parseInt(m[1], 10) < 37 : false;
+}
+
+// Urgent and due alerts, plus ones reviewed this shift (so the next doctor
+// knows they were seen, and when they come back).
+function alertLines(bed, now) {
+  return applyReviews(computeAlerts(bed, now), bed, now)
+    .filter(a => a.severity === "urgent" || a.severity === "warning" || a.reviewed)
+    .map(a => a.reviewed
+      ? `~ ${tidy(a.title)} (reviewed ${clock(a.reviewed.at)}${a.reviewed.by ? ` by ${a.reviewed.by}` : ""})`
+      : `${a.severity === "urgent" ? "!!" : "!"} ${tidy(a.title)}`);
 }
 
 export function generateHandover(beds, shift, now = Date.now()) {
@@ -37,6 +47,7 @@ export function generateHandover(beds, shift, now = Date.now()) {
     ].filter(Boolean);
     const done = [
       bed.gbsAntibioticsStarted && "Intrapartum antibiotics ✓",
+      bed.broadAntibioticsStarted && "Infection antibiotics ✓",
       bed.bleedingReviewed && "Bleeding reviewed ✓",
       bed.neonatalTeamAlerted && "Neonatal team ✓",
       bed.corticosteroidsConfirmed && "Steroids ✓",
@@ -52,9 +63,7 @@ export function generateHandover(beds, shift, now = Date.now()) {
       if (background.length) lines.push(background.join(" · "));
       if (done.length) lines.push(done.join(" · "));
       if (dl.notes) lines.push(`Notes: ${dl.notes}`);
-      computeAlerts(bed, now)
-        .filter(a => a.severity === "urgent" || a.severity === "warning")
-        .forEach(a => lines.push(`${a.severity === "urgent" ? "!!" : "!"} ${tidy(a.title)}`));
+      alertLines(bed, now).forEach(l => lines.push(l));
       if (tasks.length) lines.push(`To do: ${tasks.map(x => x.text).join(", ")}`);
       lines.push("");
       continue;
@@ -99,9 +108,7 @@ export function generateHandover(beds, shift, now = Date.now()) {
     const ctg = (bed.ctgLog ?? []).at(-1);
     if (ctg) lines.push(`CTG ${ctg.classification} at ${clock(ctg.time, now)}`);
 
-    computeAlerts(bed, now)
-      .filter(a => a.severity === "urgent" || a.severity === "warning")
-      .forEach(a => lines.push(`${a.severity === "urgent" ? "!!" : "!"} ${tidy(a.title)}`));
+    alertLines(bed, now).forEach(l => lines.push(l));
 
     if (tasks.length) lines.push(`To do: ${tasks.map(x => x.text).join(", ")}`);
     lines.push("");

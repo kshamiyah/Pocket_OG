@@ -2,9 +2,9 @@
 // Everything here is derived from computeAlerts(); no clinical threshold lives in
 // this file. "Next due" asks the engine when each alert would first fire later on.
 
-import { computeAlerts } from "./wardAlerts";
+import { alertTier, computeAlerts } from "./wardAlerts";
 import { MIN, HOUR } from "./time";
-import { OBS_STAMP } from "./bedModel";
+import { OBS_STAMP, REVIEW_MIN } from "./bedModel";
 
 // Routine obs reminders are shown as P/B/T dots instead of alerts.
 const OBS_IDS = new Set(Object.keys(OBS_STAMP));
@@ -117,8 +117,28 @@ export function nextDue(bed, now = Date.now(), alertsNow = computeAlerts(bed, no
  * tier: "urgent" | "warning" | "ok" | "delivered"
  * shown: alerts for the board and bed panel (routine obs reminders removed)
  */
+/**
+ * Mark alerts a clinician has reviewed: they drop to info (out of "needs you")
+ * and carry `reviewed` with the time, who, and when they come back.
+ */
+export function applyReviews(alerts, bed, now = Date.now()) {
+  const reviews = bed.reviews ?? {};
+  const out = alerts.map(a => {
+    const r = reviews[a.id];
+    const mins = REVIEW_MIN[a.id];
+    if (!r || !mins) return a;
+    const at = new Date(r.at).getTime();
+    const until = at + mins * MIN;
+    const newer = a.since && new Date(a.since).getTime() > at;
+    if (now >= until || newer) return a;
+    return { ...a, severity: "info", reviewed: { at: r.at, by: r.by, until } };
+  });
+  const order = { urgent: 0, warning: 1, info: 2 };
+  return out.sort((x, y) => order[x.severity] - order[y.severity] || alertTier(x.id) - alertTier(y.id));
+}
+
 export function triageBed(bed, now = Date.now()) {
-  const alerts = computeAlerts(bed, now);
+  const alerts = applyReviews(computeAlerts(bed, now), bed, now);
   const shown = alerts.filter(a => !(OBS_IDS.has(a.id) && a.severity === "info"));
   const urgent = shown.filter(a => a.severity === "urgent").length;
   const warning = shown.filter(a => a.severity === "warning").length;
@@ -131,7 +151,9 @@ export function triageBed(bed, now = Date.now()) {
 const TIER_RANK = { urgent: 0, warning: 1, ok: 2, delivered: 3 };
 
 export function compareTriage(a, b) {
+  const top = t => (t.top ? alertTier(t.top.id) : 3);
   return TIER_RANK[a.t.tier] - TIER_RANK[b.t.tier]
+    || top(a.t) - top(b.t)
     || b.t.urgent - a.t.urgent
     || b.t.warning - a.t.warning
     || (a.t.next?.at ?? Infinity) - (b.t.next?.at ?? Infinity)
