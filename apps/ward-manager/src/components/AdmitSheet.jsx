@@ -1,6 +1,9 @@
 import { useState } from "react";
 import Sheet from "../ui/Sheet";
 import RiskPicker from "./RiskPicker";
+import SubPage from "../ui/SubPage";
+import { useSubPage } from "../ui/useSubPage";
+import { IconChevron } from "../ui/icons";
 import { Chip, ChipRow, DilationGrid, Label, MultiChipRow, Stepper, WhenPicker } from "../ui/atoms";
 import { BTN, BTN_PRIMARY, INPUT, TYPE_META } from "../ui/styles";
 import { resolveWhen, whenFromISO } from "../utils/time";
@@ -14,7 +17,27 @@ import {
 const ADMIT_STAGE = { "Latent": "Latent", "Active first stage": "Active", "Passive second stage": "Passive 2nd", "Active second stage": "Pushing" };
 
 const ONSET_SHORT = { Spontaneous: "Spont", Induced: "IOL", PPROM: "PPROM" };
-const LIQUOR_TINY = { "Clear": "Clear", "Thin meconium": "Mec thin", "Thick meconium": "Mec thick", "Blood-stained": "Blood", "Absent": "Absent" };
+
+/** "now", "1h ago", "30 min ago", "at 14:05", "at 22:10 yesterday". */
+function whenText(w) {
+  if (!w) return "now";
+  if (w.clock) return `at ${w.clock}${w.daysAgo === 1 ? " yesterday" : w.daysAgo > 1 ? `, ${w.daysAgo} days ago` : ""}`;
+  const m = w.minsAgo ?? 0;
+  return m === 0 ? "now" : m % 60 === 0 ? `${m / 60}h ago` : `${m} min ago`;
+}
+
+/** A one-line summary of a choice's details; tapping it opens them. */
+function SummaryLine({ label, text, onClick, warn = false }) {
+  return (
+    <button type="button" onClick={onClick}
+      className={`w-full min-h-10 px-3 rounded-lg border flex items-center gap-2 text-left text-sm active:scale-[0.99] ${warn ? "bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-900" : "bg-claude-50 dark:bg-claude-950/40 border-claude-200 dark:border-claude-800"}`}>
+      <span className="font-semibold text-claude-800 dark:text-claude-300 shrink-0">{label}</span>
+      <span className={`flex-1 min-w-0 truncate ${warn ? "text-red-700 dark:text-red-400" : "text-gray-700 dark:text-gray-300"}`}>{text}</span>
+      <span className="shrink-0 text-xs font-semibold text-claude-700 dark:text-claude-400">Change</span>
+      <IconChevron className="w-3.5 h-3.5 text-claude-700 dark:text-claude-400 shrink-0" />
+    </button>
+  );
+}
 
 // IOL queue indications that imply a risk flag, so admitting from the queue keeps it.
 const IOL_FLAG = { "GDM": "Diabetic-GDM", "Pre-eclampsia": "Hypertensive", "Severe pre-eclampsia": "Hypertensive" };
@@ -59,6 +82,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
   const [admWhen, setAdmWhen] = useState({ minsAgo: 0 });
   // Admission time defaults to now; the picker only appears if asked for.
   const [admEarlier, setAdmEarlier] = useState(false);
+  const detail = useSubPage();
   const [more, setMore] = useState(edit || !!iolEntry);
 
   const used = new Set(existingNumbers.map(String));
@@ -209,29 +233,42 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
           </div>
         )}
       </div>
-      {ruptured && (
-        <>
-          <div>
-            <Label tight>Liquor</Label>
-            <div className="grid grid-cols-5 gap-1">
-              {LIQUORS.map(l => <Chip key={l} small className="px-0 whitespace-nowrap !text-[11px]" on={liquor === l} onClick={() => setLiquor(l)}>{LIQUOR_TINY[l] ?? LIQUOR_SHORT[l]}</Chip>)}
-            </div>
-          </div>
-          <WhenPicker tight label={`Time of ${effMemb}`} value={romWhen} onChange={setRomWhen} presets={[0, 60, 120, 240]} />
-        </>
+      {/* One summary line per choice that needs detail, in the same order as the
+          chips above. Tap a line to change the detail on a page that slides in. */}
+      {(onset === "Induced" || ruptured) && (
+        <div className="space-y-1.5">
+          {onset === "Induced" && (
+            <SummaryLine label="IOL" onClick={() => detail.open("iol")}
+              text={[indMethod, `started ${whenText(iolWhen)}`, iolReasons.length ? `${iolReasons.length} reason${iolReasons.length > 1 ? "s" : ""}` : null].filter(Boolean).join(" · ")} />
+          )}
+          {ruptured && (
+            <SummaryLine label={effMemb} onClick={() => detail.open("rom")} warn={!romISO}
+              text={`${LIQUOR_SHORT[liquor] ?? liquor} · ${romISO ? whenText(romWhen) : "time is in the future"}`} />
+          )}
+        </div>
       )}
-      {onset === "Induced" && (
-        <>
+      {detail.page === "iol" && (
+        <SubPage title="Induction" backLabel={edit ? "Edit" : "Admit"} onClose={detail.close} closing={detail.closing} onClosed={detail.closed}>
           <div>
-            <Label tight>Induction method</Label>
+            <Label>Method</Label>
             <ChipRow small options={IND_METHODS} value={indMethod} onChange={setIndMethod} />
           </div>
+          <WhenPicker label="Induction started" value={iolWhen} onChange={setIolWhen} presets={[0, 60, 120, 240]} />
           <div>
-            <Label tight>Indication</Label>
+            <Label hint="optional">Indication</Label>
             <MultiChipRow options={[...new Set([...IOL_REASONS, ...iolReasons])]} values={iolReasons} onChange={setIolReasons} />
           </div>
-          <WhenPicker tight label="IOL started" value={iolWhen} onChange={setIolWhen} presets={[0, 60, 120, 240]} />
-        </>
+        </SubPage>
+      )}
+      {detail.page === "rom" && (
+        <SubPage title={effMemb === "AROM" ? "Amniotomy (AROM)" : "Membranes ruptured (SROM)"} backLabel="Admit"
+          onClose={detail.close} closing={detail.closing} onClosed={detail.closed}>
+          <div>
+            <Label>Liquor</Label>
+            <ChipRow small options={LIQUORS} value={liquor} onChange={setLiquor} label={o => LIQUOR_SHORT[o]} />
+          </div>
+          <WhenPicker label={`Time of ${effMemb}`} value={romWhen} onChange={setRomWhen} presets={[0, 60, 120, 240]} />
+        </SubPage>
       )}
       {!more ? (
         <button type="button" onClick={() => setMore(true)}
