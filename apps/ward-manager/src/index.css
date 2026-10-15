@@ -54,6 +54,22 @@
     animation: sheet-up 240ms cubic-bezier(0.32, 0.72, 0, 1) both;
   }
 
+  /* A page pushed inside a sheet, like going into a tab, and back out. */
+  @keyframes push-in {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+  .animate-push-in {
+    animation: push-in 260ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  @keyframes push-out {
+    from { transform: translateX(0); }
+    to { transform: translateX(100%); }
+  }
+  .animate-push-out {
+    animation: push-out 200ms cubic-bezier(0.4, 0, 1, 1) both;
+  }
+
   @keyframes fade-in {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -71,6 +87,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .animate-sheet-up, .animate-fade-in, .animate-row-flash, .animate-toast-enter { animation: none; }
+    .animate-sheet-up, .animate-fade-in, .animate-row-flash, .animate-toast-enter, .animate-push-in, .animate-push-out { animation: none; }
   }
 }

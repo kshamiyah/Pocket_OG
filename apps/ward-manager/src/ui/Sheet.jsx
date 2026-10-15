@@ -19,7 +19,7 @@ export default function Sheet({ open, onClose, title, sub, children, footer, lab
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={label ?? (typeof title === "string" ? title : undefined)}>
       <div className="absolute inset-0 bg-black/40 animate-fade-in" onClick={onClose} />
-      <div className="relative w-full max-w-lg max-h-[92dvh] flex flex-col bg-white dark:bg-gray-950 rounded-t-2xl border-t border-gray-200 dark:border-gray-800 shadow-2xl dark:shadow-black/40 animate-sheet-up motion-reduce:animate-none">
+      <div className="relative overflow-hidden w-full max-w-lg max-h-[92dvh] flex flex-col bg-white dark:bg-gray-950 rounded-t-2xl border-t border-gray-200 dark:border-gray-800 shadow-2xl dark:shadow-black/40 animate-sheet-up motion-reduce:animate-none">
         <div className="shrink-0 mx-auto mt-2 mb-1 h-4 w-full flex items-center justify-center" aria-hidden="true">
           <div className="h-1 w-10 rounded-full bg-gray-200 dark:bg-gray-800" />
         </div>
