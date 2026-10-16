@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Board from "./Board";
 import BedSheet from "./BedSheet";
 import BedRecord from "./BedRecord";
@@ -22,6 +22,9 @@ import { BTN, BTN_DANGER, BTN_SECONDARY, TYPE_META } from "../ui/styles";
 import { ACTION_ALERTS, addVE, declineAlert, doctorLabel, editVE as applyEditVE, fixAlert, fixLabel, lastCTG, newId, setStage, STAGE_SHORT } from "../utils/bedModel";
 import { triageWard, wardSummary } from "../utils/triage";
 import { clock } from "../utils/time";
+
+// Test-only clock control; the live build drops this import entirely.
+const SimBar = import.meta.env.VITE_SIM === "1" ? lazy(() => import("../sim/SimBar")) : null;
 import { getThemePref, isDarkResolved, setThemePref, watchSystemTheme } from "../utils/theme";
 
 // Storage keys are unchanged so boards already on a phone carry over.
@@ -70,7 +73,10 @@ export default function WardPage({ shift, onEndShift }) {
     const id = setInterval(() => setNow(Date.now()), 30000);
     const onVis = () => { if (!document.hidden) setNow(Date.now()); };
     document.addEventListener("visibilitychange", onVis);
-    return () => { clearInterval(id); document.removeEventListener("visibilitychange", onVis); };
+    // The test board's simulated clock announces each jump (never fires in the live app).
+    const onSim = () => setNow(Date.now());
+    window.addEventListener("sim-clock", onSim);
+    return () => { clearInterval(id); document.removeEventListener("visibilitychange", onVis); window.removeEventListener("sim-clock", onSim); };
   }, []);
   useEffect(() => watchSystemTheme(setDark), []);
   useEffect(() => () => { clearTimeout(toastTimer.current); clearTimeout(flashTimer.current); }, []);
@@ -229,6 +235,7 @@ export default function WardPage({ shift, onEndShift }) {
 
   return (
     <RulesContext.Provider value={rulesCtx}>
+      {SimBar && <Suspense fallback={null}><SimBar rows={rows} /></Suspense>}
       <Board
         rows={rows} summary={summary} now={now} shift={shift} dark={dark} flashId={flashId}
         iolQueue={iolQueue} tab={tab} onTab={setTab}
