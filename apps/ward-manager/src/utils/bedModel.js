@@ -2,6 +2,7 @@
 // boards already saved on a phone keep working.
 
 import { MIN } from "./time";
+import { classifyCTGEntry } from "@pocket-og/guidelines";
 import { getUnitSettings } from "../data/unitSettings";
 
 export const STAGES = ["Latent", "Active first stage", "Passive second stage", "Active second stage"];
@@ -191,6 +192,30 @@ export function lastVE(bed) {
 export function lastCTG(bed) {
   const log = bed.ctgLog ?? [];
   return log.length ? log[log.length - 1] : null;
+}
+
+// The features a graded CTG review records, carried forward by "CTG unchanged".
+const CTG_FEATURES = ["baselineHR", "baselineUndetermined", "variability", "variabilityMinutes", "decelerations",
+  "decelerationsRepetitive", "decelerationMinutes", "accelerations", "contractionsPerTen", "hypertonus"];
+
+/**
+ * "CTG unchanged": a new review at `iso` with the same features as the last
+ * graded review. Offered only when that review was normal (and not a
+ * clinician override), and only if the copy still grades normal now (a rise
+ * in the active second stage, for example, would not). Otherwise null, and
+ * the full form is used.
+ */
+export function sameAsLastCTG(bed, iso) {
+  const log = bed.ctgLog ?? [];
+  const graded = log.filter(e => e.baselineHR != null || e.baselineUndetermined);
+  const last = graded.at(-1);
+  if (!last || log.at(-1) !== last || last.classification !== "normal" || last.clinicianOverride) return null;
+  const entry = { id: newId("ctg"), time: iso, sameAsLast: true };
+  for (const k of CTG_FEATURES) if (last[k] !== undefined) entry[k] = last[k];
+  const start = graded.find(e => e.baselineHR != null && !e.baselineUndetermined)?.baselineHR ?? null;
+  const cat = classifyCTGEntry(entry, last.baselineHR ?? null, { startBaselineHR: start, activeSecondStage: bed.labourStage === "Active second stage" });
+  if (cat !== "normal") return null;
+  return { ...entry, classification: cat, autoClassification: cat };
 }
 
 /** The running oxytocin entry, or null if never started or stopped (dose 0). */

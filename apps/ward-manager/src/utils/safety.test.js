@@ -2,7 +2,7 @@
 
 import { describe, it, expect } from "vitest"
 import { computeAlerts } from "./wardAlerts.js"
-import { currentOxytocin, declineAlert, fixAlert, fixLabel, obsProblem, recordObs, stampObs } from "./bedModel.js"
+import { currentOxytocin, declineAlert, fixAlert, fixLabel, obsProblem, recordObs, sameAsLastCTG, stampObs } from "./bedModel.js"
 import { applyReviews, compareTriage, triageBed, triageWard } from "./triage.js"
 import { generateHandover } from "./handoverText.js"
 import { UNIT_DEFAULTS } from "../data/unitSettings.js"
@@ -458,5 +458,22 @@ describe("fixes from the second shift test", () => {
     expect(obsProblem("rr", "220")).toMatch(/looks wrong/)
     expect(obsProblem("bp", ["80", "120"])).toMatch(/higher than diastolic/)
     expect(obsProblem("pulse", "88")).toBeNull()
+  })
+})
+
+describe("CTG unchanged (one tap after a normal graded review)", () => {
+  const graded = (cls = "normal", o = {}) => ({ id: "g1", time: t(60 * MIN), classification: cls, baselineHR: 140, variability: "5-25", decelerations: "none", accelerations: true, contractionsPerTen: 3, ...o })
+  it("copies the last graded features to a new time and grades it normal", () => {
+    const e = sameAsLastCTG(active({ ctgLog: [graded()] }), t(0))
+    expect(e).toMatchObject({ classification: "normal", baselineHR: 140, contractionsPerTen: 3, time: t(0), sameAsLast: true })
+  })
+  it("is not offered with no graded review, or after a suspicious one, or after a clinician override", () => {
+    expect(sameAsLastCTG(active({ ctgLog: [] }), t(0))).toBeNull()
+    expect(sameAsLastCTG(active({ ctgLog: [graded("suspicious")] }), t(0))).toBeNull()
+    expect(sameAsLastCTG(active({ ctgLog: [graded("normal", { clinicianOverride: true })] }), t(0))).toBeNull()
+  })
+  it("is not offered when the copy would no longer grade normal (20 bpm rise in the active second stage)", () => {
+    const b = active({ labourStage: "Active second stage", ctgLog: [graded("normal", { id: "a", baselineHR: 125, time: t(3 * HOUR) }), graded("normal", { id: "b", baselineHR: 145 })] })
+    expect(sameAsLastCTG(b, t(0))).toBeNull()
   })
 })

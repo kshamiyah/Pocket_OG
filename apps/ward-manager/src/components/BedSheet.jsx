@@ -5,11 +5,12 @@ import { ALERT_BOX, BTN, BTN_SECONDARY, SEV_TEXT } from "../ui/styles";
 import { IconChevron, IconInfo } from "../ui/icons";
 import { fmtAge, clock } from "../utils/time";
 import {
-  ACTION_ALERTS, DECLINABLE, STAGES, STAGE_SHORT, LIQUOR_SHORT, capitalise, currentOxytocin, fixLabel, lastCTG, lastVE, obsStatus, obsTracked,
+  ACTION_ALERTS, DECLINABLE, sameAsLastCTG, STAGES, STAGE_SHORT, LIQUOR_SHORT, capitalise, currentOxytocin, fixLabel, lastCTG, lastVE, obsStatus, obsTracked,
   parityWithHistory, riskShort, stageLabel, membraneStatus,
 } from "../utils/bedModel";
 import { shortLabel, tidy } from "../utils/triage";
 import { useRules } from "../ui/rulesContext";
+import { ctgSummary } from "../utils/ctgText";
 import { RULE_FOR_ALERT } from "../data/ruleCatalogue";
 
 /**
@@ -123,7 +124,7 @@ function Tile({ label, value, meta, tone, onClick, ariaLabel }) {
 
 const STAGE_BAR = { "Latent": "Latent", "Active first stage": "Active", "Passive second stage": "Passive", "Active second stage": "Pushing" };
 
-export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, onVE, onObs, onFix, onStage, onDelivered, onOxy, onRecord, onRemove }) {
+export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, onCTGSame, onVE, onObs, onFix, onStage, onDelivered, onOxy, onRecord, onRemove }) {
   if (!bed) return null;
   const ve = lastVE(bed);
   const ctg = lastCTG(bed);
@@ -187,6 +188,16 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, o
         <p className="text-xs text-gray-600 dark:text-gray-400 px-1 -mt-1 truncate"><span className="font-semibold">CTG {clock(ctg.time)}:</span> {ctg.comment}</p>
       )}
 
+      {(() => {
+        const same = !bed.delivery && sameAsLastCTG(bed, new Date(now).toISOString());
+        return same && onCTGSame ? (
+          <button type="button" onClick={onCTGSame}
+            className="w-full min-h-11 px-3 rounded-xl border text-left text-sm flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900 text-emerald-900 dark:text-emerald-200 active:scale-[0.99]">
+            <span className="font-bold shrink-0">✓ CTG unchanged</span>
+            <span className="min-w-0 truncate text-xs">{ctgSummary(same)}</span>
+          </button>
+        ) : null;
+      })()}
       {t.shown.length ? <AlertList alerts={t.shown} onFix={onFix} limit={2} compact /> : (
         <p className="text-sm text-gray-600 dark:text-gray-400 px-1">
           Nothing due.{t.next ? <> Next: <span className="font-semibold text-gray-900 dark:text-gray-100">{t.next.label} {clock(t.next.at)}</span> (in {fmtAge(t.next.at - now)})</> : null}
