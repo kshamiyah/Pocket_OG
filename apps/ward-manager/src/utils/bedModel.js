@@ -326,6 +326,21 @@ export function setStage(bed, stage, iso) {
 }
 
 // Alerts that a tap can clear: a stored "done" flag, or an obs stamp.
+// What each done flag means, for the bed record and handover.
+export const DONE_LABEL = {
+  gbsAntibioticsStarted: "Intrapartum antibiotics given",
+  broadAntibioticsStarted: "Antibiotics for suspected infection given",
+  pphReviewed: "PPH reviewed",
+  bleedingReviewed: "Bleeding reviewed",
+  neonatalTeamAlerted: "Neonatal team alerted",
+  mgso4Given: "MgSO4 (neuroprotection) given",
+  corticosteroidsConfirmed: "Steroids given",
+  tocolysisOffered: "Tocolysis offered",
+  mgso4PETGiven: "MgSO4 (eclampsia) given",
+  mgso4PETAssessed: "Severe pre-eclampsia features assessed",
+  gbsBirthOffered: "Immediate birth offered (GBS, ruptured membranes)",
+};
+
 export const PERSISTENT_FLAGS = {
   "gbs-iap": { field: "gbsAntibioticsStarted", label: "Given" },
   "preterm-neonatal": { field: "neonatalTeamAlerted", label: "Done" },
@@ -385,7 +400,10 @@ export function fixLabel(alertId) {
 }
 
 export function fixAlert(bed, alertId, iso, by = null) {
-  if (PERSISTENT_FLAGS[alertId]) return { [PERSISTENT_FLAGS[alertId].field]: true };
+  if (PERSISTENT_FLAGS[alertId]) {
+    const f = PERSISTENT_FLAGS[alertId].field;
+    return { [f]: true, [`${f}At`]: iso, ...(by ? { [`${f}By`]: by } : {}) };
+  }
   if (OBS_STAMP[alertId]) return stampObs(bed, iso, [OBS_STAMP[alertId]]);
   if (reviewMinutes(alertId)) return { reviews: { ...(bed.reviews ?? {}), [alertId]: { at: iso, by } } };
   return {};

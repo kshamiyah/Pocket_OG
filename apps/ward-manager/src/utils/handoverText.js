@@ -2,7 +2,9 @@
 
 import { computeAlerts } from "./wardAlerts";
 import { clock, fmtAge } from "./time";
-import { currentOxytocin, doctorLabel, lastVE, membraneStatus, parityWithHistory, riskLabel, stageLabel, veFindings } from "./bedModel";
+import { DONE_LABEL, PERSISTENT_FLAGS, currentOxytocin, doctorLabel, lastVE, membraneStatus, parityWithHistory, riskLabel, stageLabel, veFindings } from "./bedModel";
+
+const DONE_FIELDS = [...new Set(Object.values(PERSISTENT_FLAGS).map(f => f.field))];
 import { applyReviews, tidy } from "./triage";
 
 function isPreterm(g) {
@@ -45,18 +47,9 @@ export function generateHandover(beds, shift, now = Date.now()) {
       bed.modeOfOnset === "Induced" && bed.inductionMethod ? `${bed.inductionMethod}${bed.inductionStartTime ? ` from ${clock(bed.inductionStartTime, now)}` : ""}` : null,
       bed.analgesia && bed.analgesia !== "None" ? bed.analgesia : null,
     ].filter(Boolean);
-    const done = [
-      bed.gbsAntibioticsStarted && "Intrapartum antibiotics ✓",
-      bed.broadAntibioticsStarted && "Infection antibiotics ✓",
-      bed.bleedingReviewed && "Bleeding reviewed ✓",
-      bed.mgso4PETGiven && "MgSO4 (eclampsia) ✓",
-      bed.gbsBirthOffered && "Immediate birth offered (GBS, ROM) ✓",
-      bed.mgso4PETAssessed && "Severe PET features assessed ✓",
-      bed.neonatalTeamAlerted && "Neonatal team ✓",
-      bed.corticosteroidsConfirmed && "Steroids ✓",
-      bed.mgso4Given && "MgSO4 ✓",
-      bed.tocolysisOffered && "Tocolysis offered ✓",
-    ].filter(Boolean);
+    // What has been given or done, with the time where it was recorded.
+    const done = DONE_FIELDS.filter(f => bed[f])
+      .map(f => `${DONE_LABEL[f] ?? f}${bed[`${f}At`] ? ` ${clock(bed[`${f}At`], now)}` : ""} ✓`);
     const tasks = (bed.tasks ?? []).filter(x => !x.done);
 
     if (bed.delivery) {
@@ -95,7 +88,9 @@ export function generateHandover(beds, shift, now = Date.now()) {
     }
 
     const oxy = currentOxytocin(bed);
+    const lastOxy = (bed.oxytocinLog ?? []).at(-1);
     if (oxy) lines.push(`Oxytocin ${oxy.dose} mU/min since ${clock(oxy.lastIncrementTime ?? oxy.startTime, now)}${bed.oxytocinHeld ? " (held)" : ""}`);
+    else if (lastOxy?.stopped) lines.push(`Oxytocin stopped ${clock(lastOxy.startTime, now)}${lastOxy.stopReason ? `: ${lastOxy.stopReason}` : ""}`);
 
     const obs = bed.observations ?? {};
     const obsParts = [
@@ -108,8 +103,12 @@ export function generateHandover(beds, shift, now = Date.now()) {
 
     if (background.length) lines.push(background.join(" · "));
     if (done.length) lines.push(done.join(" · "));
-    const ctg = (bed.ctgLog ?? []).at(-1);
-    if (ctg) lines.push(`CTG ${ctg.classification} at ${clock(ctg.time, now)}${ctg.comment ? `: ${ctg.comment}` : ""}`);
+    // CTG trend: the last 3 reviews, oldest first, so a change is visible.
+    const ctgs = (bed.ctgLog ?? []).slice(-3);
+    if (ctgs.length) {
+      const last = ctgs.at(-1);
+      lines.push(`CTG: ${ctgs.map(c => `${c.classification} ${clock(c.time, now)}`).join(" > ")}${last.comment ? ` (${last.comment})` : ""}`);
+    }
 
     alertLines(bed, now).forEach(l => lines.push(l));
 

@@ -1,33 +1,44 @@
 import { useState } from "react";
-import { Chip, ChipRow, Label } from "../ui/atoms";
+import { Chip, ChipRow, Label, WhenPicker } from "../ui/atoms";
 import { AlertList } from "./BedSheet";
 import { ctgSummary } from "../utils/ctgText";
 import {
   BTN, BTN_PRIMARY, BTN_SECONDARY, CARD, CHIP_ON, CTG_BOX, INPUT, TYPE_DISPLAY, TYPE_META, TYPE_UI_SM,
 } from "../ui/styles";
 import { IconBack, IconTick } from "../ui/icons";
-import { fmtAge, clock } from "../utils/time";
+import { fmtAge, clock, resolveWhen, whenFromISO } from "../utils/time";
 import { getUnitSettings } from "../data/unitSettings";
 import {
-  ANALGESIA, LIQUOR_SHORT, PERSISTENT_FLAGS, STAGES, STAGE_SHORT, currentOxytocin, isHypertensiveBed, newId, obsStatus, parityWithHistory, recordObs, sortedVEs, stageLabel, stampObs, stationLabel,
+  ANALGESIA, DONE_LABEL, LIQUOR_SHORT, PERSISTENT_FLAGS, STAGES, STAGE_SHORT, currentOxytocin, isHypertensiveBed, newId, obsStatus, parityWithHistory, recordObs, sortedVEs, stageLabel, stampObs, stationLabel,
 } from "../utils/bedModel";
 
-// Labels for the "recorded as done" list, so a mistaken Given or Done can be taken back.
-const DONE_LABEL = {
-  gbsAntibioticsStarted: "Intrapartum antibiotics given",
-  broadAntibioticsStarted: "Antibiotics for suspected infection given",
-  pphReviewed: "PPH reviewed",
-  bleedingReviewed: "Bleeding reviewed",
-  neonatalTeamAlerted: "Neonatal team alerted",
-  mgso4Given: "MgSO4 given",
-  corticosteroidsConfirmed: "Steroids confirmed",
-  tocolysisOffered: "Tocolysis offered",
-};
 
 // Several alerts share one field (any intrapartum antibiotics), so list each field once.
 const DONE_FIELDS = [...new Set(Object.values(PERSISTENT_FLAGS).map(f => f.field))];
 
 const TASK_QUICK = ["Repeat FBC", "Group & Save", "Clotting screen", "Senior review", "Repeat CTG", "Antibiotics due", "Consent form", "IV access", "Urine dip"];
+
+/** "at 14:05 · Change time": lets a time be set to when it really happened. */
+function TimeEdit({ iso, label, onSave }) {
+  const [open, setOpen] = useState(false);
+  const [when, setWhen] = useState(() => whenFromISO(iso));
+  if (!open) return (
+    <span className="inline-flex items-center gap-2">
+      <span className="text-xs text-gray-500 dark:text-gray-400">{iso ? `at ${clock(iso)}` : "time not recorded"}</span>
+      <SmallBtn onClick={() => { setWhen(iso ? whenFromISO(iso) : { minsAgo: 0 }); setOpen(true); }}>{iso ? "Change time" : "Add time"}</SmallBtn>
+    </span>
+  );
+  const resolved = resolveWhen(when);
+  return (
+    <div className="w-full space-y-2 pt-1">
+      <WhenPicker tight label={label} value={when} onChange={setWhen} presets={[0, 15, 30, 60, 120, 240]} />
+      <div className="flex gap-2">
+        <SmallBtn onClick={() => setOpen(false)}>Cancel</SmallBtn>
+        <SmallBtn onClick={() => { if (resolved) { onSave(resolved); setOpen(false); } }}>Save time</SmallBtn>
+      </div>
+    </div>
+  );
+}
 
 function SmallBtn({ children, onClick, tone = "gray" }) {
   const cls = tone === "red"
@@ -170,9 +181,12 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
                 <Label>Recorded as done</Label>
                 <div className="space-y-1.5">
                   {DONE_FIELDS.filter(f => bed[f]).map(f => (
-                    <div key={f} className={`${CARD} px-3 py-2 flex items-center justify-between gap-3`}>
-                      <span className="text-sm text-gray-800 dark:text-gray-200">{DONE_LABEL[f] ?? f}</span>
-                      <SmallBtn onClick={() => onUpdate({ [f]: false }, `${DONE_LABEL[f] ?? "Item"} taken back`)}>Not done</SmallBtn>
+                    <div key={f} className={`${CARD} px-3 py-2 space-y-1.5`}>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-sm text-gray-800 dark:text-gray-200">{DONE_LABEL[f] ?? f}{bed[`${f}By`] ? <span className="text-gray-500 dark:text-gray-400"> · {bed[`${f}By`]}</span> : null}</span>
+                        <SmallBtn onClick={() => onUpdate({ [f]: false, [`${f}At`]: null }, `${DONE_LABEL[f] ?? "Item"} taken back`)}>Not done</SmallBtn>
+                      </div>
+                      <TimeEdit iso={bed[`${f}At`]} label="When" onSave={iso => onUpdate({ [`${f}At`]: iso }, `${DONE_LABEL[f] ?? "Item"}: time ${clock(iso)}`)} />
                     </div>
                   ))}
                 </div>
@@ -184,8 +198,18 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
                 <div className="flex flex-wrap gap-1.5">
                   {STAGES.map(s => <Chip key={s} on={bed.labourStage === s} onClick={() => onStage(s)}>{STAGE_SHORT[s]}</Chip>)}
                 </div>
-                {bed.labourStage === "Active second stage" && bed.pushingStartTime && <p className={`${TYPE_META} mt-1.5`}>Pushing since {clock(bed.pushingStartTime)} ({fmtAge(now - new Date(bed.pushingStartTime).getTime())})</p>}
-                {bed.labourStage === "Passive second stage" && bed.passiveStartTime && <p className={`${TYPE_META} mt-1.5`}>Fully dilated since {clock(bed.passiveStartTime)} ({fmtAge(now - new Date(bed.passiveStartTime).getTime())})</p>}
+                {(() => {
+                  // When the current stage started, editable so a late entry keeps the right clock.
+                  const k = { "Active first stage": ["activeFirstStageStartTime", "Established labour"], "Passive second stage": ["passiveStartTime", "Fully dilated"], "Active second stage": ["pushingStartTime", "Pushing"] }[bed.labourStage];
+                  if (!k) return null;
+                  const [field, what] = k;
+                  return (
+                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                      <span className={TYPE_META}>{what}{bed[field] ? ` since ${clock(bed[field])} (${fmtAge(now - new Date(bed[field]).getTime())})` : ""}</span>
+                      <TimeEdit iso={bed[field]} label={`${what} from`} onSave={iso => onUpdate({ [field]: iso }, `${what} from ${clock(iso)}`)} />
+                    </div>
+                  );
+                })()}
               </div>
             )}
             <div>

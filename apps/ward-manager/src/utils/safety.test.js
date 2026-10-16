@@ -415,3 +415,18 @@ describe("GBS positive with ruptured membranes: offer immediate birth (NG207 1.2
     expect(ids({ ...b, ...fixAlert(b, "gbs-prom-birth", t(0)) })).not.toContain("gbs-prom-birth")
   })
 })
+
+describe("handover detail", () => {
+  it("shows when a treatment was given, the CTG trend, and why oxytocin stopped", () => {
+    const b = active({
+      id: "h", bedNumber: "5", riskFlags: ["GBS+"],
+      ...fixAlert(active(), "gbs-iap", t(90 * MIN), "Dr S"),
+      ctgLog: [ctg("normal", 120), ctg("suspicious", 60), { ...ctg("pathological", 10), comment: "Discussed with reg" }],
+      oxytocinLog: [{ id: "o1", startTime: t(3 * HOUR), dose: 6, lastIncrementTime: t(2 * HOUR) }, { id: "o2", startTime: t(10 * MIN), dose: 0, stopped: true, stopReason: "Pathological CTG" }],
+    })
+    const text = generateHandover({ h: b }, null, NOW)
+    expect(text).toMatch(/Intrapartum antibiotics given 10:30 ✓/)
+    expect(text).toMatch(/CTG: normal 10:00 > suspicious 11:00 > pathological 11:50 \(Discussed with reg\)/)
+    expect(text).toMatch(/Oxytocin stopped 11:50: Pathological CTG/)
+  })
+})

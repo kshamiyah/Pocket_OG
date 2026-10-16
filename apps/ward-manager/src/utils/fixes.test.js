@@ -89,7 +89,7 @@ describe("handover", () => {
     const text = generateHandover({ b1: b }, null, NOW)
     expect(text).toMatch(/Oxytocin 6 mU\/min/)
     expect(text).toMatch(/Membranes: SROM/)
-    expect(text).toMatch(/Intrapartum antibiotics ✓/)
+    expect(text).toMatch(/Intrapartum antibiotics given/)
     expect(text).toMatch(/To do: Repeat FBC/)
   })
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Sheet from "../ui/Sheet";
-import { Label, Stepper, WhenPicker } from "../ui/atoms";
+import { ChipRow, Label, Stepper, WhenPicker } from "../ui/atoms";
 import { BTN, BTN_PRIMARY, BTN_SECONDARY } from "../ui/styles";
 import { clock, resolveWhen } from "../utils/time";
 import { currentOxytocin, newId } from "../utils/bedModel";
@@ -19,6 +19,7 @@ export default function OxySheet({ bed, onSave, onHold, onClose }) {
   const iso = resolveWhen(when);
   const held = !!bed.oxytocinHeld;
   const max = getUnitSettings().oxytocinMax;
+  const [stopReason, setStopReason] = useState(null);
 
   return (
     <Sheet open onClose={onClose} title={`Oxytocin · Bed ${bed.bedNumber}`} sub="NICE NG235 1.8.54 to 1.8.56 · local protocol for doses"
@@ -34,7 +35,7 @@ export default function OxySheet({ bed, onSave, onHold, onClose }) {
                 {held ? "Release hold" : "Hold at this dose"}
               </button>
               <button type="button" disabled={!iso}
-                onClick={() => iso && onSave({ id: newId("ox"), startTime: iso, dose: 0, stopped: true, lastIncrementTime: iso })}
+                onClick={() => iso && onSave({ id: newId("ox"), startTime: iso, dose: 0, stopped: true, lastIncrementTime: iso, stopReason: stopReason ?? undefined })}
                 className={`${BTN} whitespace-nowrap bg-red-600 text-white`}>
                 Stop oxytocin
               </button>
@@ -54,6 +55,13 @@ export default function OxySheet({ bed, onSave, onHold, onClose }) {
         {dose >= max && <p className="text-xs font-semibold text-red-600 dark:text-red-400 text-center mt-1.5">Unit maximum: escalate to the registrar.</p>}
       </div>
       <WhenPicker label="Time of change" value={when} onChange={setWhen} />
+      {current && (
+        <div>
+          <Label hint="optional, for handover">If stopping, why</Label>
+          <ChipRow small value={stopReason} onChange={v => setStopReason(r => (r === v ? null : v))}
+            options={["Pathological CTG", "5+ in 10 or hypertonus", "Birth or theatre", "Other"]} />
+        </div>
+      )}
       <ul className="rounded-xl border bg-claude-50 dark:bg-claude-950/30 border-claude-200 dark:border-claude-800 px-3 py-2.5 space-y-1">
         {PROTOCOL.map(p => <li key={p} className="text-xs text-claude-900 dark:text-claude-200 leading-snug">{p}</li>)}
         <li className="text-xs text-claude-900 dark:text-claude-200 leading-snug">Starting dose and step size are local protocol; maximum {max} mU/min is a unit setting</li>
