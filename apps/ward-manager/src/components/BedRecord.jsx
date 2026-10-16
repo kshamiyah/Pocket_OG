@@ -9,7 +9,7 @@ import { IconBack, IconTick } from "../ui/icons";
 import { fmtAge, clock, resolveWhen, whenFromISO } from "../utils/time";
 import { getUnitSettings } from "../data/unitSettings";
 import {
-  ANALGESIA, DONE_LABEL, LIQUOR_SHORT, PERSISTENT_FLAGS, STAGES, STAGE_SHORT, currentOxytocin, isHypertensiveBed, newId, obsStatus, parityWithHistory, recordObs, sortedVEs, stageLabel, stampObs, stationLabel,
+  ANALGESIA, DONE_LABEL, LIQUOR_SHORT, PERSISTENT_FLAGS, obsProblem, STAGES, STAGE_SHORT, currentOxytocin, isHypertensiveBed, newId, obsStatus, parityWithHistory, recordObs, sortedVEs, stageLabel, stampObs, stationLabel,
 } from "../utils/bedModel";
 
 
@@ -81,15 +81,16 @@ function ObsPanel({ bed, now, onUpdate }) {
             <SmallBtn onClick={() => { setOpen(open === it.key ? null : it.key); setV1(""); setV2(""); }}>Value</SmallBtn>
             <SmallBtn onClick={() => onUpdate(stampObs(bed, new Date().toISOString(), [it.key]), `${it.label} done`)}>Done</SmallBtn>
           </div>
-          {open === it.key && (
+          {open === it.key && (<>
             <div className="flex gap-2 mt-2">
               <input autoFocus type="number" inputMode={it.type === "float" ? "decimal" : "numeric"} value={v1} onChange={e => setV1(e.target.value)}
                 placeholder={it.type === "bp" ? "Systolic" : `${it.label} (${it.unit})`} className={`${INPUT} flex-1`} aria-label={it.type === "bp" ? "Systolic" : it.label} />
               {it.type === "bp" && <input type="number" inputMode="numeric" value={v2} onChange={e => setV2(e.target.value)} placeholder="Diastolic" className={`${INPUT} flex-1`} aria-label="Diastolic" />}
-              <button type="button" onClick={() => saveValue(it)} disabled={it.type === "bp" ? !(v1 && v2) : !v1}
+              <button type="button" onClick={() => saveValue(it)} disabled={(it.type === "bp" ? !(v1 && v2) : !v1) || !!obsProblem(it.name, it.type === "bp" ? [v1, v2] : v1)}
                 className={`${BTN} ${BTN_PRIMARY} px-4`} aria-label="Save value"><IconTick /></button>
             </div>
-          )}
+            {(() => { const m = obsProblem(it.name, it.type === "bp" ? [v1, v2] : v1); return m && (it.type !== "bp" || (v1 && v2)) ? <p role="alert" className="text-xs font-semibold text-red-600 dark:text-red-400 mt-1">{m}</p> : null; })()}
+          </>)}
         </div>
       ))}
       {/* Optional and quiet: only for women whose output is being measured. */}
@@ -175,6 +176,19 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
           <>
             {t.alerts.length ? <AlertList alerts={t.alerts} onFix={onFix} /> : (
               <p className="rounded-xl border px-3 py-2.5 text-sm bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-400">All clear. No active alerts.</p>
+            )}
+            {DONE_FIELDS.some(f => bed[`${f}Declined`]) && (
+              <div>
+                <Label>Decided not to give</Label>
+                <div className="space-y-1.5">
+                  {DONE_FIELDS.filter(f => bed[`${f}Declined`]).map(f => (
+                    <div key={f} className={`${CARD} px-3 py-2 flex items-center justify-between gap-3`}>
+                      <span className="text-sm text-gray-800 dark:text-gray-200">{(DONE_LABEL[f] ?? f).replace(/ (given|confirmed)$/, "")}: not given{bed[`${f}DeclinedAt`] ? ` (${clock(bed[`${f}DeclinedAt`])})` : ""}</span>
+                      <SmallBtn onClick={() => onUpdate({ [`${f}Declined`]: false }, "Decision taken back")}>Undo</SmallBtn>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
             {DONE_FIELDS.some(f => bed[f]) && (
               <div>

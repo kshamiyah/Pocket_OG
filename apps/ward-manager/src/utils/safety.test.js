@@ -2,7 +2,7 @@
 
 import { describe, it, expect } from "vitest"
 import { computeAlerts } from "./wardAlerts.js"
-import { currentOxytocin, fixAlert, recordObs, stampObs } from "./bedModel.js"
+import { currentOxytocin, declineAlert, fixAlert, fixLabel, obsProblem, recordObs, stampObs } from "./bedModel.js"
 import { applyReviews, compareTriage, triageBed, triageWard } from "./triage.js"
 import { generateHandover } from "./handoverText.js"
 import { UNIT_DEFAULTS } from "../data/unitSettings.js"
@@ -87,9 +87,12 @@ describe("after birth: maternal safety alerts continue", () => {
     expect(sev(delivered({ delivery: { time: t(HOUR), mode: "SVD", ebl: 1200 } }), "pph")).toBe("urgent")
     expect(sev(delivered({ delivery: { time: t(HOUR), mode: "SVD", ebl: 600 } }), "pph")).toBe("warning")
   })
-  it("lets the PPH alert be marked reviewed", () => {
-    const b = delivered({ delivery: { time: t(HOUR), mode: "SVD", ebl: 1200 } })
-    expect(ids({ ...b, ...fixAlert(b, "pph", t(0)) })).not.toContain("pph")
+  it("PPH Reviewed is time-limited: quiet for an hour, then back", () => {
+    const b = delivered({ delivery: { time: t(2 * HOUR), mode: "SVD", ebl: 1200 } })
+    const soon = { ...b, ...fixAlert(b, "pph", t(20 * MIN)) }
+    expect(triageBed(soon, NOW).alerts.find(a => a.id === "pph").severity).toBe("info")
+    const later = { ...b, ...fixAlert(b, "pph", t(70 * MIN)) }
+    expect(triageBed(later, NOW).alerts.find(a => a.id === "pph").severity).toBe("urgent")
   })
   it("drops labour rules, CTG and preterm prompts", () => {
     const b = delivered({ gestation: "30+0", riskFlags: ["GBS+"], ctgLog: [ctg("pathological")] })
@@ -428,5 +431,32 @@ describe("handover detail", () => {
     expect(text).toMatch(/Intrapartum antibiotics given 10:30 ✓/)
     expect(text).toMatch(/CTG: normal 10:00 > suspicious 11:00 > pathological 11:50 \(Discussed with reg\)/)
     expect(text).toMatch(/Oxytocin stopped 11:50: Pathological CTG/)
+  })
+})
+
+
+describe("fixes from the second shift test", () => {
+  it("stop-oxytocin alert is an action, not a snooze", () => {
+    expect(fixLabel("oxytocin-stop-pathological")).toBe("Stop oxytocin")
+  })
+  it("a severe BP keeps the magnesium prompt up after a lower repeat, until Assessed", () => {
+    const b0 = active({ riskFlags: ["Pre-eclampsia"], observations: { lastPulse: t(5 * MIN), lastTemp: t(5 * MIN), lastRR: t(5 * MIN) } })
+    const b1 = { ...b0, ...recordObs(b0, t(40 * MIN), { bp: ["165", "110"] }) }
+    const b2 = { ...b1, ...recordObs(b1, t(5 * MIN), { bp: ["150", "100"] }) }
+    expect(ids(b2)).toContain("mgso4-severe-pet")
+    expect(b2.observations.bpWorst).toMatchObject({ sys: 165, dia: 110 })
+    expect(ids({ ...b2, ...fixAlert(b2, "mgso4-severe-pet", t(0)) })).not.toContain("mgso4-severe-pet")
+  })
+  it("consider prompts can be answered Not given, and the handover says so", () => {
+    const b = active({ gestation: "30+2" })
+    const after = { ...b, ...declineAlert("preterm-mgso4", t(0), "Dr S") }
+    expect(ids(after)).not.toContain("preterm-mgso4")
+    expect(generateHandover({ x: { ...after, id: "x", bedNumber: "1" } }, null, NOW)).toMatch(/MgSO4 \(neuroprotection\) not given/)
+  })
+  it("implausible obs are refused", () => {
+    expect(obsProblem("temp", "383")).toMatch(/looks wrong/)
+    expect(obsProblem("rr", "220")).toMatch(/looks wrong/)
+    expect(obsProblem("bp", ["80", "120"])).toMatch(/higher than diastolic/)
+    expect(obsProblem("pulse", "88")).toBeNull()
   })
 })

@@ -62,7 +62,7 @@ export default function BoardRound({ ids, index, beds, triage, updated, now, onI
                   (() => { const m = membraneStatus(bed); return m.status ? `${m.status}${m.liquor ? `, ${LIQUOR_SHORT[m.liquor] ?? m.liquor}` : ""}` : null; })(),
                 ].filter(Boolean).join(" · ") || "Nothing else"}</dd>
               </dl>
-              {t && <AlertList key={bed.id} alerts={t.shown} onFix={id => onFix(bed.id, id)} limit={2} />}
+              {t && <AlertList key={bed.id} alerts={t.shown} onFix={(id, kind) => onFix(bed.id, id, kind)} limit={2} />}
               {t && !t.shown.length && t.next && <p className={TYPE_META}>Next: {t.next.label} {clock(t.next.at)} (in {fmtAge(t.next.at - now)})</p>}
             </div>
             {bed.delivery ? (

@@ -12,14 +12,17 @@ const PROTOCOL = [
   "Pathological CTG: stop immediately and get urgent obstetric or senior midwife review (NG235 1.8.56)",
 ];
 
-export default function OxySheet({ bed, onSave, onHold, onClose }) {
+export default function OxySheet({ bed, stopping = false, onSave, onHold, onClose }) {
   const current = currentOxytocin(bed);
   const [dose, setDose] = useState(current?.dose ?? 2);
   const [when, setWhen] = useState({ minsAgo: 0 });
   const iso = resolveWhen(when);
   const held = !!bed.oxytocinHeld;
   const max = getUnitSettings().oxytocinMax;
-  const [stopReason, setStopReason] = useState(null);
+  const [stopReason, setStopReason] = useState(stopping ? "Pathological CTG" : null);
+  // NG235 1.8.54: increase no more often than every 30 minutes.
+  const sinceChange = current ? (resolveWhen(when) ? new Date(resolveWhen(when)) - new Date(current.lastIncrementTime ?? current.startTime) : null) : null;
+  const tooSoon = current && dose > current.dose && sinceChange != null && sinceChange < 30 * 60000;
 
   return (
     <Sheet open onClose={onClose} title={`Oxytocin · Bed ${bed.bedNumber}`} sub="NICE NG235 1.8.54 to 1.8.56 · local protocol for doses"
@@ -43,6 +46,11 @@ export default function OxySheet({ bed, onSave, onHold, onClose }) {
           )}
         </div>
       }>
+      {stopping && current && (
+        <p role="alert" className="rounded-xl border px-3 py-2.5 text-sm font-semibold bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-900 text-red-800 dark:text-red-200">
+          Pathological CTG on oxytocin: stop it now and get urgent obstetric or senior midwife review (NG235 1.8.56). Tap Stop oxytocin below.
+        </p>
+      )}
       {current && (
         <p className="text-sm text-gray-700 dark:text-gray-300">
           Current: <b>{current.dose} mU/min</b> since {clock(current.lastIncrementTime ?? current.startTime)}
@@ -53,6 +61,7 @@ export default function OxySheet({ bed, onSave, onHold, onClose }) {
         <Label>Dose (mU/min)</Label>
         <Stepper value={dose} onChange={setDose} min={1} max={max} valueClass={dose >= max ? "text-red-600 dark:text-red-400" : ""} />
         {dose >= max && <p className="text-xs font-semibold text-red-600 dark:text-red-400 text-center mt-1.5">Unit maximum: escalate to the registrar.</p>}
+        {tooSoon && <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 text-center mt-1.5">Less than 30 minutes since the last change ({Math.round(sinceChange / 60000)} min). NICE: increase no more often than every 30 minutes (NG235 1.8.54).</p>}
       </div>
       <WhenPicker label="Time of change" value={when} onChange={setWhen} />
       {current && (

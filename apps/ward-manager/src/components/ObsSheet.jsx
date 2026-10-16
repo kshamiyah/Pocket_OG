@@ -4,7 +4,7 @@ import { Label, WhenPicker } from "../ui/atoms";
 import { BTN, BTN_PRIMARY, BTN_SECONDARY, INPUT, TYPE_META } from "../ui/styles";
 import { resolveWhen } from "../utils/time";
 import { computeAlerts } from "../utils/wardAlerts";
-import { isDiabetic, recordObs, stampObs } from "../utils/bedModel";
+import { isDiabetic, obsProblem, recordObs, stampObs } from "../utils/bedModel";
 import { tidy } from "../utils/triage";
 
 // Which alerts belong to which field, so the box can colour itself from the
@@ -21,16 +21,17 @@ const FIELD_TONE = {
   warning: "border-claude-400 dark:border-claude-700 bg-claude-50 dark:bg-claude-950/30",
 };
 
-function NumBox({ id, label, unit, value, onChange, decimal = false, tone, placeholder }) {
+// The last value sits beside the unit, not inside the box, so an empty box
+// never looks as if a number has been typed.
+function NumBox({ id, label, unit, value, onChange, decimal = false, tone, last }) {
   return (
     <label htmlFor={id} className="block">
       <span className="flex items-baseline justify-between mb-1">
         <span className="text-xs font-medium uppercase tracking-wide text-gray-500">{label}</span>
-        <span className="text-[11px] text-gray-400">{unit}</span>
+        <span className="text-[11px] text-gray-400">{unit}{last ? ` · last ${last}` : ""}</span>
       </span>
       <input id={id} type="text" inputMode={decimal ? "decimal" : "numeric"} autoComplete="off" value={value}
         onChange={e => onChange(e.target.value.replace(decimal ? /[^\d.]/g : /\D/g, "").slice(0, decimal ? 4 : 3))}
-        placeholder={placeholder}
         className={`${INPUT} !h-11 text-lg font-semibold tabular-nums ${tone ? FIELD_TONE[tone] : ""}`} />
     </label>
   );
@@ -50,10 +51,11 @@ export default function ObsSheet({ bed, onSave, onClose }) {
   };
   const any = Object.values(entries).some(x => Array.isArray(x) ? x.every(Boolean) : !!x);
   const bpHalf = (v.sys && !v.dia) || (!v.sys && v.dia);
+  const problem = Object.entries(entries).map(([k, x]) => obsProblem(k, x)).find(Boolean) ?? null;
 
   // Preview the alerts these values would raise.
   const preview = useMemo(() => {
-    if (!any || !iso) return [];
+    if (!any || !iso || problem) return [];
     const next = { ...bed, ...recordObs(bed, iso, entries) };
     const ids = new Set(Object.values(FIELD_ALERTS).flat());
     return computeAlerts(next).filter(a => ids.has(a.id));
@@ -62,7 +64,6 @@ export default function ObsSheet({ bed, onSave, onClose }) {
     const hit = preview.filter(a => FIELD_ALERTS[field].includes(a.id));
     return hit.some(a => a.severity === "urgent") ? "urgent" : hit.length ? "warning" : null;
   };
-  const last = val => (val ? `last ${val}` : "");
 
   return (
     <Sheet open dense onClose={onClose} title={`Obs · Bed ${bed.bedNumber}`} sub="Enter what you have. Values stay until a newer one replaces them."
@@ -70,20 +71,21 @@ export default function ObsSheet({ bed, onSave, onClose }) {
         <div className="grid grid-cols-[1fr_2fr] gap-2">
           <button type="button" disabled={!iso} onClick={() => iso && onSave(stampObs(bed, iso), "Obs done")}
             className={`${BTN} ${BTN_SECONDARY} whitespace-nowrap`}>Done, no values</button>
-          <button type="button" disabled={!iso || !any || bpHalf} onClick={() => onSave(recordObs(bed, iso, entries), "Obs recorded")}
-            className={`${BTN} ${BTN_PRIMARY} min-h-[3.25rem] text-base`}>{bpHalf ? "Add both BP numbers" : "Save obs"}</button>
+          <button type="button" disabled={!iso || !any || bpHalf || !!problem} onClick={() => onSave(recordObs(bed, iso, entries), "Obs recorded")}
+            className={`${BTN} ${BTN_PRIMARY} min-h-[3.25rem] text-base`}>{problem ? "Check values" : bpHalf ? "Add both BP numbers" : "Save obs"}</button>
         </div>
       }>
       <div className="grid grid-cols-2 gap-3">
-        <NumBox id="obs-pulse" label="Pulse" unit="bpm" value={v.pulse} onChange={set("pulse")} tone={toneOf("pulse")} placeholder={last(obs.pulseValue)} />
-        <NumBox id="obs-temp" label="Temp" unit="°C" decimal value={v.temp} onChange={set("temp")} tone={toneOf("temp")} placeholder={last(obs.tempValue)} />
+        <NumBox id="obs-pulse" label="Pulse" unit="bpm" value={v.pulse} onChange={set("pulse")} tone={toneOf("pulse")} last={obs.pulseValue} />
+        <NumBox id="obs-temp" label="Temp" unit="°C" decimal value={v.temp} onChange={set("temp")} tone={toneOf("temp")} last={obs.tempValue} />
         <div className="col-span-2 grid grid-cols-2 gap-3">
-          <NumBox id="obs-sys" label="BP systolic" unit="mmHg" value={v.sys} onChange={set("sys")} tone={toneOf("bp")} placeholder={obs.bpSystolic ? `last ${obs.bpSystolic}` : ""} />
-          <NumBox id="obs-dia" label="Diastolic" unit="mmHg" value={v.dia} onChange={set("dia")} tone={toneOf("bp")} placeholder={obs.bpDiastolic ? `last ${obs.bpDiastolic}` : ""} />
+          <NumBox id="obs-sys" label="BP systolic" unit="mmHg" value={v.sys} onChange={set("sys")} tone={toneOf("bp")} last={obs.bpSystolic} />
+          <NumBox id="obs-dia" label="Diastolic" unit="mmHg" value={v.dia} onChange={set("dia")} tone={toneOf("bp")} last={obs.bpDiastolic} />
         </div>
-        <NumBox id="obs-rr" label="Resp rate" unit="/min" value={v.rr} onChange={set("rr")} tone={toneOf("rr")} placeholder={last(obs.rrValue)} />
-        {isDiabetic(bed) && <NumBox id="obs-bgl" label="Glucose" unit="mmol/L" decimal value={v.bgl} onChange={set("bgl")} tone={toneOf("bgl")} placeholder={last(obs.bglValue)} />}
+        <NumBox id="obs-rr" label="Resp rate" unit="/min" value={v.rr} onChange={set("rr")} tone={toneOf("rr")} last={obs.rrValue} />
+        {isDiabetic(bed) && <NumBox id="obs-bgl" label="Glucose" unit="mmol/L" decimal value={v.bgl} onChange={set("bgl")} tone={toneOf("bgl")} last={obs.bglValue} />}
       </div>
+      {problem && <p role="alert" className="text-sm font-semibold text-red-600 dark:text-red-400">{problem}</p>}
       {preview.length > 0 && (
         <div className="space-y-1">
           {preview.map(a => <p key={a.id} className={`text-sm font-semibold ${a.severity === "urgent" ? "text-red-600 dark:text-red-400" : "text-claude-700 dark:text-claude-400"}`}>{tidy(a.title)}</p>)}

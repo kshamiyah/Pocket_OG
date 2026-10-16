@@ -119,7 +119,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // Offer 24+0 to 29+6; consider 30+0 to 33+6 in established preterm labour.
   const inEstablishedLabour = bed.labourStage === "Active first stage"
     || bed.labourStage === "Passive second stage" || bed.labourStage === "Active second stage";
-  if (!delivered && isPreterm && gestWks >= 23 && gestWks < 24 && !bed.mgso4Given) {
+  if (!delivered && isPreterm && gestWks >= 23 && gestWks < 24 && !bed.mgso4Given && !bed.mgso4GivenDeclined) {
     alerts.push({
       id: "preterm-mgso4",
       severity: "warning",
@@ -127,7 +127,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       body: "Discuss IV magnesium sulfate for neuroprotection in established preterm labour or planned birth within 24 h (23+0 to 23+6), in the context of her individual circumstances.",
       citation: "NICE NG25 1.10.1 [2019]",
     });
-  } else if (!delivered && isPreterm && gestWks >= 24 && gestWks < 30 && !bed.mgso4Given) {
+  } else if (!delivered && isPreterm && gestWks >= 24 && gestWks < 30 && !bed.mgso4Given && !bed.mgso4GivenDeclined) {
     alerts.push({
       id: "preterm-mgso4",
       severity: "urgent",
@@ -135,7 +135,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       body: "Offer IV magnesium sulfate for neuroprotection in established preterm labour or planned birth within 24 h (24+0 to 29+6). Regimen per NG25 1.10.4.",
       citation: "NICE NG25 1.10.2 [2015]",
     });
-  } else if (!delivered && isPreterm && gestWks >= 30 && gestWks < 34 && inEstablishedLabour && !bed.mgso4Given) {
+  } else if (!delivered && isPreterm && gestWks >= 30 && gestWks < 34 && inEstablishedLabour && !bed.mgso4Given && !bed.mgso4GivenDeclined) {
     alerts.push({
       id: "preterm-mgso4",
       severity: "warning",
@@ -147,7 +147,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
 
   // ─── Preterm — antenatal corticosteroids (NICE NG25 1.9.2–1.9.3) ─────
   // Offer 24+0 to 33+6; consider 34+0 to 35+6.
-  if (!delivered && isPreterm && gestWks >= 22 && gestWks < 24 && !bed.corticosteroidsConfirmed) {
+  if (!delivered && isPreterm && gestWks >= 22 && gestWks < 24 && !bed.corticosteroidsConfirmed && !bed.corticosteroidsConfirmedDeclined) {
     alerts.push({
       id: "preterm-steroids",
       severity: "warning",
@@ -155,7 +155,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       body: "Discuss maternal corticosteroids with the woman and the multidisciplinary team in the context of her individual circumstances (22+0 to 23+6).",
       citation: "NICE NG25 1.9.1 [2015, amended 2022]",
     });
-  } else if (!delivered && isPreterm && gestWks >= 24 && gestWks < 34 && !bed.corticosteroidsConfirmed) {
+  } else if (!delivered && isPreterm && gestWks >= 24 && gestWks < 34 && !bed.corticosteroidsConfirmed && !bed.corticosteroidsConfirmedDeclined) {
     alerts.push({
       id: "preterm-steroids",
       severity: "urgent",
@@ -163,7 +163,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       body: "Offer maternal corticosteroids in suspected, diagnosed or established preterm labour or P-PROM (24+0 to 33+6). Document if already given or not indicated.",
       citation: "NICE NG25 1.9.2 [2015, amended 2019]",
     });
-  } else if (!delivered && isPreterm && gestWks >= 34 && gestWks < 36 && !bed.corticosteroidsConfirmed) {
+  } else if (!delivered && isPreterm && gestWks >= 34 && gestWks < 36 && !bed.corticosteroidsConfirmed && !bed.corticosteroidsConfirmedDeclined) {
     alerts.push({
       id: "preterm-steroids",
       severity: "warning",
@@ -734,6 +734,9 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // uses the same regimen, so it counts.
   const mgRunning = bed.mgso4Given || bed.mgso4PETGiven;
   const severeBP = bpSys !== null && bpDia !== null && (bpSys >= 160 || bpDia >= 110);
+  // A severe reading earlier on keeps the prompt up until someone has assessed
+  // her, even if the latest BP is lower (NG133 1.8.3 asks for an assessment).
+  const severeSeenAt = obs.bpSevereAt ?? null;
   const lowUrine = obs.urineOutput !== undefined && obs.urineOutput < unit.oliguriaMlH;
   if (flags.includes("Eclampsia") && !mgRunning) {
     alerts.push({
@@ -743,12 +746,12 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       body: "A woman with severe hypertension or severe pre-eclampsia who has or has had an eclamptic fit: give IV magnesium sulfate (Collaborative Eclampsia Trial regimen, NG133 1.8.4). Do not use diazepam, phenytoin or other anticonvulsants instead (1.8.5). Senior and anaesthetic help.",
       citation: "NICE NG133 1.8.1, 1.8.4, 1.8.5",
     });
-  } else if (flags.includes("Pre-eclampsia") && (severeBP || lowUrine) && !mgRunning && !bed.mgso4PETAssessed) {
+  } else if (flags.includes("Pre-eclampsia") && (severeBP || severeSeenAt || lowUrine) && !mgRunning && !bed.mgso4PETAssessed) {
     alerts.push({
       id: "mgso4-severe-pet",
       severity: "urgent",
       title: "Pre-eclampsia: consider magnesium sulfate",
-      body: `${severeBP ? "Severe hypertension" : "Low urine output"} with pre-eclampsia. Check for features of severe pre-eclampsia: severe headaches, visual scotomata, nausea or vomiting, epigastric pain, oliguria with severe hypertension, worsening bloods (creatinine, transaminases, platelets). If any are present, consider magnesium sulfate (NG133 1.8.3). Tap Assessed once reviewed.`,
+      body: `${severeBP ? "Severe hypertension" : severeSeenAt ? `Severe BP recorded ${formatAge(now - new Date(severeSeenAt).getTime())} ago` : "Low urine output"} with pre-eclampsia. Check for features of severe pre-eclampsia: severe headaches, visual scotomata, nausea or vomiting, epigastric pain, oliguria with severe hypertension, worsening bloods (creatinine, transaminases, platelets). If any are present, consider magnesium sulfate (NG133 1.8.3). Tap Assessed once reviewed.`,
       citation: "NICE NG133 1.8.2, 1.8.3",
     });
   }
@@ -787,7 +790,8 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   }
 
   // ─── PPH after birth ─────────────────────────────────────────────────
-  if (delivered && bed.delivery.ebl != null && bed.delivery.ebl >= 500 && !bed.pphReviewed) {
+  // Reviewed quiets it for the unit's time; it then returns while she is on the board.
+  if (delivered && bed.delivery.ebl != null && bed.delivery.ebl >= 500) {
     const major = bed.delivery.ebl > 1000;
     alerts.push({
       id: "pph",

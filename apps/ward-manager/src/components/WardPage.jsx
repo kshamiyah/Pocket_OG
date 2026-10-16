@@ -19,7 +19,7 @@ import { RulesContext } from "../ui/rulesContext";
 import UndoToast from "../ui/UndoToast";
 import { ChipRow, Label } from "../ui/atoms";
 import { BTN, BTN_DANGER, BTN_SECONDARY, TYPE_META } from "../ui/styles";
-import { addVE, doctorLabel, editVE as applyEditVE, fixAlert, fixLabel, lastCTG, newId, setStage, STAGE_SHORT } from "../utils/bedModel";
+import { ACTION_ALERTS, addVE, declineAlert, doctorLabel, editVE as applyEditVE, fixAlert, fixLabel, lastCTG, newId, setStage, STAGE_SHORT } from "../utils/bedModel";
 import { triageWard, wardSummary } from "../utils/triage";
 import { clock } from "../utils/time";
 import { getThemePref, isDarkResolved, setThemePref, watchSystemTheme } from "../utils/theme";
@@ -136,11 +136,16 @@ export default function WardPage({ shift, onEndShift }) {
     updateBed(bedId, { ctgLog: [...(bed.ctgLog ?? []), { id: newId("ctg"), time: iso(), classification: "normal", quick: true }] }, `Normal CTG logged · Bed ${bed.bedNumber}`);
     if (!onCard) closeSheet();
   };
-  const fix = (bedId, alertId) => {
+  const fix = (bedId, alertId, kind) => {
     const bed = beds[bedId];
-    const label = { "gbs-iap": "GBS antibiotics given", "preterm-neonatal": "Neonatal team alerted", "preterm-steroids": "Steroids confirmed", "preterm-mgso4": "MgSO4 given", "preterm-tocolysis": "Tocolysis offered" }[alertId] ?? "Done";
-    const reviewed = fixLabel(alertId) === "Reviewed";
-    updateBed(bedId, fixAlert(bed, alertId, iso(), doctorLabel(shift?.doctorName)), `${reviewed ? "Reviewed" : label} · Bed ${bed.bedNumber}`);
+    // Stopping oxytocin is logged in the oxytocin sheet, with the reason.
+    if (ACTION_ALERTS[alertId]) { setSheet({ type: "oxy", bedId, from: sheet?.bedId === bedId ? "bed" : undefined, stop: true }); return; }
+    if (kind === "decline") {
+      updateBed(bedId, declineAlert(alertId, iso(), doctorLabel(shift?.doctorName)), `Not given · Bed ${bed.bedNumber}`);
+      return;
+    }
+    const label = fixLabel(alertId);
+    updateBed(bedId, fixAlert(bed, alertId, iso(), doctorLabel(shift?.doctorName)), `${label === "Reviewed" ? "Reviewed" : label ?? "Done"} · Bed ${bed.bedNumber}`);
   };
   const changeStage = (bedId, stage, keepOpen = false) => {
     const bed = beds[bedId]; if (bed.labourStage === stage) return;
@@ -258,7 +263,7 @@ export default function WardPage({ shift, onEndShift }) {
         <BedRecord bed={recordBed} t={triage[recordBed.id]} now={now}
           onBack={() => setRecordId(null)}
           onUpdate={(u, msg) => updateBed(recordBed.id, u, msg)}
-          onFix={id => fix(recordBed.id, id)}
+          onFix={(id, kind) => fix(recordBed.id, id, kind)}
           onStage={s => changeStage(recordBed.id, s, true)}
           onOpenVE={v => setSheet({ type: "ve", bedId: recordBed.id, edit: v })}
           onOpenCTG={c => setSheet({ type: "ctg", bedId: recordBed.id, edit: c })}
@@ -275,7 +280,7 @@ export default function WardPage({ shift, onEndShift }) {
           onCTGConcern={() => setSheet({ type: "ctg", bedId: sb.id, from: "bed" })}
           onVE={() => setSheet({ type: "ve", bedId: sb.id, from: "bed" })}
           onObs={() => setSheet({ type: "obs", bedId: sb.id, from: "bed" })}
-          onFix={id => fix(sb.id, id)}
+          onFix={(id, kind) => fix(sb.id, id, kind)}
           onStage={s => changeStage(sb.id, s)}
           onDelivered={() => setSheet({ type: "delivery", bedId: sb.id, from: "bed" })}
           onOxy={() => setSheet({ type: "oxy", bedId: sb.id, from: "bed" })}
@@ -284,7 +289,7 @@ export default function WardPage({ shift, onEndShift }) {
       )}
       {sheet?.type === "ve" && sb && <VESheet key={sheet.edit?.id ?? "new"} bed={sb} editVE={sheet.edit ?? null} onClose={finish} onSave={(ve, stageTo) => saveVE(sb.id, ve, stageTo, !!sheet.edit)} />}
       {sheet?.type === "ctg" && sb && <CTGSheet key={sheet.edit?.id ?? "new"} bed={sb} editCTG={sheet.edit ?? null} notice={sheet.notice} onClose={finish} onSave={e => saveCTG(sb.id, e, !!sheet.edit)} />}
-      {sheet?.type === "oxy" && sb && <OxySheet bed={sb} onClose={finish} onSave={e => saveOxy(sb.id, e)} onHold={h => holdOxy(sb.id, h)} />}
+      {sheet?.type === "oxy" && sb && <OxySheet bed={sb} stopping={!!sheet.stop} onClose={finish} onSave={e => saveOxy(sb.id, e)} onHold={h => holdOxy(sb.id, h)} />}
       {sheet?.type === "delivery" && sb && <DeliverySheet bed={sb} onClose={finish} onSave={r => saveDelivery(sb.id, r)} />}
       {sheet?.type === "obs" && sb && (
         <ObsSheet bed={sb} onClose={finish} onSave={(u, msg) => { updateBed(sb.id, u, `${msg} · Bed ${sb.bedNumber}`); finish(); }} />
