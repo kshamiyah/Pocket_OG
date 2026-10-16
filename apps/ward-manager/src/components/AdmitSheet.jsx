@@ -31,8 +31,8 @@ function whenText(w) {
 function SummaryLine({ label, text, onClick, warn = false }) {
   return (
     <button type="button" onClick={onClick}
-      className={`w-full min-h-10 px-3 rounded-lg border flex items-center gap-2 text-left text-sm active:scale-[0.99] ${warn ? "bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-900" : "bg-claude-50 dark:bg-claude-950/40 border-claude-200 dark:border-claude-800"}`}>
-      <span className="font-semibold text-claude-800 dark:text-claude-300 shrink-0">{label}</span>
+      className={`w-full min-h-10 px-3 rounded-lg border flex items-center gap-2 text-left text-sm active:scale-[0.99] ${warn ? "bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-900" : "bg-gray-50 dark:bg-gray-900/60 border-gray-200 dark:border-gray-800"}`}>
+      <span className="font-semibold text-gray-900 dark:text-gray-100 shrink-0">{label}</span>
       <span className={`flex-1 min-w-0 truncate ${warn ? "text-red-700 dark:text-red-400" : "text-gray-700 dark:text-gray-300"}`}>{text}</span>
       <span className="shrink-0 text-xs font-semibold text-claude-700 dark:text-claude-400">Change</span>
       <IconChevron className="w-3.5 h-3.5 text-claude-700 dark:text-claude-400 shrink-0" />
@@ -89,7 +89,6 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
   // Admission time defaults to now; the picker only appears if asked for.
   const [admEarlier, setAdmEarlier] = useState(false);
   const detail = useSubPage();
-  const [more, setMore] = useState(edit || !!iolEntry);
 
   const suggestedAdmitStage = veDil == null ? null : veDil >= 10 ? "Passive second stage" : veDil >= 4 ? "Active first stage" : null;
   const used = new Set(existingNumbers.map(String));
@@ -157,7 +156,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
   const title = edit ? `Edit Bed ${bed.bedNumber}` : iolEntry ? `Admit ${iolEntry.initials} from IOL queue` : "Admit";
   return (
     <Sheet open dense onClose={onClose} title={title}
-      sub={edit ? "VE, CTG and obs history stay as they are." : "No names or identifiers. More details is optional."}
+      sub={edit ? "VE, CTG and obs history stay as they are." : "No names or identifiers."}
       footer={
         <button type="button" onClick={save} disabled={!ready} className={`${BTN} ${BTN_PRIMARY} w-full min-h-[3.25rem] text-base`}>
           {!ready ? (clash ? `Bed ${trimmed} is already on the board` : "Pick bed, parity, gestation and stage")
@@ -323,28 +322,15 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
           <WhenPicker label={`Time of ${effMemb}`} value={romWhen} onChange={setRomWhen} presets={[0, 60, 120, 240]} />
         </SubPage>
       )}
-      {!more ? (
-        <button type="button" onClick={() => setMore(true)}
-          className="w-full min-h-12 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 text-sm font-semibold text-claude-700 dark:text-claude-400">
-          More details (optional): risks, admission time
-        </button>
+      <RiskPicker line values={flags} onChange={setFlags} backLabel={edit ? "Edit" : "Admit"} />
+      {!edit && (admEarlier ? (
+        <WhenPicker tight label="Admission time" value={admWhen} onChange={setAdmWhen} presets={[0, 30, 60, 120]} />
       ) : (
-        <>
-          <RiskPicker values={flags} onChange={setFlags} backLabel={edit ? "Edit" : "Admit"} />
-          {!edit && (
-            <>
-              {admEarlier ? (
-                <WhenPicker tight label="Admission time" value={admWhen} onChange={setAdmWhen} presets={[0, 30, 60, 120]} />
-              ) : (
-                <button type="button" onClick={() => setAdmEarlier(true)}
-                  className="min-h-10 text-sm font-semibold text-claude-700 dark:text-claude-400">
-                  + Admitted earlier? Set admission time
-                </button>
-              )}
-            </>
-          )}
-        </>
-      )}
+        <button type="button" onClick={() => setAdmEarlier(true)}
+          className="min-h-9 text-sm font-semibold text-claude-700 dark:text-claude-400">
+          + Admitted earlier? Set admission time
+        </button>
+      ))}
     </Sheet>
   );
 }
