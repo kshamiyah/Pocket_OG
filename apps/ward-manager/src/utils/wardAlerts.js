@@ -103,6 +103,12 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
 
   // Oxytocin is running unless the last entry stopped it (dose 0).
   const oxyRunning = !!currentOx && !currentOx.stopped && currentOx.dose > 0;
+  // Start of the current oxytocin episode: the first entry after the last
+  // stop. An earlier stop in the log means oxytocin was restarted (NG235 1.8.59).
+  let oxyStartIdx = oxyLog.length - 1;
+  while (oxyStartIdx > 0 && !oxyLog[oxyStartIdx - 1].stopped) oxyStartIdx--;
+  const oxyStart = oxyRunning ? new Date(oxyLog[oxyStartIdx].startTime).getTime() : null;
+  const oxyRestarted = oxyRunning && oxyLog.slice(0, oxyStartIdx).some(e => e.stopped);
 
   // ─── Preterm — neonatal team (unit setting, default under 34 weeks) ─
   if (!delivered && isPreterm && gestWks < unit.neonatalTeamUnderWk && !bed.neonatalTeamAlerted) {
@@ -256,8 +262,12 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // NICE's three steps (NG235 1.8.42 to 1.8.50): delay suspected, then diagnosed
   // if under 1 cm 2 hours later, then confirmed if no progress 2 hours after an
   // amniotomy. `level` is "suspected" | "diagnosed" | "confirmed".
+  // On oxytocin, a VE taken after it started is judged by NG235 1.8.58 instead
+  // (under 2 cm after 4 hours of oxytocin), so the delay steps stop there.
+  const lastActiveVE = activeVEs[activeVEs.length - 1];
+  const veOnOxy = oxyStart != null && !!lastActiveVE && new Date(lastActiveVE.time).getTime() > oxyStart;
   let slow = null;
-  if (bed.labourStage === "Active first stage" && activeVEs.length >= 2) {
+  if (bed.labourStage === "Active first stage" && activeVEs.length >= 2 && !veOnOxy) {
     const n = activeVEs.length;
     slow = slowAt(n - 1);
     if (slow) {
@@ -272,9 +282,34 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     }
   }
 
+  // ─── Progress on oxytocin (NICE NG235 1.8.58) ────────────────────────
+  // VE about 4 hours into oxytocin: under 2 cm gained calls for further
+  // obstetric review about caesarean birth. Compared with the VE about 4 hours
+  // before (usually the one that confirmed delay).
+  let oxyProgress = null;
+  if (bed.labourStage === "Active first stage" && veOnOxy) {
+    const lastT = new Date(lastActiveVE.time).getTime();
+    const earlier = activeVEs.slice(0, -1).reverse().find(ve => lastT - new Date(ve.time).getTime() >= 4 * HOUR - TOL);
+    if (lastT - oxyStart >= 4 * HOUR - TOL && earlier) {
+      oxyProgress = { cm: lastActiveVE.dilation - earlier.dilation, ms: lastT - new Date(earlier.time).getTime() };
+      if (oxyProgress.cm < 2) {
+        alerts.push({
+          id: "oxytocin-poor-progress",
+          severity: "urgent",
+          short: "Under 2 cm on oxytocin",
+          title: "Under 2 cm after 4 hours of oxytocin: obstetric review",
+          body: `${oxyProgress.cm} cm in ${formatAge(oxyProgress.ms)}. Further obstetric review is needed to assess whether a caesarean birth is advisable.`,
+          citation: "NICE NG235 1.8.58 [2007, amended 2023]",
+        });
+      }
+    }
+  }
+
   // ─── VE timing (established first stage) ─────────────────────────────
   // NICE: offer a VE 4-hourly (NG235 1.8.19), and 2 hours after delay is
-  // suspected (1.8.45). Amber when due; red 30 minutes later (local choice).
+  // suspected (1.8.45). On oxytocin, 4 hours after it has led to regular
+  // contractions (1.8.58); the app times that from the oxytocin start.
+  // Amber when due; red 30 minutes later (local choice).
   if (bed.labourStage === "Active first stage") {
     if (!lastVE) {
       alerts.push({
@@ -286,18 +321,32 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       });
     } else {
       const ms = now - new Date(lastVE.time).getTime();
-      const interval = slow ? 2 * HOUR : 4 * HOUR;
-      const why = slow
-        ? "Delay suspected: offer a VE 2 hours later and diagnose delay if progress is less than 1 cm."
-        : "Offer 4-hourly vaginal examination in the established first stage of labour.";
-      const cite = slow ? "NICE NG235 1.8.45 [2007]" : "NICE NG235 1.8.19 [2007]";
-      if (ms >= interval + 30 * MIN) {
+      // On oxytocin with no VE since it started, the clock runs from the start.
+      const firstOnOxy = oxyStart != null && !veOnOxy;
+      const anchor = firstOnOxy ? Math.max(oxyStart, new Date(lastVE.time).getTime()) : new Date(lastVE.time).getTime();
+      const sinceAnchor = now - anchor;
+      const interval = slow && !firstOnOxy ? 2 * HOUR : 4 * HOUR;
+      const why = firstOnOxy
+        ? (oxyRestarted
+          ? "Oxytocin was restarted: base the timing of the next VE on a clinical assessment of the woman. The app reminds 4 hours after the restart."
+          : "On oxytocin: offer a VE 4 hours after the infusion has led to regular contractions (the app counts from the oxytocin start). Under 2 cm progress needs further obstetric review about caesarean birth.")
+        : slow
+          ? "Delay suspected: offer a VE 2 hours later and diagnose delay if progress is less than 1 cm."
+          : veOnOxy && oxyProgress
+            ? "Progress of 2 cm or more on oxytocin: 4-hourly vaginal examinations."
+            : "Offer 4-hourly vaginal examination in the established first stage of labour.";
+      const cite = firstOnOxy
+        ? (oxyRestarted ? "NICE NG235 1.8.59 [2023] · 4 hour reminder is local" : "NICE NG235 1.8.58 [2007, amended 2023]")
+        : slow ? "NICE NG235 1.8.45 [2007]"
+        : veOnOxy && oxyProgress ? "NICE NG235 1.8.58 [2007, amended 2023]"
+        : "NICE NG235 1.8.19 [2007]";
+      if (sinceAnchor >= interval + 30 * MIN) {
         alerts.push({
           id: "ve-overdue", severity: "urgent", since: lastVE.time,
           title: `VE overdue (${formatAge(ms)} ago)`,
           body: why, citation: `${cite} · red after 30 min is local`,
         });
-      } else if (ms >= interval) {
+      } else if (sinceAnchor >= interval) {
         alerts.push({
           id: "ve-due", severity: "warning", since: lastVE.time,
           title: `VE due (${formatAge(ms)} ago)`,
@@ -972,7 +1021,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       temp !== null && temp >= 38 && "Pyrexia",
       pulse !== null && pulse > 120 && "Pulse over 120",
       bpSys !== null && bpDia !== null && (bpSys >= 140 || bpDia >= 90) && "Raised BP",
-      alerts.some(a => a.id === "slow-progress") && "Delay",
+      alerts.some(a => a.id === "slow-progress" || a.id === "oxytocin-poor-progress") && "Delay",
       bed.analgesia === "Epidural" && "Epidural",
       (oxyRunning || bed.oxytocinStartTime) && "Oxytocin",
       // Local additions (not NG229 indications), a unit setting

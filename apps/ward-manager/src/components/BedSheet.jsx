@@ -96,7 +96,7 @@ const TONE = {
   ok: "bg-gray-50 dark:bg-gray-900/60 border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100",
 };
 const TILE_ALERTS = {
-  ve: { red: ["ve-overdue", "ve-never", "slow-progress"], amber: ["ve-due", "arm-reassess", "active-phase-limit"] },
+  ve: { red: ["ve-overdue", "ve-never", "slow-progress", "oxytocin-poor-progress"], amber: ["ve-due", "arm-reassess", "active-phase-limit"] },
   ctg: { red: ["ctg-pathological", "ctg-suspicious-overdue", "oxytocin-stop-pathological"], amber: ["ctg-suspicious", "ctg-review-due", "ctg-not-documented"] },
   obs: { red: ["bp-severe", "bp-low", "temp-38", "rr-low", "bgl-low", "bgl-high", "bgl-due", "bgl-never"], amber: ["tachycardia", "oliguria", "bp-elevated", "temp-375", "temp-low", "rr-high", "pulse-due", "pulse-never", "bp-due", "bp-never", "temp-due", "temp-never", "rr-due", "rr-never"] },
   oxy: { red: ["hyperstim", "oxytocin-max", "oxytocin-stop-pathological"], amber: ["oxytocin-increment"] },

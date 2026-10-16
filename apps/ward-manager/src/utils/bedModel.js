@@ -434,7 +434,7 @@ export const REVIEW_GROUP = {
   "pph": "reviewHourMin", "bp-elevated": "reviewHourMin", "temp-38": "reviewHourMin", "temp-375": "reviewHourMin", "temp-low": "reviewHourMin",
   "oliguria": "reviewHourMin", "oxytocin-max": "reviewHourMin", "passive-limit": "reviewHourMin",
   "pushing-senior-review": "reviewHourMin", "liquor-blood": "reviewHourMin",
-  "slow-progress": "reviewProgressMin", "arm-reassess": "reviewProgressMin",
+  "slow-progress": "reviewProgressMin", "oxytocin-poor-progress": "reviewProgressMin", "arm-reassess": "reviewProgressMin",
   "active-phase-limit": "reviewLongMin", "latent-reassess": "reviewLongMin", "prom-24h": "reviewLongMin",
   "prom-18h": "reviewLongMin", "prom-16h": "reviewLongMin", "gbs-pending-rupture": "reviewLongMin",
   "mec-thick": "reviewLongMin", "mec-thin": "reviewLongMin", "liquor-absent": "reviewLongMin",

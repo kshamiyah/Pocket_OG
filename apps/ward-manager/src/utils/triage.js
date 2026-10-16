@@ -37,6 +37,7 @@ const SHORT = {
   "ve-due": "VE due",
   "latent-reassess": "Reassess",
   "slow-progress": "Slow progress",
+  "oxytocin-poor-progress": "Under 2 cm on oxytocin",
   "hyperstim": "Hyperstimulation",
   "oxytocin-max": "Oxytocin at max",
   "oxytocin-increment": "Oxytocin review",

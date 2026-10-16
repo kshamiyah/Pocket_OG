@@ -500,3 +500,64 @@ describe("delay in the first stage: suspected, diagnosed, confirmed (NG235 1.8.4
     expect(a.body).toMatch(/consideration of oxytocin/)
   })
 })
+
+describe("progress on oxytocin (NG235 1.8.58, 1.8.59)", () => {
+  // Mrs A: delay confirmed at the last VE, oxytocin started 10 minutes later.
+  // h = hours from that VE; the test clock runs at VE + h.
+  const at = h => NOW - 10 * HOUR + h * HOUR
+  const iso = h => new Date(at(h)).toISOString()
+  const AROM = { membranes: "AROM", membranesTime: iso(-2) }
+  const mrsA = (extraVEs = [], oxy) => bed({
+    labourStage: "Active first stage", activeFirstStageStartTime: iso(-9), armTime: iso(-2),
+    ves: [
+      { id: "1", time: iso(-6 - 5 / 60), dilation: 4, membranes: "Intact" },
+      { id: "2", time: iso(-2 - 5 / 60), dilation: 5, membranes: "Intact" },
+      { id: "3", time: iso(-2), dilation: 5, ...AROM },
+      { id: "4", time: iso(0), dilation: 5, ...AROM },
+      ...extraVEs,
+    ],
+    ctgLog: [{ id: "c", time: iso(0), classification: "normal" }],
+    oxytocinLog: oxy ?? [{ id: "o1", startTime: iso(1 / 6), dose: 2, lastIncrementTime: iso(1 / 6) }],
+  })
+  const has = (b, h, id) => computeAlerts(b, at(h)).some(a => a.id === id)
+
+  it("VE is not due 2 hours after the confirming VE once oxytocin is running", () => {
+    expect(has(mrsA(), 2.5, "ve-due")).toBe(false)
+    expect(has(mrsA(), 2.5, "ve-overdue")).toBe(false)
+  })
+  it("VE falls due 4 hours after oxytocin started", () => {
+    expect(has(mrsA(), 4.1, "ve-due")).toBe(false)
+    const a = computeAlerts(mrsA(), at(4.2)).find(x => x.id === "ve-due")
+    expect(a.citation).toMatch(/1\.8\.58/)
+  })
+  it("under 2 cm at the 4 hour VE on oxytocin: obstetric review about caesarean birth", () => {
+    const b = mrsA([{ id: "5", time: iso(4.2), dilation: 6, ...AROM }])
+    const a = computeAlerts(b, at(4.3)).find(x => x.id === "oxytocin-poor-progress")
+    expect(a.severity).toBe("urgent")
+    expect(a.body).toMatch(/caesarean/)
+    // The delay steps no longer judge VEs taken on oxytocin.
+    expect(has(b, 4.3, "slow-progress")).toBe(false)
+  })
+  it("2 cm or more on oxytocin: no review, then 4-hourly VEs", () => {
+    const b = mrsA([{ id: "5", time: iso(4.2), dilation: 7, ...AROM }])
+    expect(has(b, 4.3, "oxytocin-poor-progress")).toBe(false)
+    expect(has(b, 4.3, "slow-progress")).toBe(false)
+    expect(has(b, 6.3, "ve-due")).toBe(false)
+    expect(has(b, 8.3, "ve-due")).toBe(true)
+  })
+  it("an early VE on oxytocin is not judged until 4 hours in", () => {
+    const b = mrsA([{ id: "5", time: iso(2.2), dilation: 5, ...AROM }])
+    expect(has(b, 2.3, "oxytocin-poor-progress")).toBe(false)
+    expect(has(b, 2.3, "slow-progress")).toBe(false)
+  })
+  it("restarted oxytocin: the VE note points to clinical assessment", () => {
+    const oxy = [
+      { id: "o1", startTime: iso(1 / 6), dose: 2, lastIncrementTime: iso(1 / 6) },
+      { id: "o2", startTime: iso(0.5), dose: 0, stopped: true, lastIncrementTime: iso(0.5) },
+      { id: "o3", startTime: iso(1), dose: 2, lastIncrementTime: iso(1) },
+    ]
+    const a = computeAlerts(mrsA([], oxy), at(5.1)).find(x => x.id === "ve-due")
+    expect(a.citation).toMatch(/1\.8\.59/)
+    expect(has(mrsA([], oxy), 4.9, "ve-due")).toBe(false)
+  })
+})

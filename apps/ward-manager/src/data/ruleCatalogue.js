@@ -178,10 +178,10 @@ export const RULES = [
   },
   {
     id: "ve-4h", group: "Labour progress", title: "Vaginal examination timing",
-    when: "Established first stage: no VE yet (urgent). Otherwise amber when a VE is due (4 hours after the last, or 2 hours after delay is suspected), red 30 minutes later.",
+    when: "Established first stage: no VE yet (urgent). Otherwise amber when a VE is due (4 hours after the last, or 2 hours after delay is suspected; on oxytocin, 4 hours after it started, then 4-hourly), red 30 minutes later.",
     then: "Offer a VE. After suspected delay, diagnose delay if progress is less than 1 cm.",
-    severity: "Warning, then urgent", alertIds: ["ve-never", "ve-due", "ve-overdue"], sources: ["NG235 1.8.19", "NG235 1.8.45"],
-    local: "Turning red 30 minutes after the VE is due is a unit choice. NICE times the VE; it sets no overdue point.",
+    severity: "Warning, then urgent", alertIds: ["ve-never", "ve-due", "ve-overdue"], sources: ["NG235 1.8.19", "NG235 1.8.45", "NG235 1.8.58", "NG235 1.8.59"],
+    local: "Turning red 30 minutes after the VE is due is a unit choice. NICE times the VE; it sets no overdue point. On oxytocin NICE times the VE from when the infusion has led to regular contractions; the app counts from the start. After a restart NICE leaves the timing to clinical assessment; the app reminds at 4 hours.",
   },
   {
     id: "slow-progress", group: "Labour progress", title: "Delay in the first stage",
@@ -189,6 +189,12 @@ export const RULES = [
     then: "Suspected: re-examine in 2 hours (the VE timer switches to 2 hours). Diagnosed: consider amniotomy if membranes are intact, then VE 2 hours later; if already ruptured, obstetric review including consideration of oxytocin. Confirmed: obstetric-led care and a full obstetric assessment including consideration of oxytocin.",
     severity: "Urgent", alertIds: ["slow-progress"],
     sources: ["NG235 1.8.42", "NG235 1.8.45", "NG235 1.8.46", "NG235 1.8.48", "NG235 1.8.49", "NG235 1.8.50"],
+  },
+  {
+    id: "oxytocin-poor-progress", group: "Labour progress", title: "Progress on oxytocin",
+    when: "First VE about 4 hours or more after oxytocin started, compared with the VE about 4 hours before it: under 2 cm gained. 5 minute tolerance on the timings. VEs after oxytocin starts are judged by this rule, not the delay steps.",
+    then: "Further obstetric review to assess whether a caesarean birth is advisable. 2 cm or more: 4-hourly VEs.",
+    severity: "Urgent", alertIds: ["oxytocin-poor-progress"], sources: ["NG235 1.8.58"],
   },
   {
     id: "active-phase-limit", group: "Labour progress", title: "Long established first stage",
