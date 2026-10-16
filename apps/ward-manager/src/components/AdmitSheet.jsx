@@ -17,6 +17,7 @@ import {
 const ADMIT_STAGE = { "Latent": "Latent", "Active first stage": "Active", "Passive second stage": "Passive 2nd", "Active second stage": "Pushing" };
 
 const ONSET_SHORT = { Spontaneous: "Spont", Induced: "IOL", PPROM: "PPROM" };
+const ANALGESIA_SHORT = { "Remifentanil PCA": "Remi PCA" };
 
 /** "now", "1h ago", "30 min ago", "at 14:05", "at 22:10 yesterday". */
 function whenText(w) {
@@ -262,6 +263,14 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
           )}
         </div>
       )}
+      {/* Analgesia on the main screen: an epidural changes the passive second
+          stage timing and is a CTG indication, so it should not be hidden. */}
+      <div>
+        <Label tight>Analgesia</Label>
+        <div className="grid grid-cols-5 gap-1">
+          {ANALGESIA.map(a => <Chip key={a} small className="px-0 whitespace-nowrap !text-[11px]" on={analgesia === a} onClick={() => setAnalgesia(a)}>{ANALGESIA_SHORT[a] ?? a}</Chip>)}
+        </div>
+      </div>
       {!edit && (
         <SummaryLine label="VE" onClick={() => detail.open("ve")}
           text={veDil == null ? "not recorded · tap to add" : [
@@ -317,14 +326,10 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
       {!more ? (
         <button type="button" onClick={() => setMore(true)}
           className="w-full min-h-12 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 text-sm font-semibold text-claude-700 dark:text-claude-400">
-          More details (optional): analgesia, risks, admission time
+          More details (optional): risks, admission time
         </button>
       ) : (
         <>
-          <div>
-            <Label tight>Analgesia</Label>
-            <ChipRow small options={ANALGESIA} value={analgesia} onChange={setAnalgesia} />
-          </div>
           <RiskPicker values={flags} onChange={setFlags} backLabel={edit ? "Edit" : "Admit"} />
           {!edit && (
             <>
