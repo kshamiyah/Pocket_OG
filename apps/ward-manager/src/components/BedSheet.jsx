@@ -1,8 +1,8 @@
 import { useState } from "react";
 import Sheet from "../ui/Sheet";
 import { Label } from "../ui/atoms";
-import { ALERT_BOX, BTN, BTN_OK, BTN_SECONDARY, SEV_TEXT } from "../ui/styles";
-import { IconTick, IconChevron, IconInfo } from "../ui/icons";
+import { ALERT_BOX, BTN, BTN_SECONDARY, SEV_TEXT } from "../ui/styles";
+import { IconChevron, IconInfo } from "../ui/icons";
 import { fmtAge, clock } from "../utils/time";
 import {
   ACTION_ALERTS, DECLINABLE, STAGES, STAGE_SHORT, LIQUOR_SHORT, capitalise, currentOxytocin, fixLabel, lastCTG, lastVE, obsStatus, obsTracked,
@@ -123,7 +123,7 @@ function Tile({ label, value, meta, tone, onClick, ariaLabel }) {
 
 const STAGE_BAR = { "Latent": "Latent", "Active first stage": "Active", "Passive second stage": "Passive", "Active second stage": "Pushing" };
 
-export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGNormal, onCTGConcern, onVE, onObs, onFix, onStage, onDelivered, onOxy, onRecord, onRemove }) {
+export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, onVE, onObs, onFix, onStage, onDelivered, onOxy, onRecord, onRemove }) {
   if (!bed) return null;
   const ve = lastVE(bed);
   const ctg = lastCTG(bed);
@@ -185,9 +185,6 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGNormal, on
 
       {ctg?.comment && (
         <p className="text-xs text-gray-600 dark:text-gray-400 px-1 -mt-1 truncate"><span className="font-semibold">CTG {clock(ctg.time)}:</span> {ctg.comment}</p>
-      )}
-      {(!ctg || ctg.classification === "normal") && (
-        <button type="button" onClick={onCTGNormal} className={`${BTN} ${BTN_OK} w-full !min-h-11`}><IconTick /> CTG normal</button>
       )}
 
       {t.shown.length ? <AlertList alerts={t.shown} onFix={onFix} limit={2} compact /> : (

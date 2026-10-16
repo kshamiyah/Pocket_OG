@@ -1,11 +1,11 @@
 import { AlertList } from "./BedSheet";
-import { BTN, BTN_OK, BTN_PRIMARY, BTN_SECONDARY, CARD, TYPE_META, TYPE_OVERLINE } from "../ui/styles";
-import { IconBack, IconTick } from "../ui/icons";
+import { BTN, BTN_PRIMARY, BTN_SECONDARY, CARD, TYPE_META, TYPE_OVERLINE } from "../ui/styles";
+import { IconBack } from "../ui/icons";
 import { fmtAge, clock } from "../utils/time";
 import { LIQUOR_SHORT, capitalise, lastCTG, lastVE, membraneStatus, parityWithHistory, riskShort, stageLabel, veFindings } from "../utils/bedModel";
 
 /** Step through each woman in bed order, confirming or updating as you go. */
-export default function BoardRound({ ids, index, beds, triage, updated, now, onIndex, onExit, onVE, onCTGNormal, onMore, onFix, onHandover }) {
+export default function BoardRound({ ids, index, beds, triage, updated, now, onIndex, onExit, onVE, onCTG, onMore, onFix, onHandover }) {
   const total = ids.length;
   const done = index >= total;
   const bed = done ? null : beds[ids[index]];
@@ -70,7 +70,7 @@ export default function BoardRound({ ids, index, beds, triage, updated, now, onI
             ) : (
               <div className="grid grid-cols-3 gap-2">
                 <button type="button" onClick={() => onVE(bed.id)} className={`${BTN} ${BTN_SECONDARY}`}>VE</button>
-                <button type="button" onClick={() => onCTGNormal(bed.id)} className={`${BTN} ${BTN_OK}`}><IconTick /> CTG</button>
+                <button type="button" onClick={() => onCTG(bed.id)} className={`${BTN} ${BTN_SECONDARY}`}>CTG review</button>
                 <button type="button" onClick={() => onMore(bed.id)} className={`${BTN} ${BTN_SECONDARY}`}>More</button>
               </div>
             )}

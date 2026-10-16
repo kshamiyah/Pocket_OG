@@ -19,7 +19,7 @@ import { RulesContext } from "../ui/rulesContext";
 import UndoToast from "../ui/UndoToast";
 import { ChipRow, Label } from "../ui/atoms";
 import { BTN, BTN_DANGER, BTN_SECONDARY, TYPE_META } from "../ui/styles";
-import { ACTION_ALERTS, addVE, declineAlert, doctorLabel, editVE as applyEditVE, fixAlert, fixLabel, lastCTG, newId, setStage, STAGE_SHORT } from "../utils/bedModel";
+import { ACTION_ALERTS, addVE, declineAlert, doctorLabel, editVE as applyEditVE, fixAlert, fixLabel, setStage, STAGE_SHORT } from "../utils/bedModel";
 import { triageWard, wardSummary } from "../utils/triage";
 import { clock } from "../utils/time";
 
@@ -131,17 +131,6 @@ export default function WardPage({ shift, onEndShift }) {
   const iso = () => new Date().toISOString();
 
   // ── Actions ──────────────────────────────────────────────────────────
-  const ctgNormal = bedId => {
-    const bed = beds[bedId];
-    // A one-tap "normal" must not quietly replace an abnormal review: ask for the features.
-    const prev = lastCTG(bed);
-    if (prev && prev.classification !== "normal") {
-      setSheet({ type: "ctg", bedId, from: onCard ? "bed" : undefined, notice: `The last CTG (${clock(prev.time)}) was ${prev.classification}. Record the features to log this review.` });
-      return;
-    }
-    updateBed(bedId, { ctgLog: [...(bed.ctgLog ?? []), { id: newId("ctg"), time: iso(), classification: "normal", quick: true }] }, `Normal CTG logged · Bed ${bed.bedNumber}`);
-    if (!onCard) closeSheet();
-  };
   const fix = (bedId, alertId, kind) => {
     const bed = beds[bedId];
     // Stopping oxytocin is logged in the oxytocin sheet, with the reason.
@@ -260,7 +249,7 @@ export default function WardPage({ shift, onEndShift }) {
           onIndex={i => setRound(r => ({ ...r, index: Math.max(0, i) }))}
           onExit={() => setRound(null)}
           onVE={id => setSheet({ type: "ve", bedId: id })}
-          onCTGNormal={ctgNormal}
+          onCTG={id => setSheet({ type: "ctg", bedId: id })}
           onMore={id => setSheet({ type: "bed", bedId: id })}
           onFix={fix}
           onHandover={() => { setRound(null); setSheet({ type: "handover" }); }} />
@@ -283,7 +272,6 @@ export default function WardPage({ shift, onEndShift }) {
       {sheet?.type === "bed" && sb && (
         <BedSheet bed={sb} t={triage[sb.id]} now={now} onClose={closeSheet}
           onEdit={() => setSheet({ type: "edit", bedId: sb.id, back: "bed" })}
-          onCTGNormal={() => ctgNormal(sb.id)}
           onCTGConcern={() => setSheet({ type: "ctg", bedId: sb.id, from: "bed" })}
           onVE={() => setSheet({ type: "ve", bedId: sb.id, from: "bed" })}
           onObs={() => setSheet({ type: "obs", bedId: sb.id, from: "bed" })}
