@@ -60,6 +60,12 @@ export default function ObsSheet({ bed, onSave, onClose }) {
     const ids = new Set(Object.values(FIELD_ALERTS).flat());
     return computeAlerts(next).filter(a => ids.has(a.id));
   }, [v, iso]); // eslint-disable-line react-hooks/exhaustive-deps
+  // "All normal" marks the obs as checked; an older abnormal number still
+  // shows until a new number replaces it, so say so rather than hide it.
+  const stale = useMemo(() => {
+    const ids = new Set(Object.values(FIELD_ALERTS).flat());
+    return computeAlerts(bed).filter(a => ids.has(a.id));
+  }, [bed]);
   const toneOf = field => {
     const hit = preview.filter(a => FIELD_ALERTS[field].includes(a.id));
     return hit.some(a => a.severity === "urgent") ? "urgent" : hit.length ? "warning" : null;
@@ -69,8 +75,8 @@ export default function ObsSheet({ bed, onSave, onClose }) {
     <Sheet open dense onClose={onClose} title={`Obs · Bed ${bed.bedNumber}`} sub="Enter what you have. Values stay until a newer one replaces them."
       footer={
         <div className="grid grid-cols-[1fr_2fr] gap-2">
-          <button type="button" disabled={!iso} onClick={() => iso && onSave(stampObs(bed, iso), "Obs done")}
-            className={`${BTN} ${BTN_SECONDARY} whitespace-nowrap`}>Done, no values</button>
+          <button type="button" disabled={!iso} onClick={() => iso && onSave(stampObs(bed, iso), "Obs all normal")}
+            className={`${BTN} ${BTN_SECONDARY} whitespace-nowrap`}>All normal</button>
           <button type="button" disabled={!iso || !any || bpHalf || !!problem} onClick={() => onSave(recordObs(bed, iso, entries), "Obs recorded")}
             className={`${BTN} ${BTN_PRIMARY} min-h-[3.25rem] text-base`}>{problem ? "Check values" : bpHalf ? "Add both BP numbers" : "Save obs"}</button>
         </div>
@@ -85,6 +91,11 @@ export default function ObsSheet({ bed, onSave, onClose }) {
         <NumBox id="obs-rr" label="Resp rate" unit="/min" value={v.rr} onChange={set("rr")} tone={toneOf("rr")} last={obs.rrValue} />
         {isDiabetic(bed) && <NumBox id="obs-bgl" label="Glucose" unit="mmol/L" decimal value={v.bgl} onChange={set("bgl")} tone={toneOf("bgl")} last={obs.bglValue} />}
       </div>
+      {stale.length > 0 && !any && (
+        <p className="text-xs text-gray-600 dark:text-gray-400">
+          Still showing from an earlier reading: <b>{stale.map(a => tidy(a.title)).join("; ")}</b>. "All normal" will not clear it; type the new number to replace it.
+        </p>
+      )}
       {problem && <p role="alert" className="text-sm font-semibold text-red-600 dark:text-red-400">{problem}</p>}
       {preview.length > 0 && (
         <div className="space-y-1">
