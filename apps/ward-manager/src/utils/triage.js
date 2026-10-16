@@ -73,7 +73,8 @@ const SHORT = {
 };
 
 export function shortLabel(alert) {
-  return SHORT[alert.id] ?? tidy(alert.title);
+  // An alert can carry its own short label when one id covers several states.
+  return alert.short ?? SHORT[alert.id] ?? tidy(alert.title);
 }
 
 // Alerts worth forecasting as "next due", with the label shown on the board.

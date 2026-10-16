@@ -335,16 +335,19 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     const what = `${slow.cm} cm in ${formatAge(slow.ms)}`;
     const A = {
       suspected: {
+        short: "Delay suspected",
         title: "Delay suspected: re-examine in 2 hours",
         body: `${what}. Assess all aspects of progress (dilatation, descent and rotation, contractions) and offer a VE 2 hours later; delay is diagnosed if progress is under 1 cm.`,
         citation: "NICE NG235 1.8.42, 1.8.45",
       },
       diagnosed: {
+        short: "Delay diagnosed",
         title: "Delay diagnosed in the first stage",
         body: `${what} since delay was suspected.${intact ? " Consider amniotomy, explaining it shortens labour by about an hour and may make contractions stronger and more painful; repeat the VE 2 hours after." : " Obstetric review including consideration of oxytocin."}`,
         citation: intact ? "NICE NG235 1.8.45, 1.8.46, 1.8.48" : "NICE NG235 1.8.45, 1.8.50",
       },
       confirmed: {
+        short: "Delay confirmed",
         title: "Delay confirmed after amniotomy: obstetric review",
         body: `No progress (${what}) 2 hours after amniotomy. Obstetric-led care; the obstetrician offers a full assessment including abdominal palpation, VE and consideration of oxytocin.`,
         citation: "NICE NG235 1.8.49, 1.8.50",
