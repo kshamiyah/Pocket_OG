@@ -4,8 +4,8 @@ import { Chip, ChipRow, Label, Stepper, WhenPicker } from "../ui/atoms";
 import { BTN, BTN_PRIMARY, CTG_BOX, INPUT, TYPE_META } from "../ui/styles";
 import { resolveWhen, whenFromISO } from "../utils/time";
 import { classifyCTGEntry } from "../utils/wardAlerts";
-import { newId } from "../utils/bedModel";
-import { CTG_DESC } from "../utils/ctgText";
+import { newId, sameAsLastCTG } from "../utils/bedModel";
+import { CTG_DESC, ctgSummary } from "../utils/ctgText";
 
 export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, onClose }) {
   const log = bed.ctgLog ?? [];
@@ -44,6 +44,7 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
   const [override, setOverride] = useState(!!editCTG?.clinicianOverride);
   const cat = override ? "pathological" : autoCat;
   const iso = resolveWhen(when);
+  const same = !editCTG ? sameAsLastCTG(bed, new Date().toISOString()) : null;
   const rise = Math.max(prevHR != null ? hr - prevHR : 0, startHR != null ? hr - startHR : 0);
   const hrTone = undetermined || !hrSet ? "text-gray-400" : hr < 100 || hr > 160 ? "text-red-600 dark:text-red-400" : hr < 110 || rise >= 20 ? "text-claude-700 dark:text-claude-400" : "";
 
@@ -66,6 +67,17 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
         </button>
       }>
       {notice && <p className="text-sm font-semibold text-claude-800 dark:text-claude-300">{notice}</p>}
+      {/* Hourly review with nothing changed: one tap logs the same graded
+          features at this time (only after a normal graded review, and only
+          if it still grades normal). Otherwise grade the features below. */}
+      {same && (
+        <button type="button" onClick={() => onSave(same)}
+          className="w-full text-left rounded-xl border px-3 py-2.5 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-900 active:scale-[0.99]">
+          <span className="block text-base font-bold text-emerald-900 dark:text-emerald-200">✓ Unchanged since last review</span>
+          <span className="block text-xs text-emerald-800 dark:text-emerald-300 mt-0.5">{ctgSummary(same)} · logs as normal now</span>
+        </button>
+      )}
+      {same && <p className={`${TYPE_META} text-center`}>or grade it below if anything has changed</p>}
       {complete || override ? (
         <div className={`rounded-xl border px-3 py-2.5 ${CTG_BOX[cat]}`}>
           <p className="text-base font-semibold capitalize">{cat}</p>

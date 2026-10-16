@@ -19,7 +19,7 @@ import { RulesContext } from "../ui/rulesContext";
 import UndoToast from "../ui/UndoToast";
 import { ChipRow, Label } from "../ui/atoms";
 import { BTN, BTN_DANGER, BTN_SECONDARY, TYPE_META } from "../ui/styles";
-import { ACTION_ALERTS, addVE, declineAlert, doctorLabel, editVE as applyEditVE, fixAlert, fixLabel, sameAsLastCTG, setStage, STAGE_SHORT } from "../utils/bedModel";
+import { ACTION_ALERTS, addVE, declineAlert, doctorLabel, editVE as applyEditVE, fixAlert, fixLabel, setStage, STAGE_SHORT } from "../utils/bedModel";
 import { triageWard, wardSummary } from "../utils/triage";
 import { clock } from "../utils/time";
 
@@ -166,13 +166,6 @@ export default function WardPage({ shift, onEndShift }) {
       `${editing ? "CTG updated" : `${entry.classification[0].toUpperCase()}${entry.classification.slice(1)} CTG logged`} · Bed ${bed.bedNumber}`);
     finish();
   };
-  // One tap when the trace is unchanged from a normal graded review.
-  const ctgSame = bedId => {
-    const bed = beds[bedId];
-    const entry = sameAsLastCTG(bed, iso());
-    if (!entry) { setSheet({ type: "ctg", bedId, from: onCard ? "bed" : undefined }); return; }
-    updateBed(bedId, { ctgLog: [...(bed.ctgLog ?? []), entry] }, `CTG unchanged, normal · Bed ${bed.bedNumber}`);
-  };
   const saveOxy = (bedId, entry) => {
     const bed = beds[bedId]; const log = bed.oxytocinLog ?? [];
     const msg = entry.stopped ? "Oxytocin stopped" : `Oxytocin ${entry.dose} mU/min`;
@@ -257,7 +250,6 @@ export default function WardPage({ shift, onEndShift }) {
           onExit={() => setRound(null)}
           onVE={id => setSheet({ type: "ve", bedId: id })}
           onCTG={id => setSheet({ type: "ctg", bedId: id })}
-          onCTGSame={ctgSame}
           onMore={id => setSheet({ type: "bed", bedId: id })}
           onFix={fix}
           onHandover={() => { setRound(null); setSheet({ type: "handover" }); }} />
@@ -281,7 +273,6 @@ export default function WardPage({ shift, onEndShift }) {
         <BedSheet bed={sb} t={triage[sb.id]} now={now} onClose={closeSheet}
           onEdit={() => setSheet({ type: "edit", bedId: sb.id, back: "bed" })}
           onCTGConcern={() => setSheet({ type: "ctg", bedId: sb.id, from: "bed" })}
-          onCTGSame={() => ctgSame(sb.id)}
           onVE={() => setSheet({ type: "ve", bedId: sb.id, from: "bed" })}
           onObs={() => setSheet({ type: "obs", bedId: sb.id, from: "bed" })}
           onFix={(id, kind) => fix(sb.id, id, kind)}

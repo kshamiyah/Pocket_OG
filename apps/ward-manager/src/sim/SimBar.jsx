@@ -25,14 +25,17 @@ export default function SimBar({ rows }) {
   const btn = "min-h-10 px-3 rounded-lg text-sm font-semibold bg-white/15 active:bg-white/25 text-white";
 
   return (
-    <div className="fixed z-[70] right-2 flex flex-col items-end" style={{ top: "calc(env(safe-area-inset-top) + 4.5rem)" }}>
+    // A slim tab on the left edge, mid-screen: it sits over the page margin,
+    // so it never covers a close button, a chip or a footer button.
+    <div className="fixed z-[70] left-0 top-1/2 -translate-y-1/2">
       {!open ? (
         <button type="button" onClick={() => setOpen(true)} aria-label="Simulation clock"
-          className="min-h-10 px-3 rounded-full bg-violet-700 text-white text-sm font-bold shadow-lg tabular-nums">
-          ⏱ {clock(now)}
+          className="w-6 py-2 rounded-r-lg bg-violet-700 text-white text-[10px] font-bold shadow-lg tabular-nums leading-tight flex flex-col items-center gap-0.5">
+          <span aria-hidden="true">⏱</span>
+          <span className="[writing-mode:vertical-rl] rotate-180">{clock(now)}</span>
         </button>
       ) : (
-        <div className="w-[17.5rem] rounded-2xl bg-violet-800 text-white shadow-2xl p-3 space-y-2.5">
+        <div className="ml-2 w-[17.5rem] rounded-2xl bg-violet-800 text-white shadow-2xl p-3 space-y-2.5">
           <div className="flex items-baseline justify-between">
             <span className="text-2xl font-bold tabular-nums">{clock(now)}</span>
             <button type="button" onClick={() => setOpen(false)} className="text-sm font-semibold text-violet-200 min-h-8 px-2">Hide</button>
