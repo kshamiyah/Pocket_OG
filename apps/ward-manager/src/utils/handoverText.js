@@ -22,6 +22,23 @@ function alertLines(bed, now) {
       : `${a.severity === "urgent" ? "!!" : "!"} ${tidy(a.title)}`);
 }
 
+// Latest values, plus the worst BP this admission when it was higher, so a
+// lower repeat never hides a severe reading.
+function obsLine(obs, now) {
+  const w = obs.bpWorst;
+  const latestSys = parseFloat(obs.bpSystolic);
+  const worse = w && (w.sys > latestSys || w.dia > parseFloat(obs.bpDiastolic));
+  const parts = [
+    obs.bpSystolic && obs.bpDiastolic && `BP ${obs.bpSystolic}/${obs.bpDiastolic}${worse ? ` (highest ${w.sys}/${w.dia} at ${clock(w.at, now)})` : ""}`,
+    obs.pulseValue && `P${obs.pulseValue}`,
+    obs.rrValue && `RR ${obs.rrValue}`,
+    obs.tempValue && `T${obs.tempValue}°C`,
+    obs.bglValue && `BGL ${obs.bglValue}`,
+    obs.urineOutput != null && `Urine ${obs.urineOutput} mL/hr`,
+  ].filter(Boolean);
+  return parts.length ? parts.join(" | ") : null;
+}
+
 export function generateHandover(beds, shift, now = Date.now()) {
   const d = new Date(now);
   const date = `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
@@ -48,8 +65,13 @@ export function generateHandover(beds, shift, now = Date.now()) {
       bed.analgesia && bed.analgesia !== "None" ? bed.analgesia : null,
     ].filter(Boolean);
     // What has been given or done, with the time where it was recorded.
-    const done = DONE_FIELDS.filter(f => bed[f])
-      .map(f => `${DONE_LABEL[f] ?? f}${bed[`${f}At`] ? ` ${clock(bed[`${f}At`], now)}` : ""} ✓`);
+    const done = [
+      ...DONE_FIELDS.filter(f => bed[f])
+        .map(f => `${DONE_LABEL[f] ?? f}${bed[`${f}At`] ? ` ${clock(bed[`${f}At`], now)}` : ""} ✓`),
+      // Decided against, so it is never read as given.
+      ...DONE_FIELDS.filter(f => bed[`${f}Declined`])
+        .map(f => `${(DONE_LABEL[f] ?? f).replace(/ (given|confirmed)$/, "")} not given (decision${bed[`${f}DeclinedAt`] ? ` ${clock(bed[`${f}DeclinedAt`], now)}` : ""})`),
+    ];
     const tasks = (bed.tasks ?? []).filter(x => !x.done);
 
     if (bed.delivery) {
@@ -59,6 +81,8 @@ export function generateHandover(beds, shift, now = Date.now()) {
       if (background.length) lines.push(background.join(" · "));
       if (done.length) lines.push(done.join(" · "));
       if (dl.notes) lines.push(`Notes: ${dl.notes}`);
+      const ol = obsLine(bed.observations ?? {}, now);
+      if (ol) lines.push(ol);
       alertLines(bed, now).forEach(l => lines.push(l));
       if (tasks.length) lines.push(`To do: ${tasks.map(x => x.text).join(", ")}`);
       lines.push("");
@@ -93,13 +117,8 @@ export function generateHandover(beds, shift, now = Date.now()) {
     else if (lastOxy?.stopped) lines.push(`Oxytocin stopped ${clock(lastOxy.startTime, now)}${lastOxy.stopReason ? `: ${lastOxy.stopReason}` : ""}`);
 
     const obs = bed.observations ?? {};
-    const obsParts = [
-      obs.bpSystolic && obs.bpDiastolic && `BP ${obs.bpSystolic}/${obs.bpDiastolic}`,
-      obs.pulseValue && `P${obs.pulseValue}`,
-      obs.tempValue && `T${obs.tempValue}°C`,
-      obs.bglValue && `BGL ${obs.bglValue}`,
-    ].filter(Boolean);
-    if (obsParts.length) lines.push(obsParts.join(" | "));
+    const ol = obsLine(obs, now);
+    if (ol) lines.push(ol);
 
     if (background.length) lines.push(background.join(" · "));
     if (done.length) lines.push(done.join(" · "));

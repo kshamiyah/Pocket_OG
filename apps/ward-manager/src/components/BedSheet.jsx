@@ -5,7 +5,7 @@ import { ALERT_BOX, BTN, BTN_OK, BTN_SECONDARY, SEV_TEXT } from "../ui/styles";
 import { IconTick, IconChevron, IconInfo } from "../ui/icons";
 import { fmtAge, clock } from "../utils/time";
 import {
-  STAGES, STAGE_SHORT, LIQUOR_SHORT, capitalise, currentOxytocin, fixLabel, lastCTG, lastVE, obsStatus, obsTracked,
+  ACTION_ALERTS, DECLINABLE, STAGES, STAGE_SHORT, LIQUOR_SHORT, capitalise, currentOxytocin, fixLabel, lastCTG, lastVE, obsStatus, obsTracked,
   parityWithHistory, riskShort, stageLabel, membraneStatus,
 } from "../utils/bedModel";
 import { shortLabel, tidy } from "../utils/triage";
@@ -54,10 +54,18 @@ export function AlertList({ alerts, onFix, limit = null, compact = false }) {
               </button>
             )}
             {fix && onFix && (
-              <button type="button" onClick={() => onFix(a.id)}
-                className="shrink-0 min-h-9 px-3 rounded-lg border bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-bold text-gray-700 dark:text-gray-200 active:scale-95">
-                {fix}
-              </button>
+              <div className="shrink-0 flex flex-col gap-1">
+                <button type="button" onClick={() => onFix(a.id)}
+                  className={`min-h-9 px-3 rounded-lg border text-xs font-bold active:scale-95 ${ACTION_ALERTS[a.id] ? "bg-red-600 border-red-600 text-white" : "bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-200"}`}>
+                  {fix}
+                </button>
+                {DECLINABLE.has(a.id) && (
+                  <button type="button" onClick={() => onFix(a.id, "decline")}
+                    className="min-h-8 px-3 rounded-lg border bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-semibold text-gray-500 dark:text-gray-400 active:scale-95">
+                    Not given
+                  </button>
+                )}
+              </div>
             )}
           </div>
         );

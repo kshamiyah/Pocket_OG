@@ -34,7 +34,7 @@ export const RULES = [
   {
     id: "scope-reviewed", group: "Scope", title: "Marking an alert Reviewed",
     when: "An urgent or due alert with no Given or Done action (for example pathological CTG, severe BP, pyrexia, ROM review) is marked Reviewed, if the unit allows it.",
-    then: "It drops out of Needs you now, shows who reviewed it and when, and returns after the unit's time if still present (default 15 minutes for stop oxytocin and RR under 9; 30 for pathological CTG, BP, pulse, RR, sugars; 60 for temperature and similar; 2 to 4 hours for progress and membranes), or at once if a newer CTG or obs value arrives. The handover lists it as reviewed. With Reviewed switched off, alerts stay until the problem clears.",
+    then: "It drops out of Needs you now, shows who reviewed it and when, and returns after the unit's time if still present (default 15 minutes for RR under 9; 30 for pathological CTG, BP, pulse, RR, sugars; 60 for temperature, PPH and similar; 2 to 4 hours for progress and membranes), or at once if a newer CTG or obs value arrives. The handover lists it as reviewed. With Reviewed switched off, alerts stay until the problem clears.",
     severity: "n/a", alertIds: [], sources: ["NG133 1.7.3", "NG229 1.5.7"],
     settings: ["reviewOn", "reviewFastMin", "reviewUrgentMin", "reviewHourMin", "reviewProgressMin", "reviewLongMin"],
     local: "App design choice: whether Reviewed is allowed, and the return times, are unit settings.",
@@ -58,14 +58,14 @@ export const RULES = [
   {
     id: "preterm-steroids", group: "Preterm", title: "Antenatal corticosteroids",
     when: "Preterm and not yet confirmed. 22+0 to 23+6: discuss. 24+0 to 33+6: offer. 34+0 to 35+6: consider.",
-    then: "Discuss / offer (urgent) / consider. Tap Given to clear.",
+    then: "Discuss / offer (urgent) / consider. Tap Given, or Not given if decided against; the handover shows which.",
     severity: "Urgent 24+0 to 33+6, otherwise warning", alertIds: ["preterm-steroids"],
     sources: ["NG25 1.9.1", "NG25 1.9.2", "NG25 1.9.3"],
   },
   {
     id: "preterm-mgso4", group: "Preterm", title: "Magnesium sulfate for neuroprotection",
     when: "Preterm and not yet given. 23+0 to 23+6: discuss. 24+0 to 29+6: offer. 30+0 to 33+6 in established labour: consider.",
-    then: "Discuss / offer (urgent) / consider. Tap Given to clear.",
+    then: "Discuss / offer (urgent) / consider. Tap Given, or Not given if decided against; the handover shows which.",
     severity: "Urgent 24+0 to 29+6, otherwise warning", alertIds: ["preterm-mgso4"],
     sources: ["NG25 1.10.1", "NG25 1.10.2", "NG25 1.10.3"],
   },
@@ -229,7 +229,7 @@ export const RULES = [
   {
     id: "oxytocin-stop", group: "Oxytocin and contractions", title: "Pathological CTG on oxytocin",
     when: "Oxytocin running and the latest CTG is pathological.",
-    then: "Stop oxytocin immediately; urgent obstetric or senior midwife review. Log the stop in the oxytocin sheet.",
+    then: "Stop oxytocin immediately; urgent obstetric or senior midwife review. The alert's Stop oxytocin button opens the oxytocin sheet to log the stop and its reason; it cannot be snoozed.",
     severity: "Urgent", alertIds: ["oxytocin-stop-pathological"], sources: ["NG235 1.8.56"],
   },
   {
@@ -330,7 +330,7 @@ export const RULES = [
   {
     id: "mgso4-pet", group: "Maternal observations", title: "Magnesium sulfate: severe pre-eclampsia or eclampsia",
     when: "Eclampsia risk ticked (a fit now or earlier this pregnancy) and magnesium not running: urgent, give. Pre-eclampsia ticked with severe BP (160/110 or more) or low urine output: urgent, consider. Before or after birth. Magnesium already running for neuroprotection counts.",
-    then: "Eclampsia: give IV magnesium sulfate (Collaborative Eclampsia Trial regimen); no other anticonvulsant instead. Pre-eclampsia: check for severe features (headache, visual scotomata, vomiting, epigastric pain, oliguria with severe hypertension, worsening bloods) and consider magnesium sulfate if any. Tap Given or Assessed to clear.",
+    then: "Eclampsia: give IV magnesium sulfate (Collaborative Eclampsia Trial regimen); no other anticonvulsant instead. Pre-eclampsia: check for severe features (headache, visual scotomata, vomiting, epigastric pain, oliguria with severe hypertension, worsening bloods) and consider magnesium sulfate if any. A severe BP keeps the prompt up after a lower repeat until Assessed is tapped. Tap Given or Assessed to clear.",
     severity: "Urgent", alertIds: ["mgso4-eclampsia", "mgso4-severe-pet"],
     sources: ["NG133 1.8.1", "NG133 1.8.2", "NG133 1.8.3", "NG133 1.8.4", "NG133 1.8.5"],
     local: "NG133 section 1.8 is written for a critical care setting. The app prompts on the delivery suite board too, using severe BP or low urine output as the trigger to check for severe features.",
@@ -357,7 +357,7 @@ export const RULES = [
   {
     id: "pph", group: "After birth", title: "Postpartum haemorrhage",
     when: "Recorded EBL 500 to 1000 mL (minor) or over 1000 mL (major).",
-    then: "Minor: warning. Major: urgent. Tap Reviewed to clear.",
+    then: "Minor: warning. Major: urgent. Reviewed quiets it for the unit's time (default 60 minutes); it then returns while she is on the board.",
     severity: "Warning / urgent", alertIds: ["pph"], sources: ["GTG52 definitions"],
   },
 ];

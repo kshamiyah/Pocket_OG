@@ -81,7 +81,7 @@ export const UNIT_SETTINGS = [
   },
   {
     key: "reviewFastMin", type: "number", default: 15, min: 5, max: 60, step: 5, unit: "min", group: "Reviewed alerts",
-    label: "Returns after: stop oxytocin, RR under 9",
+    label: "Returns after: RR under 9",
     nice: "App default.",
   },
   {
@@ -91,7 +91,7 @@ export const UNIT_SETTINGS = [
   },
   {
     key: "reviewHourMin", type: "number", default: 60, min: 15, max: 240, step: 15, unit: "min", group: "Reviewed alerts",
-    label: "Returns after: raised BP, temperature, urine output, oxytocin maximum, passive stage, blood-stained liquor",
+    label: "Returns after: PPH, raised BP, temperature, urine output, oxytocin maximum, passive stage, blood-stained liquor",
     nice: "App default.",
   },
   {

@@ -36,8 +36,9 @@ export default function DeliverySheet({ bed, onSave, onClose }) {
           <ChipRow options={EBL_PRESETS} value={eblNum} onChange={v => setEbl(String(v))} />
         </div>
         <input type="number" inputMode="numeric" value={ebl} onChange={e => setEbl(e.target.value)} placeholder="Or type exact mL" className={INPUT} aria-label="EBL in mL" />
-        {eblNum >= 1000 && <p className="text-xs font-semibold text-red-600 dark:text-red-400 mt-1.5">Major PPH (1000 mL or more): follow the PPH protocol.</p>}
-        {eblNum >= 500 && eblNum < 1000 && <p className="text-xs font-semibold text-claude-700 dark:text-claude-400 mt-1.5">PPH (500 mL or more): monitor closely.</p>}
+        {/* RCOG GTG52: minor 500 to 1000 mL, major more than 1000 mL. */}
+        {eblNum > 1000 && <p className="text-xs font-semibold text-red-600 dark:text-red-400 mt-1.5">Major PPH (more than 1000 mL): follow the PPH protocol.</p>}
+        {eblNum >= 500 && eblNum <= 1000 && <p className="text-xs font-semibold text-claude-700 dark:text-claude-400 mt-1.5">Minor PPH (500 to 1000 mL): monitor closely.</p>}
       </div>
       <WhenPicker label="Time of birth" value={when} onChange={setWhen} />
       <div>

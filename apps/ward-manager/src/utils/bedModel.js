@@ -285,6 +285,29 @@ export function stampObs(bed, iso, keys = ["lastPulse", "lastBP", "lastTemp", "l
  * Record observation values taken at `iso`, e.g. { pulse: "92", bp: ["150", "95"], temp: "37.4" }.
  * Each value replaces the stored one only if it is at least as recent.
  */
+// Plausible ranges for typed values: outside them the value is almost
+// certainly a typo (383 for 38.3), so the sheet asks for it to be checked.
+export const OBS_RANGE = {
+  pulse: [[25, 250, "Pulse"]],
+  temp: [[30, 43, "Temperature"]],
+  rr: [[4, 70, "Respiratory rate"]],
+  bp: [[50, 280, "Systolic"], [20, 180, "Diastolic"]],
+  bgl: [[0.5, 40, "Glucose"]],
+};
+/** null if every value is plausible, else a message naming the first problem. */
+export function obsProblem(name, raw) {
+  const vals = Array.isArray(raw) ? raw : [raw];
+  const ranges = OBS_RANGE[name] ?? [];
+  for (let i = 0; i < vals.length; i++) {
+    const r = ranges[i]; const v = vals[i];
+    if (!r || v == null || String(v).trim() === "") continue;
+    const n = parseFloat(v);
+    if (!Number.isFinite(n) || n < r[0] || n > r[1]) return `${r[2]} ${v} looks wrong (expected ${r[0]} to ${r[1]}). Check and re-enter.`;
+  }
+  if (name === "bp" && vals.length === 2 && parseFloat(vals[0]) <= parseFloat(vals[1])) return "Systolic must be higher than diastolic. Check and re-enter.";
+  return null;
+}
+
 export function recordObs(bed, iso, entries) {
   const observations = { ...(bed.observations ?? {}) };
   for (const [name, raw] of Object.entries(entries)) {
@@ -301,6 +324,13 @@ export function recordObs(bed, iso, entries) {
     }
     f.values.forEach((k, i) => { observations[k] = String(vals[i]).trim(); });
     observations[f.at] = iso;
+    if (name === "bp") {
+      // Keep the worst BP and the last severe reading, so a lower repeat does not hide them.
+      const [sys, dia] = vals.map(v => parseFloat(v));
+      if (sys >= 160 || dia >= 110) observations.bpSevereAt = iso;
+      const w = observations.bpWorst;
+      if (!w || sys > w.sys || (sys === w.sys && dia > w.dia)) observations.bpWorst = { sys, dia, at: iso };
+    }
   }
   return { observations };
 }
@@ -342,15 +372,14 @@ export const DONE_LABEL = {
 };
 
 export const PERSISTENT_FLAGS = {
-  "gbs-iap": { field: "gbsAntibioticsStarted", label: "Given" },
+  "gbs-iap": { field: "gbsAntibioticsStarted", label: "Antibiotics given" },
   "preterm-neonatal": { field: "neonatalTeamAlerted", label: "Done" },
   "preterm-mgso4": { field: "mgso4Given", label: "Given" },
   "preterm-steroids": { field: "corticosteroidsConfirmed", label: "Given" },
   "preterm-tocolysis": { field: "tocolysisOffered", label: "Offered" },
-  "iap-preterm": { field: "gbsAntibioticsStarted", label: "Given" },
-  "prom-48h": { field: "gbsAntibioticsStarted", label: "Given" },
-  "pph": { field: "pphReviewed", label: "Reviewed" },
-  "infection-suspected": { field: "broadAntibioticsStarted", label: "Given" },
+  "iap-preterm": { field: "gbsAntibioticsStarted", label: "Antibiotics given" },
+  "prom-48h": { field: "gbsAntibioticsStarted", label: "Antibiotics given" },
+  "infection-suspected": { field: "broadAntibioticsStarted", label: "Antibiotics given" },
   "aph": { field: "bleedingReviewed", label: "Reviewed" },
   "mgso4-eclampsia": { field: "mgso4PETGiven", label: "Given" },
   "gbs-prom-birth": { field: "gbsBirthOffered", label: "Offered" },
@@ -373,11 +402,11 @@ export const OBS_STAMP = {
 // How long a Reviewed alert stays quiet: each alert belongs to a group whose
 // time is a unit setting (Unit settings, "Reviewed alerts").
 export const REVIEW_GROUP = {
-  "oxytocin-stop-pathological": "reviewFastMin", "rr-low": "reviewFastMin",
+  "rr-low": "reviewFastMin",
   "ctg-pathological": "reviewUrgentMin", "ctg-suspicious-overdue": "reviewUrgentMin", "hyperstim": "reviewUrgentMin",
   "bp-severe": "reviewUrgentMin", "bp-low": "reviewUrgentMin", "tachycardia": "reviewUrgentMin", "rr-high": "reviewUrgentMin",
   "bgl-low": "reviewUrgentMin", "bgl-high": "reviewUrgentMin", "pushing-reassess": "reviewUrgentMin",
-  "bp-elevated": "reviewHourMin", "temp-38": "reviewHourMin", "temp-375": "reviewHourMin", "temp-low": "reviewHourMin",
+  "pph": "reviewHourMin", "bp-elevated": "reviewHourMin", "temp-38": "reviewHourMin", "temp-375": "reviewHourMin", "temp-low": "reviewHourMin",
   "oliguria": "reviewHourMin", "oxytocin-max": "reviewHourMin", "passive-limit": "reviewHourMin",
   "pushing-senior-review": "reviewHourMin", "liquor-blood": "reviewHourMin",
   "slow-progress": "reviewProgressMin", "arm-reassess": "reviewProgressMin",
@@ -392,7 +421,21 @@ export function reviewMinutes(alertId, unit = getUnitSettings()) {
   return key && unit.reviewOn ? unit[key] : null;
 }
 
+// Alerts whose button does something rather than record it: the screen opens
+// the right sheet (stopping oxytocin is logged in the oxytocin sheet).
+export const ACTION_ALERTS = { "oxytocin-stop-pathological": "Stop oxytocin" };
+
+// "Discuss / consider" prompts that can be answered "not given", so the
+// handover never reads as given when it was decided against.
+export const DECLINABLE = new Set(["preterm-mgso4", "preterm-steroids"]);
+export const declinedField = alertId => DECLINABLE.has(alertId) ? `${PERSISTENT_FLAGS[alertId].field}Declined` : null;
+export function declineAlert(alertId, iso, by = null) {
+  const f = declinedField(alertId);
+  return f ? { [f]: true, [`${f}At`]: iso, ...(by ? { [`${f}By`]: by } : {}) } : {};
+}
+
 export function fixLabel(alertId) {
+  if (ACTION_ALERTS[alertId]) return ACTION_ALERTS[alertId];
   if (PERSISTENT_FLAGS[alertId]) return PERSISTENT_FLAGS[alertId].label;
   if (OBS_STAMP[alertId]) return "Done";
   if (reviewMinutes(alertId)) return "Reviewed";
@@ -400,6 +443,7 @@ export function fixLabel(alertId) {
 }
 
 export function fixAlert(bed, alertId, iso, by = null) {
+  if (ACTION_ALERTS[alertId]) return {};
   if (PERSISTENT_FLAGS[alertId]) {
     const f = PERSISTENT_FLAGS[alertId].field;
     return { [f]: true, [`${f}At`]: iso, ...(by ? { [`${f}By`]: by } : {}) };
