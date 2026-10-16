@@ -398,3 +398,20 @@ describe("magnesium sulfate in severe pre-eclampsia or eclampsia (NG133 1.8)", (
     expect(ids({ ...b, ...fixAlert(b, "mgso4-eclampsia", t(0)) })).not.toContain("mgso4-eclampsia")
   })
 })
+
+describe("GBS positive with ruptured membranes: offer immediate birth (NG207 1.2.12, 1.2.16)", () => {
+  const rom = (o = {}) => bed({ labourStage: "Latent", gestation: "38+0", riskFlags: ["GBS+"], membranes: "SROM", membranesTime: t(30 * MIN), ...o })
+  it("fires as soon as the waters break, not at 24 hours", () => expect(sev(rom(), "gbs-prom-birth")).toBe("urgent"))
+  it("also from 34+0 preterm", () => expect(ids(rom({ gestation: "34+2" }))).toContain("gbs-prom-birth"))
+  it("not under 34+0", () => expect(ids(rom({ gestation: "33+6" }))).not.toContain("gbs-prom-birth"))
+  it("not for GBS in a previous pregnancy only (NICE: positive test this pregnancy)", () =>
+    expect(ids(rom({ riskFlags: ["GBS previous"] }))).not.toContain("gbs-prom-birth"))
+  it("not once in established labour, or with an induction under way", () => {
+    expect(ids(rom({ labourStage: "Active first stage", activeFirstStageStartTime: t(10 * MIN) }))).not.toContain("gbs-prom-birth")
+    expect(ids(rom({ modeOfOnset: "Induced", inductionStartTime: t(10 * MIN) }))).not.toContain("gbs-prom-birth")
+  })
+  it("clears with Offered", () => {
+    const b = rom()
+    expect(ids({ ...b, ...fixAlert(b, "gbs-prom-birth", t(0)) })).not.toContain("gbs-prom-birth")
+  })
+})

@@ -419,6 +419,22 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     }
   }
 
+  // ─── GBS positive with prelabour rupture from 34+0 (NICE NG207 1.2.12, 1.2.16) ─
+  // Offer immediate induction or caesarean as soon as the waters break, not at
+  // 24 hours. Needs a positive test this pregnancy; an induction already under
+  // way counts as acted on.
+  const inductionUnderway = bed.modeOfOnset === "Induced" && !!bed.inductionStartTime;
+  if (membranes === "SROM" && bed.labourStage === "Latent" && gestWks !== null && gestWks >= 34
+      && isGBSThisPregnancy && !inductionUnderway && !bed.gbsBirthOffered) {
+    alerts.push({
+      id: "gbs-prom-birth",
+      severity: "urgent",
+      title: "GBS positive with ruptured membranes: offer immediate birth",
+      body: `Prelabour rupture of membranes at ${gest} with a positive GBS test this pregnancy: offer immediate induction of labour or caesarean birth, with intrapartum antibiotics. Tap Offered once discussed.`,
+      citation: gestWks >= 37 ? "NICE NG207 1.2.16 [2021] · NG195 1.6.1" : "NICE NG207 1.2.12 [2021] · NG195 1.7.1",
+    });
+  }
+
   // ─── PROM duration alerts ────────────────────────────────────────────
   if (membranesTime) {
     const ms = now - new Date(membranesTime).getTime();
@@ -438,7 +454,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
         id: "prom-24h",
         severity: "urgent",
         title: "PROM > 24 hours: offer induction",
-        body: `Prelabour rupture of membranes for > 24h without established labour. Offer induction of labour.${isGBSPos ? " GBS+: offer immediate induction with IV benzylpenicillin." : isGBSPending ? " GBS result pending: check and commence antibiotics if positive." : ""}`,
+        body: `Prelabour rupture of membranes for > 24h without established labour. Offer induction of labour.${isGBSPos ? " GBS: intrapartum antibiotics as soon as labour starts." : isGBSPending ? " GBS result pending: check and commence antibiotics if positive." : ""}`,
         citation: isGBSPos ? "NICE NG235 1.7.7 [2023] · GL787" : "NICE NG235 1.7.7 [2023]",
       });
     } else if (ms >= unit.promReviewH * HOUR) {
@@ -1002,6 +1018,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
 // only problem is a fever. The order is an app choice, shown on the Rules page.
 const TIER_0 = [
   "pph", "aph", "mgso4-eclampsia", "bp-low", "ctg-pathological", "oxytocin-stop-pathological", "bp-severe", "mgso4-severe-pet", "rr-low",
+  "gbs-prom-birth",
   "infection-suspected", "temp-38", "rr-high", "tachycardia", "hyperstim", "bgl-low", "mec-thick", "liquor-blood",
 ];
 const TIER_2 = new Set([

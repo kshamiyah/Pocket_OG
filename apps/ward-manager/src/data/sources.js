@@ -396,6 +396,14 @@ export const SOURCES = {
     "url": "https://www.nice.org.uk/guidance/ng195/chapter/Prevention-and-risk-reduction#ng195-1_6_4",
     "text": "Give the first dose of antibiotics as soon as possible after labour starts (or as soon as infection is suspected, in the case of chorioamnionitis), and continue until the birth of the baby. [2021]"
   },
+  "NG195 1.7.1": {
+    "issuer": "NICE",
+    "doc": "NG195",
+    "docTitle": "Neonatal infection: antibiotics for prevention and treatment",
+    "rec": "Recommendation 1.7.1",
+    "url": "https://www.nice.org.uk/guidance/ng195/chapter/Prevention-and-risk-reduction#ng195-1_7_1",
+    "text": "Offer an immediate birth (by induction of labour or caesarean birth) to women, trans men and non-binary people who are between 34 and 37 weeks' gestation who:\n• have prolonged prelabour rupture of membranes and\n• have group B streptococcal colonisation, bacteriuria or infection at any time in their current pregnancy. [2021]"
+  },
   "NG133 1.7.3": {
     "issuer": "NICE",
     "doc": "NG133",
@@ -475,6 +483,22 @@ export const SOURCES = {
     "rec": "Recommendation 1.5.2",
     "url": "https://www.nice.org.uk/guidance/ng255/chapter/Evaluating-risk-level#ng255-1_5_2",
     "text": "Recognise that people with suspected sepsis who are or have recently been pregnant are at:\n• high risk of severe illness or death from sepsis if they meet any of the high risk criteria in table 1: criteria for stratification of risk from sepsis in people who are or have recently been pregnant\n• moderate to high risk of severe illness or death from sepsis if they meet any of the moderate to high risk criteria in table 1: criteria for stratification of risk from sepsis in people who are or have recently been pregnant. [2016]"
+  },
+  "NG207 1.2.12": {
+    "issuer": "NICE",
+    "doc": "NG207",
+    "docTitle": "Inducing labour",
+    "rec": "Recommendation 1.2.12",
+    "url": "https://www.nice.org.uk/guidance/ng207/chapter/Recommendations#ng207-1_2_12",
+    "text": "If a woman has preterm prelabour rupture of membranes after 34+0 weeks (but before 37+0 weeks), and has had a positive group B streptococcus test at any time in their current pregnancy, offer immediate induction of labour or caesarean birth. See the NICE guidelines on neonatal infection and preterm labour and birth. [2021]"
+  },
+  "NG207 1.2.16": {
+    "issuer": "NICE",
+    "doc": "NG207",
+    "docTitle": "Inducing labour",
+    "rec": "Recommendation 1.2.16",
+    "url": "https://www.nice.org.uk/guidance/ng207/chapter/Recommendations#ng207-1_2_16",
+    "text": "If a woman has prelabour rupture of membranes at term (at or after 37+0 weeks) and has had a positive group B streptococcus test at any time in their current pregnancy, offer immediate induction of labour or caesarean birth. See the NICE guideline on neonatal infection for advice on intrapartum antibiotics. [2021]"
   },
   "NG255 table 1": {
     "issuer": "NICE",

@@ -206,7 +206,9 @@ export default function WardPage({ shift, onEndShift }) {
 
   // ── Board round ──────────────────────────────────────────────────────
   const startRound = () => {
-    const ids = Object.values(beds).filter(b => !b.delivery).sort(byBedNumber).map(b => b.id);
+    // Everyone on the board, in bed order: a delivered woman can still be bleeding,
+    // hypertensive or septic, so she is seen on the round too.
+    const ids = Object.values(beds).sort(byBedNumber).map(b => b.id);
     setRound({ ids, index: 0, updated: new Set() });
   };
 

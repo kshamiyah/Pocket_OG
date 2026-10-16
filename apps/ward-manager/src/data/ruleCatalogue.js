@@ -114,6 +114,13 @@ export const RULES = [
     sources: ["NG195 1.6.1", "NG195 1.6.4", "GL787 PROM"],
   },
   {
+    id: "gbs-prom-birth", group: "Antibiotics and membranes", title: "GBS positive and waters broken: offer immediate birth",
+    when: "Spontaneous rupture of membranes before established labour, 34+0 or later, GBS positive this pregnancy, no induction yet started.",
+    then: "Offer immediate induction of labour or caesarean birth, with intrapartum antibiotics. Tap Offered once discussed. Fires as soon as the waters break, not at 24 hours.",
+    severity: "Urgent", alertIds: ["gbs-prom-birth"],
+    sources: ["NG207 1.2.12", "NG207 1.2.16", "NG195 1.7.1"],
+  },
+  {
     id: "prom-48h", group: "Antibiotics and membranes", title: "Membranes ruptured 48 hours",
     when: "Membranes ruptured for the unit's time (default 48 hours, as GL787), not GBS+, antibiotics not yet given.",
     then: "Antibiotic prophylaxis indicated per GL787.",

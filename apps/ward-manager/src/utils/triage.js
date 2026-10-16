@@ -28,6 +28,7 @@ const SHORT = {
   "infection-suspected": "Antibiotics now",
   "aph": "Bleeding",
   "mgso4-eclampsia": "MgSO4 now",
+  "gbs-prom-birth": "GBS ROM: offer birth",
   "mgso4-severe-pet": "Consider MgSO4",
   "active-phase-limit": "Long 1st stage",
   "arm-reassess": "Post-ARM review",

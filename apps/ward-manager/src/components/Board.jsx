@@ -243,7 +243,7 @@ export default function Board({
         <div className="fixed inset-x-0 bottom-0 z-30 bg-gradient-to-t from-white via-white/95 to-white/0 dark:from-gray-950 dark:via-gray-950/95 dark:to-gray-950/0 pt-6"
           style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}>
           <div className="max-w-lg mx-auto px-5 grid grid-cols-2 gap-2">
-            <button type="button" onClick={onRound} disabled={summary.women === 0} className={`${BTN} ${BTN_SECONDARY} min-h-[3.25rem] whitespace-nowrap`}>
+            <button type="button" onClick={onRound} disabled={summary.women + summary.delivered === 0} className={`${BTN} ${BTN_SECONDARY} min-h-[3.25rem] whitespace-nowrap`}>
               <IconRound /> Board round
             </button>
             <button type="button" onClick={onAdmit} className={`${BTN} ${BTN_PRIMARY} min-h-[3.25rem] text-base`}>

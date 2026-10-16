@@ -22,16 +22,18 @@ const DOCS = {
   NG133: { title: "Hypertension in pregnancy: diagnosis and management", chapter: "Recommendations" },
   NG3: { title: "Diabetes in pregnancy: management from preconception to the postnatal period", chapter: "Recommendations" },
   NG255: { title: "Suspected sepsis in pregnant or recently pregnant people", chapter: "Evaluating-risk-level" },
+  NG207: { title: "Inducing labour", chapter: "Recommendations" },
 };
 
 const WANT = {
   NG235: ["1.6.34", "1.7.6", "1.7.7", "1.8.1", "1.8.19", "1.8.20", "1.8.33", "1.8.36", "1.8.42", "1.8.45", "1.8.48", "1.8.49", "1.8.50", "1.8.54", "1.8.55", "1.8.56", "1.9.8", "1.9.25", "1.9.26", "1.9.27", "1.9.28"],
   NG229: ["1.2.9", "1.3.2", "1.3.3", "1.3.5", "1.3.6", "1.3.8", "1.3.11", "1.4.12", "1.4.14", "1.4.15", "1.4.18", "1.4.24", "1.4.32", "1.4.37", "1.5.5", "1.5.6", "1.5.7", "1.5.8"],
   NG25: ["1.8.1", "1.8.4", "1.9.1", "1.9.2", "1.9.3", "1.10.1", "1.10.2", "1.10.3"],
-  NG195: ["1.6.1", "1.6.4"],
+  NG195: ["1.6.1", "1.6.4", "1.7.1"],
   NG133: ["1.7.3", "1.8.1", "1.8.2", "1.8.3", "1.8.4", "1.8.5"],
   NG3: ["1.4.10", "1.4.12"],
   NG255: ["1.5.1", "1.5.2"],
+  NG207: ["1.2.12", "1.2.16"],
 };
 
 const clean = (text, rec) => text

@@ -338,6 +338,7 @@ export const PERSISTENT_FLAGS = {
   "infection-suspected": { field: "broadAntibioticsStarted", label: "Given" },
   "aph": { field: "bleedingReviewed", label: "Reviewed" },
   "mgso4-eclampsia": { field: "mgso4PETGiven", label: "Given" },
+  "gbs-prom-birth": { field: "gbsBirthOffered", label: "Offered" },
   "mgso4-severe-pet": { field: "mgso4PETAssessed", label: "Assessed" },
 };
 export const OBS_STAMP = {

@@ -45,11 +45,15 @@ export default function BoardRound({ ids, index, beds, triage, updated, now, onI
               </div>
               <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
                 <dt className="text-gray-500 dark:text-gray-400">Stage</dt>
-                <dd className="text-gray-900 dark:text-gray-100">{stageLabel(bed)}{bed.labourStage === "Active second stage" && bed.pushingStartTime ? `, ${fmtAge(now - new Date(bed.pushingStartTime).getTime())}` : ""}</dd>
+                <dd className="text-gray-900 dark:text-gray-100">{bed.delivery
+                  ? ["Delivered", bed.delivery.time && `${clock(bed.delivery.time)} (${fmtAge(now - new Date(bed.delivery.time).getTime())} ago)`, bed.delivery.mode, bed.delivery.ebl != null && `EBL ${bed.delivery.ebl} mL`].filter(Boolean).join(", ")
+                  : <>{stageLabel(bed)}{bed.labourStage === "Active second stage" && bed.pushingStartTime ? `, ${fmtAge(now - new Date(bed.pushingStartTime).getTime())}` : ""}</>}</dd>
+                {!bed.delivery && <>
                 <dt className="text-gray-500 dark:text-gray-400">Last VE</dt>
                 <dd className="text-gray-900 dark:text-gray-100">{(() => { const v = lastVE(bed); return v ? `${veFindings(v)}, ${clock(v.time)} (${fmtAge(now - new Date(v.time).getTime())} ago)` : "None"; })()}</dd>
                 <dt className="text-gray-500 dark:text-gray-400">CTG</dt>
                 <dd className="text-gray-900 dark:text-gray-100">{(() => { const c = lastCTG(bed); return c ? `${capitalise(c.classification)} at ${clock(c.time)}` : "Not logged"; })()}</dd>
+                </>}
                 <dt className="text-gray-500 dark:text-gray-400">Other</dt>
                 <dd className="text-gray-900 dark:text-gray-100">{[
                   bed.analgesia !== "None" ? bed.analgesia : null,
@@ -61,11 +65,15 @@ export default function BoardRound({ ids, index, beds, triage, updated, now, onI
               {t && <AlertList key={bed.id} alerts={t.shown} onFix={id => onFix(bed.id, id)} limit={2} />}
               {t && !t.shown.length && t.next && <p className={TYPE_META}>Next: {t.next.label} {clock(t.next.at)} (in {fmtAge(t.next.at - now)})</p>}
             </div>
-            <div className="grid grid-cols-3 gap-2">
-              <button type="button" onClick={() => onVE(bed.id)} className={`${BTN} ${BTN_SECONDARY}`}>VE</button>
-              <button type="button" onClick={() => onCTGNormal(bed.id)} className={`${BTN} ${BTN_OK}`}><IconTick /> CTG</button>
-              <button type="button" onClick={() => onMore(bed.id)} className={`${BTN} ${BTN_SECONDARY}`}>More</button>
-            </div>
+            {bed.delivery ? (
+              <button type="button" onClick={() => onMore(bed.id)} className={`${BTN} ${BTN_SECONDARY} w-full`}>Open bed card</button>
+            ) : (
+              <div className="grid grid-cols-3 gap-2">
+                <button type="button" onClick={() => onVE(bed.id)} className={`${BTN} ${BTN_SECONDARY}`}>VE</button>
+                <button type="button" onClick={() => onCTGNormal(bed.id)} className={`${BTN} ${BTN_OK}`}><IconTick /> CTG</button>
+                <button type="button" onClick={() => onMore(bed.id)} className={`${BTN} ${BTN_SECONDARY}`}>More</button>
+              </div>
+            )}
             <div className="grid grid-cols-[auto_1fr] gap-2">
               <button type="button" onClick={() => onIndex(index - 1)} disabled={index === 0} aria-label="Previous woman" className={`${BTN} ${BTN_SECONDARY} w-14`}><IconBack /></button>
               <button type="button" onClick={() => onIndex(index + 1)} className={`${BTN} ${BTN_PRIMARY} min-h-[3.25rem] text-base`}>
