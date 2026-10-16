@@ -20,6 +20,7 @@ const KEYWORDS = {
   "Previous LSCS": "caesarean cs lscs vbac section",
   "Hypertensive": "htn hypertension bp",
   "Pre-eclampsia": "pet pre-eclampsia",
+  "Eclampsia": "eclampsia fit seizure convulsion",
   "Liquor volume": "poly polyhydramnios oligo anhydramnios",
   "APH": "aph bleed bleeding haemorrhage",
   "Previous OASI": "tear oasi 3rd 4th",

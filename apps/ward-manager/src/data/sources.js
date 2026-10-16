@@ -404,6 +404,46 @@ export const SOURCES = {
     "url": "https://www.nice.org.uk/guidance/ng133/chapter/Recommendations#ng133-1_7_3",
     "text": "During labour, measure blood pressure:\n• hourly, in women with hypertension\n• every 15 to 30 minutes until blood pressure is less than 160/110 mmHg in women with severe hypertension. [2010, amended 2019]"
   },
+  "NG133 1.8.1": {
+    "issuer": "NICE",
+    "doc": "NG133",
+    "docTitle": "Hypertension in pregnancy: diagnosis and management",
+    "rec": "Recommendation 1.8.1",
+    "url": "https://www.nice.org.uk/guidance/ng133/chapter/Recommendations#ng133-1_8_1",
+    "text": "If a woman in a critical care setting who has severe hypertension or severe pre-eclampsia has or previously had an eclamptic fit, give intravenous magnesium sulfate. [2010]"
+  },
+  "NG133 1.8.2": {
+    "issuer": "NICE",
+    "doc": "NG133",
+    "docTitle": "Hypertension in pregnancy: diagnosis and management",
+    "rec": "Recommendation 1.8.2",
+    "url": "https://www.nice.org.uk/guidance/ng133/chapter/Recommendations#ng133-1_8_2",
+    "text": "Consider giving intravenous magnesium sulfate to women with severe pre-eclampsia who are in a critical care setting if birth is planned within 24 hours. [2010]"
+  },
+  "NG133 1.8.3": {
+    "issuer": "NICE",
+    "doc": "NG133",
+    "docTitle": "Hypertension in pregnancy: diagnosis and management",
+    "rec": "Recommendation 1.8.3",
+    "url": "https://www.nice.org.uk/guidance/ng133/chapter/Recommendations#ng133-1_8_3",
+    "text": "Consider the need for magnesium sulfate treatment, if 1 or more of the following features of severe pre-eclampsia is present:\n• ongoing or recurring severe headaches\n• visual scotomata\n• nausea or vomiting\n• epigastric pain\n• oliguria and severe hypertension\n• progressive deterioration in laboratory blood tests (such as rising creatinine or liver transaminases, or falling platelet count). [2010, amended 2019]"
+  },
+  "NG133 1.8.4": {
+    "issuer": "NICE",
+    "doc": "NG133",
+    "docTitle": "Hypertension in pregnancy: diagnosis and management",
+    "rec": "Recommendation 1.8.4",
+    "url": "https://www.nice.org.uk/guidance/ng133/chapter/Recommendations#ng133-1_8_4",
+    "text": "Use the Collaborative Eclampsia Trial regimen for administration of magnesium sulfate:\n• A loading dose of 4 g should be given intravenously over 5 to 15 minutes, followed by an infusion of 1 g/hour maintained for 24 hours. If the woman has had an eclamptic fit, the infusion should be continued for 24 hours after the last fit.\n• Recurrent fits should be treated with a further dose of 2 g to 4 g given intravenously over 5 to 15 minutes. [2010, amended 2019]\nThe MHRA has issued a warning about the risk of skeletal adverse effects in the neonate following prolonged or repeated use of magnesium sulfate in pregnancy. Maternal administration of magnesium sulfate for longer than 5 to 7 days in pregnancy has been associated with skeletal adverse effects and hypocalcaemia and hypermagnesemia in neonates. If use of magnesium sulfate in pregnancy is prolonged or repeated, consider monitoring of neonates for abnormal calcium and magnesium levels and skeletal adverse effects."
+  },
+  "NG133 1.8.5": {
+    "issuer": "NICE",
+    "doc": "NG133",
+    "docTitle": "Hypertension in pregnancy: diagnosis and management",
+    "rec": "Recommendation 1.8.5",
+    "url": "https://www.nice.org.uk/guidance/ng133/chapter/Recommendations#ng133-1_8_5",
+    "text": "Do not use diazepam, phenytoin or other anticonvulsants as an alternative to magnesium sulfate in women with eclampsia. [2010, amended 2019]"
+  },
   "NG3 1.4.10": {
     "issuer": "NICE",
     "doc": "NG3",

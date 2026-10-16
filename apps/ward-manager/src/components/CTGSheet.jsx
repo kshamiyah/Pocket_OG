@@ -17,15 +17,18 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
   const secondStage = bed.labourStage === "Active second stage";
 
   const [when, setWhen] = useState(editCTG ? whenFromISO(editCTG.time) : { minsAgo: 0 });
+  // Nothing is pre-graded: each feature must be chosen, so a rushed entry
+  // cannot log a "normal" CTG nobody looked at.
   const [hr, setHR] = useState(editCTG?.baselineHR ?? prevHR ?? 140);
-  const [vari, setVari] = useState(editCTG?.variability ?? "5-25");
+  const [hrSet, setHrSet] = useState(!!editCTG);
+  const [vari, setVari] = useState(editCTG?.variability ?? null);
   const [varMin, setVarMin] = useState(editCTG?.variabilityMinutes ?? 0);
   const [undetermined, setUndetermined] = useState(!!editCTG?.baselineUndetermined);
-  const [dec, setDec] = useState(editCTG?.decelerations ?? "none");
+  const [dec, setDec] = useState(editCTG?.decelerations ?? null);
   const [decRep, setDecRep] = useState(editCTG?.decelerationsRepetitive ?? true);
   const [comment, setComment] = useState(editCTG?.comment ?? "");
   const [decMin, setDecMin] = useState(editCTG?.decelerationMinutes ?? 0);
-  const [accel, setAccel] = useState(editCTG?.accelerations ?? true);
+  const [accel, setAccel] = useState(editCTG?.accelerations ?? null);
   // Contractions are the 4th NG229 feature: required, never guessed or carried over.
   const [ctx, setCtx] = useState(editCTG?.contractionsPerTen ?? null);
   const [hypertonus, setHypertonus] = useState(!!editCTG?.hypertonus);
@@ -42,9 +45,11 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
   const cat = override ? "pathological" : autoCat;
   const iso = resolveWhen(when);
   const rise = Math.max(prevHR != null ? hr - prevHR : 0, startHR != null ? hr - startHR : 0);
-  const hrTone = undetermined ? "text-gray-400" : hr < 100 || hr > 160 ? "text-red-600 dark:text-red-400" : hr < 110 || rise >= 20 ? "text-claude-700 dark:text-claude-400" : "";
+  const hrTone = undetermined || !hrSet ? "text-gray-400" : hr < 100 || hr > 160 ? "text-red-600 dark:text-red-400" : hr < 110 || rise >= 20 ? "text-claude-700 dark:text-claude-400" : "";
 
-  const ready = !!iso && ctx != null;
+  const missing = [!(hrSet || undetermined) && "baseline", vari == null && "variability", dec == null && "decelerations", ctx == null && "contractions"].filter(Boolean);
+  const complete = missing.length === 0;
+  const ready = !!iso && complete;
   const save = () => ready && onSave({
     id: editCTG?.id ?? newId("ctg"), time: iso, ...entry, comment: comment.trim() || undefined, classification: cat,
     autoClassification: autoCat, clinicianOverride: override && autoCat !== "pathological",
@@ -57,14 +62,21 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
       footer={
         <button type="button" onClick={save} disabled={!ready}
           className={`${BTN} w-full min-h-[3.25rem] text-base ${cat === "pathological" ? "bg-red-600 text-white" : BTN_PRIMARY}`}>
-          {ctx == null ? "Record contractions to log" : editCTG ? "Save changes" : `Log ${cat} CTG`}
+          {!complete ? `Grade ${missing.join(", ")} to log` : editCTG ? "Save changes" : `Log ${cat} CTG`}
         </button>
       }>
       {notice && <p className="text-sm font-semibold text-claude-800 dark:text-claude-300">{notice}</p>}
-      <div className={`rounded-xl border px-3 py-2.5 ${CTG_BOX[cat]}`}>
-        <p className="text-base font-semibold capitalize">{cat}</p>
-        <p className="text-sm opacity-90 leading-snug">{CTG_DESC[cat]}</p>
-      </div>
+      {complete || override ? (
+        <div className={`rounded-xl border px-3 py-2.5 ${CTG_BOX[cat]}`}>
+          <p className="text-base font-semibold capitalize">{cat}</p>
+          <p className="text-sm opacity-90 leading-snug">{CTG_DESC[cat]}</p>
+        </div>
+      ) : (
+        <div className="rounded-xl border px-3 py-2.5 border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/60">
+          <p className="text-base font-semibold text-gray-900 dark:text-gray-100">Not graded yet</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-snug">Grade each of the 4 features; the category appears when all are done.</p>
+        </div>
+      )}
       {autoCat !== "pathological" && (
         <button type="button" onClick={() => setOverride(o => !o)} aria-pressed={override}
           className={`w-full text-left rounded-xl border px-3 py-2.5 flex items-center gap-3 transition-colors ${override ? "bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-900" : "bg-gray-50 dark:bg-gray-900/60 border-gray-200 dark:border-gray-800"}`}>
@@ -75,8 +87,9 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
 
       <div>
         <Label hint={prevHR != null ? `last ${prevHR} bpm${rise >= 20 ? `, up ${rise}${secondStage ? " (red in active 2nd stage)" : ""}` : ""}` : undefined}>Baseline (bpm)</Label>
-        <Stepper value={hr} onChange={setHR} min={60} max={220} bigStep={10} valueClass={hrTone} />
+        <Stepper value={hr} onChange={v => { setHR(v); setHrSet(true); }} min={60} max={220} bigStep={10} valueClass={hrTone} />
         <div className="flex flex-wrap gap-1.5 mt-2">
+          {!hrSet && !undetermined && <Chip small on={false} onClick={() => setHrSet(true)}>Confirm {hr} bpm</Chip>}
           <Chip small on={undetermined} onClick={() => setUndetermined(u => !u)}>Unable to determine</Chip>
         </div>
       </div>
@@ -119,7 +132,7 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
       </div>
 
       <div>
-        <Label>Accelerations</Label>
+        <Label hint="optional">Accelerations</Label>
         <ChipRow small value={accel} onChange={setAccel} options={[{ value: true, label: "Present" }, { value: false, label: "Absent" }]} />
       </div>
 

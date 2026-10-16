@@ -43,6 +43,7 @@ export const RISK_GROUPS = [
   { group: "Blood pressure", items: [
     { value: "Hypertensive", label: "Hypertension on medication", short: "HTN", effect: "alert" },
     { value: "Pre-eclampsia", label: "Pre-eclampsia", short: "PET", effect: "alert" },
+    { value: "Eclampsia", label: "Eclamptic fit (now or earlier this pregnancy)", short: "Eclampsia", effect: "alert" },
   ] },
   { group: "Uterus", items: [
     { value: "Previous LSCS", label: "Previous caesarean", short: "Prev CS", effect: "CTG" },
@@ -77,7 +78,7 @@ export function riskEffect(v) { return RISK_BY_VALUE[v]?.effect ?? "handover"; }
 
 export function isHypertensiveBed(bed) {
   const f = bed.riskFlags ?? [];
-  return f.includes("Hypertensive") || f.includes("Pre-eclampsia");
+  return f.includes("Hypertensive") || f.includes("Pre-eclampsia") || f.includes("Eclampsia");
 }
 export const ANALGESIA = ["None", "Entonox", "Pethidine", "Epidural", "Remifentanil PCA"];
 export const ONSETS = ["Spontaneous", "Induced", "PPROM"];
@@ -336,6 +337,8 @@ export const PERSISTENT_FLAGS = {
   "pph": { field: "pphReviewed", label: "Reviewed" },
   "infection-suspected": { field: "broadAntibioticsStarted", label: "Given" },
   "aph": { field: "bleedingReviewed", label: "Reviewed" },
+  "mgso4-eclampsia": { field: "mgso4PETGiven", label: "Given" },
+  "mgso4-severe-pet": { field: "mgso4PETAssessed", label: "Assessed" },
 };
 export const OBS_STAMP = {
   "pulse-never": "lastPulse", "pulse-due": "lastPulse",

@@ -372,3 +372,29 @@ describe("fever and the infection pathway (NG195 1.6.1, 1.6.4; NG25 1.8.1)", () 
     expect(computeAlerts(febrile(), NOW).find(a => a.id === "preterm-tocolysis").title).toMatch(/infection may contraindicate/)
   })
 })
+
+describe("magnesium sulfate in severe pre-eclampsia or eclampsia (NG133 1.8)", () => {
+  const severe = { lastPulse: t(10 * MIN), lastTemp: t(10 * MIN), lastRR: t(10 * MIN), lastBP: t(10 * MIN), bpSystolic: "165", bpDiastolic: "105", bpAt: t(10 * MIN) }
+  it("pre-eclampsia with severe BP prompts 'consider magnesium sulfate'", () => {
+    const b = active({ riskFlags: ["Pre-eclampsia"], observations: severe })
+    expect(sev(b, "mgso4-severe-pet")).toBe("urgent")
+  })
+  it("severe BP without pre-eclampsia ticked does not", () => {
+    expect(ids(active({ observations: severe }))).not.toContain("mgso4-severe-pet")
+  })
+  it("pre-eclampsia with low urine output prompts too", () => {
+    const b = active({ riskFlags: ["Pre-eclampsia"], observations: { ...severe, bpSystolic: "140", bpDiastolic: "90", urineOutput: 20 } })
+    expect(ids(b)).toContain("mgso4-severe-pet")
+  })
+  it("clears with Assessed, or when magnesium is already running", () => {
+    const b = active({ riskFlags: ["Pre-eclampsia"], observations: severe })
+    expect(ids({ ...b, ...fixAlert(b, "mgso4-severe-pet", t(0)) })).not.toContain("mgso4-severe-pet")
+    expect(ids({ ...b, mgso4Given: true })).not.toContain("mgso4-severe-pet")
+  })
+  it("eclampsia prompts 'give' even after birth, and outranks severe BP", () => {
+    const b = bed({ riskFlags: ["Eclampsia"], delivery: { time: t(HOUR), mode: "SVD" }, observations: severe })
+    const a = computeAlerts(b, NOW)
+    expect(a[0].id).toBe("mgso4-eclampsia")
+    expect(ids({ ...b, ...fixAlert(b, "mgso4-eclampsia", t(0)) })).not.toContain("mgso4-eclampsia")
+  })
+})

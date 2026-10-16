@@ -27,6 +27,8 @@ const SHORT = {
   "pph": "PPH",
   "infection-suspected": "Antibiotics now",
   "aph": "Bleeding",
+  "mgso4-eclampsia": "MgSO4 now",
+  "mgso4-severe-pet": "Consider MgSO4",
   "active-phase-limit": "Long 1st stage",
   "arm-reassess": "Post-ARM review",
   "ve-never": "No VE yet",

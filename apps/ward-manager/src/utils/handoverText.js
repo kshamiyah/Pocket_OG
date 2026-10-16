@@ -49,6 +49,8 @@ export function generateHandover(beds, shift, now = Date.now()) {
       bed.gbsAntibioticsStarted && "Intrapartum antibiotics ✓",
       bed.broadAntibioticsStarted && "Infection antibiotics ✓",
       bed.bleedingReviewed && "Bleeding reviewed ✓",
+      bed.mgso4PETGiven && "MgSO4 (eclampsia) ✓",
+      bed.mgso4PETAssessed && "Severe PET features assessed ✓",
       bed.neonatalTeamAlerted && "Neonatal team ✓",
       bed.corticosteroidsConfirmed && "Steroids ✓",
       bed.mgso4Given && "MgSO4 ✓",

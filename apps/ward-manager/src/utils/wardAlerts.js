@@ -59,7 +59,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   const isNullip = bed.parity === "Para 0";
   const flags = bed.riskFlags ?? [];
   const isDiabetic = flags.some(f => f.startsWith("Diabetic"));
-  const isHypertensive = flags.includes("Hypertensive") || flags.includes("Pre-eclampsia");
+  const isHypertensive = flags.includes("Hypertensive") || flags.includes("Pre-eclampsia") || flags.includes("Eclampsia");
   // NG195 1.6.1: GBS this pregnancy, or in a previous baby or pregnancy, both
   // call for antibiotics in labour.
   const isGBSThisPregnancy = flags.includes("GBS+");
@@ -109,7 +109,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     alerts.push({
       id: "preterm-neonatal",
       severity: "urgent",
-      title: `Preterm ${gest} — alert neonatal team`,
+      title: `Preterm ${gest}: alert neonatal team`,
       body: "Ensure NICU/neonatologist notified. Confirm delivery in appropriate setting with resuscitation team present.",
       citation: "Local practice",
     });
@@ -302,7 +302,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
         alerts.push({
           id: "latent-reassess",
           severity: "warning",
-          title: "Latent phase — reassess now",
+          title: "Latent phase: reassess now",
           body: `${formatAge(ms)} ${sinceLabel}. Offer reassessment to confirm or exclude established labour (regular contractions and progressive dilatation from 4 cm).`,
           citation: `${unit.latentReassessH} h unit setting · NG235 1.8.1`,
         });
@@ -437,8 +437,8 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       alerts.push({
         id: "prom-24h",
         severity: "urgent",
-        title: "PROM > 24 hours — offer induction",
-        body: `Prelabour rupture of membranes for > 24h without established labour. Offer induction of labour.${isGBSPos ? " GBS+ — offer immediate induction with IV benzylpenicillin." : isGBSPending ? " GBS result pending — check and commence antibiotics if positive." : ""}`,
+        title: "PROM > 24 hours: offer induction",
+        body: `Prelabour rupture of membranes for > 24h without established labour. Offer induction of labour.${isGBSPos ? " GBS+: offer immediate induction with IV benzylpenicillin." : isGBSPending ? " GBS result pending: check and commence antibiotics if positive." : ""}`,
         citation: isGBSPos ? "NICE NG235 1.7.7 [2023] · GL787" : "NICE NG235 1.7.7 [2023]",
       });
     } else if (ms >= unit.promReviewH * HOUR) {
@@ -454,7 +454,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       alerts.push({
         id: "prom-16h",
         severity: "warning",
-        title: `Membranes ruptured ${formatAge(ms)} — approaching ${unit.promReviewH}h`,
+        title: `Membranes ruptured ${formatAge(ms)}: approaching ${unit.promReviewH}h`,
         body: `Review GBS status${isGBSPending ? " (result pending: check now)" : ""} and signs of infection.`,
         citation: "Unit setting",
       });
@@ -488,7 +488,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     alerts.push({
       id: "gbs-iap",
       severity: "urgent",
-      title: isGBSThisPregnancy ? "GBS+ — IV antibiotic prophylaxis required" : "Previous GBS — IV antibiotic prophylaxis required",
+      title: isGBSThisPregnancy ? "GBS+: IV antibiotic prophylaxis required" : "Previous GBS: IV antibiotic prophylaxis required",
       body: "Give the first dose as soon as possible after labour starts (or membranes rupture) and continue until birth. Regimen per GL787: IV benzylpenicillin 3 g stat, then 1.5 g 4-hourly; penicillin allergy: IV teicoplanin 10 mg/kg stat, then 10 mg/kg 12-hourly.",
       citation: "NICE NG195 1.6.1, 1.6.4 [2021] · GL787",
     });
@@ -518,7 +518,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     alerts.push({
       id: "gbs-pending-rupture",
       severity: "warning",
-      title: "GBS result pending — membranes ruptured",
+      title: "GBS result pending: membranes ruptured",
       body: "Obtain GBS result urgently. If positive, commence IV benzylpenicillin 3g stat then 1.5g every 4h until delivery.",
       citation: "GL787 (local)",
     });
@@ -532,7 +532,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     alerts.push({
       id: "mec-thick",
       severity: "urgent",
-      title: "Significant meconium — continuous CTG, notify neonatology",
+      title: "Significant meconium: continuous CTG, notify neonatology",
       body: `${mecCTG} Obstetric-led care; staff trained in advanced neonatal life support may be needed at birth.`,
       citation: unit.meconiumCTGMandatory ? "NICE NG235 1.8.33 [2023] · NG229 1.3.8 · unit setting" : "NICE NG235 1.8.33 [2023] · NG229 1.3.8",
     });
@@ -540,7 +540,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     alerts.push({
       id: "mec-thin",
       severity: "warning",
-      title: unit.meconiumCTGMandatory ? "Thin meconium — continuous CTG" : "Thin meconium — discuss continuous CTG",
+      title: unit.meconiumCTGMandatory ? "Thin meconium: continuous CTG" : "Thin meconium: discuss continuous CTG",
       body: `${mecCTG} Full risk assessment; escalate if the CTG becomes suspicious or pathological.`,
       citation: unit.meconiumCTGMandatory ? "NICE NG235 1.8.33 [2023] · NG229 1.3.8 · unit setting" : "NICE NG235 1.8.33 [2023] · NG229 1.3.8",
     });
@@ -550,7 +550,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     alerts.push({
       id: "liquor-blood",
       severity: "warning",
-      title: "Blood-stained liquor — assess for abruption / vasa praevia",
+      title: "Blood-stained liquor: assess for abruption / vasa praevia",
       body: "Blood-stained amniotic fluid may indicate placental abruption or vasa praevia. Review fetal heart rate and escalate to senior if concerned.",
       citation: "NICE NG235 1.8.20 [2023]",
     });
@@ -560,7 +560,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     alerts.push({
       id: "liquor-absent",
       severity: "warning",
-      title: "No liquor draining post-rupture — assess for oligohydramnios",
+      title: "No liquor draining post-rupture: assess for oligohydramnios",
       body: "Absent liquor after membrane rupture may indicate oligohydramnios and cord compression risk. Consider CTG and senior review.",
       citation: "Local practice",
     });
@@ -585,7 +585,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       alerts.push({
         id: "temp-38",
         severity: "urgent",
-        title: `Pyrexia ${temp}°C${aged("temp")} — probable intrauterine infection`, since: valueSince("temp"),
+        title: `Pyrexia ${temp}°C${aged("temp")}: probable intrauterine infection`, since: valueSince("temp"),
         body: "38°C or above is a transfer trigger and an indication for continuous CTG. If chorioamnionitis is suspected, offer IV antibiotics as soon as infection is suspected. Senior review; consider sepsis.",
         citation: "NICE NG235 1.8.20 · NG229 1.3.8 · NG195 1.6.1, 1.6.4",
       });
@@ -594,7 +594,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     alerts.push({
       id: "temp-375",
       severity: "warning",
-      title: `Temperature ${temp}°C${aged("temp")} — possible infection`, since: valueSince("temp"),
+      title: `Temperature ${temp}°C${aged("temp")}: possible infection`, since: valueSince("temp"),
       body: "Repeat in 1 hour: 37.5°C or above on 2 readings 1 hour apart is a transfer trigger. Look for signs of chorioamnionitis.",
       citation: "NICE NG235 1.8.20 [2023]",
     });
@@ -644,8 +644,8 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
         severity: "urgent",
         // NG133 1.7.3: every 15 to 30 minutes until below 160/110.
         title: (valueAge("bp") ?? 0) >= 30 * MIN
-          ? `Severe BP ${bpSys}/${bpDia}${aged("bp")} — recheck now`
-          : `Severe hypertension — BP ${bpSys}/${bpDia} mmHg${aged("bp")}`,
+          ? `Severe BP ${bpSys}/${bpDia}${aged("bp")}: recheck now`
+          : `Severe hypertension: BP ${bpSys}/${bpDia} mmHg${aged("bp")}`,
         since: valueSince("bp"),
         body: "Severe hypertension (a single reading of 160/110 or more). Treat urgently per NG133 and local protocol; involve the obstetric consultant. Measure BP every 15 to 30 minutes until below 160/110.",
         citation: "NICE NG235 1.8.20 [2023] · NG133 1.7.3",
@@ -654,7 +654,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       alerts.push({
         id: "bp-elevated",
         severity: isHypertensive ? "urgent" : "warning",
-        title: `Hypertension — BP ${bpSys}/${bpDia} mmHg${aged("bp")}`, since: valueSince("bp"),
+        title: `Hypertension: BP ${bpSys}/${bpDia} mmHg${aged("bp")}`, since: valueSince("bp"),
         body: isHypertensive
           ? `BP 140/90 or more in a woman with known hypertension. Hourly BP in labour; review treatment.`
           : `New BP 140/90 or more in labour. Repeat in 15 to 30 minutes (2 consecutive raised readings is a transfer trigger); assess for pre-eclampsia.`,
@@ -668,7 +668,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       alerts.push({
         id: "bgl-low",
         severity: "urgent",
-        title: `Hypoglycaemia — BGL ${bgl} mmol/L${aged("bgl")}`, since: valueSince("bgl"),
+        title: `Hypoglycaemia: BGL ${bgl} mmol/L${aged("bgl")}`, since: valueSince("bgl"),
         body: "Below the 4 to 7 mmol/L target for labour. Treat hypoglycaemia per local protocol (GL983) and recheck.",
         citation: "NICE NG3 1.4.10, 1.4.12 · GL983",
       });
@@ -676,7 +676,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       alerts.push({
         id: "bgl-high",
         severity: "urgent",
-        title: `Hyperglycaemia — BGL ${bgl} mmol/L${aged("bgl")}`, since: valueSince("bgl"),
+        title: `Hyperglycaemia: BGL ${bgl} mmol/L${aged("bgl")}`, since: valueSince("bgl"),
         body: `Above the 4 to 7 mmol/L target for labour. IV dextrose and insulin if not maintained (NG3 1.4.12); adjust per GL983. Recheck hourly.`,
         citation: "NICE NG3 1.4.10, 1.4.12 · GL983",
       });
@@ -690,7 +690,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     alerts.push({
       id: "bp-low",
       severity: "urgent",
-      title: `Low BP — systolic ${bpSys} mmHg${aged("bp")}`, since: valueSince("bp"),
+      title: `Low BP: systolic ${bpSys} mmHg${aged("bp")}`, since: valueSince("bp"),
       body: "Systolic 90 mmHg or less is a high-risk criterion for severe illness or death from sepsis (NG255 table 1). Consider haemorrhage and sepsis; urgent senior review.",
       citation: "NICE NG255 1.5.1–1.5.2, table 1",
     });
@@ -698,7 +698,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     alerts.push({
       id: "bp-low",
       severity: "warning",
-      title: `Low-normal BP — systolic ${bpSys} mmHg${aged("bp")}`, since: valueSince("bp"),
+      title: `Low-normal BP: systolic ${bpSys} mmHg${aged("bp")}`, since: valueSince("bp"),
       body: "Systolic 91 to 100 mmHg is a moderate to high risk criterion if sepsis is suspected (NG255 table 1). Review the whole picture.",
       citation: "NICE NG255 1.5.1–1.5.2, table 1",
     });
@@ -710,6 +710,30 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       title: `Low temperature ${temp}°C${aged("temp")}`, since: valueSince("temp"),
       body: "Temperature below 36°C is a moderate to high risk criterion if sepsis is suspected (NG255 table 1).",
       citation: "NICE NG255 1.5.1–1.5.2, table 1",
+    });
+  }
+
+  // ─── Magnesium sulfate in severe pre-eclampsia or eclampsia (NICE NG133 1.8) ─
+  // Runs before and after birth. Magnesium already running for neuroprotection
+  // uses the same regimen, so it counts.
+  const mgRunning = bed.mgso4Given || bed.mgso4PETGiven;
+  const severeBP = bpSys !== null && bpDia !== null && (bpSys >= 160 || bpDia >= 110);
+  const lowUrine = obs.urineOutput !== undefined && obs.urineOutput < unit.oliguriaMlH;
+  if (flags.includes("Eclampsia") && !mgRunning) {
+    alerts.push({
+      id: "mgso4-eclampsia",
+      severity: "urgent",
+      title: "Eclampsia: give IV magnesium sulfate",
+      body: "A woman with severe hypertension or severe pre-eclampsia who has or has had an eclamptic fit: give IV magnesium sulfate (Collaborative Eclampsia Trial regimen, NG133 1.8.4). Do not use diazepam, phenytoin or other anticonvulsants instead (1.8.5). Senior and anaesthetic help.",
+      citation: "NICE NG133 1.8.1, 1.8.4, 1.8.5",
+    });
+  } else if (flags.includes("Pre-eclampsia") && (severeBP || lowUrine) && !mgRunning && !bed.mgso4PETAssessed) {
+    alerts.push({
+      id: "mgso4-severe-pet",
+      severity: "urgent",
+      title: "Pre-eclampsia: consider magnesium sulfate",
+      body: `${severeBP ? "Severe hypertension" : "Low urine output"} with pre-eclampsia. Check for features of severe pre-eclampsia: severe headaches, visual scotomata, nausea or vomiting, epigastric pain, oliguria with severe hypertension, worsening bloods (creatinine, transaminases, platelets). If any are present, consider magnesium sulfate (NG133 1.8.3). Tap Assessed once reviewed.`,
+      citation: "NICE NG133 1.8.2, 1.8.3",
     });
   }
 
@@ -919,7 +943,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
         id: "ctg-not-documented",
         // With a NICE (or local) indication, a missing CTG is due, not background.
         severity: ctgReasons.length ? "warning" : "info",
-        title: "Continuous CTG — not yet documented",
+        title: "Continuous CTG: not yet documented",
         body: `${ctgReasons.length ? `Indication: ${ctgReasons.join(", ")}.` : "Unit policy: continuous CTG in established labour."} Log a CTG review to track fetal wellbeing.`,
         citation: ctgReasons.length ? "NICE NG229 1.3.2, 1.3.3, 1.3.8 [2022]" : "Unit setting",
       });
@@ -932,7 +956,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
           id: "ctg-pathological",
           severity: "urgent",
           since: lastCTG.time,
-          title: `Pathological CTG — urgent review (${formatAge(msCTG)} ago)`,
+          title: `Pathological CTG: urgent review (${formatAge(msCTG)} ago)`,
           body: "Urgent review by an obstetrician and a senior midwife. Exclude acute events (cord prolapse, abruption, uterine rupture). Full risk assessment with maternal observations; conservative measures. If still pathological, consider expediting birth.",
           citation: "NICE NG229 1.5.7, 1.5.8 [2022]",
         });
@@ -942,7 +966,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
           alerts.push({
             id: "ctg-suspicious-overdue",
             severity: "urgent",
-            title: `Suspicious CTG — not reassessed (${formatAge(msCTG)} ago)`,
+            title: `Suspicious CTG: not reassessed (${formatAge(msCTG)} ago)`,
             body: `Not reassessed within ${unit.suspiciousRecheckMin} minutes (unit setting). Full risk assessment, conservative measures; urgent obstetric or senior midwife review if there are other risk factors such as slow progress, sepsis or meconium.`,
             citation: `NICE NG229 1.5.5, 1.5.6 · ${unit.suspiciousRecheckMin} min unit setting`,
           });
@@ -950,7 +974,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
           alerts.push({
             id: "ctg-suspicious",
             severity: "warning",
-            title: `Suspicious CTG — reassess within ${formatAge(recheck - msCTG)}`,
+            title: `Suspicious CTG: reassess within ${formatAge(recheck - msCTG)}`,
             body: `Full risk assessment with maternal observations and conservative measures. Accelerations make acidosis unlikely. Logged ${formatAge(msCTG)} ago.`,
             citation: `NICE NG229 1.5.5, 1.5.6 · ${unit.suspiciousRecheckMin} min unit setting`,
           });
@@ -977,7 +1001,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
 // Tier 0 in order of urgency, so a woman bleeding heavily outranks one whose
 // only problem is a fever. The order is an app choice, shown on the Rules page.
 const TIER_0 = [
-  "pph", "aph", "bp-low", "ctg-pathological", "oxytocin-stop-pathological", "bp-severe", "rr-low",
+  "pph", "aph", "mgso4-eclampsia", "bp-low", "ctg-pathological", "oxytocin-stop-pathological", "bp-severe", "mgso4-severe-pet", "rr-low",
   "infection-suspected", "temp-38", "rr-high", "tachycardia", "hyperstim", "bgl-low", "mec-thick", "liquor-blood",
 ];
 const TIER_2 = new Set([

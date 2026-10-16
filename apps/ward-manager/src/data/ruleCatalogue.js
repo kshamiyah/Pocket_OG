@@ -321,6 +321,14 @@ export const RULES = [
     local: "NG235 asks for 2 readings 15 to 30 minutes apart. Red at once below 9, and red when not repeated within 30 minutes, are unit choices.",
   },
   {
+    id: "mgso4-pet", group: "Maternal observations", title: "Magnesium sulfate: severe pre-eclampsia or eclampsia",
+    when: "Eclampsia risk ticked (a fit now or earlier this pregnancy) and magnesium not running: urgent, give. Pre-eclampsia ticked with severe BP (160/110 or more) or low urine output: urgent, consider. Before or after birth. Magnesium already running for neuroprotection counts.",
+    then: "Eclampsia: give IV magnesium sulfate (Collaborative Eclampsia Trial regimen); no other anticonvulsant instead. Pre-eclampsia: check for severe features (headache, visual scotomata, vomiting, epigastric pain, oliguria with severe hypertension, worsening bloods) and consider magnesium sulfate if any. Tap Given or Assessed to clear.",
+    severity: "Urgent", alertIds: ["mgso4-eclampsia", "mgso4-severe-pet"],
+    sources: ["NG133 1.8.1", "NG133 1.8.2", "NG133 1.8.3", "NG133 1.8.4", "NG133 1.8.5"],
+    local: "NG133 section 1.8 is written for a critical care setting. The app prompts on the delivery suite board too, using severe BP or low urine output as the trigger to check for severe features.",
+  },
+  {
     id: "oliguria", group: "Maternal observations", title: "Low urine output",
     when: "Optional: only if someone records urine output (under More in the bed record), and it is under the unit threshold (default 30 mL per hour).",
     then: "Amber: review fluid balance and escalate if concerned. No reminders to record it.",
