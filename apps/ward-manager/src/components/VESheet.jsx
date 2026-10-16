@@ -62,7 +62,7 @@ export default function VESheet({ bed, editVE = null, onSave, onClose }) {
   return (
     <Sheet open onClose={onClose}
       title={`${editVE ? "Edit VE" : "VE"} · Bed ${bed.bedNumber}`}
-      sub={last ? `Last: ${last.dilation} cm at ${clock(last.time)} · NICE NG235 §1.4.1` : "NICE NG235 §1.4.1"}
+      sub={last ? `Last: ${last.dilation} cm at ${clock(last.time)} · NICE NG235 1.8.19` : "NICE NG235 1.8.19"}
       footer={
         <button type="button" onClick={save} disabled={!canSave} className={`${BTN} ${BTN_PRIMARY} w-full min-h-[3.25rem] text-base`}>
           {dil == null ? "Set the dilation" : `${editVE ? "Save changes" : "Save VE"} · ${dil} cm`}
@@ -86,7 +86,7 @@ export default function VESheet({ bed, editVE = null, onSave, onClose }) {
         <ChipRow small options={[-3, -2, -1, 0, 1, 2, 3]} value={station} onChange={toggle(station, setStation)} label={stationLabel} />
       </div>
       <div>
-        <Label hint={cx > 5 ? "over 5 in 10: see NG235 §1.5.7" : "optional"}>Contractions in 10 min</Label>
+        <Label hint={cx >= 5 ? "5 or more in 10: reduce frequency (NG235 1.8.55, NG229 1.4.14)" : "optional"}>Contractions in 10 min</Label>
         <ChipRow small options={[1, 2, 3, 4, 5, 6, 7, 8]} value={cx} onChange={toggle(cx, setCx)} />
       </div>
 

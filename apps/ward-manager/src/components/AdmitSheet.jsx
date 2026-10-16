@@ -9,7 +9,7 @@ import { BTN, BTN_PRIMARY, INPUT, TYPE_META } from "../ui/styles";
 import { resolveWhen, whenFromISO } from "../utils/time";
 import {
   ANALGESIA, BIRTH_MODES, BIRTH_SHORT, IND_METHODS, IOL_REASONS, LIQUORS, LIQUOR_SHORT, MEMBRANES, ONSETS, PARITIES,
-  STAGES, STAGE_SHORT, gestFromDigits, newId, parityNum, parityShort,
+  STAGES, STAGE_SHORT, gestFromDigits, newId, parityNum, parityShort, stationLabel,
 } from "../utils/bedModel";
 
 
@@ -77,7 +77,12 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
   const [flags, setFlags] = useState(edit ? bed.riskFlags ?? []
     : iolEntry ? [...new Set((iolEntry.indications ?? []).map(i => IOL_FLAG[i]).filter(Boolean))] : []);
   const [romWhen, setRomWhen] = useState({ minsAgo: 0 });
+  // The admission VE, entered on its own page like the risks: the same findings
+  // as the VE form, so it becomes her first VE and starts the 4-hour clock.
   const [veDil, setVeDil] = useState(null);
+  const [veStation, setVeStation] = useState(null);
+  const [veCx, setVeCx] = useState(null);
+  const [vePres, setVePres] = useState("Cephalic");
   const [veWhen, setVeWhen] = useState({ minsAgo: 0 });
   const [admWhen, setAdmWhen] = useState({ minsAgo: 0 });
   // Admission time defaults to now; the picker only appears if asked for.
@@ -85,6 +90,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
   const detail = useSubPage();
   const [more, setMore] = useState(edit || !!iolEntry);
 
+  const suggestedAdmitStage = veDil == null ? null : veDil >= 10 ? "Passive second stage" : veDil >= 4 ? "Active first stage" : null;
   const used = new Set(existingNumbers.map(String));
   const free = Array.from({ length: 12 }, (_, i) => String(i + 1)).filter(n => !used.has(n));
   // One row of quick bed chips (the lowest free numbers); anything else is typed.
@@ -125,11 +131,10 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
     const veISO = veDil != null ? resolveWhen(veWhen) ?? admISO : null;
     const stageTime = veISO ?? admISO;
     const membranes = effMemb;
-    // Station and contractions are left unrecorded rather than guessed.
     const ves = veDil != null ? [{
-      id: newId("ve"), time: veISO, dilation: veDil, station: null, presentation: "Cephalic",
+      id: newId("ve"), time: veISO, dilation: veDil, station: veStation, presentation: vePres,
       membranes, membranesTime: ruptured ? romISO : null,
-      liquor: ruptured ? liquor : null, contractions: null,
+      liquor: ruptured ? liquor : null, contractions: veCx,
     }] : [];
     onSave({
       id: newId("bed"), bedNumber: trimmed, admissionTime: admISO,
@@ -214,6 +219,16 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
         <div className="grid grid-cols-4 gap-1.5">
           {STAGES.map(st => <Chip key={st} small className="px-0 whitespace-nowrap" on={stage === st} onClick={() => setStage(st)}>{ADMIT_STAGE[st] ?? STAGE_SHORT[st]}</Chip>)}
         </div>
+        {/* From the admission VE: 4 cm or more with regular contractions is
+            established labour (NG235 1.8.1); full dilatation is the second stage.
+            A suggestion only: the stage chosen above is what counts. */}
+        {!edit && suggestedAdmitStage && stage !== suggestedAdmitStage && (
+          <button type="button" onClick={() => setStage(suggestedAdmitStage)}
+            className="mt-1.5 w-full min-h-10 px-3 rounded-lg border border-dashed border-claude-300 dark:border-claude-800 text-left text-sm text-claude-800 dark:text-claude-300">
+            <b>Suggested: {ADMIT_STAGE[suggestedAdmitStage]}</b>
+            <span className="text-gray-600 dark:text-gray-400"> · {veDil >= 10 ? "fully dilated on the VE" : `${veDil} cm on the VE; established if contracting regularly (NG235 1.8.1)`}. Tap to use.</span>
+          </button>
+        )}
       </div>
 
       {/* Onset and membranes side by side, so the main form fits one screen. */}
@@ -247,6 +262,35 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
           )}
         </div>
       )}
+      {!edit && (
+        <SummaryLine label="VE" onClick={() => detail.open("ve")}
+          text={veDil == null ? "not recorded · tap to add" : [
+            `${veDil} cm`, veStation != null && `station ${stationLabel(veStation)}`, veCx != null && `${veCx} in 10`,
+            vePres, whenText(veWhen),
+          ].filter(Boolean).join(" · ")} />
+      )}
+      {detail.page === "ve" && (
+        <SubPage title="VE on admission" backLabel="Admit" onClose={detail.close} closing={detail.closing} onClosed={detail.closed}>
+          <div>
+            <Label>Dilation</Label>
+            <DilationGrid value={veDil} onChange={v => setVeDil(veDil === v ? null : v)} />
+          </div>
+          <div>
+            <Label hint="optional">Station</Label>
+            <ChipRow small options={[-3, -2, -1, 0, 1, 2, 3]} value={veStation} onChange={v => setVeStation(veStation === v ? null : v)} label={stationLabel} />
+          </div>
+          <div>
+            <Label hint="optional">Contractions in 10 min</Label>
+            <ChipRow small options={[1, 2, 3, 4, 5, 6, 7, 8]} value={veCx} onChange={v => setVeCx(veCx === v ? null : v)} />
+          </div>
+          <div>
+            <Label>Presentation</Label>
+            <ChipRow small options={["Cephalic", "Breech", "Other"]} value={vePres} onChange={setVePres} />
+          </div>
+          <WhenPicker label="Time of the VE" value={veWhen} onChange={setVeWhen} presets={[0, 15, 30, 60, 120]} />
+          <p className={TYPE_META}>Membranes are set on the Admit screen. This becomes her first VE, so the next one is due 4 hours from its time.</p>
+        </SubPage>
+      )}
       {detail.page === "iol" && (
         <SubPage title="Induction" backLabel={edit ? "Edit" : "Admit"} onClose={detail.close} closing={detail.closing} onClosed={detail.closed}>
           <div>
@@ -273,7 +317,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
       {!more ? (
         <button type="button" onClick={() => setMore(true)}
           className="w-full min-h-12 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 text-sm font-semibold text-claude-700 dark:text-claude-400">
-          More details (optional): analgesia, risks, last VE
+          More details (optional): analgesia, risks, admission time
         </button>
       ) : (
         <>
@@ -284,11 +328,6 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
           <RiskPicker values={flags} onChange={setFlags} backLabel={edit ? "Edit" : "Admit"} />
           {!edit && (
             <>
-              <div>
-                <Label tight hint="if handed over">Last VE</Label>
-                <DilationGrid value={veDil} onChange={v => setVeDil(veDil === v ? null : v)} />
-              </div>
-              {veDil != null && <WhenPicker tight label="Time of that VE" value={veWhen} onChange={setVeWhen} presets={[0, 30, 60, 120, 240]} />}
               {admEarlier ? (
                 <WhenPicker tight label="Admission time" value={admWhen} onChange={setAdmWhen} presets={[0, 30, 60, 120]} />
               ) : (

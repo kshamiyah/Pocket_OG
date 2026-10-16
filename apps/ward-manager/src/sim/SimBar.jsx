@@ -25,7 +25,7 @@ export default function SimBar({ rows }) {
   const btn = "min-h-10 px-3 rounded-lg text-sm font-semibold bg-white/15 active:bg-white/25 text-white";
 
   return (
-    <div className="fixed z-[70] left-2" style={{ top: "calc(env(safe-area-inset-top) + 4.5rem)" }}>
+    <div className="fixed z-[70] right-2 flex flex-col items-end" style={{ top: "calc(env(safe-area-inset-top) + 4.5rem)" }}>
       {!open ? (
         <button type="button" onClick={() => setOpen(true)} aria-label="Simulation clock"
           className="min-h-10 px-3 rounded-full bg-violet-700 text-white text-sm font-bold shadow-lg tabular-nums">
