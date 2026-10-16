@@ -353,10 +353,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
         citation: "NICE NG235 1.8.49, 1.8.50",
       },
     }[slow.level];
-    // Once delay is confirmed (or diagnosed with membranes already ruptured),
-    // oxytocin is the next decision: the alert offers to start it.
-    const oxyNext = !oxyRunning && (slow.level === "confirmed" || (slow.level === "diagnosed" && !intact));
-    alerts.push({ id: "slow-progress", severity: "urgent", ...A, ...(oxyNext ? { action: "Start oxytocin" } : {}) });
+    alerts.push({ id: "slow-progress", severity: "urgent", ...A });
   }
 
   // ─── Hyperstimulation ────────────────────────────────────────────────

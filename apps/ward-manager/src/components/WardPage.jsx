@@ -135,8 +135,6 @@ export default function WardPage({ shift, onEndShift }) {
     const bed = beds[bedId];
     // Stopping oxytocin is logged in the oxytocin sheet, with the reason.
     if (ACTION_ALERTS[alertId]) { setSheet({ type: "oxy", bedId, from: sheet?.bedId === bedId ? "bed" : undefined, stop: true }); return; }
-    // An alert's own action (e.g. "Start oxytocin" on confirmed delay) opens its sheet.
-    if (kind === "action") { setSheet({ type: "oxy", bedId, from: sheet?.bedId === bedId ? "bed" : undefined }); return; }
     if (kind === "decline") {
       updateBed(bedId, declineAlert(alertId, iso(), doctorLabel(shift?.doctorName)), `Not given · Bed ${bed.bedNumber}`);
       return;
