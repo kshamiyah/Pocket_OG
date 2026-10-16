@@ -49,7 +49,9 @@ export function MultiChipRow({ options, values, onChange, small = true }) {
  * works when a swipe starts on the strip. Tapping the selected number again
  * passes the same value back, so a caller can treat it as "clear".
  */
-export function DilationGrid({ value, onChange }) {
+// lastValue: the previous examination's dilation, marked on the ruler so the
+// new finding is set against it.
+export function DilationGrid({ value, onChange, lastValue = null }) {
   const track = useRef(null);
   const drag = useRef(null);
   const at = clientX => {
@@ -83,6 +85,11 @@ export function DilationGrid({ value, onChange }) {
         {value == null
           ? <span className="text-sm text-gray-400">Tap or slide</span>
           : <span className="text-3xl font-semibold text-gray-900 dark:text-white">{value}<span className="text-base font-normal text-gray-500"> cm</span></span>}
+        {lastValue != null && (
+          <span className="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            {value === lastValue ? "Same as the last VE: slide to change" : `Last VE ${lastValue} cm${value != null ? ` (${value > lastValue ? "+" : ""}${value - lastValue} cm)` : ""}`}
+          </span>
+        )}
       </p>
       <div ref={track} role="slider" tabIndex={0} aria-label="Dilation in centimetres"
         aria-valuemin={0} aria-valuemax={10} aria-valuenow={value ?? undefined} aria-valuetext={value == null ? "not set" : `${value} cm`}
@@ -96,6 +103,7 @@ export function DilationGrid({ value, onChange }) {
               className={`relative flex items-end justify-center pb-1.5 text-sm font-semibold tabular-nums ${i ? "border-l border-gray-200 dark:border-gray-800" : ""} ${sel ? "bg-claude-600 text-white" : below ? "bg-claude-100 dark:bg-claude-950/50 text-claude-800 dark:text-claude-300" : "text-gray-500 dark:text-gray-400"}`}>
               <span aria-hidden="true" className={`absolute top-0 left-1/2 w-px ${i % 5 === 0 ? "h-3" : "h-2"} ${sel ? "bg-white/70" : "bg-gray-300 dark:bg-gray-700"}`} />
               {i}
+              {lastValue === i && !sel && <span aria-hidden="true" className="absolute top-0.5 right-0.5 text-[8px] font-bold uppercase text-claude-700 dark:text-claude-400">last</span>}
             </span>
           );
         })}

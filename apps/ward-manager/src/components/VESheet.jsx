@@ -16,7 +16,8 @@ const toggle = (cur, set) => v => set(cur === v ? null : v);
 export default function VESheet({ bed, editVE = null, onSave, onClose }) {
   const last = editVE ? null : lastVE(bed);
   const base = editVE ?? last;
-  const [dil, setDil] = useState(editVE?.dilation ?? null);
+  // Starts at the last examination's dilation, so the new finding is a slide from it.
+  const [dil, setDil] = useState(editVE?.dilation ?? last?.dilation ?? null);
   const [when, setWhen] = useState(editVE ? whenFromISO(editVE.time) : { minsAgo: 0 });
   // Station and contractions are findings of this examination, so they are never
   // copied from the last VE. Membranes, liquor and presentation carry over.
@@ -70,7 +71,7 @@ export default function VESheet({ bed, editVE = null, onSave, onClose }) {
       }>
       <div>
         <Label>Dilation</Label>
-        <DilationGrid value={dil} onChange={setDil} />
+        <DilationGrid value={dil} onChange={setDil} lastValue={editVE ? null : last?.dilation ?? null} />
       </div>
 
       {suggestion && (

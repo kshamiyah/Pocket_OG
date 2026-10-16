@@ -30,7 +30,7 @@ export default function SimBar({ rows }) {
     <div className="fixed z-[70] left-0 top-1/2 -translate-y-1/2">
       {!open ? (
         <button type="button" onClick={() => setOpen(true)} aria-label="Simulation clock"
-          className="w-6 py-2 rounded-r-lg bg-violet-700 text-white text-[10px] font-bold shadow-lg tabular-nums leading-tight flex flex-col items-center gap-0.5">
+          className="w-4 py-2 rounded-r-md bg-violet-700/90 text-white text-[9px] font-bold shadow-lg tabular-nums leading-tight flex flex-col items-center gap-0.5">
           <span aria-hidden="true">⏱</span>
           <span className="[writing-mode:vertical-rl] rotate-180">{clock(now)}</span>
         </button>
