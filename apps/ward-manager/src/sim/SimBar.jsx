@@ -7,6 +7,7 @@ const MIN = 60000;
 /** Floating clock control for the private test board. Not in the live app. */
 export default function SimBar({ rows }) {
   const [open, setOpen] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const on = () => setNow(Date.now());
@@ -51,6 +52,17 @@ export default function SimBar({ rows }) {
               Back to real time
             </button>
           )}
+          {/* Start a test case from an empty board: two taps so it cannot happen by accident. */}
+          <button type="button"
+            onClick={() => {
+              if (!confirmClear) { setConfirmClear(true); return; }
+              try { localStorage.removeItem("pocket_og_ward_beds"); localStorage.removeItem("pocket_og_iol_queue"); } catch { /* storage blocked */ }
+              resetClock();
+              location.reload();
+            }}
+            className={`w-full min-h-10 rounded-lg text-sm font-semibold ${confirmClear ? "bg-red-600 text-white" : "bg-white/10 text-violet-100"}`}>
+            {confirmClear ? "Tap again to remove every patient" : "Clear board and reset clock"}
+          </button>
         </div>
       )}
     </div>
