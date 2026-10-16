@@ -2,6 +2,7 @@
 // boards already saved on a phone keep working.
 
 import { MIN } from "./time";
+import { getUnitSettings } from "../data/unitSettings";
 
 export const STAGES = ["Latent", "Active first stage", "Passive second stage", "Active second stage"];
 export const STAGE_SHORT = {
@@ -266,10 +267,10 @@ export function deleteVE(bed, id) {
 // never deletes a value: an abnormal reading keeps alerting (with its age)
 // until a newer value replaces it, so a one-tap "done" cannot hide it.
 const OBS_FIELDS = {
-  pulse: { stamp: "lastPulse", values: ["pulseValue"], at: "pulseAt" },
+  pulse: { stamp: "lastPulse", values: ["pulseValue"], at: "pulseAt", prev: "pulsePrev", prevAt: "pulsePrevAt" },
   bp: { stamp: "lastBP", values: ["bpSystolic", "bpDiastolic"], at: "bpAt" },
   temp: { stamp: "lastTemp", values: ["tempValue"], at: "tempAt" },
-  rr: { stamp: "lastRR", values: ["rrValue"], at: "rrAt" },
+  rr: { stamp: "lastRR", values: ["rrValue"], at: "rrAt", prev: "rrPrev", prevAt: "rrPrevAt" },
   bgl: { stamp: "lastBGL", values: ["bglValue"], at: "bglAt" },
 };
 
@@ -292,6 +293,11 @@ export function recordObs(bed, iso, entries) {
     if (!observations[f.stamp] || observations[f.stamp] < iso) observations[f.stamp] = iso;
     const prevAt = observations[f.at] ?? observations[f.stamp];
     if (prevAt && prevAt > iso && observations[f.values[0]] != null) continue;
+    // Pulse and RR keep the reading before, so a repeat can confirm it (NG235 1.8.20).
+    if (f.prev && observations[f.values[0]] != null && prevAt) {
+      observations[f.prev] = observations[f.values[0]];
+      observations[f.prevAt] = prevAt;
+    }
     f.values.forEach((k, i) => { observations[k] = String(vals[i]).trim(); });
     observations[f.at] = iso;
   }
@@ -345,27 +351,39 @@ export const OBS_STAMP = {
  * record (a new CTG, a new obs value) arrives. Severe BP and pathological CTG
  * use 30 min: NG133 1.7.3 (BP every 15 to 30 min) and a prompt re-review.
  */
-export const REVIEW_MIN = {
-  "ctg-pathological": 30, "oxytocin-stop-pathological": 15, "ctg-suspicious-overdue": 30, "hyperstim": 30,
-  "bp-severe": 30, "bp-elevated": 60, "bp-low": 30, "tachycardia": 30, "temp-38": 60, "temp-375": 60, "temp-low": 60,
-  "rr-high": 30, "rr-low": 15, "bgl-low": 30, "bgl-high": 30, "oliguria": 60, "oxytocin-max": 60,
-  "slow-progress": 120, "active-phase-limit": 240, "arm-reassess": 120, "arm-cx-inadequate": 120, "latent-reassess": 240,
-  "passive-limit": 60, "pushing-reassess": 30, "pushing-senior-review": 60,
-  "prom-24h": 240, "prom-18h": 240, "prom-16h": 120, "gbs-pending-rupture": 240,
-  "mec-thick": 240, "mec-thin": 240, "liquor-blood": 60, "liquor-absent": 240,
+// How long a Reviewed alert stays quiet: each alert belongs to a group whose
+// time is a unit setting (Unit settings, "Reviewed alerts").
+export const REVIEW_GROUP = {
+  "oxytocin-stop-pathological": "reviewFastMin", "rr-low": "reviewFastMin",
+  "ctg-pathological": "reviewUrgentMin", "ctg-suspicious-overdue": "reviewUrgentMin", "hyperstim": "reviewUrgentMin",
+  "bp-severe": "reviewUrgentMin", "bp-low": "reviewUrgentMin", "tachycardia": "reviewUrgentMin", "rr-high": "reviewUrgentMin",
+  "bgl-low": "reviewUrgentMin", "bgl-high": "reviewUrgentMin", "pushing-reassess": "reviewUrgentMin",
+  "bp-elevated": "reviewHourMin", "temp-38": "reviewHourMin", "temp-375": "reviewHourMin", "temp-low": "reviewHourMin",
+  "oliguria": "reviewHourMin", "oxytocin-max": "reviewHourMin", "passive-limit": "reviewHourMin",
+  "pushing-senior-review": "reviewHourMin", "liquor-blood": "reviewHourMin",
+  "slow-progress": "reviewProgressMin", "arm-reassess": "reviewProgressMin",
+  "active-phase-limit": "reviewLongMin", "latent-reassess": "reviewLongMin", "prom-24h": "reviewLongMin",
+  "prom-18h": "reviewLongMin", "prom-16h": "reviewLongMin", "gbs-pending-rupture": "reviewLongMin",
+  "mec-thick": "reviewLongMin", "mec-thin": "reviewLongMin", "liquor-absent": "reviewLongMin",
 };
+
+/** Minutes a Reviewed alert stays quiet, or null if it cannot be reviewed (or Reviewed is off). */
+export function reviewMinutes(alertId, unit = getUnitSettings()) {
+  const key = REVIEW_GROUP[alertId];
+  return key && unit.reviewOn ? unit[key] : null;
+}
 
 export function fixLabel(alertId) {
   if (PERSISTENT_FLAGS[alertId]) return PERSISTENT_FLAGS[alertId].label;
   if (OBS_STAMP[alertId]) return "Done";
-  if (REVIEW_MIN[alertId]) return "Reviewed";
+  if (reviewMinutes(alertId)) return "Reviewed";
   return null;
 }
 
 export function fixAlert(bed, alertId, iso, by = null) {
   if (PERSISTENT_FLAGS[alertId]) return { [PERSISTENT_FLAGS[alertId].field]: true };
   if (OBS_STAMP[alertId]) return stampObs(bed, iso, [OBS_STAMP[alertId]]);
-  if (REVIEW_MIN[alertId]) return { reviews: { ...(bed.reviews ?? {}), [alertId]: { at: iso, by } } };
+  if (reviewMinutes(alertId)) return { reviews: { ...(bed.reviews ?? {}), [alertId]: { at: iso, by } } };
   return {};
 }
 

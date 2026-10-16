@@ -129,6 +129,16 @@ describe("observation values are never erased by a one-tap check", () => {
   })
 })
 
+describe("a repeat pulse confirms the first (NG235 1.8.20)", () => {
+  it("recording twice keeps the earlier reading and turns red if both are over 120", () => {
+    const b0 = active({ observations: { lastBP: t(5 * MIN), lastTemp: t(5 * MIN), lastRR: t(5 * MIN) } })
+    const b1 = { ...b0, ...recordObs(b0, t(25 * MIN), { pulse: "126" }) }
+    const b2 = { ...b1, ...recordObs(b1, t(5 * MIN), { pulse: "124" }) }
+    expect(b2.observations.pulsePrev).toBe("126")
+    expect(sev(b2, "tachycardia")).toBe("urgent")
+  })
+})
+
 describe("respiratory rate (NG255 table 1; NG235 1.8.20)", () => {
   const rrBed = v => active({ observations: { lastPulse: t(10 * MIN), lastBP: t(10 * MIN), lastTemp: t(10 * MIN), lastRR: t(10 * MIN), rrValue: v, rrAt: t(10 * MIN) } })
   it("25 or more is urgent", () => expect(sev(rrBed("26"), "rr-high")).toBe("urgent"))
@@ -226,8 +236,8 @@ describe("unit settings change the local thresholds", () => {
   })
   it("latent reassessment interval", () => {
     const b = bed({ admissionTime: t(5 * HOUR) })
-    expect(run(b, {})).toContain("latent-reassess")
-    expect(run(b, { latentReassessH: 6 })).not.toContain("latent-reassess")
+    expect(run(b, {})).not.toContain("latent-reassess")
+    expect(run(b, { latentReassessH: 4 })).toContain("latent-reassess")
   })
   it("ROM review and antibiotic hours", () => {
     const b = active({ membranes: "SROM", membranesTime: t(13 * HOUR) })

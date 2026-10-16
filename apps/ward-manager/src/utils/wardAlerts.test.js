@@ -65,14 +65,30 @@ describe("VE monitoring", () => {
     expect(hasNot(alerts, "ve-overdue")).toBe(true)
   })
 
-  it("fires ve-due-soon warning at exactly 3h 30m", () => {
-    const bed = activeBed({ ves: [{ time: t(3 * HOUR + 30 * MIN), dilation: 5 }] })
-    expect(has(computeAlerts(bed, NOW), "ve-due-soon")).toBe(true)
+  it("nothing at 3h 50m (no early warning)", () => {
+    const bed = activeBed({ ves: [{ time: t(3 * HOUR + 50 * MIN), dilation: 5 }] })
+    expect(computeAlerts(bed, NOW).some(a => a.id.startsWith("ve-"))).toBe(false)
   })
 
-  it("fires ve-overdue urgent at exactly 4h", () => {
+  it("amber ve-due at exactly 4h", () => {
     const bed = activeBed({ ves: [{ time: t(4 * HOUR), dilation: 5 }] })
+    expect(computeAlerts(bed, NOW).find(a => a.id === "ve-due")?.severity).toBe("warning")
+    expect(has(computeAlerts(bed, NOW), "ve-overdue")).toBe(false)
+  })
+
+  it("red ve-overdue at 4h 30m", () => {
+    const bed = activeBed({ ves: [{ time: t(4 * HOUR + 30 * MIN), dilation: 5 }] })
     expect(has(computeAlerts(bed, NOW), "ve-overdue")).toBe(true)
+    expect(has(computeAlerts(bed, NOW), "ve-due")).toBe(false)
+  })
+
+  it("after suspected delay the VE is due at 2h, red at 2h 30m (NG235 1.8.45)", () => {
+    const at = (h) => activeBed({ activeFirstStageStartTime: t((h + 5) * HOUR), ves: [
+      { id: "a", time: t((h + 4) * HOUR), dilation: 4 }, { id: "b", time: t(h * HOUR), dilation: 5 },
+    ] })
+    expect(has(computeAlerts(at(1.9), NOW), "ve-due")).toBe(false)
+    expect(has(computeAlerts(at(2), NOW), "ve-due")).toBe(true)
+    expect(has(computeAlerts(at(2.5), NOW), "ve-overdue")).toBe(true)
   })
 
   it("ve-overdue is urgent not warning", () => {
@@ -112,22 +128,22 @@ describe("Latent phase reassessment", () => {
     expect(hasNot(computeAlerts(latentBed(3.98), NOW), "latent-reassess")).toBe(true)
   })
 
-  it("fires warning at exactly 4h", () => {
-    expect(has(computeAlerts(latentBed(4), NOW), "latent-reassess")).toBe(true)
+  it("fires warning at exactly 6h (unit default)", () => {
+    expect(has(computeAlerts(latentBed(6), NOW), "latent-reassess")).toBe(true)
   })
 
   it("uses inductionStartTime for induced latent patients", () => {
     const bed = {
       ...latentBed(1),
       modeOfOnset: "Induced",
-      inductionStartTime: t(5 * HOUR),
+      inductionStartTime: t(7 * HOUR),
       admissionTime: t(1 * HOUR),
     }
     expect(has(computeAlerts(bed, NOW), "latent-reassess")).toBe(true)
   })
 
   it("falls back to admissionTime when induced but no IOL start recorded", () => {
-    const bed = { ...latentBed(4), modeOfOnset: "Induced", inductionStartTime: null }
+    const bed = { ...latentBed(6), modeOfOnset: "Induced", inductionStartTime: null }
     expect(has(computeAlerts(bed, NOW), "latent-reassess")).toBe(true)
   })
 })
@@ -242,8 +258,8 @@ describe("Passive second stage limits", () => {
   it("nullip — fires urgent at exactly 2h", () => {
     expect(has(computeAlerts(passiveBed("Para 0", 120), NOW), "passive-limit")).toBe(true)
   })
-  it("nullip — fires approaching warning at 1h 45m", () => {
-    expect(has(computeAlerts(passiveBed("Para 0", 105), NOW), "passive-limit-soon")).toBe(true)
+  it("nullip: no early warning at 1h 45m (single alert at the NICE time)", () => {
+    expect(computeAlerts(passiveBed("Para 0", 105), NOW).some(a => a.id.startsWith("passive"))).toBe(false)
   })
 
   // Multiparous: 1h limit
@@ -489,8 +505,29 @@ describe("Maternal tachycardia (NICE NG235 §1.4.5)", () => {
   it("no alert at 120 bpm", () => {
     expect(hasNot(computeAlerts(pulseBed(120), NOW), "tachycardia")).toBe(true)
   })
-  it("fires urgent at 121 bpm", () => {
+  it("fires at 121 bpm", () => {
     expect(has(computeAlerts(pulseBed(121), NOW), "tachycardia")).toBe(true)
+  })
+})
+
+describe("Pulse and RR: amber, then red if confirmed (NG235 1.8.20, NG255 table 1)", () => {
+  const withObs = o => activeBed({ observations: { lastPulse: t(5*MIN), lastBP: t(5*MIN), lastTemp: t(5*MIN), lastRR: t(5*MIN), ...o } })
+  const sevOf = (b, id) => computeAlerts(b, NOW).find(a => a.id === id)?.severity
+  it("a first pulse over 120 is amber", () =>
+    expect(sevOf(withObs({ pulseValue: "125", pulseAt: t(5*MIN) }), "tachycardia")).toBe("warning"))
+  it("red when not repeated within 30 minutes", () =>
+    expect(sevOf(withObs({ pulseValue: "125", pulseAt: t(31*MIN) }), "tachycardia")).toBe("urgent"))
+  it("red when the repeat is still over 120", () =>
+    expect(sevOf(withObs({ pulseValue: "124", pulseAt: t(5*MIN), pulsePrev: "126", pulsePrevAt: t(25*MIN) }), "tachycardia")).toBe("urgent"))
+  it("amber when the earlier reading was normal", () =>
+    expect(sevOf(withObs({ pulseValue: "124", pulseAt: t(5*MIN), pulsePrev: "100", pulsePrevAt: t(25*MIN) }), "tachycardia")).toBe("warning"))
+  it("pulse over 130 is red at once (NG255 high risk)", () =>
+    expect(sevOf(withObs({ pulseValue: "135", pulseAt: t(2*MIN) }), "tachycardia")).toBe("urgent"))
+  it("RR 22 first reading amber; confirmed red; 25 red at once; under 9 red at once", () => {
+    expect(sevOf(withObs({ rrValue: "22", rrAt: t(5*MIN) }), "rr-high")).toBe("warning")
+    expect(sevOf(withObs({ rrValue: "22", rrAt: t(5*MIN), rrPrev: "23", rrPrevAt: t(30*MIN) }), "rr-high")).toBe("urgent")
+    expect(sevOf(withObs({ rrValue: "25", rrAt: t(2*MIN) }), "rr-high")).toBe("urgent")
+    expect(sevOf(withObs({ rrValue: "8", rrAt: t(2*MIN) }), "rr-low")).toBe("urgent")
   })
 })
 
@@ -700,7 +737,7 @@ describe("ARM reassessment", () => {
   })
 })
 
-// ─── CTG classification engine (NICE NG229 §1.4.16–1.4.31) ───────────────────
+// ─── CTG classification engine (NICE NG229 1.4.12 to 1.4.32, current tables) ──
 
 describe("classifyCTGEntry — baseline HR", () => {
   const entry = (baselineHR, prevHR = null) =>
@@ -713,9 +750,15 @@ describe("classifyCTGEntry — baseline HR", () => {
   it("109 bpm — suspicious (AMBER baseline)", () => expect(entry(109)).toBe("suspicious"))
   it("100 bpm — suspicious", () => expect(entry(100)).toBe("suspicious"))
   it("99 bpm — pathological (RED baseline)", () => expect(entry(99)).toBe("pathological"))
-  it("161 bpm — suspicious (NG229: 161–180 non-reassuring)", () => expect(entry(161)).toBe("suspicious"))
-  it("180 bpm — suspicious", () => expect(entry(180)).toBe("suspicious"))
-  it("181 bpm — pathological (NG229: above 180 abnormal)", () => expect(entry(181)).toBe("pathological"))
+  it("161 bpm: pathological (NG229 1.4.15: above 160 is red)", () => expect(entry(161)).toBe("pathological"))
+  it("170 bpm: pathological", () => expect(entry(170)).toBe("pathological"))
+  it("181 bpm: pathological", () => expect(entry(181)).toBe("pathological"))
+  it("unable to determine baseline: amber", () =>
+    expect(classifyCTGEntry({ baselineHR: 140, baselineUndetermined: true, contractionsPerTen: 3 })).toBe("suspicious"))
+  it("rise of 20 from the start of labour counts, not only since the last review", () =>
+    expect(classifyCTGEntry({ baselineHR: 150, contractionsPerTen: 3 }, 140, { startBaselineHR: 130 })).toBe("suspicious"))
+  it("rise of 20 in the active second stage is red (NG229 1.4.37)", () =>
+    expect(classifyCTGEntry({ baselineHR: 155, contractionsPerTen: 3 }, 135, { activeSecondStage: true })).toBe("pathological"))
   it("rise ≥ 20 bpm from previous — suspicious", () => expect(entry(155, 135)).toBe("suspicious"))
   it("rise = 19 bpm — still normal", () => expect(entry(154, 135)).toBe("normal"))
   it("rise ≥ 20 but HR still in normal range — suspicious (1 amber: baseline)", () =>
@@ -733,10 +776,10 @@ describe("classifyCTGEntry — variability", () => {
   it("<5 bpm for 30 min — AMBER → suspicious", () => expect(entry("<5", 30)).toBe("suspicious"))
   it("<5 bpm for 50 min — AMBER → suspicious", () => expect(entry("<5", 50)).toBe("suspicious"))
   it("<5 bpm for 51 min — RED → pathological", () => expect(entry("<5", 51)).toBe("pathological"))
-  it(">25 bpm for under 15 min — reassuring (NG229)", () => expect(entry(">25", 14)).toBe("normal"))
-  it(">25 bpm for 15 min — AMBER → suspicious", () => expect(entry(">25", 15)).toBe("suspicious"))
-  it(">25 bpm for 25 min — AMBER → suspicious", () => expect(entry(">25", 25)).toBe("suspicious"))
-  it(">25 bpm for 26 min — RED → pathological", () => expect(entry(">25", 26)).toBe("pathological"))
+  it(">25 bpm for a few minutes: amber (NG229 1.4.18: up to 10 min)", () => expect(entry(">25", 5)).toBe("suspicious"))
+  it(">25 bpm for 10 min: amber", () => expect(entry(">25", 10)).toBe("suspicious"))
+  it(">25 bpm for 11 min: red", () => expect(entry(">25", 11)).toBe("pathological"))
+  it(">25 bpm for 20 min: red", () => expect(entry(">25", 20)).toBe("pathological"))
   it("sinusoidal — RED → pathological", () => expect(entry("sinusoidal", 0)).toBe("pathological"))
 })
 
@@ -750,7 +793,10 @@ describe("classifyCTGEntry — decelerations", () => {
   it("early — normal (white)", () => expect(entry("early", 0)).toBe("normal"))
   it("variable without concerns — normal (white)", () => expect(entry("variable", 0)).toBe("normal"))
   it("variable-concerning < 30 min — AMBER → suspicious", () => expect(entry("variable-concerning", 29)).toBe("suspicious"))
-  it("variable-concerning at exactly 30 min — RED → pathological", () => expect(entry("variable-concerning", 30)).toBe("pathological"))
+  it("repetitive concerning variables at 30 min: amber (red is more than 30)", () => expect(entry("variable-concerning", 30)).toBe("suspicious"))
+  it("repetitive concerning variables over 30 min: red", () => expect(entry("variable-concerning", 31)).toBe("pathological"))
+  it("non-repetitive concerning variables over 30 min: amber (NG229 1.4.24)", () =>
+    expect(classifyCTGEntry({ baselineHR: 140, decelerations: "variable-concerning", decelerationsRepetitive: false, decelerationMinutes: 45, contractionsPerTen: 3 })).toBe("suspicious"))
   it("late decelerations — RED → pathological", () => expect(entry("late", 0)).toBe("pathological"))
   it("prolonged deceleration — RED → pathological", () => expect(entry("prolonged", 0)).toBe("pathological"))
 })

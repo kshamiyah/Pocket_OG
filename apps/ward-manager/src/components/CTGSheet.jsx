@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import Sheet from "../ui/Sheet";
 import { Chip, ChipRow, Label, Stepper, WhenPicker } from "../ui/atoms";
-import { BTN, BTN_PRIMARY, CTG_BOX, TYPE_META } from "../ui/styles";
+import { BTN, BTN_PRIMARY, CTG_BOX, INPUT, TYPE_META } from "../ui/styles";
 import { resolveWhen, whenFromISO } from "../utils/time";
 import { classifyCTGEntry } from "../utils/wardAlerts";
 import { newId } from "../utils/bedModel";
@@ -12,31 +12,41 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
   // Quick "CTG normal" entries carry no features, so look back for the last full review.
   const prev = (editCTG ? log.filter(e => e.id !== editCTG.id) : log).filter(e => e.baselineHR != null).at(-1) ?? null;
   const prevHR = prev?.baselineHR ?? null;
+  // NG229 1.4.15 compares with the start of labour as well as the last review.
+  const startHR = log.find(e => e.baselineHR != null && !e.baselineUndetermined && e.id !== editCTG?.id)?.baselineHR ?? null;
+  const secondStage = bed.labourStage === "Active second stage";
 
   const [when, setWhen] = useState(editCTG ? whenFromISO(editCTG.time) : { minsAgo: 0 });
   const [hr, setHR] = useState(editCTG?.baselineHR ?? prevHR ?? 140);
   const [vari, setVari] = useState(editCTG?.variability ?? "5-25");
   const [varMin, setVarMin] = useState(editCTG?.variabilityMinutes ?? 0);
+  const [undetermined, setUndetermined] = useState(!!editCTG?.baselineUndetermined);
   const [dec, setDec] = useState(editCTG?.decelerations ?? "none");
+  const [decRep, setDecRep] = useState(editCTG?.decelerationsRepetitive ?? true);
+  const [comment, setComment] = useState(editCTG?.comment ?? "");
   const [decMin, setDecMin] = useState(editCTG?.decelerationMinutes ?? 0);
   const [accel, setAccel] = useState(editCTG?.accelerations ?? true);
   // Contractions are the 4th NG229 feature: required, never guessed or carried over.
   const [ctx, setCtx] = useState(editCTG?.contractionsPerTen ?? null);
   const [hypertonus, setHypertonus] = useState(!!editCTG?.hypertonus);
 
-  const entry = { baselineHR: hr, variability: vari, variabilityMinutes: varMin, decelerations: dec, decelerationMinutes: decMin, accelerations: accel, contractionsPerTen: ctx, hypertonus };
-  const autoCat = useMemo(() => classifyCTGEntry(entry, prevHR), [hr, vari, varMin, dec, decMin, accel, ctx, hypertonus, prevHR]); // eslint-disable-line react-hooks/exhaustive-deps
+  const entry = {
+    baselineHR: hr, baselineUndetermined: undetermined, variability: vari, variabilityMinutes: varMin,
+    decelerations: dec, decelerationsRepetitive: dec === "variable-concerning" ? decRep : undefined, decelerationMinutes: decMin,
+    accelerations: accel, contractionsPerTen: ctx, hypertonus,
+  };
+  const autoCat = useMemo(() => classifyCTGEntry(entry, prevHR, { startBaselineHR: startHR, activeSecondStage: secondStage }), [hr, undetermined, vari, varMin, dec, decRep, decMin, accel, ctx, hypertonus, prevHR, startHR, secondStage]); // eslint-disable-line react-hooks/exhaustive-deps
   // The clinician may judge a trace pathological on the whole picture even when
   // the features grade lower; the app never downgrades.
   const [override, setOverride] = useState(!!editCTG?.clinicianOverride);
   const cat = override ? "pathological" : autoCat;
   const iso = resolveWhen(when);
-  const rise = prevHR != null ? hr - prevHR : 0;
-  const hrTone = hr < 100 || hr > 160 ? "text-red-600 dark:text-red-400" : hr < 110 ? "text-claude-700 dark:text-claude-400" : "";
+  const rise = Math.max(prevHR != null ? hr - prevHR : 0, startHR != null ? hr - startHR : 0);
+  const hrTone = undetermined ? "text-gray-400" : hr < 100 || hr > 160 ? "text-red-600 dark:text-red-400" : hr < 110 || rise >= 20 ? "text-claude-700 dark:text-claude-400" : "";
 
   const ready = !!iso && ctx != null;
   const save = () => ready && onSave({
-    id: editCTG?.id ?? newId("ctg"), time: iso, ...entry, classification: cat,
+    id: editCTG?.id ?? newId("ctg"), time: iso, ...entry, comment: comment.trim() || undefined, classification: cat,
     autoClassification: autoCat, clinicianOverride: override && autoCat !== "pathological",
   });
 
@@ -64,8 +74,11 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
       )}
 
       <div>
-        <Label hint={prevHR != null ? `last ${prevHR} bpm${rise >= 20 ? `, up ${rise}` : ""}` : undefined}>Baseline (bpm)</Label>
+        <Label hint={prevHR != null ? `last ${prevHR} bpm${rise >= 20 ? `, up ${rise}${secondStage ? " (red in active 2nd stage)" : ""}` : ""}` : undefined}>Baseline (bpm)</Label>
         <Stepper value={hr} onChange={setHR} min={60} max={220} bigStep={10} valueClass={hrTone} />
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          <Chip small on={undetermined} onClick={() => setUndetermined(u => !u)}>Unable to determine</Chip>
+        </div>
       </div>
 
       <div>
@@ -81,24 +94,26 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
         )}
         {vari === ">25" && (
           <div className="flex flex-wrap gap-1.5 mt-2">
-            <Chip small on={varMin < 15} onClick={() => setVarMin(10)}>Under 15 min</Chip>
-            <Chip small on={varMin >= 15 && varMin <= 25} onClick={() => setVarMin(20)}>15 to 25 min</Chip>
-            <Chip small on={varMin > 25} onClick={() => setVarMin(30)}>Over 25 min</Chip>
+            <Chip small on={varMin <= 10} onClick={() => setVarMin(5)}>Up to 10 min</Chip>
+            <Chip small on={varMin > 10} onClick={() => setVarMin(15)}>Over 10 min</Chip>
           </div>
         )}
       </div>
 
       <div>
         <Label>Decelerations</Label>
-        <ChipRow small value={dec} onChange={v => { setDec(v); setDecMin(0); }}
+        <ChipRow small value={dec} onChange={v => { setDec(v); setDecMin(0); setDecRep(true); }}
           options={[
             { value: "none", label: "None" }, { value: "early", label: "Early" }, { value: "variable", label: "Variable" },
             { value: "variable-concerning", label: "Variable, concerning" }, { value: "late", label: "Late" }, { value: "prolonged", label: "Prolonged, 3 min+" },
           ]} />
         {dec === "variable-concerning" && (
           <div className="flex flex-wrap gap-1.5 mt-2">
-            <Chip small on={decMin < 30} onClick={() => setDecMin(15)}>Under 30 min</Chip>
-            <Chip small on={decMin >= 30} onClick={() => setDecMin(30)}>30 min or more</Chip>
+            <Chip small on={decRep} onClick={() => setDecRep(true)}>Repetitive</Chip>
+            <Chip small on={!decRep} onClick={() => setDecRep(false)}>Non-repetitive</Chip>
+            <span className="w-px bg-gray-200 dark:bg-gray-700 mx-0.5" aria-hidden="true" />
+            <Chip small on={decMin <= 30} onClick={() => setDecMin(15)}>30 min or less</Chip>
+            <Chip small on={decMin > 30} onClick={() => setDecMin(31)}>Over 30 min</Chip>
           </div>
         )}
       </div>
@@ -117,6 +132,12 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
       </div>
 
       <WhenPicker label="Time of review" value={when} onChange={setWhen} />
+      <div>
+        <Label hint="optional">Comment</Label>
+        <input id="ctg-comment" type="text" value={comment} onChange={e => setComment(e.target.value)} maxLength={120}
+          placeholder="e.g. CTG discussed with registrar, review in 30 min" aria-label="CTG comment" className={INPUT} />
+        <p className={`${TYPE_META} mt-1`}>Shows on the card and in handover. No names or identifiers.</p>
+      </div>
       <p className={TYPE_META}>Decision aid only. Clinical responsibility remains with the treating clinician.</p>
     </Sheet>
   );

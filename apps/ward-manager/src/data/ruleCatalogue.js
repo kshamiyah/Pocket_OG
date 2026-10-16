@@ -25,18 +25,19 @@ export const RULE_GROUPS = [
 export const RULES = [
   // ── Scope ──────────────────────────────────────────────────────────────
   {
-    id: "scope-under-28", group: "Scope", title: "Under 28+0 weeks",
-    when: "Gestation under 28+0 and not yet delivered.",
+    id: "scope-under-28", group: "Scope", title: "Under the unit's gestation (default 28+0)",
+    when: "Gestation under the unit's cut-off (default 28+0) and not yet delivered.",
     then: "Shows a note that labour progress and CTG rules are not applied. Preterm, antibiotic and maternal observation alerts still run.",
-    severity: "Info", alertIds: ["under-28"], sources: [],
-    local: "App scope decision: the labour timings and CTG categories here are written for later gestations. Care is individualised with senior and neonatal input.",
+    severity: "Info", alertIds: ["under-28"], sources: [], settings: ["labourRulesFromWk"],
+    local: "App scope decision, editable by the unit: the labour timings and CTG categories here are written for later gestations. Care is individualised with senior and neonatal input.",
   },
   {
     id: "scope-reviewed", group: "Scope", title: "Marking an alert Reviewed",
-    when: "An urgent or due alert with no Given or Done action (for example pathological CTG, severe BP, pyrexia, ROM review) is marked Reviewed.",
-    then: "It drops out of Needs you now, shows who reviewed it and when, and returns after a set time if still present (30 minutes for severe BP and pathological CTG) or at once if a newer CTG or obs value arrives. The handover lists it as reviewed.",
+    when: "An urgent or due alert with no Given or Done action (for example pathological CTG, severe BP, pyrexia, ROM review) is marked Reviewed, if the unit allows it.",
+    then: "It drops out of Needs you now, shows who reviewed it and when, and returns after the unit's time if still present (default 15 minutes for stop oxytocin and RR under 9; 30 for pathological CTG, BP, pulse, RR, sugars; 60 for temperature and similar; 2 to 4 hours for progress and membranes), or at once if a newer CTG or obs value arrives. The handover lists it as reviewed. With Reviewed switched off, alerts stay until the problem clears.",
     severity: "n/a", alertIds: [], sources: ["NG133 1.7.3", "NG229 1.5.7"],
-    local: "App design choice: the return times are app defaults.",
+    settings: ["reviewOn", "reviewFastMin", "reviewUrgentMin", "reviewHourMin", "reviewProgressMin", "reviewLongMin"],
+    local: "App design choice: whether Reviewed is allowed, and the return times, are unit settings.",
   },
   {
     id: "scope-order", group: "Scope", title: "Which problem comes first",
@@ -163,17 +164,17 @@ export const RULES = [
   // ── Labour progress ────────────────────────────────────────────────────
   {
     id: "latent-reassess", group: "Labour progress", title: "Latent phase reassessment",
-    when: "Latent for the unit's interval (default 4 hours) since admission, or since induction started.",
+    when: "Latent for the unit's interval (default 6 hours) since admission, or since induction started.",
     then: "Reassess to confirm or exclude established labour.",
     severity: "Warning", alertIds: ["latent-reassess"], sources: ["NG235 1.8.1"], settings: ["latentReassessH"],
     local: "The interval is a unit setting; NG235 1.8.1 gives the definition of established labour only.",
   },
   {
-    id: "ve-4h", group: "Labour progress", title: "Vaginal examination every 4 hours",
-    when: "Established first stage: no VE yet (urgent), 3.5 hours since the last (warning), 4 hours (urgent).",
-    then: "Offer a VE.",
-    severity: "Warning, then urgent", alertIds: ["ve-never", "ve-due-soon", "ve-overdue"], sources: ["NG235 1.8.19"],
-    local: "The 30 minute early warning is an app choice.",
+    id: "ve-4h", group: "Labour progress", title: "Vaginal examination timing",
+    when: "Established first stage: no VE yet (urgent). Otherwise amber when a VE is due (4 hours after the last, or 2 hours after delay is suspected), red 30 minutes later.",
+    then: "Offer a VE. After suspected delay, diagnose delay if progress is less than 1 cm.",
+    severity: "Warning, then urgent", alertIds: ["ve-never", "ve-due", "ve-overdue"], sources: ["NG235 1.8.19", "NG235 1.8.45"],
+    local: "Turning red 30 minutes after the VE is due is a unit choice. NICE times the VE; it sets no overdue point.",
   },
   {
     id: "slow-progress", group: "Labour progress", title: "Slow progress in the first stage",
@@ -189,21 +190,19 @@ export const RULES = [
   },
   {
     id: "arm", group: "Labour progress", title: "After amniotomy",
-    when: "2 hours after ARM in the established first stage with no VE since, or a later VE with fewer than 3 contractions in 10 minutes.",
+    when: "2 hours after ARM in the established first stage with no VE since.",
     then: "Repeat VE; if no progress, diagnose delay and obtain obstetric review including consideration of oxytocin.",
-    severity: "Warning", alertIds: ["arm-reassess", "arm-cx-inadequate"],
+    severity: "Warning", alertIds: ["arm-reassess"],
     sources: ["NG235 1.8.48", "NG235 1.8.49", "NG235 1.8.50"],
-    local: "\"Fewer than 3 in 10\" is a local marker of inadequate contractions.",
   },
 
   // ── Second stage ───────────────────────────────────────────────────────
   {
     id: "passive", group: "Second stage", title: "Passive second stage",
-    when: "With an epidural: 2 hours (first labour) or 1 hour (later labours) since full dilatation. Without: 1 hour with no urge to push. Warning 15 minutes before.",
+    when: "With an epidural: 2 hours (first labour) or 1 hour (later labours) since full dilatation. Without: 1 hour with no urge to push.",
     then: "With an epidural, actively encourage pushing; without, offer further assessment.",
-    severity: "Warning, then urgent", alertIds: ["passive-limit-soon", "passive-limit"],
+    severity: "Urgent", alertIds: ["passive-limit"],
     sources: ["NG235 1.6.34", "NG235 1.9.8"],
-    local: "The 15 minute early warning is an app choice.",
   },
   {
     id: "pushing", group: "Second stage", title: "Active pushing",
@@ -243,10 +242,11 @@ export const RULES = [
   // ── CTG ────────────────────────────────────────────────────────────────
   {
     id: "ctg-classify", group: "Fetal monitoring (CTG)", title: "How the app grades a CTG",
-    when: "4 features: contractions, baseline, variability, decelerations. Each white, amber or red. Contractions amber at 5 or more in 10, or hypertonus.",
+    when: "4 features, each white, amber or red. Contractions: amber at 5 or more in 10, or hypertonus. Baseline: white 110 to 160; amber 100 to 109, a rise of 20 bpm or more from the start of labour or the last review, or unable to determine; red below 100 or above 160, and a 20 bpm rise in the active second stage. Variability: amber under 5 for 30 to 50 min or over 25 for up to 10 min; red under 5 for over 50 min, over 25 for over 10 min, or sinusoidal. Decelerations: amber repetitive concerning variables for 30 min or less, or non-repetitive for over 30 min; red repetitive concerning variables for over 30 min, late, acute bradycardia or a prolonged deceleration of 3 min or more.",
     then: "Normal: all white. Suspicious: 1 amber. Pathological: 1 red, or 2 or more amber. A clinician can grade a trace pathological on the whole picture; the app never downgrades.",
-    severity: "n/a", alertIds: [], sources: ["NG229 1.4.12", "NG229 1.4.32"],
-    local: "A baseline rise of 20 bpm or more scores amber here (local). NG229 1.4.37 uses this as a red feature in the active second stage.",
+    severity: "n/a", alertIds: [],
+    sources: ["NG229 1.4.12", "NG229 1.4.15", "NG229 1.4.18", "NG229 1.4.24", "NG229 1.4.32", "NG229 1.4.37"],
+    local: "NICE does not grade non-repetitive concerning variables present for 30 minutes or less; the app scores them amber (they are not white, which excludes concerning features).",
   },
   {
     id: "ctg-pathological", group: "Fetal monitoring (CTG)", title: "Pathological CTG",
@@ -256,7 +256,7 @@ export const RULES = [
   },
   {
     id: "ctg-suspicious", group: "Fetal monitoring (CTG)", title: "Suspicious CTG",
-    when: "Latest CTG suspicious, any stage. Becomes urgent if not reassessed within the unit's interval (default 30 minutes).",
+    when: "Latest CTG suspicious, any stage. Becomes urgent if not reassessed within the unit's interval (default 30 minutes). Each CTG review can carry a short comment (for example \"discussed with registrar\"), shown on the card and in handover.",
     then: "Full risk assessment and conservative measures; urgent review if other risk factors.",
     severity: "Warning, then urgent", alertIds: ["ctg-suspicious", "ctg-suspicious-overdue"],
     sources: ["NG229 1.5.5", "NG229 1.5.6"], settings: ["suspiciousRecheckMin"],
@@ -294,10 +294,10 @@ export const RULES = [
   },
   {
     id: "tachycardia", group: "Maternal observations", title: "Maternal tachycardia",
-    when: "Pulse over 120.",
-    then: "Assess for bleeding, sepsis, PE or pain; escalate.",
-    severity: "Urgent", alertIds: ["tachycardia"], sources: ["NG235 1.8.20", "NG255 table 1"],
-    local: "NG235 asks for 2 readings over 120 15 to 30 minutes apart; the app alerts on the first so it is repeated.",
+    when: "Pulse over 130: urgent at once. Pulse over 120: amber on the first reading; urgent if a repeat within the hour is also over 120, or no repeat within 30 minutes.",
+    then: "Repeat the pulse; then assess for bleeding, sepsis, PE or pain and escalate.",
+    severity: "Warning, then urgent", alertIds: ["tachycardia"], sources: ["NG235 1.8.20", "NG255 table 1"],
+    local: "NG235 asks for 2 readings over 120, 15 to 30 minutes apart. Red when not repeated within 30 minutes is a unit choice.",
   },
   {
     id: "bp-high", group: "Maternal observations", title: "Raised blood pressure",
@@ -314,18 +314,18 @@ export const RULES = [
   },
   {
     id: "rr", group: "Maternal observations", title: "Respiratory rate",
-    when: "25 or more, or under 9 (urgent); 21 to 24 (warning).",
-    then: "Senior review; consider sepsis. Repeat a borderline reading.",
-    severity: "Urgent / warning", alertIds: ["rr-high", "rr-low"],
+    when: "25 or more: urgent at once (NG255). Under 9: urgent at once. 21 to 24: amber on the first reading; urgent if a repeat within the hour is also 21 or more, or no repeat within 30 minutes.",
+    then: "Repeat a borderline reading; senior review and consider sepsis.",
+    severity: "Warning, then urgent", alertIds: ["rr-high", "rr-low"],
     sources: ["NG255 table 1", "NG235 1.8.20"],
-    local: "NG235 asks for 2 readings 15 to 30 minutes apart; the app alerts on the first so it is repeated.",
+    local: "NG235 asks for 2 readings 15 to 30 minutes apart. Red at once below 9, and red when not repeated within 30 minutes, are unit choices.",
   },
   {
     id: "oliguria", group: "Maternal observations", title: "Low urine output",
-    when: "Recorded urine output under the unit threshold (default 30 mL per hour).",
-    then: "Escalate.",
-    severity: "Urgent", alertIds: ["oliguria"], sources: [], settings: ["oliguriaMlH"],
-    local: "The threshold is a unit setting.",
+    when: "Optional: only if someone records urine output (under More in the bed record), and it is under the unit threshold (default 30 mL per hour).",
+    then: "Amber: review fluid balance and escalate if concerned. No reminders to record it.",
+    severity: "Warning", alertIds: ["oliguria"], sources: [], settings: ["oliguriaMlH"],
+    local: "The threshold is a unit setting; NICE sets none for labour.",
   },
 
   // ── Diabetes ───────────────────────────────────────────────────────────

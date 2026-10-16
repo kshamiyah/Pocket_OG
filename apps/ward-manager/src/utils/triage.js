@@ -4,7 +4,7 @@
 
 import { alertTier, computeAlerts } from "./wardAlerts";
 import { MIN, HOUR } from "./time";
-import { OBS_STAMP, REVIEW_MIN } from "./bedModel";
+import { OBS_STAMP, reviewMinutes } from "./bedModel";
 
 // Routine obs reminders are shown as P/B/T dots instead of alerts.
 const OBS_IDS = new Set(Object.keys(OBS_STAMP));
@@ -29,17 +29,15 @@ const SHORT = {
   "aph": "Bleeding",
   "active-phase-limit": "Long 1st stage",
   "arm-reassess": "Post-ARM review",
-  "arm-cx-inadequate": "Contractions post-ARM",
   "ve-never": "No VE yet",
   "ve-overdue": "VE overdue",
-  "ve-due-soon": "VE due soon",
+  "ve-due": "VE due",
   "latent-reassess": "Reassess",
   "slow-progress": "Slow progress",
   "hyperstim": "Hyperstimulation",
   "oxytocin-max": "Oxytocin at max",
   "oxytocin-increment": "Oxytocin review",
   "passive-limit": "Passive limit",
-  "passive-limit-soon": "Passive limit soon",
   "pushing-reassess": "Reassess pushing",
   "pushing-senior-review": "Senior review",
   "prom-48h": "ROM 48h: antibiotics",
@@ -77,7 +75,8 @@ export function shortLabel(alert) {
 
 // Alerts worth forecasting as "next due", with the label shown on the board.
 const NEXT = {
-  "ve-overdue": "VE",
+  "ve-due": "VE",
+  "ve-overdue": "VE overdue",
   "latent-reassess": "Reassess",
   "ctg-review-due": "CTG review",
   "ctg-suspicious-overdue": "CTG recheck",
@@ -125,7 +124,7 @@ export function applyReviews(alerts, bed, now = Date.now()) {
   const reviews = bed.reviews ?? {};
   const out = alerts.map(a => {
     const r = reviews[a.id];
-    const mins = REVIEW_MIN[a.id];
+    const mins = reviewMinutes(a.id);
     if (!r || !mins) return a;
     const at = new Date(r.at).getTime();
     const until = at + mins * MIN;

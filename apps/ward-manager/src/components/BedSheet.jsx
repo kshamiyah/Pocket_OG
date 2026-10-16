@@ -88,9 +88,9 @@ const TONE = {
   ok: "bg-gray-50 dark:bg-gray-900/60 border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100",
 };
 const TILE_ALERTS = {
-  ve: { red: ["ve-overdue", "ve-never", "slow-progress"], amber: ["ve-due-soon", "arm-reassess", "arm-cx-inadequate", "active-phase-limit"] },
+  ve: { red: ["ve-overdue", "ve-never", "slow-progress"], amber: ["ve-due", "arm-reassess", "active-phase-limit"] },
   ctg: { red: ["ctg-pathological", "ctg-suspicious-overdue", "oxytocin-stop-pathological"], amber: ["ctg-suspicious", "ctg-review-due", "ctg-not-documented"] },
-  obs: { red: ["tachycardia", "bp-severe", "bp-low", "temp-38", "rr-low", "bgl-low", "bgl-high", "bgl-due", "bgl-never", "oliguria"], amber: ["bp-elevated", "temp-375", "temp-low", "rr-high", "pulse-due", "pulse-never", "bp-due", "bp-never", "temp-due", "temp-never", "rr-due", "rr-never"] },
+  obs: { red: ["bp-severe", "bp-low", "temp-38", "rr-low", "bgl-low", "bgl-high", "bgl-due", "bgl-never"], amber: ["tachycardia", "oliguria", "bp-elevated", "temp-375", "temp-low", "rr-high", "pulse-due", "pulse-never", "bp-due", "bp-never", "temp-due", "temp-never", "rr-due", "rr-never"] },
   oxy: { red: ["hyperstim", "oxytocin-max", "oxytocin-stop-pathological"], amber: ["oxytocin-increment"] },
   memb: { red: ["mec-thick", "liquor-blood", "prom-48h", "prom-24h", "prom-18h"], amber: ["mec-thin", "liquor-absent", "prom-16h", "gbs-pending-rupture"] },
 };
@@ -153,7 +153,7 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGNormal, on
   const obsDue = obs.filter(o => !o.done);
   // An abnormal value outranks "done": the tile names it until a newer value replaces it.
   const obsAbnormal = t.alerts.find(a => TILE_ALERTS.obs.red.includes(a.id) && !a.id.startsWith("bgl-d") && !a.id.startsWith("bgl-n"))
-    ?? t.alerts.find(a => ["bp-elevated", "temp-375", "temp-low", "rr-high"].includes(a.id));
+    ?? t.alerts.find(a => ["tachycardia", "rr-high", "bp-elevated", "temp-375", "temp-low", "oliguria"].includes(a.id));
   const CTG_WORD = { normal: "Normal", suspicious: "Susp.", pathological: "Path." };
   return (
     <Sheet open onClose={onClose} title={`Bed ${bed.bedNumber}`} sub={sub} action={editBtn}>
@@ -175,6 +175,9 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGNormal, on
         )}
       </div>
 
+      {ctg?.comment && (
+        <p className="text-xs text-gray-600 dark:text-gray-400 px-1 -mt-1 truncate"><span className="font-semibold">CTG {clock(ctg.time)}:</span> {ctg.comment}</p>
+      )}
       {(!ctg || ctg.classification === "normal") && (
         <button type="button" onClick={onCTGNormal} className={`${BTN} ${BTN_OK} w-full !min-h-11`}><IconTick /> CTG normal</button>
       )}

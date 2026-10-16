@@ -7,6 +7,7 @@ import {
 } from "../ui/styles";
 import { IconBack, IconTick } from "../ui/icons";
 import { fmtAge, clock } from "../utils/time";
+import { getUnitSettings } from "../data/unitSettings";
 import {
   ANALGESIA, LIQUOR_SHORT, PERSISTENT_FLAGS, STAGES, STAGE_SHORT, currentOxytocin, isHypertensiveBed, newId, obsStatus, parityWithHistory, recordObs, sortedVEs, stageLabel, stampObs, stationLabel,
 } from "../utils/bedModel";
@@ -41,6 +42,7 @@ function ObsPanel({ bed, now, onUpdate }) {
   const [v1, setV1] = useState("");
   const [v2, setV2] = useState("");
   const [urine, setUrine] = useState(obs.urineOutput != null ? String(obs.urineOutput) : "");
+  const { oliguriaMlH } = getUnitSettings();
   const items = obsStatus(bed, now);
   const shown = it => it.type === "bp"
     ? (obs.bpSystolic ? `${obs.bpSystolic}/${obs.bpDiastolic ?? "?"}` : null)
@@ -79,15 +81,18 @@ function ObsPanel({ bed, now, onUpdate }) {
           )}
         </div>
       ))}
-      <div>
-        <Label>Urine output (mL/hr)</Label>
-        <div className="flex gap-2">
-          <input type="number" inputMode="numeric" value={urine} onChange={e => setUrine(e.target.value)} className={`${INPUT} flex-1`} aria-label="Urine output" />
+      {/* Optional and quiet: only for women whose output is being measured. */}
+      <details className="group" open={obs.urineOutput != null}>
+        <summary className="min-h-10 flex items-center gap-1.5 text-sm font-semibold text-claude-700 dark:text-claude-400 cursor-pointer list-none">
+          <span className="transition-transform group-open:rotate-90" aria-hidden="true">›</span> More: urine output
+        </summary>
+        <div className="flex gap-2 mt-1">
+          <input id="urine-output" type="number" inputMode="numeric" value={urine} onChange={e => setUrine(e.target.value)} placeholder="mL/hr, optional" className={`${INPUT} flex-1`} aria-label="Urine output" />
           <button type="button" disabled={!urine} onClick={() => onUpdate({ observations: { ...obs, urineOutput: parseFloat(urine), lastUrineCheck: new Date().toISOString() } }, "Urine output recorded")}
             className={`${BTN} ${BTN_PRIMARY} px-5`}>Set</button>
         </div>
-        {obs.urineOutput != null && obs.urineOutput < 30 && <p className="text-xs font-semibold text-red-600 dark:text-red-400 mt-1.5">Oliguria {obs.urineOutput} mL/hr: escalate (NG235 §1.4.5).</p>}
-      </div>
+        {obs.urineOutput != null && obs.urineOutput < oliguriaMlH && <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mt-1.5">Below the unit threshold of {oliguriaMlH} mL/hr: review fluid balance.</p>}
+      </details>
     </div>
   );
 }

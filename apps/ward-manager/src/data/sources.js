@@ -244,6 +244,30 @@ export const SOURCES = {
     "url": "https://www.nice.org.uk/guidance/ng229/chapter/Recommendations#ng229-1_4_14",
     "text": "If 5 or more contractions per 10 minutes are present:\n• perform a full risk assessment\n• take action to reduce contraction frequency as described in the section on underlying causes and conservative measures\n• explain to the woman what is happening, and ensure that she has adequate pain relief. [2022]"
   },
+  "NG229 1.4.15": {
+    "issuer": "NICE",
+    "doc": "NG229",
+    "docTitle": "Fetal monitoring in labour",
+    "rec": "Recommendation 1.4.15",
+    "url": "https://www.nice.org.uk/guidance/ng229/chapter/Recommendations#ng229-1_4_15",
+    "text": "Use the following to work out the categorisation for baseline fetal heart rate (see recommendation 1.4.31 to work out the overall categorisation for the CTG):\n• white\n• stable baseline of 110 to 160 beats a minute\n• amber\n• increase in baseline fetal heart rate of 20 beats a minute or more from the start of labour or since the last review an hour ago, or\n• 100 to 109 beats a minute (but see recommendation 1.4.16), or\n• unable to determine baseline\n• red\n• below 100 beats a minute, or\n• above 160 beats a minute. [2017, amended 2022]"
+  },
+  "NG229 1.4.18": {
+    "issuer": "NICE",
+    "doc": "NG229",
+    "docTitle": "Fetal monitoring in labour",
+    "rec": "Recommendation 1.4.18",
+    "url": "https://www.nice.org.uk/guidance/ng229/chapter/Recommendations#ng229-1_4_18",
+    "text": "Use the following to work out the categorisation for fetal heart rate variability (see recommendation 1.4.31 to work out the overall categorisation for the CTG):\n• white\n• 5 to 25 beats a minute\n• amber\n• fewer than 5 beats a minute for between 30 and 50 minutes, or\n• more than 25 beats a minute for up to 10 minutes\n• red\n• fewer than 5 beats a minute for more than 50 minutes, or\n• more than 25 beats a minute for more than 10 minutes, or\n• sinusoidal. [2017, amended 2022]"
+  },
+  "NG229 1.4.24": {
+    "issuer": "NICE",
+    "doc": "NG229",
+    "docTitle": "Fetal monitoring in labour",
+    "rec": "Recommendation 1.4.24",
+    "url": "https://www.nice.org.uk/guidance/ng229/chapter/Recommendations#ng229-1_4_24",
+    "text": "Use the following to work out the categorisation for decelerations in fetal heart rate (see recommendation 1.4.31 to work out the overall categorisation for the CTG):\n• white\n• no decelerations, or\n• early decelerations, or\n• variable decelerations that are not evolving to have concerning characteristics\n• amber\n• repetitive variable decelerations with any concerning characteristics for less than 30 minutes, or\n• non-repetitive variable decelerations with any concerning characteristics for more than 30 minutes\n• red\n• repetitive variable decelerations with any concerning characteristics for more than 30 minutes, or\n• late decelerations, or\n• acute bradycardia, or a single prolonged deceleration lasting 3 minutes or more. [2017, amended 2025]"
+  },
   "NG229 1.4.32": {
     "issuer": "NICE",
     "doc": "NG229",
@@ -251,6 +275,14 @@ export const SOURCES = {
     "rec": "Recommendation 1.4.32",
     "url": "https://www.nice.org.uk/guidance/ng229/chapter/Recommendations#ng229-1_4_32",
     "text": "Categorise CTG traces as follows, based on whether each of the 4 features (contractions, baseline, variability, decelerations) have been scored as white, amber or red:\n• normal\n• no amber or red features (all 4 features are white)\n• suspicious\n• any 1 feature is amber\n• pathological\n• any 1 feature is red, or\n• 2 or more features are amber. [2017, amended 2022]"
+  },
+  "NG229 1.4.37": {
+    "issuer": "NICE",
+    "doc": "NG229",
+    "docTitle": "Fetal monitoring in labour",
+    "rec": "Recommendation 1.4.37",
+    "url": "https://www.nice.org.uk/guidance/ng229/chapter/Recommendations#ng229-1_4_37",
+    "text": "Take into account that onset of hypoxia is both more common and more rapid in the active second stage of labour. Take an increase in the baseline fetal heart rate of 20 beats a minute or more from the start of labour or since the last review an hour ago as a red feature in active second stage labour. [2022]"
   },
   "NG229 1.5.5": {
     "issuer": "NICE",

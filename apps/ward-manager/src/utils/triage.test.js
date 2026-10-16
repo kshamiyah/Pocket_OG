@@ -61,10 +61,10 @@ describe("triageBed", () => {
     expect(after.shown.some(a => a.id === "gbs-iap")).toBe(false)
   })
 
-  it("is due soon when the VE is due within 30 minutes", () => {
-    const r = triageBed(activeBed({ ves: [{ id: "v1", time: t(3 * HOUR + 40 * MIN), dilation: 5, station: -2 }] }), NOW)
+  it("is due when the VE reaches 4 hours", () => {
+    const r = triageBed(activeBed({ ves: [{ id: "v1", time: t(4 * HOUR + 10 * MIN), dilation: 5, station: -2 }] }), NOW)
     expect(r.tier).toBe("warning")
-    expect(r.top.id).toBe("ve-due-soon")
+    expect(r.top.id).toBe("ve-due")
   })
 })
 
@@ -86,7 +86,7 @@ describe("triageWard ordering", () => {
     const beds = {
       a: activeBed({ id: "a", bedNumber: "1" }),
       b: activeBed({ id: "b", bedNumber: "2", riskFlags: ["GBS+"], ves: [{ id: "v", time: t(HOUR), dilation: 5, station: -2, membranes: "SROM", membranesTime: t(2 * HOUR) }] }),
-      c: activeBed({ id: "c", bedNumber: "3", ves: [{ id: "v", time: t(3 * HOUR + 40 * MIN), dilation: 5, station: -2 }] }),
+      c: activeBed({ id: "c", bedNumber: "3", ves: [{ id: "v", time: t(4 * HOUR + 10 * MIN), dilation: 5, station: -2 }] }),
       d: activeBed({ id: "d", bedNumber: "4", delivery: { time: t(HOUR), mode: "SVD" } }),
     }
     const rows = triageWard(beds, NOW)

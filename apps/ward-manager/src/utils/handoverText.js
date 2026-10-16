@@ -106,7 +106,7 @@ export function generateHandover(beds, shift, now = Date.now()) {
     if (background.length) lines.push(background.join(" · "));
     if (done.length) lines.push(done.join(" · "));
     const ctg = (bed.ctgLog ?? []).at(-1);
-    if (ctg) lines.push(`CTG ${ctg.classification} at ${clock(ctg.time, now)}`);
+    if (ctg) lines.push(`CTG ${ctg.classification} at ${clock(ctg.time, now)}${ctg.comment ? `: ${ctg.comment}` : ""}`);
 
     alertLines(bed, now).forEach(l => lines.push(l));
 

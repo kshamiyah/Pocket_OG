@@ -4,7 +4,8 @@ import { BTN, BTN_PRIMARY, BTN_SECONDARY, CARD, INPUT, TYPE_DISPLAY, TYPE_META, 
 import { IconBack, IconChevron } from "../ui/icons";
 import { RULES, RULE_FOR_ALERT, RULE_GROUPS } from "../data/ruleCatalogue";
 import { SOURCES, SOURCES_ACCESSED } from "../data/sources";
-import { UNIT_SETTINGS, formatSetting, getUnitSettings } from "../data/unitSettings";
+import { UNIT_SETTINGS, formatSetting, getUnitSettings, saveUnitSettings } from "../data/unitSettings";
+import { Chip, Stepper } from "../ui/atoms";
 
 const DISCLAIMER = "Decision aid only. Clinical responsibility remains with the treating clinician.";
 
@@ -25,31 +26,66 @@ function SourceChip({ k, onSource }) {
   );
 }
 
+/** One unit setting, changeable right here on the rule card. */
+function SettingLine({ s, onSaved }) {
+  const v = getUnitSettings()[s.key];
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(v);
+  const save = () => {
+    saveUnitSettings({ ...getUnitSettings(), [s.key]: draft });
+    setEditing(false);
+    onSaved?.(s);
+  };
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-start gap-2">
+        <p className="flex-1 text-xs leading-snug text-gray-700 dark:text-gray-300">
+          <span className="font-semibold">This phone: </span>{s.label} <span className="font-semibold">{formatSetting(s, v)}</span>
+          {v === s.default ? " (app default)" : <span className="font-semibold text-amber-700 dark:text-amber-400"> (changed from {formatSetting(s, s.default)})</span>}
+        </p>
+        {!editing && (
+          <button type="button" onClick={() => { setDraft(v); setEditing(true); }} aria-label={`Change: ${s.label}`}
+            className="shrink-0 min-h-8 px-2.5 rounded-lg border border-claude-200 dark:border-claude-800 text-xs font-semibold text-claude-700 dark:text-claude-400">Change</button>
+        )}
+      </div>
+      {editing && (
+        <div className="space-y-2 pb-1">
+          {s.type === "bool" ? (
+            <div className="flex gap-1.5">
+              <Chip small on={draft === true} onClick={() => setDraft(true)}>On</Chip>
+              <Chip small on={draft === false} onClick={() => setDraft(false)}>Off</Chip>
+            </div>
+          ) : (
+            <Stepper value={draft} onChange={setDraft} min={s.min} max={s.max} step={s.step}
+              format={x => <>{x}<span className="text-sm font-normal text-gray-500"> {s.unit}</span></>} />
+          )}
+          <p className={TYPE_META}>App default: {formatSetting(s, s.default)} · {s.nice}</p>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setEditing(false)} className={`${BTN} ${BTN_SECONDARY} flex-1 !min-h-10`}>Cancel</button>
+            <button type="button" onClick={save} disabled={draft === v} className={`${BTN} ${BTN_PRIMARY} flex-1 !min-h-10`}>Save for this phone</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** What this phone is set to, for rules a unit can change. */
-function SettingLines({ keys, onSettings }) {
-  const unit = getUnitSettings();
+function SettingLines({ keys, onSettings, onSettingSaved }) {
   const defs = keys.map(k => UNIT_SETTINGS.find(s => s.key === k)).filter(Boolean);
   return (
-    <div className="rounded-lg px-2.5 py-2 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 space-y-1">
-      {defs.map(s => {
-        const v = unit[s.key];
-        return (
-          <p key={s.key} className="text-xs leading-snug text-gray-700 dark:text-gray-300">
-            <span className="font-semibold">This phone: </span>{s.label} <span className="font-semibold">{formatSetting(s, v)}</span>
-            {v === s.default ? " (app default)" : <span className="font-semibold text-amber-700 dark:text-amber-400"> (changed from {formatSetting(s, s.default)})</span>}
-          </p>
-        );
-      })}
+    <div className="rounded-lg px-2.5 py-2 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 space-y-2">
+      {defs.map(s => <SettingLine key={s.key} s={s} onSaved={onSettingSaved} />)}
       {onSettings && (
         <button type="button" onClick={onSettings} className="min-h-8 text-xs font-semibold text-claude-700 dark:text-claude-400 underline decoration-dotted underline-offset-2">
-          Change in unit settings
+          All unit settings
         </button>
       )}
     </div>
   );
 }
 
-function RuleBody({ rule, onSource, onSettings }) {
+function RuleBody({ rule, onSource, onSettings, onSettingSaved }) {
   return (
     <div className="space-y-2">
       <p className="text-sm text-gray-800 dark:text-gray-200 leading-snug"><span className="font-semibold">When: </span>{rule.when}</p>
@@ -60,7 +96,7 @@ function RuleBody({ rule, onSource, onSettings }) {
           <span className="font-semibold">{rule.group === "Scope" ? "App design choice: " : "Local, verify against your protocol: "}</span>{rule.local.replace(/^App scope decision:?\s*/, "")}
         </p>
       )}
-      {rule.settings?.length > 0 && <SettingLines keys={rule.settings} onSettings={onSettings} />}
+      {rule.settings?.length > 0 && <SettingLines keys={rule.settings} onSettings={onSettings} onSettingSaved={onSettingSaved} />}
       {rule.sources.length > 0 && (
         <div className="flex flex-wrap gap-1.5 pt-0.5">
           {rule.sources.map(k => <SourceChip key={k} k={k} onSource={onSource} />)}
@@ -97,20 +133,20 @@ export function SourceSheet({ sourceKey, onClose }) {
 }
 
 /** Pop-up for one alert: the rule behind it and its sources. */
-export function RuleSheet({ alertId, onSource, onAll, onSettings, onClose }) {
+export function RuleSheet({ alertId, onSource, onAll, onSettings, onSettingSaved, onClose }) {
   const rule = RULE_FOR_ALERT[alertId];
   if (!rule) return null;
   return (
     <Sheet open onClose={onClose} title={rule.title} sub={`Rule behind this alert · ${rule.group}`}
       footer={<button type="button" onClick={onAll} className={`${BTN} ${BTN_SECONDARY} w-full`}>All rules and sources</button>}>
-      <RuleBody rule={rule} onSource={onSource} onSettings={onSettings} />
+      <RuleBody rule={rule} onSource={onSource} onSettings={onSettings} onSettingSaved={onSettingSaved} />
       <p className={TYPE_META}>{DISCLAIMER}</p>
     </Sheet>
   );
 }
 
 /** Full-screen list of every rule the board applies, grouped by topic. */
-export default function RulesPage({ onClose, onSource, onSettings }) {
+export default function RulesPage({ onClose, onSource, onSettings, onSettingSaved }) {
   const [q, setQ] = useState("");
   const shown = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -156,7 +192,7 @@ export default function RulesPage({ onClose, onSource, onSettings }) {
               {rules.map(r => (
                 <article key={r.id} className={`${CARD} px-3.5 py-3 space-y-2`}>
                   <h4 className="text-base font-semibold text-gray-900 dark:text-white leading-snug">{r.title}</h4>
-                  <RuleBody rule={r} onSource={onSource} onSettings={onSettings} />
+                  <RuleBody rule={r} onSource={onSource} onSettings={onSettings} onSettingSaved={onSettingSaved} />
                 </article>
               ))}
             </section>

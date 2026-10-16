@@ -89,15 +89,15 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // Under 28+0 the labour-progress and CTG rules are not validated, so they are
   // switched off and a visible note says so. Preterm, antibiotic and maternal
   // safety rules still run.
-  const under28 = gestWks !== null && gestWks < 28;
+  const under28 = gestWks !== null && gestWks < unit.labourRulesFromWk;
   const labourRules = !delivered && !under28;
   if (under28 && !delivered) {
     alerts.push({
       id: "under-28",
       severity: "info",
-      title: `Under 28+0 (${gest}): labour progress and CTG rules are not applied`,
+      title: `Under ${unit.labourRulesFromWk}+0 (${gest}): labour progress and CTG rules are not applied`,
       body: "Individualised care with senior and neonatal input. Preterm, antibiotic and maternal observation alerts still run.",
-      citation: "Local (app scope)",
+      citation: "Unit setting (app scope)",
     });
   }
 
@@ -227,22 +227,35 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
           body: "Repeat vaginal examination 2 hours after amniotomy. If there is no progress, diagnose delay and transfer to obstetric-led care for review and consideration of oxytocin.",
           citation: "NICE NG235 1.8.48, 1.8.49 [2023]",
         });
-      } else {
-        const lastPostARM = vesAfterARM[vesAfterARM.length - 1];
-        if (typeof lastPostARM.contractions === "number" && lastPostARM.contractions < 3) {
-          alerts.push({
-            id: "arm-cx-inadequate",
-            severity: "warning",
-            title: `ARM ${formatAge(ms)} ago — contractions still inadequate (${lastPostARM.contractions}/10 min)`,
-            body: `Post-ARM VE shows fewer than 3 contractions in 10 min (local threshold). Obstetric review should include consideration of oxytocin.`,
-            citation: "NICE NG235 1.8.50 [2023] · under 3 in 10 local",
-          });
-        }
       }
     }
   }
 
-  // ─── VE overdue (active first stage) ────────────────────────────────
+  // ─── Progress in the established first stage (NICE NG235 1.8.42, 1.8.45) ─
+  // Only examinations in the established first stage count (a latent-phase VE
+  // would make a woman look slow the moment she becomes active). A 5-minute
+  // tolerance stops a VE taken "2 hours later" being missed by seconds.
+  const TOL = 5 * MIN;
+  const activeStart = bed.activeFirstStageStartTime ? new Date(bed.activeFirstStageStartTime).getTime() - TOL : null;
+  const activeVEs = activeStart == null ? ves : ves.filter(ve => new Date(ve.time).getTime() >= activeStart);
+  let slow = null;
+  if (bed.labourStage === "Active first stage" && activeVEs.length >= 2) {
+    const last = activeVEs[activeVEs.length - 1];
+    const prev = activeVEs[activeVEs.length - 2];
+    const lastT = new Date(last.time).getTime();
+    // Check 1: consecutive VEs about 2 h or more apart, less than 1 cm per 2 h.
+    const gap = lastT - new Date(prev.time).getTime();
+    const rate = (last.dilation - prev.dilation) / (gap / HOUR);
+    // Check 2: less than 2 cm over about 4 h (latest active VE at least 4 h earlier).
+    const earlier = [...activeVEs].reverse().find(ve => lastT - new Date(ve.time).getTime() >= 4 * HOUR - TOL);
+    const gain4h = earlier ? last.dilation - earlier.dilation : null;
+    if (gap >= 2 * HOUR - TOL && rate < 0.5) slow = { kind: "2h", cm: last.dilation - prev.dilation, ms: gap };
+    else if (gain4h != null && gain4h < 2) slow = { kind: "4h", cm: gain4h, ms: lastT - new Date(earlier.time).getTime() };
+  }
+
+  // ─── VE timing (established first stage) ─────────────────────────────
+  // NICE: offer a VE 4-hourly (NG235 1.8.19), and 2 hours after delay is
+  // suspected (1.8.45). Amber when due; red 30 minutes later (local choice).
   if (bed.labourStage === "Active first stage") {
     if (!lastVE) {
       alerts.push({
@@ -254,21 +267,22 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       });
     } else {
       const ms = now - new Date(lastVE.time).getTime();
-      if (ms >= 4 * HOUR) {
+      const interval = slow ? 2 * HOUR : 4 * HOUR;
+      const why = slow
+        ? "Delay suspected: offer a VE 2 hours later and diagnose delay if progress is less than 1 cm."
+        : "Offer 4-hourly vaginal examination in the established first stage of labour.";
+      const cite = slow ? "NICE NG235 1.8.45 [2007]" : "NICE NG235 1.8.19 [2007]";
+      if (ms >= interval + 30 * MIN) {
         alerts.push({
-          id: "ve-overdue",
-          severity: "urgent",
+          id: "ve-overdue", severity: "urgent", since: lastVE.time,
           title: `VE overdue (${formatAge(ms)} ago)`,
-          body: "Offer 4-hourly vaginal examination in the established first stage of labour.",
-          citation: "NICE NG235 1.8.19 [2007]",
+          body: why, citation: `${cite} · red after 30 min is local`,
         });
-      } else if (ms >= 3.5 * HOUR) {
+      } else if (ms >= interval) {
         alerts.push({
-          id: "ve-due-soon",
-          severity: "warning",
-          title: "VE due in 30 min",
-          body: "Approaching the 4-hour vaginal examination interval.",
-          citation: "NICE NG235 1.8.19 · 30 min warning local",
+          id: "ve-due", severity: "warning", since: lastVE.time,
+          title: `VE due (${formatAge(ms)} ago)`,
+          body: why, citation: cite,
         });
       }
     }
@@ -297,39 +311,22 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   }
 
   // ─── Slow progress (NICE NG235 1.8.42, 1.8.45) ──────────────────────────
-  // Only examinations in the established first stage count (a latent-phase VE
-  // would make a woman look slow the moment she becomes active). A 5-minute
-  // tolerance stops a VE taken "2 hours later" being missed by seconds.
-  const TOL = 5 * MIN;
-  const activeStart = bed.activeFirstStageStartTime ? new Date(bed.activeFirstStageStartTime).getTime() - TOL : null;
-  const activeVEs = activeStart == null ? ves : ves.filter(ve => new Date(ve.time).getTime() >= activeStart);
-  if (bed.labourStage === "Active first stage" && activeVEs.length >= 2) {
-    const last = activeVEs[activeVEs.length - 1];
-    const prev = activeVEs[activeVEs.length - 2];
-    const lastT = new Date(last.time).getTime();
-    // Check 1: consecutive VEs about 2 h or more apart, less than 1 cm per 2 h.
-    const gap = lastT - new Date(prev.time).getTime();
-    const rate = (last.dilation - prev.dilation) / (gap / HOUR);
-    // Check 2: less than 2 cm over about 4 h (latest active VE at least 4 h earlier).
-    const earlier = [...activeVEs].reverse().find(ve => lastT - new Date(ve.time).getTime() >= 4 * HOUR - TOL);
-    const gain4h = earlier ? last.dilation - earlier.dilation : null;
-    if (gap >= 2 * HOUR - TOL && rate < 0.5) {
-      alerts.push({
-        id: "slow-progress",
-        severity: "urgent",
-        title: "Slow labour progress",
-        body: `${(last.dilation - prev.dilation)} cm in ${formatAge(gap)} between examinations. Diagnose delay if progress is less than 1 cm 2 hours after delay is suspected; consider amniotomy if membranes intact, and obstetric review.`,
-        citation: "NICE NG235 1.8.45 [2007]",
-      });
-    } else if (gain4h != null && gain4h < 2) {
-      alerts.push({
-        id: "slow-progress",
-        severity: "urgent",
-        title: "Slow labour progress",
-        body: `${gain4h} cm in ${formatAge(lastT - new Date(earlier.time).getTime())}. Less than 2 cm in 4 hours suggests delay: assess all aspects of progress and re-examine in 2 hours.`,
-        citation: "NICE NG235 1.8.42 [2007]",
-      });
-    }
+  if (slow?.kind === "2h") {
+    alerts.push({
+      id: "slow-progress",
+      severity: "urgent",
+      title: "Slow labour progress",
+      body: `${slow.cm} cm in ${formatAge(slow.ms)} between examinations. Diagnose delay if progress is less than 1 cm 2 hours after delay is suspected; consider amniotomy if membranes intact, and obstetric review.`,
+      citation: "NICE NG235 1.8.45 [2007]",
+    });
+  } else if (slow?.kind === "4h") {
+    alerts.push({
+      id: "slow-progress",
+      severity: "urgent",
+      title: "Slow labour progress",
+      body: `${slow.cm} cm in ${formatAge(slow.ms)}. Less than 2 cm in 4 hours suggests delay: assess all aspects of progress and re-examine in 2 hours.`,
+      citation: "NICE NG235 1.8.42 [2007]",
+    });
   }
 
   // ─── Hyperstimulation ────────────────────────────────────────────────
@@ -417,14 +414,6 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
         body: hasRegionalAnalgesia
           ? `${limitLabel} since full dilatation with an epidural (${isNullip ? "nulliparous" : "parous"}). Actively encourage her to push during contractions.`
           : `1 hour since full dilatation without an urge to push. Offer further assessment.`,
-        citation: passiveCite,
-      });
-    } else if (ms >= limit - 15 * MIN) {
-      alerts.push({
-        id: "passive-limit-soon",
-        severity: "warning",
-        title: `Passive second stage limit approaching`,
-        body: `${formatAge(limit - ms)} until the ${limitLabel} point.`,
         citation: passiveCite,
       });
     }
@@ -611,13 +600,40 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     });
   }
 
-  if (pulse !== null && pulse > 120) {
+  // Repeat-reading rule (NG235 1.8.20: abnormal on 2 readings 15 to 30 minutes
+  // apart). The first abnormal reading is amber; it turns red when a repeat
+  // within the hour is also abnormal, or when no repeat comes within 30 minutes
+  // (both local choices that put the NICE rule into practice).
+  const repeatState = (name, abnormal) => {
+    const at = valueSince(name);
+    const prevRaw = obs[`${name}Prev`];
+    const prevAt = obs[`${name}PrevAt`];
+    const prev = prevRaw != null ? parseFloat(prevRaw) : null;
+    if (prev != null && abnormal(prev) && at && prevAt && new Date(at) - new Date(prevAt) <= 60 * MIN) return "confirmed";
+    // A value with no time (older boards) cannot be shown to be recent: treat as unrepeated.
+    if (!at || now - new Date(at).getTime() >= 30 * MIN) return "unrepeated";
+    return "first";
+  };
+  const REPEAT_TITLE = { confirmed: "confirmed on repeat", unrepeated: "not repeated", first: "repeat in 15 to 30 min" };
+
+  if (pulse !== null && pulse > 130) {
     alerts.push({
       id: "tachycardia",
       severity: "urgent",
-      title: `Maternal tachycardia — pulse ${pulse} bpm${aged("pulse")}`, since: valueSince("pulse"),
-      body: "Pulse over 120 bpm (NG235 1.8.20: over 120 on 2 occasions 15 to 30 minutes apart). Assess for haemorrhage, sepsis, pulmonary embolism, or pain. Escalate to senior clinician.",
-      citation: "NICE NG235 1.8.20 [2023]",
+      title: `Maternal tachycardia: pulse ${pulse} bpm${aged("pulse")}`, since: valueSince("pulse"),
+      body: "Over 130 is a high-risk criterion for severe illness or death from sepsis (NG255 table 1). Assess for haemorrhage, sepsis, pulmonary embolism or pain. Senior review.",
+      citation: "NICE NG255 table 1 · NG235 1.8.20",
+    });
+  } else if (pulse !== null && pulse > 120) {
+    const st = repeatState("pulse", v => v > 120);
+    alerts.push({
+      id: "tachycardia",
+      severity: st === "first" ? "warning" : "urgent",
+      title: `Pulse ${pulse} bpm${aged("pulse")}: ${REPEAT_TITLE[st]}`, since: valueSince("pulse"),
+      body: st === "first"
+        ? "Over 120 on 2 readings 15 to 30 minutes apart is a transfer trigger (NG235 1.8.20). Repeat the pulse; turns red if still over 120 or not repeated within 30 minutes."
+        : "Over 120 on 2 readings, or not rechecked. Assess for haemorrhage, sepsis, pulmonary embolism or pain. Escalate to a senior clinician (NG235 1.8.20).",
+      citation: st === "first" ? "NICE NG235 1.8.20 [2023]" : "NICE NG235 1.8.20 [2023] · red if not repeated in 30 min is local",
     });
   }
 
@@ -703,8 +719,8 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       id: "rr-low",
       severity: "urgent",
       title: `Respiratory rate ${rr}/min${aged("rr")}`,
-      body: "Below 9 on 2 readings 15 to 30 minutes apart is a transfer trigger (NG235 1.8.20). Assess now.",
-      citation: "NICE NG235 1.8.20 [2023]",
+      body: "Below 9 on 2 readings 15 to 30 minutes apart is a transfer trigger (NG235 1.8.20). Assess now; the app does not wait for the repeat (local choice).",
+      citation: "NICE NG235 1.8.20 [2023] · red on the first reading is local",
       since: valueSince("rr"),
     });
   } else if (rr !== null && rr >= 25) {
@@ -717,12 +733,15 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       since: valueSince("rr"),
     });
   } else if (rr !== null && rr >= 21) {
+    const st = repeatState("rr", v => v >= 21);
     alerts.push({
       id: "rr-high",
-      severity: "warning",
-      title: `Respiratory rate ${rr}/min${aged("rr")}`,
-      body: "21 to 24 is a moderate to high risk criterion if sepsis is suspected (NG255 table 1); over 21 on 2 readings 15 to 30 minutes apart is a transfer trigger (NG235 1.8.20). Repeat.",
-      citation: "NICE NG255 table 1 · NG235 1.8.20",
+      severity: st === "first" ? "warning" : "urgent",
+      title: `Respiratory rate ${rr}/min${aged("rr")}: ${REPEAT_TITLE[st]}`,
+      body: st === "first"
+        ? "21 to 24 is a moderate to high risk criterion if sepsis is suspected (NG255 table 1); over 21 on 2 readings 15 to 30 minutes apart is a transfer trigger (NG235 1.8.20). Repeat; turns red if still raised or not repeated within 30 minutes."
+        : "Raised on 2 readings, or not rechecked. Senior review and consider sepsis (NG235 1.8.20, NG255 table 1).",
+      citation: st === "first" ? "NICE NG255 table 1 · NG235 1.8.20" : "NICE NG235 1.8.20 · NG255 table 1 · red if not repeated in 30 min is local",
       since: valueSince("rr"),
     });
   }
@@ -845,10 +864,11 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   if (obs.urineOutput !== undefined && obs.urineOutput < unit.oliguriaMlH) {
     alerts.push({
       id: "oliguria",
-      severity: "urgent",
-      title: "Oliguria",
-      body: `Urine output ${obs.urineOutput} mL/hr — below the unit threshold of ${unit.oliguriaMlH} mL/hr. Escalate to medical team.`,
-      citation: "Unit setting",
+      // Optional and quiet: urine output is recorded only when someone chooses to.
+      severity: "warning",
+      title: `Low urine output: ${obs.urineOutput} mL/hr`,
+      body: `Below the unit threshold of ${unit.oliguriaMlH} mL/hr. Review fluid balance and escalate if concerned.`,
+      citation: "Unit setting: no NICE threshold in labour",
     });
   }
 
@@ -961,9 +981,9 @@ const TIER_0 = [
   "infection-suspected", "temp-38", "rr-high", "tachycardia", "hyperstim", "bgl-low", "mec-thick", "liquor-blood",
 ];
 const TIER_2 = new Set([
-  "ve-overdue", "ve-never", "ve-due-soon", "bp-due", "bp-never", "pulse-due", "pulse-never", "temp-due", "temp-never",
+  "ve-overdue", "ve-never", "ve-due", "bp-due", "bp-never", "pulse-due", "pulse-never", "temp-due", "temp-never",
   "rr-due", "rr-never", "bgl-due", "bgl-never", "prom-18h", "prom-16h", "latent-reassess", "ctg-review-due",
-  "ctg-not-documented", "oxytocin-increment", "passive-limit-soon", "active-phase-limit", "under-28",
+  "ctg-not-documented", "oxytocin-increment", "active-phase-limit", "under-28",
 ]);
 export function alertTier(id) {
   const i = TIER_0.indexOf(id);

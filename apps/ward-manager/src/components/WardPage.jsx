@@ -85,6 +85,7 @@ export default function WardPage({ shift, onEndShift }) {
     setToast({ message, snapshot });
     toastTimer.current = setTimeout(() => setToast(null), 6000);
   }, []);
+  const settingSaved = s => { setUnitVersion(v => v + 1); showToast(`Saved: ${s.label}`); };
 
   const flash = useCallback(id => {
     clearTimeout(flashTimer.current);
@@ -352,7 +353,7 @@ export default function WardPage({ shift, onEndShift }) {
           bottom={round ? "calc(env(safe-area-inset-bottom) + 9rem)" : recordBed ? "calc(env(safe-area-inset-bottom) + 1.25rem)" : undefined} />
       )}
 
-      {rulesOpen && <RulesPage onClose={() => setRulesOpen(false)} onSource={setSourceKey} onSettings={() => setSettingsOpen(true)} />}
+      {rulesOpen && <RulesPage onClose={() => setRulesOpen(false)} onSource={setSourceKey} onSettings={() => setSettingsOpen(true)} onSettingSaved={settingSaved} />}
       {settingsOpen && (
         <UnitSettings onClose={() => setSettingsOpen(false)}
           onSave={draft => { saveUnitSettings(draft); setUnitVersion(v => v + 1); setSettingsOpen(false); showToast("Unit settings saved"); }} />
@@ -360,6 +361,7 @@ export default function WardPage({ shift, onEndShift }) {
       {ruleAlert && (
         <RuleSheet alertId={ruleAlert} onSource={setSourceKey} onClose={() => setRuleAlert(null)}
           onSettings={() => { setRuleAlert(null); setSheet(null); setSettingsOpen(true); }}
+          onSettingSaved={settingSaved}
           onAll={() => { setRuleAlert(null); setSheet(null); setRulesOpen(true); }} />
       )}
       {sourceKey && <SourceSheet sourceKey={sourceKey} onClose={() => setSourceKey(null)} />}

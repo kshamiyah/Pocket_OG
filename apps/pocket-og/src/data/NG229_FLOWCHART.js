@@ -2,8 +2,8 @@
 // Mirrors the NG229 reader (packages/guidelines/src/NG229.js) and the tested
 // classifyCTGEntry engine in apps/ward-manager. NICE NG229 1.4–1.5 [2022].
 //
-// ⚠ Two threshold cells (baseline upper band, increased-variability timing) are
-//   flagged for verbatim verification against the NG229 PDF — see the reader.
+// Feature bands checked against the current NG229 tables on nice.org.uk
+// (16 Oct 2026); see packages/guidelines/src/ctg.js.
 
 export const NG229_CTG_FLOWCHART = {
   id: "NG229_CTG",

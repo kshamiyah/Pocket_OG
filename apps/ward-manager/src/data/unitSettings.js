@@ -33,7 +33,7 @@ export const UNIT_SETTINGS = [
     nice: "NICE sets no interval (NG229 1.5.5, 1.5.6).",
   },
   {
-    key: "latentReassessH", type: "number", default: 4, min: 2, max: 8, step: 1, unit: "h", group: "Labour progress",
+    key: "latentReassessH", type: "number", default: 6, min: 2, max: 8, step: 1, unit: "h", group: "Labour progress",
     label: "Reassess latent phase after",
     help: "Counted from admission, or from the start of induction.",
     nice: "NICE sets no interval.",
@@ -66,6 +66,43 @@ export const UNIT_SETTINGS = [
     key: "oliguriaMlH", type: "number", default: 30, min: 20, max: 50, step: 5, unit: "mL/h", group: "Maternal observations",
     label: "Low urine output below",
     nice: "No NICE threshold in labour.",
+  },
+  {
+    key: "labourRulesFromWk", type: "number", default: 28, min: 22, max: 34, step: 1, unit: "weeks", group: "Scope",
+    label: "Apply labour progress and CTG rules from",
+    help: "Below this gestation the board shows a note instead; preterm, antibiotic and obs alerts still run.",
+    nice: "No national number: NICE CTG categories and labour timings are not written for extreme prematurity.",
+  },
+  {
+    key: "reviewOn", type: "bool", default: true, group: "Reviewed alerts",
+    label: "Allow Reviewed on urgent alerts",
+    help: "On: a clinician can mark an alert Reviewed and it goes quiet for the time below. Off: alerts stay until the problem clears.",
+    nice: "App design choice.",
+  },
+  {
+    key: "reviewFastMin", type: "number", default: 15, min: 5, max: 60, step: 5, unit: "min", group: "Reviewed alerts",
+    label: "Returns after: stop oxytocin, RR under 9",
+    nice: "App default.",
+  },
+  {
+    key: "reviewUrgentMin", type: "number", default: 30, min: 5, max: 120, step: 5, unit: "min", group: "Reviewed alerts",
+    label: "Returns after: pathological CTG, severe or low BP, pulse, RR, sugars, 5+ contractions",
+    nice: "App default.",
+  },
+  {
+    key: "reviewHourMin", type: "number", default: 60, min: 15, max: 240, step: 15, unit: "min", group: "Reviewed alerts",
+    label: "Returns after: raised BP, temperature, urine output, oxytocin maximum, passive stage, blood-stained liquor",
+    nice: "App default.",
+  },
+  {
+    key: "reviewProgressMin", type: "number", default: 120, min: 30, max: 360, step: 30, unit: "min", group: "Reviewed alerts",
+    label: "Returns after: slow progress, after ARM",
+    nice: "App default.",
+  },
+  {
+    key: "reviewLongMin", type: "number", default: 240, min: 60, max: 480, step: 30, unit: "min", group: "Reviewed alerts",
+    label: "Returns after: long first stage, latent phase, membranes, meconium, liquor",
+    nice: "App default.",
   },
 ];
 
