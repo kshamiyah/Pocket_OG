@@ -53,7 +53,7 @@ export default function App() {
   };
 
   if (view === "landing")     return <LandingScreen onBegin={beginShift} />;
-  if (view === "setup")       return <ShiftSetup onComplete={completeSetup} />;
+  if (view === "setup")       return <ShiftSetup onComplete={completeSetup} onBack={() => setView("landing")} />;
   if (view === "handover_in") return (
     <HandoverIn
       beds={beds}

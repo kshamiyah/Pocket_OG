@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { combineFeatureGrades } from "@pocket-og/guidelines";
 
-// Interactive CTG feature picker (NICE NG229 1.4). Grades each feature as
-// white = reassuring, amber = non-reassuring, red = abnormal, then computes the
-// overall category via the shared combineFeatureGrades engine. Used as the
-// "classifier" node of the NG229_CTG flowchart. Thresholds verified against
-// NG229: baseline non-reassuring 100–109 or 161–180, abnormal <100 or >180;
-// variability non-reassuring <5 for 30–50 min or >25 for 15–25 min, abnormal
-// <5 for >50 min or >25 for >25 min or sinusoidal.
-// NB: ward-manager's numeric classifyCTGEntry (ctg.js) still uses coarser
-// operational bands (>160 abnormal, >25/>10 min) — reconcile when next touched.
+// Interactive CTG feature picker (NICE NG229 1.4). Grades each of the 4
+// features as white = reassuring, amber = non-reassuring, red = abnormal, then
+// computes the overall category via the shared combineFeatureGrades engine.
+// Used as the "classifier" node of the NG229_CTG flowchart. Bands follow the
+// current NG229 tables (checked against nice.org.uk, 16 Oct 2026):
+//   baseline 1.4.15 (red above 160; a 20 bpm rise is amber, red in the active
+//   second stage per 1.4.37), variability 1.4.18 (over 25 bpm: amber up to
+//   10 min, red beyond), decelerations 1.4.24, contractions 1.4.12.
+// ward-manager's classifyCTGEntry (packages/guidelines/src/ctg.js) uses the same bands.
 
 const GRADE = {
   white: { label: "Reassuring",     chip: "bg-emerald-600 text-white", dot: "bg-emerald-500", text: "text-emerald-700" },
@@ -18,11 +18,15 @@ const GRADE = {
 };
 
 const BASELINE = [
-  { id: "110-160", label: "110–160", grade: "white" },
+  { id: "110-160", label: "110–160, stable", grade: "white" },
   { id: "100-109", label: "100–109", grade: "amber" },
-  { id: "161-180", label: "161–180", grade: "amber" },
+  { id: "rise20",  label: "Rise of 20+ bpm", durTitle: "Since the start of labour or the last hourly review. Stage?", durations: [
+      { id: "first",  label: "First stage or passive", grade: "amber" },
+      { id: "active2", label: "Active second stage", grade: "red" },
+  ]},
+  { id: "undetermined", label: "Can't determine", grade: "amber" },
   { id: "lt100",   label: "< 100",   grade: "red" },
-  { id: "gt180",   label: "> 180",   grade: "red" },
+  { id: "gt160",   label: "> 160",   grade: "red" },
 ];
 
 const VARIABILITY = [
@@ -32,24 +36,30 @@ const VARIABILITY = [
       { id: "gt50",  label: "> 50 min",  grade: "red" },
   ]},
   { id: "gt25", label: "> 25 bpm", durations: [
-      { id: "15-25", label: "15–25 min", grade: "amber" },
-      { id: "gt25",  label: "> 25 min",  grade: "red" },
+      { id: "le10", label: "Up to 10 min", grade: "amber" },
+      { id: "gt10", label: "> 10 min",     grade: "red" },
   ]},
   { id: "sinusoidal", label: "Sinusoidal", grade: "red" },
 ];
 
 const DECELS = [
   { id: "none", label: "None / early / non-concerning variable", grade: "white" },
-  { id: "var-concerning", label: "Variable with concerning features", durations: [
-      { id: "lt30", label: "< 30 min", grade: "amber" },
-      { id: "ge30", label: "≥ 30 min", grade: "red" },
+  { id: "var-concerning", label: "Repetitive variable, concerning", durations: [
+      { id: "le30", label: "30 min or less", grade: "amber" },
+      { id: "gt30", label: "> 30 min",       grade: "red" },
   ]},
+  { id: "var-nonrep", label: "Non-repetitive variable, concerning", grade: "amber" },
   { id: "late",      label: "Late",                 grade: "red" },
-  { id: "prolonged", label: "Prolonged (≥ 3 min)",  grade: "red" },
+  { id: "prolonged", label: "Acute bradycardia or prolonged (≥ 3 min)", grade: "red" },
+];
+
+const CONTRACTIONS = [
+  { id: "lt5", label: "Fewer than 5 in 10 min", grade: "white" },
+  { id: "ge5", label: "5+ in 10 min, or hypertonus", grade: "amber" },
 ];
 
 const CATEGORY = {
-  normal:       { label: "Normal",               tone: "emerald", sub: "All three features reassuring" },
+  normal:       { label: "Normal",               tone: "emerald", sub: "All four features reassuring" },
   suspicious:   { label: "Suspicious",           tone: "amber",   sub: "1 non-reassuring feature" },
   pathological: { label: "Pathological",         tone: "red",     sub: "≥ 2 non-reassuring, or ≥ 1 abnormal feature" },
   urgent:       { label: "Urgent intervention",  tone: "red",     sub: "Prolonged deceleration ≥ 3 minutes" },
@@ -90,7 +100,7 @@ function FeatureGroup({ index, title, options, sel, dur, onPick, onPickDur }) {
       </div>
       {selected?.durations && (
         <div className="mt-2.5 pl-3 border-l-2 border-gray-100">
-          <p className="text-xs text-gray-400 mb-1.5">For how long?</p>
+          <p className="text-xs text-gray-400 mb-1.5">{selected.durTitle ?? "For how long?"}</p>
           <div className="flex flex-wrap gap-2">
             {selected.durations.map(d => (
               <Chip key={d.id} active={dur === d.id} grade={d.grade} onClick={() => onPickDur(d.id)}>{d.label}</Chip>
@@ -108,6 +118,8 @@ export default function CTGFeaturePicker({ onResult }) {
   const [varDur, setVarDur] = useState(null);
   const [decel, setDecel] = useState(null);
   const [decelDur, setDecelDur] = useState(null);
+  const [baseDur, setBaseDur] = useState(null);
+  const [ctx, setCtx] = useState(null);
 
   const gradeOf = (options, sel, dur) => {
     const o = options.find(x => x.id === sel);
@@ -116,30 +128,33 @@ export default function CTGFeaturePicker({ onResult }) {
     return o.durations?.find(d => d.id === dur)?.grade ?? null;
   };
 
-  const gBaseline = gradeOf(BASELINE, baseline);
+  const gBaseline = gradeOf(BASELINE, baseline, baseDur);
   const gVar = gradeOf(VARIABILITY, variability, varDur);
   const gDecel = gradeOf(DECELS, decel, decelDur);
+  const gCtx = gradeOf(CONTRACTIONS, ctx);
 
-  const allResolved = gBaseline && gVar && gDecel;
+  const allResolved = gBaseline && gVar && gDecel && gCtx;
   const category = allResolved
-    ? (decel === "prolonged" ? "urgent" : combineFeatureGrades([gBaseline, gVar, gDecel]))
+    ? (decel === "prolonged" ? "urgent" : combineFeatureGrades([gBaseline, gVar, gDecel, gCtx]))
     : null;
 
-  const reset = () => { setBaseline(null); setVariability(null); setVarDur(null); setDecel(null); setDecelDur(null); };
+  const reset = () => { setBaseline(null); setBaseDur(null); setVariability(null); setVarDur(null); setDecel(null); setDecelDur(null); setCtx(null); };
 
   const cat = category ? CATEGORY[category] : null;
   const tone = cat ? TONE[cat.tone] : null;
 
   return (
     <div>
-      <FeatureGroup index={1} title="Baseline rate (bpm)" options={BASELINE} sel={baseline} onPick={setBaseline} />
+      <FeatureGroup index={1} title="Baseline rate (bpm)" options={BASELINE} sel={baseline} dur={baseDur}
+        onPick={id => { setBaseline(id); setBaseDur(null); }} onPickDur={setBaseDur} />
       <FeatureGroup index={2} title="Baseline variability" options={VARIABILITY} sel={variability} dur={varDur}
         onPick={id => { setVariability(id); setVarDur(null); }} onPickDur={setVarDur} />
       <FeatureGroup index={3} title="Decelerations" options={DECELS} sel={decel} dur={decelDur}
         onPick={id => { setDecel(id); setDecelDur(null); }} onPickDur={setDecelDur} />
+      <FeatureGroup index={4} title="Contractions" options={CONTRACTIONS} sel={ctx} onPick={setCtx} />
 
       {!category ? (
-        <p className="text-sm text-gray-400 text-center py-3">Grade all three features to calculate the category.</p>
+        <p className="text-sm text-gray-400 text-center py-3">Grade all four features to calculate the category.</p>
       ) : (
         <div className={`rounded-2xl border ${tone.banner} p-4`}>
           <div className="flex items-center gap-2.5">

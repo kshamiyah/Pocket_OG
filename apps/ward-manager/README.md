@@ -1,111 +1,90 @@
-# Ward Manager — Labour Ward Board
+# PocketSuite: labour ward board
 
-A mobile-first clinical tool for managing the labour ward board during a shift. Tracks patients, fires evidence-based alerts, and provides quick access to VE, CTG, and obs logging — all client-side with no server or patient identifiers stored.
+A phone-first board for the delivery suite doctor. It is a memory aid, not a record: it answers "who needs me next, and why?" and makes the common actions one or two taps. Everything stays on the device, with bed numbers only.
 
-## Features
+The look (colours, type, sheets, undo toast) matches the Handover app so the two tools feel like one family.
 
-### Ward board
-- Per-shift setup (doctor name, day/night, custom handover time)
-- Bed cards with real-time alert status, obs dots, and quick + VE / + CTG actions
-- **Tasks tab** — ward-wide task list grouped by urgency (Urgent / Warning / Routine), each item tappable to navigate directly to the relevant bed
+## A shift with PocketSuite
 
-### Admission wizard (one question per page)
-Linear pager with phase labels (**Patient · Handover · Finish**). Single-select auto-advances; multi-select uses **Continue**.
+1. **Begin shift**: name, day or night, length. One screen.
+2. **Taking over**: if the last shift left women on the board, you see them and take over. A **board round** steps through each woman in bed order with a big "No change · next" button.
+3. **During the shift**: the board sorts itself.
+   - **Needs you now** (red): the alert engine's urgent alerts.
+   - **Due soon** (orange): its warnings.
+   - **On track**: everything else, with the next thing due (for example "VE 01:28, in 3h 30m").
+   Routine pulse, BP and temperature reminders are P/B/T dots on the row instead of alerts.
+4. **Tap a woman** for big actions: **CTG normal** (1 tap), **CTG concern** (full NG229 review), **VE** (dilation and save; membranes, station and contractions carry over from the last VE), **Obs done** (1 tap), stage chips, delivered, oxytocin (start, change, hold or stop). Alerts such as GBS antibiotics or neonatal team have a Given or Done button.
+5. **Admit**: bed, parity, gestation and stage on one screen (about 6 taps). Onset, membranes, analgesia, risk flags and the handover VE are optional.
+6. **Handover**: plain-text handover sorted by bed, ready to copy or share.
 
-**Full admit:** bed → parity & gestation → risk flags → stage → analgesia → mode → membranes (+ liquor if ruptured; skipped for PPROM) → *(if induced)* method, indications, IOL start → admission time → VE on handover?
+Every change shows an undo toast for a few seconds instead of an "Are you sure?" dialog. Times are "Now", "10 / 20 / 30 / 60 min ago" or an exact time today or earlier; future times are refused.
 
-**IOL express admit** (from IOL queue): bed → stage → method → IOL start *(defaults from queue time)* → VE on handover? — gestation & indications pre-filled.
+The **full record** for each woman keeps the detail: VE and CTG history (edit or delete), obs values and urine output, oxytocin log, per-woman tasks, induction details, delivery, and edit details.
 
-- **No VE** → confirm summary → board (toast + bed highlight; no forced VE sheet)
-- **Yes** → VE time → dilation → optional station & contractions
-- Times default to **Today · now** (compact; tap Edit to expand)
-- **PPROM** auto-sets ruptured membranes; **2nd stage** pre-selects VE Yes
+The **IOL queue** (NICE NG207 priority order) sits in its own tab, with admit-to-ward pre-filling the admission.
 
-### Vaginal examination (VE)
-- Dilation (0–10 cm), membranes, station, presentation, contractions/10 min
-- NowField: preview with ±15 min stepper, date row, quick time presets, optional custom
+**Rules and sources** (menu, or the footer under the board) lists every alert rule in plain language. Tap a source to read the guideline's exact wording and open the page it came from. Every alert's citation is tappable too, so you can check why an alert fired from the bed itself.
 
-### CTG review (NICE NG229 — Fetal Monitoring in Labour, Dec 2022)
-- Feature entry: baseline HR stepper, variability (5-25 / <5 / >25 / sinusoidal) with duration buckets, decelerations with duration sub-classification, accelerations, contractions
-- Live classification banner: **Normal / Suspicious / Pathological** computed per NG229 §1.4 rules
-- History log per bed with classification badge
+## Code map
 
-### Observations
-- Pulse, BP (sys/dia), Temperature, BGL (diabetic patients)
-- Tap a card to mark done instantly (clears the alert); optional value entry via `+ label` buttons
-- Urine output with oliguria warning (< 30 mL/hr)
-- Oxytocin log with 30-min increment reminders
-
-### Delivery
-- Mark delivered: mode (SVD / Forceps / Ventouse / Em LSCS / El LSCS), time, EBL
-- Major PPH flag at ≥ 1000 mL
-- Delivered beds shown in green, excluded from task list
-
-### Handover
-- Auto-generated SBAR-style text handover for all active beds
-- Share sheet integration
+- `src/components/WardPage.jsx`: board state, persistence, undo, which sheet is open.
+- `src/components/Board.jsx`: the triage board and bottom bar.
+- `src/components/BedSheet.jsx`, `VESheet.jsx`, `CTGSheet.jsx`, `OxySheet.jsx`, `DeliverySheet.jsx`, `AdmitSheet.jsx`: action sheets.
+- `src/components/BedRecord.jsx`, `BoardRound.jsx`, `HandoverSheet.jsx`, `IOLQueue.jsx`.
+- `src/ui/`: Handover-matching style tokens, bottom sheet, chips, time picker, undo toast, icons.
+- `src/utils/triage.js`: tiers, short labels and "next due". No clinical thresholds live here: next due asks the alert engine when each alert would first fire.
+- `src/utils/bedModel.js`: bed helpers (add VE, stamp obs, set stage, clear an alert). The stored bed shape is unchanged from earlier versions.
 
 ## Clinical alert engine
 
-`src/utils/wardAlerts.js` — pure function, injectable clock for testing.
+`src/utils/wardAlerts.js`: pure function, injectable clock for testing.
 
-| Rule | Source | Severity |
-|------|--------|----------|
-| VE overdue (> 4 h active first stage) | NICE NG235 §1.4.1 | Urgent |
-| VE due soon (> 3.5 h) | NICE NG235 §1.4.1 | Warning |
-| Latent phase reassessment (> 4 h) | NICE NG235 §1.3.3 | Warning |
-| Slow progress (< 0.5 cm/hr over ≥ 2 h) | NICE NG235 §1.5.1–1.5.4 | Urgent |
-| Uterine hyperstimulation (> 5 ctx/10 min) | NICE NG235 §1.5.7 | Urgent |
-| Oxytocin increment due (> 30 min) | NICE NG235 §1.5.6 | Warning |
-| Oxytocin at maximum dose (≥ 20 mU/min) | NICE NG235 §1.5.6 | Urgent |
-| Active pushing — nulliparous warning (≥ 45 min) | NICE NG235 §1.6.2 | Warning |
-| Active pushing — nulliparous urgent (≥ 60 min) | NICE NG235 §1.6.2 | Urgent |
-| Active pushing — multiparous warning (≥ 20 min) | NICE NG235 §1.6.2 | Warning |
-| Active pushing — multiparous urgent (≥ 30 min) | NICE NG235 §1.6.2 | Urgent |
-| Maternal pulse overdue (> 1 h active labour) | NICE NG235 §1.4.5 | Info |
-| BP overdue (> 4 h; > 1 h if hypertensive) | NICE NG235 §1.4.5 | Info / Urgent |
-| Temperature overdue (> 4 h) | NICE NG235 §1.4.5 | Info |
-| BP elevated (≥ 140/90) | NICE NG133 / NG235 §1.4.5 | Warning |
-| BP severe (≥ 160/110) | NICE NG133 / NG235 §1.4.5 | Urgent |
-| Oliguria (< 30 mL/hr) | NICE NG235 §1.4.5 | Urgent |
-| BGL overdue — diabetic (> 1 h) | GL983 | Urgent |
-| BGL outside target (< 4.0 or > 7.0 mmol/L) | GL983 | Urgent |
-| GBS IAP due | GL787 | Urgent |
-| Ruptured membranes > 18 h (GBS+) | GL787 | Urgent |
-| Preterm — alert neonatal team (< 34 weeks) | NICE NG25 §1.1.4 | Urgent |
-| Preterm — MgSO4 neuroprotection (< 30 weeks) | NICE NG25 §1.6.1 | Urgent |
-| Preterm — corticosteroids (< 34+6) | NICE NG25 §1.7.1 | Urgent |
-| Preterm — consider tocolysis (28–33+6) | NICE NG25 §1.8 | Warning |
-| Continuous CTG not documented | NICE NG229 §1.3.2 | Info |
-| CTG suspicious (last entry) | NICE NG229 §1.4 | Warning |
-| CTG suspicious ≥ 30 min without follow-up | NICE NG229 §1.4 | Urgent |
-| CTG pathological (last entry) | NICE NG229 §1.4 | Urgent |
-| CTG review overdue — normal (> 60 min) | NICE NG229 §1.3.2 | Info |
+The rules are listed in plain language, with their sources, in **`src/data/ruleCatalogue.js`**. That file drives the in-app **Rules and sources** page (menu, or the footer under the board) and is the single place to read what the board does. A test fails if the engine can raise an alert the catalogue does not describe, or if a rule cites a source that does not exist.
 
-**152 tests** covering all rules — `npm test -w apps/ward-manager`
+`src/data/sources.js` holds the exact guideline wording for each cited recommendation, with a link to its anchor on the NICE website. It is generated, not hand-typed:
 
-## CTG classification (NICE NG229 §1.4)
+```bash
+node scripts/build-sources.mjs <recs.json>   # recs.json: NICE recommendation texts keyed by anchor id
+```
 
-`classifyCTGEntry(entry, prevBaselineHR?)` classifies each feature as White / Amber / Red:
+Local guideline text (GL787, GL983) and the RCOG GTG52 summary are read from `@pocket-og/guidelines`.
 
-- **Baseline HR**: 110–160 bpm = White; 100–109 or rise ≥ 20 bpm = Amber; < 100 or > 160 bpm = Red
-- **Variability**: 5–25 bpm = White; < 5 bpm for 30–50 min = Amber; < 5 bpm > 50 min = Red; sinusoidal = Red; > 25 bpm ≤ 10 min = Amber; > 25 bpm > 10 min = Red
-- **Decelerations**: None / Early = White; Variable (concerning) < 30 min = Amber; Variable ≥ 30 min / Late / Prolonged = Red
-- **Contractions**: ≤ 5/10 min = White; > 5/10 min = Amber
+What runs when:
 
-Overall: ≥ 1 Red or ≥ 2 Amber = **Pathological** · 1 Amber = **Suspicious** · All White = **Normal**
+- **Any stage of labour, including latent and induction**: a logged suspicious or pathological CTG is acted on. The "CTG not logged" and hourly review prompts start in established labour or once oxytocin is running (for every woman by default; a unit setting).
+- **Under 28+0**: a note says labour progress and CTG rules are not applied. Preterm (NG25 lower bands), antibiotic and maternal observation alerts still run.
+- **After birth**: maternal observations, low BP or temperature (NG255 table 1) and PPH (GTG52) continue; a woman with an active alert returns to "Needs you now".
+- **Oxytocin** can be stopped or held. Pathological CTG on oxytocin raises "stop oxytocin" (NG235 1.8.56); there is no "increase" prompt while held, in the second stage, with 5 or more contractions in 10, or with an abnormal CTG.
+- **Observations**: marking a check done without a value clears the old value, so an abnormal reading does not linger.
+
+Numbers that are local choices rather than national guidance are marked as local on the Rules and sources page.
+
+**Unit settings** (menu) let each unit set those local choices: continuous CTG for everyone in established labour (default on; NICE offers intermittent auscultation at low risk), extra CTG indications, meconium CTG mandatory, suspicious CTG recheck, latent reassessment, ROM review and antibiotic hours, neonatal team gestation, oxytocin maximum and oliguria threshold. Definitions and defaults live in `src/data/unitSettings.js`; values are stored on the phone (`pocketog_suite_unit_v1`, only changed values). Each Rules and sources card that a setting affects shows what this phone is set to and whether it differs from the app default.
+
+**295 tests** covering the rules, triage, bed helpers and the catalogue: `npm test -w apps/ward-manager`
+
+## CTG classification (NICE NG229 1.4.12, 1.4.32)
+
+`classifyCTGEntry(entry, prevBaselineHR?)` grades 4 features as white, amber or red:
+
+- **Contractions**: fewer than 5 in 10 min = white; 5 or more, or hypertonus = amber. Recorded on every full CTG review.
+- **Baseline**: 110 to 160 bpm = white; 100 to 109 or 161 to 180 = amber; under 100 or over 180 = red. A rise of 20 bpm or more is also amber (local threshold).
+- **Variability**: 5 to 25 bpm = white; under 5 for 30 to 50 min = amber; under 5 for over 50 min or sinusoidal = red; over 25 for 15 to 25 min = amber; over 25 for over 25 min = red.
+- **Decelerations**: none, early or variable = white; concerning variable under 30 min = amber; concerning variable 30 min or more, late or prolonged = red.
+
+Overall: 1 red or 2 or more amber = **pathological**; 1 amber = **suspicious**; all white = **normal**. The clinician can judge a trace pathological on the whole picture; the app records this as a clinician decision and never downgrades.
 
 ## Local development
 
 ```bash
 npm install
 npm run dev -w apps/ward-manager   # http://localhost:5173
-npm test -w apps/ward-manager      # 152 clinical rule tests
+npm test -w apps/ward-manager      # 295 tests
 ```
 
 ## Data storage
 
-All data is stored in `localStorage` on the device — no network requests, no server, no patient identifiers. Bed numbers only.
+All data is stored in `localStorage` on the device: no network requests, no server, no patient identifiers. Bed numbers only.
 
 ## Tech stack
 
@@ -113,4 +92,4 @@ Vite · React 19 · Tailwind CSS · Vitest
 
 ## Important
 
-This tool implements rules from NICE NG235, NG229, NG25, NG133, and local RBH guidelines (GL787, GL983). It is not a substitute for clinical judgement. Always escalate to a senior when uncertain.
+This tool implements rules from NICE NG235, NG229, NG25, NG195, NG133, NG3 and NG255, RCOG GTG52, and local RBH guidelines (GL787, GL983); see the in-app Rules and sources page. It is not a substitute for clinical judgement. Always escalate to a senior when uncertain.

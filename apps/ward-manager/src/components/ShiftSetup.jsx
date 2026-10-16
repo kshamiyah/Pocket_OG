@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { Chip, Label } from "../ui/atoms";
+import { BTN, BTN_PRIMARY, CARD, INPUT, TYPE_DISPLAY, TYPE_EYEBROW, TYPE_META } from "../ui/styles";
 
 const DOCTOR_KEY = "pocket_suite_doctor";
 
+// Shifts are usually set up shortly before an 08:00 or 20:00 start.
 function detectShiftType() {
   const h = new Date().getHours();
-  return h >= 20 || h < 8 ? "night" : "day";
+  return h >= 19 || h < 7 ? "night" : "day";
 }
 
 function addHours(h) {
@@ -22,162 +25,79 @@ function parseCustomEnd(timeStr) {
 }
 
 function fmtEndPreview(date) {
-  const h   = String(date.getHours()).padStart(2, "0");
-  const m   = String(date.getMinutes()).padStart(2, "0");
   const now = new Date();
   const tomorrow = date.getDate() !== now.getDate() || date.getMonth() !== now.getMonth();
-  return `${h}:${m}${tomorrow ? " tomorrow" : ""}`;
+  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}${tomorrow ? " tomorrow" : ""}`;
 }
 
-export default function ShiftSetup({ onComplete }) {
+export default function ShiftSetup({ onComplete, onBack }) {
   const savedName = (() => { try { return localStorage.getItem(DOCTOR_KEY) ?? ""; } catch { return ""; } })();
-
-  const [page,       setPage]       = useState(1);
-  const [name,       setName]       = useState(savedName);
-  const [shiftType,  setShiftType]  = useState(detectShiftType);
-  const [durationH,  setDurationH]  = useState(() => detectShiftType() === "night" ? 12 : 8);
-  const [useCustom,  setUseCustom]  = useState(false);
+  const [name, setName] = useState(savedName === "Doctor" ? "" : savedName);
+  const [shiftType, setShiftType] = useState(detectShiftType);
+  const [durationH, setDurationH] = useState(() => (detectShiftType() === "night" ? 12 : 8));
+  const [useCustom, setUseCustom] = useState(false);
   const [customTime, setCustomTime] = useState("");
 
-  const greeting = (() => {
-    const h = new Date().getHours();
-    return h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
-  })();
-
+  const h = new Date().getHours();
+  const greeting = h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
   const endTime = useCustom && customTime ? parseCustomEnd(customTime) : addHours(durationH);
-
   const DURATIONS = shiftType === "night" ? [10, 12, 13] : [8, 10, 12];
 
   const start = () => {
     const doctorName = name.trim() || "Doctor";
-    try { localStorage.setItem(DOCTOR_KEY, doctorName); } catch {}
-    onComplete({
-      doctorName,
-      shiftType,
-      shiftStart: new Date().toISOString(),
-      shiftEnd:   endTime.toISOString(),
-    });
+    try { localStorage.setItem(DOCTOR_KEY, doctorName); } catch { /* ignore */ }
+    onComplete({ doctorName, shiftType, shiftStart: new Date().toISOString(), shiftEnd: endTime.toISOString() });
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col px-6"
-      style={{ paddingTop: "calc(env(safe-area-inset-top) + 3rem)", paddingBottom: "calc(env(safe-area-inset-bottom) + 2rem)" }}>
+    <div className="min-h-dvh bg-white dark:bg-gray-950 flex flex-col"
+      style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.5rem)", paddingBottom: "calc(env(safe-area-inset-bottom) + 1.25rem)" }}>
+      <div className="max-w-lg w-full mx-auto px-6 flex-1 flex flex-col gap-6">
+        {onBack && (
+          <button type="button" onClick={onBack} className="self-start text-sm font-semibold text-claude-700 dark:text-claude-400 min-h-10">Back</button>
+        )}
+        <div>
+          <span className={`${TYPE_EYEBROW} block mb-2`}>New shift</span>
+          <p className="text-base text-gray-600 dark:text-gray-400">Good {greeting}{savedName && savedName !== "Doctor" ? <>, <b className="text-gray-900 dark:text-white">Dr {savedName}</b></> : null}.</p>
+          <h1 className={`${TYPE_DISPLAY} mt-1`}>Starting a labour ward shift?</h1>
+        </div>
 
-      {/* Progress dots */}
-      <div className="flex gap-1.5 mb-12">
-        {[1, 2].map(p => (
-          <div key={p} className={`h-1 rounded-full transition-all duration-300 ${p === page ? "w-6 bg-gray-900 dark:bg-white" : "w-1.5 bg-gray-300 dark:bg-gray-700"}`} />
-        ))}
-      </div>
-
-      {/* ── Page 1: Name ───────────────────────────────── */}
-      {page === 1 && (
-        <div className="flex-1 flex flex-col">
-          <p className="text-gray-500 text-base mb-2">Good {greeting}, Doctor.</p>
-          <h1 className="text-gray-900 dark:text-white text-3xl font-bold leading-tight mb-10">
-            What should we<br />call you?
-          </h1>
-
+        <div>
+          <Label>Your name</Label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg font-medium pointer-events-none">
-              Dr.
-            </span>
-            <input
-              type="text"
-              autoFocus
-              value={name}
-              onChange={e => setName(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && setPage(2)}
-              placeholder="Your name"
-              className="w-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 rounded-2xl pl-12 pr-4 py-4 text-lg font-medium focus:outline-none focus:border-gray-400 dark:focus:border-gray-600 transition-colors"
-            />
-          </div>
-
-          <div className="mt-auto pt-8">
-            <button onClick={() => setPage(2)}
-              className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all">
-              Continue →
-            </button>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium pointer-events-none">Dr</span>
+            <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" className={`${INPUT} pl-10`} aria-label="Your name" />
           </div>
         </div>
-      )}
 
-      {/* ── Page 2: Shift ──────────────────────────────── */}
-      {page === 2 && (
-        <div className="flex-1 flex flex-col">
-          <h1 className="text-gray-900 dark:text-white text-3xl font-bold leading-tight mb-1">Your shift</h1>
-          <p className="text-gray-500 text-base mb-8">Dr. {name.trim() || "Doctor"}</p>
-
-          {/* Day / Night */}
-          <p className="text-gray-600 text-[11px] font-bold uppercase tracking-widest mb-2">Type</p>
-          <div className="flex gap-2 mb-8">
-            {[
-              { key: "day",   label: "Day",   icon: "☀︎" },
-              { key: "night", label: "Night", icon: "☾" },
-            ].map(({ key, label, icon }) => (
-              <button key={key}
-                onClick={() => { setShiftType(key); setDurationH(key === "night" ? 12 : 8); setUseCustom(false); }}
-                className={`flex-1 py-3.5 rounded-xl text-sm font-bold transition-colors ${
-                  shiftType === key
-                    ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950"
-                    : "bg-gray-100 dark:bg-gray-900 text-gray-500 border border-gray-200 dark:border-gray-800"
-                }`}>
-                {icon} {label}
-              </button>
+        <div>
+          <Label>Shift</Label>
+          <div className="grid grid-cols-2 gap-2">
+            {[["day", "Day"], ["night", "Night"]].map(([key, label]) => (
+              <Chip key={key} on={shiftType === key} className="min-h-12 text-base"
+                onClick={() => { setShiftType(key); setDurationH(key === "night" ? 12 : 8); setUseCustom(false); }}>{label}</Chip>
             ))}
-          </div>
-
-          {/* Duration presets */}
-          <p className="text-gray-600 text-[11px] font-bold uppercase tracking-widest mb-2">Length</p>
-          <div className="flex gap-2 mb-2">
-            {DURATIONS.map(h => (
-              <button key={h}
-                onClick={() => { setDurationH(h); setUseCustom(false); }}
-                className={`flex-1 py-3.5 rounded-xl text-sm font-bold transition-colors ${
-                  !useCustom && durationH === h
-                    ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950"
-                    : "bg-gray-100 dark:bg-gray-900 text-gray-500 border border-gray-200 dark:border-gray-800"
-                }`}>
-                {h}h
-              </button>
-            ))}
-          </div>
-
-          {/* Custom */}
-          <div className="flex gap-2 items-center mb-8">
-            <button onClick={() => { setUseCustom(true); }}
-              className={`px-4 py-3 rounded-xl text-sm font-bold transition-colors ${
-                useCustom
-                  ? "bg-gray-900 dark:bg-white text-white dark:text-gray-950"
-                  : "bg-gray-100 dark:bg-gray-900 text-gray-500 border border-gray-200 dark:border-gray-800"
-              }`}>
-              Custom
-            </button>
-            {useCustom && (
-              <input type="time" autoFocus value={customTime}
-                onChange={e => setCustomTime(e.target.value)}
-                className="flex-1 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-gray-400 dark:focus:border-gray-500" />
-            )}
-          </div>
-
-          {/* End time preview */}
-          <div className="p-5 rounded-2xl bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-            <p className="text-gray-600 text-[11px] font-bold uppercase tracking-widest mb-1">Handing over at</p>
-            <p className="text-gray-900 dark:text-white text-3xl font-bold tracking-tight">{fmtEndPreview(endTime)}</p>
-          </div>
-
-          <div className="mt-auto pt-8 flex gap-3">
-            <button onClick={() => setPage(1)}
-              className="w-12 h-14 rounded-2xl bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 flex items-center justify-center text-gray-500 shrink-0 active:scale-95 transition-all">
-              ←
-            </button>
-            <button onClick={start}
-              className="flex-1 py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-950 text-base font-bold active:scale-95 transition-all">
-              Start Shift
-            </button>
           </div>
         </div>
-      )}
+
+        <div>
+          <Label>Length</Label>
+          <div className="flex gap-2 flex-wrap">
+            {DURATIONS.map(d => <Chip key={d} on={!useCustom && durationH === d} onClick={() => { setDurationH(d); setUseCustom(false); }}>{d}h</Chip>)}
+            <Chip on={useCustom} onClick={() => setUseCustom(true)}>Ends at…</Chip>
+          </div>
+          {useCustom && <input type="time" value={customTime} onChange={e => setCustomTime(e.target.value)} className={`${INPUT} mt-2`} aria-label="Shift end time" />}
+        </div>
+
+        <div className={`${CARD} px-4 py-3`}>
+          <p className={TYPE_META}>Handing over at</p>
+          <p className="text-2xl font-semibold tabular-nums text-gray-900 dark:text-white">{fmtEndPreview(endTime)}</p>
+        </div>
+
+        <div className="mt-auto">
+          <button type="button" onClick={start} className={`${BTN} ${BTN_PRIMARY} w-full min-h-[3.25rem] text-base`}>Start shift</button>
+        </div>
+      </div>
     </div>
   );
 }

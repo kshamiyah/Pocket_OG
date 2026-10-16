@@ -4,6 +4,17 @@
 // the hero chip and this list all show the same number.
 export const UPDATES = [
   {
+    version: "1.41.0",
+    date: "16/10/2026",
+    title: "CTG classifier matches the current NICE table",
+    changes: [
+      { tag: "fixed", text: "The CTG classifier now follows the current NICE NG229 feature tables. A baseline above 160 bpm is red (it was amber up to 180). Variability over 25 bpm is amber for up to 10 minutes and red beyond (it was graded on 15 and 25 minutes)." },
+      { tag: "fixed", text: "Contractions are now the 4th feature, as in NG229: 5 or more in 10 minutes, or hypertonus, is amber. A rise in baseline of 20 bpm or more is amber, and red in the active second stage; \"unable to determine baseline\" is amber; repetitive and non-repetitive concerning variable decelerations are graded separately." },
+      { tag: "fixed", text: "The NG229 reader table and the list of concerning features of variable decelerations now use NICE's current wording. The categorisation table no longer suggests fetal blood sampling (NICE makes no recommendation on it) and marks the 30 minute reassessment as local practice." },
+      { tag: "fixed", text: "The CTG flowchart now follows NG229 1.5 and 1.6: urgent review by an obstetrician or senior midwife and scalp stimulation for a suspicious trace with other risk factors; for a pathological trace, exclude acute events and consider expediting birth if it persists. IV fluids only for hypotension or sepsis, and no maternal facial oxygen. The 9 minute point for acute bradycardia is cited to NG229 1.5.9." },
+    ],
+  },
+  {
     version: "1.40.0",
     date: "13/10/2026",
     title: "Easier to find Back in flowcharts",

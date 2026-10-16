@@ -1,17 +1,18 @@
 // NICE NG229 — Fetal monitoring in labour (published 14 December 2022, updated 2026)
 //
-// Source: NICE NG229 1.2–1.6. The classification table below is the NG229
-// feature classification (verified against published NG229 sources):
-//   Baseline    — reassuring 110–160; non-reassuring 100–109 or 161–180;
-//                 abnormal <100 or >180.
-//   Variability — reassuring 5–25; non-reassuring <5 for 30–50 min or >25 for
-//                 15–25 min; abnormal <5 for >50 min, >25 for >25 min, or sinusoidal.
+// Source: NICE NG229 1.2–1.6. The classification table below follows the
+// current NG229 feature tables (checked against nice.org.uk, 16 Oct 2026):
+//   Baseline (1.4.15)    reassuring 110–160; non-reassuring 100–109, a rise of
+//                        20 bpm or more from the start of labour or since the
+//                        last hourly review, or unable to determine; abnormal
+//                        below 100 or above 160. A 20 bpm rise is abnormal in
+//                        the active second stage (1.4.37).
+//   Variability (1.4.18) reassuring 5–25; non-reassuring <5 for 30–50 min or
+//                        >25 for up to 10 min; abnormal <5 for >50 min, >25 for
+//                        >10 min, or sinusoidal.
+//   Decelerations (1.4.24) and contractions (1.4.12) as in the table.
 // Management/escalation wording is taken from NG229 1.5.
-//
-// NB: ward-manager's numeric classifyCTGEntry (ctg.js) still uses coarser
-//     operational bands (>160 abnormal; >25 cut at 10 min) and a local ≥20 bpm
-//     rising-baseline prompt that is NOT an NG229 number. Reconcile ctg.js +
-//     ward-manager tests with this table when ward-manager is next worked on.
+// ward-manager's classifyCTGEntry (ctg.js) uses these same bands.
 
 export const NG229_SECTIONS = [
   {
@@ -65,26 +66,26 @@ export const NG229_SECTIONS = [
       "fetal heart rate", "ng229", "ctg features",
     ],
     content: [
-      { type: "text", value: "Assess and document each feature individually — baseline rate, baseline variability and decelerations — then derive the overall category. NICE NG229 1.4.16–1.4.31 [2022]." },
+      { type: "text", value: "Assess and document each of the 4 features individually (contractions, baseline rate, baseline variability, decelerations), then derive the overall category. NICE NG229 1.4.12 to 1.4.32." },
       { type: "table",
         headers: ["Feature", "Reassuring", "Non-reassuring", "Abnormal"],
         rows: [
-          ["Baseline (bpm)", "110–160", "100–109, or 161–180", "Below 100, or above 180"],
-          ["Variability (bpm)", "5–25", "<5 for 30–50 min, or >25 for 15–25 min", "<5 for >50 min, >25 for >25 min, or sinusoidal"],
-          ["Decelerations", "None, early, or variable without concerning features", "Variable with concerning features for <30 min", "Variable with concerning features ≥30 min, late, or prolonged (≥3 min)"],
+          ["Contractions", "Fewer than 5 in 10 min", "5 or more in 10 min, or hypertonus", "None"],
+          ["Baseline (bpm)", "Stable 110–160", "Rise of 20 or more from the start of labour or since the last hourly review; 100–109; or unable to determine", "Below 100, or above 160"],
+          ["Variability (bpm)", "5–25", "<5 for 30–50 min, or >25 for up to 10 min", "<5 for >50 min, >25 for >10 min, or sinusoidal"],
+          ["Decelerations", "None, early, or variable not evolving to have concerning characteristics", "Repetitive variable with any concerning characteristics for under 30 min, or non-repetitive variable with concerning characteristics for over 30 min", "Repetitive variable with concerning characteristics for over 30 min, late, acute bradycardia, or a single prolonged deceleration of 3 min or more"],
         ],
       },
       { type: "subheading", value: "Accelerations" },
       { type: "text", value: "The presence of accelerations is reassuring. Their absence in an otherwise normal CTG is of uncertain significance and is not classified as a feature on its own." },
       { type: "subheading", value: "Rising baseline" },
-      { type: "text", value: "A baseline that is rising — even within the normal range — can be an early sign of compromise and should prompt closer review in clinical context. (Note: the ≥20 bpm rise used as a prompt in the ward-manager engine is a LOCAL threshold, not an NG229-specified number.)" },
+      { type: "text", value: "A rise of 20 bpm or more from the start of labour, or since the last hourly review, is a non-reassuring feature even within 110–160 (NG229 1.4.15). A rise may represent developing infection or hypoxia (1.4.16). In the active second stage, where hypoxia is more common and more rapid, treat a 20 bpm rise as an abnormal (red) feature (1.4.37)." },
       { type: "subheading", value: "Concerning features of variable decelerations" },
       { type: "list", items: [
         "Lasting more than 60 seconds",
-        "Reduced baseline variability within the deceleration",
-        "Failure to return to baseline",
-        "Biphasic (W) shape",
-        "No shouldering",
+        "Reduced variability within the deceleration",
+        "Failure or slow return to baseline fetal heart rate",
+        "Loss of previously present shouldering",
       ]},
     ],
   },
@@ -103,19 +104,19 @@ export const NG229_SECTIONS = [
       "cardiotocography", "ng229", "ctg management", "reassess",
     ],
     content: [
-      { type: "text", value: "Combine the three individual features into an overall category, then act on it. NICE NG229 1.4 / 1.5 [2022]." },
+      { type: "text", value: "Combine the 4 individual features into an overall category, then act on it. NICE NG229 1.4.32 and 1.5." },
       { type: "table",
         headers: ["Category", "Features", "Action"],
         rows: [
-          ["Normal", "All three features reassuring", "Continue CTG and normal care; reassess regularly."],
-          ["Suspicious", "1 non-reassuring feature (both others reassuring)", "Start conservative measures, find and correct any reversible cause, and reassess within 30 minutes. Inform a senior."],
-          ["Pathological", "≥2 non-reassuring features, OR ≥1 abnormal feature", "Immediate senior/consultant review. Conservative measures. Offer fetal scalp stimulation; if no acceleration, consider fetal blood sampling or expedite birth."],
-          ["Need for urgent intervention", "Acute bradycardia or single prolonged deceleration ≥3 min", "Call for help. Conservative measures. If it persists ≥9 min, prepare for urgent birth. If it recovers, continue monitoring and review the plan."],
+          ["Normal", "All 4 features reassuring", "Continue CTG and normal care; reassess regularly."],
+          ["Suspicious", "1 non-reassuring feature (all others reassuring)", "Full risk assessment and conservative measures, correcting any reversible cause; urgent obstetric or senior midwife review if there are other risk factors (NG229 1.5.5, 1.5.6). A 30 minute reassessment is local practice; NICE sets no interval."],
+          ["Pathological", "≥2 non-reassuring features, OR ≥1 abnormal feature", "Urgent obstetric and senior midwife review, exclude acute events, conservative measures (NG229 1.5.7). If still pathological after conservative measures, further urgent review and consider expediting birth (1.5.8). NICE makes no recommendation on fetal blood sampling (1.7.1)."],
+          ["Need for urgent intervention", "Acute bradycardia or single prolonged deceleration ≥3 min", "Acute bradycardia or a single prolonged deceleration of 3 min or more: urgent obstetric review, prepare for urgent birth with neonatal support, and expedite the birth if it persists for 9 minutes, or sooner with significant risk factors (NG229 1.5.9)."],
         ],
       },
       { type: "alert", value: "A pathological CTG, or any single prolonged deceleration of 3 minutes or more, mandates urgent senior involvement — escalate, do not wait." },
       { type: "subheading", value: "Fetal scalp stimulation" },
-      { type: "text", value: "An acceleration in response to digital fetal scalp stimulation is reassuring and can support continued monitoring. Absence of a response is a further concern and should prompt consideration of fetal blood sampling or expediting birth, depending on the clinical picture. NICE NG229 1.5.3 [2022]." },
+      { type: "text", value: "Consider digital fetal scalp stimulation if the trace is suspicious with risk factors for fetal compromise. An acceleration with a sustained improvement in the trace supports continued monitoring; no acceleration is a worrying sign that expedited birth may be necessary. NICE NG229 1.6.1, 1.6.2." },
     ],
   },
 
@@ -146,7 +147,7 @@ export const NG229_SECTIONS = [
       { type: "list", items: [
         "Suspicious CTG — reassess within 30 minutes; inform the coordinating midwife and obstetric team",
         "Pathological CTG — immediate review by an obstetrician (senior/consultant)",
-        "Prolonged deceleration ≥3 min — call for senior help immediately; if not recovered by ~9 min, prepare for urgent birth",
+        "Acute bradycardia or a prolonged deceleration of 3 min or more: urgent obstetric review and prepare for urgent birth; expedite if it persists for 9 min, or sooner with significant risk factors (NG229 1.5.9)",
       ]},
       { type: "text", value: "Document the category, the features, the time, the actions taken and the plan at each review. Reference: NICE NG229 1.5 [2022]." },
     ],
