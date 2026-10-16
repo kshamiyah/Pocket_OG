@@ -84,6 +84,14 @@ export const SOURCES = {
     "url": "https://www.nice.org.uk/guidance/ng235/chapter/Recommendations#ng235-1_8_45",
     "text": "Advise all women with suspected delay in the established first stage of labour to have a vaginal examination 2 hours later, and diagnose delay if progress is less than 1 cm. [2007]"
   },
+  "NG235 1.8.46": {
+    "issuer": "NICE",
+    "doc": "NG235",
+    "docTitle": "Intrapartum care",
+    "rec": "Recommendation 1.8.46",
+    "url": "https://www.nice.org.uk/guidance/ng235/chapter/Recommendations#ng235-1_8_46",
+    "text": "If delay in the established first stage of labour is diagnosed, consider amniotomy for all women with intact membranes, after explanation of the procedure and advice that it will shorten labour by about an hour and may increase the strength and pain of contractions. [2007, amended 2023]"
+  },
   "NG235 1.8.48": {
     "issuer": "NICE",
     "doc": "NG235",

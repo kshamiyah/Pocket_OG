@@ -477,3 +477,26 @@ describe("CTG unchanged (one tap after a normal graded review)", () => {
     expect(sameAsLastCTG(b, t(0))).toBeNull()
   })
 })
+
+describe("delay in the first stage: suspected, diagnosed, confirmed (NG235 1.8.42 to 1.8.50)", () => {
+  const ve = (id, hAgo, cm, o = {}) => ({ id, time: t(hAgo * HOUR), dilation: cm, membranes: "Intact", ...o })
+  const lab = (ves, o = {}) => active({ activeFirstStageStartTime: t(9 * HOUR), ves, ...o })
+  const title = b => computeAlerts(b, NOW).find(a => a.id === "slow-progress")?.title
+  it("under 2 cm in 4 hours: suspected", () => {
+    expect(title(lab([ve("a", 4, 4), ve("b", 0, 5)]))).toMatch(/Delay suspected/)
+  })
+  it("under 1 cm at the VE 2 hours after suspicion: diagnosed, with amniotomy if intact", () => {
+    const b = lab([ve("a", 6, 4), ve("b", 2, 5), ve("c", 0, 5.5)])
+    expect(title(b)).toMatch(/Delay diagnosed/)
+    expect(computeAlerts(b, NOW).find(a => a.id === "slow-progress").body).toMatch(/Consider amniotomy/)
+  })
+  it("Mrs A: no progress 2 hours after ARM is confirmed delay, obstetric review and oxytocin", () => {
+    const b = lab([
+      ve("1", 6 + 5 / 60, 4), ve("2", 2 + 5 / 60, 5), ve("3", 2, 5, { membranes: "AROM", membranesTime: t(2 * HOUR) }),
+      ve("4", 0, 5, { membranes: "AROM", membranesTime: t(2 * HOUR) }),
+    ], { armTime: t(2 * HOUR) })
+    const a = computeAlerts(b, NOW).find(x => x.id === "slow-progress")
+    expect(a.title).toMatch(/Delay confirmed after amniotomy/)
+    expect(a.body).toMatch(/consideration of oxytocin/)
+  })
+})

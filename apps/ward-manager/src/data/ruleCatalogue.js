@@ -184,10 +184,11 @@ export const RULES = [
     local: "Turning red 30 minutes after the VE is due is a unit choice. NICE times the VE; it sets no overdue point.",
   },
   {
-    id: "slow-progress", group: "Labour progress", title: "Slow progress in the first stage",
-    when: "Established first stage VEs only: under 1 cm in about 2 hours between VEs, or under 2 cm over about 4 hours (5 minute tolerance).",
-    then: "Suspect or diagnose delay; consider amniotomy and obstetric review.",
-    severity: "Urgent", alertIds: ["slow-progress"], sources: ["NG235 1.8.42", "NG235 1.8.45"],
+    id: "slow-progress", group: "Labour progress", title: "Delay in the first stage",
+    when: "Established first stage VEs. Suspected: under 2 cm in about 4 hours (or under 1 cm in 2 hours). Diagnosed: under 1 cm at the VE 2 hours after delay was suspected. Confirmed: no progress at the VE 2 hours after an amniotomy. 5 minute tolerance on the timings.",
+    then: "Suspected: re-examine in 2 hours (the VE timer switches to 2 hours). Diagnosed: consider amniotomy if membranes are intact, then VE 2 hours later; if already ruptured, obstetric review including consideration of oxytocin. Confirmed: obstetric-led care and a full obstetric assessment including consideration of oxytocin.",
+    severity: "Urgent", alertIds: ["slow-progress"],
+    sources: ["NG235 1.8.42", "NG235 1.8.45", "NG235 1.8.46", "NG235 1.8.48", "NG235 1.8.49", "NG235 1.8.50"],
   },
   {
     id: "active-phase-limit", group: "Labour progress", title: "Long established first stage",

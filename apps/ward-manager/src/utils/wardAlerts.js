@@ -238,19 +238,38 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   const TOL = 5 * MIN;
   const activeStart = bed.activeFirstStageStartTime ? new Date(bed.activeFirstStageStartTime).getTime() - TOL : null;
   const activeVEs = activeStart == null ? ves : ves.filter(ve => new Date(ve.time).getTime() >= activeStart);
-  let slow = null;
-  if (bed.labourStage === "Active first stage" && activeVEs.length >= 2) {
-    const last = activeVEs[activeVEs.length - 1];
-    const prev = activeVEs[activeVEs.length - 2];
+  // Progress at examination i, judged on the examinations up to it:
+  // "2h" = less than 1 cm over about 2 h; "4h" = less than 2 cm over about 4 h.
+  const slowAt = i => {
+    if (i < 1) return null;
+    const last = activeVEs[i];
+    const prev = activeVEs[i - 1];
     const lastT = new Date(last.time).getTime();
-    // Check 1: consecutive VEs about 2 h or more apart, less than 1 cm per 2 h.
     const gap = lastT - new Date(prev.time).getTime();
     const rate = (last.dilation - prev.dilation) / (gap / HOUR);
-    // Check 2: less than 2 cm over about 4 h (latest active VE at least 4 h earlier).
-    const earlier = [...activeVEs].reverse().find(ve => lastT - new Date(ve.time).getTime() >= 4 * HOUR - TOL);
+    const earlier = activeVEs.slice(0, i).reverse().find(ve => lastT - new Date(ve.time).getTime() >= 4 * HOUR - TOL);
     const gain4h = earlier ? last.dilation - earlier.dilation : null;
-    if (gap >= 2 * HOUR - TOL && rate < 0.5) slow = { kind: "2h", cm: last.dilation - prev.dilation, ms: gap };
-    else if (gain4h != null && gain4h < 2) slow = { kind: "4h", cm: gain4h, ms: lastT - new Date(earlier.time).getTime() };
+    if (gap >= 2 * HOUR - TOL && rate < 0.5) return { kind: "2h", cm: last.dilation - prev.dilation, ms: gap };
+    if (gain4h != null && gain4h < 2) return { kind: "4h", cm: gain4h, ms: lastT - new Date(earlier.time).getTime() };
+    return null;
+  };
+  // NICE's three steps (NG235 1.8.42 to 1.8.50): delay suspected, then diagnosed
+  // if under 1 cm 2 hours later, then confirmed if no progress 2 hours after an
+  // amniotomy. `level` is "suspected" | "diagnosed" | "confirmed".
+  let slow = null;
+  if (bed.labourStage === "Active first stage" && activeVEs.length >= 2) {
+    const n = activeVEs.length;
+    slow = slowAt(n - 1);
+    if (slow) {
+      const lastT = new Date(activeVEs[n - 1].time).getTime();
+      const prevT = new Date(activeVEs[n - 2].time).getTime();
+      const armT = bed.armTime ? new Date(bed.armTime).getTime() : null;
+      const armBefore = armT != null && armT >= prevT - TOL && lastT - armT >= 2 * HOUR - TOL;
+      const suspectedBefore = !!slowAt(n - 2);
+      slow.level = slow.kind === "2h" && armBefore ? "confirmed"
+        : slow.kind === "2h" && suspectedBefore ? "diagnosed"
+        : "suspected";
+    }
   }
 
   // ─── VE timing (established first stage) ─────────────────────────────
@@ -310,23 +329,28 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     }
   }
 
-  // ─── Slow progress (NICE NG235 1.8.42, 1.8.45) ──────────────────────────
-  if (slow?.kind === "2h") {
-    alerts.push({
-      id: "slow-progress",
-      severity: "urgent",
-      title: "Slow labour progress",
-      body: `${slow.cm} cm in ${formatAge(slow.ms)} between examinations. Diagnose delay if progress is less than 1 cm 2 hours after delay is suspected; consider amniotomy if membranes intact, and obstetric review.`,
-      citation: "NICE NG235 1.8.45 [2007]",
-    });
-  } else if (slow?.kind === "4h") {
-    alerts.push({
-      id: "slow-progress",
-      severity: "urgent",
-      title: "Slow labour progress",
-      body: `${slow.cm} cm in ${formatAge(slow.ms)}. Less than 2 cm in 4 hours suggests delay: assess all aspects of progress and re-examine in 2 hours.`,
-      citation: "NICE NG235 1.8.42 [2007]",
-    });
+  // ─── Slow progress (NICE NG235 1.8.42 to 1.8.50) ─────────────────────
+  if (slow) {
+    const intact = (lastVE?.membranes ?? bed.membranes ?? "Intact") === "Intact";
+    const what = `${slow.cm} cm in ${formatAge(slow.ms)}`;
+    const A = {
+      suspected: {
+        title: "Delay suspected: re-examine in 2 hours",
+        body: `${what}. Assess all aspects of progress (dilatation, descent and rotation, contractions) and offer a VE 2 hours later; delay is diagnosed if progress is under 1 cm.`,
+        citation: "NICE NG235 1.8.42, 1.8.45",
+      },
+      diagnosed: {
+        title: "Delay diagnosed in the first stage",
+        body: `${what} since delay was suspected.${intact ? " Consider amniotomy, explaining it shortens labour by about an hour and may make contractions stronger and more painful; repeat the VE 2 hours after." : " Obstetric review including consideration of oxytocin."}`,
+        citation: intact ? "NICE NG235 1.8.45, 1.8.46, 1.8.48" : "NICE NG235 1.8.45, 1.8.50",
+      },
+      confirmed: {
+        title: "Delay confirmed after amniotomy: obstetric review",
+        body: `No progress (${what}) 2 hours after amniotomy. Obstetric-led care; the obstetrician offers a full assessment including abdominal palpation, VE and consideration of oxytocin.`,
+        citation: "NICE NG235 1.8.49, 1.8.50",
+      },
+    }[slow.level];
+    alerts.push({ id: "slow-progress", severity: "urgent", ...A });
   }
 
   // ─── Hyperstimulation ────────────────────────────────────────────────
