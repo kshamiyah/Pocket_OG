@@ -194,24 +194,28 @@ export function lastCTG(bed) {
   return log.length ? log[log.length - 1] : null;
 }
 
-// The features a graded CTG review records, carried forward by "CTG unchanged".
+// The fetal heart features a graded CTG review records, carried forward by
+// "CTG unchanged". Contractions are not: they are counted afresh each time
+// (oxytocin is titrated against them, NG235 1.8.54).
 const CTG_FEATURES = ["baselineHR", "baselineUndetermined", "variability", "variabilityMinutes", "decelerations",
-  "decelerationsRepetitive", "decelerationMinutes", "accelerations", "contractionsPerTen", "hypertonus"];
+  "decelerationsRepetitive", "decelerationMinutes", "accelerations"];
 
 /**
- * "CTG unchanged": a new review at `iso` with the same features as the last
- * graded review. Offered only when that review was normal (and not a
- * clinician override), and only if the copy still grades normal now (a rise
- * in the active second stage, for example, would not). Otherwise null, and
- * the full form is used.
+ * "CTG unchanged": a new review at `iso` with the same fetal heart features as
+ * the last graded review, plus this review's contraction count `contractions`
+ * (left out when not given, for previewing). Offered only when that review was
+ * normal (and not a clinician override), and only if the copy still grades
+ * normal now (a rise in the active second stage, for example, would not).
+ * Otherwise null, and the full form is used.
  */
-export function sameAsLastCTG(bed, iso) {
+export function sameAsLastCTG(bed, iso, contractions = null) {
   const log = bed.ctgLog ?? [];
   const graded = log.filter(e => e.baselineHR != null || e.baselineUndetermined);
   const last = graded.at(-1);
   if (!last || log.at(-1) !== last || last.classification !== "normal" || last.clinicianOverride) return null;
   const entry = { id: newId("ctg"), time: iso, sameAsLast: true };
   for (const k of CTG_FEATURES) if (last[k] !== undefined) entry[k] = last[k];
+  if (contractions != null) entry.contractionsPerTen = contractions;
   const start = graded.find(e => e.baselineHR != null && !e.baselineUndetermined)?.baselineHR ?? null;
   const cat = classifyCTGEntry(entry, last.baselineHR ?? null, { startBaselineHR: start, activeSecondStage: bed.labourStage === "Active second stage" });
   if (cat !== "normal") return null;

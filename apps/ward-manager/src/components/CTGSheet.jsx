@@ -67,17 +67,28 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
         </button>
       }>
       {notice && <p className="text-sm font-semibold text-claude-800 dark:text-claude-300">{notice}</p>}
-      {/* Hourly review with nothing changed: one tap logs the same graded
-          features at this time (only after a normal graded review, and only
-          if it still grades normal). Otherwise grade the features below. */}
+      {/* Hourly review with the fetal heart unchanged: tapping today's
+          contraction count logs the same graded heart features at this time
+          (only after a normal graded review, and only if it still grades
+          normal). Contractions are never carried over. 5 or more, or anything
+          else changed: grade the features below. */}
       {same && (
-        <button type="button" onClick={() => onSave(same)}
-          className="w-full text-left rounded-xl border px-3 py-2.5 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-900 active:scale-[0.99]">
-          <span className="block text-base font-bold text-emerald-900 dark:text-emerald-200">✓ Unchanged since last review</span>
-          <span className="block text-xs text-emerald-800 dark:text-emerald-300 mt-0.5">{ctgSummary(same)} · logs as normal now</span>
-        </button>
+        <div className="rounded-xl border px-3 py-2.5 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-900">
+          <span className="block text-base font-bold text-emerald-900 dark:text-emerald-200">✓ Fetal heart unchanged since last review</span>
+          <span className="block text-xs text-emerald-800 dark:text-emerald-300 mt-0.5">{ctgSummary(same)}</span>
+          <span className="block text-xs font-semibold text-emerald-900 dark:text-emerald-200 mt-2 mb-1.5">Contractions in 10 min now: tap to log as normal</span>
+          <div className="flex gap-1.5">
+            {[0, 1, 2, 3, 4].map(n => (
+              <button key={n} type="button" aria-label={`Unchanged, ${n} contractions in 10 minutes`}
+                onClick={() => { const e = sameAsLastCTG(bed, new Date().toISOString(), n); if (e) onSave(e); }}
+                className="flex-1 min-h-[2.75rem] rounded-lg border text-base font-semibold tabular-nums bg-white dark:bg-gray-900 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 active:scale-95">
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
-      {same && <p className={`${TYPE_META} text-center`}>or grade it below if anything has changed</p>}
+      {same && <p className={`${TYPE_META} text-center`}>5 or more, or anything else changed: grade it below</p>}
       {complete || override ? (
         <div className={`rounded-xl border px-3 py-2.5 ${CTG_BOX[cat]}`}>
           <p className="text-base font-semibold capitalize">{cat}</p>

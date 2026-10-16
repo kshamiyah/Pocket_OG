@@ -464,8 +464,20 @@ describe("fixes from the second shift test", () => {
 describe("CTG unchanged (one tap after a normal graded review)", () => {
   const graded = (cls = "normal", o = {}) => ({ id: "g1", time: t(60 * MIN), classification: cls, baselineHR: 140, variability: "5-25", decelerations: "none", accelerations: true, contractionsPerTen: 3, ...o })
   it("copies the last graded features to a new time and grades it normal", () => {
-    const e = sameAsLastCTG(active({ ctgLog: [graded()] }), t(0))
-    expect(e).toMatchObject({ classification: "normal", baselineHR: 140, contractionsPerTen: 3, time: t(0), sameAsLast: true })
+    const e = sameAsLastCTG(active({ ctgLog: [graded()] }), t(0), 2)
+    expect(e).toMatchObject({ classification: "normal", baselineHR: 140, contractionsPerTen: 2, time: t(0), sameAsLast: true })
+  })
+  it("never carries the contraction count over (Mrs A: 3 in 10 copied would hide the oxytocin dose review)", () => {
+    expect(sameAsLastCTG(active({ ctgLog: [graded()] }), t(0)).contractionsPerTen).toBeUndefined()
+    const b = active({
+      ves: [{ id: "v", time: t(70 * MIN), dilation: 5, contractions: 2, membranes: "AROM" }],
+      ctgLog: [graded("normal", { time: t(71 * MIN) })],
+      oxytocinLog: [{ id: "o", startTime: t(35 * MIN), dose: 2, lastIncrementTime: t(35 * MIN) }],
+    })
+    const after = { ...b, ctgLog: [...b.ctgLog, sameAsLastCTG(b, t(0), 2)] }
+    expect(ids(after)).toContain("oxytocin-increment")
+    const atTarget = { ...b, ctgLog: [...b.ctgLog, sameAsLastCTG(b, t(0), 4)] }
+    expect(ids(atTarget)).not.toContain("oxytocin-increment")
   })
   it("is not offered with no graded review, or after a suspicious one, or after a clinician override", () => {
     expect(sameAsLastCTG(active({ ctgLog: [] }), t(0))).toBeNull()
