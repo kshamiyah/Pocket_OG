@@ -53,7 +53,21 @@ export function AlertList({ alerts, onFix, limit = null, compact = false }) {
                 <IconInfo className="w-4 h-4" />
               </button>
             )}
-            {fix && onFix && (
+            {a.action && onFix && !a.reviewed && (
+              <div className="shrink-0 flex flex-col gap-1">
+                <button type="button" onClick={() => onFix(a.id, "action")}
+                  className="min-h-9 px-3 rounded-lg border text-xs font-bold active:scale-95 bg-claude-600 border-claude-600 text-white">
+                  {a.action}
+                </button>
+                {fix && (
+                  <button type="button" onClick={() => onFix(a.id)}
+                    className="min-h-8 px-3 rounded-lg border bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-semibold text-gray-500 dark:text-gray-400 active:scale-95">
+                    {fix}
+                  </button>
+                )}
+              </div>
+            )}
+            {fix && onFix && !a.action && (
               <div className="shrink-0 flex flex-col gap-1">
                 <button type="button" onClick={() => onFix(a.id)}
                   className={`min-h-9 px-3 rounded-lg border text-xs font-bold active:scale-95 ${ACTION_ALERTS[a.id] ? "bg-red-600 border-red-600 text-white" : "bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-200"}`}>
