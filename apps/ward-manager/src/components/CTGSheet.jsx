@@ -79,7 +79,7 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
           <span className="block text-xs font-semibold text-emerald-900 dark:text-emerald-200 mt-2 mb-1.5">Contractions in 10 min now: tap to log as normal</span>
           <div className="flex gap-1.5">
             {[0, 1, 2, 3, 4].map(n => (
-              <button key={n} type="button" aria-label={`Unchanged, ${n} contractions in 10 minutes`}
+              <button key={n} type="button" aria-label={`Unchanged, ${n} ${n === 1 ? "contraction" : "contractions"} in 10 minutes`}
                 onClick={() => { const e = sameAsLastCTG(bed, new Date().toISOString(), n); if (e) onSave(e); }}
                 className="flex-1 min-h-[2.75rem] rounded-lg border text-base font-semibold tabular-nums bg-white dark:bg-gray-900 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 active:scale-95">
                 {n}
@@ -100,7 +100,7 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
           <p className="text-sm text-gray-600 dark:text-gray-400 leading-snug">Grade each of the 4 features; the category appears when all are done.</p>
         </div>
       )}
-      {autoCat !== "pathological" && (
+      {complete && autoCat !== "pathological" && (
         <button type="button" onClick={() => setOverride(o => !o)} aria-pressed={override}
           className={`w-full text-left rounded-xl border px-3 py-2.5 flex items-center gap-3 transition-colors ${override ? "bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-900" : "bg-gray-50 dark:bg-gray-900/60 border-gray-200 dark:border-gray-800"}`}>
           <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center text-[11px] font-bold ${override ? "bg-red-600 border-red-600 text-white" : "border-gray-300 dark:border-gray-600"}`}>{override ? "✓" : ""}</span>

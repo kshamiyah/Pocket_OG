@@ -65,7 +65,7 @@ export const RULES = [
   },
   {
     id: "preterm-mgso4", group: "Preterm", title: "Magnesium sulfate for neuroprotection",
-    when: "Preterm and not yet given. 23+0 to 23+6: discuss. 24+0 to 29+6: offer. 30+0 to 33+6 in established labour: consider.",
+    when: "Preterm, in established labour, not yet given or declined. 23+0 to 23+6: discuss. 24+0 to 29+6: offer. 30+0 to 33+6: consider. Not in threatened labour; a planned birth within 24 hours is the clinician's call.",
     then: "Discuss / offer (urgent) / consider. Tap Given, or Not given if decided against; the handover shows which.",
     severity: "Urgent 24+0 to 29+6, otherwise warning", alertIds: ["preterm-mgso4"],
     sources: ["NG25 1.10.1", "NG25 1.10.2", "NG25 1.10.3"],
@@ -157,7 +157,7 @@ export const RULES = [
   },
   {
     id: "latent-reassess", group: "Labour progress", title: "Latent phase reassessment",
-    when: "Latent for the unit's interval (default 6 hours) since admission, or since induction started.",
+    when: "Latent for the unit's interval (default 6 hours) since admission, since induction started, or since the last VE (a VE is the reassessment).",
     then: "Reassess to confirm or exclude established labour.",
     severity: "Warning", alertIds: ["latent-reassess"], sources: ["NG235 1.8.1"], settings: ["latentReassessH"],
     local: "The interval is a unit setting; NG235 1.8.1 gives the definition of established labour only.",
@@ -171,7 +171,7 @@ export const RULES = [
   },
   {
     id: "slow-progress", group: "Labour progress", title: "Delay in the first stage",
-    when: "Established first stage VEs. Suspected: under 2 cm in about 4 hours (or under 1 cm in 2 hours). Diagnosed: under 1 cm at the VE 2 hours after delay was suspected. Confirmed: no progress at the VE 2 hours after an amniotomy. 5 minute tolerance on the timings.",
+    when: "Established first stage VEs. Suspected: under 2 cm in about 4 hours (exactly 2 cm is normal progress). Diagnosed: under 1 cm at the VE 2 hours after delay was suspected. Confirmed: no progress at the VE 2 hours after an amniotomy. 5 minute tolerance on the timings.",
     then: "Suspected: re-examine in 2 hours (the VE timer switches to 2 hours). Diagnosed: consider amniotomy if membranes are intact, then VE 2 hours later; if already ruptured, obstetric review including consideration of oxytocin. Confirmed: obstetric-led care and a full obstetric assessment including consideration of oxytocin.",
     severity: "Urgent", alertIds: ["slow-progress"],
     sources: ["NG235 1.8.42", "NG235 1.8.45", "NG235 1.8.46", "NG235 1.8.48", "NG235 1.8.49", "NG235 1.8.50"],
@@ -288,7 +288,7 @@ export const RULES = [
   },
   {
     id: "temp", group: "Maternal observations", title: "Raised temperature",
-    when: "38.0°C or above (urgent), 37.5 to 37.9°C (warning).",
+    when: "38.0°C or above (urgent). 37.5 to 37.9°C: warning with a 1 hour recheck, urgent pyrexia if the next reading about an hour later is also 37.5°C or more (also a continuous CTG indication).",
     then: "In labour: transfer trigger and indication for continuous CTG; antibiotics if chorioamnionitis suspected; repeat 37.5 in 1 hour. After birth, 38.0°C or above: assess for sepsis, grading risk with the NG255 criteria for people recently pregnant; senior review.",
     severity: "Urgent / warning", alertIds: ["temp-38", "temp-375"],
     sources: ["NG235 1.8.20", "NG229 1.3.8", "NG195 1.6.1", "NG195 1.6.4", "NG255 1.5.1", "NG255 1.5.2"],
@@ -323,7 +323,7 @@ export const RULES = [
   },
   {
     id: "mgso4-pet", group: "Maternal observations", title: "Magnesium sulfate: severe pre-eclampsia or eclampsia",
-    when: "Eclampsia risk ticked (a fit now or earlier this pregnancy) and magnesium not running: urgent, give. Pre-eclampsia ticked with severe BP (160/110 or more) or low urine output: urgent, consider. Before or after birth. Magnesium already running for neuroprotection counts.",
+    when: "Eclampsia risk ticked (a fit now or earlier this pregnancy) and magnesium not running: urgent, give. Pre-eclampsia ticked with severe BP (160/110 or more) or low urine output: urgent, consider. Assessed quiets it until a new severe BP or low urine output is recorded. Before or after birth. Magnesium already running for neuroprotection counts.",
     then: "Eclampsia: give IV magnesium sulfate (Collaborative Eclampsia Trial regimen); no other anticonvulsant instead. Pre-eclampsia: check for severe features (headache, visual scotomata, vomiting, epigastric pain, oliguria with severe hypertension, worsening bloods) and consider magnesium sulfate if any. A severe BP keeps the prompt up after a lower repeat until Assessed is tapped. Tap Given or Assessed to clear.",
     severity: "Urgent", alertIds: ["mgso4-eclampsia", "mgso4-severe-pet"],
     sources: ["NG133 1.8.1", "NG133 1.8.2", "NG133 1.8.3", "NG133 1.8.4", "NG133 1.8.5"],

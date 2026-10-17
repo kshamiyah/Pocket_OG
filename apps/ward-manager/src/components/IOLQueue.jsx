@@ -119,7 +119,7 @@ export default function IOLQueue({ queue, now, onAdd, onEdit, onAdmit, onRemove 
           </div>
         );
       })}
-      {sorted.length > 0 && <p className={`${TYPE_META} text-center`}>Priority order per NICE NG207. Decision aid only.</p>}
+      {sorted.length > 0 && <p className={`${TYPE_META} text-center`}>Priority order is the app's, for local review: NICE NG207 sets none. Decision aid only.</p>}
       {showRef && <IOLReference onClose={() => setShowRef(false)} />}
     </div>
   );

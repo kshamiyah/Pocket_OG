@@ -93,7 +93,7 @@ function RuleBody({ rule, onSource, onSettings, onSettingSaved }) {
       {rule.severity !== "n/a" && <p className={TYPE_META}>Alert level: {rule.severity}</p>}
       {rule.local && (
         <p className="rounded-lg px-2.5 py-2 text-xs leading-snug bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 text-amber-900 dark:text-amber-200">
-          <span className="font-semibold">{rule.group === "Scope" || rule.group === "Board" ? "App design choice: " : "Local, verify against your protocol: "}</span>{rule.local.replace(/^App scope decision:?\s*/, "")}
+          <span className="font-semibold">{rule.group === "Scope" || rule.group === "Board" ? "App design choice: " : "Local, verify against your protocol: "}</span>{(t => t.charAt(0).toUpperCase() + t.slice(1))(rule.local.replace(/^App (scope decision|design choice)[:,]?\s*/, ""))}
         </p>
       )}
       {rule.settings?.length > 0 && <SettingLines keys={rule.settings} onSettings={onSettings} onSettingSaved={onSettingSaved} />}

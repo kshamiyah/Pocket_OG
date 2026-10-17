@@ -302,7 +302,7 @@ export function deleteVE(bed, id) {
 const OBS_FIELDS = {
   pulse: { stamp: "lastPulse", values: ["pulseValue"], at: "pulseAt", prev: "pulsePrev", prevAt: "pulsePrevAt" },
   bp: { stamp: "lastBP", values: ["bpSystolic", "bpDiastolic"], at: "bpAt" },
-  temp: { stamp: "lastTemp", values: ["tempValue"], at: "tempAt" },
+  temp: { stamp: "lastTemp", values: ["tempValue"], at: "tempAt", prev: "tempPrev", prevAt: "tempPrevAt" },
   rr: { stamp: "lastRR", values: ["rrValue"], at: "rrAt", prev: "rrPrev", prevAt: "rrPrevAt" },
   bgl: { stamp: "lastBGL", values: ["bglValue"], at: "bglAt" },
 };
@@ -349,7 +349,7 @@ export function recordObs(bed, iso, entries) {
     if (!observations[f.stamp] || observations[f.stamp] < iso) observations[f.stamp] = iso;
     const prevAt = observations[f.at] ?? observations[f.stamp];
     if (prevAt && prevAt > iso && observations[f.values[0]] != null) continue;
-    // Pulse and RR keep the reading before, so a repeat can confirm it (NG235 1.8.20).
+    // Pulse, RR and temperature keep the reading before, so a repeat can confirm it (NG235 1.8.20).
     if (f.prev && observations[f.values[0]] != null && prevAt) {
       observations[f.prev] = observations[f.values[0]];
       observations[f.prevAt] = prevAt;
@@ -362,6 +362,12 @@ export function recordObs(bed, iso, entries) {
       if (sys >= 160 || dia >= 110) observations.bpSevereAt = iso;
       const w = observations.bpWorst;
       if (!w || sys > w.sys || (sys === w.sys && dia > w.dia)) observations.bpWorst = { sys, dia, at: iso };
+    }
+    // Highest pulse and temperature, with times, for the handover.
+    if (name === "pulse" || name === "temp") {
+      const v = parseFloat(vals[0]);
+      const key = `${name}Worst`;
+      if (Number.isFinite(v) && (!observations[key] || v > observations[key].value)) observations[key] = { value: v, at: iso };
     }
   }
   return { observations };
@@ -424,7 +430,6 @@ export const OBS_STAMP = {
   "bp-never": "lastBP", "bp-due": "lastBP",
   "temp-never": "lastTemp", "temp-due": "lastTemp",
   "rr-never": "lastRR", "rr-due": "lastRR",
-  "bgl-never": "lastBGL", "bgl-due": "lastBGL",
 };
 
 /**

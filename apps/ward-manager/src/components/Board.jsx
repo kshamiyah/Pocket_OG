@@ -89,14 +89,15 @@ export function BedRow({ bed, t, now, onOpen, flash }) {
         <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">{status}</span>
         <span className="flex items-center gap-1 flex-wrap">
           <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mr-0.5 whitespace-nowrap">{parityShort(bed.parity)} · {bed.gestation}</span>
-          {bed.modeOfOnset === "Induced" && <Tag tone="claude">IOL</Tag>}
-          {bed.modeOfOnset === "PPROM" && <Tag tone="claude">PPROM</Tag>}
+          {/* Facts are neutral; orange and red are kept for things that need doing. */}
+          {!bed.delivery && bed.modeOfOnset === "Induced" && <Tag>IOL</Tag>}
+          {!bed.delivery && bed.modeOfOnset === "PPROM" && <Tag>PPROM</Tag>}
           {!bed.delivery && malpresentation(bed) && <Tag tone="claude">{malpresentation(bed)}</Tag>}
-          {oxy && <Tag tone="claude">Oxy {oxy.dose}{bed.oxytocinHeld ? " held" : ""}</Tag>}
+          {!bed.delivery && oxy && <Tag>Oxy {oxy.dose}{bed.oxytocinHeld ? " held" : ""}</Tag>}
           {obsDue.length > 0 && <Tag tone="amber">Obs due {obsDue.join("")}</Tag>}
           {flags.slice(0, 2).map(f => <Tag key={f}>{riskShort(f)}</Tag>)}
           {flags.length > 2 && <Tag>+{flags.length - 2}</Tag>}
-          {todo > 0 && <Tag tone="amber">{todo} to do</Tag>}
+          {todo > 0 && <Tag>{todo} to do</Tag>}
         </span>
       </span>
       <span className="shrink-0 max-w-[38%] flex flex-col items-end gap-1 text-right">{side}</span>
@@ -135,7 +136,7 @@ export default function Board({
   const iolUrgent = iolQueue.filter(e => iolEntryTier(e) <= 1).length;
 
   const summaryBits = [
-    `${summary.women} ${summary.women === 1 ? "woman" : "women"}`,
+    `${summary.women} not yet delivered`,
     summary.delivered ? `${summary.delivered} delivered` : null,
     summary.urgent ? `${summary.urgent} ${summary.urgent === 1 ? "needs" : "need"} you` : null,
     summary.warning ? `${summary.warning} due soon` : null,

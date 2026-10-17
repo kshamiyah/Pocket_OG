@@ -147,6 +147,8 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, o
   // An abnormal value outranks "done": the tile names it until a newer value replaces it.
   const obsAbnormal = t.alerts.find(a => TILE_ALERTS.obs.red.includes(a.id) && !a.id.startsWith("bgl-d") && !a.id.startsWith("bgl-n"))
     ?? t.alerts.find(a => ["tachycardia", "rr-high", "bp-elevated", "temp-375", "temp-low", "oliguria"].includes(a.id));
+  // When any obs were last recorded (for women not on the labour schedule).
+  const obsLastAt = Math.max(0, ...obs.map(o => o.at ?? 0)) || null;
   if (bed.delivery) {
     const d = bed.delivery;
     return (
@@ -158,7 +160,7 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, o
         </div>
         {/* Postnatal obs feed the PPH and sepsis checks, so recording them stays one tap away. */}
         {(() => {
-          const lastAt = Math.max(0, ...obs.map(o => o.at ?? 0));
+          const lastAt = obsLastAt;
           return (
             <div className="grid">
               <Tile label="Obs" tone={toneFor("obs", t.alerts)} onClick={onObs} ariaLabel="Record obs"
@@ -186,8 +188,8 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, o
         <Tile label="CTG" tone={toneFor("ctg", t.alerts)} onClick={onCTGConcern} ariaLabel="CTG review"
           value={ctg ? CTG_WORD[ctg.classification] ?? capitalise(ctg.classification) : "None"} meta={ctg ? `${ago(ctg.time)} ago` : "not logged"} />
         <Tile label="Obs" tone={toneFor("obs", t.alerts)} onClick={onObs} ariaLabel="Record obs"
-          value={obsAbnormal ? "Check" : !obsTracked(bed) ? "—" : obsDue.length ? `${obsDue.length} due` : "Done"}
-          meta={obsAbnormal ? shortLabel(obsAbnormal) : obsTracked(bed) ? obs.map(o => `${o.letter}${o.done ? "✓" : "·"}`).join(" ") : "tap to record"} />
+          value={obsAbnormal ? "Check" : !obsTracked(bed) ? (obsLastAt ? `${fmtAge(now - obsLastAt)} ago` : "None") : obsDue.length ? `${obsDue.length} due` : "Done"}
+          meta={obsAbnormal ? shortLabel(obsAbnormal) : obsTracked(bed) ? obs.map(o => `${o.letter}${o.done ? "✓" : "·"}`).join(" ") : obsLastAt ? "last obs, tap to record" : "tap to record"} />
         {/* Always oxytocin, so starting it is always in the same place. */}
         <Tile label="Oxytocin" tone={toneFor("oxy", t.alerts)} onClick={onOxy} ariaLabel={oxy ? "Oxytocin" : "Start oxytocin"}
           value={oxy ? `${oxy.dose} mU` : "Off"}

@@ -725,3 +725,56 @@ describe("national, not local, wording (NG195 table 1, GTG36 9.4, 9.5; NG235 1.7
     expect(ids(rom("35+0"))).not.toContain("gbs-prom-birth")
   })
 })
+
+describe("shift-test safety fixes", () => {
+  it("MgSO4 neuroprotection waits for established labour (NG25 1.10.2), so Not given in threatened labour cannot hide it", () => {
+    const threatened = bed({ gestation: "26+4", labourStage: "Latent" })
+    expect(ids(threatened)).not.toContain("preterm-mgso4")
+    expect(ids(active({ gestation: "26+4" }))).toContain("preterm-mgso4")
+  })
+  it("pre-eclampsia Assessed comes back with a new severe BP or low urine output (NG133 1.8.3)", () => {
+    const pet = { riskFlags: ["Pre-eclampsia"], mgso4PETAssessed: true, mgso4PETAssessedAt: t(60 * MIN) }
+    const before = active({ ...pet, observations: { bpSystolic: "162", bpDiastolic: "112", bpAt: t(90 * MIN), bpSevereAt: t(90 * MIN) } })
+    expect(ids(before)).not.toContain("mgso4-severe-pet")
+    const newBP = active({ ...pet, observations: { bpSystolic: "168", bpDiastolic: "114", bpAt: t(10 * MIN), bpSevereAt: t(10 * MIN) } })
+    expect(ids(newBP)).toContain("mgso4-severe-pet")
+    const urine = active({ ...pet, observations: { bpSystolic: "150", bpDiastolic: "95", bpAt: t(10 * MIN), bpSevereAt: t(90 * MIN), urineOutput: 15, lastUrineCheck: t(5 * MIN) } })
+    expect(ids(urine)).toContain("mgso4-severe-pet")
+  })
+  it("two temperatures of 37.5 or more about an hour apart are pyrexia (NG235 1.8.20)", () => {
+    let b = active()
+    b = { ...b, ...recordObs(b, t(70 * MIN), { temp: "37.8" }) }
+    expect(sev(b, "temp-375")).toBe("warning")
+    b = { ...b, ...recordObs(b, t(5 * MIN), { temp: "37.6" }) }
+    expect(sev(b, "temp-375")).toBe("urgent")
+    expect(computeAlerts(b, NOW).find(a => a.id === "temp-375").title).toMatch(/Pyrexia/)
+  })
+  it("a single 37.8 asks for a recheck after an hour", () => {
+    const b = { ...active(), ...recordObs(active(), t(65 * MIN), { temp: "37.8" }) }
+    expect(computeAlerts(b, NOW).find(a => a.id === "temp-375").title).toMatch(/Recheck temperature/)
+  })
+  it("a VE after oxytocin was stopped is not sent back through the delay steps", () => {
+    const b = active({
+      activeFirstStageStartTime: t(8 * HOUR),
+      ves: [{ id: "a", time: t(7 * HOUR), dilation: 4 }, { id: "b", time: t(3.5 * HOUR), dilation: 5 }, { id: "c", time: t(0), dilation: 5 }],
+      oxytocinLog: [{ id: "o1", startTime: t(3.25 * HOUR), dose: 2, lastIncrementTime: t(3.25 * HOUR) },
+        { id: "o2", startTime: t(30 * MIN), dose: 0, stopped: true, lastIncrementTime: t(30 * MIN) }],
+    })
+    expect(ids(b)).not.toContain("slow-progress")
+  })
+  it("glucose prompts cannot be ticked off without a value", () => {
+    expect(fixLabel("bgl-due")).toBeNull()
+    expect(fixLabel("bgl-never")).toBeNull()
+  })
+  it("a VE in the latent phase restarts the reassessment clock", () => {
+    const b = bed({ labourStage: "Latent", admissionTime: t(7 * HOUR), ves: [{ id: "v", time: t(HOUR), dilation: 2 }] })
+    expect(ids(b)).not.toContain("latent-reassess")
+  })
+  it("recordObs keeps the highest pulse and temperature with times", () => {
+    let b = active()
+    b = { ...b, ...recordObs(b, t(60 * MIN), { pulse: "128", temp: "38.4" }) }
+    b = { ...b, ...recordObs(b, t(10 * MIN), { pulse: "96", temp: "37.1" }) }
+    expect(b.observations.pulseWorst).toEqual({ value: 128, at: t(60 * MIN) })
+    expect(b.observations.tempWorst).toEqual({ value: 38.4, at: t(60 * MIN) })
+  })
+})

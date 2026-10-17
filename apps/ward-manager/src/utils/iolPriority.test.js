@@ -240,10 +240,8 @@ describe("sortIOLQueue", () => {
       });
     });
 
-    it("all Urgent indications (tier 0) have a cite", () => {
-      IOL_IND.filter(i => i.tier === 0).forEach(ind => {
-        expect(ind.cite).toBeTruthy();
-      });
+    it("no indication claims a NICE section for the queue order (NG207 sets none)", () => {
+      IOL_IND.forEach(ind => expect(ind.cite).not.toMatch(/NG207 §1\.[34]/));
     });
   });
 });

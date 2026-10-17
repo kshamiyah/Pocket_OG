@@ -41,7 +41,9 @@ function SummaryLine({ label, text, onClick, warn = false }) {
 }
 
 // IOL queue indications that imply a risk flag, so admitting from the queue keeps it.
-const IOL_FLAG = { "GDM": "Diabetic-GDM", "Pre-eclampsia": "Hypertensive", "Severe pre-eclampsia": "Hypertensive" };
+// IOL indications that carry a risk flag onto the board. Pre-eclampsia must
+// arrive as Pre-eclampsia (not plain hypertension) so the MgSO4 rules run.
+const IOL_FLAG = { "GDM": "Diabetic-GDM", "Pre-eclampsia": "Pre-eclampsia", "Severe pre-eclampsia": "Pre-eclampsia" };
 
 function parseGest(g) {
   const m = /^(\d+)\+(\d)$/.exec(g ?? "");

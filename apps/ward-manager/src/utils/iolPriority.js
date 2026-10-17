@@ -1,26 +1,30 @@
-// ─── IOL priority logic — NICE NG207 (Inducing labour) ───────────────────
+// IOL queue priority. The tiers are the app's own order for local review:
+// NICE NG207 lists indications (section 1.2) but sets no queue priority.
 
 export const IOL_IND = [
-  { label: "Severe pre-eclampsia",      tier: 0, cite: "NG207 §1.4" },
-  { label: "PPROM + chorioamnionitis",  tier: 0, cite: "NG207 §1.4" },
-  { label: "FGR — absent/reversed EDF",tier: 0, cite: "NG207 §1.4" },
-  { label: "Pre-eclampsia",            tier: 1, cite: "NG207 §1.4" },
-  { label: "PROM at term >24h",        tier: 1, cite: "NG207 §1.4" },
-  { label: "Post-dates 42+0",          tier: 1, cite: "NG207 §1.3" },
-  { label: "RFM + concerns",           tier: 1, cite: "NG207 §1.4" },
-  { label: "Post-dates 41+",           tier: 2, cite: "NG207 §1.3" },
-  { label: "GDM",                      tier: 2, cite: "NG207 §1.4" },
-  { label: "ICP",                      tier: 2, cite: "NG207 §1.4" },
-  { label: "Previous stillbirth",      tier: 2, cite: "NG207 §1.4" },
-  { label: "SGA / FGR (stable)",       tier: 2, cite: "NG207 §1.4" },
-  { label: "Maternal request",         tier: 3, cite: "NG207 §1.4" },
+  { label: "Severe pre-eclampsia",      tier: 0, cite: "" },
+  { label: "PPROM + chorioamnionitis",  tier: 0, cite: "" },
+  { label: "FGR: absent or reversed EDF", tier: 0, cite: "" },
+  { label: "Pre-eclampsia",            tier: 1, cite: "" },
+  { label: "PROM at term >24h",        tier: 1, cite: "" },
+  { label: "Post-dates 42+0",          tier: 1, cite: "" },
+  { label: "RFM + concerns",           tier: 1, cite: "" },
+  { label: "Post-dates 41+",           tier: 2, cite: "" },
+  { label: "GDM",                      tier: 2, cite: "" },
+  { label: "ICP",                      tier: 2, cite: "" },
+  { label: "Previous stillbirth",      tier: 2, cite: "" },
+  { label: "SGA / FGR (stable)",       tier: 2, cite: "" },
+  { label: "Maternal request",         tier: 3, cite: "" },
   { label: "Social",                   tier: 3, cite: "" },
 ];
+
+// Labels saved by older versions.
+const LEGACY = { "FGR \u2014 absent/reversed EDF": "FGR: absent or reversed EDF" };
 
 // 0 = Urgent, 1 = High, 2 = Moderate, 3 = Routine
 export function iolEntryTier(entry) {
   if (!entry.indications?.length) return 3;
-  return Math.min(...entry.indications.map(ind => IOL_IND.find(i => i.label === ind)?.tier ?? 3));
+  return Math.min(...entry.indications.map(ind => IOL_IND.find(i => i.label === (LEGACY[ind] ?? ind))?.tier ?? 3));
 }
 
 export function sortIOLQueue(queue) {
