@@ -28,6 +28,14 @@ export const SOURCES = {
     "url": "https://www.nice.org.uk/guidance/ng235/chapter/Recommendations#ng235-1_7_7",
     "text": "For women who choose expectant management after prelabour rupture of the membranes at term (at or after 37+0 weeks), offer induction of labour if labour has not started naturally after approximately 24 hours. (see the section on induction of labour in specific circumstances in NICE's guideline on inducing labour). [2023]"
   },
+  "NG235 1.7.11": {
+    "issuer": "NICE",
+    "doc": "NG235",
+    "docTitle": "Intrapartum care",
+    "rec": "Recommendation 1.7.11",
+    "url": "https://www.nice.org.uk/guidance/ng235/chapter/Recommendations#ng235-1_7_11",
+    "text": "If a woman has prelabour rupture of membranes at term (at or after 37+0 weeks) and has had a positive group B streptococcus test at any time in their current pregnancy, or a previous pregnancy where the baby developed group B streptococcus infection, offer immediate induction of labour, or caesarean birth if it had been planned. For advice on intrapartum antibiotics, see the section on intrapartum antibiotics in NICE's guideline on neonatal infection. [2023]"
+  },
   "NG235 1.8.1": {
     "issuer": "NICE",
     "doc": "NG235",
@@ -548,6 +556,14 @@ export const SOURCES = {
     "url": "https://www.nice.org.uk/guidance/ng255/chapter/Evaluating-risk-level",
     "text": "Criteria for stratification of risk of severe illness or death from sepsis in people who are or have recently been pregnant\nBlood pressure. High risk: Systolic blood pressure 90 mmHg or less or systolic blood pressure more than 40mmHg below normal. Moderate to high risk: Systolic blood pressure 91 to 100 mmHg\nCirculation and hydration. High risk: Raised heart rate: more than 130 beats per minute. Moderate to high risk: Raised heart rate: 100 to 130 beats per minute or new-onset arrhythmia\nTemperature. High risk: none. Moderate to high risk: Tympanic temperature less than 36°C\nRespiratory. High risk: Raised respiratory rate: 25 breaths per minute or more. Moderate to high risk: Raised respiratory rate: 21 to 24 breaths per minute"
   },
+  "NG195 table 1": {
+    "issuer": "NICE",
+    "doc": "NG195",
+    "docTitle": "Neonatal infection: antibiotics for prevention and treatment",
+    "rec": "Table 1: Intrapartum antibiotics (without chorioamnionitis)",
+    "url": "https://www.nice.org.uk/guidance/ng195/chapter/Prevention-and-risk-reduction",
+    "text": "No penicillin allergy: Use benzylpenicillin sodium.\nPenicillin allergy that is not severe: Use cephalosporin with activity against group B streptococcus (for example, cefotaxime). Use with caution. In April 2021 this was an off-label use of cephalosporins.\nSevere penicillin allergy: Consider: Vancomycin or An alternative antibiotic that would be expected to be active against group B streptococcus based on either sensitivity testing performed on the woman's, trans man's or non-binary person's isolate or on local antibiotic susceptibility surveillance data. In April 2021 this was an off-label use of vancomycin."
+  },
   "GL787 GBS": {
     "issuer": "Local",
     "doc": "GL787",
@@ -590,6 +606,22 @@ export const SOURCES = {
     "rec": "Section 5.4",
     "url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/prevention-of-early-onset-group-b-streptococcal-disease-green-top-guideline-no-36/",
     "text": "IAP should be offered to women with a previous baby with early- or late-onset GBS disease."
+  },
+  "GTG36 9.4": {
+    "issuer": "RCOG",
+    "doc": "GTG36",
+    "docTitle": "Prevention of early-onset neonatal group B streptococcal disease (2017)",
+    "rec": "Section 9.4",
+    "url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/prevention-of-early-onset-group-b-streptococcal-disease-green-top-guideline-no-36/",
+    "text": "For women who have agreed to IAP, benzylpenicillin should be administered. Once commenced, treatment should be given regularly until delivery.\nIt is recommended that 3 g intravenous benzylpenicillin be given as soon as possible after the onset of labour and 1.5 g 4 hourly until delivery. To optimise the efficacy of IAP, the first dose should be given at least 4 hours prior to delivery."
+  },
+  "GTG36 9.5": {
+    "issuer": "RCOG",
+    "doc": "GTG36",
+    "docTitle": "Prevention of early-onset neonatal group B streptococcal disease (2017)",
+    "rec": "Section 9.5",
+    "url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/prevention-of-early-onset-group-b-streptococcal-disease-green-top-guideline-no-36/",
+    "text": "Provided a woman has not had severe allergy to penicillin, a cephalosporin should be used. If there is any evidence of severe allergy to penicillin, vancomycin should be used.\nIf the history suggests an allergy to beta-lactams, but one that is not severe (i.e. no anaphylaxis, angioedema, respiratory distress or urticaria), then a cephalosporin can be administered intravenously (e.g. cefuroxime, 1.5 g loading dose followed by 750 mg every 8 hours). If the allergy to beta-lactams is severe then intravenous vancomycin (1 g every 12 hours) is recommended."
   },
   "GTG36 7.1": {
     "issuer": "RCOG",

@@ -1,3 +1,7 @@
+// Intrapartum GBS regimen, as RCOG GTG36 9.4 and 9.5 give it (drug choice as
+// NICE NG195 table 1).
+const IAP_REGIMEN = "IV benzylpenicillin 3 g as soon as possible, then 1.5 g 4-hourly until birth. Penicillin allergy that is not severe: a cephalosporin active against GBS (for example cefuroxime 1.5 g, then 750 mg 8-hourly); severe allergy: IV vancomycin 1 g 12-hourly.";
+
 // Alert engine — rules from NICE NG235 (Intrapartum Care, Sept 2023) and NICE NG25 (Preterm Labour, Nov 2022)
 
 // CTG feature classification (NICE NG229 §1.4.16–1.4.31) now lives in the shared
@@ -516,14 +520,15 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // 24 hours. Needs a positive test this pregnancy; an induction already under
   // way counts as acted on.
   const inductionUnderway = bed.modeOfOnset === "Induced" && !!bed.inductionStartTime;
+  // From 37+0 a previous baby with GBS infection counts too (NG235 1.7.11).
   if (membranes === "SROM" && bed.labourStage === "Latent" && gestWks !== null && gestWks >= 34
-      && isGBSThisPregnancy && !inductionUnderway && !bed.gbsBirthOffered) {
+      && (isGBSThisPregnancy || (isGBSPrevBaby && gestWks >= 37)) && !inductionUnderway && !bed.gbsBirthOffered) {
     alerts.push({
       id: "gbs-prom-birth",
       severity: "urgent",
       title: "GBS positive with ruptured membranes: offer immediate birth",
-      body: `Prelabour rupture of membranes at ${gest} with a positive GBS test this pregnancy: offer immediate induction of labour or caesarean birth, with intrapartum antibiotics. Tap Offered once discussed.`,
-      citation: gestWks >= 37 ? "NICE NG207 1.2.16 [2021] · NG195 1.6.1" : "NICE NG207 1.2.12 [2021] · NG195 1.7.1",
+      body: `Prelabour rupture of membranes at ${gest} with ${isGBSThisPregnancy ? "a positive GBS test this pregnancy" : "a previous baby who developed GBS infection"}: offer immediate induction of labour or caesarean birth, with intrapartum antibiotics. Tap Offered once discussed.`,
+      citation: gestWks >= 37 ? "NICE NG235 1.7.11 [2023] · NG207 1.2.16 [2021] · NG195 1.6.1" : "NICE NG207 1.2.12 [2021] · NG195 1.7.1",
     });
   }
 
@@ -532,13 +537,15 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     const ms = now - new Date(membranesTime).getTime();
     // GL787 (term PROM): prophylaxis indicated if GBS positive, ROM 48 h or
     // more, or maternal pyrexia over 38°C. GBS+ is covered by gbs-iap below.
-    if (ms >= unit.promAntibioticH * HOUR && !isGBSPos && !bed.gbsAntibioticsStarted) {
+    // Optional unit rule (off by default): NICE and GTG36 give no antibiotics
+    // for time since rupture alone.
+    if (unit.promAntibioticsOn && ms >= unit.promAntibioticH * HOUR && !isGBSPos && !bed.gbsAntibioticsStarted) {
       alerts.push({
         id: "prom-48h",
         severity: "urgent",
-        title: `Membranes ruptured ${formatAge(ms)}: antibiotic prophylaxis indicated`,
-        body: `ROM ${unit.promAntibioticH} hours or more (unit setting; GL787 says 48): intrapartum antibiotic prophylaxis is indicated. Regimen: IV benzylpenicillin 3 g stat, then 1.5 g 4-hourly until delivered; penicillin allergy: IV teicoplanin 10 mg/kg stat, then 12-hourly.`,
-        citation: "GL787 (local)",
+        title: `Membranes ruptured ${formatAge(ms)}: antibiotic prophylaxis (local)`,
+        body: `ROM ${unit.promAntibioticH} hours or more: intrapartum antibiotic prophylaxis by unit policy (GL787 uses 48 hours; not in NICE or Green-top 36). ${IAP_REGIMEN}`,
+        citation: "GL787 (local, not national) · regimen RCOG GTG36 9.4, 9.5",
       });
     }
     if (ms >= 24 * HOUR && bed.labourStage === "Latent" && gestWks !== null && gestWks >= 37) {
@@ -586,10 +593,10 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       id: "gbs-iap",
       severity: "urgent",
       title: `${who}: IV antibiotic prophylaxis required`,
-      body: `${!isGBSThisPregnancy && !isGBSPrevBaby ? "No negative swab at 35 to 37 weeks this pregnancy. " : ""}Give the first dose as soon as possible after labour starts (from 37+0, as soon as the membranes rupture) and continue until birth. Regimen per GL787: IV benzylpenicillin 3 g stat, then 1.5 g 4-hourly; penicillin allergy: IV teicoplanin 10 mg/kg stat, then 10 mg/kg 12-hourly.`,
-      citation: isGBSThisPregnancy ? "NICE NG195 1.6.1, 1.6.4 [2021] · RCOG GTG36 7.1, 8.1.1 · GL787"
-        : isGBSPrevBaby ? "NICE NG195 1.6.1, 1.6.4 [2021] · RCOG GTG36 5.4 · GL787"
-        : "NICE NG195 1.6.1, 1.6.4 [2021] · RCOG GTG36 5.3 · GL787",
+      body: `${!isGBSThisPregnancy && !isGBSPrevBaby ? "No negative swab at 35 to 37 weeks this pregnancy. " : ""}Give the first dose as soon as possible after labour starts (from 37+0, as soon as the membranes rupture) and continue until birth. ${IAP_REGIMEN}`,
+      citation: isGBSThisPregnancy ? "NICE NG195 1.6.1, 1.6.4, table 1 [2021] · RCOG GTG36 7.1, 8.1.1, 9.4, 9.5"
+        : isGBSPrevBaby ? "NICE NG195 1.6.1, 1.6.4, table 1 [2021] · RCOG GTG36 5.4, 9.4, 9.5"
+        : "NICE NG195 1.6.1, 1.6.4, table 1 [2021] · RCOG GTG36 5.3, 9.4, 9.5",
     });
   } else if (!delivered && isPreterm && !isGBSPos && !isInfection && inLabour && !bed.gbsAntibioticsStarted) {
     alerts.push({
@@ -656,16 +663,6 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       title: "Blood-stained liquor: assess for abruption / vasa praevia",
       body: "Blood-stained amniotic fluid may indicate placental abruption or vasa praevia. Review fetal heart rate and escalate to senior if concerned.",
       citation: "NICE NG235 1.8.20 [2023]",
-    });
-  }
-
-  if (labourRules && lastLiquor === "Absent") {
-    alerts.push({
-      id: "liquor-absent",
-      severity: "warning",
-      title: "No liquor draining post-rupture: assess for oligohydramnios",
-      body: "Absent liquor after membrane rupture may indicate oligohydramnios and cord compression risk. Consider CTG and senior review.",
-      citation: "Local practice",
     });
   }
 

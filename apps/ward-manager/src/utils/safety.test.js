@@ -220,15 +220,19 @@ describe("PROM 24 hours: term only (NICE NG235 1.7.7)", () => {
   })
 })
 
-describe("ROM 48 hours: antibiotics (GL787)", () => {
+describe("ROM 48 hours: antibiotics (GL787, only when the unit switches it on)", () => {
+  const ON = { ...UNIT_DEFAULTS, promAntibioticsOn: true }
   const rom = (h, o = {}) => bed({ gestation: "39+0", labourStage: "Active first stage", activeFirstStageStartTime: t(HOUR),
     ves: [{ id: "v", time: t(30 * MIN), dilation: 5 }], membranes: "SROM", membranesTime: t(h * HOUR), ...o })
-  it("fires at 48 hours", () => {
-    expect(sev(rom(48), "prom-48h")).toBe("urgent")
-    expect(ids(rom(47))).not.toContain("prom-48h")
+  const on = b => computeAlerts(b, NOW, ON)
+  it("fires at 48 hours when switched on, and is marked local", () => {
+    const a = on(rom(48)).find(x => x.id === "prom-48h")
+    expect(a.severity).toBe("urgent")
+    expect(a.citation).toMatch(/local, not national/)
+    expect(on(rom(47)).map(x => x.id)).not.toContain("prom-48h")
   })
   it("clears once antibiotics are given", () => {
-    expect(ids(rom(50, { gbsAntibioticsStarted: true }))).not.toContain("prom-48h")
+    expect(on(rom(50, { gbsAntibioticsStarted: true })).map(x => x.id)).not.toContain("prom-48h")
   })
 })
 
@@ -245,10 +249,13 @@ describe("unit settings change the local thresholds", () => {
     expect(run(b, {})).not.toContain("latent-reassess")
     expect(run(b, { latentReassessH: 4 })).toContain("latent-reassess")
   })
-  it("ROM antibiotic hours", () => {
-    const b = active({ membranes: "SROM", membranesTime: t(13 * HOUR) })
+  it("ROM antibiotics: off by default (not national), hours editable when on", () => {
+    const b = active({ membranes: "SROM", membranesTime: t(50 * HOUR) })
     expect(run(b, {})).not.toContain("prom-48h")
-    expect(run(b, { promAntibioticH: 12 })).toContain("prom-48h")
+    expect(run(b, { promAntibioticsOn: true })).toContain("prom-48h")
+    const b13 = active({ membranes: "SROM", membranesTime: t(13 * HOUR) })
+    expect(run(b13, { promAntibioticsOn: true })).not.toContain("prom-48h")
+    expect(run(b13, { promAntibioticsOn: true, promAntibioticH: 12 })).toContain("prom-48h")
   })
   it("neonatal team gestation", () => {
     const b = active({ gestation: "35+0" })
@@ -696,5 +703,25 @@ describe("PPROM oral antibiotics (GL787; NICE NG25 1.4.1)", () => {
     expect(fixLabel("pprom-antibiotics")).toBe("Antibiotics given")
     expect(ids({ ...b, ...fixAlert(b, "pprom-antibiotics", t(0)) })).not.toContain("pprom-antibiotics")
     expect(ids({ ...b, ...declineAlert("pprom-antibiotics", t(0)) })).not.toContain("pprom-antibiotics")
+  })
+})
+
+describe("national, not local, wording (NG195 table 1, GTG36 9.4, 9.5; NG235 1.7.11)", () => {
+  it("GBS antibiotics give the national penicillin-allergy choice, not teicoplanin", () => {
+    const a = computeAlerts(active({ riskFlags: ["GBS+"] }), NOW).find(x => x.id === "gbs-iap")
+    expect(a.body).toMatch(/cephalosporin/)
+    expect(a.body).toMatch(/vancomycin/)
+    expect(a.body).not.toMatch(/teicoplanin/)
+    expect(a.citation).not.toMatch(/GL787/)
+  })
+  it("absent liquor no longer raises an alert", () => {
+    expect(ids(active({ ves: [{ id: "v", time: t(30 * MIN), dilation: 5, membranes: "AROM", liquor: "Absent" }] }))).not.toContain("liquor-absent")
+  })
+  it("a previous baby with GBS disease: offer immediate birth from 37+0 when the waters break", () => {
+    const rom = g => bed({ gestation: g, labourStage: "Latent", membranes: "SROM", membranesTime: t(HOUR), riskFlags: ["GBS previous baby"] })
+    const a = computeAlerts(rom("38+0"), NOW).find(x => x.id === "gbs-prom-birth")
+    expect(a.citation).toMatch(/NG235 1\.7\.11/)
+    expect(a.body).toMatch(/previous baby/)
+    expect(ids(rom("35+0"))).not.toContain("gbs-prom-birth")
   })
 })
