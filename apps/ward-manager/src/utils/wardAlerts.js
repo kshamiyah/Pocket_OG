@@ -886,7 +886,10 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
 
   // ─── PPH after birth ─────────────────────────────────────────────────
   // Reviewed quiets it for the unit's time; it then returns while she is on the board.
-  if (delivered && bed.delivery.ebl != null && bed.delivery.ebl >= 500) {
+  // After a caesarean the unit may start at a higher loss (unit setting).
+  const isCS = /LSCS/.test(bed.delivery?.mode ?? "");
+  const pphFrom = isCS ? unit.pphCsMl : 500;
+  if (delivered && bed.delivery.ebl != null && bed.delivery.ebl >= pphFrom) {
     const major = bed.delivery.ebl > 1000;
     alerts.push({
       id: "pph",
@@ -895,7 +898,22 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       body: major
         ? "Major PPH (more than 1000 mL). Follow the PPH protocol; repeat observations and reassess ongoing loss."
         : "Minor PPH (500 to 1000 mL). Repeat observations and reassess ongoing loss.",
-      citation: "RCOG GTG52",
+      citation: pphFrom !== 500 ? `RCOG GTG52 · ${pphFrom} mL after caesarean is local` : "RCOG GTG52",
+    });
+  }
+
+  // ─── Is she still here? (unit setting) ───────────────────────────────
+  // Nothing entered for hours usually means the board is out of date: she has
+  // delivered, moved or gone home. Any change to her record restarts the clock.
+  const lastEntry = lastEntryAt(bed);
+  if (lastEntry != null && now - lastEntry >= unit.staleBedH * HOUR) {
+    alerts.push({
+      id: "bed-stale",
+      severity: "warning",
+      short: "Still here?",
+      title: `No entries for ${formatAge(now - lastEntry)}: is she still here?`,
+      body: "Update her record if she is. If she has been transferred or gone home, remove her from the board so it stays true.",
+      citation: "Unit setting (app design)",
     });
   }
 
@@ -1097,12 +1115,17 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
           });
         }
       } else if (ctgClockRuns && needsContinuousCTG && msCTG >= 60 * MIN) {
+        // Grey when due; amber then red once overdue (unit settings).
+        const over = msCTG - 60 * MIN;
+        const red = over >= unit.ctgReviewRedMin * MIN;
+        const amber = !red && over >= unit.ctgReviewAmberMin * MIN;
         alerts.push({
           id: "ctg-review-due",
-          severity: "info",
-          title: `Hourly CTG review due (${formatAge(msCTG)} ago)`,
+          severity: red ? "urgent" : amber ? "warning" : "info",
+          ...(red || amber ? { short: "CTG overdue" } : {}),
+          title: `Hourly CTG review ${red || amber ? "overdue" : "due"} (${formatAge(msCTG)} ago)`,
           body: "Full assessment of the woman and baby every hour, with a fresh-eyes review by another clinician.",
-          citation: "NICE NG229 1.3.5, 1.3.6 [2022]",
+          citation: red || amber ? "NICE NG229 1.3.5, 1.3.6 [2022] · overdue colours are local" : "NICE NG229 1.3.5, 1.3.6 [2022]",
         });
       }
     }
@@ -1110,6 +1133,20 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
 
   const order = { urgent: 0, warning: 1, info: 2 };
   return alerts.sort((a, b) => order[a.severity] - order[b.severity] || alertTier(a.id) - alertTier(b.id));
+}
+
+/**
+ * Time (ms) of the latest entry on a woman's record: any edit (updatedAt),
+ * or failing that the latest recorded time in it. null if none.
+ */
+export function lastEntryAt(bed) {
+  const times = [bed.updatedAt, bed.admissionTime, bed.confirmedHereAt, bed.delivery?.time,
+    ...(bed.ves ?? []).map(v => v.time), ...(bed.ctgLog ?? []).map(c => c.time),
+    ...(bed.oxytocinLog ?? []).map(o => o.startTime),
+    ...Object.values(bed.observations ?? {}).filter(v => typeof v === "string"),
+    ...Object.values(bed.reviews ?? {}).map(r => r?.at)]
+    .map(v => (typeof v === "string" ? Date.parse(v) : NaN)).filter(Number.isFinite);
+  return times.length ? Math.max(...times) : null;
 }
 
 // Clinical priority within a severity, so the most dangerous problem is always

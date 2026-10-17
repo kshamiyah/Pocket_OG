@@ -19,6 +19,7 @@ export const RULE_GROUPS = [
   "Maternal observations",
   "Diabetes",
   "After birth",
+  "Board",
   "Scope",
 ];
 
@@ -287,8 +288,9 @@ export const RULES = [
   {
     id: "ctg-hourly", group: "Fetal monitoring (CTG)", title: "Hourly CTG review",
     when: "On continuous CTG (everyone by default, see above), established labour or oxytocin, and an hour since the last review.",
-    then: "Hourly assessment with a fresh-eyes review.",
-    severity: "Info", alertIds: ["ctg-review-due"], sources: ["NG229 1.3.5", "NG229 1.3.6"], settings: ["ctgForAll"],
+    then: "Hourly assessment with a fresh-eyes review. Grey when due; amber, then red, once overdue by the unit's times (default 15 and 30 minutes).",
+    severity: "Info, then warning, then urgent", alertIds: ["ctg-review-due"], sources: ["NG229 1.3.5", "NG229 1.3.6"], settings: ["ctgForAll", "ctgReviewAmberMin", "ctgReviewRedMin"],
+    local: "NICE asks for an hourly review; the overdue colours and their timings are unit choices.",
   },
 
   // ── Maternal observations ──────────────────────────────────────────────
@@ -360,12 +362,22 @@ export const RULES = [
     local: "Hourly for every diabetic flag, by choice, following NG3. GL983 allows 2-hourly for type 2 diabetes on metformin or diet with glucose at or below 7.",
   },
 
+  // ── Board ──────────────────────────────────────────────────────────────
+  {
+    id: "bed-stale", group: "Board", title: "Is she still here?",
+    when: "No entry on her record for the unit's time (default 3 hours). Any change to the record, or Still here, restarts the clock.",
+    then: "Still here restarts the clock. Not here opens her full record to update her or remove her from the board.",
+    severity: "Warning", alertIds: ["bed-stale"], sources: [], settings: ["staleBedH"],
+    local: "An app design choice so the board does not show women who have left.",
+  },
+
   // ── After birth ────────────────────────────────────────────────────────
   {
     id: "pph", group: "After birth", title: "Postpartum haemorrhage",
-    when: "Recorded EBL 500 to 1000 mL (minor) or over 1000 mL (major).",
+    when: "Recorded EBL 500 to 1000 mL (minor) or over 1000 mL (major). After a caesarean the alert starts at the unit's setting (default 500 mL, as GTG52).",
     then: "Minor: warning. Major: urgent. Reviewed quiets it for the unit's time (default 60 minutes); it then returns while she is on the board.",
-    severity: "Warning / urgent", alertIds: ["pph"], sources: ["GTG52 definitions"],
+    severity: "Warning / urgent", alertIds: ["pph"], sources: ["GTG52 definitions"], settings: ["pphCsMl"],
+    local: "GTG52 uses 500 mL after any birth. A higher start after caesarean is a unit choice.",
   },
 ];
 

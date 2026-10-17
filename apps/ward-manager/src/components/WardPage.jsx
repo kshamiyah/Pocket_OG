@@ -19,7 +19,7 @@ import { RulesContext } from "../ui/rulesContext";
 import UndoToast from "../ui/UndoToast";
 import { ChipRow, Label } from "../ui/atoms";
 import { BTN, BTN_DANGER, BTN_SECONDARY, TYPE_META } from "../ui/styles";
-import { ACTION_ALERTS, addVE, declineAlert, doctorLabel, editVE as applyEditVE, fixAlert, fixLabel, setStage, STAGE_SHORT } from "../utils/bedModel";
+import { ACTION_ALERTS, STILL_HERE, addVE, declineAlert, doctorLabel, editVE as applyEditVE, fixAlert, fixLabel, setStage, STAGE_SHORT } from "../utils/bedModel";
 import { triageWard, wardSummary } from "../utils/triage";
 import { clock } from "../utils/time";
 
@@ -113,7 +113,8 @@ export default function WardPage({ shift, onEndShift }) {
 
   const updateBed = useCallback((bedId, updates, message) => {
     const bed = beds[bedId]; if (!bed) return;
-    commit(message ?? `Bed ${bed.bedNumber} updated`, { ...beds, [bedId]: { ...bed, ...updates } }, null, bedId);
+    // updatedAt feeds "is she still here?": any edit counts as an entry.
+    commit(message ?? `Bed ${bed.bedNumber} updated`, { ...beds, [bedId]: { ...bed, ...updates, updatedAt: new Date().toISOString() } }, null, bedId);
   }, [beds, commit]);
 
   const undo = () => {
@@ -135,6 +136,8 @@ export default function WardPage({ shift, onEndShift }) {
     const bed = beds[bedId];
     // Stopping oxytocin is logged in the oxytocin sheet, with the reason.
     if (ACTION_ALERTS[alertId]) { setSheet({ type: "oxy", bedId, from: sheet?.bedId === bedId ? "bed" : undefined, stop: true }); return; }
+    // "Not here": open her full record, where she can be removed or updated.
+    if (kind === "decline" && alertId === STILL_HERE) { closeSheet(); setRecordId(bedId); return; }
     if (kind === "decline") {
       updateBed(bedId, declineAlert(alertId, iso(), doctorLabel(shift?.doctorName)), `Not given · Bed ${bed.bedNumber}`);
       return;

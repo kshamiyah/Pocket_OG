@@ -33,6 +33,17 @@ export const UNIT_SETTINGS = [
     nice: "NICE sets no interval (NG229 1.5.5, 1.5.6).",
   },
   {
+    key: "ctgReviewAmberMin", type: "number", default: 15, min: 5, max: 60, step: 5, unit: "min", group: "Fetal monitoring",
+    label: "Hourly CTG review: amber when overdue by",
+    help: "Before this the reminder is grey.",
+    nice: "NICE asks for an hourly review (NG229 1.3.5, 1.3.6); it sets no overdue point.",
+  },
+  {
+    key: "ctgReviewRedMin", type: "number", default: 30, min: 10, max: 120, step: 5, unit: "min", group: "Fetal monitoring",
+    label: "Hourly CTG review: red when overdue by",
+    nice: "NICE sets no overdue point.",
+  },
+  {
     key: "latentReassessH", type: "number", default: 6, min: 2, max: 8, step: 1, unit: "h", group: "Labour progress",
     label: "Reassess latent phase after",
     help: "Counted from admission, or from the start of induction.",
@@ -72,6 +83,18 @@ export const UNIT_SETTINGS = [
     label: "Apply labour progress and CTG rules from",
     help: "Below this gestation the board shows a note instead; preterm, antibiotic and obs alerts still run.",
     nice: "No national number: NICE CTG categories and labour timings are not written for extreme prematurity.",
+  },
+  {
+    key: "pphCsMl", type: "number", default: 500, min: 500, max: 1000, step: 100, unit: "mL", group: "After birth",
+    label: "PPH alert after a caesarean from",
+    help: "After a vaginal birth the alert always starts at 500 mL. Over 1000 mL is always major.",
+    nice: "RCOG GTG52: PPH is 500 mL or more after any birth. Some units use 1000 mL after a caesarean.",
+  },
+  {
+    key: "staleBedH", type: "number", default: 3, min: 1, max: 8, step: 1, unit: "h", group: "Board",
+    label: "Ask \"is she still here?\" after no entries for",
+    help: "Any change to her record restarts the clock. Still here restarts it too.",
+    nice: "App design choice.",
   },
   {
     key: "reviewOn", type: "bool", default: true, group: "Reviewed alerts",

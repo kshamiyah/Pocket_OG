@@ -596,3 +596,48 @@ describe("after birth", () => {
     expect(a.citation).toMatch(/NG255/)
   })
 })
+
+describe("hourly CTG review turns amber, then red, once overdue (local)", () => {
+  const b = minsAgo => active({ ctgLog: [{ id: "c", time: t(minsAgo * MIN), classification: "normal" }] })
+  it("grey when due, amber at 15 minutes over, red at 30", () => {
+    expect(sev(b(65), "ctg-review-due")).toBe("info")
+    expect(sev(b(76), "ctg-review-due")).toBe("warning")
+    expect(sev(b(91), "ctg-review-due")).toBe("urgent")
+  })
+  it("follows the unit settings", () => {
+    const unit = { ...UNIT_DEFAULTS, ctgReviewAmberMin: 30, ctgReviewRedMin: 60 }
+    expect(computeAlerts(b(91), NOW, unit).find(a => a.id === "ctg-review-due").severity).toBe("warning")
+  })
+})
+
+describe("is she still here? (local)", () => {
+  const stale = (o = {}) => bed({ labourStage: "Latent", admissionTime: t(4 * HOUR), observations: { lastPulse: t(4 * HOUR) }, ...o })
+  it("asks after 3 hours with no entry", () => {
+    expect(ids(stale())).toContain("bed-stale")
+    expect(ids(stale({ admissionTime: t(2 * HOUR) }))).not.toContain("bed-stale")
+  })
+  it("any edit, or Still here, restarts the clock", () => {
+    expect(ids(stale({ updatedAt: t(10 * MIN) }))).not.toContain("bed-stale")
+    const b = stale()
+    expect(fixLabel("bed-stale")).toBe("Still here")
+    expect(ids({ ...b, ...fixAlert(b, "bed-stale", t(0)) })).not.toContain("bed-stale")
+  })
+  it("applies to delivered women too", () => {
+    expect(ids(stale({ delivery: { mode: "SVD", time: t(4 * HOUR), ebl: 200 } }))).toContain("bed-stale")
+  })
+})
+
+describe("PPH after a caesarean (GTG52, unit setting)", () => {
+  const cs = (ebl, mode = "Em LSCS") => bed({ labourStage: "Active first stage", admissionTime: t(HOUR), delivery: { mode, time: t(30 * MIN), ebl } })
+  it("defaults to 500 mL after any birth, as GTG52", () => {
+    expect(sev(cs(600), "pph")).toBe("warning")
+  })
+  it("a unit can start at 1000 mL after caesarean only", () => {
+    const unit = { ...UNIT_DEFAULTS, pphCsMl: 1000 }
+    const has = (b, id) => computeAlerts(b, NOW, unit).some(a => a.id === id)
+    expect(has(cs(600), "pph")).toBe(false)
+    expect(has(cs(600, "SVD"), "pph")).toBe(true)
+    expect(computeAlerts(cs(1200), NOW, unit).find(a => a.id === "pph")).toMatchObject({ severity: "urgent" })
+    expect(computeAlerts(cs(1000), NOW, unit).find(a => a.id === "pph").citation).toMatch(/1000 mL after caesarean is local/)
+  })
+})

@@ -454,6 +454,10 @@ export function reviewMinutes(alertId, unit = getUnitSettings()) {
 // the right sheet (stopping oxytocin is logged in the oxytocin sheet).
 export const ACTION_ALERTS = { "oxytocin-stop-pathological": "Stop oxytocin" };
 
+// "Is she still here?": Still here stamps the record (restarting the clock);
+// the second button, Not here, opens her full record to remove or update her.
+export const STILL_HERE = "bed-stale";
+
 // "Discuss / consider" prompts that can be answered "not given", so the
 // handover never reads as given when it was decided against.
 export const DECLINABLE = new Set(["preterm-mgso4", "preterm-steroids"]);
@@ -464,6 +468,7 @@ export function declineAlert(alertId, iso, by = null) {
 }
 
 export function fixLabel(alertId) {
+  if (alertId === STILL_HERE) return "Still here";
   if (ACTION_ALERTS[alertId]) return ACTION_ALERTS[alertId];
   if (PERSISTENT_FLAGS[alertId]) return PERSISTENT_FLAGS[alertId].label;
   if (OBS_STAMP[alertId]) return "Done";
@@ -472,6 +477,7 @@ export function fixLabel(alertId) {
 }
 
 export function fixAlert(bed, alertId, iso, by = null) {
+  if (alertId === STILL_HERE) return { confirmedHereAt: iso };
   if (ACTION_ALERTS[alertId]) return {};
   if (PERSISTENT_FLAGS[alertId]) {
     const f = PERSISTENT_FLAGS[alertId].field;
