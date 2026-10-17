@@ -799,3 +799,36 @@ describe("reviewed problems stay visible (Reviewed, watching)", () => {
     expect([ok, watch, due].sort(compareTriage).map(r => r.t.tier)).toEqual(["warning", "watching", "ok"])
   })
 })
+
+describe("handover: priority order, times and timeline", () => {
+  const calm = active({ id: "c", bedNumber: "1" })
+  const sick = active({ id: "s", bedNumber: "2", ctgLog: [ctg("normal", 120), ctg("pathological", 10)],
+    oxytocinLog: [{ id: "o1", startTime: t(3 * HOUR), dose: 4, lastIncrementTime: t(HOUR) }] })
+  const text = generateHandover({ c: calm, s: sick }, null, NOW)
+  it("lists the sickest woman first and tags her", () => {
+    expect(text.indexOf("BED 2")).toBeLessThan(text.indexOf("BED 1"))
+    expect(text).toMatch(/BED 2 .*\[NEEDS YOU\]/)
+  })
+  it("gives a timestamped timeline and oxytocin start and last change", () => {
+    expect(text).toMatch(/Timeline:/)
+    expect(text).toMatch(/09:00 Oxytocin started 4 mU\/min/)
+    expect(text).toMatch(/11:50 CTG normal to pathological/)
+    expect(text).toMatch(/Oxytocin 4 mU\/min · started 09:00 · last change 11:00/)
+  })
+  it("puts the time against each observation", () => {
+    const b = active({ observations: { pulseValue: "88", pulseAt: t(30 * MIN), lastPulse: t(30 * MIN) } })
+    expect(generateHandover({ b }, null, NOW)).toMatch(/P 88 11:30/)
+  })
+  it("lists women who left the board this shift, and the IOL queue with waiting time", () => {
+    const gone = { ...active({ id: "g", bedNumber: "4" }), delivery: { mode: "Em LSCS", time: t(2 * HOUR), ebl: 900 } }
+    const shift = { doctorName: "O", shiftType: "night", shiftStart: t(10 * HOUR), shiftEnd: t(-2 * HOUR) }
+    const out = generateHandover({ c: calm }, shift, NOW, {
+      removed: [{ at: t(HOUR), bed: gone }],
+      iolQueue: [{ id: "i", initials: "JB", gestWeeks: 41, gestDays: 3, indications: ["Post-dates 41+"], addedAt: t(13 * HOUR) }],
+    })
+    expect(out).toMatch(/LEFT THE BOARD THIS SHIFT \(1\)/)
+    expect(out).toMatch(/Bed 4 .*Em LSCS 10:00, EBL 900 mL · removed 11:00/)
+    expect(out).toMatch(/IOL QUEUE \(1\)/)
+    expect(out).toMatch(/JB 41\+3 · Post-dates 41\+ · waiting 13h/)
+  })
+})

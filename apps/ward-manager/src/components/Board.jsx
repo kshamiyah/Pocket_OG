@@ -79,7 +79,7 @@ export function BedRow({ bed, t, now, onOpen, flash }) {
     status = <>Pushing <span className="font-normal text-gray-500 dark:text-gray-400">· {ago(bed.pushingStartTime)}</span></>;
   } else {
     status = <>{stageLabel(bed)}{ve
-      ? <> · <span className="tabular-nums">{ve.dilation} cm</span> <span className="font-normal text-gray-500 dark:text-gray-400">{ago(ve.time)}</span></>
+      ? <> · <span className="tabular-nums">{ve.dilation} cm</span></>
       : <span className="font-normal text-gray-500 dark:text-gray-400"> · no VE</span>}</>;
   }
 
@@ -94,7 +94,7 @@ export function BedRow({ bed, t, now, onOpen, flash }) {
       <span className="flex-1 min-w-0 flex flex-col gap-1">
         <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">{status}</span>
         <span className="flex items-center gap-1 flex-wrap">
-          <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mr-0.5 whitespace-nowrap">{parityShort(bed.parity)} · {bed.gestation}</span>
+          <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mr-0.5 whitespace-nowrap">{parityShort(bed.parity)} · {bed.gestation}{!bed.delivery && ve ? ` · VE ${ago(ve.time)} ago` : ""}</span>
           {/* Facts are neutral; orange and red are kept for things that need doing. */}
           {!bed.delivery && bed.modeOfOnset === "Induced" && <Tag>IOL</Tag>}
           {!bed.delivery && bed.modeOfOnset === "PPROM" && <Tag>PPROM</Tag>}

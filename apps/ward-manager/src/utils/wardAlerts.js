@@ -1171,8 +1171,11 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     }
   }
 
+  // One event, one card: the 2 hour post-ARM review already asks for the VE,
+  // so the plain "VE due" reminder is not shown beside it.
+  const out = alerts.some(a => a.id === "arm-reassess") ? alerts.filter(a => a.id !== "ve-due") : alerts;
   const order = { urgent: 0, warning: 1, info: 2 };
-  return alerts.sort((a, b) => order[a.severity] - order[b.severity] || alertTier(a.id) - alertTier(b.id));
+  return out.sort((a, b) => order[a.severity] - order[b.severity] || alertTier(a.id) - alertTier(b.id));
 }
 
 /**

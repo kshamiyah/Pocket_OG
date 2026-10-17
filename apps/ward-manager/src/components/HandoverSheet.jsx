@@ -3,8 +3,8 @@ import Sheet from "../ui/Sheet";
 import { BTN, BTN_PRIMARY, BTN_SECONDARY } from "../ui/styles";
 import { generateHandover } from "../utils/handoverText";
 
-export default function HandoverSheet({ beds, shift, now, onClose }) {
-  const text = useMemo(() => generateHandover(beds, shift, now), [beds, shift, now]);
+export default function HandoverSheet({ beds, shift, now, removed = [], iolQueue = [], onClose }) {
+  const text = useMemo(() => generateHandover(beds, shift, now, { removed, iolQueue }), [beds, shift, now, removed, iolQueue]);
   const [status, setStatus] = useState(null);
   const preRef = useRef(null);
   const count = Object.keys(beds).length;
@@ -23,7 +23,7 @@ export default function HandoverSheet({ beds, shift, now, onClose }) {
   const canShare = typeof navigator !== "undefined" && !!navigator.share;
 
   return (
-    <Sheet open onClose={onClose} title="Handover" sub={`${count} ${count === 1 ? "woman" : "women"} · sorted by bed`}
+    <Sheet open onClose={onClose} title="Handover" sub={`${count} ${count === 1 ? "woman" : "women"} · in priority order, with times`}
       footer={
         <div className="flex gap-2">
           <button type="button" onClick={copy} className={`${BTN} ${BTN_PRIMARY} flex-1 min-h-[3.25rem] text-base`}>{status === "Copied" ? "Copied" : "Copy handover"}</button>

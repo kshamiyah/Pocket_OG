@@ -2,9 +2,11 @@ import { AlertList } from "./BedSheet";
 import { BTN, BTN_PRIMARY, BTN_SECONDARY, CARD, TYPE_META, TYPE_OVERLINE } from "../ui/styles";
 import { IconBack } from "../ui/icons";
 import { fmtAge, clock } from "../utils/time";
-import { LIQUOR_SHORT, capitalise, lastCTG, lastVE, membraneStatus, parityWithHistory, riskShort, stageLabel, veFindings } from "../utils/bedModel";
+import { DONE_LABEL, LIQUOR_SHORT, PERSISTENT_FLAGS, capitalise, currentOxytocin, lastCTG, lastVE, membraneStatus, parityWithHistory, riskShort, stageLabel, veFindings } from "../utils/bedModel";
 
-/** Step through each woman in bed order, confirming or updating as you go. */
+const DONE_FIELDS = [...new Set(Object.values(PERSISTENT_FLAGS).map(f => f.field))];
+
+/** Step through each woman in priority order, confirming or updating as you go. */
 export default function BoardRound({ ids, index, beds, triage, updated, now, onIndex, onExit, onVE, onCTG, onMore, onFix, onHandover }) {
   const total = ids.length;
   const done = index >= total;
@@ -53,6 +55,25 @@ export default function BoardRound({ ids, index, beds, triage, updated, now, onI
                 <dd className="text-gray-900 dark:text-gray-100">{(() => { const v = lastVE(bed); return v ? `${veFindings(v)}, ${clock(v.time)} (${fmtAge(now - new Date(v.time).getTime())} ago)` : "None"; })()}</dd>
                 <dt className="text-gray-500 dark:text-gray-400">CTG</dt>
                 <dd className="text-gray-900 dark:text-gray-100">{(() => { const c = lastCTG(bed); return c ? `${capitalise(c.classification)} at ${clock(c.time)}` : "Not logged"; })()}</dd>
+                </>}
+                {!bed.delivery && (() => {
+                  const oxy = currentOxytocin(bed);
+                  const last = (bed.oxytocinLog ?? []).at(-1);
+                  if (!oxy && !last) return null;
+                  return <>
+                    <dt className="text-gray-500 dark:text-gray-400">Oxytocin</dt>
+                    <dd className="text-gray-900 dark:text-gray-100">{oxy
+                      ? `${oxy.dose} mU/min${bed.oxytocinHeld ? ", held" : ""}, last change ${clock(oxy.lastIncrementTime ?? oxy.startTime)}`
+                      : `Stopped ${clock(last.startTime)}${last.stopReason ? `: ${last.stopReason}` : ""}`}</dd>
+                  </>;
+                })()}
+                {DONE_FIELDS.some(f => bed[f]) && <>
+                  <dt className="text-gray-500 dark:text-gray-400">Given</dt>
+                  <dd className="text-gray-900 dark:text-gray-100">{DONE_FIELDS.filter(f => bed[f]).map(f => `${DONE_LABEL[f] ?? f}${bed[`${f}At`] ? ` ${clock(bed[`${f}At`])}` : ""}`).join(" · ")}</dd>
+                </>}
+                {(bed.tasks ?? []).some(x => !x.done) && <>
+                  <dt className="text-gray-500 dark:text-gray-400">To do</dt>
+                  <dd className="text-gray-900 dark:text-gray-100">{bed.tasks.filter(x => !x.done).map(x => x.text).join(", ")}</dd>
                 </>}
                 <dt className="text-gray-500 dark:text-gray-400">Other</dt>
                 <dd className="text-gray-900 dark:text-gray-100">{[

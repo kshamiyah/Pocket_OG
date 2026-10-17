@@ -20,6 +20,9 @@ import { RULE_FOR_ALERT } from "../data/ruleCatalogue";
 export function AlertList({ alerts, onFix, limit = null, compact = false }) {
   const { openRule } = useRules();
   const [expanded, setExpanded] = useState(false);
+  // Tap an alert to read its details (with this woman's numbers); the top
+  // unreviewed one starts open.
+  const [openId, setOpenId] = useState(() => alerts.find(a => !a.reviewed)?.id ?? null);
   if (!alerts.length) return null;
   const collapsed = limit != null && !expanded && alerts.length > limit + 1;
   const visible = collapsed ? alerts.slice(0, limit) : alerts;
@@ -32,7 +35,12 @@ export function AlertList({ alerts, onFix, limit = null, compact = false }) {
         return (
           <div key={a.id} className={`rounded-xl border px-3 ${compact ? "py-2" : "py-2.5"} flex items-center gap-2.5 ${ALERT_BOX[a.severity]}`}>
             <div className="flex-1 min-w-0">
-              <p className={`text-sm font-semibold leading-snug ${SEV_TEXT[a.severity]}`}>{tidy(a.title)}</p>
+              <button type="button" onClick={() => setOpenId(o => (o === a.id ? null : a.id))} aria-expanded={openId === a.id}
+                className="w-full text-left flex items-start gap-1 active:opacity-70">
+                <span className={`flex-1 text-sm font-semibold leading-snug ${SEV_TEXT[a.severity]}`}>{tidy(a.title)}</span>
+                {a.body && <span aria-hidden="true" className={`shrink-0 text-xs mt-0.5 text-gray-400 transition-transform ${openId === a.id ? "rotate-90" : ""}`}>›</span>}
+              </button>
+              {openId === a.id && a.body && <p className="text-xs leading-snug text-gray-700 dark:text-gray-300 mt-1">{tidy(a.body)}</p>}
               {a.reviewed && (
                 <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">
                   Reviewed {clock(a.reviewed.at)}{a.reviewed.by ? ` by ${a.reviewed.by}` : ""} · returns {clock(a.reviewed.until)} if still present

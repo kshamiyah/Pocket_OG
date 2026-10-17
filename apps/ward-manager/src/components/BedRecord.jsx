@@ -118,7 +118,8 @@ function TasksPanel({ bed, onUpdate }) {
     onUpdate({ tasks: [...tasks, { id: newId("task"), text: label, done: false, createdAt: new Date().toISOString() }] }, `Task added: ${label}`);
     setText("");
   };
-  const toggle = id => onUpdate({ tasks: tasks.map(x => (x.id === id ? { ...x, done: !x.done } : x)) });
+  // Ticking a task off records when, for the handover timeline.
+  const toggle = id => onUpdate({ tasks: tasks.map(x => (x.id === id ? { ...x, done: !x.done, doneAt: x.done ? null : new Date().toISOString() } : x)) });
   const ordered = [...tasks.filter(x => !x.done), ...tasks.filter(x => x.done)];
   return (
     <div className="space-y-3">
