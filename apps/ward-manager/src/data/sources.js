@@ -340,6 +340,22 @@ export const SOURCES = {
     "url": "https://www.nice.org.uk/guidance/ng229/chapter/Recommendations#ng229-1_5_8",
     "text": "If the CTG trace is still pathological after implementing conservative measures:\n• obtain a further urgent review by an obstetrician and a senior midwife\n• evaluate the whole clinical picture and consider expediting birth\n• if there are evolving intrapartum risk factors for fetal compromise, have a very low threshold for expediting birth. [2017, amended 2022]"
   },
+  "NG25 1.4.1": {
+    "issuer": "NICE",
+    "doc": "NG25",
+    "docTitle": "Preterm labour and birth",
+    "rec": "Recommendation 1.4.1",
+    "url": "https://www.nice.org.uk/guidance/ng25/chapter/Recommendations#ng25-1_4_1",
+    "text": "As prophylaxis for intrauterine infection, offer women with P-PROM oral erythromycin 250 mg 4 times a day for a maximum of 10 days or until the woman is in established labour (whichever is sooner). [2015, amended 2022]"
+  },
+  "NG25 1.4.2": {
+    "issuer": "NICE",
+    "doc": "NG25",
+    "docTitle": "Preterm labour and birth",
+    "rec": "Recommendation 1.4.2",
+    "url": "https://www.nice.org.uk/guidance/ng25/chapter/Recommendations#ng25-1_4_2",
+    "text": "For women with P‑PROM who cannot tolerate erythromycin or in whom erythromycin is contraindicated, consider an oral penicillin for a maximum of 10 days or until the woman is in established labour (whichever is sooner). [2015, amended 2019]"
+  },
   "NG25 1.8.1": {
     "issuer": "NICE",
     "doc": "NG25",
@@ -559,14 +575,44 @@ export const SOURCES = {
     "readerCode": "GL983",
     "text": "Intrapartum Management:\n• All inpatients using own insulin: assessed by admitting midwife for suitability to self-administer per RBH trust guidelines\n• If using CGM/FreeStyle Libre: check reported result against finger prick — if within 0.3 mmol/L, existing monitor can be used\n• Continue normal medication (Metformin and/or insulin) until active labour or after ARM; discontinue Metformin and short-acting insulin in women not eating\n• IV cannula sited as soon as in established labour; second IV cannula required if VRII needed\n• T1DM: offer VRII once in established labour or after ARM — stop short-acting (bolus) insulin but continue long-acting (basal) insulin on VRII; women may choose insulin pump as alternative\n• T2DM on Metformin/diet: monitor BG 2-hourly; increase to hourly if BG > 7.0 mmol/L; if persistently > 7.0 mmol/L start VRII\n• Target blood glucose 4.0–7.0 mmol/L during labour\n• Monitor BG every hour in first stage and every 30 minutes in second stage for insulin-dependent T1 and T2\n• Check U&Es 4–6 hourly during labour to maintain potassium and bicarbonate\n• VRII: discontinued after delivery when patient is eating and drinking normally and BG < 8 mmol/L — ensure short-acting insulin given 30 minutes before stopping\nALL insulin pumps and blood sugar monitors (e.g. FreeStyle Libre) MUST BE REMOVED IN THEATRE. Women advised to bring new sets.\nPostnatal Care (Pre-existing T1/T2):\n• T1 and T2: significantly smaller insulin doses needed postnatally — document plan on EPR\n• If no documented plan: reduce first insulin dose by 25% below last pregnancy dose, OR reduce last pregnancy dose by 50%\n• If still unsure: contact endocrine registrar on bleep 192/199\n• Monitor BG 4 times daily (before each meal and pre-bed); aim pre-meal glucose 6.0–10.0 mmol/L\n• T1: CGM recordings can be used; replace sensor and pump from own kit immediately postnatal\n• T2 on Metformin/diet: may or may not need medication — review delivery plan on EPR for postnatal instructions\n• If BMs persistently > 10.0 mmol/L: consult DSM or endocrine registrar\n• Breastfeeding/expressing: include 10–15 g carbohydrate and drink fluids with each feed and when expressing"
   },
+  "GTG36 5.3": {
+    "issuer": "RCOG",
+    "doc": "GTG36",
+    "docTitle": "Prevention of early-onset neonatal group B streptococcal disease (2017)",
+    "rec": "Section 5.3",
+    "url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/prevention-of-early-onset-group-b-streptococcal-disease-green-top-guideline-no-36/",
+    "text": "Explain to women that the likelihood of maternal GBS carriage in this pregnancy is 50%. Discuss the options of IAP, or bacteriological testing in late pregnancy and the offer of IAP if still positive.\nIf performed, bacteriological testing should ideally be carried out at 35–37 weeks of gestation or 3–5 weeks prior to the anticipated delivery date, e.g. 32–34 weeks of gestation for women with twins."
+  },
+  "GTG36 5.4": {
+    "issuer": "RCOG",
+    "doc": "GTG36",
+    "docTitle": "Prevention of early-onset neonatal group B streptococcal disease (2017)",
+    "rec": "Section 5.4",
+    "url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/prevention-of-early-onset-group-b-streptococcal-disease-green-top-guideline-no-36/",
+    "text": "IAP should be offered to women with a previous baby with early- or late-onset GBS disease."
+  },
+  "GTG36 7.1": {
+    "issuer": "RCOG",
+    "doc": "GTG36",
+    "docTitle": "Prevention of early-onset neonatal group B streptococcal disease (2017)",
+    "rec": "Section 7.1",
+    "url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/prevention-of-early-onset-group-b-streptococcal-disease-green-top-guideline-no-36/",
+    "text": "Women who are known GBS carriers should be offered immediate IAP and induction of labour as soon as reasonably possible.\nIn women where the carrier status is negative or unknown, offer induction of labour immediately or expectant management up to 24 hours. Beyond 24 hours, induction of labour is appropriate."
+  },
+  "GTG36 8.1.1": {
+    "issuer": "RCOG",
+    "doc": "GTG36",
+    "docTitle": "Prevention of early-onset neonatal group B streptococcal disease (2017)",
+    "rec": "Section 8.1.1",
+    "url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/prevention-of-early-onset-group-b-streptococcal-disease-green-top-guideline-no-36/",
+    "text": "Bacteriological testing for GBS carriage is not recommended for women with preterm rupture of membranes. IAP should be given once labour is confirmed or induced irrespective of GBS status.\nFor those with evidence of colonisation in the current pregnancy or in previous pregnancies, the perinatal risks associated with preterm delivery at less than 34+0 weeks of gestation are likely to outweigh the risk of perinatal infection. For those at more than 34+0 weeks of gestation it may be beneficial to expedite delivery if a woman is a known GBS carrier."
+  },
   "GTG52 definitions": {
     "issuer": "RCOG",
     "doc": "GTG52",
-    "docTitle": "Prevention and management of postpartum haemorrhage",
-    "rec": "PPH — Definition, Classification & Causes",
+    "docTitle": "Prevention and management of postpartum haemorrhage (2016)",
+    "rec": "Definitions and first measures",
     "url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/prevention-and-management-of-postpartum-haemorrhage-green-top-guideline-no-52/",
-    "readerCode": "GTG52",
-    "text": "Definition & Classification:\n• Primary PPH: blood loss ≥500 ml from genital tract within 24 hours of birth\n• Minor PPH: 500–1000 ml — initial measures often sufficient\n• Major PPH: >1000 ml — requires escalation\n• Moderate major PPH: 1001–2000 ml\n• Severe major PPH: >2000 ml — activate massive haemorrhage protocol\n• Secondary PPH: abnormal bleeding 24 hours to 12 weeks postpartum\nThe 4 Ts — Causes:\n• Tone (uterine atony): ~80%: Polyhydramnios, multiple pregnancy, macrosomia, prolonged labour, uterine fibroids, chorioamnionitis\n• Tissue (retained products): ~10%: Retained placenta, retained products of conception, morbid placental adhesion\n• Trauma (genital tract injury): ~5%: Perineal, vaginal, cervical, uterine lacerations; uterine rupture, uterine inversion\n• Thrombin (coagulopathy): ~1–5%: Antepartum DIC (abruption, IVF), inherited coagulation disorders, therapeutic anticoagulation\nRisk Factors for Atonic PPH:\n• Previous PPH or placenta praevia\n• Multiple pregnancy or polyhydramnios (overdistension)\n• Macrosomia (EFW >4 kg)\n• Grand multiparity (≥5 deliveries)\n• Prolonged labour (especially third stage >30 min)\n• Chorioamnionitis or pyrexia in labour\n• Uterine fibroids\n• General anaesthesia, oxytocin augmentation\n• Placenta praevia or accreta suspected\nWomen at increased risk of PPH should deliver in a consultant-led unit with immediate access to blood products and theatre.",
-    "note": "Text as summarised in Pocket O&G; check the full guideline."
+    "text": "The traditional definition of primary PPH is the loss of 500 ml or more of blood from the genital tract within 24 hours of the birth of a baby. PPH can be minor (500–1000 ml) or major (more than 1000 ml). Major can be further subdivided into moderate (1001–2000 ml) and severe (more than 2000 ml).\nThe midwife in charge and the first-line obstetric and anaesthetic staff should be alerted when women present with minor PPH (blood loss 500–1000 ml) without clinical shock.\nA multidisciplinary team involving senior members of staff should be summoned to attend to women with major PPH (blood loss of more than 1000 ml) and ongoing bleeding or clinical shock.\nMeasures for minor PPH (blood loss 500–1000 ml) without clinical shock: intravenous access (one 14-gauge cannula); urgent venepuncture (20 ml) for group and screen, full blood count, coagulation screen, including fibrinogen; pulse, respiratory rate and blood pressure recording every 15 minutes; commence warmed crystalloid infusion.\nAll cases of PPH involving a blood loss of greater than 1500 ml should be the subject of a formal clinical incident review."
   }
 };

@@ -63,7 +63,13 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // NG195 1.6.1: GBS this pregnancy, or in a previous baby or pregnancy, both
   // call for antibiotics in labour.
   const isGBSThisPregnancy = flags.includes("GBS+");
-  const isGBSPrevious = flags.includes("GBS previous");
+  // NG195 1.6.1, GTG36 5.3 and 5.4: a previous baby with GBS disease always
+  // calls for antibiotics in labour; GBS in a previous pregnancy does unless a
+  // swab at 35 to 37 weeks this pregnancy was negative. The older combined flag
+  // "GBS previous" is read as the first, so saved boards keep their alert.
+  const isGBSPrevBaby = flags.includes("GBS previous baby") || flags.includes("GBS previous");
+  const isGBSPrevPregnancy = flags.includes("GBS previous pregnancy") && !flags.includes("GBS negative 35-37");
+  const isGBSPrevious = isGBSPrevBaby || isGBSPrevPregnancy;
   const isGBSPos = isGBSThisPregnancy || isGBSPrevious;
   // A temperature of 38°C or more starts the infection pathway too (NG235
   // 1.8.20; GL787 treats maternal pyrexia over 38°C as intra-amniotic infection).
@@ -71,7 +77,6 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   const isFever = !delivered && tempNow !== null && tempNow >= 38;
   const isInfection = flags.includes("Infection suspected") || isFever;
   const hasBleeding = flags.includes("APH");
-  const isGBSPending = flags.includes("GBS pending");
   // Membrane status comes from the VEs. Only when no VE has recorded membranes yet
   // does it fall back to what was recorded at admission (bed.membranes, etc.).
   const vesKnowMembranes = ves.some(v => v.membranes);
@@ -541,25 +546,8 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
         id: "prom-24h",
         severity: "urgent",
         title: "PROM > 24 hours: offer induction",
-        body: `Prelabour rupture of membranes for > 24h without established labour. Offer induction of labour.${isGBSPos ? " GBS: intrapartum antibiotics as soon as labour starts." : isGBSPending ? " GBS result pending: check and commence antibiotics if positive." : ""}`,
+        body: `Prelabour rupture of membranes for > 24h without established labour. Offer induction of labour.${isGBSPos ? " GBS: intrapartum antibiotics as soon as labour starts." : ""}`,
         citation: isGBSPos ? "NICE NG235 1.7.7 [2023] · GL787" : "NICE NG235 1.7.7 [2023]",
-      });
-    } else if (ms >= unit.promReviewH * HOUR) {
-      alerts.push({
-        id: "prom-18h",
-        // A review prompt at a local threshold, not an emergency.
-        severity: "warning",
-        title: `Membranes ruptured over ${unit.promReviewH} hours (${formatAge(ms)})`,
-        body: `${isGBSPending ? "GBS result pending: obtain it urgently. " : "Review GBS status. "}Antibiotics if GBS positive, ROM 48 hours or more, or pyrexia over 38°C (GL787); in preterm labour (NG195 1.6.1).`,
-        citation: `${unit.promReviewH} h is a unit setting: not in NG195 or GL787`,
-      });
-    } else if (ms >= (unit.promReviewH - 2) * HOUR) {
-      alerts.push({
-        id: "prom-16h",
-        severity: "warning",
-        title: `Membranes ruptured ${formatAge(ms)}: approaching ${unit.promReviewH}h`,
-        body: `Review GBS status${isGBSPending ? " (result pending: check now)" : ""} and signs of infection.`,
-        citation: "Unit setting",
       });
     }
   }
@@ -570,7 +558,12 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // NICE NG195 1.6.1: offer antibiotics during labour for GBS this pregnancy
   // or preterm labour; 1.6.4: first dose as soon as possible after labour starts.
   // An induction still latent with intact membranes is not yet labour.
-  const inLabour = inEstablishedLabour || (bed.labourStage === "Latent" && bed.modeOfOnset !== "Induced");
+  // Waters broken before labour (PPROM) is not labour either: GTG36 8.1.1 gives
+  // antibiotics once labour is confirmed or induced.
+  const inLabour = inEstablishedLabour || (bed.labourStage === "Latent" && bed.modeOfOnset !== "Induced" && bed.modeOfOnset !== "PPROM");
+  // GTG36 7.1: from 37+0 a known carrier is offered antibiotics as soon as the
+  // waters break; before that, once labour starts (8.1.1, NG195 1.6.4).
+  const gbsAtRupture = membranesRuptured && (gestWks === null || gestWks >= 37);
   // Suspected chorioamnionitis or sepsis: antibiotics as soon as infection is
   // suspected (NG195 1.6.4). Broad-spectrum treatment also covers GBS (GL787:
   // IAP not required if already on antibiotics for chorioamnionitis).
@@ -587,13 +580,16 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       citation: "NICE NG195 1.6.1, 1.6.4 · NG229 1.3.2, 1.3.8 · GL787",
     });
   }
-  if (!delivered && isGBSPos && !isInfection && (membranesRuptured || inLabour) && !bed.gbsAntibioticsStarted) {
+  if (!delivered && isGBSPos && !isInfection && (gbsAtRupture || inLabour) && !bed.gbsAntibioticsStarted) {
+    const who = isGBSThisPregnancy ? "GBS+" : isGBSPrevBaby ? "Previous baby with GBS disease" : "GBS in a previous pregnancy";
     alerts.push({
       id: "gbs-iap",
       severity: "urgent",
-      title: isGBSThisPregnancy ? "GBS+: IV antibiotic prophylaxis required" : "Previous GBS: IV antibiotic prophylaxis required",
-      body: "Give the first dose as soon as possible after labour starts (or membranes rupture) and continue until birth. Regimen per GL787: IV benzylpenicillin 3 g stat, then 1.5 g 4-hourly; penicillin allergy: IV teicoplanin 10 mg/kg stat, then 10 mg/kg 12-hourly.",
-      citation: "NICE NG195 1.6.1, 1.6.4 [2021] · GL787",
+      title: `${who}: IV antibiotic prophylaxis required`,
+      body: `${!isGBSThisPregnancy && !isGBSPrevBaby ? "No negative swab at 35 to 37 weeks this pregnancy. " : ""}Give the first dose as soon as possible after labour starts (from 37+0, as soon as the membranes rupture) and continue until birth. Regimen per GL787: IV benzylpenicillin 3 g stat, then 1.5 g 4-hourly; penicillin allergy: IV teicoplanin 10 mg/kg stat, then 10 mg/kg 12-hourly.`,
+      citation: isGBSThisPregnancy ? "NICE NG195 1.6.1, 1.6.4 [2021] · RCOG GTG36 7.1, 8.1.1 · GL787"
+        : isGBSPrevBaby ? "NICE NG195 1.6.1, 1.6.4 [2021] · RCOG GTG36 5.4 · GL787"
+        : "NICE NG195 1.6.1, 1.6.4 [2021] · RCOG GTG36 5.3 · GL787",
     });
   } else if (!delivered && isPreterm && !isGBSPos && !isInfection && inLabour && !bed.gbsAntibioticsStarted) {
     alerts.push({
@@ -605,6 +601,21 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     });
   }
 
+  // ─── PPROM: oral antibiotics until labour (GL787; NICE NG25 1.4.1) ────
+  // Waters broken before 37+0 without labour: prophylaxis for intrauterine
+  // infection. Suspected infection has its own (IV) alert, and once labour is
+  // established the intrapartum antibiotic prompts take over.
+  if (!delivered && isPreterm && membranes === "SROM" && bed.labourStage === "Latent" && !isInfection
+      && !bed.ppromAntibioticsStarted && !bed.ppromAntibioticsStartedDeclined) {
+    alerts.push({
+      id: "pprom-antibiotics",
+      severity: "urgent",
+      title: `PPROM (${gest}): start oral antibiotics`,
+      body: "Prophylaxis for intrauterine infection until established labour. GL787: oral amoxicillin 1 g 8-hourly for 7 days; penicillin allergy: oral azithromycin 500 mg 24-hourly for 7 days. NICE uses oral erythromycin 250 mg 4 times a day for up to 10 days (an oral penicillin if not tolerated). In established labour, switch to the intrapartum regimen.",
+      citation: "GL787 (local) · NICE NG25 1.4.1, 1.4.2",
+    });
+  }
+
   // ─── Bleeding (NICE NG235 1.8.20; NG229 1.3.2, 1.3.8) ────────────────
   if (!delivered && hasBleeding && !bed.bleedingReviewed) {
     alerts.push({
@@ -613,17 +624,6 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       title: "Bleeding: urgent obstetric review",
       body: "Fresh red bleeding is a transfer trigger and antepartum haemorrhage an obstetric emergency (NG235 1.8.20). Urgent obstetric review; offer continuous CTG. Tap Reviewed once seen; the flag stays for handover.",
       citation: "NICE NG235 1.8.20 · NG229 1.3.2, 1.3.8",
-    });
-  }
-
-  // ─── GBS pending — remind to check result after rupture ─────────────
-  if (!delivered && isGBSPending && membranesRuptured && !isGBSPos && !alerts.find(a => a.id.startsWith("prom-"))) {
-    alerts.push({
-      id: "gbs-pending-rupture",
-      severity: "warning",
-      title: "GBS result pending: membranes ruptured",
-      body: "Obtain GBS result urgently. If positive, commence IV benzylpenicillin 3g stat then 1.5g every 4h until delivery.",
-      citation: "GL787 (local)",
     });
   }
 
@@ -896,9 +896,9 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       severity: major ? "urgent" : "warning",
       title: `${major ? "Major" : "Minor"} PPH: EBL ${bed.delivery.ebl} mL`,
       body: major
-        ? "Major PPH (more than 1000 mL). Follow the PPH protocol; repeat observations and reassess ongoing loss."
-        : "Minor PPH (500 to 1000 mL). Repeat observations and reassess ongoing loss.",
-      citation: pphFrom !== 500 ? `RCOG GTG52 · ${pphFrom} mL after caesarean is local` : "RCOG GTG52",
+        ? `Major PPH (more than 1000 mL). If still bleeding or in clinical shock, summon a multidisciplinary team with senior staff and follow the full major PPH protocol.${bed.delivery.ebl > 1500 ? " Over 1500 mL: formal clinical incident review." : ""}`
+        : "Minor PPH (500 to 1000 mL). Without clinical shock: alert the midwife in charge and first-line obstetric and anaesthetic staff; one 14-gauge cannula; group and screen, FBC, clotting with fibrinogen; pulse, RR and BP every 15 minutes; warmed crystalloid.",
+      citation: pphFrom !== 500 ? `RCOG GTG52 [2016] · ${pphFrom} mL after caesarean is local` : "RCOG GTG52 [2016]",
     });
   }
 
@@ -1064,7 +1064,6 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       // Local additions (not NG229 indications), a unit setting
       unit.ctgLocalIndications && isPreterm && `Preterm (${gest})`,
       unit.ctgLocalIndications && isGBSPos && "GBS+",
-      unit.ctgLocalIndications && isGBSPending && "GBS pending",
       unit.ctgLocalIndications && bed.modeOfOnset === "PPROM" && "PPROM",
     ].filter(Boolean);
     // Unit setting: continuous CTG for everyone in established labour.
@@ -1161,7 +1160,7 @@ const TIER_0 = [
 ];
 const TIER_2 = new Set([
   "ve-overdue", "ve-never", "ve-due", "bp-due", "bp-never", "pulse-due", "pulse-never", "temp-due", "temp-never",
-  "rr-due", "rr-never", "bgl-due", "bgl-never", "prom-18h", "prom-16h", "latent-reassess", "ctg-review-due",
+  "rr-due", "rr-never", "bgl-due", "bgl-never", "latent-reassess", "ctg-review-due",
   "ctg-not-documented", "oxytocin-increment", "active-phase-limit", "under-28",
 ]);
 export function alertTier(id) {

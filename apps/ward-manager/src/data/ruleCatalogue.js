@@ -88,10 +88,10 @@ export const RULES = [
   // ── Antibiotics and membranes ──────────────────────────────────────────
   {
     id: "gbs-iap", group: "Antibiotics and membranes", title: "GBS: intrapartum antibiotics",
-    when: "GBS positive this pregnancy, or GBS in a previous baby or pregnancy; in labour or membranes ruptured; antibiotics not yet given. An induction still latent with intact membranes is not yet labour.",
+    when: "GBS positive this pregnancy; a previous baby with GBS disease; or GBS in a previous pregnancy without a negative swab at 35 to 37 weeks this pregnancy. In labour, or from 37+0 as soon as the membranes rupture; antibiotics not yet given. Before 37+0, ruptured membranes alone (PPROM) do not count, and an induction still latent with intact membranes is not yet labour.",
     then: "First dose as soon as possible, continue until birth. Regimen from GL787. Never hidden by the PROM alerts.",
     severity: "Urgent", alertIds: ["gbs-iap"],
-    sources: ["NG195 1.6.1", "NG195 1.6.4", "GL787 GBS"],
+    sources: ["NG195 1.6.1", "NG195 1.6.4", "GTG36 5.3", "GTG36 5.4", "GTG36 7.1", "GTG36 8.1.1", "GL787 GBS"],
   },
   {
     id: "infection-suspected", group: "Antibiotics and membranes", title: "Suspected chorioamnionitis or sepsis",
@@ -109,10 +109,17 @@ export const RULES = [
   },
   {
     id: "iap-preterm", group: "Antibiotics and membranes", title: "Preterm labour: intrapartum antibiotics",
-    when: "Under 37+0, in labour, not GBS+ (that has its own alert), antibiotics not yet given.",
+    when: "Under 37+0, in labour, not GBS+ (that has its own alert), antibiotics not yet given. Waters broken without labour (PPROM) does not count until labour starts.",
     then: "Offer antibiotics in labour, first dose as soon as possible.",
     severity: "Urgent", alertIds: ["iap-preterm"],
     sources: ["NG195 1.6.1", "NG195 1.6.4", "GL787 PROM"],
+  },
+  {
+    id: "pprom-antibiotics", group: "Antibiotics and membranes", title: "PPROM: oral antibiotics",
+    when: "Under 37+0, spontaneous rupture of membranes, not in labour (latent), no suspected infection, antibiotics not yet given or declined.",
+    then: "Start oral prophylaxis until established labour: GL787 amoxicillin (azithromycin if penicillin allergic) for 7 days; NICE uses erythromycin for up to 10 days. Antibiotics given, or Not given, clears it.",
+    severity: "Urgent", alertIds: ["pprom-antibiotics"], sources: ["GL787 PROM", "NG25 1.4.1", "NG25 1.4.2"],
+    local: "The drug and duration follow GL787 (amoxicillin for 7 days), which differs from NICE NG25 (erythromycin for up to 10 days).",
   },
   {
     id: "gbs-prom-birth", group: "Antibiotics and membranes", title: "GBS positive and waters broken: offer immediate birth",
@@ -131,21 +138,7 @@ export const RULES = [
     id: "prom-24h", group: "Antibiotics and membranes", title: "Prelabour rupture of membranes at term: 24 hours",
     when: "37+0 or later, membranes ruptured 24 hours or more, still latent.",
     then: "Offer induction of labour.",
-    severity: "Urgent", alertIds: ["prom-24h"], sources: ["NG235 1.7.6", "NG235 1.7.7"],
-  },
-  {
-    id: "prom-18h", group: "Antibiotics and membranes", title: "Membranes ruptured: review",
-    when: "Membranes ruptured for the unit's review time (default 18 hours; warning 2 hours earlier).",
-    then: "Review GBS status and signs of infection.",
-    severity: "Warning", alertIds: ["prom-16h", "prom-18h"], sources: ["GL787 PROM"], settings: ["promReviewH"],
-    local: "The review time is a unit setting. Neither NG195 nor GL787 uses an 18 hour threshold; GL787 gives 48 hours for antibiotics at term.",
-  },
-  {
-    id: "gbs-pending", group: "Antibiotics and membranes", title: "GBS result pending",
-    when: "GBS pending flag and membranes ruptured.",
-    then: "Chase the result; start antibiotics if positive.",
-    severity: "Warning", alertIds: ["gbs-pending-rupture"], sources: ["GL787 GBS"],
-    local: "Prompt to chase a pending result is local practice.",
+    severity: "Urgent", alertIds: ["prom-24h"], sources: ["NG235 1.7.6", "NG235 1.7.7", "GTG36 7.1"],
   },
   {
     id: "meconium", group: "Antibiotics and membranes", title: "Meconium",
@@ -283,7 +276,7 @@ export const RULES = [
     then: "Log a CTG review.",
     severity: "Warning with an indication, otherwise info", alertIds: ["ctg-not-documented"], sources: ["NG229 1.2.9", "NG229 1.3.2", "NG229 1.3.3", "NG229 1.3.8"],
     settings: ["ctgForAll", "ctgLocalIndications"],
-    local: "Continuous CTG for everyone is a unit choice: NICE offers intermittent auscultation to women at low risk (NG229 1.2.9). Preterm, GBS+, GBS pending and PPROM can be added as local indications; they are not NG229 indications.",
+    local: "Continuous CTG for everyone is a unit choice: NICE offers intermittent auscultation to women at low risk (NG229 1.2.9). Preterm, GBS+ and PPROM can be added as local indications; they are not NG229 indications.",
   },
   {
     id: "ctg-hourly", group: "Fetal monitoring (CTG)", title: "Hourly CTG review",
@@ -375,7 +368,7 @@ export const RULES = [
   {
     id: "pph", group: "After birth", title: "Postpartum haemorrhage",
     when: "Recorded EBL 500 to 1000 mL (minor) or over 1000 mL (major). After a caesarean the alert starts at the unit's setting (default 500 mL, as GTG52).",
-    then: "Minor: warning. Major: urgent. Reviewed quiets it for the unit's time (default 60 minutes); it then returns while she is on the board.",
+    then: "Minor: warning, with the GTG52 first measures. Major: urgent; senior multidisciplinary team if still bleeding or shocked; over 1500 mL, incident review. Reviewed quiets it for the unit's time (default 60 minutes); it then returns while she is on the board.",
     severity: "Warning / urgent", alertIds: ["pph"], sources: ["GTG52 definitions"], settings: ["pphCsMl"],
     local: "GTG52 uses 500 mL after any birth. A higher start after caesarean is a unit choice.",
   },

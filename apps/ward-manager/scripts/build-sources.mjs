@@ -9,7 +9,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { GL787_SECTIONS } from "../../../packages/guidelines/src/GL787.js";
 import { GL983_SECTIONS } from "../../../packages/guidelines/src/GL983.js";
-import { GTG52_SECTIONS } from "../../../packages/guidelines/src/GTG52.js";
 
 const ACCESSED = "15 Oct 2026";
 const recs = JSON.parse(readFileSync(process.argv[2], "utf8"));
@@ -28,7 +27,7 @@ const DOCS = {
 const WANT = {
   NG235: ["1.6.34", "1.7.6", "1.7.7", "1.8.1", "1.8.19", "1.8.20", "1.8.33", "1.8.36", "1.8.42", "1.8.45", "1.8.46", "1.8.48", "1.8.49", "1.8.50", "1.8.54", "1.8.55", "1.8.56", "1.8.58", "1.8.59", "1.9.8", "1.9.25", "1.9.26", "1.9.27", "1.9.28"],
   NG229: ["1.2.9", "1.3.2", "1.3.3", "1.3.5", "1.3.6", "1.3.8", "1.3.11", "1.4.12", "1.4.14", "1.4.15", "1.4.18", "1.4.24", "1.4.32", "1.4.37", "1.5.5", "1.5.6", "1.5.7", "1.5.8"],
-  NG25: ["1.8.1", "1.8.4", "1.9.1", "1.9.2", "1.9.3", "1.10.1", "1.10.2", "1.10.3"],
+  NG25: ["1.4.1", "1.4.2", "1.8.1", "1.8.4", "1.9.1", "1.9.2", "1.9.3", "1.10.1", "1.10.2", "1.10.3"],
   NG195: ["1.6.1", "1.6.4", "1.7.1"],
   NG133: ["1.7.3", "1.8.1", "1.8.2", "1.8.3", "1.8.4", "1.8.5"],
   NG3: ["1.4.10", "1.4.12"],
@@ -83,9 +82,27 @@ const local = (key, doc, docTitle, sections, id, issuer) => {
 local("GL787 GBS", "GL787", "Antimicrobial guideline (local)", GL787_SECTIONS, "abx-gbs", "Local");
 local("GL787 PROM", "GL787", "Antimicrobial guideline (local)", GL787_SECTIONS, "abx-pprom", "Local");
 local("GL983 intrapartum", "GL983", "Diabetes in pregnancy (local)", GL983_SECTIONS, "dm-preexisting-intrapartum", "Local");
-local("GTG52 definitions", "GTG52", "Prevention and management of postpartum haemorrhage", GTG52_SECTIONS, "gtg52-overview", "RCOG");
-out["GTG52 definitions"].url = "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/prevention-and-management-of-postpartum-haemorrhage-green-top-guideline-no-52/";
-out["GTG52 definitions"].note = "Text as summarised in Pocket O&G; check the full guideline.";
+// RCOG Green-top text copied from the published guidelines (BJOG full text).
+const GTG36_URL = "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/prevention-of-early-onset-group-b-streptococcal-disease-green-top-guideline-no-36/";
+const GTG52_URL = "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/prevention-and-management-of-postpartum-haemorrhage-green-top-guideline-no-52/";
+const gtg = (key, doc, docTitle, rec, url, text) => { out[key] = { issuer: "RCOG", doc, docTitle, rec, url, text }; };
+const T36 = "Prevention of early-onset neonatal group B streptococcal disease (2017)";
+gtg("GTG36 5.3", "GTG36", T36, "Section 5.3", GTG36_URL,
+  "Explain to women that the likelihood of maternal GBS carriage in this pregnancy is 50%. Discuss the options of IAP, or bacteriological testing in late pregnancy and the offer of IAP if still positive.\nIf performed, bacteriological testing should ideally be carried out at 35–37 weeks of gestation or 3–5 weeks prior to the anticipated delivery date, e.g. 32–34 weeks of gestation for women with twins.");
+gtg("GTG36 5.4", "GTG36", T36, "Section 5.4", GTG36_URL,
+  "IAP should be offered to women with a previous baby with early- or late-onset GBS disease.");
+gtg("GTG36 7.1", "GTG36", T36, "Section 7.1", GTG36_URL,
+  "Women who are known GBS carriers should be offered immediate IAP and induction of labour as soon as reasonably possible.\nIn women where the carrier status is negative or unknown, offer induction of labour immediately or expectant management up to 24 hours. Beyond 24 hours, induction of labour is appropriate.");
+gtg("GTG36 8.1.1", "GTG36", T36, "Section 8.1.1", GTG36_URL,
+  "Bacteriological testing for GBS carriage is not recommended for women with preterm rupture of membranes. IAP should be given once labour is confirmed or induced irrespective of GBS status.\nFor those with evidence of colonisation in the current pregnancy or in previous pregnancies, the perinatal risks associated with preterm delivery at less than 34+0 weeks of gestation are likely to outweigh the risk of perinatal infection. For those at more than 34+0 weeks of gestation it may be beneficial to expedite delivery if a woman is a known GBS carrier.");
+const T52 = "Prevention and management of postpartum haemorrhage (2016)";
+gtg("GTG52 definitions", "GTG52", T52, "Definitions and first measures", GTG52_URL, [
+  "The traditional definition of primary PPH is the loss of 500 ml or more of blood from the genital tract within 24 hours of the birth of a baby. PPH can be minor (500–1000 ml) or major (more than 1000 ml). Major can be further subdivided into moderate (1001–2000 ml) and severe (more than 2000 ml).",
+  "The midwife in charge and the first-line obstetric and anaesthetic staff should be alerted when women present with minor PPH (blood loss 500–1000 ml) without clinical shock.",
+  "A multidisciplinary team involving senior members of staff should be summoned to attend to women with major PPH (blood loss of more than 1000 ml) and ongoing bleeding or clinical shock.",
+  "Measures for minor PPH (blood loss 500–1000 ml) without clinical shock: intravenous access (one 14-gauge cannula); urgent venepuncture (20 ml) for group and screen, full blood count, coagulation screen, including fibrinogen; pulse, respiratory rate and blood pressure recording every 15 minutes; commence warmed crystalloid infusion.",
+  "All cases of PPH involving a blood loss of greater than 1500 ml should be the subject of a formal clinical incident review.",
+].join("\n"));
 
 const header = `// GENERATED by scripts/build-sources.mjs. Do not edit by hand.
 // Verbatim guideline text behind each alert rule (NICE text accessed ${ACCESSED}).
