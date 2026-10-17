@@ -208,7 +208,7 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
             )}
             {!bed.delivery && (
               <div>
-                <Label hint="NICE NG235 §1.1">Stage</Label>
+                <Label hint="NICE NG235 1.8.1">Stage</Label>
                 <div className="flex flex-wrap gap-1.5">
                   {STAGES.map(s => <Chip key={s} on={bed.labourStage === s} onClick={() => onStage(s)}>{STAGE_SHORT[s]}</Chip>)}
                 </div>
@@ -271,7 +271,7 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
                 </div>
               </div>
             ))}
-            <p className={`${TYPE_META} text-center`}>NICE NG235 §1.4.1: 4-hourly VE in active labour</p>
+            <p className={`${TYPE_META} text-center`}>NICE NG235 1.8.19: offer a VE 4-hourly in established labour</p>
           </>
         )}
 
@@ -301,7 +301,7 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
           <>
             <ObsPanel bed={bed} now={now} onUpdate={onUpdate} />
             <div>
-              <Label hint="NG235 §1.5.6">Oxytocin</Label>
+              <Label hint="NG235 1.8.54 to 1.8.56">Oxytocin</Label>
               <div className={`${CARD} px-3 py-2.5 flex items-center gap-3`}>
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">{oxy ? `${oxy.dose} mU/min${bed.oxytocinHeld ? ", held" : ""}` : "Not running"}</p>

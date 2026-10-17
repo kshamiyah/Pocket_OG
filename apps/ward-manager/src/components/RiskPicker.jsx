@@ -94,10 +94,23 @@ function RisksPage({ values, onChange, onClose, closing, onClosed, backLabel }) 
   );
 }
 
-/** Risks row on the Admit sheet: one tap opens the risks page. */
-export default function RiskPicker({ values, onChange, backLabel = "Admit" }) {
+/** Risks row on the Admit sheet: one tap opens the risks page. With `line`,
+ *  it is a one-line summary like the other Admit details (Risk factors · …). */
+export default function RiskPicker({ values, onChange, backLabel = "Admit", line = false }) {
   const sp = useSubPage();
   const toggle = v => onChange(values.filter(x => x !== v));
+  if (line) return (
+    <>
+      <button type="button" onClick={() => sp.open("risks")}
+        className="w-full min-h-10 px-3 rounded-lg border flex items-center gap-2 text-left text-sm active:scale-[0.99] bg-gray-50 dark:bg-gray-900/60 border-gray-200 dark:border-gray-800">
+        <span className="font-semibold text-gray-900 dark:text-gray-100 shrink-0">Risk factors</span>
+        <span className="flex-1 min-w-0 truncate text-gray-700 dark:text-gray-300">{values.length ? values.map(riskShort).join(", ") : "none · tap to add"}</span>
+        <span className="shrink-0 text-xs font-semibold text-claude-700 dark:text-claude-400">Change</span>
+        <IconChevron className="w-3.5 h-3.5 text-claude-700 dark:text-claude-400 shrink-0" />
+      </button>
+      {sp.page && <RisksPage backLabel={backLabel} values={values} onChange={onChange} onClose={sp.close} closing={sp.closing} onClosed={sp.closed} />}
+    </>
+  );
   return (
     <div>
       <Label tight hint="optional">Risks</Label>

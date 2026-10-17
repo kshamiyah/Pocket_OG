@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Board from "./Board";
 import BedSheet from "./BedSheet";
 import BedRecord from "./BedRecord";
@@ -19,9 +19,12 @@ import { RulesContext } from "../ui/rulesContext";
 import UndoToast from "../ui/UndoToast";
 import { ChipRow, Label } from "../ui/atoms";
 import { BTN, BTN_DANGER, BTN_SECONDARY, TYPE_META } from "../ui/styles";
-import { ACTION_ALERTS, addVE, declineAlert, doctorLabel, editVE as applyEditVE, fixAlert, fixLabel, lastCTG, newId, setStage, STAGE_SHORT } from "../utils/bedModel";
+import { ACTION_ALERTS, STILL_HERE, addVE, declineAlert, doctorLabel, editVE as applyEditVE, fixAlert, fixLabel, setStage, STAGE_SHORT } from "../utils/bedModel";
 import { triageWard, wardSummary } from "../utils/triage";
 import { clock } from "../utils/time";
+
+// Test-only clock control; the live build drops this import entirely.
+const SimBar = import.meta.env.VITE_SIM === "1" ? lazy(() => import("../sim/SimBar")) : null;
 import { getThemePref, isDarkResolved, setThemePref, watchSystemTheme } from "../utils/theme";
 
 // Storage keys are unchanged so boards already on a phone carry over.
@@ -70,7 +73,10 @@ export default function WardPage({ shift, onEndShift }) {
     const id = setInterval(() => setNow(Date.now()), 30000);
     const onVis = () => { if (!document.hidden) setNow(Date.now()); };
     document.addEventListener("visibilitychange", onVis);
-    return () => { clearInterval(id); document.removeEventListener("visibilitychange", onVis); };
+    // The test board's simulated clock announces each jump (never fires in the live app).
+    const onSim = () => setNow(Date.now());
+    window.addEventListener("sim-clock", onSim);
+    return () => { clearInterval(id); document.removeEventListener("visibilitychange", onVis); window.removeEventListener("sim-clock", onSim); };
   }, []);
   useEffect(() => watchSystemTheme(setDark), []);
   useEffect(() => () => { clearTimeout(toastTimer.current); clearTimeout(flashTimer.current); }, []);
@@ -107,7 +113,8 @@ export default function WardPage({ shift, onEndShift }) {
 
   const updateBed = useCallback((bedId, updates, message) => {
     const bed = beds[bedId]; if (!bed) return;
-    commit(message ?? `Bed ${bed.bedNumber} updated`, { ...beds, [bedId]: { ...bed, ...updates } }, null, bedId);
+    // updatedAt feeds "is she still here?": any edit counts as an entry.
+    commit(message ?? `Bed ${bed.bedNumber} updated`, { ...beds, [bedId]: { ...bed, ...updates, updatedAt: new Date().toISOString() } }, null, bedId);
   }, [beds, commit]);
 
   const undo = () => {
@@ -125,21 +132,12 @@ export default function WardPage({ shift, onEndShift }) {
   const iso = () => new Date().toISOString();
 
   // ── Actions ──────────────────────────────────────────────────────────
-  const ctgNormal = bedId => {
-    const bed = beds[bedId];
-    // A one-tap "normal" must not quietly replace an abnormal review: ask for the features.
-    const prev = lastCTG(bed);
-    if (prev && prev.classification !== "normal") {
-      setSheet({ type: "ctg", bedId, from: onCard ? "bed" : undefined, notice: `The last CTG (${clock(prev.time)}) was ${prev.classification}. Record the features to log this review.` });
-      return;
-    }
-    updateBed(bedId, { ctgLog: [...(bed.ctgLog ?? []), { id: newId("ctg"), time: iso(), classification: "normal", quick: true }] }, `Normal CTG logged · Bed ${bed.bedNumber}`);
-    if (!onCard) closeSheet();
-  };
   const fix = (bedId, alertId, kind) => {
     const bed = beds[bedId];
     // Stopping oxytocin is logged in the oxytocin sheet, with the reason.
     if (ACTION_ALERTS[alertId]) { setSheet({ type: "oxy", bedId, from: sheet?.bedId === bedId ? "bed" : undefined, stop: true }); return; }
+    // "Not here": open her full record, where she can be removed or updated.
+    if (kind === "decline" && alertId === STILL_HERE) { closeSheet(); setRecordId(bedId); return; }
     if (kind === "decline") {
       updateBed(bedId, declineAlert(alertId, iso(), doctorLabel(shift?.doctorName)), `Not given · Bed ${bed.bedNumber}`);
       return;
@@ -229,6 +227,7 @@ export default function WardPage({ shift, onEndShift }) {
 
   return (
     <RulesContext.Provider value={rulesCtx}>
+      {SimBar && <Suspense fallback={null}><SimBar rows={rows} /></Suspense>}
       <Board
         rows={rows} summary={summary} now={now} shift={shift} dark={dark} flashId={flashId}
         iolQueue={iolQueue} tab={tab} onTab={setTab}
@@ -253,7 +252,7 @@ export default function WardPage({ shift, onEndShift }) {
           onIndex={i => setRound(r => ({ ...r, index: Math.max(0, i) }))}
           onExit={() => setRound(null)}
           onVE={id => setSheet({ type: "ve", bedId: id })}
-          onCTGNormal={ctgNormal}
+          onCTG={id => setSheet({ type: "ctg", bedId: id })}
           onMore={id => setSheet({ type: "bed", bedId: id })}
           onFix={fix}
           onHandover={() => { setRound(null); setSheet({ type: "handover" }); }} />
@@ -276,7 +275,6 @@ export default function WardPage({ shift, onEndShift }) {
       {sheet?.type === "bed" && sb && (
         <BedSheet bed={sb} t={triage[sb.id]} now={now} onClose={closeSheet}
           onEdit={() => setSheet({ type: "edit", bedId: sb.id, back: "bed" })}
-          onCTGNormal={() => ctgNormal(sb.id)}
           onCTGConcern={() => setSheet({ type: "ctg", bedId: sb.id, from: "bed" })}
           onVE={() => setSheet({ type: "ve", bedId: sb.id, from: "bed" })}
           onObs={() => setSheet({ type: "obs", bedId: sb.id, from: "bed" })}

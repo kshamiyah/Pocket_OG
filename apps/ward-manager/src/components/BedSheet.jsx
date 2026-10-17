@@ -1,11 +1,11 @@
 import { useState } from "react";
 import Sheet from "../ui/Sheet";
 import { Label } from "../ui/atoms";
-import { ALERT_BOX, BTN, BTN_OK, BTN_SECONDARY, SEV_TEXT } from "../ui/styles";
-import { IconTick, IconChevron, IconInfo } from "../ui/icons";
+import { ALERT_BOX, BTN, BTN_SECONDARY, SEV_TEXT } from "../ui/styles";
+import { IconChevron, IconInfo } from "../ui/icons";
 import { fmtAge, clock } from "../utils/time";
 import {
-  ACTION_ALERTS, DECLINABLE, STAGES, STAGE_SHORT, LIQUOR_SHORT, capitalise, currentOxytocin, fixLabel, lastCTG, lastVE, obsStatus, obsTracked,
+  ACTION_ALERTS, DECLINABLE, STILL_HERE, STAGES, STAGE_SHORT, LIQUOR_SHORT, capitalise, currentOxytocin, fixLabel, lastCTG, lastVE, obsStatus, obsTracked,
   parityWithHistory, riskShort, stageLabel, membraneStatus,
 } from "../utils/bedModel";
 import { shortLabel, tidy } from "../utils/triage";
@@ -59,10 +59,10 @@ export function AlertList({ alerts, onFix, limit = null, compact = false }) {
                   className={`min-h-9 px-3 rounded-lg border text-xs font-bold active:scale-95 ${ACTION_ALERTS[a.id] ? "bg-red-600 border-red-600 text-white" : "bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-200"}`}>
                   {fix}
                 </button>
-                {DECLINABLE.has(a.id) && (
+                {(DECLINABLE.has(a.id) || a.id === STILL_HERE) && (
                   <button type="button" onClick={() => onFix(a.id, "decline")}
                     className="min-h-8 px-3 rounded-lg border bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-semibold text-gray-500 dark:text-gray-400 active:scale-95">
-                    Not given
+                    {a.id === STILL_HERE ? "Not here" : "Not given"}
                   </button>
                 )}
               </div>
@@ -96,7 +96,7 @@ const TONE = {
   ok: "bg-gray-50 dark:bg-gray-900/60 border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100",
 };
 const TILE_ALERTS = {
-  ve: { red: ["ve-overdue", "ve-never", "slow-progress"], amber: ["ve-due", "arm-reassess", "active-phase-limit"] },
+  ve: { red: ["ve-overdue", "ve-never", "slow-progress", "oxytocin-poor-progress"], amber: ["ve-due", "arm-reassess", "active-phase-limit"] },
   ctg: { red: ["ctg-pathological", "ctg-suspicious-overdue", "oxytocin-stop-pathological"], amber: ["ctg-suspicious", "ctg-review-due", "ctg-not-documented"] },
   obs: { red: ["bp-severe", "bp-low", "temp-38", "rr-low", "bgl-low", "bgl-high", "bgl-due", "bgl-never"], amber: ["tachycardia", "oliguria", "bp-elevated", "temp-375", "temp-low", "rr-high", "pulse-due", "pulse-never", "bp-due", "bp-never", "temp-due", "temp-never", "rr-due", "rr-never"] },
   oxy: { red: ["hyperstim", "oxytocin-max", "oxytocin-stop-pathological"], amber: ["oxytocin-increment"] },
@@ -123,13 +123,17 @@ function Tile({ label, value, meta, tone, onClick, ariaLabel }) {
 
 const STAGE_BAR = { "Latent": "Latent", "Active first stage": "Active", "Passive second stage": "Passive", "Active second stage": "Pushing" };
 
-export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGNormal, onCTGConcern, onVE, onObs, onFix, onStage, onDelivered, onOxy, onRecord, onRemove }) {
+export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, onVE, onObs, onFix, onStage, onDelivered, onOxy, onRecord, onRemove }) {
   if (!bed) return null;
   const ve = lastVE(bed);
   const ctg = lastCTG(bed);
   const oxy = currentOxytocin(bed);
   const iol = bed.modeOfOnset === "Induced" ? `IOL${bed.inductionMethod ? ` (${bed.inductionMethod})` : ""}` : null;
-  const sub = [parityWithHistory(bed), bed.gestation, stageLabel(bed), iol, ...(bed.riskFlags ?? []).map(riskShort), bed.analgesia !== "None" ? bed.analgesia : null]
+  // Membranes sit in the line under the bed number, so the 4th tile can always be oxytocin.
+  const m0 = membraneStatus(bed);
+  const membText = !m0.status || bed.delivery ? null : m0.status === "Intact" ? "Membranes intact"
+    : [`${m0.status}${m0.time ? ` ${fmtAge(now - new Date(m0.time).getTime())}` : ""}`, m0.liquor ? (LIQUOR_SHORT[m0.liquor] ?? m0.liquor) : null].filter(Boolean).join(", ");
+  const sub = [parityWithHistory(bed), bed.gestation, stageLabel(bed), iol, membText, ...(bed.riskFlags ?? []).map(riskShort), bed.analgesia !== "None" ? bed.analgesia : null]
     .filter(Boolean).join(" · ");
 
   const editBtn = onEdit && (
@@ -137,6 +141,12 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGNormal, on
       className="shrink-0 min-h-9 px-3 rounded-full bg-gray-100 dark:bg-gray-900 text-sm font-semibold text-claude-700 dark:text-claude-400 active:scale-95">Edit</button>
   );
 
+  const obs = obsStatus(bed, now);
+  const ago = iso => fmtAge(now - new Date(iso).getTime());
+  const obsDue = obs.filter(o => !o.done);
+  // An abnormal value outranks "done": the tile names it until a newer value replaces it.
+  const obsAbnormal = t.alerts.find(a => TILE_ALERTS.obs.red.includes(a.id) && !a.id.startsWith("bgl-d") && !a.id.startsWith("bgl-n"))
+    ?? t.alerts.find(a => ["tachycardia", "rr-high", "bp-elevated", "temp-375", "temp-low", "oliguria"].includes(a.id));
   if (bed.delivery) {
     const d = bed.delivery;
     return (
@@ -146,6 +156,17 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGNormal, on
           <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400">{d.mode} at {clock(d.time)}</p>
           <p className="text-xs text-emerald-700 dark:text-emerald-400/80">{d.ebl != null ? `EBL ${d.ebl} mL` : "EBL not recorded"}{d.notes ? ` · ${d.notes}` : ""}</p>
         </div>
+        {/* Postnatal obs feed the PPH and sepsis checks, so recording them stays one tap away. */}
+        {(() => {
+          const lastAt = Math.max(0, ...obs.map(o => o.at ?? 0));
+          return (
+            <div className="grid">
+              <Tile label="Obs" tone={toneFor("obs", t.alerts)} onClick={onObs} ariaLabel="Record obs"
+                value={obsAbnormal ? "Check" : lastAt ? `Last ${fmtAge(now - lastAt)} ago` : "None recorded"}
+                meta={obsAbnormal ? shortLabel(obsAbnormal) : "tap to record"} />
+            </div>
+          );
+        })()}
         <div className="grid grid-cols-2 gap-2">
           <button type="button" onClick={onDelivered} className={`${BTN} ${BTN_SECONDARY}`}>Edit delivery</button>
           <button type="button" onClick={onRecord} className={`${BTN} ${BTN_SECONDARY}`}>Full record</button>
@@ -155,13 +176,6 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGNormal, on
     );
   }
 
-  const obs = obsStatus(bed, now);
-  const ago = iso => fmtAge(now - new Date(iso).getTime());
-  const memb = membraneStatus(bed);
-  const obsDue = obs.filter(o => !o.done);
-  // An abnormal value outranks "done": the tile names it until a newer value replaces it.
-  const obsAbnormal = t.alerts.find(a => TILE_ALERTS.obs.red.includes(a.id) && !a.id.startsWith("bgl-d") && !a.id.startsWith("bgl-n"))
-    ?? t.alerts.find(a => ["tachycardia", "rr-high", "bp-elevated", "temp-375", "temp-low", "oliguria"].includes(a.id));
   const CTG_WORD = { normal: "Normal", suspicious: "Susp.", pathological: "Path." };
   return (
     <Sheet open onClose={onClose} title={`Bed ${bed.bedNumber}`} sub={sub} action={editBtn}>
@@ -174,20 +188,14 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGNormal, on
         <Tile label="Obs" tone={toneFor("obs", t.alerts)} onClick={onObs} ariaLabel="Record obs"
           value={obsAbnormal ? "Check" : !obsTracked(bed) ? "—" : obsDue.length ? `${obsDue.length} due` : "Done"}
           meta={obsAbnormal ? shortLabel(obsAbnormal) : obsTracked(bed) ? obs.map(o => `${o.letter}${o.done ? "✓" : "·"}`).join(" ") : "tap to record"} />
-        {oxy ? (
-          <Tile label="Oxytocin" tone={toneFor("oxy", t.alerts)} onClick={onOxy} ariaLabel="Oxytocin"
-            value={`${oxy.dose} mU`} meta={bed.oxytocinHeld ? "held" : `since ${clock(oxy.lastIncrementTime ?? oxy.startTime)}`} />
-        ) : (
-          <Tile label="Membranes" tone={toneFor("memb", t.alerts)} onClick={onRecord} ariaLabel="Membranes, open full record"
-            value={memb.status ?? "—"} meta={memb.status && memb.status !== "Intact" ? [memb.time ? `${ago(memb.time)}` : null, memb.liquor ? (LIQUOR_SHORT[memb.liquor] ?? memb.liquor) : null].filter(Boolean).join(" · ") : memb.status ? "" : "none"} />
-        )}
+        {/* Always oxytocin, so starting it is always in the same place. */}
+        <Tile label="Oxytocin" tone={toneFor("oxy", t.alerts)} onClick={onOxy} ariaLabel={oxy ? "Oxytocin" : "Start oxytocin"}
+          value={oxy ? `${oxy.dose} mU` : "Off"}
+          meta={oxy ? (bed.oxytocinHeld ? "held" : `since ${clock(oxy.lastIncrementTime ?? oxy.startTime)}`) : "tap to start"} />
       </div>
 
       {ctg?.comment && (
         <p className="text-xs text-gray-600 dark:text-gray-400 px-1 -mt-1 truncate"><span className="font-semibold">CTG {clock(ctg.time)}:</span> {ctg.comment}</p>
-      )}
-      {(!ctg || ctg.classification === "normal") && (
-        <button type="button" onClick={onCTGNormal} className={`${BTN} ${BTN_OK} w-full !min-h-11`}><IconTick /> CTG normal</button>
       )}
 
       {t.shown.length ? <AlertList alerts={t.shown} onFix={onFix} limit={2} compact /> : (
@@ -208,7 +216,7 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGNormal, on
       </div>
 
       <div className="flex items-center justify-between gap-2 pt-1">
-        {oxy ? <span /> : <button type="button" onClick={onOxy} className="min-h-10 px-1 text-sm font-semibold text-claude-700 dark:text-claude-400">Start oxytocin</button>}
+        <span />
         <button type="button" onClick={onRecord} className="min-h-10 px-1 text-sm font-semibold text-claude-700 dark:text-claude-400 inline-flex items-center gap-0.5">Full record <IconChevron className="w-3.5 h-3.5" /></button>
       </div>
     </Sheet>

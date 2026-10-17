@@ -2,6 +2,7 @@
 // boards already saved on a phone keep working.
 
 import { MIN } from "./time";
+import { classifyCTGEntry } from "@pocket-og/guidelines";
 import { getUnitSettings } from "../data/unitSettings";
 
 export const STAGES = ["Latent", "Active first stage", "Passive second stage", "Active second stage"];
@@ -191,6 +192,34 @@ export function lastVE(bed) {
 export function lastCTG(bed) {
   const log = bed.ctgLog ?? [];
   return log.length ? log[log.length - 1] : null;
+}
+
+// The fetal heart features a graded CTG review records, carried forward by
+// "CTG unchanged". Contractions are not: they are counted afresh each time
+// (oxytocin is titrated against them, NG235 1.8.54).
+const CTG_FEATURES = ["baselineHR", "baselineUndetermined", "variability", "variabilityMinutes", "decelerations",
+  "decelerationsRepetitive", "decelerationMinutes", "accelerations"];
+
+/**
+ * "CTG unchanged": a new review at `iso` with the same fetal heart features as
+ * the last graded review, plus this review's contraction count `contractions`
+ * (left out when not given, for previewing). Offered only when that review was
+ * normal (and not a clinician override), and only if the copy still grades
+ * normal now (a rise in the active second stage, for example, would not).
+ * Otherwise null, and the full form is used.
+ */
+export function sameAsLastCTG(bed, iso, contractions = null) {
+  const log = bed.ctgLog ?? [];
+  const graded = log.filter(e => e.baselineHR != null || e.baselineUndetermined);
+  const last = graded.at(-1);
+  if (!last || log.at(-1) !== last || last.classification !== "normal" || last.clinicianOverride) return null;
+  const entry = { id: newId("ctg"), time: iso, sameAsLast: true };
+  for (const k of CTG_FEATURES) if (last[k] !== undefined) entry[k] = last[k];
+  if (contractions != null) entry.contractionsPerTen = contractions;
+  const start = graded.find(e => e.baselineHR != null && !e.baselineUndetermined)?.baselineHR ?? null;
+  const cat = classifyCTGEntry(entry, last.baselineHR ?? null, { startBaselineHR: start, activeSecondStage: bed.labourStage === "Active second stage" });
+  if (cat !== "normal") return null;
+  return { ...entry, classification: cat, autoClassification: cat };
 }
 
 /** The running oxytocin entry, or null if never started or stopped (dose 0). */
@@ -409,7 +438,7 @@ export const REVIEW_GROUP = {
   "pph": "reviewHourMin", "bp-elevated": "reviewHourMin", "temp-38": "reviewHourMin", "temp-375": "reviewHourMin", "temp-low": "reviewHourMin",
   "oliguria": "reviewHourMin", "oxytocin-max": "reviewHourMin", "passive-limit": "reviewHourMin",
   "pushing-senior-review": "reviewHourMin", "liquor-blood": "reviewHourMin",
-  "slow-progress": "reviewProgressMin", "arm-reassess": "reviewProgressMin",
+  "slow-progress": "reviewProgressMin", "oxytocin-poor-progress": "reviewProgressMin", "arm-reassess": "reviewProgressMin",
   "active-phase-limit": "reviewLongMin", "latent-reassess": "reviewLongMin", "prom-24h": "reviewLongMin",
   "prom-18h": "reviewLongMin", "prom-16h": "reviewLongMin", "gbs-pending-rupture": "reviewLongMin",
   "mec-thick": "reviewLongMin", "mec-thin": "reviewLongMin", "liquor-absent": "reviewLongMin",
@@ -425,6 +454,10 @@ export function reviewMinutes(alertId, unit = getUnitSettings()) {
 // the right sheet (stopping oxytocin is logged in the oxytocin sheet).
 export const ACTION_ALERTS = { "oxytocin-stop-pathological": "Stop oxytocin" };
 
+// "Is she still here?": Still here stamps the record (restarting the clock);
+// the second button, Not here, opens her full record to remove or update her.
+export const STILL_HERE = "bed-stale";
+
 // "Discuss / consider" prompts that can be answered "not given", so the
 // handover never reads as given when it was decided against.
 export const DECLINABLE = new Set(["preterm-mgso4", "preterm-steroids"]);
@@ -435,6 +468,7 @@ export function declineAlert(alertId, iso, by = null) {
 }
 
 export function fixLabel(alertId) {
+  if (alertId === STILL_HERE) return "Still here";
   if (ACTION_ALERTS[alertId]) return ACTION_ALERTS[alertId];
   if (PERSISTENT_FLAGS[alertId]) return PERSISTENT_FLAGS[alertId].label;
   if (OBS_STAMP[alertId]) return "Done";
@@ -443,6 +477,7 @@ export function fixLabel(alertId) {
 }
 
 export function fixAlert(bed, alertId, iso, by = null) {
+  if (alertId === STILL_HERE) return { confirmedHereAt: iso };
   if (ACTION_ALERTS[alertId]) return {};
   if (PERSISTENT_FLAGS[alertId]) {
     const f = PERSISTENT_FLAGS[alertId].field;

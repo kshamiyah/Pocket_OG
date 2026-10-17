@@ -16,14 +16,15 @@ const toggle = (cur, set) => v => set(cur === v ? null : v);
 export default function VESheet({ bed, editVE = null, onSave, onClose }) {
   const last = editVE ? null : lastVE(bed);
   const base = editVE ?? last;
-  const [dil, setDil] = useState(editVE?.dilation ?? null);
+  // Starts at the last examination's dilation, so the new finding is a slide from it.
+  const [dil, setDil] = useState(editVE?.dilation ?? last?.dilation ?? null);
   const [when, setWhen] = useState(editVE ? whenFromISO(editVE.time) : { minsAgo: 0 });
-  // Station and contractions are findings of this examination, so they are never
-  // copied from the last VE. Membranes, liquor and presentation carry over.
-  const [station, setStation] = useState(editVE ? editVE.station ?? null : null);
+  // Every finding starts at the last examination's value, so a new VE is a
+  // set of changes from it; labels say which values are still the last ones.
+  const [station, setStation] = useState(editVE ? editVE.station ?? null : last?.station ?? null);
   const [memb, setMemb] = useState(base?.membranes ?? bed.membranes ?? "Intact");
   const [liquor, setLiquor] = useState(base?.liquor ?? bed.liquor ?? "Clear");
-  const [cx, setCx] = useState(editVE ? editVE.contractions ?? null : null);
+  const [cx, setCx] = useState(editVE ? editVE.contractions ?? null : last?.contractions ?? null);
   const [pres, setPres] = useState(base?.presentation ?? "Cephalic");
   const [more, setMore] = useState(!!editVE || !last);
   const [romWhen, setRomWhen] = useState(editVE?.membranesTime ? whenFromISO(editVE.membranesTime) : null);
@@ -62,7 +63,7 @@ export default function VESheet({ bed, editVE = null, onSave, onClose }) {
   return (
     <Sheet open onClose={onClose}
       title={`${editVE ? "Edit VE" : "VE"} · Bed ${bed.bedNumber}`}
-      sub={last ? `Last: ${last.dilation} cm at ${clock(last.time)} · NICE NG235 §1.4.1` : "NICE NG235 §1.4.1"}
+      sub={last ? `Last: ${last.dilation} cm at ${clock(last.time)} · NICE NG235 1.8.19` : "NICE NG235 1.8.19"}
       footer={
         <button type="button" onClick={save} disabled={!canSave} className={`${BTN} ${BTN_PRIMARY} w-full min-h-[3.25rem] text-base`}>
           {dil == null ? "Set the dilation" : `${editVE ? "Save changes" : "Save VE"} · ${dil} cm`}
@@ -70,7 +71,7 @@ export default function VESheet({ bed, editVE = null, onSave, onClose }) {
       }>
       <div>
         <Label>Dilation</Label>
-        <DilationGrid value={dil} onChange={setDil} />
+        <DilationGrid value={dil} onChange={setDil} lastValue={editVE ? null : last?.dilation ?? null} />
       </div>
 
       {suggestion && (
@@ -82,11 +83,11 @@ export default function VESheet({ bed, editVE = null, onSave, onClose }) {
       )}
 
       <div>
-        <Label hint="optional">Station</Label>
+        <Label hint={last && station != null && station === last.station ? "same as last VE" : "optional"}>Station</Label>
         <ChipRow small options={[-3, -2, -1, 0, 1, 2, 3]} value={station} onChange={toggle(station, setStation)} label={stationLabel} />
       </div>
       <div>
-        <Label hint={cx > 5 ? "over 5 in 10: see NG235 §1.5.7" : "optional"}>Contractions in 10 min</Label>
+        <Label hint={cx >= 5 ? "5 or more in 10: reduce frequency (NG235 1.8.55, NG229 1.4.14)" : last && cx != null && cx === last.contractions ? "same as last VE" : "optional"}>Contractions in 10 min</Label>
         <ChipRow small options={[1, 2, 3, 4, 5, 6, 7, 8]} value={cx} onChange={toggle(cx, setCx)} />
       </div>
 

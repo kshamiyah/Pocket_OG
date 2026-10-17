@@ -4,8 +4,8 @@ import { Chip, ChipRow, Label, Stepper, WhenPicker } from "../ui/atoms";
 import { BTN, BTN_PRIMARY, CTG_BOX, INPUT, TYPE_META } from "../ui/styles";
 import { resolveWhen, whenFromISO } from "../utils/time";
 import { classifyCTGEntry } from "../utils/wardAlerts";
-import { newId } from "../utils/bedModel";
-import { CTG_DESC } from "../utils/ctgText";
+import { newId, sameAsLastCTG } from "../utils/bedModel";
+import { CTG_DESC, ctgSummary } from "../utils/ctgText";
 
 export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, onClose }) {
   const log = bed.ctgLog ?? [];
@@ -44,6 +44,7 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
   const [override, setOverride] = useState(!!editCTG?.clinicianOverride);
   const cat = override ? "pathological" : autoCat;
   const iso = resolveWhen(when);
+  const same = !editCTG ? sameAsLastCTG(bed, new Date().toISOString()) : null;
   const rise = Math.max(prevHR != null ? hr - prevHR : 0, startHR != null ? hr - startHR : 0);
   const hrTone = undetermined || !hrSet ? "text-gray-400" : hr < 100 || hr > 160 ? "text-red-600 dark:text-red-400" : hr < 110 || rise >= 20 ? "text-claude-700 dark:text-claude-400" : "";
 
@@ -66,6 +67,28 @@ export default function CTGSheet({ bed, editCTG = null, notice = null, onSave, o
         </button>
       }>
       {notice && <p className="text-sm font-semibold text-claude-800 dark:text-claude-300">{notice}</p>}
+      {/* Hourly review with the fetal heart unchanged: tapping today's
+          contraction count logs the same graded heart features at this time
+          (only after a normal graded review, and only if it still grades
+          normal). Contractions are never carried over. 5 or more, or anything
+          else changed: grade the features below. */}
+      {same && (
+        <div className="rounded-xl border px-3 py-2.5 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-900">
+          <span className="block text-base font-bold text-emerald-900 dark:text-emerald-200">✓ Fetal heart unchanged since last review</span>
+          <span className="block text-xs text-emerald-800 dark:text-emerald-300 mt-0.5">{ctgSummary(same)}</span>
+          <span className="block text-xs font-semibold text-emerald-900 dark:text-emerald-200 mt-2 mb-1.5">Contractions in 10 min now: tap to log as normal</span>
+          <div className="flex gap-1.5">
+            {[0, 1, 2, 3, 4].map(n => (
+              <button key={n} type="button" aria-label={`Unchanged, ${n} contractions in 10 minutes`}
+                onClick={() => { const e = sameAsLastCTG(bed, new Date().toISOString(), n); if (e) onSave(e); }}
+                className="flex-1 min-h-[2.75rem] rounded-lg border text-base font-semibold tabular-nums bg-white dark:bg-gray-900 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 active:scale-95">
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {same && <p className={`${TYPE_META} text-center`}>5 or more, or anything else changed: grade it below</p>}
       {complete || override ? (
         <div className={`rounded-xl border px-3 py-2.5 ${CTG_BOX[cat]}`}>
           <p className="text-base font-semibold capitalize">{cat}</p>

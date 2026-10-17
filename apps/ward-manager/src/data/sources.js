@@ -84,6 +84,14 @@ export const SOURCES = {
     "url": "https://www.nice.org.uk/guidance/ng235/chapter/Recommendations#ng235-1_8_45",
     "text": "Advise all women with suspected delay in the established first stage of labour to have a vaginal examination 2 hours later, and diagnose delay if progress is less than 1 cm. [2007]"
   },
+  "NG235 1.8.46": {
+    "issuer": "NICE",
+    "doc": "NG235",
+    "docTitle": "Intrapartum care",
+    "rec": "Recommendation 1.8.46",
+    "url": "https://www.nice.org.uk/guidance/ng235/chapter/Recommendations#ng235-1_8_46",
+    "text": "If delay in the established first stage of labour is diagnosed, consider amniotomy for all women with intact membranes, after explanation of the procedure and advice that it will shorten labour by about an hour and may increase the strength and pain of contractions. [2007, amended 2023]"
+  },
   "NG235 1.8.48": {
     "issuer": "NICE",
     "doc": "NG235",
@@ -131,6 +139,22 @@ export const SOURCES = {
     "rec": "Recommendation 1.8.56",
     "url": "https://www.nice.org.uk/guidance/ng235/chapter/Recommendations#ng235-1_8_56",
     "text": "Oxytocin must be discontinued immediately if the cardiotocography is pathological, and urgent obstetrician or senior midwife review sought. See the NICE guideline on fetal monitoring in labour. [2023]"
+  },
+  "NG235 1.8.58": {
+    "issuer": "NICE",
+    "doc": "NG235",
+    "docTitle": "Intrapartum care",
+    "rec": "Recommendation 1.8.58",
+    "url": "https://www.nice.org.uk/guidance/ng235/chapter/Recommendations#ng235-1_8_58",
+    "text": "Advise the woman to have a vaginal examination 4 hours after the oxytocin infusion has led to regular contractions in established labour:\n• if cervical dilatation has increased by less than 2 cm after 4 hours of oxytocin, further obstetric review is needed to assess whether a caesarean birth is advisable\n• if cervical dilatation has increased by 2 cm or more, advise 4‑hourly vaginal examinations. [2007, amended 2023]"
+  },
+  "NG235 1.8.59": {
+    "issuer": "NICE",
+    "doc": "NG235",
+    "docTitle": "Intrapartum care",
+    "rec": "Recommendation 1.8.59",
+    "url": "https://www.nice.org.uk/guidance/ng235/chapter/Recommendations#ng235-1_8_59",
+    "text": "If oxytocin is restarted in the first stage of labour, base the timing of the next vaginal examination on a clinical assessment of the woman and her individual circumstances. [2023]"
   },
   "NG235 1.9.8": {
     "issuer": "NICE",

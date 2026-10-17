@@ -37,6 +37,7 @@ const SHORT = {
   "ve-due": "VE due",
   "latent-reassess": "Reassess",
   "slow-progress": "Slow progress",
+  "oxytocin-poor-progress": "Under 2 cm on oxytocin",
   "hyperstim": "Hyperstimulation",
   "oxytocin-max": "Oxytocin at max",
   "oxytocin-increment": "Oxytocin review",
@@ -73,7 +74,8 @@ const SHORT = {
 };
 
 export function shortLabel(alert) {
-  return SHORT[alert.id] ?? tidy(alert.title);
+  // An alert can carry its own short label when one id covers several states.
+  return alert.short ?? SHORT[alert.id] ?? tidy(alert.title);
 }
 
 // Alerts worth forecasting as "next due", with the label shown on the board.

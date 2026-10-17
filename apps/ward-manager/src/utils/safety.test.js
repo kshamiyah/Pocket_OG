@@ -2,7 +2,7 @@
 
 import { describe, it, expect } from "vitest"
 import { computeAlerts } from "./wardAlerts.js"
-import { currentOxytocin, declineAlert, fixAlert, fixLabel, obsProblem, recordObs, stampObs } from "./bedModel.js"
+import { currentOxytocin, declineAlert, fixAlert, fixLabel, obsProblem, recordObs, sameAsLastCTG, stampObs } from "./bedModel.js"
 import { applyReviews, compareTriage, triageBed, triageWard } from "./triage.js"
 import { generateHandover } from "./handoverText.js"
 import { UNIT_DEFAULTS } from "../data/unitSettings.js"
@@ -154,6 +154,9 @@ describe("oxytocin stop, hold and safety (NG235 1.8.54 to 1.8.56)", () => {
   const ox = (dose, minsAgo = 40, extra = {}) => ({ id: "o" + dose, startTime: t(minsAgo * MIN), dose, lastIncrementTime: t(minsAgo * MIN), ...extra })
   it("tells you to stop oxytocin when the CTG is pathological", () => {
     expect(sev(active({ oxytocinLog: [ox(6)], ctgLog: [ctg("pathological")] }), "oxytocin-stop-pathological")).toBe("urgent")
+    // One alert for one problem: the review alert waits until the stop is logged.
+    expect(ids(active({ oxytocinLog: [ox(6)], ctgLog: [ctg("pathological")] }))).not.toContain("ctg-pathological")
+    expect(ids(active({ oxytocinLog: [ox(6), { ...ox(0), stopped: true }], ctgLog: [ctg("pathological")] }))).toContain("ctg-pathological")
   })
   it("no increment prompt while the CTG is suspicious", () => {
     expect(ids(active({ oxytocinLog: [ox(6)], ctgLog: [ctg("suspicious")] }))).not.toContain("oxytocin-increment")
@@ -458,5 +461,183 @@ describe("fixes from the second shift test", () => {
     expect(obsProblem("rr", "220")).toMatch(/looks wrong/)
     expect(obsProblem("bp", ["80", "120"])).toMatch(/higher than diastolic/)
     expect(obsProblem("pulse", "88")).toBeNull()
+  })
+})
+
+describe("CTG unchanged (one tap after a normal graded review)", () => {
+  const graded = (cls = "normal", o = {}) => ({ id: "g1", time: t(60 * MIN), classification: cls, baselineHR: 140, variability: "5-25", decelerations: "none", accelerations: true, contractionsPerTen: 3, ...o })
+  it("copies the last graded features to a new time and grades it normal", () => {
+    const e = sameAsLastCTG(active({ ctgLog: [graded()] }), t(0), 2)
+    expect(e).toMatchObject({ classification: "normal", baselineHR: 140, contractionsPerTen: 2, time: t(0), sameAsLast: true })
+  })
+  it("never carries the contraction count over (Mrs A: 3 in 10 copied would hide the oxytocin dose review)", () => {
+    expect(sameAsLastCTG(active({ ctgLog: [graded()] }), t(0)).contractionsPerTen).toBeUndefined()
+    const b = active({
+      ves: [{ id: "v", time: t(70 * MIN), dilation: 5, contractions: 2, membranes: "AROM" }],
+      ctgLog: [graded("normal", { time: t(71 * MIN) })],
+      oxytocinLog: [{ id: "o", startTime: t(35 * MIN), dose: 2, lastIncrementTime: t(35 * MIN) }],
+    })
+    const after = { ...b, ctgLog: [...b.ctgLog, sameAsLastCTG(b, t(0), 2)] }
+    expect(ids(after)).toContain("oxytocin-increment")
+    const atTarget = { ...b, ctgLog: [...b.ctgLog, sameAsLastCTG(b, t(0), 4)] }
+    expect(ids(atTarget)).not.toContain("oxytocin-increment")
+  })
+  it("is not offered with no graded review, or after a suspicious one, or after a clinician override", () => {
+    expect(sameAsLastCTG(active({ ctgLog: [] }), t(0))).toBeNull()
+    expect(sameAsLastCTG(active({ ctgLog: [graded("suspicious")] }), t(0))).toBeNull()
+    expect(sameAsLastCTG(active({ ctgLog: [graded("normal", { clinicianOverride: true })] }), t(0))).toBeNull()
+  })
+  it("is not offered when the copy would no longer grade normal (20 bpm rise in the active second stage)", () => {
+    const b = active({ labourStage: "Active second stage", ctgLog: [graded("normal", { id: "a", baselineHR: 125, time: t(3 * HOUR) }), graded("normal", { id: "b", baselineHR: 145 })] })
+    expect(sameAsLastCTG(b, t(0))).toBeNull()
+  })
+})
+
+describe("delay in the first stage: suspected, diagnosed, confirmed (NG235 1.8.42 to 1.8.50)", () => {
+  const ve = (id, hAgo, cm, o = {}) => ({ id, time: t(hAgo * HOUR), dilation: cm, membranes: "Intact", ...o })
+  const lab = (ves, o = {}) => active({ activeFirstStageStartTime: t(9 * HOUR), ves, ...o })
+  const title = b => computeAlerts(b, NOW).find(a => a.id === "slow-progress")?.title
+  it("under 2 cm in 4 hours: suspected", () => {
+    expect(title(lab([ve("a", 4, 4), ve("b", 0, 5)]))).toMatch(/Delay suspected/)
+  })
+  it("under 1 cm at the VE 2 hours after suspicion: diagnosed, with amniotomy if intact", () => {
+    const b = lab([ve("a", 6, 4), ve("b", 2, 5), ve("c", 0, 5.5)])
+    expect(title(b)).toMatch(/Delay diagnosed/)
+    expect(computeAlerts(b, NOW).find(a => a.id === "slow-progress").body).toMatch(/Consider amniotomy/)
+  })
+  it("Mrs A: no progress 2 hours after ARM is confirmed delay, obstetric review and oxytocin", () => {
+    const b = lab([
+      ve("1", 6 + 5 / 60, 4), ve("2", 2 + 5 / 60, 5), ve("3", 2, 5, { membranes: "AROM", membranesTime: t(2 * HOUR) }),
+      ve("4", 0, 5, { membranes: "AROM", membranesTime: t(2 * HOUR) }),
+    ], { armTime: t(2 * HOUR) })
+    const a = computeAlerts(b, NOW).find(x => x.id === "slow-progress")
+    expect(a.title).toMatch(/Delay confirmed after amniotomy/)
+    expect(a.body).toMatch(/consideration of oxytocin/)
+  })
+})
+
+describe("progress on oxytocin (NG235 1.8.58, 1.8.59)", () => {
+  // Mrs A: delay confirmed at the last VE, oxytocin started 10 minutes later.
+  // h = hours from that VE; the test clock runs at VE + h.
+  const at = h => NOW - 10 * HOUR + h * HOUR
+  const iso = h => new Date(at(h)).toISOString()
+  const AROM = { membranes: "AROM", membranesTime: iso(-2) }
+  const mrsA = (extraVEs = [], oxy) => bed({
+    labourStage: "Active first stage", activeFirstStageStartTime: iso(-9), armTime: iso(-2),
+    ves: [
+      { id: "1", time: iso(-6 - 5 / 60), dilation: 4, membranes: "Intact" },
+      { id: "2", time: iso(-2 - 5 / 60), dilation: 5, membranes: "Intact" },
+      { id: "3", time: iso(-2), dilation: 5, ...AROM },
+      { id: "4", time: iso(0), dilation: 5, ...AROM },
+      ...extraVEs,
+    ],
+    ctgLog: [{ id: "c", time: iso(0), classification: "normal" }],
+    oxytocinLog: oxy ?? [{ id: "o1", startTime: iso(1 / 6), dose: 2, lastIncrementTime: iso(1 / 6) }],
+  })
+  const has = (b, h, id) => computeAlerts(b, at(h)).some(a => a.id === id)
+
+  it("VE is not due 2 hours after the confirming VE once oxytocin is running", () => {
+    expect(has(mrsA(), 2.5, "ve-due")).toBe(false)
+    expect(has(mrsA(), 2.5, "ve-overdue")).toBe(false)
+  })
+  it("VE falls due 4 hours after oxytocin started", () => {
+    expect(has(mrsA(), 4.1, "ve-due")).toBe(false)
+    const a = computeAlerts(mrsA(), at(4.2)).find(x => x.id === "ve-due")
+    expect(a.citation).toMatch(/1\.8\.58/)
+  })
+  it("under 2 cm at the 4 hour VE on oxytocin: obstetric review about caesarean birth", () => {
+    const b = mrsA([{ id: "5", time: iso(4.2), dilation: 6, ...AROM }])
+    const a = computeAlerts(b, at(4.3)).find(x => x.id === "oxytocin-poor-progress")
+    expect(a.severity).toBe("urgent")
+    expect(a.body).toMatch(/caesarean/)
+    // The delay steps no longer judge VEs taken on oxytocin.
+    expect(has(b, 4.3, "slow-progress")).toBe(false)
+  })
+  it("2 cm or more on oxytocin: no review, then 4-hourly VEs", () => {
+    const b = mrsA([{ id: "5", time: iso(4.2), dilation: 7, ...AROM }])
+    expect(has(b, 4.3, "oxytocin-poor-progress")).toBe(false)
+    expect(has(b, 4.3, "slow-progress")).toBe(false)
+    expect(has(b, 6.3, "ve-due")).toBe(false)
+    expect(has(b, 8.3, "ve-due")).toBe(true)
+  })
+  it("an early VE on oxytocin is not judged until 4 hours in", () => {
+    const b = mrsA([{ id: "5", time: iso(2.2), dilation: 5, ...AROM }])
+    expect(has(b, 2.3, "oxytocin-poor-progress")).toBe(false)
+    expect(has(b, 2.3, "slow-progress")).toBe(false)
+  })
+  it("stopping oxytocin after the 4 hour VE keeps that VE judged as on oxytocin", () => {
+    const oxy = [
+      { id: "o1", startTime: iso(1 / 6), dose: 2, lastIncrementTime: iso(1 / 6) },
+      { id: "o2", startTime: iso(4.5), dose: 0, stopped: true, lastIncrementTime: iso(4.5), stopReason: "Pathological CTG" },
+    ]
+    const b = mrsA([{ id: "5", time: iso(4.2), dilation: 6, ...AROM }], oxy)
+    expect(has(b, 4.6, "oxytocin-poor-progress")).toBe(true)
+    expect(has(b, 4.6, "slow-progress")).toBe(false)
+  })
+  it("restarted oxytocin: the VE note points to clinical assessment", () => {
+    const oxy = [
+      { id: "o1", startTime: iso(1 / 6), dose: 2, lastIncrementTime: iso(1 / 6) },
+      { id: "o2", startTime: iso(0.5), dose: 0, stopped: true, lastIncrementTime: iso(0.5) },
+      { id: "o3", startTime: iso(1), dose: 2, lastIncrementTime: iso(1) },
+    ]
+    const a = computeAlerts(mrsA([], oxy), at(5.1)).find(x => x.id === "ve-due")
+    expect(a.citation).toMatch(/1\.8\.59/)
+    expect(has(mrsA([], oxy), 4.9, "ve-due")).toBe(false)
+  })
+})
+
+describe("after birth", () => {
+  it("a fever is framed as sepsis assessment, not intrauterine infection (NG255 1.5.1)", () => {
+    const b = bed({ labourStage: "Active first stage", delivery: { mode: "Em LSCS", time: t(HOUR), ebl: 300 },
+      observations: { lastTemp: t(5 * MIN), tempValue: "38.3", tempAt: t(5 * MIN) } })
+    const a = computeAlerts(b, NOW).find(x => x.id === "temp-38")
+    expect(a.title).toMatch(/after birth: assess for sepsis/)
+    expect(a.body).not.toMatch(/CTG|chorioamnionitis/)
+    expect(a.citation).toMatch(/NG255/)
+  })
+})
+
+describe("hourly CTG review turns amber, then red, once overdue (local)", () => {
+  const b = minsAgo => active({ ctgLog: [{ id: "c", time: t(minsAgo * MIN), classification: "normal" }] })
+  it("grey when due, amber at 15 minutes over, red at 30", () => {
+    expect(sev(b(65), "ctg-review-due")).toBe("info")
+    expect(sev(b(76), "ctg-review-due")).toBe("warning")
+    expect(sev(b(91), "ctg-review-due")).toBe("urgent")
+  })
+  it("follows the unit settings", () => {
+    const unit = { ...UNIT_DEFAULTS, ctgReviewAmberMin: 30, ctgReviewRedMin: 60 }
+    expect(computeAlerts(b(91), NOW, unit).find(a => a.id === "ctg-review-due").severity).toBe("warning")
+  })
+})
+
+describe("is she still here? (local)", () => {
+  const stale = (o = {}) => bed({ labourStage: "Latent", admissionTime: t(4 * HOUR), observations: { lastPulse: t(4 * HOUR) }, ...o })
+  it("asks after 3 hours with no entry", () => {
+    expect(ids(stale())).toContain("bed-stale")
+    expect(ids(stale({ admissionTime: t(2 * HOUR) }))).not.toContain("bed-stale")
+  })
+  it("any edit, or Still here, restarts the clock", () => {
+    expect(ids(stale({ updatedAt: t(10 * MIN) }))).not.toContain("bed-stale")
+    const b = stale()
+    expect(fixLabel("bed-stale")).toBe("Still here")
+    expect(ids({ ...b, ...fixAlert(b, "bed-stale", t(0)) })).not.toContain("bed-stale")
+  })
+  it("applies to delivered women too", () => {
+    expect(ids(stale({ delivery: { mode: "SVD", time: t(4 * HOUR), ebl: 200 } }))).toContain("bed-stale")
+  })
+})
+
+describe("PPH after a caesarean (GTG52, unit setting)", () => {
+  const cs = (ebl, mode = "Em LSCS") => bed({ labourStage: "Active first stage", admissionTime: t(HOUR), delivery: { mode, time: t(30 * MIN), ebl } })
+  it("defaults to 500 mL after any birth, as GTG52", () => {
+    expect(sev(cs(600), "pph")).toBe("warning")
+  })
+  it("a unit can start at 1000 mL after caesarean only", () => {
+    const unit = { ...UNIT_DEFAULTS, pphCsMl: 1000 }
+    const has = (b, id) => computeAlerts(b, NOW, unit).some(a => a.id === id)
+    expect(has(cs(600), "pph")).toBe(false)
+    expect(has(cs(600, "SVD"), "pph")).toBe(true)
+    expect(computeAlerts(cs(1200), NOW, unit).find(a => a.id === "pph")).toMatchObject({ severity: "urgent" })
+    expect(computeAlerts(cs(1000), NOW, unit).find(a => a.id === "pph").citation).toMatch(/1000 mL after caesarean is local/)
   })
 })

@@ -19,6 +19,7 @@ export const RULE_GROUPS = [
   "Maternal observations",
   "Diabetes",
   "After birth",
+  "Board",
   "Scope",
 ];
 
@@ -178,16 +179,23 @@ export const RULES = [
   },
   {
     id: "ve-4h", group: "Labour progress", title: "Vaginal examination timing",
-    when: "Established first stage: no VE yet (urgent). Otherwise amber when a VE is due (4 hours after the last, or 2 hours after delay is suspected), red 30 minutes later.",
+    when: "Established first stage: no VE yet (urgent). Otherwise amber when a VE is due (4 hours after the last, or 2 hours after delay is suspected; on oxytocin, 4 hours after it started, then 4-hourly), red 30 minutes later.",
     then: "Offer a VE. After suspected delay, diagnose delay if progress is less than 1 cm.",
-    severity: "Warning, then urgent", alertIds: ["ve-never", "ve-due", "ve-overdue"], sources: ["NG235 1.8.19", "NG235 1.8.45"],
-    local: "Turning red 30 minutes after the VE is due is a unit choice. NICE times the VE; it sets no overdue point.",
+    severity: "Warning, then urgent", alertIds: ["ve-never", "ve-due", "ve-overdue"], sources: ["NG235 1.8.19", "NG235 1.8.45", "NG235 1.8.58", "NG235 1.8.59"],
+    local: "Turning red 30 minutes after the VE is due is a unit choice. NICE times the VE; it sets no overdue point. On oxytocin NICE times the VE from when the infusion has led to regular contractions; the app counts from the start. After a restart NICE leaves the timing to clinical assessment; the app reminds at 4 hours.",
   },
   {
-    id: "slow-progress", group: "Labour progress", title: "Slow progress in the first stage",
-    when: "Established first stage VEs only: under 1 cm in about 2 hours between VEs, or under 2 cm over about 4 hours (5 minute tolerance).",
-    then: "Suspect or diagnose delay; consider amniotomy and obstetric review.",
-    severity: "Urgent", alertIds: ["slow-progress"], sources: ["NG235 1.8.42", "NG235 1.8.45"],
+    id: "slow-progress", group: "Labour progress", title: "Delay in the first stage",
+    when: "Established first stage VEs. Suspected: under 2 cm in about 4 hours (or under 1 cm in 2 hours). Diagnosed: under 1 cm at the VE 2 hours after delay was suspected. Confirmed: no progress at the VE 2 hours after an amniotomy. 5 minute tolerance on the timings.",
+    then: "Suspected: re-examine in 2 hours (the VE timer switches to 2 hours). Diagnosed: consider amniotomy if membranes are intact, then VE 2 hours later; if already ruptured, obstetric review including consideration of oxytocin. Confirmed: obstetric-led care and a full obstetric assessment including consideration of oxytocin.",
+    severity: "Urgent", alertIds: ["slow-progress"],
+    sources: ["NG235 1.8.42", "NG235 1.8.45", "NG235 1.8.46", "NG235 1.8.48", "NG235 1.8.49", "NG235 1.8.50"],
+  },
+  {
+    id: "oxytocin-poor-progress", group: "Labour progress", title: "Progress on oxytocin",
+    when: "First VE about 4 hours or more after oxytocin started, compared with the VE about 4 hours before it: under 2 cm gained. 5 minute tolerance on the timings. VEs after oxytocin starts are judged by this rule, not the delay steps.",
+    then: "Further obstetric review to assess whether a caesarean birth is advisable. 2 cm or more: 4-hourly VEs.",
+    severity: "Urgent", alertIds: ["oxytocin-poor-progress"], sources: ["NG235 1.8.58"],
   },
   {
     id: "active-phase-limit", group: "Labour progress", title: "Long established first stage",
@@ -229,8 +237,8 @@ export const RULES = [
   {
     id: "oxytocin-stop", group: "Oxytocin and contractions", title: "Pathological CTG on oxytocin",
     when: "Oxytocin running and the latest CTG is pathological.",
-    then: "Stop oxytocin immediately; urgent obstetric or senior midwife review. The alert's Stop oxytocin button opens the oxytocin sheet to log the stop and its reason; it cannot be snoozed.",
-    severity: "Urgent", alertIds: ["oxytocin-stop-pathological"], sources: ["NG235 1.8.56"],
+    then: "Stop oxytocin immediately; urgent obstetric or senior midwife review. One alert covers both: it replaces the pathological CTG alert until the stop is logged, then that alert takes over. The Stop oxytocin button opens the oxytocin sheet to log the stop and its reason; it cannot be snoozed.",
+    severity: "Urgent", alertIds: ["oxytocin-stop-pathological"], sources: ["NG235 1.8.56", "NG229 1.5.7", "NG229 1.5.8"],
   },
   {
     id: "oxytocin-increment", group: "Oxytocin and contractions", title: "Oxytocin dose review",
@@ -280,8 +288,9 @@ export const RULES = [
   {
     id: "ctg-hourly", group: "Fetal monitoring (CTG)", title: "Hourly CTG review",
     when: "On continuous CTG (everyone by default, see above), established labour or oxytocin, and an hour since the last review.",
-    then: "Hourly assessment with a fresh-eyes review.",
-    severity: "Info", alertIds: ["ctg-review-due"], sources: ["NG229 1.3.5", "NG229 1.3.6"], settings: ["ctgForAll"],
+    then: "Hourly assessment with a fresh-eyes review. Grey when due; amber, then red, once overdue by the unit's times (default 15 and 30 minutes).",
+    severity: "Info, then warning, then urgent", alertIds: ["ctg-review-due"], sources: ["NG229 1.3.5", "NG229 1.3.6"], settings: ["ctgForAll", "ctgReviewAmberMin", "ctgReviewRedMin"],
+    local: "NICE asks for an hourly review; the overdue colours and their timings are unit choices.",
   },
 
   // ── Maternal observations ──────────────────────────────────────────────
@@ -295,9 +304,9 @@ export const RULES = [
   {
     id: "temp", group: "Maternal observations", title: "Raised temperature",
     when: "38.0°C or above (urgent), 37.5 to 37.9°C (warning).",
-    then: "Transfer trigger and indication for continuous CTG; antibiotics if chorioamnionitis suspected; repeat 37.5 in 1 hour.",
+    then: "In labour: transfer trigger and indication for continuous CTG; antibiotics if chorioamnionitis suspected; repeat 37.5 in 1 hour. After birth, 38.0°C or above: assess for sepsis, grading risk with the NG255 criteria for people recently pregnant; senior review.",
     severity: "Urgent / warning", alertIds: ["temp-38", "temp-375"],
-    sources: ["NG235 1.8.20", "NG229 1.3.8", "NG195 1.6.1", "NG195 1.6.4"],
+    sources: ["NG235 1.8.20", "NG229 1.3.8", "NG195 1.6.1", "NG195 1.6.4", "NG255 1.5.1", "NG255 1.5.2"],
   },
   {
     id: "tachycardia", group: "Maternal observations", title: "Maternal tachycardia",
@@ -353,12 +362,22 @@ export const RULES = [
     local: "Hourly for every diabetic flag, by choice, following NG3. GL983 allows 2-hourly for type 2 diabetes on metformin or diet with glucose at or below 7.",
   },
 
+  // ── Board ──────────────────────────────────────────────────────────────
+  {
+    id: "bed-stale", group: "Board", title: "Is she still here?",
+    when: "No entry on her record for the unit's time (default 3 hours). Any change to the record, or Still here, restarts the clock.",
+    then: "Still here restarts the clock. Not here opens her full record to update her or remove her from the board.",
+    severity: "Warning", alertIds: ["bed-stale"], sources: [], settings: ["staleBedH"],
+    local: "An app design choice so the board does not show women who have left.",
+  },
+
   // ── After birth ────────────────────────────────────────────────────────
   {
     id: "pph", group: "After birth", title: "Postpartum haemorrhage",
-    when: "Recorded EBL 500 to 1000 mL (minor) or over 1000 mL (major).",
+    when: "Recorded EBL 500 to 1000 mL (minor) or over 1000 mL (major). After a caesarean the alert starts at the unit's setting (default 500 mL, as GTG52).",
     then: "Minor: warning. Major: urgent. Reviewed quiets it for the unit's time (default 60 minutes); it then returns while she is on the board.",
-    severity: "Warning / urgent", alertIds: ["pph"], sources: ["GTG52 definitions"],
+    severity: "Warning / urgent", alertIds: ["pph"], sources: ["GTG52 definitions"], settings: ["pphCsMl"],
+    local: "GTG52 uses 500 mL after any birth. A higher start after caesarean is a unit choice.",
   },
 ];
 
