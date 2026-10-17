@@ -50,12 +50,6 @@ export const UNIT_SETTINGS = [
     nice: "NICE sets no interval.",
   },
   {
-    key: "promReviewH", type: "number", default: 18, min: 12, max: 24, step: 1, unit: "h", group: "Membranes and antibiotics",
-    label: "Review GBS status and infection when membranes ruptured",
-    help: "A warning shows 2 hours earlier.",
-    nice: "Not a NICE or GL787 threshold.",
-  },
-  {
     key: "promAntibioticH", type: "number", default: 48, min: 12, max: 72, step: 6, unit: "h", group: "Membranes and antibiotics",
     label: "Antibiotics indicated when membranes ruptured",
     help: "For women who are not GBS positive.",

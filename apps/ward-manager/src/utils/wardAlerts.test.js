@@ -395,24 +395,10 @@ describe("PROM duration alerts", () => {
     }],
   })
 
-  it("no alert at 15h 59m", () => {
-    const alerts = computeAlerts(promBed(15.98), NOW)
-    expect(hasNot(alerts, "prom-16h")).toBe(true)
-    expect(hasNot(alerts, "prom-18h")).toBe(true)
-  })
-
-  it("fires prom-16h warning at exactly 16h", () => {
-    expect(has(computeAlerts(promBed(16), NOW), "prom-16h")).toBe(true)
-  })
-
-  it("fires prom-18h urgent at exactly 18h", () => {
-    expect(has(computeAlerts(promBed(18), NOW), "prom-18h")).toBe(true)
-  })
-
-  it("at 18h prom-16h is replaced by prom-18h (only one fires)", () => {
-    const alerts = computeAlerts(promBed(18), NOW)
-    expect(hasNot(alerts, "prom-16h")).toBe(true)
-    expect(has(alerts, "prom-18h")).toBe(true)
+  it("no review warnings at 16 or 18 hours: no guideline uses those times (GTG36 7.1, NG235 1.7.7)", () => {
+    for (const h of [16, 18, 23.9]) {
+      expect(computeAlerts(promBed(h, "Latent"), NOW).some(a => a.id.startsWith("prom-"))).toBe(false)
+    }
   })
 
   it("fires prom-24h urgent at 24h when in latent phase", () => {
@@ -453,17 +439,18 @@ describe("GBS+ antibiotic prophylaxis", () => {
     expect(hasNot(computeAlerts(bed, NOW), "gbs-iap")).toBe(true)
   })
 
-  it("gbs-iap still fires alongside prom-18h (the antibiotics prompt is never hidden)", () => {
+  it("gbs-iap still fires alongside prom-24h (the antibiotics prompt is never hidden)", () => {
     const bed = gbsBed({
+      labourStage: "Latent",
       ves: [{
-        time: t(18 * HOUR),
-        dilation: 5,
+        time: t(25 * HOUR),
+        dilation: 2,
         membranes: "SROM",
-        membranesTime: t(18 * HOUR),
+        membranesTime: t(25 * HOUR),
       }],
     })
     expect(has(computeAlerts(bed, NOW), "gbs-iap")).toBe(true)
-    expect(has(computeAlerts(bed, NOW), "prom-18h")).toBe(true)
+    expect(has(computeAlerts(bed, NOW), "prom-24h")).toBe(true)
   })
 })
 

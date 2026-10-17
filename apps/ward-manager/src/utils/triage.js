@@ -46,10 +46,7 @@ const SHORT = {
   "pushing-senior-review": "Senior review",
   "prom-48h": "ROM 48h: antibiotics",
   "prom-24h": "ROM over 24h",
-  "prom-18h": "ROM review",
-  "prom-16h": "ROM review soon",
   "gbs-iap": "GBS antibiotics",
-  "gbs-pending-rupture": "GBS pending",
   "mec-thick": "Thick meconium",
   "mec-thin": "Thin meconium",
   "liquor-blood": "Blood-stained liquor",
@@ -91,7 +88,6 @@ const NEXT = {
   "passive-limit": "Passive limit",
   "pushing-reassess": "Reassess pushing",
   "pushing-senior-review": "Senior review",
-  "prom-18h": "ROM review",
   "prom-24h": "ROM 24h",
   "bgl-due": "BGL",
 };

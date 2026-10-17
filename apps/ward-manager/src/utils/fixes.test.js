@@ -24,8 +24,8 @@ function bed(overrides = {}) {
 
 describe("membranes recorded at admission (no VE yet)", () => {
   it("counts rupture time from admission for the PROM alerts", () => {
-    const b = bed({ membranes: "SROM", membranesTime: t(19 * HOUR), liquor: "Clear" })
-    expect(has(computeAlerts(b, NOW), "prom-18h")).toBe(true)
+    const b = bed({ membranes: "SROM", membranesTime: t(25 * HOUR), liquor: "Clear" })
+    expect(has(computeAlerts(b, NOW), "prom-24h")).toBe(true)
   })
 
   it("prompts GBS antibiotics for a GBS+ woman whose membranes ruptured before admission", () => {
@@ -40,10 +40,10 @@ describe("membranes recorded at admission (no VE yet)", () => {
 
   it("lets a later VE that records membranes take over", () => {
     const b = bed({
-      membranes: "SROM", membranesTime: t(19 * HOUR),
+      membranes: "SROM", membranesTime: t(25 * HOUR),
       ves: [{ id: "v", time: t(HOUR), dilation: 3, membranes: "Intact" }],
     })
-    expect(has(computeAlerts(b, NOW), "prom-18h")).toBe(false)
+    expect(has(computeAlerts(b, NOW), "prom-24h")).toBe(false)
   })
 
   it("behaves exactly as before when nothing was recorded at admission", () => {

@@ -245,10 +245,9 @@ describe("unit settings change the local thresholds", () => {
     expect(run(b, {})).not.toContain("latent-reassess")
     expect(run(b, { latentReassessH: 4 })).toContain("latent-reassess")
   })
-  it("ROM review and antibiotic hours", () => {
+  it("ROM antibiotic hours", () => {
     const b = active({ membranes: "SROM", membranesTime: t(13 * HOUR) })
-    expect(run(b, {})).not.toContain("prom-18h")
-    expect(run(b, { promReviewH: 12 })).toContain("prom-18h")
+    expect(run(b, {})).not.toContain("prom-48h")
     expect(run(b, { promAntibioticH: 12 })).toContain("prom-48h")
   })
   it("neonatal team gestation", () => {
@@ -277,10 +276,30 @@ describe("unit settings change the local thresholds", () => {
 describe("new risk flags", () => {
   const NICE = { ...UNIT_DEFAULTS, ctgForAll: false }
   const reasons = b => computeAlerts(b, NOW, NICE).find(a => a.id === "ctg-not-documented")?.body ?? ""
-  it("GBS in a previous baby prompts antibiotics like GBS+ (NG195 1.6.1)", () => {
-    const a = computeAlerts(active({ riskFlags: ["GBS previous"] }), NOW).find(x => x.id === "gbs-iap")
+  it("a previous baby with GBS disease prompts antibiotics like GBS+ (NG195 1.6.1, GTG36 5.4)", () => {
+    const a = computeAlerts(active({ riskFlags: ["GBS previous baby"] }), NOW).find(x => x.id === "gbs-iap")
     expect(a?.severity).toBe("urgent")
-    expect(a.title).toMatch(/Previous GBS/)
+    expect(a.title).toMatch(/Previous baby with GBS disease/)
+    // The older combined flag on saved boards behaves the same.
+    expect(ids(active({ riskFlags: ["GBS previous"] }))).toContain("gbs-iap")
+  })
+  it("GBS in a previous pregnancy prompts antibiotics unless a 35 to 37 week swab was negative (NG195 1.6.1)", () => {
+    expect(ids(active({ riskFlags: ["GBS previous pregnancy"] }))).toContain("gbs-iap")
+    expect(ids(active({ riskFlags: ["GBS previous pregnancy", "GBS negative 35-37"] }))).not.toContain("gbs-iap")
+    // A negative swab does not quiet a previous baby with GBS disease.
+    expect(ids(active({ riskFlags: ["GBS previous baby", "GBS negative 35-37"] }))).toContain("gbs-iap")
+  })
+  it("GBS+ before 37+0 with waters broken but not in labour: antibiotics wait for labour (GTG36 8.1.1)", () => {
+    const pprom = { gestation: "32+0", labourStage: "Latent", modeOfOnset: "PPROM", activeFirstStageStartTime: undefined,
+      ves: [], membranes: "SROM", membranesTime: t(2 * HOUR), riskFlags: ["GBS+"] }
+    expect(ids(bed(pprom))).not.toContain("gbs-iap")
+    expect(ids(bed(pprom))).not.toContain("iap-preterm")
+    expect(ids(active({ gestation: "32+0", riskFlags: ["GBS+"] }))).toContain("gbs-iap")
+    // From 37+0 they start as soon as the waters break (GTG36 7.1).
+    expect(ids(bed({ ...pprom, gestation: "37+1", modeOfOnset: "Spontaneous" }))).toContain("gbs-iap")
+  })
+  it("GBS pending no longer raises its own alert (GTG36 7.1: unknown is managed like negative)", () => {
+    expect(ids(active({ riskFlags: ["GBS pending"], membranes: "SROM", membranesTime: t(2 * HOUR) })).some(id => id.startsWith("gbs"))).toBe(false)
   })
   it("suspected infection asks for antibiotics now and replaces the GBS prompt", () => {
     const a = ids(active({ riskFlags: ["GBS+", "Infection suspected"] }))
@@ -411,7 +430,7 @@ describe("GBS positive with ruptured membranes: offer immediate birth (NG207 1.2
   it("also from 34+0 preterm", () => expect(ids(rom({ gestation: "34+2" }))).toContain("gbs-prom-birth"))
   it("not under 34+0", () => expect(ids(rom({ gestation: "33+6" }))).not.toContain("gbs-prom-birth"))
   it("not for GBS in a previous pregnancy only (NICE: positive test this pregnancy)", () =>
-    expect(ids(rom({ riskFlags: ["GBS previous"] }))).not.toContain("gbs-prom-birth"))
+    expect(ids(rom({ riskFlags: ["GBS previous pregnancy"] }))).not.toContain("gbs-prom-birth"))
   it("not once in established labour, or with an induction under way", () => {
     expect(ids(rom({ labourStage: "Active first stage", activeFirstStageStartTime: t(10 * MIN) }))).not.toContain("gbs-prom-birth")
     expect(ids(rom({ modeOfOnset: "Induced", inductionStartTime: t(10 * MIN) }))).not.toContain("gbs-prom-birth")
@@ -583,6 +602,21 @@ describe("progress on oxytocin (NG235 1.8.58, 1.8.59)", () => {
     const a = computeAlerts(mrsA([], oxy), at(5.1)).find(x => x.id === "ve-due")
     expect(a.citation).toMatch(/1\.8\.59/)
     expect(has(mrsA([], oxy), 4.9, "ve-due")).toBe(false)
+  })
+})
+
+describe("PPH wording follows GTG52", () => {
+  const d = ebl => bed({ labourStage: "Active first stage", admissionTime: t(HOUR), delivery: { mode: "SVD", time: t(30 * MIN), ebl } })
+  const body = ebl => computeAlerts(d(ebl), NOW).find(a => a.id === "pph").body
+  it("minor: who to alert and the first measures", () => {
+    expect(body(700)).toMatch(/midwife in charge/)
+    expect(body(700)).toMatch(/14-gauge/)
+    expect(body(700)).toMatch(/fibrinogen/)
+  })
+  it("major: senior team; over 1500 mL an incident review", () => {
+    expect(body(1200)).toMatch(/multidisciplinary team/)
+    expect(body(1200)).not.toMatch(/incident review/)
+    expect(body(1600)).toMatch(/incident review/)
   })
 })
 

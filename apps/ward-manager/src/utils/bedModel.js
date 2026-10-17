@@ -31,8 +31,9 @@ export const BIRTH_SHORT = { SVD: "SVD", Instrumental: "Instr", "Emergency CS": 
 export const RISK_GROUPS = [
   { group: "Infection and GBS", items: [
     { value: "GBS+", label: "GBS positive this pregnancy", short: "GBS+", effect: "alert" },
-    { value: "GBS previous", label: "GBS in a previous baby or pregnancy", short: "GBS prev", effect: "alert" },
-    { value: "GBS pending", label: "GBS result pending", short: "GBS pending", effect: "alert" },
+    { value: "GBS previous baby", label: "Previous baby with GBS disease", short: "GBS prev baby", effect: "alert" },
+    { value: "GBS previous pregnancy", label: "GBS in a previous pregnancy", short: "GBS prev preg", effect: "alert" },
+    { value: "GBS negative 35-37", label: "Negative GBS swab at 35 to 37 weeks", short: "GBS neg swab", effect: "handover" },
     { value: "Infection suspected", label: "Suspected chorioamnionitis or sepsis", short: "Infection", effect: "alert" },
   ] },
   { group: "Diabetes", items: [
@@ -70,6 +71,8 @@ export const RISK_GROUPS = [
 const RISK_BY_VALUE = Object.fromEntries(RISK_GROUPS.flatMap(g => g.items).map(i => [i.value, i]));
 // Older stored values that are no longer offered.
 RISK_BY_VALUE["VBAC"] = { value: "VBAC", label: "VBAC", short: "VBAC", effect: "CTG" };
+RISK_BY_VALUE["GBS previous"] = { value: "GBS previous", label: "GBS in a previous baby or pregnancy", short: "GBS prev", effect: "alert" };
+RISK_BY_VALUE["GBS pending"] = { value: "GBS pending", label: "GBS result pending", short: "GBS pending", effect: "handover" };
 export const RISK_FLAGS = Object.keys(RISK_BY_VALUE);
 
 /** Display label for a stored risk value; typed "Other" risks show as typed. */
@@ -440,7 +443,7 @@ export const REVIEW_GROUP = {
   "pushing-senior-review": "reviewHourMin", "liquor-blood": "reviewHourMin",
   "slow-progress": "reviewProgressMin", "oxytocin-poor-progress": "reviewProgressMin", "arm-reassess": "reviewProgressMin",
   "active-phase-limit": "reviewLongMin", "latent-reassess": "reviewLongMin", "prom-24h": "reviewLongMin",
-  "prom-18h": "reviewLongMin", "prom-16h": "reviewLongMin", "gbs-pending-rupture": "reviewLongMin",
+
   "mec-thick": "reviewLongMin", "mec-thin": "reviewLongMin", "liquor-absent": "reviewLongMin",
 };
 
