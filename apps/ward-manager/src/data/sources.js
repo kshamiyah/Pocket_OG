@@ -340,6 +340,22 @@ export const SOURCES = {
     "url": "https://www.nice.org.uk/guidance/ng229/chapter/Recommendations#ng229-1_5_8",
     "text": "If the CTG trace is still pathological after implementing conservative measures:\n• obtain a further urgent review by an obstetrician and a senior midwife\n• evaluate the whole clinical picture and consider expediting birth\n• if there are evolving intrapartum risk factors for fetal compromise, have a very low threshold for expediting birth. [2017, amended 2022]"
   },
+  "NG25 1.4.1": {
+    "issuer": "NICE",
+    "doc": "NG25",
+    "docTitle": "Preterm labour and birth",
+    "rec": "Recommendation 1.4.1",
+    "url": "https://www.nice.org.uk/guidance/ng25/chapter/Recommendations#ng25-1_4_1",
+    "text": "As prophylaxis for intrauterine infection, offer women with P-PROM oral erythromycin 250 mg 4 times a day for a maximum of 10 days or until the woman is in established labour (whichever is sooner). [2015, amended 2022]"
+  },
+  "NG25 1.4.2": {
+    "issuer": "NICE",
+    "doc": "NG25",
+    "docTitle": "Preterm labour and birth",
+    "rec": "Recommendation 1.4.2",
+    "url": "https://www.nice.org.uk/guidance/ng25/chapter/Recommendations#ng25-1_4_2",
+    "text": "For women with P‑PROM who cannot tolerate erythromycin or in whom erythromycin is contraindicated, consider an oral penicillin for a maximum of 10 days or until the woman is in established labour (whichever is sooner). [2015, amended 2019]"
+  },
   "NG25 1.8.1": {
     "issuer": "NICE",
     "doc": "NG25",

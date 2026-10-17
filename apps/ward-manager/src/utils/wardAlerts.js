@@ -601,6 +601,21 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     });
   }
 
+  // ─── PPROM: oral antibiotics until labour (GL787; NICE NG25 1.4.1) ────
+  // Waters broken before 37+0 without labour: prophylaxis for intrauterine
+  // infection. Suspected infection has its own (IV) alert, and once labour is
+  // established the intrapartum antibiotic prompts take over.
+  if (!delivered && isPreterm && membranes === "SROM" && bed.labourStage === "Latent" && !isInfection
+      && !bed.ppromAntibioticsStarted && !bed.ppromAntibioticsStartedDeclined) {
+    alerts.push({
+      id: "pprom-antibiotics",
+      severity: "urgent",
+      title: `PPROM (${gest}): start oral antibiotics`,
+      body: "Prophylaxis for intrauterine infection until established labour. GL787: oral amoxicillin 1 g 8-hourly for 7 days; penicillin allergy: oral azithromycin 500 mg 24-hourly for 7 days. NICE uses oral erythromycin 250 mg 4 times a day for up to 10 days (an oral penicillin if not tolerated). In established labour, switch to the intrapartum regimen.",
+      citation: "GL787 (local) · NICE NG25 1.4.1, 1.4.2",
+    });
+  }
+
   // ─── Bleeding (NICE NG235 1.8.20; NG229 1.3.2, 1.3.8) ────────────────
   if (!delivered && hasBleeding && !bed.bleedingReviewed) {
     alerts.push({

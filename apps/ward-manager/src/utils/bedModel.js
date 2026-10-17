@@ -401,6 +401,7 @@ export const DONE_LABEL = {
   mgso4PETGiven: "MgSO4 (eclampsia) given",
   mgso4PETAssessed: "Severe pre-eclampsia features assessed",
   gbsBirthOffered: "Immediate birth offered (GBS, ruptured membranes)",
+  ppromAntibioticsStarted: "PPROM antibiotics given",
 };
 
 export const PERSISTENT_FLAGS = {
@@ -416,6 +417,7 @@ export const PERSISTENT_FLAGS = {
   "mgso4-eclampsia": { field: "mgso4PETGiven", label: "Given" },
   "gbs-prom-birth": { field: "gbsBirthOffered", label: "Offered" },
   "mgso4-severe-pet": { field: "mgso4PETAssessed", label: "Assessed" },
+  "pprom-antibiotics": { field: "ppromAntibioticsStarted", label: "Antibiotics given" },
 };
 export const OBS_STAMP = {
   "pulse-never": "lastPulse", "pulse-due": "lastPulse",
@@ -463,7 +465,7 @@ export const STILL_HERE = "bed-stale";
 
 // "Discuss / consider" prompts that can be answered "not given", so the
 // handover never reads as given when it was decided against.
-export const DECLINABLE = new Set(["preterm-mgso4", "preterm-steroids"]);
+export const DECLINABLE = new Set(["preterm-mgso4", "preterm-steroids", "pprom-antibiotics"]);
 export const declinedField = alertId => DECLINABLE.has(alertId) ? `${PERSISTENT_FLAGS[alertId].field}Declined` : null;
 export function declineAlert(alertId, iso, by = null) {
   const f = declinedField(alertId);

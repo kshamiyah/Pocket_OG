@@ -675,3 +675,26 @@ describe("PPH after a caesarean (GTG52, unit setting)", () => {
     expect(computeAlerts(cs(1000), NOW, unit).find(a => a.id === "pph").citation).toMatch(/1000 mL after caesarean is local/)
   })
 })
+
+describe("PPROM oral antibiotics (GL787; NICE NG25 1.4.1)", () => {
+  const pprom = (o = {}) => bed({ gestation: "31+0", labourStage: "Latent", modeOfOnset: "PPROM",
+    membranes: "SROM", membranesTime: t(HOUR), ...o })
+  it("prompts oral antibiotics before labour, citing GL787 and NG25", () => {
+    const a = computeAlerts(pprom(), NOW).find(x => x.id === "pprom-antibiotics")
+    expect(a.severity).toBe("urgent")
+    expect(a.body).toMatch(/amoxicillin/)
+    expect(a.citation).toMatch(/GL787.*NG25 1\.4\.1/)
+  })
+  it("not at term, not in established labour, not with suspected infection", () => {
+    expect(ids(pprom({ gestation: "37+2" }))).not.toContain("pprom-antibiotics")
+    expect(ids(pprom({ labourStage: "Active first stage", activeFirstStageStartTime: t(10 * MIN) }))).not.toContain("pprom-antibiotics")
+    expect(ids(pprom({ riskFlags: ["Infection suspected"] }))).not.toContain("pprom-antibiotics")
+    expect(ids(pprom({ membranes: "Intact", membranesTime: undefined }))).not.toContain("pprom-antibiotics")
+  })
+  it("clears with Antibiotics given or Not given", () => {
+    const b = pprom()
+    expect(fixLabel("pprom-antibiotics")).toBe("Antibiotics given")
+    expect(ids({ ...b, ...fixAlert(b, "pprom-antibiotics", t(0)) })).not.toContain("pprom-antibiotics")
+    expect(ids({ ...b, ...declineAlert("pprom-antibiotics", t(0)) })).not.toContain("pprom-antibiotics")
+  })
+})

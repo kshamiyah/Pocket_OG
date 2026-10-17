@@ -100,7 +100,7 @@ const TILE_ALERTS = {
   ctg: { red: ["ctg-pathological", "ctg-suspicious-overdue", "oxytocin-stop-pathological"], amber: ["ctg-suspicious", "ctg-review-due", "ctg-not-documented"] },
   obs: { red: ["bp-severe", "bp-low", "temp-38", "rr-low", "bgl-low", "bgl-high", "bgl-due", "bgl-never"], amber: ["tachycardia", "oliguria", "bp-elevated", "temp-375", "temp-low", "rr-high", "pulse-due", "pulse-never", "bp-due", "bp-never", "temp-due", "temp-never", "rr-due", "rr-never"] },
   oxy: { red: ["hyperstim", "oxytocin-max", "oxytocin-stop-pathological"], amber: ["oxytocin-increment"] },
-  memb: { red: ["mec-thick", "liquor-blood", "prom-48h", "prom-24h"], amber: ["mec-thin", "liquor-absent"] },
+  memb: { red: ["mec-thick", "liquor-blood", "prom-48h", "prom-24h", "pprom-antibiotics"], amber: ["mec-thin", "liquor-absent"] },
 };
 function toneFor(kind, alerts) {
   const ids = new Set(alerts.map(a => a.id));

@@ -115,6 +115,13 @@ export const RULES = [
     sources: ["NG195 1.6.1", "NG195 1.6.4", "GL787 PROM"],
   },
   {
+    id: "pprom-antibiotics", group: "Antibiotics and membranes", title: "PPROM: oral antibiotics",
+    when: "Under 37+0, spontaneous rupture of membranes, not in labour (latent), no suspected infection, antibiotics not yet given or declined.",
+    then: "Start oral prophylaxis until established labour: GL787 amoxicillin (azithromycin if penicillin allergic) for 7 days; NICE uses erythromycin for up to 10 days. Antibiotics given, or Not given, clears it.",
+    severity: "Urgent", alertIds: ["pprom-antibiotics"], sources: ["GL787 PROM", "NG25 1.4.1", "NG25 1.4.2"],
+    local: "The drug and duration follow GL787 (amoxicillin for 7 days), which differs from NICE NG25 (erythromycin for up to 10 days).",
+  },
+  {
     id: "gbs-prom-birth", group: "Antibiotics and membranes", title: "GBS positive and waters broken: offer immediate birth",
     when: "Spontaneous rupture of membranes before established labour, 34+0 or later, GBS positive this pregnancy, no induction yet started.",
     then: "Offer immediate induction of labour or caesarean birth, with intrapartum antibiotics. Tap Offered once discussed. Fires as soon as the waters break, not at 24 hours.",

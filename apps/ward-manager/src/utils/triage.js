@@ -21,6 +21,7 @@ const SHORT = {
   "preterm-tocolysis": "Tocolysis?",
   "under-28": "Under 28 weeks",
   "iap-preterm": "Preterm antibiotics",
+  "pprom-antibiotics": "PPROM antibiotics",
   "oxytocin-stop-pathological": "Stop oxytocin",
   "bp-low": "Low BP",
   "temp-low": "Low temp",
