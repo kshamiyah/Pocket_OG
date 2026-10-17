@@ -50,6 +50,12 @@ export const UNIT_SETTINGS = [
     nice: "NICE sets no interval.",
   },
   {
+    key: "promAntibioticsOn", type: "bool", default: false, group: "Membranes and antibiotics",
+    label: "Antibiotics after membranes ruptured for a set time",
+    help: "Off: the app follows NICE and Green-top 36, which give antibiotics for GBS, preterm labour or suspected infection, not for time since rupture. On: an urgent prompt at the time below (GL787 uses 48 hours).",
+    nice: "Not in NICE or Green-top 36: NG235 1.7.6 and 1.7.7, GTG36 7.1 offer induction at 24 hours instead.",
+  },
+  {
     key: "promAntibioticH", type: "number", default: 48, min: 12, max: 72, step: 6, unit: "h", group: "Membranes and antibiotics",
     label: "Antibiotics indicated when membranes ruptured",
     help: "For women who are not GBS positive.",

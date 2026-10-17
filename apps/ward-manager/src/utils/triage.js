@@ -51,7 +51,6 @@ const SHORT = {
   "mec-thick": "Thick meconium",
   "mec-thin": "Thin meconium",
   "liquor-blood": "Blood-stained liquor",
-  "liquor-absent": "No liquor",
   "temp-38": "Pyrexia",
   "temp-375": "Raised temp",
   "tachycardia": "Tachycardia",

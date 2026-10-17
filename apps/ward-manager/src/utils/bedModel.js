@@ -446,7 +446,7 @@ export const REVIEW_GROUP = {
   "slow-progress": "reviewProgressMin", "oxytocin-poor-progress": "reviewProgressMin", "arm-reassess": "reviewProgressMin",
   "active-phase-limit": "reviewLongMin", "latent-reassess": "reviewLongMin", "prom-24h": "reviewLongMin",
 
-  "mec-thick": "reviewLongMin", "mec-thin": "reviewLongMin", "liquor-absent": "reviewLongMin",
+  "mec-thick": "reviewLongMin", "mec-thin": "reviewLongMin",
 };
 
 /** Minutes a Reviewed alert stays quiet, or null if it cannot be reviewed (or Reviewed is off). */

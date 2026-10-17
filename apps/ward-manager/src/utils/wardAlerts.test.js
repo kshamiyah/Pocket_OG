@@ -1087,13 +1087,6 @@ describe("Liquor alerts", () => {
     expect(alerts.find(a => a.id === "liquor-blood").severity).toBe("warning")
   })
 
-  it("fires liquor-absent (warning) for absent liquor", () => {
-    const bed = activeBed({ ves: [{ time: t(1 * HOUR), dilation: 5, liquor: "Absent" }] })
-    const alerts = computeAlerts(bed, NOW)
-    expect(has(alerts, "liquor-absent")).toBe(true)
-    expect(alerts.find(a => a.id === "liquor-absent").severity).toBe("warning")
-  })
-
   it("fires no liquor alert when liquor is Clear", () => {
     const bed = activeBed({ ves: [{ time: t(1 * HOUR), dilation: 5, liquor: "Clear" }] })
     const alerts = computeAlerts(bed, NOW)

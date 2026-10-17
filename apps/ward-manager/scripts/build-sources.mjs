@@ -25,7 +25,7 @@ const DOCS = {
 };
 
 const WANT = {
-  NG235: ["1.6.34", "1.7.6", "1.7.7", "1.8.1", "1.8.19", "1.8.20", "1.8.33", "1.8.36", "1.8.42", "1.8.45", "1.8.46", "1.8.48", "1.8.49", "1.8.50", "1.8.54", "1.8.55", "1.8.56", "1.8.58", "1.8.59", "1.9.8", "1.9.25", "1.9.26", "1.9.27", "1.9.28"],
+  NG235: ["1.6.34", "1.7.6", "1.7.7", "1.7.11", "1.8.1", "1.8.19", "1.8.20", "1.8.33", "1.8.36", "1.8.42", "1.8.45", "1.8.46", "1.8.48", "1.8.49", "1.8.50", "1.8.54", "1.8.55", "1.8.56", "1.8.58", "1.8.59", "1.9.8", "1.9.25", "1.9.26", "1.9.27", "1.9.28"],
   NG229: ["1.2.9", "1.3.2", "1.3.3", "1.3.5", "1.3.6", "1.3.8", "1.3.11", "1.4.12", "1.4.14", "1.4.15", "1.4.18", "1.4.24", "1.4.32", "1.4.37", "1.5.5", "1.5.6", "1.5.7", "1.5.8"],
   NG25: ["1.4.1", "1.4.2", "1.8.1", "1.8.4", "1.9.1", "1.9.2", "1.9.3", "1.10.1", "1.10.2", "1.10.3"],
   NG195: ["1.6.1", "1.6.4", "1.7.1"],
@@ -68,6 +68,17 @@ out["NG255 table 1"] = {
   ].join("\n"),
 };
 
+// NG195 table 1 rows used by the GBS alert, copied from the published table.
+out["NG195 table 1"] = {
+  issuer: "NICE", doc: "NG195", docTitle: DOCS.NG195.title, rec: "Table 1: Intrapartum antibiotics (without chorioamnionitis)",
+  url: "https://www.nice.org.uk/guidance/ng195/chapter/Prevention-and-risk-reduction",
+  text: [
+    "No penicillin allergy: Use benzylpenicillin sodium.",
+    "Penicillin allergy that is not severe: Use cephalosporin with activity against group B streptococcus (for example, cefotaxime). Use with caution. In April 2021 this was an off-label use of cephalosporins.",
+    "Severe penicillin allergy: Consider: Vancomycin or An alternative antibiotic that would be expected to be active against group B streptococcus based on either sensitivity testing performed on the woman's, trans man's or non-binary person's isolate or on local antibiotic susceptibility surveillance data. In April 2021 this was an off-label use of vancomycin.",
+  ].join("\n"),
+};
+
 // Local guidelines: the text Pocket O&G holds, item by item.
 const items = section => section.content.flatMap(c =>
   c.type === "subheading" ? [`${c.value}:`]
@@ -91,6 +102,10 @@ gtg("GTG36 5.3", "GTG36", T36, "Section 5.3", GTG36_URL,
   "Explain to women that the likelihood of maternal GBS carriage in this pregnancy is 50%. Discuss the options of IAP, or bacteriological testing in late pregnancy and the offer of IAP if still positive.\nIf performed, bacteriological testing should ideally be carried out at 35–37 weeks of gestation or 3–5 weeks prior to the anticipated delivery date, e.g. 32–34 weeks of gestation for women with twins.");
 gtg("GTG36 5.4", "GTG36", T36, "Section 5.4", GTG36_URL,
   "IAP should be offered to women with a previous baby with early- or late-onset GBS disease.");
+gtg("GTG36 9.4", "GTG36", T36, "Section 9.4", GTG36_URL,
+  "For women who have agreed to IAP, benzylpenicillin should be administered. Once commenced, treatment should be given regularly until delivery.\nIt is recommended that 3 g intravenous benzylpenicillin be given as soon as possible after the onset of labour and 1.5 g 4 hourly until delivery. To optimise the efficacy of IAP, the first dose should be given at least 4 hours prior to delivery.");
+gtg("GTG36 9.5", "GTG36", T36, "Section 9.5", GTG36_URL,
+  "Provided a woman has not had severe allergy to penicillin, a cephalosporin should be used. If there is any evidence of severe allergy to penicillin, vancomycin should be used.\nIf the history suggests an allergy to beta-lactams, but one that is not severe (i.e. no anaphylaxis, angioedema, respiratory distress or urticaria), then a cephalosporin can be administered intravenously (e.g. cefuroxime, 1.5 g loading dose followed by 750 mg every 8 hours). If the allergy to beta-lactams is severe then intravenous vancomycin (1 g every 12 hours) is recommended.");
 gtg("GTG36 7.1", "GTG36", T36, "Section 7.1", GTG36_URL,
   "Women who are known GBS carriers should be offered immediate IAP and induction of labour as soon as reasonably possible.\nIn women where the carrier status is negative or unknown, offer induction of labour immediately or expectant management up to 24 hours. Beyond 24 hours, induction of labour is appropriate.");
 gtg("GTG36 8.1.1", "GTG36", T36, "Section 8.1.1", GTG36_URL,

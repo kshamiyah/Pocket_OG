@@ -89,9 +89,9 @@ export const RULES = [
   {
     id: "gbs-iap", group: "Antibiotics and membranes", title: "GBS: intrapartum antibiotics",
     when: "GBS positive this pregnancy; a previous baby with GBS disease; or GBS in a previous pregnancy without a negative swab at 35 to 37 weeks this pregnancy. In labour, or from 37+0 as soon as the membranes rupture; antibiotics not yet given. Before 37+0, ruptured membranes alone (PPROM) do not count, and an induction still latent with intact membranes is not yet labour.",
-    then: "First dose as soon as possible, continue until birth. Regimen from GL787. Never hidden by the PROM alerts.",
+    then: "First dose as soon as possible, continue until birth: benzylpenicillin; a cephalosporin if the penicillin allergy is not severe, vancomycin if severe (NICE NG195 table 1, Green-top 36 9.4 and 9.5). Never hidden by the PROM alerts.",
     severity: "Urgent", alertIds: ["gbs-iap"],
-    sources: ["NG195 1.6.1", "NG195 1.6.4", "GTG36 5.3", "GTG36 5.4", "GTG36 7.1", "GTG36 8.1.1", "GL787 GBS"],
+    sources: ["NG195 1.6.1", "NG195 1.6.4", "NG195 table 1", "GTG36 5.3", "GTG36 5.4", "GTG36 7.1", "GTG36 8.1.1", "GTG36 9.4", "GTG36 9.5"],
   },
   {
     id: "infection-suspected", group: "Antibiotics and membranes", title: "Suspected chorioamnionitis or sepsis",
@@ -123,16 +123,17 @@ export const RULES = [
   },
   {
     id: "gbs-prom-birth", group: "Antibiotics and membranes", title: "GBS positive and waters broken: offer immediate birth",
-    when: "Spontaneous rupture of membranes before established labour, 34+0 or later, GBS positive this pregnancy, no induction yet started.",
+    when: "Spontaneous rupture of membranes before established labour, no induction yet started, and either GBS positive this pregnancy (34+0 or later) or a previous baby with GBS disease (37+0 or later).",
     then: "Offer immediate induction of labour or caesarean birth, with intrapartum antibiotics. Tap Offered once discussed. Fires as soon as the waters break, not at 24 hours.",
     severity: "Urgent", alertIds: ["gbs-prom-birth"],
-    sources: ["NG207 1.2.12", "NG207 1.2.16", "NG195 1.7.1"],
+    sources: ["NG235 1.7.11", "NG207 1.2.12", "NG207 1.2.16", "NG195 1.7.1"],
   },
   {
     id: "prom-48h", group: "Antibiotics and membranes", title: "Membranes ruptured 48 hours",
-    when: "Membranes ruptured for the unit's time (default 48 hours, as GL787), not GBS+, antibiotics not yet given.",
-    then: "Antibiotic prophylaxis indicated per GL787.",
-    severity: "Urgent", alertIds: ["prom-48h"], sources: ["GL787 PROM"], settings: ["promAntibioticH"],
+    when: "Only if the unit switches it on (off by default). Membranes ruptured for the unit's time (default 48 hours, as GL787), not GBS+, antibiotics not yet given.",
+    then: "Antibiotic prophylaxis by unit policy, with the Green-top 36 regimen.",
+    severity: "Urgent", alertIds: ["prom-48h"], sources: ["GL787 PROM", "GTG36 9.4", "GTG36 9.5"], settings: ["promAntibioticsOn", "promAntibioticH"],
+    local: "A local rule (GL787). NICE and Green-top 36 give no antibiotics for time since rupture alone, so it starts switched off.",
   },
   {
     id: "prom-24h", group: "Antibiotics and membranes", title: "Prelabour rupture of membranes at term: 24 hours",
@@ -154,15 +155,6 @@ export const RULES = [
     then: "Review fetal heart rate; escalate if concerned.",
     severity: "Warning", alertIds: ["liquor-blood"], sources: ["NG235 1.8.20", "NG229 1.3.8"],
   },
-  {
-    id: "liquor-absent", group: "Antibiotics and membranes", title: "No liquor after rupture",
-    when: "Liquor recorded as absent.",
-    then: "Consider CTG and senior review.",
-    severity: "Warning", alertIds: ["liquor-absent"], sources: [],
-    local: "Local practice; no national threshold.",
-  },
-
-  // ── Labour progress ────────────────────────────────────────────────────
   {
     id: "latent-reassess", group: "Labour progress", title: "Latent phase reassessment",
     when: "Latent for the unit's interval (default 6 hours) since admission, or since induction started.",
