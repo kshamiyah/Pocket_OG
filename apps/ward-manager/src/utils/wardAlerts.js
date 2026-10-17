@@ -439,9 +439,9 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       id: "oxytocin-stop-pathological",
       severity: "urgent",
       since: lastCTG.time,
-      title: "Pathological CTG: stop oxytocin",
-      body: "Oxytocin must be discontinued immediately if the CTG is pathological, and urgent obstetrician or senior midwife review sought. Record the stop in the oxytocin log.",
-      citation: "NICE NG235 1.8.56 [2023]",
+      title: "Pathological CTG: stop oxytocin, urgent review",
+      body: "Oxytocin must be discontinued immediately if the CTG is pathological, and urgent obstetrician or senior midwife review sought. Record the stop in the oxytocin log. Exclude acute events (cord prolapse, abruption, uterine rupture); full risk assessment with maternal observations; conservative measures. If still pathological, consider expediting birth.",
+      citation: "NICE NG235 1.8.56 [2023] · NG229 1.5.7, 1.5.8 [2022]",
     });
   }
   if (oxyRunning) {
@@ -1047,7 +1047,9 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
 
     if (lastCTG) {
       const msCTG = now - new Date(lastCTG.time).getTime();
-      if (lastCTG.classification === "pathological") {
+      // While oxytocin runs, the stop-oxytocin alert carries the review too,
+      // so one problem shows as one alert; once stopped, this one takes over.
+      if (lastCTG.classification === "pathological" && !oxyRunning) {
         alerts.push({
           id: "ctg-pathological",
           severity: "urgent",

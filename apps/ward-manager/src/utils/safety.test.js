@@ -154,6 +154,9 @@ describe("oxytocin stop, hold and safety (NG235 1.8.54 to 1.8.56)", () => {
   const ox = (dose, minsAgo = 40, extra = {}) => ({ id: "o" + dose, startTime: t(minsAgo * MIN), dose, lastIncrementTime: t(minsAgo * MIN), ...extra })
   it("tells you to stop oxytocin when the CTG is pathological", () => {
     expect(sev(active({ oxytocinLog: [ox(6)], ctgLog: [ctg("pathological")] }), "oxytocin-stop-pathological")).toBe("urgent")
+    // One alert for one problem: the review alert waits until the stop is logged.
+    expect(ids(active({ oxytocinLog: [ox(6)], ctgLog: [ctg("pathological")] }))).not.toContain("ctg-pathological")
+    expect(ids(active({ oxytocinLog: [ox(6), { ...ox(0), stopped: true }], ctgLog: [ctg("pathological")] }))).toContain("ctg-pathological")
   })
   it("no increment prompt while the CTG is suspicious", () => {
     expect(ids(active({ oxytocinLog: [ox(6)], ctgLog: [ctg("suspicious")] }))).not.toContain("oxytocin-increment")

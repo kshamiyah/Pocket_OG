@@ -236,8 +236,8 @@ export const RULES = [
   {
     id: "oxytocin-stop", group: "Oxytocin and contractions", title: "Pathological CTG on oxytocin",
     when: "Oxytocin running and the latest CTG is pathological.",
-    then: "Stop oxytocin immediately; urgent obstetric or senior midwife review. The alert's Stop oxytocin button opens the oxytocin sheet to log the stop and its reason; it cannot be snoozed.",
-    severity: "Urgent", alertIds: ["oxytocin-stop-pathological"], sources: ["NG235 1.8.56"],
+    then: "Stop oxytocin immediately; urgent obstetric or senior midwife review. One alert covers both: it replaces the pathological CTG alert until the stop is logged, then that alert takes over. The Stop oxytocin button opens the oxytocin sheet to log the stop and its reason; it cannot be snoozed.",
+    severity: "Urgent", alertIds: ["oxytocin-stop-pathological"], sources: ["NG235 1.8.56", "NG229 1.5.7", "NG229 1.5.8"],
   },
   {
     id: "oxytocin-increment", group: "Oxytocin and contractions", title: "Oxytocin dose review",
