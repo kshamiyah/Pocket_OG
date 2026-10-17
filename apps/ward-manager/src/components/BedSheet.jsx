@@ -160,9 +160,11 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, o
         {(() => {
           const lastAt = Math.max(0, ...obs.map(o => o.at ?? 0));
           return (
-            <Tile label="Obs" tone={toneFor("obs", t.alerts)} onClick={onObs} ariaLabel="Record obs"
-              value={obsAbnormal ? "Check" : lastAt ? `Last ${fmtAge(now - lastAt)} ago` : "None recorded"}
-              meta={obsAbnormal ? shortLabel(obsAbnormal) : "tap to record"} />
+            <div className="grid">
+              <Tile label="Obs" tone={toneFor("obs", t.alerts)} onClick={onObs} ariaLabel="Record obs"
+                value={obsAbnormal ? "Check" : lastAt ? `Last ${fmtAge(now - lastAt)} ago` : "None recorded"}
+                meta={obsAbnormal ? shortLabel(obsAbnormal) : "tap to record"} />
+            </div>
           );
         })()}
         <div className="grid grid-cols-2 gap-2">
