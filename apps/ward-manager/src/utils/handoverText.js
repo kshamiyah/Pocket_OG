@@ -176,7 +176,8 @@ function shortBlock(bed, t, now, since) {
   const events = timelineEvents(bed, now)
     .filter(e => new Date(e.time).getTime() >= since && (KEY_EVENT.test(e.text) || isTreatment(e.text)))
     .slice(-6);
-  if (events.length) lines.push(`Events: ${events.map(e => `${clock(e.time, now)} ${e.text}`).join(" · ")}`);
+  // One event per line, time first, straight under the opening line.
+  events.forEach(e => lines.push(`  ${clock(e.time, now)} ${e.text}`));
 
   // Now: the current state only (how she got here is in the events).
   const n = [];

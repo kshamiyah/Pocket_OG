@@ -848,7 +848,7 @@ describe("handover: short by default, said the way handover is given", () => {
     expect(text).toMatch(/\nBed 2, P0, 39\+2, induced for pre-eclampsia \/ hypertension \(Dinoprostone\), PET, GBS\+, Epidural, in active labour since 11:00, 5 cm at 11:30 {2}\[NEEDS YOU\]/)
   })
   it("then events with times (treatments included), now, and plan", () => {
-    expect(text).toMatch(/\nEvents: 08:00 Intrapartum antibiotics given \(Dr S\) · 09:30 Oxytocin started 6 mU\/min · 11:40 CTG normal to pathological · 11:45 Oxytocin stopped: Pathological CTG/)
+    expect(text).toMatch(/\[NEEDS YOU\]\n {2}08:00 Intrapartum antibiotics given \(Dr S\)\n {2}09:30 Oxytocin started 6 mU\/min\n {2}11:40 CTG normal to pathological\n {2}11:45 Oxytocin stopped: Pathological CTG\nNow: /)
     expect(text).toMatch(/\nNow: CTG pathological 11:40 · obs: highest BP 168\/114 at 08:00/)
     expect(text).toMatch(/\nPlan: !! Pathological CTG.*to do: FBC/)
   })
