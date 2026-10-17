@@ -131,7 +131,7 @@ export function applyReviews(alerts, bed, now = Date.now()) {
     const until = at + mins * MIN;
     const newer = a.since && new Date(a.since).getTime() > at;
     if (now >= until || newer) return a;
-    return { ...a, severity: "info", reviewed: { at: r.at, by: r.by, until } };
+    return { ...a, severity: "info", reviewed: { at: r.at, by: r.by, until, severity: a.severity } };
   });
   const order = { urgent: 0, warning: 1, info: 2 };
   return out.sort((x, y) => order[x.severity] - order[y.severity] || alertTier(x.id) - alertTier(y.id));
@@ -142,13 +142,15 @@ export function triageBed(bed, now = Date.now()) {
   const shown = alerts.filter(a => !(OBS_IDS.has(a.id) && a.severity === "info"));
   const urgent = shown.filter(a => a.severity === "urgent").length;
   const warning = shown.filter(a => a.severity === "warning").length;
-  // A delivered woman stays in the delivered list unless a postnatal alert
-  // (PPH, abnormal observations) needs attention.
-  const tier = urgent ? "urgent" : warning ? "warning" : bed.delivery ? "delivered" : "ok";
-  return { tier, alerts, shown, top: shown[0] ?? null, next: nextDue(bed, now, alerts), urgent, warning };
+  // Reviewed problems that are still there: quieter, but never "on track" and
+  // never folded away with the delivered women.
+  const watching = shown.filter(a => a.reviewed).length;
+  const tier = urgent ? "urgent" : warning ? "warning" : watching ? "watching" : bed.delivery ? "delivered" : "ok";
+  const top = tier === "watching" ? shown.find(a => a.reviewed) : shown[0] ?? null;
+  return { tier, alerts, shown, top, next: nextDue(bed, now, alerts), urgent, warning, watching };
 }
 
-const TIER_RANK = { urgent: 0, warning: 1, ok: 2, delivered: 3 };
+const TIER_RANK = { urgent: 0, warning: 1, watching: 2, ok: 3, delivered: 4 };
 
 export function compareTriage(a, b) {
   const top = t => (t.top ? alertTier(t.top.id) : 3);
@@ -172,6 +174,7 @@ export function wardSummary(rows) {
     women: live.length,
     urgent: rows.filter(r => r.t.tier === "urgent").length,
     warning: rows.filter(r => r.t.tier === "warning").length,
+    watching: rows.filter(r => r.t.tier === "watching").length,
     delivered: rows.length - live.length,
     nextAt: nexts[0] ?? null,
   };

@@ -9,7 +9,9 @@ import {
 } from "../ui/styles";
 import { IconClipboard, IconMoon, IconMore, IconPlus, IconRound, IconSun } from "../ui/icons";
 
-const CARD_FOR = { urgent: CARD_URGENT, warning: CARD_DUE, ok: CARD, delivered: CARD };
+// Reviewed but still present: a muted red edge, so it reads as "being watched".
+const CARD_WATCH = "rounded-xl border bg-gray-50 dark:bg-gray-900/60 border-red-200 dark:border-red-950 border-dashed";
+const CARD_FOR = { urgent: CARD_URGENT, warning: CARD_DUE, watching: CARD_WATCH, ok: CARD, delivered: CARD };
 
 function Tag({ children, tone = "gray" }) {
   const cls = {
@@ -24,6 +26,7 @@ function Tag({ children, tone = "gray" }) {
 const BADGE = {
   urgent: "bg-red-600 text-white",
   warning: "bg-claude-500 text-white",
+  watching: "bg-red-100 dark:bg-red-950/50 text-red-800 dark:text-red-300",
   ok: "bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-100",
   delivered: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300",
 };
@@ -32,6 +35,7 @@ const PILL = {
   urgent: "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300",
   warning: "bg-claude-50 dark:bg-claude-950/40 text-claude-800 dark:text-claude-300",
   info: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300",
+  watching: "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 ring-1 ring-inset ring-red-200 dark:ring-red-900",
 };
 
 export function BedRow({ bed, t, now, onOpen, flash }) {
@@ -48,8 +52,10 @@ export function BedRow({ bed, t, now, onOpen, flash }) {
     const rest = t.shown.length - 1;
     side = (
       <>
-        <span className={`text-xs font-semibold leading-tight px-2 py-1 rounded-lg ${PILL[t.top.severity] ?? PILL.info}`}>{shortLabel(t.top)}</span>
-        {rest > 0 && <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500">+{rest} more</span>}
+        <span className={`text-xs font-semibold leading-tight px-2 py-1 rounded-lg ${t.top.reviewed ? PILL.watching : PILL[t.top.severity] ?? PILL.info}`}>{shortLabel(t.top)}</span>
+        {t.top.reviewed
+          ? <span className="text-[11px] text-gray-500 dark:text-gray-400">reviewed {clock(t.top.reviewed.at)}</span>
+          : rest > 0 && <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500">+{rest} more</span>}
       </>
     );
   } else if (t.tier === "delivered") {
@@ -105,7 +111,7 @@ export function BedRow({ bed, t, now, onOpen, flash }) {
   );
 }
 
-const SECTION_DOT = { urgent: "bg-red-600", warning: "bg-claude-500", ok: "bg-gray-400 dark:bg-gray-600" };
+const SECTION_DOT = { urgent: "bg-red-600", warning: "bg-claude-500", watching: "bg-red-300 dark:bg-red-800", ok: "bg-gray-400 dark:bg-gray-600" };
 
 function Section({ title, count, tone = "ok", children }) {
   return (
@@ -127,6 +133,7 @@ export default function Board({
   const [showDelivered, setShowDelivered] = useState(false);
   const urgent = rows.filter(r => r.t.tier === "urgent");
   const due = rows.filter(r => r.t.tier === "warning");
+  const watching = rows.filter(r => r.t.tier === "watching");
   const ok = rows.filter(r => r.t.tier === "ok");
   const delivered = rows.filter(r => r.t.tier === "delivered");
 
@@ -140,6 +147,7 @@ export default function Board({
     summary.delivered ? `${summary.delivered} delivered` : null,
     summary.urgent ? `${summary.urgent} ${summary.urgent === 1 ? "needs" : "need"} you` : null,
     summary.warning ? `${summary.warning} due soon` : null,
+    summary.watching ? `${summary.watching} watching` : null,
     summary.nextAt ? `next ${clock(summary.nextAt)}` : null,
   ].filter(Boolean);
 
@@ -212,6 +220,11 @@ export default function Board({
                 {due.length > 0 && (
                   <Section title="Due soon" tone="warning" count={due.length}>
                     {due.map(r => <BedRow key={r.bed.id} {...r} now={now} onOpen={onOpenBed} flash={flashId === r.bed.id} />)}
+                  </Section>
+                )}
+                {watching.length > 0 && (
+                  <Section title="Reviewed, watching" tone="watching" count={watching.length}>
+                    {watching.map(r => <BedRow key={r.bed.id} {...r} now={now} onOpen={onOpenBed} flash={flashId === r.bed.id} />)}
                   </Section>
                 )}
                 {ok.length > 0 && (

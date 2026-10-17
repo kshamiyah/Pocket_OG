@@ -778,3 +778,24 @@ describe("shift-test safety fixes", () => {
     expect(b.observations.tempWorst).toEqual({ value: 38.4, at: t(60 * MIN) })
   })
 })
+
+describe("reviewed problems stay visible (Reviewed, watching)", () => {
+  it("a reviewed pathological CTG is 'watching', not on track", () => {
+    const b0 = active({ ctgLog: [ctg("pathological", 5)] })
+    const b = { ...b0, ...fixAlert(b0, "ctg-pathological", t(2 * MIN), "Dr S") }
+    const tr = triageBed(b, NOW)
+    expect(tr.tier).toBe("watching")
+    expect(tr.top.id).toBe("ctg-pathological")
+  })
+  it("a delivered woman with a reviewed PPH is watching, not folded into delivered", () => {
+    const b0 = bed({ labourStage: "Active first stage", admissionTime: t(HOUR), delivery: { mode: "SVD", time: t(30 * MIN), ebl: 1600 } })
+    const b = { ...b0, ...fixAlert(b0, "pph", t(5 * MIN), "Dr S") }
+    expect(triageBed(b, NOW).tier).toBe("watching")
+  })
+  it("watching ranks below due soon and above on track", () => {
+    const watch = { bed: { bedNumber: "1" }, t: { tier: "watching", urgent: 0, warning: 0 } }
+    const ok = { bed: { bedNumber: "2" }, t: { tier: "ok", urgent: 0, warning: 0 } }
+    const due = { bed: { bedNumber: "3" }, t: { tier: "warning", urgent: 0, warning: 1 } }
+    expect([ok, watch, due].sort(compareTriage).map(r => r.t.tier)).toEqual(["warning", "watching", "ok"])
+  })
+})
