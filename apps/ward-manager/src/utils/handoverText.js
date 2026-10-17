@@ -1,7 +1,8 @@
-// Plain-text ward handover: women in priority order (the board's order), each
-// with what is happening now, a timestamped timeline of the important events,
-// what is due next, then the women who left the board this shift and the IOL
-// queue. Every clinical item carries the time it happened or was recorded.
+// Plain-text ward handover, women in priority order (the board's order).
+// Default: SBAR, one short line each for Situation, Background, Assessment and
+// Recommendation, with times on the clinical items. "Full detail" adds every
+// observation and a timeline of the shift. Both end with the women who left
+// the board this shift and the IOL queue.
 
 import { computeAlerts } from "./wardAlerts";
 import { clock, fmtAge } from "./time";
@@ -56,6 +57,10 @@ function obsLine(obs, now) {
  * alerts reviewed, tasks done, severe readings and the birth.
  */
 export function bedTimeline(bed, now = Date.now()) {
+  return timelineEvents(bed, now).map(e => `${clock(e.time, now)} ${e.text}`);
+}
+
+function timelineEvents(bed, now) {
   const ev = [];
   const add = (time, text) => { if (time && Number.isFinite(new Date(time).getTime())) ev.push({ time, text }); };
   add(bed.admissionTime, "Admitted");
@@ -93,11 +98,119 @@ export function bedTimeline(bed, now = Date.now()) {
   if (bed.delivery) add(bed.delivery.time, `${bed.delivery.mode}${bed.delivery.ebl != null ? `, EBL ${bed.delivery.ebl} mL` : ""}`);
   return ev
     .filter(e => new Date(e.time).getTime() <= now + 60000)
-    .sort((a, b) => new Date(a.time) - new Date(b.time))
-    .map(e => `${clock(e.time, now)} ${e.text}`);
+    .sort((a, b) => new Date(a.time) - new Date(b.time));
 }
 
-// The woman's block: header, background, now, obs, timeline, alerts, next, to do.
+// Background: risk factors, onset, analgesia, and treatments given or declined.
+function backgroundItems(bed, now) {
+  return [
+    ...(bed.riskFlags ?? []).map(riskLabel),
+    bed.modeOfOnset && bed.modeOfOnset !== "Spontaneous"
+      ? `${bed.modeOfOnset}${!bed.delivery && bed.modeOfOnset === "Induced" && bed.inductionMethod ? ` (${bed.inductionMethod})` : ""}` : null,
+    bed.analgesia && bed.analgesia !== "None" ? bed.analgesia : null,
+    ...DONE_FIELDS.filter(f => bed[f])
+      .map(f => `${DONE_LABEL[f] ?? f}${bed[`${f}At`] ? ` ${clock(bed[`${f}At`], now)}` : ""} ✓`),
+    ...DONE_FIELDS.filter(f => bed[`${f}Declined`])
+      .map(f => `${(DONE_LABEL[f] ?? f).replace(/ (given|confirmed)$/, "")} not given (decision${bed[`${f}DeclinedAt`] ? ` ${clock(bed[`${f}DeclinedAt`], now)}` : ""})`),
+  ].filter(Boolean);
+}
+
+// Only the observations worth saying out loud: abnormal or the worst this
+// admission, each with its time. Otherwise "obs normal" with the last time.
+function obsFindings(obs, now) {
+  const out = [];
+  const w = obs.bpWorst;
+  if (w && (w.sys >= 140 || w.dia >= 90)) out.push(`highest BP ${w.sys}/${w.dia} at ${clock(w.at, now)}`);
+  const val = k => (obs[k] != null ? parseFloat(obs[k]) : null);
+  const pw = obs.pulseWorst;
+  if (pw && pw.value > 100) out.push(`highest pulse ${pw.value} at ${clock(pw.at, now)}`);
+  const tw = obs.tempWorst;
+  if (tw && tw.value >= 37.5) out.push(`highest temp ${tw.value}°C at ${clock(tw.at, now)}`);
+  const rr = val("rrValue");
+  if (rr != null && (rr > 20 || rr < 12)) out.push(`RR ${rr} at ${clock(obs.rrAt ?? obs.lastRR, now)}`);
+  const bgl = val("bglValue");
+  if (bgl != null && (bgl < 4 || bgl > 7)) out.push(`BGL ${bgl} at ${clock(obs.bglAt ?? obs.lastBGL, now)}`);
+  if (obs.urineOutput != null && obs.urineOutput < 30) out.push(`urine ${obs.urineOutput} mL/hr at ${clock(obs.lastUrineCheck, now)}`);
+  if (out.length) return `Obs: ${out.join(", ")}`;
+  const times = ["lastPulse", "lastBP", "lastTemp", "lastRR"].map(k => obs[k]).filter(Boolean).sort();
+  return times.length ? `Obs normal (last ${clock(times.at(-1), now)})` : null;
+}
+
+// Events worth adding to the assessment that the other items do not already
+// say: tasks completed, with their times.
+const KEY_EVENT = /^Done:/;
+
+/** One woman in SBAR: four short lines. */
+function sbarBlock(bed, t, now) {
+  const pt = isPreterm(bed.gestation) ? " (preterm)" : "";
+  const lines = [`BED ${bed.bedNumber} · ${parityWithHistory(bed)} · ${bed.gestation ?? "?"}${pt}${t ? ` · ${TIER_TAG[t.tier] ?? ""}` : ""}`];
+  const open = applyReviews(computeAlerts(bed, now), bed, now).filter(a => a.severity === "urgent" || a.severity === "warning");
+
+  // S: where she is now, and the main problem.
+  let where;
+  if (bed.delivery) {
+    const dl = bed.delivery;
+    const pph = dl.ebl > 1000 ? " (major PPH)" : dl.ebl >= 500 ? " (minor PPH)" : "";
+    where = `Delivered: ${dl.mode} ${clock(dl.time, now)}${dl.ebl != null ? `, EBL ${dl.ebl} mL${pph}` : ""}`;
+  } else {
+    const ve = lastVE(bed);
+    const since = bed.labourStage === "Active second stage" ? bed.pushingStartTime
+      : bed.labourStage === "Passive second stage" ? bed.passiveStartTime
+      : bed.labourStage === "Active first stage" ? bed.activeFirstStageStartTime : null;
+    where = `${stageLabel(bed)}${since ? ` since ${clock(since, now)}` : ""}${ve ? `, ${ve.dilation} cm at ${clock(ve.time, now)}` : ", no VE yet"}`;
+  }
+  // The main problem, unless the situation already says it (a PPH after birth).
+  const main = open[0] && !(bed.delivery && open[0].id === "pph") ? `. ${tidy(open[0].title)}` : "";
+  lines.push(`S: ${where}${main}`);
+
+  // B: background.
+  const bg = backgroundItems(bed, now);
+  lines.push(`B: ${bg.length ? bg.join(" · ") : "Nil of note"}`);
+
+  // A: current findings and the shift's key events.
+  const a = [];
+  if (!bed.delivery) {
+    const ctgs = (bed.ctgLog ?? []).slice(-3);
+    if (ctgs.length) a.push(`CTG ${ctgs.map(c => `${c.classification} ${clock(c.time, now)}`).join(" > ")}${ctgs.at(-1).comment ? ` (${ctgs.at(-1).comment})` : ""}`);
+    // Oxytocin as one item: since when and the dose now, or from when to when.
+    const log = bed.oxytocinLog ?? [];
+    const oxy = currentOxytocin(bed);
+    const lastOxy = log.at(-1);
+    const episodeStart = end => {
+      let i = end;
+      while (i > 0 && !log[i - 1].stopped) i--;
+      return log[i]?.startTime;
+    };
+    if (oxy) {
+      a.push(`Oxytocin ${oxy.dose} mU/min${bed.oxytocinHeld ? " (held)" : ""} since ${clock(episodeStart(log.length - 1), now)}, last change ${clock(oxy.lastIncrementTime ?? oxy.startTime, now)}`);
+    } else if (lastOxy?.stopped) {
+      const from = log.length > 1 ? episodeStart(log.length - 2) : null;
+      a.push(`Oxytocin ${from ? `${clock(from, now)} to ` : "stopped "}${clock(lastOxy.startTime, now)}${lastOxy.stopReason ? `, stopped: ${lastOxy.stopReason}` : ""}`);
+    }
+    const m = membraneStatus(bed);
+    if (m.status && m.status !== "Intact") a.push(`${m.status}${m.time ? ` ${clock(m.time, now)}` : ""}${m.liquor ? `, ${m.liquor.toLowerCase()}` : ""}`);
+  } else if (bed.delivery.notes) {
+    a.push(bed.delivery.notes);
+  }
+  const of = obsFindings(bed.observations ?? {}, now);
+  if (of) a.push(of);
+  const events = timelineEvents(bed, now).filter(e => KEY_EVENT.test(e.text));
+  if (events.length) a.push(events.slice(-3).map(e => `${e.text} ${clock(e.time, now)}`).join(", "));
+  lines.push(`A: ${a.length ? a.join(" · ") : "Nothing new"}`);
+
+  // R: what needs doing.
+  const r = [
+    ...open.map(x => `${x.severity === "urgent" ? "!!" : "!"} ${shortLabel(x)}`),
+    ...applyReviews(computeAlerts(bed, now), bed, now).filter(x => x.reviewed)
+      .map(x => `~ ${shortLabel(x)} (reviewed ${clock(x.reviewed.at, now)}${x.reviewed.by ? ` by ${x.reviewed.by}` : ""})`),
+    t?.next ? `next ${t.next.label} ${clock(t.next.at, now)}` : null,
+    ...(bed.tasks ?? []).filter(x => !x.done).map(x => `to do: ${x.text}`),
+  ].filter(Boolean);
+  lines.push(`R: ${r.length ? r.join(" · ") : "Continue current plan"}`);
+  return lines;
+}
+
+// Full detail: header, background, now, every obs, timeline, alerts, next, to do.
 function bedBlock(bed, t, now) {
   const lines = [];
   const pt = isPreterm(bed.gestation) ? " [PRETERM]" : "";
@@ -187,6 +300,7 @@ function bedBlock(bed, t, now) {
  * this shift and not back on the board). opts.iolQueue: the IOL queue.
  */
 export function generateHandover(beds, shift, now = Date.now(), opts = {}) {
+  const full = opts.detail === "full";
   const d = new Date(now);
   const date = `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
   const rows = triageWard(beds, now);
@@ -194,12 +308,12 @@ export function generateHandover(beds, shift, now = Date.now(), opts = {}) {
   const heading = shift
     ? `${doctorLabel(shift.doctorName).toUpperCase()} · ${String(shift.shiftType ?? "").toUpperCase()} SHIFT`
     : "LABOUR WARD HANDOVER";
-  const lines = [heading, `${date}  ${clock(now, now)}  · in priority order`, ""];
+  const lines = [heading, `${date}  ${clock(now, now)}  · ${full ? "full detail" : "SBAR"}, in priority order`, ""];
 
   if (!rows.length) lines.push("No patients on board.");
 
   for (const { bed, t } of rows) {
-    lines.push(DIV, ...bedBlock(bed, t, now), "");
+    lines.push(DIV, ...(full ? bedBlock(bed, t, now) : sbarBlock(bed, t, now)), "");
   }
 
   // Women who left the board this shift (delivered and moved, transferred).
@@ -213,7 +327,7 @@ export function generateHandover(beds, shift, now = Date.now(), opts = {}) {
       const b = r.bed;
       const dl = b.delivery ? ` · ${b.delivery.mode} ${clock(b.delivery.time, now)}${b.delivery.ebl != null ? `, EBL ${b.delivery.ebl} mL` : ""}` : " · not delivered";
       lines.push(`Bed ${b.bedNumber}  ${parityWithHistory(b)}  ${b.gestation ?? "?"}${dl} · removed ${clock(r.at, now)}`);
-      bedTimeline(b, now).slice(-5).forEach(l => lines.push(`  ${l}`));
+      if (full) bedTimeline(b, now).slice(-5).forEach(l => lines.push(`  ${l}`));
     }
     lines.push("");
   }

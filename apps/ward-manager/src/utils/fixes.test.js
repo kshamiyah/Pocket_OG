@@ -86,7 +86,7 @@ describe("handover", () => {
       oxytocinLog: [{ id: "o", startTime: t(2 * HOUR), dose: 6, lastIncrementTime: t(20 * MIN) }],
       tasks: [{ id: "x", text: "Repeat FBC", done: false }],
     })
-    const text = generateHandover({ b1: b }, null, NOW)
+    const text = generateHandover({ b1: b }, null, NOW, { detail: "full" })
     expect(text).toMatch(/Oxytocin 6 mU\/min/)
     expect(text).toMatch(/Membranes: SROM/)
     expect(text).toMatch(/Intrapartum antibiotics given/)
@@ -98,7 +98,7 @@ describe("handover", () => {
       riskFlags: ["Hypertensive"], delivery: { time: t(HOUR), mode: "Ventouse", ebl: 1200 },
       tasks: [{ id: "x", text: "Repeat Hb", done: false }],
     })
-    const text = generateHandover({ b1: b }, null, NOW)
+    const text = generateHandover({ b1: b }, null, NOW, { detail: "full" })
     expect(text).toMatch(/major PPH/)
     expect(text).toMatch(/Hypertension on medication/)
     expect(text).toMatch(/To do: Repeat Hb/)

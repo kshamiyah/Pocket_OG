@@ -103,7 +103,8 @@ describe("after birth: maternal safety alerts continue", () => {
   })
   it("puts postnatal alerts in the handover", () => {
     const b = delivered({ delivery: { time: t(HOUR), mode: "SVD", ebl: 1200 } })
-    expect(generateHandover({ b1: b }, null, NOW)).toMatch(/!! Major PPH/)
+    expect(generateHandover({ b1: b }, null, NOW, { detail: "full" })).toMatch(/!! Major PPH/)
+    expect(generateHandover({ b1: b }, null, NOW)).toMatch(/R: !! PPH/)
   })
 })
 
@@ -456,7 +457,7 @@ describe("handover detail", () => {
       ctgLog: [ctg("normal", 120), ctg("suspicious", 60), { ...ctg("pathological", 10), comment: "Discussed with reg" }],
       oxytocinLog: [{ id: "o1", startTime: t(3 * HOUR), dose: 6, lastIncrementTime: t(2 * HOUR) }, { id: "o2", startTime: t(10 * MIN), dose: 0, stopped: true, stopReason: "Pathological CTG" }],
     })
-    const text = generateHandover({ h: b }, null, NOW)
+    const text = generateHandover({ h: b }, null, NOW, { detail: "full" })
     expect(text).toMatch(/Intrapartum antibiotics given 10:30 ✓/)
     expect(text).toMatch(/CTG: normal 10:00 > suspicious 11:00 > pathological 11:50 \(Discussed with reg\)/)
     expect(text).toMatch(/Oxytocin stopped 11:50: Pathological CTG/)
@@ -804,7 +805,7 @@ describe("handover: priority order, times and timeline", () => {
   const calm = active({ id: "c", bedNumber: "1" })
   const sick = active({ id: "s", bedNumber: "2", ctgLog: [ctg("normal", 120), ctg("pathological", 10)],
     oxytocinLog: [{ id: "o1", startTime: t(3 * HOUR), dose: 4, lastIncrementTime: t(HOUR) }] })
-  const text = generateHandover({ c: calm, s: sick }, null, NOW)
+  const text = generateHandover({ c: calm, s: sick }, null, NOW, { detail: "full" })
   it("lists the sickest woman first and tags her", () => {
     expect(text.indexOf("BED 2")).toBeLessThan(text.indexOf("BED 1"))
     expect(text).toMatch(/BED 2 .*\[NEEDS YOU\]/)
@@ -817,7 +818,7 @@ describe("handover: priority order, times and timeline", () => {
   })
   it("puts the time against each observation", () => {
     const b = active({ observations: { pulseValue: "88", pulseAt: t(30 * MIN), lastPulse: t(30 * MIN) } })
-    expect(generateHandover({ b }, null, NOW)).toMatch(/P 88 11:30/)
+    expect(generateHandover({ b }, null, NOW, { detail: "full" })).toMatch(/P 88 11:30/)
   })
   it("lists women who left the board this shift, and the IOL queue with waiting time", () => {
     const gone = { ...active({ id: "g", bedNumber: "4" }), delivery: { mode: "Em LSCS", time: t(2 * HOUR), ebl: 900 } }
@@ -830,5 +831,26 @@ describe("handover: priority order, times and timeline", () => {
     expect(out).toMatch(/Bed 4 .*Em LSCS 10:00, EBL 900 mL · removed 11:00/)
     expect(out).toMatch(/IOL QUEUE \(1\)/)
     expect(out).toMatch(/JB 41\+3 · Post-dates 41\+ · waiting 13h/)
+  })
+})
+
+describe("handover: SBAR by default", () => {
+  const b = active({ id: "s", bedNumber: "2", riskFlags: ["Pre-eclampsia"], analgesia: "Epidural",
+    ctgLog: [ctg("normal", 120), ctg("pathological", 20)],
+    oxytocinLog: [{ id: "o1", startTime: t(150 * MIN), dose: 6, lastIncrementTime: t(HOUR) }, { id: "o2", startTime: t(15 * MIN), dose: 0, stopped: true, stopReason: "Pathological CTG" }],
+    observations: { bpSystolic: "150", bpDiastolic: "95", bpAt: t(30 * MIN), lastBP: t(30 * MIN), bpWorst: { sys: 168, dia: 114, at: t(4 * HOUR) } },
+    tasks: [{ id: "x", text: "FBC", done: false }] })
+  const text = generateHandover({ s: b }, null, NOW)
+  it("gives each woman four lines: S, B, A, R", () => {
+    expect(text).toMatch(/\nS: Active 1st since 11:00, 5 cm at 11:30\. Pathological CTG/)
+    expect(text).toMatch(/\nB: Pre-eclampsia · Epidural/)
+    expect(text).toMatch(/\nA: CTG normal 10:00 > pathological 11:40/)
+    expect(text).toMatch(/Oxytocin 09:30 to 11:45, stopped: Pathological CTG/)
+    expect(text).toMatch(/highest BP 168\/114 at 08:00/)
+    expect(text).toMatch(/\nR: !! Pathological CTG.*to do: FBC/)
+  })
+  it("leaves out the timeline and routine obs", () => {
+    expect(text).not.toMatch(/Timeline:/)
+    expect(generateHandover({ c: active({ observations: { pulseValue: "84", lastPulse: t(30 * MIN) } }) }, null, NOW)).toMatch(/Obs normal \(last 11:30\)/)
   })
 })
