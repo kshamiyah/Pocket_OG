@@ -565,6 +565,15 @@ describe("progress on oxytocin (NG235 1.8.58, 1.8.59)", () => {
     expect(has(b, 2.3, "oxytocin-poor-progress")).toBe(false)
     expect(has(b, 2.3, "slow-progress")).toBe(false)
   })
+  it("stopping oxytocin after the 4 hour VE keeps that VE judged as on oxytocin", () => {
+    const oxy = [
+      { id: "o1", startTime: iso(1 / 6), dose: 2, lastIncrementTime: iso(1 / 6) },
+      { id: "o2", startTime: iso(4.5), dose: 0, stopped: true, lastIncrementTime: iso(4.5), stopReason: "Pathological CTG" },
+    ]
+    const b = mrsA([{ id: "5", time: iso(4.2), dilation: 6, ...AROM }], oxy)
+    expect(has(b, 4.6, "oxytocin-poor-progress")).toBe(true)
+    expect(has(b, 4.6, "slow-progress")).toBe(false)
+  })
   it("restarted oxytocin: the VE note points to clinical assessment", () => {
     const oxy = [
       { id: "o1", startTime: iso(1 / 6), dose: 2, lastIncrementTime: iso(1 / 6) },
