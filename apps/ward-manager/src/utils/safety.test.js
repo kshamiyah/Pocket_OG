@@ -585,3 +585,14 @@ describe("progress on oxytocin (NG235 1.8.58, 1.8.59)", () => {
     expect(has(mrsA([], oxy), 4.9, "ve-due")).toBe(false)
   })
 })
+
+describe("after birth", () => {
+  it("a fever is framed as sepsis assessment, not intrauterine infection (NG255 1.5.1)", () => {
+    const b = bed({ labourStage: "Active first stage", delivery: { mode: "Em LSCS", time: t(HOUR), ebl: 300 },
+      observations: { lastTemp: t(5 * MIN), tempValue: "38.3", tempAt: t(5 * MIN) } })
+    const a = computeAlerts(b, NOW).find(x => x.id === "temp-38")
+    expect(a.title).toMatch(/after birth: assess for sepsis/)
+    expect(a.body).not.toMatch(/CTG|chorioamnionitis/)
+    expect(a.citation).toMatch(/NG255/)
+  })
+})

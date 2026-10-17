@@ -141,6 +141,12 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, o
       className="shrink-0 min-h-9 px-3 rounded-full bg-gray-100 dark:bg-gray-900 text-sm font-semibold text-claude-700 dark:text-claude-400 active:scale-95">Edit</button>
   );
 
+  const obs = obsStatus(bed, now);
+  const ago = iso => fmtAge(now - new Date(iso).getTime());
+  const obsDue = obs.filter(o => !o.done);
+  // An abnormal value outranks "done": the tile names it until a newer value replaces it.
+  const obsAbnormal = t.alerts.find(a => TILE_ALERTS.obs.red.includes(a.id) && !a.id.startsWith("bgl-d") && !a.id.startsWith("bgl-n"))
+    ?? t.alerts.find(a => ["tachycardia", "rr-high", "bp-elevated", "temp-375", "temp-low", "oliguria"].includes(a.id));
   if (bed.delivery) {
     const d = bed.delivery;
     return (
@@ -150,6 +156,15 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, o
           <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400">{d.mode} at {clock(d.time)}</p>
           <p className="text-xs text-emerald-700 dark:text-emerald-400/80">{d.ebl != null ? `EBL ${d.ebl} mL` : "EBL not recorded"}{d.notes ? ` · ${d.notes}` : ""}</p>
         </div>
+        {/* Postnatal obs feed the PPH and sepsis checks, so recording them stays one tap away. */}
+        {(() => {
+          const lastAt = Math.max(0, ...obs.map(o => o.at ?? 0));
+          return (
+            <Tile label="Obs" tone={toneFor("obs", t.alerts)} onClick={onObs} ariaLabel="Record obs"
+              value={obsAbnormal ? "Check" : lastAt ? `Last ${fmtAge(now - lastAt)} ago` : "None recorded"}
+              meta={obsAbnormal ? shortLabel(obsAbnormal) : "tap to record"} />
+          );
+        })()}
         <div className="grid grid-cols-2 gap-2">
           <button type="button" onClick={onDelivered} className={`${BTN} ${BTN_SECONDARY}`}>Edit delivery</button>
           <button type="button" onClick={onRecord} className={`${BTN} ${BTN_SECONDARY}`}>Full record</button>
@@ -159,12 +174,6 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, o
     );
   }
 
-  const obs = obsStatus(bed, now);
-  const ago = iso => fmtAge(now - new Date(iso).getTime());
-  const obsDue = obs.filter(o => !o.done);
-  // An abnormal value outranks "done": the tile names it until a newer value replaces it.
-  const obsAbnormal = t.alerts.find(a => TILE_ALERTS.obs.red.includes(a.id) && !a.id.startsWith("bgl-d") && !a.id.startsWith("bgl-n"))
-    ?? t.alerts.find(a => ["tachycardia", "rr-high", "bp-elevated", "temp-375", "temp-low", "oliguria"].includes(a.id));
   const CTG_WORD = { normal: "Normal", suspicious: "Susp.", pathological: "Path." };
   return (
     <Sheet open onClose={onClose} title={`Bed ${bed.bedNumber}`} sub={sub} action={editBtn}>

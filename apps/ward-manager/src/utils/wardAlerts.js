@@ -685,7 +685,15 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // the pyrexia alert stays until a newer temperature replaces it.
   if (temp !== null && temp >= 38.0) {
     if (!isInfection || bed.broadAntibioticsStarted) {
-      alerts.push({
+      // After birth the labour wording (CTG, chorioamnionitis) no longer fits:
+      // the question is sepsis in someone recently pregnant (NG255).
+      alerts.push(delivered ? {
+        id: "temp-38",
+        severity: "urgent",
+        title: `Pyrexia ${temp}°C${aged("temp")} after birth: assess for sepsis`, since: valueSince("temp"),
+        body: "Grade her risk of severe illness or death from sepsis using her history, examination and the table 1 criteria for people who have recently been pregnant. Senior review.",
+        citation: "NICE NG255 1.5.1, 1.5.2",
+      } : {
         id: "temp-38",
         severity: "urgent",
         title: `Pyrexia ${temp}°C${aged("temp")}: probable intrauterine infection`, since: valueSince("temp"),

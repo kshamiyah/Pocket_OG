@@ -302,9 +302,9 @@ export const RULES = [
   {
     id: "temp", group: "Maternal observations", title: "Raised temperature",
     when: "38.0°C or above (urgent), 37.5 to 37.9°C (warning).",
-    then: "Transfer trigger and indication for continuous CTG; antibiotics if chorioamnionitis suspected; repeat 37.5 in 1 hour.",
+    then: "In labour: transfer trigger and indication for continuous CTG; antibiotics if chorioamnionitis suspected; repeat 37.5 in 1 hour. After birth, 38.0°C or above: assess for sepsis, grading risk with the NG255 criteria for people recently pregnant; senior review.",
     severity: "Urgent / warning", alertIds: ["temp-38", "temp-375"],
-    sources: ["NG235 1.8.20", "NG229 1.3.8", "NG195 1.6.1", "NG195 1.6.4"],
+    sources: ["NG235 1.8.20", "NG229 1.3.8", "NG195 1.6.1", "NG195 1.6.4", "NG255 1.5.1", "NG255 1.5.2"],
   },
   {
     id: "tachycardia", group: "Maternal observations", title: "Maternal tachycardia",
