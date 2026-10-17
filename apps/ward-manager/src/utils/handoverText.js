@@ -1,6 +1,6 @@
 // Plain-text ward handover, women in priority order (the board's order).
-// Default: SBAR, one short line each for Situation, Background, Assessment and
-// Recommendation, with times on the clinical items. "Full detail" adds every
+// Default: short, in the order handover is given (situation, background,
+// important events, now, plan), with times on the clinical items. "Full detail" adds every
 // observation and a timeline of the shift. Both end with the women who left
 // the board this shift and the IOL queue.
 
@@ -136,17 +136,22 @@ function obsFindings(obs, now) {
   return times.length ? `Obs normal (last ${clock(times.at(-1), now)})` : null;
 }
 
-// Events worth adding to the assessment that the other items do not already
-// say: tasks completed, with their times.
-const KEY_EVENT = /^Done:/;
+// The shift's important events, time first: membranes, oxytocin started or
+// stopped, CTG changes, second stage, severe readings, tasks done, birth.
+// A first CTG that is normal is not an event; any change, or an abnormal one, is.
+const KEY_EVENT = /^(ARM|Membranes ruptured|Oxytocin (started|restarted|stopped)|CTG .* to |CTG (suspicious|pathological)$|Fully dilated|Pushing|Severe BP|Temperature|Pulse|Done:)/;
 
-/** One woman in SBAR: four short lines. */
-function sbarBlock(bed, t, now) {
+/**
+ * One woman in the handover order: situation, background, important events,
+ * how she is now, and the plan. Short lines, times on everything clinical.
+ */
+function shortBlock(bed, t, now, since) {
   const pt = isPreterm(bed.gestation) ? " (preterm)" : "";
   const lines = [`BED ${bed.bedNumber} · ${parityWithHistory(bed)} · ${bed.gestation ?? "?"}${pt}${t ? ` · ${TIER_TAG[t.tier] ?? ""}` : ""}`];
-  const open = applyReviews(computeAlerts(bed, now), bed, now).filter(a => a.severity === "urgent" || a.severity === "warning");
+  const all = applyReviews(computeAlerts(bed, now), bed, now);
+  const open = all.filter(a => a.severity === "urgent" || a.severity === "warning");
 
-  // S: where she is now, and the main problem.
+  // Situation: where she is now, and the main problem.
   let where;
   if (bed.delivery) {
     const dl = bed.delivery;
@@ -154,59 +159,50 @@ function sbarBlock(bed, t, now) {
     where = `Delivered: ${dl.mode} ${clock(dl.time, now)}${dl.ebl != null ? `, EBL ${dl.ebl} mL${pph}` : ""}`;
   } else {
     const ve = lastVE(bed);
-    const since = bed.labourStage === "Active second stage" ? bed.pushingStartTime
+    const from = bed.labourStage === "Active second stage" ? bed.pushingStartTime
       : bed.labourStage === "Passive second stage" ? bed.passiveStartTime
       : bed.labourStage === "Active first stage" ? bed.activeFirstStageStartTime : null;
-    where = `${stageLabel(bed)}${since ? ` since ${clock(since, now)}` : ""}${ve ? `, ${ve.dilation} cm at ${clock(ve.time, now)}` : ", no VE yet"}`;
+    where = `${stageLabel(bed)}${from ? ` since ${clock(from, now)}` : ""}${ve ? `, ${ve.dilation} cm at ${clock(ve.time, now)}` : ", no VE yet"}`;
   }
   // The main problem, unless the situation already says it (a PPH after birth).
   const main = open[0] && !(bed.delivery && open[0].id === "pph") ? `. ${tidy(open[0].title)}` : "";
-  lines.push(`S: ${where}${main}`);
+  lines.push(`${where}${main}`);
 
-  // B: background.
+  // Background.
   const bg = backgroundItems(bed, now);
-  lines.push(`B: ${bg.length ? bg.join(" · ") : "Nil of note"}`);
+  lines.push(`Background: ${bg.length ? bg.join(" · ") : "nil of note"}`);
 
-  // A: current findings and the shift's key events.
-  const a = [];
+  // Important events this shift, oldest first.
+  const events = timelineEvents(bed, now)
+    .filter(e => new Date(e.time).getTime() >= since && KEY_EVENT.test(e.text))
+    .slice(-6);
+  if (events.length) lines.push(`Events: ${events.map(e => `${clock(e.time, now)} ${e.text}`).join(" · ")}`);
+
+  // Now: the current state only (how she got here is in the events).
+  const n = [];
   if (!bed.delivery) {
-    const ctgs = (bed.ctgLog ?? []).slice(-3);
-    if (ctgs.length) a.push(`CTG ${ctgs.map(c => `${c.classification} ${clock(c.time, now)}`).join(" > ")}${ctgs.at(-1).comment ? ` (${ctgs.at(-1).comment})` : ""}`);
-    // Oxytocin as one item: since when and the dose now, or from when to when.
-    const log = bed.oxytocinLog ?? [];
+    const ctg = (bed.ctgLog ?? []).at(-1);
+    if (ctg) n.push(`CTG ${ctg.classification} ${clock(ctg.time, now)}${ctg.comment ? ` (${ctg.comment})` : ""}`);
     const oxy = currentOxytocin(bed);
-    const lastOxy = log.at(-1);
-    const episodeStart = end => {
-      let i = end;
-      while (i > 0 && !log[i - 1].stopped) i--;
-      return log[i]?.startTime;
-    };
-    if (oxy) {
-      a.push(`Oxytocin ${oxy.dose} mU/min${bed.oxytocinHeld ? " (held)" : ""} since ${clock(episodeStart(log.length - 1), now)}, last change ${clock(oxy.lastIncrementTime ?? oxy.startTime, now)}`);
-    } else if (lastOxy?.stopped) {
-      const from = log.length > 1 ? episodeStart(log.length - 2) : null;
-      a.push(`Oxytocin ${from ? `${clock(from, now)} to ` : "stopped "}${clock(lastOxy.startTime, now)}${lastOxy.stopReason ? `, stopped: ${lastOxy.stopReason}` : ""}`);
-    }
+    if (oxy) n.push(`oxytocin ${oxy.dose} mU/min${bed.oxytocinHeld ? " (held)" : ""}, last change ${clock(oxy.lastIncrementTime ?? oxy.startTime, now)}`);
     const m = membraneStatus(bed);
-    if (m.status && m.status !== "Intact") a.push(`${m.status}${m.time ? ` ${clock(m.time, now)}` : ""}${m.liquor ? `, ${m.liquor.toLowerCase()}` : ""}`);
+    if (m.status && m.status !== "Intact") n.push(`${m.status}${m.liquor ? `, ${m.liquor.toLowerCase()} liquor` : ""}`);
   } else if (bed.delivery.notes) {
-    a.push(bed.delivery.notes);
+    n.push(bed.delivery.notes);
   }
   const of = obsFindings(bed.observations ?? {}, now);
-  if (of) a.push(of);
-  const events = timelineEvents(bed, now).filter(e => KEY_EVENT.test(e.text));
-  if (events.length) a.push(events.slice(-3).map(e => `${e.text} ${clock(e.time, now)}`).join(", "));
-  lines.push(`A: ${a.length ? a.join(" · ") : "Nothing new"}`);
+  if (of) n.push(of.charAt(0).toLowerCase() + of.slice(1));
+  if (n.length) lines.push(`Now: ${n.join(" · ")}`);
 
-  // R: what needs doing.
+  // Plan: what needs doing.
   const r = [
     ...open.map(x => `${x.severity === "urgent" ? "!!" : "!"} ${shortLabel(x)}`),
-    ...applyReviews(computeAlerts(bed, now), bed, now).filter(x => x.reviewed)
+    ...all.filter(x => x.reviewed)
       .map(x => `~ ${shortLabel(x)} (reviewed ${clock(x.reviewed.at, now)}${x.reviewed.by ? ` by ${x.reviewed.by}` : ""})`),
     t?.next ? `next ${t.next.label} ${clock(t.next.at, now)}` : null,
     ...(bed.tasks ?? []).filter(x => !x.done).map(x => `to do: ${x.text}`),
   ].filter(Boolean);
-  lines.push(`R: ${r.length ? r.join(" · ") : "Continue current plan"}`);
+  lines.push(`Plan: ${r.length ? r.join(" · ") : "continue current plan"}`);
   return lines;
 }
 
@@ -308,16 +304,17 @@ export function generateHandover(beds, shift, now = Date.now(), opts = {}) {
   const heading = shift
     ? `${doctorLabel(shift.doctorName).toUpperCase()} · ${String(shift.shiftType ?? "").toUpperCase()} SHIFT`
     : "LABOUR WARD HANDOVER";
-  const lines = [heading, `${date}  ${clock(now, now)}  · ${full ? "full detail" : "SBAR"}, in priority order`, ""];
+  const lines = [heading, `${date}  ${clock(now, now)}  · ${full ? "full detail, " : ""}in priority order`, ""];
+  // Events are this shift's (or the last 12 hours without a shift).
+  const since = shift?.shiftStart ? new Date(shift.shiftStart).getTime() : now - 12 * HOUR;
 
   if (!rows.length) lines.push("No patients on board.");
 
   for (const { bed, t } of rows) {
-    lines.push(DIV, ...(full ? bedBlock(bed, t, now) : sbarBlock(bed, t, now)), "");
+    lines.push(DIV, ...(full ? bedBlock(bed, t, now) : shortBlock(bed, t, now, since)), "");
   }
 
   // Women who left the board this shift (delivered and moved, transferred).
-  const since = shift?.shiftStart ? new Date(shift.shiftStart).getTime() : now - 12 * HOUR;
   const gone = (opts.removed ?? [])
     .filter(r => new Date(r.at).getTime() >= since && !beds[r.bed?.id])
     .sort((a, b) => new Date(a.at) - new Date(b.at));

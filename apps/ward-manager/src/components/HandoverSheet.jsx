@@ -5,8 +5,8 @@ import { generateHandover } from "../utils/handoverText";
 import { ChipRow } from "../ui/atoms";
 
 export default function HandoverSheet({ beds, shift, now, removed = [], iolQueue = [], onClose }) {
-  // SBAR by default; "Full detail" adds every observation and the timeline.
-  const [detail, setDetail] = useState("sbar");
+  // Short by default; "Full detail" adds every observation and the timeline.
+  const [detail, setDetail] = useState("short");
   const text = useMemo(() => generateHandover(beds, shift, now, { removed, iolQueue, detail }), [beds, shift, now, removed, iolQueue, detail]);
   const [status, setStatus] = useState(null);
   const preRef = useRef(null);
@@ -33,7 +33,7 @@ export default function HandoverSheet({ beds, shift, now, removed = [], iolQueue
           {canShare && <button type="button" onClick={() => navigator.share({ title: "Labour ward handover", text }).catch(() => {})} className={`${BTN} ${BTN_SECONDARY} px-5`}>Share</button>}
         </div>
       }>
-      <ChipRow small value={detail} onChange={setDetail} options={[{ value: "sbar", label: "SBAR" }, { value: "full", label: "Full detail" }]} />
+      <ChipRow small value={detail} onChange={setDetail} options={[{ value: "short", label: "Handover" }, { value: "full", label: "Full detail" }]} />
       {status && status !== "Copied" && <p className="text-xs font-semibold text-claude-700 dark:text-claude-400">{status}</p>}
       <pre ref={preRef} className="text-xs leading-relaxed font-mono whitespace-pre-wrap break-words rounded-xl border p-3 bg-gray-50 dark:bg-gray-900/60 border-gray-200 dark:border-gray-800 text-gray-800 dark:text-gray-200 select-text">{text}</pre>
     </Sheet>

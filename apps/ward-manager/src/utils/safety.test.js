@@ -104,7 +104,7 @@ describe("after birth: maternal safety alerts continue", () => {
   it("puts postnatal alerts in the handover", () => {
     const b = delivered({ delivery: { time: t(HOUR), mode: "SVD", ebl: 1200 } })
     expect(generateHandover({ b1: b }, null, NOW, { detail: "full" })).toMatch(/!! Major PPH/)
-    expect(generateHandover({ b1: b }, null, NOW)).toMatch(/R: !! PPH/)
+    expect(generateHandover({ b1: b }, null, NOW)).toMatch(/Plan: !! PPH/)
   })
 })
 
@@ -834,23 +834,23 @@ describe("handover: priority order, times and timeline", () => {
   })
 })
 
-describe("handover: SBAR by default", () => {
+describe("handover: short by default, in handover order", () => {
   const b = active({ id: "s", bedNumber: "2", riskFlags: ["Pre-eclampsia"], analgesia: "Epidural",
     ctgLog: [ctg("normal", 120), ctg("pathological", 20)],
     oxytocinLog: [{ id: "o1", startTime: t(150 * MIN), dose: 6, lastIncrementTime: t(HOUR) }, { id: "o2", startTime: t(15 * MIN), dose: 0, stopped: true, stopReason: "Pathological CTG" }],
     observations: { bpSystolic: "150", bpDiastolic: "95", bpAt: t(30 * MIN), lastBP: t(30 * MIN), bpWorst: { sys: 168, dia: 114, at: t(4 * HOUR) } },
     tasks: [{ id: "x", text: "FBC", done: false }] })
   const text = generateHandover({ s: b }, null, NOW)
-  it("gives each woman four lines: S, B, A, R", () => {
-    expect(text).toMatch(/\nS: Active 1st since 11:00, 5 cm at 11:30\. Pathological CTG/)
-    expect(text).toMatch(/\nB: Pre-eclampsia · Epidural/)
-    expect(text).toMatch(/\nA: CTG normal 10:00 > pathological 11:40/)
-    expect(text).toMatch(/Oxytocin 09:30 to 11:45, stopped: Pathological CTG/)
-    expect(text).toMatch(/highest BP 168\/114 at 08:00/)
-    expect(text).toMatch(/\nR: !! Pathological CTG.*to do: FBC/)
+  it("situation, background, events, now and plan, without SBAR labels", () => {
+    expect(text).not.toMatch(/SBAR|\nS: |\nB: |\nA: |\nR: /)
+    expect(text).toMatch(/\nActive 1st since 11:00, 5 cm at 11:30\. Pathological CTG/)
+    expect(text).toMatch(/\nBackground: Pre-eclampsia · Epidural/)
+    expect(text).toMatch(/\nEvents: 08:00 Severe BP 168\/114 · 09:30 Oxytocin started 6 mU\/min · 11:40 CTG normal to pathological · 11:45 Oxytocin stopped: Pathological CTG/)
+    expect(text).toMatch(/\nNow: CTG pathological 11:40 · obs: highest BP 168\/114 at 08:00/)
+    expect(text).toMatch(/\nPlan: !! Pathological CTG.*to do: FBC/)
   })
   it("leaves out the timeline and routine obs", () => {
     expect(text).not.toMatch(/Timeline:/)
-    expect(generateHandover({ c: active({ observations: { pulseValue: "84", lastPulse: t(30 * MIN) } }) }, null, NOW)).toMatch(/Obs normal \(last 11:30\)/)
+    expect(generateHandover({ c: active({ observations: { pulseValue: "84", lastPulse: t(30 * MIN) } }) }, null, NOW)).toMatch(/obs normal \(last 11:30\)/)
   })
 })
