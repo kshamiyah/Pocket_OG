@@ -1,12 +1,13 @@
 // Plain-text ward handover, women in priority order (the board's order).
-// Default: short, in the order handover is given (situation, background,
-// important events, now, plan), with times on the clinical items. "Full detail" adds every
+// Default: short, in the order handover is given: one opening line (bed,
+// parity, gestation, why induced, risks, analgesia, where she is now), then
+// the shift's important events, how she is now, and the plan. "Full detail" adds every
 // observation and a timeline of the shift. Both end with the women who left
 // the board this shift and the IOL queue.
 
 import { computeAlerts } from "./wardAlerts";
 import { clock, fmtAge } from "./time";
-import { DONE_LABEL, PERSISTENT_FLAGS, currentOxytocin, doctorLabel, lastVE, membraneStatus, parityWithHistory, riskLabel, sortedVEs, stageLabel, veFindings } from "./bedModel";
+import { DONE_LABEL, PERSISTENT_FLAGS, currentOxytocin, doctorLabel, lastVE, membraneStatus, parityWithHistory, riskLabel, riskShort, sortedVEs, stageLabel, veFindings } from "./bedModel";
 import { applyReviews, shortLabel, tidy, triageWard } from "./triage";
 import { sortIOLQueue } from "./iolPriority";
 
@@ -101,20 +102,6 @@ function timelineEvents(bed, now) {
     .sort((a, b) => new Date(a.time) - new Date(b.time));
 }
 
-// Background: risk factors, onset, analgesia, and treatments given or declined.
-function backgroundItems(bed, now) {
-  return [
-    ...(bed.riskFlags ?? []).map(riskLabel),
-    bed.modeOfOnset && bed.modeOfOnset !== "Spontaneous"
-      ? `${bed.modeOfOnset}${!bed.delivery && bed.modeOfOnset === "Induced" && bed.inductionMethod ? ` (${bed.inductionMethod})` : ""}` : null,
-    bed.analgesia && bed.analgesia !== "None" ? bed.analgesia : null,
-    ...DONE_FIELDS.filter(f => bed[f])
-      .map(f => `${DONE_LABEL[f] ?? f}${bed[`${f}At`] ? ` ${clock(bed[`${f}At`], now)}` : ""} ✓`),
-    ...DONE_FIELDS.filter(f => bed[`${f}Declined`])
-      .map(f => `${(DONE_LABEL[f] ?? f).replace(/ (given|confirmed)$/, "")} not given (decision${bed[`${f}DeclinedAt`] ? ` ${clock(bed[`${f}DeclinedAt`], now)}` : ""})`),
-  ].filter(Boolean);
-}
-
 // Only the observations worth saying out loud: abnormal or the worst this
 // admission, each with its time. Otherwise "obs normal" with the last time.
 function obsFindings(obs, now) {
@@ -137,44 +124,57 @@ function obsFindings(obs, now) {
 }
 
 // The shift's important events, time first: membranes, oxytocin started or
-// stopped, CTG changes, second stage, severe readings, tasks done, birth.
+// stopped, CTG changes, second stage, severe readings, treatments given or
+// declined, tasks done.
 // A first CTG that is normal is not an event; any change, or an abnormal one, is.
-const KEY_EVENT = /^(ARM|Membranes ruptured|Oxytocin (started|restarted|stopped)|CTG .* to |CTG (suspicious|pathological)$|Fully dilated|Pushing|Severe BP|Temperature|Pulse|Done:)/;
+const TREATMENTS = Object.values(DONE_LABEL);
+const isTreatment = text => TREATMENTS.some(l => text.startsWith(l));
+// Severe readings are not repeated here: "Now" gives the worst with its time.
+const KEY_EVENT = /^(ARM|Membranes ruptured|Oxytocin (started|restarted|stopped)|CTG .* to |CTG (suspicious|pathological)$|Fully dilated|Pushing|Done:|.*: not given)/;
 
-/**
- * One woman in the handover order: situation, background, important events,
- * how she is now, and the plan. Short lines, times on everything clinical.
- */
-function shortBlock(bed, t, now, since) {
-  const pt = isPreterm(bed.gestation) ? " (preterm)" : "";
-  const lines = [`BED ${bed.bedNumber} · ${parityWithHistory(bed)} · ${bed.gestation ?? "?"}${pt}${t ? ` · ${TIER_TAG[t.tier] ?? ""}` : ""}`];
-  const all = applyReviews(computeAlerts(bed, now), bed, now);
-  const open = all.filter(a => a.severity === "urgent" || a.severity === "warning");
-
-  // Situation: where she is now, and the main problem.
+// The opening line, said the way handover is given: "Bed 2, P0, 39+2,
+// induced for pre-eclampsia, PET, GBS+, epidural, in active labour since
+// 07:00, 7 cm at 11:00".
+function opener(bed, t, now) {
+  const ve = lastVE(bed);
+  // Lower-case ordinary words mid-sentence; keep abbreviations like PET as typed.
+  const reasons = (bed.iolReasons ?? []).map(r => (/^[A-Z][a-z]/.test(r) ? r[0].toLowerCase() + r.slice(1) : r));
+  const onset = bed.modeOfOnset === "Induced"
+    ? `induced${reasons.length ? ` for ${reasons.join(", ")}` : ""}${!bed.delivery && bed.inductionMethod ? ` (${bed.inductionMethod})` : ""}`
+    : bed.modeOfOnset === "PPROM" ? "PPROM" : null;
   let where;
   if (bed.delivery) {
     const dl = bed.delivery;
     const pph = dl.ebl > 1000 ? " (major PPH)" : dl.ebl >= 500 ? " (minor PPH)" : "";
-    where = `Delivered: ${dl.mode} ${clock(dl.time, now)}${dl.ebl != null ? `, EBL ${dl.ebl} mL${pph}` : ""}`;
+    where = `delivered ${dl.mode} at ${clock(dl.time, now)}${dl.ebl != null ? `, EBL ${dl.ebl} mL${pph}` : ""}`;
   } else {
-    const ve = lastVE(bed);
-    const from = bed.labourStage === "Active second stage" ? bed.pushingStartTime
-      : bed.labourStage === "Passive second stage" ? bed.passiveStartTime
-      : bed.labourStage === "Active first stage" ? bed.activeFirstStageStartTime : null;
-    where = `${stageLabel(bed)}${from ? ` since ${clock(from, now)}` : ""}${ve ? `, ${ve.dilation} cm at ${clock(ve.time, now)}` : ", no VE yet"}`;
+    const at = ve ? `, ${ve.dilation} cm at ${clock(ve.time, now)}` : ", no VE yet";
+    where = bed.labourStage === "Active second stage" ? `pushing since ${clock(bed.pushingStartTime, now)}`
+      : bed.labourStage === "Passive second stage" ? `fully dilated since ${clock(bed.passiveStartTime, now)}`
+      : bed.labourStage === "Active first stage" ? `in active labour${bed.activeFirstStageStartTime ? ` since ${clock(bed.activeFirstStageStartTime, now)}` : ""}${at}`
+      : `latent${at}`;
   }
-  // The main problem, unless the situation already says it (a PPH after birth).
-  const main = open[0] && !(bed.delivery && open[0].id === "pph") ? `. ${tidy(open[0].title)}` : "";
-  lines.push(`${where}${main}`);
+  const parts = [
+    `Bed ${bed.bedNumber}`, parityWithHistory(bed), `${bed.gestation ?? "?"}${isPreterm(bed.gestation) ? " (preterm)" : ""}`,
+    onset, ...(bed.riskFlags ?? []).map(riskShort),
+    bed.analgesia && bed.analgesia !== "None" ? bed.analgesia : null,
+    where,
+  ].filter(Boolean);
+  return `${parts.join(", ")}${t ? `  [${TIER_TAG[t.tier] ?? ""}]` : ""}`;
+}
 
-  // Background.
-  const bg = backgroundItems(bed, now);
-  lines.push(`Background: ${bg.length ? bg.join(" · ") : "nil of note"}`);
+/**
+ * One woman: the opening line, then the shift's important events, how she is
+ * now, and the plan. Short lines, times on everything clinical.
+ */
+function shortBlock(bed, t, now, since) {
+  const lines = [opener(bed, t, now)];
+  const all = applyReviews(computeAlerts(bed, now), bed, now);
+  const open = all.filter(a => a.severity === "urgent" || a.severity === "warning");
 
-  // Important events this shift, oldest first.
+  // Important events this shift, oldest first, treatments included.
   const events = timelineEvents(bed, now)
-    .filter(e => new Date(e.time).getTime() >= since && KEY_EVENT.test(e.text))
+    .filter(e => new Date(e.time).getTime() >= since && (KEY_EVENT.test(e.text) || isTreatment(e.text)))
     .slice(-6);
   if (events.length) lines.push(`Events: ${events.map(e => `${clock(e.time, now)} ${e.text}`).join(" · ")}`);
 

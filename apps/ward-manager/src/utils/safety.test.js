@@ -481,7 +481,7 @@ describe("fixes from the second shift test", () => {
     const b = active({ gestation: "30+2" })
     const after = { ...b, ...declineAlert("preterm-mgso4", t(0), "Dr S") }
     expect(ids(after)).not.toContain("preterm-mgso4")
-    expect(generateHandover({ x: { ...after, id: "x", bedNumber: "1" } }, null, NOW)).toMatch(/MgSO4 \(neuroprotection\) not given/)
+    expect(generateHandover({ x: { ...after, id: "x", bedNumber: "1" } }, null, NOW)).toMatch(/MgSO4 \(neuroprotection\): not given/)
   })
   it("implausible obs are refused", () => {
     expect(obsProblem("temp", "383")).toMatch(/looks wrong/)
@@ -834,18 +834,21 @@ describe("handover: priority order, times and timeline", () => {
   })
 })
 
-describe("handover: short by default, in handover order", () => {
-  const b = active({ id: "s", bedNumber: "2", riskFlags: ["Pre-eclampsia"], analgesia: "Epidural",
+describe("handover: short by default, said the way handover is given", () => {
+  const b = active({ id: "s", bedNumber: "2", riskFlags: ["Pre-eclampsia", "GBS+"], analgesia: "Epidural",
+    modeOfOnset: "Induced", iolReasons: ["Pre-eclampsia / hypertension"], inductionMethod: "Dinoprostone",
+    ...fixAlert(active(), "gbs-iap", t(4 * HOUR), "Dr S"),
     ctgLog: [ctg("normal", 120), ctg("pathological", 20)],
     oxytocinLog: [{ id: "o1", startTime: t(150 * MIN), dose: 6, lastIncrementTime: t(HOUR) }, { id: "o2", startTime: t(15 * MIN), dose: 0, stopped: true, stopReason: "Pathological CTG" }],
     observations: { bpSystolic: "150", bpDiastolic: "95", bpAt: t(30 * MIN), lastBP: t(30 * MIN), bpWorst: { sys: 168, dia: 114, at: t(4 * HOUR) } },
     tasks: [{ id: "x", text: "FBC", done: false }] })
   const text = generateHandover({ s: b }, null, NOW)
-  it("situation, background, events, now and plan, without SBAR labels", () => {
-    expect(text).not.toMatch(/SBAR|\nS: |\nB: |\nA: |\nR: /)
-    expect(text).toMatch(/\nActive 1st since 11:00, 5 cm at 11:30\. Pathological CTG/)
-    expect(text).toMatch(/\nBackground: Pre-eclampsia · Epidural/)
-    expect(text).toMatch(/\nEvents: 08:00 Severe BP 168\/114 · 09:30 Oxytocin started 6 mU\/min · 11:40 CTG normal to pathological · 11:45 Oxytocin stopped: Pathological CTG/)
+  it("opens with one spoken line: bed, parity, gestation, why induced, risks, analgesia, where she is", () => {
+    expect(text).not.toMatch(/SBAR|\nS: |\nB: |Background:/)
+    expect(text).toMatch(/\nBed 2, P0, 39\+2, induced for pre-eclampsia \/ hypertension \(Dinoprostone\), PET, GBS\+, Epidural, in active labour since 11:00, 5 cm at 11:30 {2}\[NEEDS YOU\]/)
+  })
+  it("then events with times (treatments included), now, and plan", () => {
+    expect(text).toMatch(/\nEvents: 08:00 Intrapartum antibiotics given \(Dr S\) · 09:30 Oxytocin started 6 mU\/min · 11:40 CTG normal to pathological · 11:45 Oxytocin stopped: Pathological CTG/)
     expect(text).toMatch(/\nNow: CTG pathological 11:40 · obs: highest BP 168\/114 at 08:00/)
     expect(text).toMatch(/\nPlan: !! Pathological CTG.*to do: FBC/)
   })
