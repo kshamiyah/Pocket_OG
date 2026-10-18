@@ -128,7 +128,7 @@ function Section({ title, count, tone = "ok", children }) {
 
 export default function Board({
   rows, summary, now, shift, dark, flashId, iolQueue, tab, onTab,
-  onOpenBed, onAdmit, onRound, onHandover, onToggleTheme, onMenu, onRules, iolView,
+  onOpenBed, onAdmit, onRound, onHandover, onToggleTheme, onMenu, iolView,
 }) {
   const [showDelivered, setShowDelivered] = useState(false);
   const urgent = rows.filter(r => r.t.tier === "urgent");
@@ -242,10 +242,8 @@ export default function Board({
                   </section>
                 )}
                 <p className={`${TYPE_CAPTION} text-center leading-relaxed pt-2`}>
-                  Decision aid only. Clinical responsibility remains with the treating clinician.<br />
-                  <button type="button" onClick={onRules} className="min-h-9 px-2 font-semibold text-claude-700 dark:text-claude-400 underline decoration-dotted underline-offset-2">
-                    Rules and sources: NICE NG235 · NG229 · NG25 · NG195 · NG255 · local
-                  </button>
+                  {/* Rules and sources lives in the ⋯ menu. */}
+                  Decision aid only. Clinical responsibility remains with the treating clinician.
                 </p>
               </>
             )}

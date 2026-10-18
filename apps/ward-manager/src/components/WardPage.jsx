@@ -244,7 +244,6 @@ export default function WardPage({ shift, onEndShift }) {
         onHandover={() => setSheet({ type: "handover" })}
         onToggleTheme={toggleTheme}
         onMenu={() => { setConfirmEnd(false); setConfirmClear(null); setSheet({ type: "menu" }); }}
-        onRules={() => setRulesOpen(true)}
         iolView={
           <IOLQueue queue={iolQueue} now={now}
             onAdd={() => setSheet({ type: "iol" })}
