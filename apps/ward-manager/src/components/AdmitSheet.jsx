@@ -5,7 +5,7 @@ import SubPage from "../ui/SubPage";
 import { useSubPage } from "../ui/useSubPage";
 import { IconChevron } from "../ui/icons";
 import { Chip, ChipRow, DilationGrid, Label, MultiChipRow, Stepper, WhenPicker } from "../ui/atoms";
-import { BTN, BTN_PRIMARY, INPUT, TYPE_META } from "../ui/styles";
+import { BTN, BTN_PRIMARY, BTN_SECONDARY, INPUT, TYPE_META } from "../ui/styles";
 import { resolveWhen, whenFromISO } from "../utils/time";
 import {
   ANALGESIA, BIRTH_MODES, BIRTH_SHORT, IND_METHODS, IOL_REASONS, LIQUORS, LIQUOR_SHORT, MEMBRANES, ONSETS, PARITIES,
@@ -87,6 +87,10 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
   const [veCx, setVeCx] = useState(null);
   const [vePres, setVePres] = useState("Cephalic");
   const [veWhen, setVeWhen] = useState({ minsAgo: 0 });
+  // VEs done before she reached the board (elsewhere, or earlier in labour):
+  // dilation and time each, so progress and the delay rules start from them.
+  const [earlier, setEarlier] = useState([]);
+  const setEarlierAt = (id, patch) => setEarlier(list => list.map(e => (e.id === id ? { ...e, ...patch } : e)));
   const [admWhen, setAdmWhen] = useState({ minsAgo: 0 });
   // Admission time defaults to now; the picker only appears if asked for.
   const [admEarlier, setAdmEarlier] = useState(false);
@@ -131,13 +135,24 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
     }
     const admISO = resolveWhen(admWhen) ?? new Date().toISOString();
     const veISO = veDil != null ? resolveWhen(veWhen) ?? admISO : null;
-    const stageTime = veISO ?? admISO;
     const membranes = effMemb;
-    const ves = veDil != null ? [{
+    // Earlier VEs: membranes intact unless they were already ruptured then.
+    const before = earlier
+      .map(e => ({ ...e, iso: e.dil != null ? resolveWhen(e.when) : null }))
+      .filter(e => e.iso)
+      .map(e => ({
+        id: newId("ve"), time: e.iso, dilation: e.dil,
+        membranes: ruptured && romISO && e.iso >= romISO ? membranes : "Intact",
+      }));
+    const ves = [...before, ...(veDil != null ? [{
       id: newId("ve"), time: veISO, dilation: veDil, station: veStation, presentation: vePres,
       membranes, membranesTime: ruptured ? romISO : null,
       liquor: ruptured ? liquor : null, contractions: veCx,
-    }] : [];
+    }] : [])].sort((a, b) => new Date(a.time) - new Date(b.time));
+    // Established labour starts at the first VE of 4 cm or more, so a woman
+    // who has been labouring for hours is not timed from her arrival.
+    const firstActive = ves.find(v => v.dilation >= 4)?.time;
+    const stageTime = (stage === "Active first stage" ? firstActive : null) ?? veISO ?? admISO;
     onSave({
       id: newId("bed"), bedNumber: trimmed, admissionTime: admISO,
       parity, prevBirths: births, gestation, modeOfOnset: onset,
@@ -277,6 +292,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
           text={veDil == null ? "not recorded · tap to add" : [
             `${veDil} cm`, veStation != null && `station ${stationLabel(veStation)}`, veCx != null && `${veCx} in 10`,
             vePres, whenText(veWhen),
+            earlier.some(e => e.dil != null) && `+${earlier.filter(e => e.dil != null).length} earlier`,
           ].filter(Boolean).join(" · ")} />
       )}
       {detail.page === "ve" && (
@@ -298,7 +314,23 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
             <ChipRow small options={["Cephalic", "Breech", "Other"]} value={vePres} onChange={setVePres} />
           </div>
           <WhenPicker label="Time of the VE" value={veWhen} onChange={setVeWhen} presets={[0, 15, 30, 60, 120]} />
-          <p className={TYPE_META}>Membranes are set on the Admit screen. This becomes her first VE, so the next one is due 4 hours from its time.</p>
+          <div className="space-y-2">
+            <Label hint="optional">Earlier VEs</Label>
+            {earlier.map((e, k) => (
+              <div key={e.id} className="rounded-xl border border-gray-200 dark:border-gray-800 p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">Earlier VE {k + 1}</span>
+                  <button type="button" onClick={() => setEarlier(list => list.filter(x => x.id !== e.id))}
+                    className="min-h-9 px-2 text-xs font-semibold text-red-600 dark:text-red-400">Remove</button>
+                </div>
+                <DilationGrid value={e.dil} onChange={v => setEarlierAt(e.id, { dil: e.dil === v ? null : v })} />
+                <WhenPicker tight label="When" value={e.when} onChange={w => setEarlierAt(e.id, { when: w })} presets={[60, 120, 240, 360, 480]} />
+              </div>
+            ))}
+            <button type="button" onClick={() => setEarlier(list => [...list, { id: newId("prev"), dil: null, when: { minsAgo: 240 } }])}
+              className={`${BTN} ${BTN_SECONDARY} w-full`}>+ Add an earlier VE</button>
+          </div>
+          <p className={TYPE_META}>Membranes are set on the Admit screen. The latest VE starts the 4-hour clock; earlier ones show her progress, and established labour is timed from the first at 4 cm or more.</p>
         </SubPage>
       )}
       {detail.page === "iol" && (
