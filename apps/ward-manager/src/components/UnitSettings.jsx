@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Chip, Stepper } from "../ui/atoms";
 import { BTN, BTN_PRIMARY, BTN_SECONDARY, CARD, TYPE_DISPLAY, TYPE_META, TYPE_OVERLINE } from "../ui/styles";
 import { IconBack } from "../ui/icons";
+import { useSwipeBack } from "../ui/useSwipeBack";
 import { UNIT_DEFAULTS, UNIT_SETTINGS, formatSetting, getUnitSettings } from "../data/unitSettings";
 
 const GROUPS = [...new Set(UNIT_SETTINGS.map(s => s.group))];
@@ -13,8 +14,10 @@ export default function UnitSettings({ onClose, onSave }) {
   const dirty = UNIT_SETTINGS.some(s => draft[s.key] !== saved[s.key]);
   const set = (k, v) => setDraft(d => ({ ...d, [k]: v }));
 
+  // Swipe in from the left edge to go back.
+  const { swipeProps, swipeStyle } = useSwipeBack(onClose);
   return (
-    <div className="fixed inset-0 z-40 bg-white dark:bg-gray-950 flex flex-col" role="dialog" aria-label="Unit settings">
+    <div className="fixed inset-0 z-40 bg-white dark:bg-gray-950 flex flex-col" {...swipeProps} style={swipeStyle} role="dialog" aria-label="Unit settings">
       <div className="shrink-0 border-b border-gray-200 dark:border-gray-800" style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)" }}>
         <div className="max-w-lg mx-auto px-5 pb-3 flex items-start gap-3">
           <button type="button" onClick={onClose} aria-label="Back without saving"

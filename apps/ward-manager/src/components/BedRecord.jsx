@@ -6,6 +6,7 @@ import {
   BTN, BTN_PRIMARY, BTN_SECONDARY, CARD, CHIP_ON, CTG_BOX, INPUT, TYPE_DISPLAY, TYPE_META, TYPE_UI_SM,
 } from "../ui/styles";
 import { IconBack, IconTick } from "../ui/icons";
+import { useSwipeBack } from "../ui/useSwipeBack";
 import { fmtAge, clock, resolveWhen, whenFromISO } from "../utils/time";
 import { getUnitSettings } from "../data/unitSettings";
 import {
@@ -142,6 +143,8 @@ function TasksPanel({ bed, onUpdate }) {
 
 export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStage, onOpenVE, onOpenCTG, onOpenOxy, onOpenDelivery, onEdit, onRemove }) {
   const [tab, setTab] = useState("overview");
+  // Swipe in from the left edge to go back.
+  const { swipeProps, swipeStyle } = useSwipeBack(onBack);
   if (!bed) return null;
   const ves = [...sortedVEs(bed)].reverse();
   const ctgs = [...(bed.ctgLog ?? [])].reverse();
@@ -150,7 +153,7 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
   const TABS = [["overview", "Overview"], ["ves", `VEs ${ves.length || ""}`], ["ctg", `CTG ${ctgs.length || ""}`], ["obs", "Obs"], ["tasks", `Tasks${pendingTasks ? ` ${pendingTasks}` : ""}`]];
 
   return (
-    <div className="fixed inset-0 z-40 bg-white dark:bg-gray-950 overflow-y-auto overscroll-contain" role="dialog" aria-label={`Bed ${bed.bedNumber} record`}>
+    <div className="fixed inset-0 z-40 bg-white dark:bg-gray-950 overflow-y-auto overscroll-contain" {...swipeProps} style={swipeStyle} role="dialog" aria-label={`Bed ${bed.bedNumber} record`}>
       <div className="sticky top-0 z-10 bg-white/95 dark:bg-gray-950/95 backdrop-blur border-b border-gray-200 dark:border-gray-800"
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)" }}>
         <div className="max-w-lg mx-auto px-5 pb-3">

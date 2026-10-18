@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import Sheet from "../ui/Sheet";
 import { BTN, BTN_PRIMARY, BTN_SECONDARY, CARD, INPUT, TYPE_DISPLAY, TYPE_META, TYPE_OVERLINE } from "../ui/styles";
 import { IconBack, IconChevron } from "../ui/icons";
+import { useSwipeBack } from "../ui/useSwipeBack";
 import { RULES, RULE_FOR_ALERT, RULE_GROUPS } from "../data/ruleCatalogue";
 import { SOURCES, SOURCES_ACCESSED } from "../data/sources";
 import { UNIT_SETTINGS, formatSetting, getUnitSettings, saveUnitSettings } from "../data/unitSettings";
@@ -159,8 +160,10 @@ export default function RulesPage({ onClose, onSource, onSettings, onSettingSave
     sources: new Set(RULES.flatMap(r => r.sources)).size,
   }), []);
 
+  // Swipe in from the left edge to go back.
+  const { swipeProps, swipeStyle } = useSwipeBack(onClose);
   return (
-    <div className="fixed inset-0 z-40 bg-white dark:bg-gray-950 overflow-y-auto overscroll-contain" role="dialog" aria-label="Rules and sources">
+    <div className="fixed inset-0 z-40 bg-white dark:bg-gray-950 overflow-y-auto overscroll-contain" {...swipeProps} style={swipeStyle} role="dialog" aria-label="Rules and sources">
       <div className="sticky top-0 z-10 bg-white/95 dark:bg-gray-950/95 backdrop-blur border-b border-gray-200 dark:border-gray-800"
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)" }}>
         <div className="max-w-lg mx-auto px-5 pb-3">

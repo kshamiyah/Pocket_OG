@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { BTN, BTN_PRIMARY } from "./styles";
 import { IconBack } from "./icons";
+import { useSwipeBack } from "./useSwipeBack";
 
 /**
  * A page pushed in over a sheet at the same size, like going into a tab.
@@ -14,8 +15,9 @@ export default function SubPage({ title, sub, backLabel, onClose, closing, onClo
     return () => window.removeEventListener("keydown", onKey, true);
   }, [onClose]);
 
+  const { swipeProps, swipeStyle } = useSwipeBack(onClose);
   return (
-    <div role="dialog" aria-label={title}
+    <div role="dialog" aria-label={title} {...swipeProps} style={swipeStyle}
       onAnimationEnd={e => { if (closing && e.target === e.currentTarget) onClosed(); }}
       className={`absolute inset-0 z-10 bg-white dark:bg-gray-950 flex flex-col ${closing ? "animate-push-out" : "animate-push-in"}`}>
       <div className="shrink-0 border-b border-gray-200 dark:border-gray-800 pt-3">
