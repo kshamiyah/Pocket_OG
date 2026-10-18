@@ -857,3 +857,12 @@ describe("handover: short by default, said the way handover is given", () => {
     expect(generateHandover({ c: active({ observations: { pulseValue: "84", lastPulse: t(30 * MIN) } }) }, null, NOW)).toMatch(/obs normal \(last 11:30\)/)
   })
 })
+
+describe("handover plan always gives the next VE in established labour", () => {
+  it("shows the next VE even when a CTG review comes first", () => {
+    const b = active({ ves: [{ id: "v", time: t(30 * MIN), dilation: 5 }], ctgLog: [ctg("normal", 50)] })
+    const text = generateHandover({ b }, null, NOW)
+    expect(text).toMatch(/Plan: .*next VE 15:30/)
+    expect(text).toMatch(/next CTG review 12:10/)
+  })
+})

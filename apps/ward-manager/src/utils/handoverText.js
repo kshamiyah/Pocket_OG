@@ -8,7 +8,7 @@
 import { computeAlerts } from "./wardAlerts";
 import { clock, fmtAge } from "./time";
 import { DONE_LABEL, PERSISTENT_FLAGS, currentOxytocin, doctorLabel, lastVE, membraneStatus, parityWithHistory, riskLabel, riskShort, sortedVEs, stageLabel, veFindings } from "./bedModel";
-import { applyReviews, shortLabel, tidy, triageWard } from "./triage";
+import { applyReviews, nextOf, shortLabel, tidy, triageWard } from "./triage";
 import { sortIOLQueue } from "./iolPriority";
 
 const DONE_FIELDS = [...new Set(Object.values(PERSISTENT_FLAGS).map(f => f.field))];
@@ -196,11 +196,14 @@ function shortBlock(bed, t, now, since) {
   if (n.length) lines.push(`Now: ${n.join(" · ")}`);
 
   // Plan: what needs doing.
+  const nextVE = bed.labourStage === "Active first stage" ? nextOf(bed, ["ve-due", "ve-overdue"], now) : null;
   const r = [
     ...open.map(x => `${x.severity === "urgent" ? "!!" : "!"} ${shortLabel(x)}`),
     ...all.filter(x => x.reviewed)
       .map(x => `~ ${shortLabel(x)} (reviewed ${clock(x.reviewed.at, now)}${x.reviewed.by ? ` by ${x.reviewed.by}` : ""})`),
-    t?.next ? `next ${t.next.label} ${clock(t.next.at, now)}` : null,
+    // The next VE is always given in labour; the next other item too if sooner.
+    nextVE ? `next VE ${clock(nextVE.at, now)}` : null,
+    t?.next && !(nextVE && t.next.label.startsWith("VE")) ? `next ${t.next.label} ${clock(t.next.at, now)}` : null,
     ...(bed.tasks ?? []).filter(x => !x.done).map(x => `to do: ${x.text}`),
   ].filter(Boolean);
   lines.push(`Plan: ${r.length ? r.join(" · ") : "continue current plan"}`);

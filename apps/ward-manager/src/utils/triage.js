@@ -95,6 +95,23 @@ const NEXT = {
 const STEP = 5 * MIN;
 const HORIZON = 8 * HOUR;
 
+/**
+ * When one of `ids` (for example the VE reminders) will next appear, if it is
+ * not showing now: { id, label, at } or null. Same 5 minute scan as nextDue.
+ */
+export function nextOf(bed, ids, now = Date.now()) {
+  if (bed.delivery) return null;
+  const want = new Set(ids);
+  if (computeAlerts(bed, now).some(a => want.has(a.id))) return null;
+  const hitAt = t => computeAlerts(bed, t).find(a => want.has(a.id));
+  for (let t = now + STEP; t <= now + HORIZON; t += STEP) {
+    if (!hitAt(t)) continue;
+    for (let u = t - STEP + MIN; u < t; u += MIN) if (hitAt(u)) return { label: "VE", at: u };
+    return { label: "VE", at: t };
+  }
+  return null;
+}
+
 /** Earliest future alert from NEXT that is not already showing. */
 export function nextDue(bed, now = Date.now(), alertsNow = computeAlerts(bed, now)) {
   if (bed.delivery) return null;
