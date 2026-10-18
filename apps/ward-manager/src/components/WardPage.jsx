@@ -30,6 +30,9 @@ import { getThemePref, isDarkResolved, setThemePref, watchSystemTheme } from "..
 // Storage keys are unchanged so boards already on a phone carry over.
 const STORAGE_KEY = "pocket_og_ward_beds";
 const IOL_STORAGE_KEY = "pocket_og_iol_queue";
+// Women removed from the board, kept for a day so the handover can list who
+// left this shift (delivered and moved, transferred) with their timeline.
+const REMOVED_KEY = "pocket_og_ward_removed";
 
 function load(key, fallback) {
   try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; } catch { return fallback; }
@@ -38,11 +41,11 @@ function save(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* storage full or blocked */ }
 }
 
-const byBedNumber = (a, b) => String(a.bedNumber).localeCompare(String(b.bedNumber), undefined, { numeric: true });
 
 export default function WardPage({ shift, onEndShift }) {
   const [beds, setBeds] = useState(() => load(STORAGE_KEY, {}));
   const [iolQueue, setIolQueue] = useState(() => load(IOL_STORAGE_KEY, []));
+  const [removed, setRemoved] = useState(() => load(REMOVED_KEY, []));
   const [now, setNow] = useState(() => Date.now());
   const [tab, setTab] = useState("board");
   const [sheet, setSheet] = useState(null);        // { type, bedId?, edit?, entry? }
@@ -69,6 +72,7 @@ export default function WardPage({ shift, onEndShift }) {
 
   useEffect(() => { save(STORAGE_KEY, beds); }, [beds]);
   useEffect(() => { save(IOL_STORAGE_KEY, iolQueue); }, [iolQueue]);
+  useEffect(() => { save(REMOVED_KEY, removed); }, [removed]);
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 30000);
     const onVis = () => { if (!document.hidden) setNow(Date.now()); };
@@ -77,6 +81,29 @@ export default function WardPage({ shift, onEndShift }) {
     const onSim = () => setNow(Date.now());
     window.addEventListener("sim-clock", onSim);
     return () => { clearInterval(id); document.removeEventListener("visibilitychange", onVis); window.removeEventListener("sim-clock", onSim); };
+  }, []);
+  // The phone's own back gesture or button closes the top layer (rule pop-up,
+  // a sheet, the record, a full page) instead of leaving the app and losing a
+  // half-filled form. One history entry is kept in hand for this.
+  const layers = useRef({});
+  useEffect(() => { layers.current = { ruleAlert, sourceKey, rulesOpen, settingsOpen, sheet, recordId, round }; });
+  useEffect(() => {
+    window.history.pushState({ pocketsuite: true }, "");
+    const onPop = () => {
+      const l = layers.current;
+      const open = l.sourceKey || l.ruleAlert || l.rulesOpen || l.settingsOpen || l.sheet || l.recordId || l.round;
+      if (!open) { window.history.back(); return; }
+      window.history.pushState({ pocketsuite: true }, "");
+      if (l.sourceKey) setSourceKey(null);
+      else if (l.ruleAlert) setRuleAlert(null);
+      else if (l.rulesOpen) setRulesOpen(false);
+      else if (l.settingsOpen) setSettingsOpen(false);
+      else if (l.sheet) setSheet(null);
+      else if (l.recordId) setRecordId(null);
+      else setRound(null);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
   }, []);
   useEffect(() => watchSystemTheme(setDark), []);
   useEffect(() => () => { clearTimeout(toastTimer.current); clearTimeout(flashTimer.current); }, []);
@@ -143,7 +170,8 @@ export default function WardPage({ shift, onEndShift }) {
       return;
     }
     const label = fixLabel(alertId);
-    updateBed(bedId, fixAlert(bed, alertId, iso(), doctorLabel(shift?.doctorName)), `${label === "Reviewed" ? "Reviewed" : label ?? "Done"} · Bed ${bed.bedNumber}`);
+    const shown = triage[bedId]?.alerts?.find(a => a.id === alertId) ?? null;
+    updateBed(bedId, fixAlert(bed, alertId, iso(), doctorLabel(shift?.doctorName), shown), `${label === "Reviewed" ? "Reviewed" : label ?? "Done"} · Bed ${bed.bedNumber}`);
   };
   const changeStage = (bedId, stage, keepOpen = false) => {
     const bed = beds[bedId]; if (bed.labourStage === stage) return;
@@ -202,6 +230,9 @@ export default function WardPage({ shift, onEndShift }) {
   const removeBed = bedId => {
     const bed = beds[bedId];
     const next = { ...beds }; delete next[bedId];
+    // Undo puts her back on the board; the handover then ignores this entry.
+    const iso = new Date().toISOString();
+    setRemoved(r => [...r.filter(x => Date.now() - new Date(x.at).getTime() < 24 * 3600000 && x.bed?.id !== bedId), { at: iso, bed }]);
     commit(`Bed ${bed.bedNumber} removed`, next);
     setRecordId(null);
     closeSheet();
@@ -209,9 +240,9 @@ export default function WardPage({ shift, onEndShift }) {
 
   // ── Board round ──────────────────────────────────────────────────────
   const startRound = () => {
-    // Everyone on the board, in bed order: a delivered woman can still be bleeding,
-    // hypertensive or septic, so she is seen on the round too.
-    const ids = Object.values(beds).sort(byBedNumber).map(b => b.id);
+    // Everyone on the board, sickest first (the board's order): a delivered
+    // woman can still be bleeding, hypertensive or septic, so she is seen too.
+    const ids = rows.map(r => r.bed.id);
     setRound({ ids, index: 0, updated: new Set() });
   };
 
@@ -237,7 +268,6 @@ export default function WardPage({ shift, onEndShift }) {
         onHandover={() => setSheet({ type: "handover" })}
         onToggleTheme={toggleTheme}
         onMenu={() => { setConfirmEnd(false); setConfirmClear(null); setSheet({ type: "menu" }); }}
-        onRules={() => setRulesOpen(true)}
         iolView={
           <IOLQueue queue={iolQueue} now={now}
             onAdd={() => setSheet({ type: "iol" })}
@@ -301,7 +331,7 @@ export default function WardPage({ shift, onEndShift }) {
         <AdmitSheet mode={sheet.entry ? "iol" : "new"} iolEntry={sheet.entry ?? null}
           existingNumbers={Object.values(beds).map(b => b.bedNumber)} onClose={closeSheet} onSave={bed => admit(bed, sheet.entry)} />
       )}
-      {sheet?.type === "handover" && <HandoverSheet beds={beds} shift={shift} now={now} onClose={closeSheet} />}
+      {sheet?.type === "handover" && <HandoverSheet beds={beds} shift={shift} now={now} removed={removed} iolQueue={iolQueue} onClose={closeSheet} />}
       {sheet?.type === "iol" && (
         <IOLEntrySheet entry={sheet.entry ?? null} onClose={closeSheet} onSave={entry => {
           const exists = iolQueue.some(e => e.id === entry.id);
@@ -333,7 +363,12 @@ export default function WardPage({ shift, onEndShift }) {
               <p className={`${TYPE_META} text-center`}>This removes all {Object.keys(beds).length} women from this phone.</p>
               <div className="grid grid-cols-2 gap-2">
                 <button type="button" onClick={() => setConfirmClear(null)} className={`${BTN} ${BTN_SECONDARY}`}>Keep them</button>
-                <button type="button" onClick={() => { commit("Board cleared", {}); setConfirmClear(null); closeSheet(); }} className={`${BTN} bg-red-600 text-white`}>Clear board</button>
+                <button type="button" onClick={() => {
+                  // Cleared women still appear under "Left the board" in the handover.
+                  const iso = new Date().toISOString();
+                  setRemoved(r => [...r.filter(x => Date.now() - new Date(x.at).getTime() < 24 * 3600000 && !beds[x.bed?.id]), ...Object.values(beds).map(bed => ({ at: iso, bed }))]);
+                  commit("Board cleared", {}); setConfirmClear(null); closeSheet();
+                }} className={`${BTN} bg-red-600 text-white`}>Clear board</button>
               </div>
             </div>
           )}

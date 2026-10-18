@@ -103,7 +103,8 @@ describe("after birth: maternal safety alerts continue", () => {
   })
   it("puts postnatal alerts in the handover", () => {
     const b = delivered({ delivery: { time: t(HOUR), mode: "SVD", ebl: 1200 } })
-    expect(generateHandover({ b1: b }, null, NOW)).toMatch(/!! Major PPH/)
+    expect(generateHandover({ b1: b }, null, NOW, { detail: "full" })).toMatch(/!! Major PPH/)
+    expect(generateHandover({ b1: b }, null, NOW)).toMatch(/Plan: !! PPH/)
   })
 })
 
@@ -456,7 +457,7 @@ describe("handover detail", () => {
       ctgLog: [ctg("normal", 120), ctg("suspicious", 60), { ...ctg("pathological", 10), comment: "Discussed with reg" }],
       oxytocinLog: [{ id: "o1", startTime: t(3 * HOUR), dose: 6, lastIncrementTime: t(2 * HOUR) }, { id: "o2", startTime: t(10 * MIN), dose: 0, stopped: true, stopReason: "Pathological CTG" }],
     })
-    const text = generateHandover({ h: b }, null, NOW)
+    const text = generateHandover({ h: b }, null, NOW, { detail: "full" })
     expect(text).toMatch(/Intrapartum antibiotics given 10:30 ✓/)
     expect(text).toMatch(/CTG: normal 10:00 > suspicious 11:00 > pathological 11:50 \(Discussed with reg\)/)
     expect(text).toMatch(/Oxytocin stopped 11:50: Pathological CTG/)
@@ -480,7 +481,7 @@ describe("fixes from the second shift test", () => {
     const b = active({ gestation: "30+2" })
     const after = { ...b, ...declineAlert("preterm-mgso4", t(0), "Dr S") }
     expect(ids(after)).not.toContain("preterm-mgso4")
-    expect(generateHandover({ x: { ...after, id: "x", bedNumber: "1" } }, null, NOW)).toMatch(/MgSO4 \(neuroprotection\) not given/)
+    expect(generateHandover({ x: { ...after, id: "x", bedNumber: "1" } }, null, NOW)).toMatch(/MgSO4 \(neuroprotection\): not given/)
   })
   it("implausible obs are refused", () => {
     expect(obsProblem("temp", "383")).toMatch(/looks wrong/)
@@ -723,5 +724,209 @@ describe("national, not local, wording (NG195 table 1, GTG36 9.4, 9.5; NG235 1.7
     expect(a.citation).toMatch(/NG235 1\.7\.11/)
     expect(a.body).toMatch(/previous baby/)
     expect(ids(rom("35+0"))).not.toContain("gbs-prom-birth")
+  })
+})
+
+describe("shift-test safety fixes", () => {
+  it("MgSO4 neuroprotection waits for established labour (NG25 1.10.2), so Not given in threatened labour cannot hide it", () => {
+    const threatened = bed({ gestation: "26+4", labourStage: "Latent" })
+    expect(ids(threatened)).not.toContain("preterm-mgso4")
+    expect(ids(active({ gestation: "26+4" }))).toContain("preterm-mgso4")
+  })
+  it("pre-eclampsia Assessed comes back with a new severe BP or low urine output (NG133 1.8.3)", () => {
+    const pet = { riskFlags: ["Pre-eclampsia"], mgso4PETAssessed: true, mgso4PETAssessedAt: t(60 * MIN) }
+    const before = active({ ...pet, observations: { bpSystolic: "162", bpDiastolic: "112", bpAt: t(90 * MIN), bpSevereAt: t(90 * MIN) } })
+    expect(ids(before)).not.toContain("mgso4-severe-pet")
+    const newBP = active({ ...pet, observations: { bpSystolic: "168", bpDiastolic: "114", bpAt: t(10 * MIN), bpSevereAt: t(10 * MIN) } })
+    expect(ids(newBP)).toContain("mgso4-severe-pet")
+    const urine = active({ ...pet, observations: { bpSystolic: "150", bpDiastolic: "95", bpAt: t(10 * MIN), bpSevereAt: t(90 * MIN), urineOutput: 15, lastUrineCheck: t(5 * MIN) } })
+    expect(ids(urine)).toContain("mgso4-severe-pet")
+  })
+  it("two temperatures of 37.5 or more about an hour apart are pyrexia (NG235 1.8.20)", () => {
+    let b = active()
+    b = { ...b, ...recordObs(b, t(70 * MIN), { temp: "37.8" }) }
+    expect(sev(b, "temp-375")).toBe("warning")
+    b = { ...b, ...recordObs(b, t(5 * MIN), { temp: "37.6" }) }
+    expect(sev(b, "temp-375")).toBe("urgent")
+    expect(computeAlerts(b, NOW).find(a => a.id === "temp-375").title).toMatch(/Pyrexia/)
+  })
+  it("a single 37.8 asks for a recheck after an hour", () => {
+    const b = { ...active(), ...recordObs(active(), t(65 * MIN), { temp: "37.8" }) }
+    expect(computeAlerts(b, NOW).find(a => a.id === "temp-375").title).toMatch(/Recheck temperature/)
+  })
+  it("a VE after oxytocin was stopped is not sent back through the delay steps", () => {
+    const b = active({
+      activeFirstStageStartTime: t(8 * HOUR),
+      ves: [{ id: "a", time: t(7 * HOUR), dilation: 4 }, { id: "b", time: t(3.5 * HOUR), dilation: 5 }, { id: "c", time: t(0), dilation: 5 }],
+      oxytocinLog: [{ id: "o1", startTime: t(3.25 * HOUR), dose: 2, lastIncrementTime: t(3.25 * HOUR) },
+        { id: "o2", startTime: t(30 * MIN), dose: 0, stopped: true, lastIncrementTime: t(30 * MIN) }],
+    })
+    expect(ids(b)).not.toContain("slow-progress")
+  })
+  it("glucose prompts cannot be ticked off without a value", () => {
+    expect(fixLabel("bgl-due")).toBeNull()
+    expect(fixLabel("bgl-never")).toBeNull()
+  })
+  it("a VE in the latent phase restarts the reassessment clock", () => {
+    const b = bed({ labourStage: "Latent", admissionTime: t(7 * HOUR), ves: [{ id: "v", time: t(HOUR), dilation: 2 }] })
+    expect(ids(b)).not.toContain("latent-reassess")
+  })
+  it("recordObs keeps the highest pulse and temperature with times", () => {
+    let b = active()
+    b = { ...b, ...recordObs(b, t(60 * MIN), { pulse: "128", temp: "38.4" }) }
+    b = { ...b, ...recordObs(b, t(10 * MIN), { pulse: "96", temp: "37.1" }) }
+    expect(b.observations.pulseWorst).toEqual({ value: 128, at: t(60 * MIN) })
+    expect(b.observations.tempWorst).toEqual({ value: 38.4, at: t(60 * MIN) })
+  })
+})
+
+describe("reviewed problems stay visible (Reviewed, watching)", () => {
+  it("a reviewed pathological CTG is 'watching', not on track", () => {
+    const b0 = active({ ctgLog: [ctg("pathological", 5)] })
+    const b = { ...b0, ...fixAlert(b0, "ctg-pathological", t(2 * MIN), "Dr S") }
+    const tr = triageBed(b, NOW)
+    expect(tr.tier).toBe("watching")
+    expect(tr.top.id).toBe("ctg-pathological")
+  })
+  it("a delivered woman with a reviewed PPH is watching, not folded into delivered", () => {
+    const b0 = bed({ labourStage: "Active first stage", admissionTime: t(HOUR), delivery: { mode: "SVD", time: t(30 * MIN), ebl: 1600 } })
+    const b = { ...b0, ...fixAlert(b0, "pph", t(5 * MIN), "Dr S") }
+    expect(triageBed(b, NOW).tier).toBe("watching")
+  })
+  it("watching ranks below due soon and above on track", () => {
+    const watch = { bed: { bedNumber: "1" }, t: { tier: "watching", urgent: 0, warning: 0 } }
+    const ok = { bed: { bedNumber: "2" }, t: { tier: "ok", urgent: 0, warning: 0 } }
+    const due = { bed: { bedNumber: "3" }, t: { tier: "warning", urgent: 0, warning: 1 } }
+    expect([ok, watch, due].sort(compareTriage).map(r => r.t.tier)).toEqual(["warning", "watching", "ok"])
+  })
+})
+
+describe("handover: priority order, times and timeline", () => {
+  const calm = active({ id: "c", bedNumber: "1" })
+  const sick = active({ id: "s", bedNumber: "2", ctgLog: [ctg("normal", 120), ctg("pathological", 10)],
+    oxytocinLog: [{ id: "o1", startTime: t(3 * HOUR), dose: 4, lastIncrementTime: t(HOUR) }] })
+  const text = generateHandover({ c: calm, s: sick }, null, NOW, { detail: "full" })
+  it("lists the sickest woman first and tags her", () => {
+    expect(text.indexOf("BED 2")).toBeLessThan(text.indexOf("BED 1"))
+    expect(text).toMatch(/BED 2 .*\[NEEDS YOU\]/)
+  })
+  it("gives a timestamped timeline and oxytocin start and last change", () => {
+    expect(text).toMatch(/Timeline:/)
+    expect(text).toMatch(/09:00 Oxytocin started 4 mU\/min/)
+    expect(text).toMatch(/11:50 CTG normal to pathological/)
+    expect(text).toMatch(/Oxytocin 4 mU\/min · started 09:00 · last change 11:00/)
+  })
+  it("puts the time against each observation", () => {
+    const b = active({ observations: { pulseValue: "88", pulseAt: t(30 * MIN), lastPulse: t(30 * MIN) } })
+    expect(generateHandover({ b }, null, NOW, { detail: "full" })).toMatch(/P 88 11:30/)
+  })
+  it("lists women who left the board this shift, and the IOL queue with waiting time", () => {
+    const gone = { ...active({ id: "g", bedNumber: "4" }), delivery: { mode: "Em LSCS", time: t(2 * HOUR), ebl: 900 } }
+    const shift = { doctorName: "O", shiftType: "night", shiftStart: t(10 * HOUR), shiftEnd: t(-2 * HOUR) }
+    const out = generateHandover({ c: calm }, shift, NOW, {
+      removed: [{ at: t(HOUR), bed: gone }],
+      iolQueue: [{ id: "i", initials: "JB", gestWeeks: 41, gestDays: 3, indications: ["Post-dates 41+"], addedAt: t(13 * HOUR) }],
+    })
+    expect(out).toMatch(/LEFT THE BOARD THIS SHIFT \(1\)/)
+    expect(out).toMatch(/Bed 4 .*Em LSCS 10:00, EBL 900 mL · removed 11:00/)
+    expect(out).toMatch(/IOL QUEUE \(1\)/)
+    expect(out).toMatch(/JB 41\+3 · Post-dates 41\+ · waiting 13h/)
+  })
+})
+
+describe("handover: short by default, said the way handover is given", () => {
+  const b = active({ id: "s", bedNumber: "2", riskFlags: ["Pre-eclampsia", "GBS+"], analgesia: "Epidural",
+    modeOfOnset: "Induced", iolReasons: ["Pre-eclampsia / hypertension"], inductionMethod: "Dinoprostone",
+    ...fixAlert(active(), "gbs-iap", t(4 * HOUR), "Dr S"),
+    ctgLog: [ctg("normal", 120), ctg("pathological", 20)],
+    oxytocinLog: [{ id: "o1", startTime: t(150 * MIN), dose: 6, lastIncrementTime: t(HOUR) }, { id: "o2", startTime: t(15 * MIN), dose: 0, stopped: true, stopReason: "Pathological CTG" }],
+    observations: { bpSystolic: "150", bpDiastolic: "95", bpAt: t(30 * MIN), lastBP: t(30 * MIN), bpWorst: { sys: 168, dia: 114, at: t(4 * HOUR) } },
+    tasks: [{ id: "x", text: "FBC", done: false }] })
+  const text = generateHandover({ s: b }, null, NOW)
+  it("opens with one spoken line: bed, parity, gestation, why induced, risks, analgesia, where she is", () => {
+    expect(text).not.toMatch(/SBAR|\nS: |\nB: |Background:/)
+    expect(text).toMatch(/\nBed 2, P0, 39\+2, induced for pre-eclampsia \/ hypertension \(Dinoprostone\), PET, GBS\+, Epidural, in active labour since 11:00, 5 cm at 11:30 {2}\[NEEDS YOU\]/)
+  })
+  it("then events with times (treatments included), now, and plan", () => {
+    expect(text).toMatch(/\[NEEDS YOU\]\n {2}08:00 Intrapartum antibiotics given \(Dr S\)\n {2}09:30 Oxytocin started 6 mU\/min\n {2}11:40 CTG normal to pathological\n {2}11:45 Oxytocin stopped: Pathological CTG\nNow: /)
+    expect(text).toMatch(/\nNow: CTG pathological 11:40 · obs: highest BP 168\/114 at 08:00/)
+    expect(text).toMatch(/\nPlan: !! Pathological CTG.*to do: FBC/)
+  })
+  it("leaves out the timeline and routine obs", () => {
+    expect(text).not.toMatch(/Timeline:/)
+    const now = { lastPulse: t(30 * MIN), lastBP: t(30 * MIN), lastTemp: t(30 * MIN), lastRR: t(30 * MIN), pulseValue: "84" }
+    expect(generateHandover({ c: active({ observations: now }) }, null, NOW)).toMatch(/obs normal \(last 11:30\)/)
+  })
+  it("never says obs normal when they are low, out of date or missing", () => {
+    const low = { lastPulse: t(10 * MIN), lastBP: t(10 * MIN), lastTemp: t(10 * MIN), lastRR: t(10 * MIN), bpSystolic: "82", bpDiastolic: "45", bpAt: t(10 * MIN), tempValue: "35.4", tempAt: t(10 * MIN) }
+    expect(generateHandover({ c: active({ observations: low }) }, null, NOW)).toMatch(/obs: BP 82\/45 at 11:50, temp 35.4°C at 11:50/)
+    const stale = { lastPulse: t(5 * MIN), lastBP: t(9 * HOUR), lastTemp: t(9 * HOUR), lastRR: t(9 * HOUR) }
+    expect(generateHandover({ c: active({ observations: stale }) }, null, NOW)).toMatch(/obs: BP, Temp, Resp rate due/)
+    expect(generateHandover({ c: active({ observations: {} }) }, null, NOW)).toMatch(/obs: Pulse, BP, Temp, Resp rate due/)
+  })
+})
+
+describe("handover plan always gives the next VE in established labour", () => {
+  it("shows the next VE even when a CTG review comes first", () => {
+    const b = active({ ves: [{ id: "v", time: t(30 * MIN), dilation: 5 }], ctgLog: [ctg("normal", 50)] })
+    const text = generateHandover({ b }, null, NOW)
+    expect(text).toMatch(/Plan: .*next VE 15:30/)
+    expect(text).toMatch(/next CTG review 12:10/)
+  })
+})
+
+describe("QA round: pitfalls fixed", () => {
+  it("a reviewed minor PPH comes back at once when it becomes major", () => {
+    const d = ebl => bed({ labourStage: "Active first stage", admissionTime: t(HOUR), delivery: { mode: "SVD", time: t(30 * MIN), ebl } })
+    const b0 = d(600)
+    const shown = computeAlerts(b0, NOW).find(a => a.id === "pph")
+    const reviewed = { ...b0, ...fixAlert(b0, "pph", t(5 * MIN), "Dr S", shown) }
+    expect(applyReviews(computeAlerts(reviewed, NOW), reviewed, NOW).find(a => a.id === "pph").severity).toBe("info")
+    const worse = { ...reviewed, delivery: { ...reviewed.delivery, ebl: 1800 } }
+    expect(applyReviews(computeAlerts(worse, NOW), worse, NOW).find(a => a.id === "pph").severity).toBe("urgent")
+  })
+  it("a reviewed 'delay suspected' comes back when delay is diagnosed", () => {
+    const ve = (id, h, cm) => ({ id, time: t(h * HOUR), dilation: cm })
+    const b0 = active({ activeFirstStageStartTime: t(9 * HOUR), ves: [ve("a", 6, 4), ve("b", 2, 5)] })
+    const shown = computeAlerts(b0, NOW).find(a => a.id === "slow-progress")
+    const reviewed = { ...b0, ...fixAlert(b0, "slow-progress", t(HOUR), "Dr S", shown) }
+    const later = { ...reviewed, ves: [...reviewed.ves, ve("c", 0, 5.5)] }
+    const a = applyReviews(computeAlerts(later, NOW), later, NOW).find(x => x.id === "slow-progress")
+    expect(a.title).toMatch(/Delay diagnosed/)
+    expect(a.severity).toBe("urgent")
+  })
+  it("pyrexia is confirmed by frequent rechecks and by a backdated reading", () => {
+    let b = active()
+    for (const [m, v] of [[60, "37.6"], [30, "37.7"], [0, "37.8"]]) b = { ...b, ...recordObs(b, t(m * MIN), { temp: v }) }
+    expect(sev(b, "temp-375")).toBe("urgent")
+    let c = active()
+    c = { ...c, ...recordObs(c, t(0), { temp: "37.8" }) }
+    c = { ...c, ...recordObs(c, t(60 * MIN), { temp: "37.6" }) }
+    expect(sev(c, "temp-375")).toBe("urgent")
+  })
+  it("a temperature of 38 keeps the infection prompt after a lower reading, until treated or declined", () => {
+    let b = active()
+    b = { ...b, ...recordObs(b, t(60 * MIN), { temp: "38.2" }) }
+    b = { ...b, ...recordObs(b, t(5 * MIN), { temp: "37.2" }) }
+    expect(ids(b)).toContain("infection-suspected")
+    expect(ids({ ...b, ...declineAlert("infection-suspected", t(0)) })).not.toContain("infection-suspected")
+  })
+  it("oxytocin that ran 18 minutes does not trigger the 4 hour rule", () => {
+    const b = active({
+      activeFirstStageStartTime: t(9 * HOUR),
+      ves: [{ id: "a", time: t(5 * HOUR), dilation: 5 }, { id: "b", time: t(0), dilation: 5.5 }],
+      oxytocinLog: [{ id: "o1", startTime: t(4.6 * HOUR), dose: 2, lastIncrementTime: t(4.6 * HOUR) },
+        { id: "o2", startTime: t(4.3 * HOUR), dose: 0, stopped: true, lastIncrementTime: t(4.3 * HOUR) }],
+    })
+    expect(ids(b)).not.toContain("oxytocin-poor-progress")
+  })
+  it("GBS+ PPROM at 35 weeks gets one antibiotic message (immediate birth), not two", () => {
+    const b = bed({ gestation: "35+0", labourStage: "Latent", modeOfOnset: "PPROM", membranes: "SROM", membranesTime: t(HOUR), riskFlags: ["GBS+"] })
+    expect(ids(b)).toContain("gbs-prom-birth")
+    expect(ids(b)).not.toContain("pprom-antibiotics")
+  })
+  it("after birth with pre-eclampsia, BP is due 6 hours after the last (NG133 1.5.16)", () => {
+    const b = bed({ riskFlags: ["Pre-eclampsia"], delivery: { mode: "SVD", time: t(8 * HOUR), ebl: 300 }, observations: { lastBP: t(7 * HOUR), bpSystolic: "140", bpDiastolic: "90" } })
+    expect(ids(b)).toContain("bp-due")
   })
 })

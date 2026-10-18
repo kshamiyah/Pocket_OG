@@ -9,7 +9,9 @@ import {
 } from "../ui/styles";
 import { IconClipboard, IconMoon, IconMore, IconPlus, IconRound, IconSun } from "../ui/icons";
 
-const CARD_FOR = { urgent: CARD_URGENT, warning: CARD_DUE, ok: CARD, delivered: CARD };
+// Reviewed but still present: a muted red edge, so it reads as "being watched".
+const CARD_WATCH = "rounded-xl border bg-gray-50 dark:bg-gray-900/60 border-red-200 dark:border-red-950 border-dashed";
+const CARD_FOR = { urgent: CARD_URGENT, warning: CARD_DUE, watching: CARD_WATCH, ok: CARD, delivered: CARD };
 
 function Tag({ children, tone = "gray" }) {
   const cls = {
@@ -24,6 +26,7 @@ function Tag({ children, tone = "gray" }) {
 const BADGE = {
   urgent: "bg-red-600 text-white",
   warning: "bg-claude-500 text-white",
+  watching: "bg-red-100 dark:bg-red-950/50 text-red-800 dark:text-red-300",
   ok: "bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-100",
   delivered: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300",
 };
@@ -32,6 +35,7 @@ const PILL = {
   urgent: "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300",
   warning: "bg-claude-50 dark:bg-claude-950/40 text-claude-800 dark:text-claude-300",
   info: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300",
+  watching: "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 ring-1 ring-inset ring-red-200 dark:ring-red-900",
 };
 
 export function BedRow({ bed, t, now, onOpen, flash }) {
@@ -48,8 +52,10 @@ export function BedRow({ bed, t, now, onOpen, flash }) {
     const rest = t.shown.length - 1;
     side = (
       <>
-        <span className={`text-xs font-semibold leading-tight px-2 py-1 rounded-lg ${PILL[t.top.severity] ?? PILL.info}`}>{shortLabel(t.top)}</span>
-        {rest > 0 && <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500">+{rest} more</span>}
+        <span className={`text-xs font-semibold leading-tight px-2 py-1 rounded-lg ${t.top.reviewed ? PILL.watching : PILL[t.top.severity] ?? PILL.info}`}>{shortLabel(t.top)}</span>
+        {t.top.reviewed
+          ? <span className="text-[11px] text-gray-500 dark:text-gray-400">reviewed {clock(t.top.reviewed.at)}</span>
+          : rest > 0 && <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500">+{rest} more</span>}
       </>
     );
   } else if (t.tier === "delivered") {
@@ -73,7 +79,7 @@ export function BedRow({ bed, t, now, onOpen, flash }) {
     status = <>Pushing <span className="font-normal text-gray-500 dark:text-gray-400">· {ago(bed.pushingStartTime)}</span></>;
   } else {
     status = <>{stageLabel(bed)}{ve
-      ? <> · <span className="tabular-nums">{ve.dilation} cm</span> <span className="font-normal text-gray-500 dark:text-gray-400">{ago(ve.time)}</span></>
+      ? <> · <span className="tabular-nums">{ve.dilation} cm</span></>
       : <span className="font-normal text-gray-500 dark:text-gray-400"> · no VE</span>}</>;
   }
 
@@ -86,17 +92,19 @@ export function BedRow({ bed, t, now, onOpen, flash }) {
         {bed.bedNumber}
       </span>
       <span className="flex-1 min-w-0 flex flex-col gap-1">
-        <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">{status}</span>
+        {/* Wraps to a second line on narrow phones rather than cutting off "EBL 1200 mL". */}
+        <span className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 break-words">{status}</span>
         <span className="flex items-center gap-1 flex-wrap">
-          <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mr-0.5 whitespace-nowrap">{parityShort(bed.parity)} · {bed.gestation}</span>
-          {bed.modeOfOnset === "Induced" && <Tag tone="claude">IOL</Tag>}
-          {bed.modeOfOnset === "PPROM" && <Tag tone="claude">PPROM</Tag>}
+          <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mr-0.5 whitespace-nowrap">{parityShort(bed.parity)} · {bed.gestation}{!bed.delivery && ve ? ` · VE ${ago(ve.time)} ago` : ""}</span>
+          {/* Facts are neutral; orange and red are kept for things that need doing. */}
+          {!bed.delivery && bed.modeOfOnset === "Induced" && <Tag>IOL</Tag>}
+          {!bed.delivery && bed.modeOfOnset === "PPROM" && <Tag>PPROM</Tag>}
           {!bed.delivery && malpresentation(bed) && <Tag tone="claude">{malpresentation(bed)}</Tag>}
-          {oxy && <Tag tone="claude">Oxy {oxy.dose}{bed.oxytocinHeld ? " held" : ""}</Tag>}
+          {!bed.delivery && oxy && <Tag>Oxy {oxy.dose}{bed.oxytocinHeld ? " held" : ""}</Tag>}
           {obsDue.length > 0 && <Tag tone="amber">Obs due {obsDue.join("")}</Tag>}
           {flags.slice(0, 2).map(f => <Tag key={f}>{riskShort(f)}</Tag>)}
           {flags.length > 2 && <Tag>+{flags.length - 2}</Tag>}
-          {todo > 0 && <Tag tone="amber">{todo} to do</Tag>}
+          {todo > 0 && <Tag>{todo} to do</Tag>}
         </span>
       </span>
       <span className="shrink-0 max-w-[38%] flex flex-col items-end gap-1 text-right">{side}</span>
@@ -104,7 +112,7 @@ export function BedRow({ bed, t, now, onOpen, flash }) {
   );
 }
 
-const SECTION_DOT = { urgent: "bg-red-600", warning: "bg-claude-500", ok: "bg-gray-400 dark:bg-gray-600" };
+const SECTION_DOT = { urgent: "bg-red-600", warning: "bg-claude-500", watching: "bg-red-300 dark:bg-red-800", ok: "bg-gray-400 dark:bg-gray-600" };
 
 function Section({ title, count, tone = "ok", children }) {
   return (
@@ -121,11 +129,12 @@ function Section({ title, count, tone = "ok", children }) {
 
 export default function Board({
   rows, summary, now, shift, dark, flashId, iolQueue, tab, onTab,
-  onOpenBed, onAdmit, onRound, onHandover, onToggleTheme, onMenu, onRules, iolView,
+  onOpenBed, onAdmit, onRound, onHandover, onToggleTheme, onMenu, iolView,
 }) {
   const [showDelivered, setShowDelivered] = useState(false);
   const urgent = rows.filter(r => r.t.tier === "urgent");
   const due = rows.filter(r => r.t.tier === "warning");
+  const watching = rows.filter(r => r.t.tier === "watching");
   const ok = rows.filter(r => r.t.tier === "ok");
   const delivered = rows.filter(r => r.t.tier === "delivered");
 
@@ -135,10 +144,11 @@ export default function Board({
   const iolUrgent = iolQueue.filter(e => iolEntryTier(e) <= 1).length;
 
   const summaryBits = [
-    `${summary.women} ${summary.women === 1 ? "woman" : "women"}`,
+    `${summary.women} not yet delivered`,
     summary.delivered ? `${summary.delivered} delivered` : null,
     summary.urgent ? `${summary.urgent} ${summary.urgent === 1 ? "needs" : "need"} you` : null,
     summary.warning ? `${summary.warning} due soon` : null,
+    summary.watching ? `${summary.watching} watching` : null,
     summary.nextAt ? `next ${clock(summary.nextAt)}` : null,
   ].filter(Boolean);
 
@@ -213,6 +223,11 @@ export default function Board({
                     {due.map(r => <BedRow key={r.bed.id} {...r} now={now} onOpen={onOpenBed} flash={flashId === r.bed.id} />)}
                   </Section>
                 )}
+                {watching.length > 0 && (
+                  <Section title="Reviewed, watching" tone="watching" count={watching.length}>
+                    {watching.map(r => <BedRow key={r.bed.id} {...r} now={now} onOpen={onOpenBed} flash={flashId === r.bed.id} />)}
+                  </Section>
+                )}
                 {ok.length > 0 && (
                   <Section title="On track" tone="ok" count={ok.length}>
                     {ok.map(r => <BedRow key={r.bed.id} {...r} now={now} onOpen={onOpenBed} flash={flashId === r.bed.id} />)}
@@ -228,10 +243,8 @@ export default function Board({
                   </section>
                 )}
                 <p className={`${TYPE_CAPTION} text-center leading-relaxed pt-2`}>
-                  Decision aid only. Clinical responsibility remains with the treating clinician.<br />
-                  <button type="button" onClick={onRules} className="min-h-9 px-2 font-semibold text-claude-700 dark:text-claude-400 underline decoration-dotted underline-offset-2">
-                    Rules and sources: NICE NG235 · NG229 · NG25 · NG195 · NG255 · local
-                  </button>
+                  {/* Rules and sources lives in the ⋯ menu. */}
+                  Decision aid only. Clinical responsibility remains with the treating clinician.
                 </p>
               </>
             )}

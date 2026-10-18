@@ -150,7 +150,7 @@ describe("Latent phase reassessment", () => {
 
 // ─── Slow progress (NICE NG235 §1.5.1–1.5.4) ─────────────────────────────────
 
-describe("Slow progress — threshold 0.5 cm/hr", () => {
+describe("Slow progress: NICE NG235 1.8.42 (under 2 cm in 4 h) and 1.8.45 (under 1 cm at the re-check)", () => {
   const slowBed = (cm1, cm2, hoursBetween) => activeBed({
     ves: [
       { time: t(hoursBetween * HOUR), dilation: cm1 },
@@ -162,12 +162,18 @@ describe("Slow progress — threshold 0.5 cm/hr", () => {
     expect(hasNot(computeAlerts(slowBed(5, 6, 2), NOW), "slow-progress")).toBe(true)
   })
 
-  it("fires when rate is 0.4 cm/hr (0.8cm in 2h)", () => {
-    expect(has(computeAlerts(slowBed(5, 5.8, 2), NOW), "slow-progress")).toBe(true)
+  it("under 1 cm in 2 hours on its own is not delay (only a re-check after suspicion diagnoses it)", () => {
+    expect(hasNot(computeAlerts(slowBed(5, 5.8, 2), NOW), "slow-progress")).toBe(true)
+    expect(hasNot(computeAlerts(slowBed(5, 5, 2), NOW), "slow-progress")).toBe(true)
   })
 
-  it("fires when no cervical change over 2h", () => {
-    expect(has(computeAlerts(slowBed(5, 5, 2), NOW), "slow-progress")).toBe(true)
+  it("exactly 2 cm in 4 hours is normal, even a little over 4 hours (testers' cases)", () => {
+    expect(hasNot(computeAlerts(slowBed(5, 7, 4 + 0.5 / 60), NOW), "slow-progress")).toBe(true)
+    expect(hasNot(computeAlerts(slowBed(4, 6, 4.25), NOW), "slow-progress")).toBe(true)
+  })
+
+  it("under 2 cm in 4 hours is suspected delay", () => {
+    expect(has(computeAlerts(slowBed(5, 6.5, 4), NOW), "slow-progress")).toBe(true)
   })
 
   it("does not fire with only one VE (need two to calculate rate)", () => {

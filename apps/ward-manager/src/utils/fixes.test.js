@@ -86,7 +86,7 @@ describe("handover", () => {
       oxytocinLog: [{ id: "o", startTime: t(2 * HOUR), dose: 6, lastIncrementTime: t(20 * MIN) }],
       tasks: [{ id: "x", text: "Repeat FBC", done: false }],
     })
-    const text = generateHandover({ b1: b }, null, NOW)
+    const text = generateHandover({ b1: b }, null, NOW, { detail: "full" })
     expect(text).toMatch(/Oxytocin 6 mU\/min/)
     expect(text).toMatch(/Membranes: SROM/)
     expect(text).toMatch(/Intrapartum antibiotics given/)
@@ -98,7 +98,7 @@ describe("handover", () => {
       riskFlags: ["Hypertensive"], delivery: { time: t(HOUR), mode: "Ventouse", ebl: 1200 },
       tasks: [{ id: "x", text: "Repeat Hb", done: false }],
     })
-    const text = generateHandover({ b1: b }, null, NOW)
+    const text = generateHandover({ b1: b }, null, NOW, { detail: "full" })
     expect(text).toMatch(/major PPH/)
     expect(text).toMatch(/Hypertension on medication/)
     expect(text).toMatch(/To do: Repeat Hb/)
@@ -120,12 +120,14 @@ describe("slow progress (NICE NG235 1.8.42, 1.8.45)", () => {
     expect(has(computeAlerts(b, NOW), "slow-progress")).toBe(false)
   })
 
-  it("catches no change at a VE taken 2 hours later, even a minute early", () => {
+  it("after suspicion, catches no change at the VE 2 hours later, even a minute early", () => {
     const b = active([
+      { time: t(6 * HOUR), dilation: 4 },
       { time: t(2 * HOUR - MIN), dilation: 5 },
       { time: t(0), dilation: 5 },
-    ], 3)
-    expect(has(computeAlerts(b, NOW), "slow-progress")).toBe(true)
+    ], 7)
+    const a = computeAlerts(b, NOW).find(x => x.id === "slow-progress")
+    expect(a.title).toMatch(/Delay diagnosed/)
   })
 
   it("flags less than 2 cm over 4 hours", () => {

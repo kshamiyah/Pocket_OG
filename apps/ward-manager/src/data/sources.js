@@ -452,6 +452,22 @@ export const SOURCES = {
     "url": "https://www.nice.org.uk/guidance/ng195/chapter/Prevention-and-risk-reduction#ng195-1_7_1",
     "text": "Offer an immediate birth (by induction of labour or caesarean birth) to women, trans men and non-binary people who are between 34 and 37 weeks' gestation who:\n• have prolonged prelabour rupture of membranes and\n• have group B streptococcal colonisation, bacteriuria or infection at any time in their current pregnancy. [2021]"
   },
+  "NG133 1.5.15": {
+    "issuer": "NICE",
+    "doc": "NG133",
+    "docTitle": "Hypertension in pregnancy: diagnosis and management",
+    "rec": "Recommendation 1.5.15",
+    "url": "https://www.nice.org.uk/guidance/ng133/chapter/Recommendations#ng133-1_5_15",
+    "text": "Ask women with pre-eclampsia who have given birth about severe headache and epigastric pain each time blood pressure is measured. [2010]"
+  },
+  "NG133 1.5.16": {
+    "issuer": "NICE",
+    "doc": "NG133",
+    "docTitle": "Hypertension in pregnancy: diagnosis and management",
+    "rec": "Recommendation 1.5.16",
+    "url": "https://www.nice.org.uk/guidance/ng133/chapter/Recommendations#ng133-1_5_16",
+    "text": "In women with pre-eclampsia who took antihypertensive treatment and have given birth, measure blood pressure:\n• at least 4 times a day while the woman is an inpatient\n• every 1 to 2 days for up to 2 weeks after transfer to community care until the woman is off treatment and has no hypertension. [2010]"
+  },
   "NG133 1.7.3": {
     "issuer": "NICE",
     "doc": "NG133",

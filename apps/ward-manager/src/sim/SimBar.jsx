@@ -59,7 +59,7 @@ export default function SimBar({ rows }) {
           <button type="button"
             onClick={() => {
               if (!confirmClear) { setConfirmClear(true); return; }
-              try { localStorage.removeItem("pocket_og_ward_beds"); localStorage.removeItem("pocket_og_iol_queue"); } catch { /* storage blocked */ }
+              try { localStorage.removeItem("pocket_og_ward_beds"); localStorage.removeItem("pocket_og_iol_queue"); localStorage.removeItem("pocket_og_ward_removed"); } catch { /* storage blocked */ }
               resetClock();
               location.reload();
             }}

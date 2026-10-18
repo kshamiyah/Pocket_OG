@@ -20,6 +20,9 @@ import { RULE_FOR_ALERT } from "../data/ruleCatalogue";
 export function AlertList({ alerts, onFix, limit = null, compact = false }) {
   const { openRule } = useRules();
   const [expanded, setExpanded] = useState(false);
+  // Tap an alert to read its details (with this woman's numbers); the top
+  // unreviewed one starts open.
+  const [openId, setOpenId] = useState(() => alerts.find(a => !a.reviewed)?.id ?? null);
   if (!alerts.length) return null;
   const collapsed = limit != null && !expanded && alerts.length > limit + 1;
   const visible = collapsed ? alerts.slice(0, limit) : alerts;
@@ -32,7 +35,12 @@ export function AlertList({ alerts, onFix, limit = null, compact = false }) {
         return (
           <div key={a.id} className={`rounded-xl border px-3 ${compact ? "py-2" : "py-2.5"} flex items-center gap-2.5 ${ALERT_BOX[a.severity]}`}>
             <div className="flex-1 min-w-0">
-              <p className={`text-sm font-semibold leading-snug ${SEV_TEXT[a.severity]}`}>{tidy(a.title)}</p>
+              <button type="button" onClick={() => setOpenId(o => (o === a.id ? null : a.id))} aria-expanded={openId === a.id}
+                className="w-full text-left flex items-start gap-1 active:opacity-70">
+                <span className={`flex-1 text-sm font-semibold leading-snug ${SEV_TEXT[a.severity]}`}>{tidy(a.title)}</span>
+                {a.body && <span aria-hidden="true" className={`shrink-0 text-xs mt-0.5 text-gray-400 transition-transform ${openId === a.id ? "rotate-90" : ""}`}>›</span>}
+              </button>
+              {openId === a.id && a.body && <p className="text-xs leading-snug text-gray-700 dark:text-gray-300 mt-1">{tidy(a.body)}</p>}
               {a.reviewed && (
                 <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">
                   Reviewed {clock(a.reviewed.at)}{a.reviewed.by ? ` by ${a.reviewed.by}` : ""} · returns {clock(a.reviewed.until)} if still present
@@ -113,8 +121,12 @@ function toneFor(kind, alerts) {
 function Tile({ label, value, meta, tone, onClick, ariaLabel }) {
   return (
     <button type="button" onClick={onClick} aria-label={ariaLabel}
-      className={`min-w-0 min-h-[4.75rem] rounded-xl border px-2.5 py-2 flex flex-col items-start justify-between text-left active:scale-[0.98] transition-transform ${TONE[tone]}`}>
-      <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{label}</span>
+      className={`min-w-0 min-h-[4.75rem] rounded-xl border border-b-[3px] shadow-sm px-2.5 py-2 flex flex-col items-start justify-between text-left active:scale-[0.97] active:border-b transition-transform ${TONE[tone]}`}>
+      {/* A raised edge and a "+" mark say "tap me": each tile is the button for its action. */}
+      <span className="w-full flex items-center justify-between gap-1">
+        <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{label}</span>
+        <span aria-hidden="true" className="w-4 h-4 rounded-full flex items-center justify-center text-[12px] font-bold leading-none bg-current/10 opacity-80">+</span>
+      </span>
       <span className="text-base font-semibold leading-tight tabular-nums truncate w-full">{value}</span>
       <span className="text-[11px] leading-tight opacity-80 truncate w-full">{meta}</span>
     </button>
@@ -147,6 +159,8 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, o
   // An abnormal value outranks "done": the tile names it until a newer value replaces it.
   const obsAbnormal = t.alerts.find(a => TILE_ALERTS.obs.red.includes(a.id) && !a.id.startsWith("bgl-d") && !a.id.startsWith("bgl-n"))
     ?? t.alerts.find(a => ["tachycardia", "rr-high", "bp-elevated", "temp-375", "temp-low", "oliguria"].includes(a.id));
+  // When any obs were last recorded (for women not on the labour schedule).
+  const obsLastAt = Math.max(0, ...obs.map(o => o.at ?? 0)) || null;
   if (bed.delivery) {
     const d = bed.delivery;
     return (
@@ -158,7 +172,7 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, o
         </div>
         {/* Postnatal obs feed the PPH and sepsis checks, so recording them stays one tap away. */}
         {(() => {
-          const lastAt = Math.max(0, ...obs.map(o => o.at ?? 0));
+          const lastAt = obsLastAt;
           return (
             <div className="grid">
               <Tile label="Obs" tone={toneFor("obs", t.alerts)} onClick={onObs} ariaLabel="Record obs"
@@ -186,8 +200,8 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, o
         <Tile label="CTG" tone={toneFor("ctg", t.alerts)} onClick={onCTGConcern} ariaLabel="CTG review"
           value={ctg ? CTG_WORD[ctg.classification] ?? capitalise(ctg.classification) : "None"} meta={ctg ? `${ago(ctg.time)} ago` : "not logged"} />
         <Tile label="Obs" tone={toneFor("obs", t.alerts)} onClick={onObs} ariaLabel="Record obs"
-          value={obsAbnormal ? "Check" : !obsTracked(bed) ? "—" : obsDue.length ? `${obsDue.length} due` : "Done"}
-          meta={obsAbnormal ? shortLabel(obsAbnormal) : obsTracked(bed) ? obs.map(o => `${o.letter}${o.done ? "✓" : "·"}`).join(" ") : "tap to record"} />
+          value={obsAbnormal ? "Check" : !obsTracked(bed) ? (obsLastAt ? `${fmtAge(now - obsLastAt)} ago` : "None") : obsDue.length ? `${obsDue.length} due` : "Done"}
+          meta={obsAbnormal ? shortLabel(obsAbnormal) : obsTracked(bed) ? obs.map(o => `${o.letter}${o.done ? "✓" : "·"}`).join(" ") : obsLastAt ? "last obs, tap to record" : "tap to record"} />
         {/* Always oxytocin, so starting it is always in the same place. */}
         <Tile label="Oxytocin" tone={toneFor("oxy", t.alerts)} onClick={onOxy} ariaLabel={oxy ? "Oxytocin" : "Start oxytocin"}
           value={oxy ? `${oxy.dose} mU` : "Off"}

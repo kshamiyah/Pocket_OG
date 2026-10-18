@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { BTN, BTN_PRIMARY, BTN_SECONDARY, CARD, TYPE_DISPLAY, TYPE_EYEBROW, TYPE_META } from "../ui/styles";
 import { doctorLabel, lastVE, parityShort, stageLabel } from "../utils/bedModel";
 
 export default function HandoverIn({ beds, doctorName, onTakeOver, onClear }) {
+  // Clearing deletes every woman on this phone, so it takes a second tap.
+  const [confirm, setConfirm] = useState(false);
   const bedList = Object.values(beds).sort((a, b) => String(a.bedNumber).localeCompare(String(b.bedNumber), undefined, { numeric: true }));
   return (
     <div className="min-h-dvh bg-white dark:bg-gray-950 flex flex-col"
@@ -30,7 +33,17 @@ export default function HandoverIn({ beds, doctorName, onTakeOver, onClear }) {
         </div>
         <div className="mt-auto space-y-2">
           <button type="button" onClick={onTakeOver} className={`${BTN} ${BTN_PRIMARY} w-full min-h-[3.25rem] text-base`}>Take over the board</button>
-          <button type="button" onClick={onClear} className={`${BTN} ${BTN_SECONDARY} w-full`}>Clear the board and start fresh</button>
+          {!confirm ? (
+            <button type="button" onClick={() => setConfirm(true)} className={`${BTN} ${BTN_SECONDARY} w-full`}>Clear the board and start fresh</button>
+          ) : (
+            <div className="space-y-2">
+              <p className={`${TYPE_META} text-center font-semibold text-red-700 dark:text-red-400`}>This deletes every woman on the board from this phone. It cannot be undone.</p>
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" onClick={() => setConfirm(false)} className={`${BTN} ${BTN_SECONDARY}`}>Keep the board</button>
+                <button type="button" onClick={onClear} className={`${BTN} bg-red-600 text-white`}>Delete all</button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

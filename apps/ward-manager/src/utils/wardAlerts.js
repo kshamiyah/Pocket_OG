@@ -78,7 +78,10 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // A temperature of 38°C or more starts the infection pathway too (NG235
   // 1.8.20; GL787 treats maternal pyrexia over 38°C as intra-amniotic infection).
   const tempNow = obs.tempValue ? parseFloat(obs.tempValue) : null;
-  const isFever = !delivered && tempNow !== null && tempNow >= 38;
+  // A temperature of 38 or more keeps the infection prompt up until antibiotics
+  // are given or declined, even if a later reading is lower.
+  const isFever = !delivered && ((tempNow !== null && tempNow >= 38) || (obs.tempWorst?.value >= 38))
+    && !bed.broadAntibioticsStartedDeclined;
   const isInfection = flags.includes("Infection suspected") || isFever;
   const hasBleeding = flags.includes("APH");
   // Membrane status comes from the VEs. Only when no VE has recorded membranes yet
@@ -118,6 +121,11 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   while (oxyStartIdx > 0 && !oxyLog[oxyStartIdx - 1].stopped) oxyStartIdx--;
   const oxyStart = oxyRunning ? new Date(oxyLog[oxyStartIdx].startTime).getTime() : null;
   const oxyRestarted = oxyRunning && oxyLog.slice(0, oxyStartIdx).some(e => e.stopped);
+  // Start (ms) of the first oxytocin given before `at`, or null.
+  const oxyFirstBefore = at => {
+    const e = oxyLog.find(x => !x.stopped && x.dose > 0 && new Date(x.startTime).getTime() < at);
+    return e ? new Date(e.startTime).getTime() : null;
+  };
   // Start (ms) of the oxytocin episode that was running just before `at`, or
   // null if none was. A VE is judged by whether oxytocin was running when it
   // was taken, not by whether it is running now (it may since have stopped).
@@ -144,7 +152,9 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // Offer 24+0 to 29+6; consider 30+0 to 33+6 in established preterm labour.
   const inEstablishedLabour = bed.labourStage === "Active first stage"
     || bed.labourStage === "Passive second stage" || bed.labourStage === "Active second stage";
-  if (!delivered && isPreterm && gestWks >= 23 && gestWks < 24 && !bed.mgso4Given && !bed.mgso4GivenDeclined) {
+  // All three bands are for established preterm labour (or a planned birth
+  // within 24 hours, which the clinician judges): never in threatened labour.
+  if (!delivered && isPreterm && gestWks >= 23 && gestWks < 24 && inEstablishedLabour && !bed.mgso4Given && !bed.mgso4GivenDeclined) {
     alerts.push({
       id: "preterm-mgso4",
       severity: "warning",
@@ -152,7 +162,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       body: "Discuss IV magnesium sulfate for neuroprotection in established preterm labour or planned birth within 24 h (23+0 to 23+6), in the context of her individual circumstances.",
       citation: "NICE NG25 1.10.1 [2019]",
     });
-  } else if (!delivered && isPreterm && gestWks >= 24 && gestWks < 30 && !bed.mgso4Given && !bed.mgso4GivenDeclined) {
+  } else if (!delivered && isPreterm && gestWks >= 24 && gestWks < 30 && inEstablishedLabour && !bed.mgso4Given && !bed.mgso4GivenDeclined) {
     alerts.push({
       id: "preterm-mgso4",
       severity: "urgent",
@@ -263,18 +273,22 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   const TOL = 5 * MIN;
   const activeStart = bed.activeFirstStageStartTime ? new Date(bed.activeFirstStageStartTime).getTime() - TOL : null;
   const activeVEs = activeStart == null ? ves : ves.filter(ve => new Date(ve.time).getTime() >= activeStart);
-  // Progress at examination i, judged on the examinations up to it:
-  // "2h" = less than 1 cm over about 2 h; "4h" = less than 2 cm over about 4 h.
+  // Progress at examination i, judged on the examinations up to it.
+  // "4h": under 2 cm over about 4 hours, which raises suspicion (1.8.42).
+  // "2h": under 1 cm at the VE about 2 hours after delay was suspected, which
+  // diagnoses it (1.8.45). Under 1 cm in 2 hours on its own is not delay.
+  // Exactly 2 cm in 4 hours (or 1 cm in 2) is normal progress.
   const slowAt = i => {
     if (i < 1) return null;
     const last = activeVEs[i];
     const prev = activeVEs[i - 1];
     const lastT = new Date(last.time).getTime();
     const gap = lastT - new Date(prev.time).getTime();
-    const rate = (last.dilation - prev.dilation) / (gap / HOUR);
+    if (gap >= 2 * HOUR - TOL && last.dilation - prev.dilation < 1 && slowAt(i - 1)) {
+      return { kind: "2h", cm: last.dilation - prev.dilation, ms: gap };
+    }
     const earlier = activeVEs.slice(0, i).reverse().find(ve => lastT - new Date(ve.time).getTime() >= 4 * HOUR - TOL);
     const gain4h = earlier ? last.dilation - earlier.dilation : null;
-    if (gap >= 2 * HOUR - TOL && rate < 0.5) return { kind: "2h", cm: last.dilation - prev.dilation, ms: gap };
     if (gain4h != null && gain4h < 2) return { kind: "4h", cm: gain4h, ms: lastT - new Date(earlier.time).getTime() };
     return null;
   };
@@ -284,7 +298,10 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // On oxytocin, a VE taken after it started is judged by NG235 1.8.58 instead
   // (under 2 cm after 4 hours of oxytocin), so the delay steps stop there.
   const lastActiveVE = activeVEs[activeVEs.length - 1];
-  const oxyAtVE = lastActiveVE ? oxyEpisodeAt(new Date(lastActiveVE.time).getTime()) : null;
+  // A VE after oxytocin was stopped still follows it: the delay steps would
+  // otherwise restart as if she had never had oxytocin.
+  const lastVET = lastActiveVE ? new Date(lastActiveVE.time).getTime() : null;
+  const oxyAtVE = lastActiveVE ? (oxyEpisodeAt(lastVET) ?? oxyFirstBefore(lastVET)) : null;
   const veOnOxy = oxyAtVE != null;
   let slow = null;
   if (bed.labourStage === "Active first stage" && activeVEs.length >= 2 && !veOnOxy) {
@@ -295,9 +312,8 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       const prevT = new Date(activeVEs[n - 2].time).getTime();
       const armT = bed.armTime ? new Date(bed.armTime).getTime() : null;
       const armBefore = armT != null && armT >= prevT - TOL && lastT - armT >= 2 * HOUR - TOL;
-      const suspectedBefore = !!slowAt(n - 2);
       slow.level = slow.kind === "2h" && armBefore ? "confirmed"
-        : slow.kind === "2h" && suspectedBefore ? "diagnosed"
+        : slow.kind === "2h" ? "diagnosed"
         : "suspected";
     }
   }
@@ -310,7 +326,15 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   if (bed.labourStage === "Active first stage" && veOnOxy) {
     const lastT = new Date(lastActiveVE.time).getTime();
     const earlier = activeVEs.slice(0, -1).reverse().find(ve => lastT - new Date(ve.time).getTime() >= 4 * HOUR - TOL);
-    if (lastT - oxyAtVE >= 4 * HOUR - TOL && earlier) {
+    // At least about 4 hours of oxytocin actually running before this VE.
+    let ranMs = 0;
+    oxyLog.forEach((e, i) => {
+      if (e.stopped || !(e.dose > 0)) return;
+      const from = new Date(e.startTime).getTime();
+      const to = Math.min(lastT, i + 1 < oxyLog.length ? new Date(oxyLog[i + 1].startTime).getTime() : lastT);
+      if (to > from) ranMs += to - from;
+    });
+    if (ranMs >= 4 * HOUR - TOL && earlier) {
       oxyProgress = { cm: lastActiveVE.dilation - earlier.dilation, ms: lastT - new Date(earlier.time).getTime() };
       if (oxyProgress.cm < 2) {
         alerts.push({
@@ -378,13 +402,16 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
 
   // ─── Latent phase reassessment ───────────────────────────────────────
   if (bed.labourStage === "Latent") {
-    const anchorTime = bed.modeOfOnset === "Induced" && bed.inductionStartTime
+    const startTime = bed.modeOfOnset === "Induced" && bed.inductionStartTime
       ? bed.inductionStartTime
       : bed.admissionTime;
+    // A VE in the latent phase is the reassessment, so it restarts the clock.
+    const veAfter = lastVE && startTime && new Date(lastVE.time) > new Date(startTime);
+    const anchorTime = veAfter ? lastVE.time : startTime;
     if (anchorTime) {
       const ms = now - new Date(anchorTime).getTime();
-      const sinceLabel = bed.modeOfOnset === "Induced" && bed.inductionStartTime
-        ? "since IOL started"
+      const sinceLabel = veAfter ? "since the last VE"
+        : bed.modeOfOnset === "Induced" && bed.inductionStartTime ? "since IOL started"
         : "since admission";
       if (ms >= unit.latentReassessH * HOUR) {
         alerts.push({
@@ -526,7 +553,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     alerts.push({
       id: "gbs-prom-birth",
       severity: "urgent",
-      title: "GBS positive with ruptured membranes: offer immediate birth",
+      title: isGBSThisPregnancy ? "GBS positive with ruptured membranes: offer immediate birth" : "Previous GBS baby, ruptured membranes: offer immediate birth",
       body: `Prelabour rupture of membranes at ${gest} with ${isGBSThisPregnancy ? "a positive GBS test this pregnancy" : "a previous baby who developed GBS infection"}: offer immediate induction of labour or caesarean birth, with intrapartum antibiotics. Tap Offered once discussed.`,
       citation: gestWks >= 37 ? "NICE NG235 1.7.11 [2023] · NG207 1.2.16 [2021] · NG195 1.6.1" : "NICE NG207 1.2.12 [2021] · NG195 1.7.1",
     });
@@ -612,7 +639,10 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // Waters broken before 37+0 without labour: prophylaxis for intrauterine
   // infection. Suspected infection has its own (IV) alert, and once labour is
   // established the intrapartum antibiotic prompts take over.
+  // Not alongside "offer immediate birth" (GBS+ from 34+0): one antibiotic
+  // message, the intrapartum one.
   if (!delivered && isPreterm && membranes === "SROM" && bed.labourStage === "Latent" && !isInfection
+      && !alerts.some(a => a.id === "gbs-prom-birth")
       && !bed.ppromAntibioticsStarted && !bed.ppromAntibioticsStartedDeclined) {
     alerts.push({
       id: "pprom-antibiotics",
@@ -678,6 +708,17 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   const valueAge = name => { const at = valueSince(name); return at ? now - new Date(at).getTime() : null; };
   const aged = name => { const ms = valueAge(name); return ms != null && ms >= 5 * MIN ? ` (${formatAge(ms)} ago)` : ""; };
 
+  // Two raised temperatures (37.5°C or more) about an hour apart (NG235 1.8.20).
+  // Any earlier raised reading 45 minutes to 2 hours before the latest counts,
+  // so frequent rechecks (or a backdated one) still confirm it.
+  const tempHist = obs.tempLog ?? (obs.tempPrev != null && obs.tempPrevAt ? [{ value: parseFloat(obs.tempPrev), at: obs.tempPrevAt }] : []);
+  const tempLatestAt = valueSince("temp") ? new Date(valueSince("temp")).getTime() : null;
+  const tempPair = tempLatestAt == null ? null : tempHist.find(r => {
+    const gap = tempLatestAt - new Date(r.at).getTime();
+    return r.value >= 37.5 && gap >= 45 * MIN && gap <= 2 * HOUR;
+  });
+  const tempTwice = !!tempPair;
+
   // While the infection prompt is up it carries the temperature; afterwards
   // the pyrexia alert stays until a newer temperature replaces it.
   if (temp !== null && temp >= 38.0) {
@@ -698,12 +739,29 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
         citation: "NICE NG235 1.8.20 · NG229 1.3.8 · NG195 1.6.1, 1.6.4",
       });
     }
+  } else if (temp !== null && temp >= 37.5 && tempTwice) {
+    alerts.push({
+      id: "temp-375",
+      severity: "urgent",
+      short: "Pyrexia",
+      title: `Pyrexia: ${tempPair?.value}°C then ${temp}°C${aged("temp")}`, since: valueSince("temp"),
+      body: delivered
+        ? "37.5°C or above on 2 readings about 1 hour apart. Assess for sepsis; senior review."
+        : "37.5°C or above on 2 readings about 1 hour apart counts as maternal pyrexia: a transfer trigger and an indication for continuous CTG. Look for signs of chorioamnionitis; senior review.",
+      citation: delivered ? "NICE NG235 1.8.20 [2023] · NG255 1.5.1" : "NICE NG235 1.8.20 [2023] · NG229 1.3.8",
+    });
   } else if (temp !== null && temp >= 37.5) {
+    const tempAge = valueAge("temp");
     alerts.push({
       id: "temp-375",
       severity: "warning",
-      title: `Temperature ${temp}°C${aged("temp")}: possible infection`, since: valueSince("temp"),
-      body: "Repeat in 1 hour: 37.5°C or above on 2 readings 1 hour apart is a transfer trigger. Look for signs of chorioamnionitis.",
+      short: tempAge >= HOUR ? "Temp recheck" : undefined,
+      title: tempAge >= HOUR
+        ? `Recheck temperature: ${temp}°C ${formatAge(tempAge)} ago`
+        : `Temperature ${temp}°C${aged("temp")}: recheck in 1 hour`, since: valueSince("temp"),
+      body: delivered
+        ? "Repeat in 1 hour. A raised temperature after birth: consider sepsis."
+        : "Repeat in 1 hour: 37.5°C or above on 2 readings 1 hour apart is maternal pyrexia, a transfer trigger and an indication for continuous CTG. Look for signs of chorioamnionitis.",
       citation: "NICE NG235 1.8.20 [2023]",
     });
   }
@@ -830,6 +888,12 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // her, even if the latest BP is lower (NG133 1.8.3 asks for an assessment).
   const severeSeenAt = obs.bpSevereAt ?? null;
   const lowUrine = obs.urineOutput !== undefined && obs.urineOutput < unit.oliguriaMlH;
+  // "Assessed" holds only until something new: a severe BP or low urine output
+  // recorded after the assessment brings the prompt back.
+  const assessedAt = bed.mgso4PETAssessed ? new Date(bed.mgso4PETAssessedAt ?? 0).getTime() : null;
+  const after = iso => !!iso && new Date(iso).getTime() > assessedAt;
+  const petAssessedStillHolds = assessedAt != null
+    && !after(severeSeenAt) && !(lowUrine && after(obs.lastUrineCheck));
   if (flags.includes("Eclampsia") && !mgRunning) {
     alerts.push({
       id: "mgso4-eclampsia",
@@ -838,7 +902,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       body: "A woman with severe hypertension or severe pre-eclampsia who has or has had an eclamptic fit: give IV magnesium sulfate (Collaborative Eclampsia Trial regimen, NG133 1.8.4). Do not use diazepam, phenytoin or other anticonvulsants instead (1.8.5). Senior and anaesthetic help.",
       citation: "NICE NG133 1.8.1, 1.8.4, 1.8.5",
     });
-  } else if (flags.includes("Pre-eclampsia") && (severeBP || severeSeenAt || lowUrine) && !mgRunning && !bed.mgso4PETAssessed) {
+  } else if (flags.includes("Pre-eclampsia") && (severeBP || severeSeenAt || lowUrine) && !mgRunning && !petAssessedStillHolds) {
     alerts.push({
       id: "mgso4-severe-pet",
       severity: "urgent",
@@ -914,6 +978,20 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     });
   }
 
+  // ─── After birth with pre-eclampsia: BP at least 4 times a day (NG133 1.5.16) ─
+  if (delivered && flags.includes("Pre-eclampsia")) {
+    const last = obs.lastBP ? new Date(obs.lastBP).getTime() : new Date(bed.delivery.time).getTime();
+    const ms = now - last;
+    if (ms >= 6 * HOUR) {
+      alerts.push({
+        id: "bp-due", severity: "warning",
+        title: `BP due after birth (pre-eclampsia): last ${formatAge(ms)} ago`,
+        body: "Measure BP at least 4 times a day while she is an inpatient, and ask about severe headache and epigastric pain each time.",
+        citation: "NICE NG133 1.5.15, 1.5.16 [2010]",
+      });
+    }
+  }
+
   // ─── Maternal observations due (NICE NG235 1.8.19; NG133 1.7.3) ──────
   if (!delivered && bed.labourStage !== "Latent") {
     if (obs.lastPulse) {
@@ -922,7 +1000,8 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
         alerts.push({ id: "pulse-due", severity: "info", title: "Maternal pulse check due", body: `Last recorded ${formatAge(ms)} ago. Hourly pulse in active labour.`, citation: "NICE NG235 1.8.19 [2007]" });
       }
     } else {
-      alerts.push({ id: "pulse-never", severity: "info", title: "Pulse not recorded", body: "Hourly maternal pulse required in active labour.", citation: "NICE NG235 1.8.19 [2007]" });
+      // Never recorded is not "on track": it is due now.
+      alerts.push({ id: "pulse-never", severity: "warning", title: "Pulse not recorded", body: "Hourly maternal pulse required in active labour.", citation: "NICE NG235 1.8.19 [2007]" });
     }
 
     if (obs.lastBP) {
@@ -1052,7 +1131,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       // NG229 1.3.8 intrapartum risk factors
       hasMeconium && "Meconium",
       lastLiquor === "Blood-stained" && "Blood-stained liquor",
-      temp !== null && temp >= 38 && "Pyrexia",
+      temp !== null && (temp >= 38 || (temp >= 37.5 && tempTwice)) && "Pyrexia",
       pulse !== null && pulse > 120 && "Pulse over 120",
       bpSys !== null && bpDia !== null && (bpSys >= 140 || bpDia >= 90) && "Raised BP",
       alerts.some(a => a.id === "slow-progress" || a.id === "oxytocin-poor-progress") && "Delay",
@@ -1070,8 +1149,8 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     if (ctgClockRuns && needsContinuousCTG && !lastCTG) {
       alerts.push({
         id: "ctg-not-documented",
-        // With a NICE (or local) indication, a missing CTG is due, not background.
-        severity: ctgReasons.length ? "warning" : "info",
+        // Never logged in established labour (or on oxytocin) is due, not background.
+        severity: "warning",
         title: "Continuous CTG: not yet documented",
         body: `${ctgReasons.length ? `Indication: ${ctgReasons.join(", ")}.` : "Unit policy: continuous CTG in established labour."} Log a CTG review to track fetal wellbeing.`,
         citation: ctgReasons.length ? "NICE NG229 1.3.2, 1.3.3, 1.3.8 [2022]" : "Unit setting",
@@ -1127,8 +1206,11 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     }
   }
 
+  // One event, one card: the 2 hour post-ARM review already asks for the VE,
+  // so the plain "VE due" reminder is not shown beside it.
+  const out = alerts.some(a => a.id === "arm-reassess") ? alerts.filter(a => a.id !== "ve-due") : alerts;
   const order = { urgent: 0, warning: 1, info: 2 };
-  return alerts.sort((a, b) => order[a.severity] - order[b.severity] || alertTier(a.id) - alertTier(b.id));
+  return out.sort((a, b) => order[a.severity] - order[b.severity] || alertTier(a.id) - alertTier(b.id));
 }
 
 /**

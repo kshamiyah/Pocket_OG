@@ -5,11 +5,11 @@ import SubPage from "../ui/SubPage";
 import { useSubPage } from "../ui/useSubPage";
 import { IconChevron } from "../ui/icons";
 import { Chip, ChipRow, DilationGrid, Label, MultiChipRow, Stepper, WhenPicker } from "../ui/atoms";
-import { BTN, BTN_PRIMARY, INPUT, TYPE_META } from "../ui/styles";
+import { BTN, BTN_PRIMARY, BTN_SECONDARY, INPUT, TYPE_META } from "../ui/styles";
 import { resolveWhen, whenFromISO } from "../utils/time";
 import {
   ANALGESIA, BIRTH_MODES, BIRTH_SHORT, IND_METHODS, IOL_REASONS, LIQUORS, LIQUOR_SHORT, MEMBRANES, ONSETS, PARITIES,
-  STAGES, STAGE_SHORT, gestFromDigits, newId, parityNum, parityShort, stationLabel,
+  STAGES, STAGE_SHORT, gestFromDigits, newId, parityNum, parityShort, setStage as stageUpdate, stationLabel,
 } from "../utils/bedModel";
 
 
@@ -41,7 +41,12 @@ function SummaryLine({ label, text, onClick, warn = false }) {
 }
 
 // IOL queue indications that imply a risk flag, so admitting from the queue keeps it.
-const IOL_FLAG = { "GDM": "Diabetic-GDM", "Pre-eclampsia": "Hypertensive", "Severe pre-eclampsia": "Hypertensive" };
+// IOL indications that carry a risk flag onto the board. Pre-eclampsia must
+// arrive as Pre-eclampsia (not plain hypertension) so the MgSO4 rules run.
+// Named rooms offered under "Other" for the bed.
+const ROOMS = ["Pool", "HDU", "Triage", "Theatre", "Recovery"];
+
+const IOL_FLAG = { "GDM": "Diabetic-GDM", "Pre-eclampsia": "Pre-eclampsia", "Severe pre-eclampsia": "Pre-eclampsia" };
 
 function parseGest(g) {
   const m = /^(\d+)\+(\d)$/.exec(g ?? "");
@@ -85,6 +90,10 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
   const [veCx, setVeCx] = useState(null);
   const [vePres, setVePres] = useState("Cephalic");
   const [veWhen, setVeWhen] = useState({ minsAgo: 0 });
+  // VEs done before she reached the board (elsewhere, or earlier in labour):
+  // dilation and time each, so progress and the delay rules start from them.
+  const [earlier, setEarlier] = useState([]);
+  const setEarlierAt = (id, patch) => setEarlier(list => list.map(e => (e.id === id ? { ...e, ...patch } : e)));
   const [admWhen, setAdmWhen] = useState({ minsAgo: 0 });
   // Admission time defaults to now; the picker only appears if asked for.
   const [admEarlier, setAdmEarlier] = useState(false);
@@ -92,16 +101,25 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
 
   const suggestedAdmitStage = veDil == null ? null : veDil >= 10 ? "Passive second stage" : veDil >= 4 ? "Active first stage" : null;
   const used = new Set(existingNumbers.map(String));
+  // Bed names compare without case or spaces ("pool" and "Pool" are one room).
+  const norm = x => String(x ?? "").trim().toLowerCase();
+  const usedNorm = new Set(existingNumbers.map(norm));
   const free = Array.from({ length: 12 }, (_, i) => String(i + 1)).filter(n => !used.has(n));
   // One row of quick bed chips (the lowest free numbers); anything else is typed.
   const quick = [...new Set([...(edit ? [String(bed.bedNumber)] : []), ...free])].slice(0, 5);
   const [custom, setCustom] = useState(edit && !quick.includes(String(bed.bedNumber)));
   const trimmed = String(num ?? "").trim();
-  const clash = trimmed && used.has(trimmed) && !(edit && trimmed === String(bed.bedNumber));
+  const clash = trimmed && usedNorm.has(norm(trimmed)) && !(edit && norm(trimmed) === norm(bed.bedNumber));
   const effMemb = onset === "PPROM" && memb === "Intact" ? "SROM" : memb;
   const ruptured = !edit && effMemb !== "Intact";
   const romISO = ruptured ? resolveWhen(romWhen) : null;
-  const ready = trimmed && !clash && parity && weeks && stage && (!ruptured || !!romISO);
+  // Every time entered must be a real past time: a future one (23:40 typed
+  // after midnight without "Yesterday") would otherwise be saved as now.
+  const timesOk = (veDil == null || !!resolveWhen(veWhen))
+    && earlier.every(e => e.dil == null || !!resolveWhen(e.when))
+    && (!admEarlier || !!resolveWhen(admWhen))
+    && (onset !== "Induced" || !iolWhen || !!resolveWhen(iolWhen));
+  const ready = trimmed && !clash && parity && weeks && stage && (!ruptured || !!romISO) && (edit || timesOk);
   const nBirths = Math.min(parityNum(parity) ?? (parity === "Para 3+" ? 3 : 0), 10);
   const births = prevBirths.slice(0, nBirths);
   const setBirth = (i, mode) => {
@@ -120,7 +138,9 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
     const iolISO = induced ? resolveWhen(iolWhen) : null;
     if (edit) {
       onSave({
-        bedNumber: trimmed, parity, prevBirths: births, gestation, labourStage: stage, modeOfOnset: onset, analgesia, riskFlags: flags,
+        bedNumber: trimmed, parity, prevBirths: births, gestation, modeOfOnset: onset, analgesia, riskFlags: flags,
+        // A stage change here starts (or clears) the stage clocks, as the stage bar does.
+        ...(stage !== bed.labourStage ? stageUpdate(bed, stage, new Date().toISOString()) : { labourStage: stage }),
         inductionMethod: induced ? indMethod : null,
         iolReasons: induced ? iolReasons : [],
         inductionStartTime: induced ? iolISO ?? bed.inductionStartTime ?? null : null,
@@ -129,13 +149,22 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
     }
     const admISO = resolveWhen(admWhen) ?? new Date().toISOString();
     const veISO = veDil != null ? resolveWhen(veWhen) ?? admISO : null;
-    const stageTime = veISO ?? admISO;
     const membranes = effMemb;
-    const ves = veDil != null ? [{
+    const before = earlier
+      .map(e => ({ ...e, iso: e.dil != null ? resolveWhen(e.when) : null }))
+      .filter(e => e.iso)
+      // No membranes on earlier VEs: what was recorded at admission (status,
+      // rupture time, liquor) stays the record the alerts use.
+      .map(e => ({ id: newId("ve"), time: e.iso, dilation: e.dil }));
+    const ves = [...before, ...(veDil != null ? [{
       id: newId("ve"), time: veISO, dilation: veDil, station: veStation, presentation: vePres,
       membranes, membranesTime: ruptured ? romISO : null,
       liquor: ruptured ? liquor : null, contractions: veCx,
-    }] : [];
+    }] : [])].sort((a, b) => new Date(a.time) - new Date(b.time));
+    // Established labour starts at the first VE of 4 cm or more, so a woman
+    // who has been labouring for hours is not timed from her arrival.
+    const firstActive = ves.find(v => v.dilation >= 4)?.time;
+    const stageTime = (stage === "Active first stage" ? firstActive : null) ?? veISO ?? admISO;
     onSave({
       id: newId("bed"), bedNumber: trimmed, admissionTime: admISO,
       parity, prevBirths: births, gestation, modeOfOnset: onset,
@@ -159,7 +188,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
       sub={edit ? "VE, CTG and obs history stay as they are." : "No names or identifiers."}
       footer={
         <button type="button" onClick={save} disabled={!ready} className={`${BTN} ${BTN_PRIMARY} w-full min-h-[3.25rem] text-base`}>
-          {!ready ? (clash ? `Bed ${trimmed} is already on the board` : "Pick bed, parity, gestation and stage")
+          {!ready ? (clash ? `Bed ${trimmed} is already on the board` : !edit && !timesOk ? "A time is in the future: check the times" : "Pick bed, parity, gestation and stage")
             : edit ? "Save changes" : `Add Bed ${trimmed} · ${parityShort(parity)} · ${weeks}+${days}`}
         </button>
       }>
@@ -167,11 +196,28 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
         <Label tight hint={free.length ? "free beds" : undefined}>Bed</Label>
         <div className="grid grid-cols-[repeat(5,minmax(0,1fr))_auto] gap-1.5">
           {quick.map(n => <Chip key={n} small className="px-0 text-sm" on={!custom && trimmed === n} onClick={() => { setCustom(false); setNum(n); }}>{n}</Chip>)}
-          <Chip small className="text-sm" on={custom} onClick={() => { if (!custom) setNum(""); setCustom(true); }}>Custom</Chip>
+          <Chip small className="text-sm" on={custom} onClick={() => { if (!custom) setNum(""); setCustom(true); }}>{custom && trimmed ? trimmed : "Other"}</Chip>
         </div>
+        {/* Every bed up to 16 (taken ones greyed out), common named rooms, or
+            anything typed. */}
         {custom && (
-          <input autoFocus value={num} onChange={e => setNum(e.target.value)} placeholder="Type a bed, e.g. 14, Pool or HDU"
-            className={`${INPUT} mt-2`} aria-label="Bed" maxLength={12} />
+          <div className="mt-2 space-y-2 rounded-xl border border-gray-200 dark:border-gray-800 p-2.5">
+            <div className="grid grid-cols-8 gap-1">
+              {Array.from({ length: 16 }, (_, i) => String(i + 1)).map(n => {
+                const taken = used.has(n) && !(edit && n === String(bed.bedNumber));
+                return <Chip key={n} small className="px-0 text-sm disabled:opacity-30" disabled={taken} aria-label={taken ? `Bed ${n}, occupied` : `Bed ${n}`}
+                  on={trimmed === n} onClick={() => setNum(n)}>{n}</Chip>;
+              })}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {ROOMS.map(r => {
+                const taken = usedNorm.has(norm(r)) && !(edit && norm(r) === norm(bed.bedNumber));
+                return <Chip key={r} small className="disabled:opacity-30" disabled={taken} on={trimmed === r} onClick={() => setNum(r)}>{r}</Chip>;
+              })}
+            </div>
+            <input value={num} onChange={e => setNum(e.target.value)}
+              placeholder="Or type a bed or room" className={INPUT} aria-label="Bed" maxLength={12} />
+          </div>
         )}
       </div>
 
@@ -179,7 +225,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
         <Label tight>Parity</Label>
         <div className="flex flex-wrap gap-1.5">
           {PARITIES.map(p => <Chip key={p} small className="text-sm min-w-[3rem]" on={!customParity && parity === p} onClick={() => { setCustomParity(false); setParity(p); }}>{parityShort(p)}</Chip>)}
-          <Chip small className="text-sm" on={customParity} onClick={() => { if (!customParity) setParity("Para 4"); setCustomParity(true); }}>Custom</Chip>
+          <Chip small className="text-sm" on={customParity} onClick={() => { if (!customParity) setParity("Para 4"); setCustomParity(true); }}>{customParity ? parityShort(parity) : "P4+"}</Chip>
         </div>
         {customParity && (
           <div className="mt-2">
@@ -275,6 +321,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
           text={veDil == null ? "not recorded · tap to add" : [
             `${veDil} cm`, veStation != null && `station ${stationLabel(veStation)}`, veCx != null && `${veCx} in 10`,
             vePres, whenText(veWhen),
+            earlier.some(e => e.dil != null) && `+${earlier.filter(e => e.dil != null).length} earlier`,
           ].filter(Boolean).join(" · ")} />
       )}
       {detail.page === "ve" && (
@@ -296,7 +343,23 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
             <ChipRow small options={["Cephalic", "Breech", "Other"]} value={vePres} onChange={setVePres} />
           </div>
           <WhenPicker label="Time of the VE" value={veWhen} onChange={setVeWhen} presets={[0, 15, 30, 60, 120]} />
-          <p className={TYPE_META}>Membranes are set on the Admit screen. This becomes her first VE, so the next one is due 4 hours from its time.</p>
+          <div className="space-y-2">
+            <Label hint="optional">Earlier VEs</Label>
+            {earlier.map((e, k) => (
+              <div key={e.id} className="rounded-xl border border-gray-200 dark:border-gray-800 p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">Earlier VE {k + 1}</span>
+                  <button type="button" onClick={() => setEarlier(list => list.filter(x => x.id !== e.id))}
+                    className="min-h-9 px-2 text-xs font-semibold text-red-600 dark:text-red-400">Remove</button>
+                </div>
+                <DilationGrid value={e.dil} onChange={v => setEarlierAt(e.id, { dil: e.dil === v ? null : v })} />
+                <WhenPicker tight label="When" value={e.when} onChange={w => setEarlierAt(e.id, { when: w })} presets={[60, 120, 240, 360, 480]} />
+              </div>
+            ))}
+            <button type="button" onClick={() => setEarlier(list => [...list, { id: newId("prev"), dil: null, when: { minsAgo: 240 } }])}
+              className={`${BTN} ${BTN_SECONDARY} w-full`}>+ Add an earlier VE</button>
+          </div>
+          <p className={TYPE_META}>Membranes are set on the Admit screen. The latest VE starts the 4-hour clock; earlier ones show her progress, and established labour is timed from the first at 4 cm or more.</p>
         </SubPage>
       )}
       {detail.page === "iol" && (

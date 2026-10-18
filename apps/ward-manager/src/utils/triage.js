@@ -95,6 +95,23 @@ const NEXT = {
 const STEP = 5 * MIN;
 const HORIZON = 8 * HOUR;
 
+/**
+ * When one of `ids` (for example the VE reminders) will next appear, if it is
+ * not showing now: { id, label, at } or null. Same 5 minute scan as nextDue.
+ */
+export function nextOf(bed, ids, now = Date.now()) {
+  if (bed.delivery) return null;
+  const want = new Set(ids);
+  if (computeAlerts(bed, now).some(a => want.has(a.id))) return null;
+  const hitAt = t => computeAlerts(bed, t).find(a => want.has(a.id));
+  for (let t = now + STEP; t <= now + HORIZON; t += STEP) {
+    if (!hitAt(t)) continue;
+    for (let u = t - STEP + MIN; u < t; u += MIN) if (hitAt(u)) return { label: "VE", at: u };
+    return { label: "VE", at: t };
+  }
+  return null;
+}
+
 /** Earliest future alert from NEXT that is not already showing. */
 export function nextDue(bed, now = Date.now(), alertsNow = computeAlerts(bed, now)) {
   if (bed.delivery) return null;
@@ -130,8 +147,11 @@ export function applyReviews(alerts, bed, now = Date.now()) {
     const at = new Date(r.at).getTime();
     const until = at + mins * MIN;
     const newer = a.since && new Date(a.since).getTime() > at;
-    if (now >= until || newer) return a;
-    return { ...a, severity: "info", reviewed: { at: r.at, by: r.by, until } };
+    // Worse than when it was reviewed: a higher severity or a new stage.
+    const RANK = { urgent: 0, warning: 1, info: 2 };
+    const worse = (r.severity && RANK[a.severity] < RANK[r.severity]) || (r.short != null && a.short && a.short !== r.short);
+    if (now >= until || newer || worse) return a;
+    return { ...a, severity: "info", reviewed: { at: r.at, by: r.by, until, severity: a.severity } };
   });
   const order = { urgent: 0, warning: 1, info: 2 };
   return out.sort((x, y) => order[x.severity] - order[y.severity] || alertTier(x.id) - alertTier(y.id));
@@ -142,13 +162,15 @@ export function triageBed(bed, now = Date.now()) {
   const shown = alerts.filter(a => !(OBS_IDS.has(a.id) && a.severity === "info"));
   const urgent = shown.filter(a => a.severity === "urgent").length;
   const warning = shown.filter(a => a.severity === "warning").length;
-  // A delivered woman stays in the delivered list unless a postnatal alert
-  // (PPH, abnormal observations) needs attention.
-  const tier = urgent ? "urgent" : warning ? "warning" : bed.delivery ? "delivered" : "ok";
-  return { tier, alerts, shown, top: shown[0] ?? null, next: nextDue(bed, now, alerts), urgent, warning };
+  // Reviewed problems that are still there: quieter, but never "on track" and
+  // never folded away with the delivered women.
+  const watching = shown.filter(a => a.reviewed).length;
+  const tier = urgent ? "urgent" : warning ? "warning" : watching ? "watching" : bed.delivery ? "delivered" : "ok";
+  const top = tier === "watching" ? shown.find(a => a.reviewed) : shown[0] ?? null;
+  return { tier, alerts, shown, top, next: nextDue(bed, now, alerts), urgent, warning, watching };
 }
 
-const TIER_RANK = { urgent: 0, warning: 1, ok: 2, delivered: 3 };
+const TIER_RANK = { urgent: 0, warning: 1, watching: 2, ok: 3, delivered: 4 };
 
 export function compareTriage(a, b) {
   const top = t => (t.top ? alertTier(t.top.id) : 3);
@@ -172,6 +194,7 @@ export function wardSummary(rows) {
     women: live.length,
     urgent: rows.filter(r => r.t.tier === "urgent").length,
     warning: rows.filter(r => r.t.tier === "warning").length,
+    watching: rows.filter(r => r.t.tier === "watching").length,
     delivered: rows.length - live.length,
     nextAt: nexts[0] ?? null,
   };

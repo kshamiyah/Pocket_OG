@@ -6,6 +6,7 @@ import {
   BTN, BTN_PRIMARY, BTN_SECONDARY, CARD, CHIP_ON, CTG_BOX, INPUT, TYPE_DISPLAY, TYPE_META, TYPE_UI_SM,
 } from "../ui/styles";
 import { IconBack, IconTick } from "../ui/icons";
+import { useSwipeBack } from "../ui/useSwipeBack";
 import { fmtAge, clock, resolveWhen, whenFromISO } from "../utils/time";
 import { getUnitSettings } from "../data/unitSettings";
 import {
@@ -118,7 +119,8 @@ function TasksPanel({ bed, onUpdate }) {
     onUpdate({ tasks: [...tasks, { id: newId("task"), text: label, done: false, createdAt: new Date().toISOString() }] }, `Task added: ${label}`);
     setText("");
   };
-  const toggle = id => onUpdate({ tasks: tasks.map(x => (x.id === id ? { ...x, done: !x.done } : x)) });
+  // Ticking a task off records when, for the handover timeline.
+  const toggle = id => onUpdate({ tasks: tasks.map(x => (x.id === id ? { ...x, done: !x.done, doneAt: x.done ? null : new Date().toISOString() } : x)) });
   const ordered = [...tasks.filter(x => !x.done), ...tasks.filter(x => x.done)];
   return (
     <div className="space-y-3">
@@ -141,6 +143,9 @@ function TasksPanel({ bed, onUpdate }) {
 
 export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStage, onOpenVE, onOpenCTG, onOpenOxy, onOpenDelivery, onEdit, onRemove }) {
   const [tab, setTab] = useState("overview");
+  const [undoDelivery, setUndoDelivery] = useState(false);
+  // Swipe in from the left edge to go back.
+  const { swipeProps, swipeStyle } = useSwipeBack(onBack);
   if (!bed) return null;
   const ves = [...sortedVEs(bed)].reverse();
   const ctgs = [...(bed.ctgLog ?? [])].reverse();
@@ -149,7 +154,7 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
   const TABS = [["overview", "Overview"], ["ves", `VEs ${ves.length || ""}`], ["ctg", `CTG ${ctgs.length || ""}`], ["obs", "Obs"], ["tasks", `Tasks${pendingTasks ? ` ${pendingTasks}` : ""}`]];
 
   return (
-    <div className="fixed inset-0 z-40 bg-white dark:bg-gray-950 overflow-y-auto overscroll-contain" role="dialog" aria-label={`Bed ${bed.bedNumber} record`}>
+    <div className="fixed inset-0 z-40 bg-white dark:bg-gray-950 overflow-y-auto overscroll-contain" {...swipeProps} style={swipeStyle} role="dialog" aria-label={`Bed ${bed.bedNumber} record`}>
       <div className="sticky top-0 z-10 bg-white/95 dark:bg-gray-950/95 backdrop-blur border-b border-gray-200 dark:border-gray-800"
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)" }}>
         <div className="max-w-lg mx-auto px-5 pb-3">
@@ -243,7 +248,13 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
                   <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400">{bed.delivery.mode} at {clock(bed.delivery.time)}</p>
                   <p className="text-xs text-emerald-700 dark:text-emerald-400/80">{bed.delivery.ebl != null ? `EBL ${bed.delivery.ebl} mL` : "EBL not recorded"}{bed.delivery.notes ? ` · ${bed.delivery.notes}` : ""}</p>
                 </div>
-                <SmallBtn onClick={onOpenDelivery}>Edit</SmallBtn>
+                <div className="flex flex-col gap-1">
+                  <SmallBtn onClick={onOpenDelivery}>Edit</SmallBtn>
+                  {/* A mistaken "Delivered" switches the labour rules off, so it can be taken back. */}
+                  <SmallBtn tone="red" onClick={() => (undoDelivery ? onUpdate({ delivery: null }, "Delivery taken back: labour rules back on") : setUndoDelivery(true))}>
+                    {undoDelivery ? "Tap to confirm" : "Undo delivery"}
+                  </SmallBtn>
+                </div>
               </div>
             ) : (
               <button type="button" onClick={onOpenDelivery} className={`${BTN} ${BTN_SECONDARY} w-full`}>Mark delivered</button>
