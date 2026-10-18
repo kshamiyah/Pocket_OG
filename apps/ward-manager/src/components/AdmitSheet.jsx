@@ -43,6 +43,9 @@ function SummaryLine({ label, text, onClick, warn = false }) {
 // IOL queue indications that imply a risk flag, so admitting from the queue keeps it.
 // IOL indications that carry a risk flag onto the board. Pre-eclampsia must
 // arrive as Pre-eclampsia (not plain hypertension) so the MgSO4 rules run.
+// Named rooms offered under "Other" for the bed.
+const ROOMS = ["Pool", "HDU", "Triage", "Theatre", "Recovery"];
+
 const IOL_FLAG = { "GDM": "Diabetic-GDM", "Pre-eclampsia": "Pre-eclampsia", "Severe pre-eclampsia": "Pre-eclampsia" };
 
 function parseGest(g) {
@@ -184,11 +187,28 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
         <Label tight hint={free.length ? "free beds" : undefined}>Bed</Label>
         <div className="grid grid-cols-[repeat(5,minmax(0,1fr))_auto] gap-1.5">
           {quick.map(n => <Chip key={n} small className="px-0 text-sm" on={!custom && trimmed === n} onClick={() => { setCustom(false); setNum(n); }}>{n}</Chip>)}
-          <Chip small className="text-sm" on={custom} onClick={() => { if (!custom) setNum(""); setCustom(true); }}>Custom</Chip>
+          <Chip small className="text-sm" on={custom} onClick={() => { if (!custom) setNum(""); setCustom(true); }}>{custom && trimmed ? trimmed : "Other"}</Chip>
         </div>
+        {/* Every bed up to 16 (taken ones greyed out), common named rooms, or
+            anything typed. */}
         {custom && (
-          <input autoFocus value={num} onChange={e => setNum(e.target.value)} placeholder="Type a bed, e.g. 14, Pool or HDU"
-            className={`${INPUT} mt-2`} aria-label="Bed" maxLength={12} />
+          <div className="mt-2 space-y-2 rounded-xl border border-gray-200 dark:border-gray-800 p-2.5">
+            <div className="grid grid-cols-8 gap-1">
+              {Array.from({ length: 16 }, (_, i) => String(i + 1)).map(n => {
+                const taken = used.has(n) && !(edit && n === String(bed.bedNumber));
+                return <Chip key={n} small className="px-0 text-sm disabled:opacity-30" disabled={taken} aria-label={taken ? `Bed ${n}, occupied` : `Bed ${n}`}
+                  on={trimmed === n} onClick={() => setNum(n)}>{n}</Chip>;
+              })}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {ROOMS.map(r => {
+                const taken = used.has(r) && !(edit && r === String(bed.bedNumber));
+                return <Chip key={r} small className="disabled:opacity-30" disabled={taken} on={trimmed === r} onClick={() => setNum(r)}>{r}</Chip>;
+              })}
+            </div>
+            <input value={ROOMS.includes(trimmed) || /^([1-9]|1[0-6])$/.test(trimmed) ? "" : num} onChange={e => setNum(e.target.value)}
+              placeholder="Or type a bed or room" className={INPUT} aria-label="Bed" maxLength={12} />
+          </div>
         )}
       </div>
 
@@ -196,7 +216,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
         <Label tight>Parity</Label>
         <div className="flex flex-wrap gap-1.5">
           {PARITIES.map(p => <Chip key={p} small className="text-sm min-w-[3rem]" on={!customParity && parity === p} onClick={() => { setCustomParity(false); setParity(p); }}>{parityShort(p)}</Chip>)}
-          <Chip small className="text-sm" on={customParity} onClick={() => { if (!customParity) setParity("Para 4"); setCustomParity(true); }}>Custom</Chip>
+          <Chip small className="text-sm" on={customParity} onClick={() => { if (!customParity) setParity("Para 4"); setCustomParity(true); }}>{customParity ? parityShort(parity) : "P4+"}</Chip>
         </div>
         {customParity && (
           <div className="mt-2">
