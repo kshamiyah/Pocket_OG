@@ -121,8 +121,12 @@ function toneFor(kind, alerts) {
 function Tile({ label, value, meta, tone, onClick, ariaLabel }) {
   return (
     <button type="button" onClick={onClick} aria-label={ariaLabel}
-      className={`min-w-0 min-h-[4.75rem] rounded-xl border px-2.5 py-2 flex flex-col items-start justify-between text-left active:scale-[0.98] transition-transform ${TONE[tone]}`}>
-      <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{label}</span>
+      className={`min-w-0 min-h-[4.75rem] rounded-xl border border-b-[3px] shadow-sm px-2.5 py-2 flex flex-col items-start justify-between text-left active:scale-[0.97] active:border-b transition-transform ${TONE[tone]}`}>
+      {/* A raised edge and a "+" mark say "tap me": each tile is the button for its action. */}
+      <span className="w-full flex items-center justify-between gap-1">
+        <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{label}</span>
+        <span aria-hidden="true" className="w-4 h-4 rounded-full flex items-center justify-center text-[12px] font-bold leading-none bg-current/10 opacity-80">+</span>
+      </span>
       <span className="text-base font-semibold leading-tight tabular-nums truncate w-full">{value}</span>
       <span className="text-[11px] leading-tight opacity-80 truncate w-full">{meta}</span>
     </button>
