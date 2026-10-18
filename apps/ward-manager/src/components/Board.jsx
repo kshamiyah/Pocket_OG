@@ -92,7 +92,8 @@ export function BedRow({ bed, t, now, onOpen, flash }) {
         {bed.bedNumber}
       </span>
       <span className="flex-1 min-w-0 flex flex-col gap-1">
-        <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">{status}</span>
+        {/* Wraps to a second line on narrow phones rather than cutting off "EBL 1200 mL". */}
+        <span className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 break-words">{status}</span>
         <span className="flex items-center gap-1 flex-wrap">
           <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mr-0.5 whitespace-nowrap">{parityShort(bed.parity)} · {bed.gestation}{!bed.delivery && ve ? ` · VE ${ago(ve.time)} ago` : ""}</span>
           {/* Facts are neutral; orange and red are kept for things that need doing. */}

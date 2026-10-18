@@ -143,6 +143,7 @@ function TasksPanel({ bed, onUpdate }) {
 
 export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStage, onOpenVE, onOpenCTG, onOpenOxy, onOpenDelivery, onEdit, onRemove }) {
   const [tab, setTab] = useState("overview");
+  const [undoDelivery, setUndoDelivery] = useState(false);
   // Swipe in from the left edge to go back.
   const { swipeProps, swipeStyle } = useSwipeBack(onBack);
   if (!bed) return null;
@@ -247,7 +248,13 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
                   <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400">{bed.delivery.mode} at {clock(bed.delivery.time)}</p>
                   <p className="text-xs text-emerald-700 dark:text-emerald-400/80">{bed.delivery.ebl != null ? `EBL ${bed.delivery.ebl} mL` : "EBL not recorded"}{bed.delivery.notes ? ` · ${bed.delivery.notes}` : ""}</p>
                 </div>
-                <SmallBtn onClick={onOpenDelivery}>Edit</SmallBtn>
+                <div className="flex flex-col gap-1">
+                  <SmallBtn onClick={onOpenDelivery}>Edit</SmallBtn>
+                  {/* A mistaken "Delivered" switches the labour rules off, so it can be taken back. */}
+                  <SmallBtn tone="red" onClick={() => (undoDelivery ? onUpdate({ delivery: null }, "Delivery taken back: labour rules back on") : setUndoDelivery(true))}>
+                    {undoDelivery ? "Tap to confirm" : "Undo delivery"}
+                  </SmallBtn>
+                </div>
               </div>
             ) : (
               <button type="button" onClick={onOpenDelivery} className={`${BTN} ${BTN_SECONDARY} w-full`}>Mark delivered</button>

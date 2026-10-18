@@ -82,6 +82,29 @@ export default function WardPage({ shift, onEndShift }) {
     window.addEventListener("sim-clock", onSim);
     return () => { clearInterval(id); document.removeEventListener("visibilitychange", onVis); window.removeEventListener("sim-clock", onSim); };
   }, []);
+  // The phone's own back gesture or button closes the top layer (rule pop-up,
+  // a sheet, the record, a full page) instead of leaving the app and losing a
+  // half-filled form. One history entry is kept in hand for this.
+  const layers = useRef({});
+  useEffect(() => { layers.current = { ruleAlert, sourceKey, rulesOpen, settingsOpen, sheet, recordId, round }; });
+  useEffect(() => {
+    window.history.pushState({ pocketsuite: true }, "");
+    const onPop = () => {
+      const l = layers.current;
+      const open = l.sourceKey || l.ruleAlert || l.rulesOpen || l.settingsOpen || l.sheet || l.recordId || l.round;
+      if (!open) { window.history.back(); return; }
+      window.history.pushState({ pocketsuite: true }, "");
+      if (l.sourceKey) setSourceKey(null);
+      else if (l.ruleAlert) setRuleAlert(null);
+      else if (l.rulesOpen) setRulesOpen(false);
+      else if (l.settingsOpen) setSettingsOpen(false);
+      else if (l.sheet) setSheet(null);
+      else if (l.recordId) setRecordId(null);
+      else setRound(null);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
   useEffect(() => watchSystemTheme(setDark), []);
   useEffect(() => () => { clearTimeout(toastTimer.current); clearTimeout(flashTimer.current); }, []);
 
@@ -147,7 +170,8 @@ export default function WardPage({ shift, onEndShift }) {
       return;
     }
     const label = fixLabel(alertId);
-    updateBed(bedId, fixAlert(bed, alertId, iso(), doctorLabel(shift?.doctorName)), `${label === "Reviewed" ? "Reviewed" : label ?? "Done"} · Bed ${bed.bedNumber}`);
+    const shown = triage[bedId]?.alerts?.find(a => a.id === alertId) ?? null;
+    updateBed(bedId, fixAlert(bed, alertId, iso(), doctorLabel(shift?.doctorName), shown), `${label === "Reviewed" ? "Reviewed" : label ?? "Done"} · Bed ${bed.bedNumber}`);
   };
   const changeStage = (bedId, stage, keepOpen = false) => {
     const bed = beds[bedId]; if (bed.labourStage === stage) return;
@@ -339,7 +363,12 @@ export default function WardPage({ shift, onEndShift }) {
               <p className={`${TYPE_META} text-center`}>This removes all {Object.keys(beds).length} women from this phone.</p>
               <div className="grid grid-cols-2 gap-2">
                 <button type="button" onClick={() => setConfirmClear(null)} className={`${BTN} ${BTN_SECONDARY}`}>Keep them</button>
-                <button type="button" onClick={() => { commit("Board cleared", {}); setConfirmClear(null); closeSheet(); }} className={`${BTN} bg-red-600 text-white`}>Clear board</button>
+                <button type="button" onClick={() => {
+                  // Cleared women still appear under "Left the board" in the handover.
+                  const iso = new Date().toISOString();
+                  setRemoved(r => [...r.filter(x => Date.now() - new Date(x.at).getTime() < 24 * 3600000 && !beds[x.bed?.id]), ...Object.values(beds).map(bed => ({ at: iso, bed }))]);
+                  commit("Board cleared", {}); setConfirmClear(null); closeSheet();
+                }} className={`${BTN} bg-red-600 text-white`}>Clear board</button>
               </div>
             </div>
           )}

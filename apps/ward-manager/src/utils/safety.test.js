@@ -854,7 +854,15 @@ describe("handover: short by default, said the way handover is given", () => {
   })
   it("leaves out the timeline and routine obs", () => {
     expect(text).not.toMatch(/Timeline:/)
-    expect(generateHandover({ c: active({ observations: { pulseValue: "84", lastPulse: t(30 * MIN) } }) }, null, NOW)).toMatch(/obs normal \(last 11:30\)/)
+    const now = { lastPulse: t(30 * MIN), lastBP: t(30 * MIN), lastTemp: t(30 * MIN), lastRR: t(30 * MIN), pulseValue: "84" }
+    expect(generateHandover({ c: active({ observations: now }) }, null, NOW)).toMatch(/obs normal \(last 11:30\)/)
+  })
+  it("never says obs normal when they are low, out of date or missing", () => {
+    const low = { lastPulse: t(10 * MIN), lastBP: t(10 * MIN), lastTemp: t(10 * MIN), lastRR: t(10 * MIN), bpSystolic: "82", bpDiastolic: "45", bpAt: t(10 * MIN), tempValue: "35.4", tempAt: t(10 * MIN) }
+    expect(generateHandover({ c: active({ observations: low }) }, null, NOW)).toMatch(/obs: BP 82\/45 at 11:50, temp 35.4°C at 11:50/)
+    const stale = { lastPulse: t(5 * MIN), lastBP: t(9 * HOUR), lastTemp: t(9 * HOUR), lastRR: t(9 * HOUR) }
+    expect(generateHandover({ c: active({ observations: stale }) }, null, NOW)).toMatch(/obs: BP, Temp, Resp rate due/)
+    expect(generateHandover({ c: active({ observations: {} }) }, null, NOW)).toMatch(/obs: Pulse, BP, Temp, Resp rate due/)
   })
 })
 
@@ -864,5 +872,61 @@ describe("handover plan always gives the next VE in established labour", () => {
     const text = generateHandover({ b }, null, NOW)
     expect(text).toMatch(/Plan: .*next VE 15:30/)
     expect(text).toMatch(/next CTG review 12:10/)
+  })
+})
+
+describe("QA round: pitfalls fixed", () => {
+  it("a reviewed minor PPH comes back at once when it becomes major", () => {
+    const d = ebl => bed({ labourStage: "Active first stage", admissionTime: t(HOUR), delivery: { mode: "SVD", time: t(30 * MIN), ebl } })
+    const b0 = d(600)
+    const shown = computeAlerts(b0, NOW).find(a => a.id === "pph")
+    const reviewed = { ...b0, ...fixAlert(b0, "pph", t(5 * MIN), "Dr S", shown) }
+    expect(applyReviews(computeAlerts(reviewed, NOW), reviewed, NOW).find(a => a.id === "pph").severity).toBe("info")
+    const worse = { ...reviewed, delivery: { ...reviewed.delivery, ebl: 1800 } }
+    expect(applyReviews(computeAlerts(worse, NOW), worse, NOW).find(a => a.id === "pph").severity).toBe("urgent")
+  })
+  it("a reviewed 'delay suspected' comes back when delay is diagnosed", () => {
+    const ve = (id, h, cm) => ({ id, time: t(h * HOUR), dilation: cm })
+    const b0 = active({ activeFirstStageStartTime: t(9 * HOUR), ves: [ve("a", 6, 4), ve("b", 2, 5)] })
+    const shown = computeAlerts(b0, NOW).find(a => a.id === "slow-progress")
+    const reviewed = { ...b0, ...fixAlert(b0, "slow-progress", t(HOUR), "Dr S", shown) }
+    const later = { ...reviewed, ves: [...reviewed.ves, ve("c", 0, 5.5)] }
+    const a = applyReviews(computeAlerts(later, NOW), later, NOW).find(x => x.id === "slow-progress")
+    expect(a.title).toMatch(/Delay diagnosed/)
+    expect(a.severity).toBe("urgent")
+  })
+  it("pyrexia is confirmed by frequent rechecks and by a backdated reading", () => {
+    let b = active()
+    for (const [m, v] of [[60, "37.6"], [30, "37.7"], [0, "37.8"]]) b = { ...b, ...recordObs(b, t(m * MIN), { temp: v }) }
+    expect(sev(b, "temp-375")).toBe("urgent")
+    let c = active()
+    c = { ...c, ...recordObs(c, t(0), { temp: "37.8" }) }
+    c = { ...c, ...recordObs(c, t(60 * MIN), { temp: "37.6" }) }
+    expect(sev(c, "temp-375")).toBe("urgent")
+  })
+  it("a temperature of 38 keeps the infection prompt after a lower reading, until treated or declined", () => {
+    let b = active()
+    b = { ...b, ...recordObs(b, t(60 * MIN), { temp: "38.2" }) }
+    b = { ...b, ...recordObs(b, t(5 * MIN), { temp: "37.2" }) }
+    expect(ids(b)).toContain("infection-suspected")
+    expect(ids({ ...b, ...declineAlert("infection-suspected", t(0)) })).not.toContain("infection-suspected")
+  })
+  it("oxytocin that ran 18 minutes does not trigger the 4 hour rule", () => {
+    const b = active({
+      activeFirstStageStartTime: t(9 * HOUR),
+      ves: [{ id: "a", time: t(5 * HOUR), dilation: 5 }, { id: "b", time: t(0), dilation: 5.5 }],
+      oxytocinLog: [{ id: "o1", startTime: t(4.6 * HOUR), dose: 2, lastIncrementTime: t(4.6 * HOUR) },
+        { id: "o2", startTime: t(4.3 * HOUR), dose: 0, stopped: true, lastIncrementTime: t(4.3 * HOUR) }],
+    })
+    expect(ids(b)).not.toContain("oxytocin-poor-progress")
+  })
+  it("GBS+ PPROM at 35 weeks gets one antibiotic message (immediate birth), not two", () => {
+    const b = bed({ gestation: "35+0", labourStage: "Latent", modeOfOnset: "PPROM", membranes: "SROM", membranesTime: t(HOUR), riskFlags: ["GBS+"] })
+    expect(ids(b)).toContain("gbs-prom-birth")
+    expect(ids(b)).not.toContain("pprom-antibiotics")
+  })
+  it("after birth with pre-eclampsia, BP is due 6 hours after the last (NG133 1.5.16)", () => {
+    const b = bed({ riskFlags: ["Pre-eclampsia"], delivery: { mode: "SVD", time: t(8 * HOUR), ebl: 300 }, observations: { lastBP: t(7 * HOUR), bpSystolic: "140", bpDiastolic: "90" } })
+    expect(ids(b)).toContain("bp-due")
   })
 })

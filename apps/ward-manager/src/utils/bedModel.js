@@ -347,6 +347,15 @@ export function recordObs(bed, iso, entries) {
     const vals = Array.isArray(raw) ? raw : [raw];
     if (!f || vals.some(v => v == null || String(v).trim() === "")) continue;
     if (!observations[f.stamp] || observations[f.stamp] < iso) observations[f.stamp] = iso;
+    // Temperatures keep a short history (backdated ones included), so a pair
+    // about an hour apart confirms pyrexia however often she is checked.
+    if (name === "temp") {
+      const v = parseFloat(vals[0]);
+      if (Number.isFinite(v)) {
+        observations.tempLog = [...(observations.tempLog ?? []), { value: v, at: iso }]
+          .sort((a, b) => new Date(a.at) - new Date(b.at)).slice(-10);
+      }
+    }
     const prevAt = observations[f.at] ?? observations[f.stamp];
     if (prevAt && prevAt > iso && observations[f.values[0]] != null) continue;
     // Pulse, RR and temperature keep the reading before, so a repeat can confirm it (NG235 1.8.20).
@@ -470,7 +479,7 @@ export const STILL_HERE = "bed-stale";
 
 // "Discuss / consider" prompts that can be answered "not given", so the
 // handover never reads as given when it was decided against.
-export const DECLINABLE = new Set(["preterm-mgso4", "preterm-steroids", "pprom-antibiotics"]);
+export const DECLINABLE = new Set(["preterm-mgso4", "preterm-steroids", "pprom-antibiotics", "infection-suspected"]);
 export const declinedField = alertId => DECLINABLE.has(alertId) ? `${PERSISTENT_FLAGS[alertId].field}Declined` : null;
 export function declineAlert(alertId, iso, by = null) {
   const f = declinedField(alertId);
@@ -486,7 +495,10 @@ export function fixLabel(alertId) {
   return null;
 }
 
-export function fixAlert(bed, alertId, iso, by = null) {
+// `alert` (optional) is the alert as shown when reviewed: its severity and
+// short label are kept, so a worse version (minor to major PPH, delay
+// suspected to diagnosed) comes back at once instead of staying quiet.
+export function fixAlert(bed, alertId, iso, by = null, alert = null) {
   if (alertId === STILL_HERE) return { confirmedHereAt: iso };
   if (ACTION_ALERTS[alertId]) return {};
   if (PERSISTENT_FLAGS[alertId]) {
@@ -494,7 +506,10 @@ export function fixAlert(bed, alertId, iso, by = null) {
     return { [f]: true, [`${f}At`]: iso, ...(by ? { [`${f}By`]: by } : {}) };
   }
   if (OBS_STAMP[alertId]) return stampObs(bed, iso, [OBS_STAMP[alertId]]);
-  if (reviewMinutes(alertId)) return { reviews: { ...(bed.reviews ?? {}), [alertId]: { at: iso, by } } };
+  if (reviewMinutes(alertId)) {
+    const seen = alert ? { severity: alert.severity, short: alert.short ?? null } : {};
+    return { reviews: { ...(bed.reviews ?? {}), [alertId]: { at: iso, by, ...seen } } };
+  }
   return {};
 }
 

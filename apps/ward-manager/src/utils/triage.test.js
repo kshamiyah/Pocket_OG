@@ -19,7 +19,7 @@ function activeBed(overrides = {}) {
     riskFlags: [],
     ves: [{ id: "v1", time: t(1 * HOUR), dilation: 5, station: -2 }],
     oxytocinLog: [],
-    ctgLog: [],
+    ctgLog: [{ id: "c1", time: t(20 * MIN), classification: "normal" }],
     observations: { lastPulse: t(30 * MIN), lastBP: t(30 * MIN), lastTemp: t(30 * MIN) },
     ...overrides,
   }
@@ -40,10 +40,20 @@ describe("triageBed", () => {
   })
 
   it("hides routine obs reminders from the alert list (they show as dots)", () => {
-    const r = triageBed(activeBed({ observations: {} }), NOW)
-    expect(r.alerts.some(a => a.id === "pulse-never")).toBe(true)
-    expect(r.shown.some(a => a.id === "pulse-never")).toBe(false)
+    const r = triageBed(activeBed({ observations: { lastPulse: t(2 * HOUR), lastBP: t(10 * MIN), lastTemp: t(10 * MIN), lastRR: t(10 * MIN) } }), NOW)
+    expect(r.alerts.some(a => a.id === "pulse-due")).toBe(true)
+    expect(r.shown.some(a => a.id === "pulse-due")).toBe(false)
     expect(r.tier).toBe("ok")
+  })
+
+  it("a pulse never recorded in established labour is due, not on track", () => {
+    const r = triageBed(activeBed({ observations: {} }), NOW)
+    expect(r.shown.some(a => a.id === "pulse-never")).toBe(true)
+    expect(r.tier).toBe("warning")
+  })
+
+  it("no CTG ever logged in established labour is due, not on track", () => {
+    expect(triageBed(activeBed({ ctgLog: [] }), NOW).tier).toBe("warning")
   })
 
   it("keeps an urgent BP reminder for a hypertensive woman", () => {
@@ -70,7 +80,7 @@ describe("triageBed", () => {
 
 describe("nextDue", () => {
   it("forecasts the next VE four hours after the last one, to the minute", () => {
-    const bed = activeBed()
+    const bed = activeBed({ ctgLog: [] }) // no hourly CTG review to come first
     const n = nextDue(bed, NOW)
     expect(n.label).toBe("VE")
     expect(n.at).toBe(NOW + 3 * HOUR)

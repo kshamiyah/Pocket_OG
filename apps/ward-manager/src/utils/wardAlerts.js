@@ -78,7 +78,10 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // A temperature of 38°C or more starts the infection pathway too (NG235
   // 1.8.20; GL787 treats maternal pyrexia over 38°C as intra-amniotic infection).
   const tempNow = obs.tempValue ? parseFloat(obs.tempValue) : null;
-  const isFever = !delivered && tempNow !== null && tempNow >= 38;
+  // A temperature of 38 or more keeps the infection prompt up until antibiotics
+  // are given or declined, even if a later reading is lower.
+  const isFever = !delivered && ((tempNow !== null && tempNow >= 38) || (obs.tempWorst?.value >= 38))
+    && !bed.broadAntibioticsStartedDeclined;
   const isInfection = flags.includes("Infection suspected") || isFever;
   const hasBleeding = flags.includes("APH");
   // Membrane status comes from the VEs. Only when no VE has recorded membranes yet
@@ -323,7 +326,15 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   if (bed.labourStage === "Active first stage" && veOnOxy) {
     const lastT = new Date(lastActiveVE.time).getTime();
     const earlier = activeVEs.slice(0, -1).reverse().find(ve => lastT - new Date(ve.time).getTime() >= 4 * HOUR - TOL);
-    if (lastT - oxyAtVE >= 4 * HOUR - TOL && earlier) {
+    // At least about 4 hours of oxytocin actually running before this VE.
+    let ranMs = 0;
+    oxyLog.forEach((e, i) => {
+      if (e.stopped || !(e.dose > 0)) return;
+      const from = new Date(e.startTime).getTime();
+      const to = Math.min(lastT, i + 1 < oxyLog.length ? new Date(oxyLog[i + 1].startTime).getTime() : lastT);
+      if (to > from) ranMs += to - from;
+    });
+    if (ranMs >= 4 * HOUR - TOL && earlier) {
       oxyProgress = { cm: lastActiveVE.dilation - earlier.dilation, ms: lastT - new Date(earlier.time).getTime() };
       if (oxyProgress.cm < 2) {
         alerts.push({
@@ -628,7 +639,10 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   // Waters broken before 37+0 without labour: prophylaxis for intrauterine
   // infection. Suspected infection has its own (IV) alert, and once labour is
   // established the intrapartum antibiotic prompts take over.
+  // Not alongside "offer immediate birth" (GBS+ from 34+0): one antibiotic
+  // message, the intrapartum one.
   if (!delivered && isPreterm && membranes === "SROM" && bed.labourStage === "Latent" && !isInfection
+      && !alerts.some(a => a.id === "gbs-prom-birth")
       && !bed.ppromAntibioticsStarted && !bed.ppromAntibioticsStartedDeclined) {
     alerts.push({
       id: "pprom-antibiotics",
@@ -695,9 +709,15 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   const aged = name => { const ms = valueAge(name); return ms != null && ms >= 5 * MIN ? ` (${formatAge(ms)} ago)` : ""; };
 
   // Two raised temperatures (37.5°C or more) about an hour apart (NG235 1.8.20).
-  const tempPrevNum = obs.tempPrev != null ? parseFloat(obs.tempPrev) : null;
-  const tempGap = obs.tempPrevAt && valueSince("temp") ? new Date(valueSince("temp")) - new Date(obs.tempPrevAt) : null;
-  const tempTwice = tempPrevNum !== null && tempPrevNum >= 37.5 && tempGap !== null && tempGap >= 45 * MIN && tempGap <= 2 * HOUR;
+  // Any earlier raised reading 45 minutes to 2 hours before the latest counts,
+  // so frequent rechecks (or a backdated one) still confirm it.
+  const tempHist = obs.tempLog ?? (obs.tempPrev != null && obs.tempPrevAt ? [{ value: parseFloat(obs.tempPrev), at: obs.tempPrevAt }] : []);
+  const tempLatestAt = valueSince("temp") ? new Date(valueSince("temp")).getTime() : null;
+  const tempPair = tempLatestAt == null ? null : tempHist.find(r => {
+    const gap = tempLatestAt - new Date(r.at).getTime();
+    return r.value >= 37.5 && gap >= 45 * MIN && gap <= 2 * HOUR;
+  });
+  const tempTwice = !!tempPair;
 
   // While the infection prompt is up it carries the temperature; afterwards
   // the pyrexia alert stays until a newer temperature replaces it.
@@ -724,7 +744,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       id: "temp-375",
       severity: "urgent",
       short: "Pyrexia",
-      title: `Pyrexia: ${obs.tempPrev}°C then ${temp}°C${aged("temp")}`, since: valueSince("temp"),
+      title: `Pyrexia: ${tempPair?.value}°C then ${temp}°C${aged("temp")}`, since: valueSince("temp"),
       body: delivered
         ? "37.5°C or above on 2 readings about 1 hour apart. Assess for sepsis; senior review."
         : "37.5°C or above on 2 readings about 1 hour apart counts as maternal pyrexia: a transfer trigger and an indication for continuous CTG. Look for signs of chorioamnionitis; senior review.",
@@ -958,6 +978,20 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     });
   }
 
+  // ─── After birth with pre-eclampsia: BP at least 4 times a day (NG133 1.5.16) ─
+  if (delivered && flags.includes("Pre-eclampsia")) {
+    const last = obs.lastBP ? new Date(obs.lastBP).getTime() : new Date(bed.delivery.time).getTime();
+    const ms = now - last;
+    if (ms >= 6 * HOUR) {
+      alerts.push({
+        id: "bp-due", severity: "warning",
+        title: `BP due after birth (pre-eclampsia): last ${formatAge(ms)} ago`,
+        body: "Measure BP at least 4 times a day while she is an inpatient, and ask about severe headache and epigastric pain each time.",
+        citation: "NICE NG133 1.5.15, 1.5.16 [2010]",
+      });
+    }
+  }
+
   // ─── Maternal observations due (NICE NG235 1.8.19; NG133 1.7.3) ──────
   if (!delivered && bed.labourStage !== "Latent") {
     if (obs.lastPulse) {
@@ -966,7 +1000,8 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
         alerts.push({ id: "pulse-due", severity: "info", title: "Maternal pulse check due", body: `Last recorded ${formatAge(ms)} ago. Hourly pulse in active labour.`, citation: "NICE NG235 1.8.19 [2007]" });
       }
     } else {
-      alerts.push({ id: "pulse-never", severity: "info", title: "Pulse not recorded", body: "Hourly maternal pulse required in active labour.", citation: "NICE NG235 1.8.19 [2007]" });
+      // Never recorded is not "on track": it is due now.
+      alerts.push({ id: "pulse-never", severity: "warning", title: "Pulse not recorded", body: "Hourly maternal pulse required in active labour.", citation: "NICE NG235 1.8.19 [2007]" });
     }
 
     if (obs.lastBP) {
@@ -1114,8 +1149,8 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     if (ctgClockRuns && needsContinuousCTG && !lastCTG) {
       alerts.push({
         id: "ctg-not-documented",
-        // With a NICE (or local) indication, a missing CTG is due, not background.
-        severity: ctgReasons.length ? "warning" : "info",
+        // Never logged in established labour (or on oxytocin) is due, not background.
+        severity: "warning",
         title: "Continuous CTG: not yet documented",
         body: `${ctgReasons.length ? `Indication: ${ctgReasons.join(", ")}.` : "Unit policy: continuous CTG in established labour."} Log a CTG review to track fetal wellbeing.`,
         citation: ctgReasons.length ? "NICE NG229 1.3.2, 1.3.3, 1.3.8 [2022]" : "Unit setting",

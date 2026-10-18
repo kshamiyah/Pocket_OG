@@ -7,12 +7,13 @@ import { useRef, useState } from "react";
  * otherwise it springs back. Vertical scrolling is untouched (touch-action
  * pan-y), and mouse input is ignored.
  */
-export function useSwipeBack(onBack, { edge = 24 } = {}) {
+export function useSwipeBack(onBack, { edge = 16 } = {}) {
   const [dx, setDx] = useState(0);
   const drag = useRef(null);
   const reset = () => { drag.current = null; setDx(0); };
   const onPointerDown = e => {
-    if (e.pointerType === "mouse" || e.clientX > edge) return;
+    // Not from a slider (the dilation strip), whose drag is its own.
+    if (e.pointerType === "mouse" || e.clientX > edge || e.target?.closest?.('[role="slider"]')) return;
     drag.current = { x: e.clientX, y: e.clientY, t: Date.now(), id: e.pointerId, sideways: null, dx: 0 };
   };
   const onPointerMove = e => {

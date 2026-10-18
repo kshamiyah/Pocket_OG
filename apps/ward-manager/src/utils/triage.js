@@ -147,7 +147,10 @@ export function applyReviews(alerts, bed, now = Date.now()) {
     const at = new Date(r.at).getTime();
     const until = at + mins * MIN;
     const newer = a.since && new Date(a.since).getTime() > at;
-    if (now >= until || newer) return a;
+    // Worse than when it was reviewed: a higher severity or a new stage.
+    const RANK = { urgent: 0, warning: 1, info: 2 };
+    const worse = (r.severity && RANK[a.severity] < RANK[r.severity]) || (r.short != null && a.short && a.short !== r.short);
+    if (now >= until || newer || worse) return a;
     return { ...a, severity: "info", reviewed: { at: r.at, by: r.by, until, severity: a.severity } };
   });
   const order = { urgent: 0, warning: 1, info: 2 };

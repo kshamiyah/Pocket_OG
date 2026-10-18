@@ -24,7 +24,9 @@ export default function VESheet({ bed, editVE = null, onSave, onClose }) {
   const [station, setStation] = useState(editVE ? editVE.station ?? null : last?.station ?? null);
   const [memb, setMemb] = useState(base?.membranes ?? bed.membranes ?? "Intact");
   const [liquor, setLiquor] = useState(base?.liquor ?? bed.liquor ?? "Clear");
-  const [cx, setCx] = useState(editVE ? editVE.contractions ?? null : last?.contractions ?? null);
+  // Contractions are counted afresh at every VE, never carried over (a copied
+  // "5 in 10" would raise a false hyperstimulation alert).
+  const [cx, setCx] = useState(editVE ? editVE.contractions ?? null : null);
   const [pres, setPres] = useState(base?.presentation ?? "Cephalic");
   const [more, setMore] = useState(!!editVE || !last);
   const [romWhen, setRomWhen] = useState(editVE?.membranesTime ? whenFromISO(editVE.membranesTime) : null);

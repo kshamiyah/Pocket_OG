@@ -35,7 +35,7 @@ export const RULES = [
   {
     id: "scope-reviewed", group: "Scope", title: "Marking an alert Reviewed",
     when: "An urgent or due alert with no Given or Done action (for example pathological CTG, severe BP, pyrexia, ROM review) is marked Reviewed, if the unit allows it.",
-    then: "It drops out of Needs you now, shows who reviewed it and when, and returns after the unit's time if still present (default 15 minutes for RR under 9; 30 for pathological CTG, BP, pulse, RR, sugars; 60 for temperature, PPH and similar; 2 to 4 hours for progress and membranes), or at once if a newer CTG or obs value arrives. The handover lists it as reviewed. With Reviewed switched off, alerts stay until the problem clears.",
+    then: "It drops out of Needs you now, shows who reviewed it and when, and returns after the unit's time if still present (default 15 minutes for RR under 9; 30 for pathological CTG, BP, pulse, RR, sugars; 60 for temperature, PPH and similar; 2 to 4 hours for progress and membranes), or at once if a newer CTG or obs value arrives, or the problem gets worse (for example minor to major PPH, or delay suspected to delay diagnosed). The handover lists it as reviewed. With Reviewed switched off, alerts stay until the problem clears.",
     severity: "n/a", alertIds: [], sources: ["NG133 1.7.3", "NG229 1.5.7"],
     settings: ["reviewOn", "reviewFastMin", "reviewUrgentMin", "reviewHourMin", "reviewProgressMin", "reviewLongMin"],
     local: "App design choice: whether Reviewed is allowed, and the return times, are unit settings.",
@@ -95,7 +95,7 @@ export const RULES = [
   },
   {
     id: "infection-suspected", group: "Antibiotics and membranes", title: "Suspected chorioamnionitis or sepsis",
-    when: "Risk flag \"Suspected chorioamnionitis or sepsis\" ticked, or a temperature of 38°C or more recorded, and antibiotics for infection not yet given. GBS prophylaxis does not count.",
+    when: "Risk flag \"Suspected chorioamnionitis or sepsis\" ticked, or a temperature of 38°C or more recorded at any point in labour (a later lower reading does not clear it), and antibiotics for infection not yet given or marked declined. GBS prophylaxis does not count.",
     then: "IV antibiotics now, first dose as soon as infection is suspected; continuous CTG; senior review. Replaces the GBS and preterm antibiotic prompts, since broad-spectrum treatment covers GBS (GL787).",
     severity: "Urgent", alertIds: ["infection-suspected"],
     sources: ["NG195 1.6.1", "NG195 1.6.4", "NG229 1.3.2", "NG229 1.3.8", "GL787 GBS", "GL787 PROM"],
@@ -281,14 +281,14 @@ export const RULES = [
   // ── Maternal observations ──────────────────────────────────────────────
   {
     id: "obs-due", group: "Maternal observations", title: "Routine observations",
-    when: "Established labour: pulse hourly; BP, temperature and respiratory rate 4-hourly (BP hourly if hypertensive).",
+    when: "Established labour: pulse hourly; BP, temperature and respiratory rate 4-hourly (BP hourly if hypertensive). After birth with pre-eclampsia: BP at least 4 times a day (due 6 hours after the last).",
     then: "Shown as \"Obs due\" on the board. Recorded values stay on the board, with their age, until a newer value replaces them; marking obs done never erases a value.",
-    severity: "Info (BP urgent if hypertensive)", alertIds: ["pulse-due", "pulse-never", "bp-due", "bp-never", "temp-due", "temp-never", "rr-due", "rr-never"],
-    sources: ["NG235 1.8.19", "NG133 1.7.3"],
+    severity: "Info; due (warning) if pulse never recorded in established labour; BP urgent if hypertensive", alertIds: ["pulse-due", "pulse-never", "bp-due", "bp-never", "temp-due", "temp-never", "rr-due", "rr-never"],
+    sources: ["NG235 1.8.19", "NG133 1.7.3", "NG133 1.5.15", "NG133 1.5.16"],
   },
   {
     id: "temp", group: "Maternal observations", title: "Raised temperature",
-    when: "38.0°C or above (urgent). 37.5 to 37.9°C: warning with a 1 hour recheck, urgent pyrexia if the next reading about an hour later is also 37.5°C or more (also a continuous CTG indication).",
+    when: "38.0°C or above (urgent). 37.5 to 37.9°C: warning with a 1 hour recheck, urgent pyrexia if another reading of 37.5°C or more was taken between 45 minutes and 2 hours earlier (so frequent rechecks and backdated entries both count) (also a continuous CTG indication).",
     then: "In labour: transfer trigger and indication for continuous CTG; antibiotics if chorioamnionitis suspected; repeat 37.5 in 1 hour. After birth, 38.0°C or above: assess for sepsis, grading risk with the NG255 criteria for people recently pregnant; senior review.",
     severity: "Urgent / warning", alertIds: ["temp-38", "temp-375"],
     sources: ["NG235 1.8.20", "NG229 1.3.8", "NG195 1.6.1", "NG195 1.6.4", "NG255 1.5.1", "NG255 1.5.2"],

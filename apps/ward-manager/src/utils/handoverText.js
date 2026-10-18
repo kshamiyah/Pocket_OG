@@ -7,7 +7,7 @@
 
 import { computeAlerts } from "./wardAlerts";
 import { clock, fmtAge } from "./time";
-import { DONE_LABEL, PERSISTENT_FLAGS, currentOxytocin, doctorLabel, lastVE, membraneStatus, parityWithHistory, riskLabel, riskShort, sortedVEs, stageLabel, veFindings } from "./bedModel";
+import { DONE_LABEL, PERSISTENT_FLAGS, currentOxytocin, doctorLabel, lastVE, malpresentation, membraneStatus, obsStatus, obsTracked, parityWithHistory, riskLabel, riskShort, sortedVEs, stageLabel, veFindings } from "./bedModel";
 import { applyReviews, nextOf, shortLabel, tidy, triageWard } from "./triage";
 import { sortIOLQueue } from "./iolPriority";
 
@@ -104,7 +104,7 @@ function timelineEvents(bed, now) {
 
 // Only the observations worth saying out loud: abnormal or the worst this
 // admission, each with its time. Otherwise "obs normal" with the last time.
-function obsFindings(obs, now) {
+function obsFindings(obs, now, bed = null) {
   const out = [];
   const w = obs.bpWorst;
   if (w && (w.sys >= 140 || w.dia >= 90)) out.push(`highest BP ${w.sys}/${w.dia} at ${clock(w.at, now)}`);
@@ -118,9 +118,17 @@ function obsFindings(obs, now) {
   const bgl = val("bglValue");
   if (bgl != null && (bgl < 4 || bgl > 7)) out.push(`BGL ${bgl} at ${clock(obs.bglAt ?? obs.lastBGL, now)}`);
   if (obs.urineOutput != null && obs.urineOutput < 30) out.push(`urine ${obs.urineOutput} mL/hr at ${clock(obs.lastUrineCheck, now)}`);
+  // Low values too (the latest reading).
+  const sys = val("bpSystolic"), temp = val("tempValue"), pulse = val("pulseValue");
+  if (sys != null && sys <= 100) out.push(`BP ${obs.bpSystolic}/${obs.bpDiastolic} at ${clock(obs.bpAt ?? obs.lastBP, now)}`);
+  if (temp != null && temp < 36) out.push(`temp ${temp}°C at ${clock(obs.tempAt ?? obs.lastTemp, now)}`);
+  if (pulse != null && pulse < 50) out.push(`pulse ${pulse} at ${clock(obs.pulseAt ?? obs.lastPulse, now)}`);
+  // Out of date: only for women on the labour obs schedule.
+  const overdue = bed && obsTracked(bed) ? obsStatus(bed, now).filter(o => !o.done).map(o => o.label) : [];
+  if (overdue.length) out.push(`${overdue.join(", ")} due`);
   if (out.length) return `Obs: ${out.join(", ")}`;
   const times = ["lastPulse", "lastBP", "lastTemp", "lastRR"].map(k => obs[k]).filter(Boolean).sort();
-  return times.length ? `Obs normal (last ${clock(times.at(-1), now)})` : null;
+  return times.length ? `Obs normal (last ${clock(times.at(-1), now)})` : "Obs not recorded";
 }
 
 // The shift's important events, time first: membranes, oxytocin started or
@@ -157,6 +165,8 @@ function opener(bed, t, now) {
   const parts = [
     `Bed ${bed.bedNumber}`, parityWithHistory(bed), `${bed.gestation ?? "?"}${isPreterm(bed.gestation) ? " (preterm)" : ""}`,
     onset, ...(bed.riskFlags ?? []).map(riskShort),
+    // A breech (or other) presentation on the latest VE, if not already a risk.
+    !bed.delivery && malpresentation(bed) && !(bed.riskFlags ?? []).includes("Non-cephalic") ? malpresentation(bed) : null,
     bed.analgesia && bed.analgesia !== "None" ? bed.analgesia : null,
     where,
   ].filter(Boolean);
@@ -173,9 +183,11 @@ function shortBlock(bed, t, now, since) {
   const open = all.filter(a => a.severity === "urgent" || a.severity === "warning");
 
   // Important events this shift, oldest first, treatments included.
-  const events = timelineEvents(bed, now)
-    .filter(e => new Date(e.time).getTime() >= since && (KEY_EVENT.test(e.text) || isTreatment(e.text)))
-    .slice(-6);
+  // Treatments and decisions are never dropped; other events keep the last 6.
+  const shift = timelineEvents(bed, now).filter(e => new Date(e.time).getTime() >= since);
+  const keep = e => isTreatment(e.text) || /: not given/.test(e.text);
+  const others = shift.filter(e => !keep(e) && KEY_EVENT.test(e.text)).slice(-6);
+  const events = shift.filter(e => keep(e) || others.includes(e));
   // One event per line, time first, straight under the opening line.
   events.forEach(e => lines.push(`  ${clock(e.time, now)} ${e.text}`));
 
@@ -191,7 +203,7 @@ function shortBlock(bed, t, now, since) {
   } else if (bed.delivery.notes) {
     n.push(bed.delivery.notes);
   }
-  const of = obsFindings(bed.observations ?? {}, now);
+  const of = obsFindings(bed.observations ?? {}, now, bed);
   if (of) n.push(of.charAt(0).toLowerCase() + of.slice(1));
   if (n.length) lines.push(`Now: ${n.join(" · ")}`);
 

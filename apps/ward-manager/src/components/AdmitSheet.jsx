@@ -9,7 +9,7 @@ import { BTN, BTN_PRIMARY, BTN_SECONDARY, INPUT, TYPE_META } from "../ui/styles"
 import { resolveWhen, whenFromISO } from "../utils/time";
 import {
   ANALGESIA, BIRTH_MODES, BIRTH_SHORT, IND_METHODS, IOL_REASONS, LIQUORS, LIQUOR_SHORT, MEMBRANES, ONSETS, PARITIES,
-  STAGES, STAGE_SHORT, gestFromDigits, newId, parityNum, parityShort, stationLabel,
+  STAGES, STAGE_SHORT, gestFromDigits, newId, parityNum, parityShort, setStage as stageUpdate, stationLabel,
 } from "../utils/bedModel";
 
 
@@ -101,16 +101,25 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
 
   const suggestedAdmitStage = veDil == null ? null : veDil >= 10 ? "Passive second stage" : veDil >= 4 ? "Active first stage" : null;
   const used = new Set(existingNumbers.map(String));
+  // Bed names compare without case or spaces ("pool" and "Pool" are one room).
+  const norm = x => String(x ?? "").trim().toLowerCase();
+  const usedNorm = new Set(existingNumbers.map(norm));
   const free = Array.from({ length: 12 }, (_, i) => String(i + 1)).filter(n => !used.has(n));
   // One row of quick bed chips (the lowest free numbers); anything else is typed.
   const quick = [...new Set([...(edit ? [String(bed.bedNumber)] : []), ...free])].slice(0, 5);
   const [custom, setCustom] = useState(edit && !quick.includes(String(bed.bedNumber)));
   const trimmed = String(num ?? "").trim();
-  const clash = trimmed && used.has(trimmed) && !(edit && trimmed === String(bed.bedNumber));
+  const clash = trimmed && usedNorm.has(norm(trimmed)) && !(edit && norm(trimmed) === norm(bed.bedNumber));
   const effMemb = onset === "PPROM" && memb === "Intact" ? "SROM" : memb;
   const ruptured = !edit && effMemb !== "Intact";
   const romISO = ruptured ? resolveWhen(romWhen) : null;
-  const ready = trimmed && !clash && parity && weeks && stage && (!ruptured || !!romISO);
+  // Every time entered must be a real past time: a future one (23:40 typed
+  // after midnight without "Yesterday") would otherwise be saved as now.
+  const timesOk = (veDil == null || !!resolveWhen(veWhen))
+    && earlier.every(e => e.dil == null || !!resolveWhen(e.when))
+    && (!admEarlier || !!resolveWhen(admWhen))
+    && (onset !== "Induced" || !iolWhen || !!resolveWhen(iolWhen));
+  const ready = trimmed && !clash && parity && weeks && stage && (!ruptured || !!romISO) && (edit || timesOk);
   const nBirths = Math.min(parityNum(parity) ?? (parity === "Para 3+" ? 3 : 0), 10);
   const births = prevBirths.slice(0, nBirths);
   const setBirth = (i, mode) => {
@@ -129,7 +138,9 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
     const iolISO = induced ? resolveWhen(iolWhen) : null;
     if (edit) {
       onSave({
-        bedNumber: trimmed, parity, prevBirths: births, gestation, labourStage: stage, modeOfOnset: onset, analgesia, riskFlags: flags,
+        bedNumber: trimmed, parity, prevBirths: births, gestation, modeOfOnset: onset, analgesia, riskFlags: flags,
+        // A stage change here starts (or clears) the stage clocks, as the stage bar does.
+        ...(stage !== bed.labourStage ? stageUpdate(bed, stage, new Date().toISOString()) : { labourStage: stage }),
         inductionMethod: induced ? indMethod : null,
         iolReasons: induced ? iolReasons : [],
         inductionStartTime: induced ? iolISO ?? bed.inductionStartTime ?? null : null,
@@ -139,14 +150,12 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
     const admISO = resolveWhen(admWhen) ?? new Date().toISOString();
     const veISO = veDil != null ? resolveWhen(veWhen) ?? admISO : null;
     const membranes = effMemb;
-    // Earlier VEs: membranes intact unless they were already ruptured then.
     const before = earlier
       .map(e => ({ ...e, iso: e.dil != null ? resolveWhen(e.when) : null }))
       .filter(e => e.iso)
-      .map(e => ({
-        id: newId("ve"), time: e.iso, dilation: e.dil,
-        membranes: ruptured && romISO && e.iso >= romISO ? membranes : "Intact",
-      }));
+      // No membranes on earlier VEs: what was recorded at admission (status,
+      // rupture time, liquor) stays the record the alerts use.
+      .map(e => ({ id: newId("ve"), time: e.iso, dilation: e.dil }));
     const ves = [...before, ...(veDil != null ? [{
       id: newId("ve"), time: veISO, dilation: veDil, station: veStation, presentation: vePres,
       membranes, membranesTime: ruptured ? romISO : null,
@@ -179,7 +188,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
       sub={edit ? "VE, CTG and obs history stay as they are." : "No names or identifiers."}
       footer={
         <button type="button" onClick={save} disabled={!ready} className={`${BTN} ${BTN_PRIMARY} w-full min-h-[3.25rem] text-base`}>
-          {!ready ? (clash ? `Bed ${trimmed} is already on the board` : "Pick bed, parity, gestation and stage")
+          {!ready ? (clash ? `Bed ${trimmed} is already on the board` : !edit && !timesOk ? "A time is in the future: check the times" : "Pick bed, parity, gestation and stage")
             : edit ? "Save changes" : `Add Bed ${trimmed} · ${parityShort(parity)} · ${weeks}+${days}`}
         </button>
       }>
@@ -202,11 +211,11 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
             </div>
             <div className="flex flex-wrap gap-1.5">
               {ROOMS.map(r => {
-                const taken = used.has(r) && !(edit && r === String(bed.bedNumber));
+                const taken = usedNorm.has(norm(r)) && !(edit && norm(r) === norm(bed.bedNumber));
                 return <Chip key={r} small className="disabled:opacity-30" disabled={taken} on={trimmed === r} onClick={() => setNum(r)}>{r}</Chip>;
               })}
             </div>
-            <input value={ROOMS.includes(trimmed) || /^([1-9]|1[0-6])$/.test(trimmed) ? "" : num} onChange={e => setNum(e.target.value)}
+            <input value={num} onChange={e => setNum(e.target.value)}
               placeholder="Or type a bed or room" className={INPUT} aria-label="Bed" maxLength={12} />
           </div>
         )}
