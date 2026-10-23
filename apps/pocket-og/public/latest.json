@@ -1,6 +1,20 @@
 {
-  "updated": "2026-09-27",
+  "updated": "2026-10-18",
   "items": [
+    {
+      "id": "2026-10-rcog-birth-after-caesarean-info",
+      "date": "2026-10-06",
+      "kind": "guideline",
+      "source": "RCOG",
+      "weight": "aware",
+      "title": "Birth after caesarean: RCOG updates shared-decision information",
+      "why": "The RCOG information on birth after caesarean now reflects the latest NICE guidance and presents options in a balanced way. Use it in antenatal clinic and handover discussions to support personalised counselling about VBAC and repeat caesarean birth.",
+      "url": "https://www.rcog.org.uk/news/rcog-patient-information-on-birth-choices-after-previous-caesarean-birth-updated",
+      "link": {
+        "type": "reader",
+        "id": "GTG45"
+      }
+    },
     {
       "id": "2026-09-rcog-robotic-gynae-cancer-surgery",
       "date": "2026-09-16",
