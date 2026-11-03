@@ -471,7 +471,7 @@ export function reviewMinutes(alertId, unit = getUnitSettings()) {
 
 // Alerts whose button does something rather than record it: the screen opens
 // the right sheet (stopping oxytocin is logged in the oxytocin sheet).
-export const ACTION_ALERTS = { "oxytocin-stop-pathological": "Stop oxytocin" };
+export const ACTION_ALERTS = { "oxytocin-stop-pathological": "Stop oxytocin", "details-missing": "Add details" };
 
 // "Is she still here?": Still here stamps the record (restarting the clock);
 // the second button, Not here, opens her full record to remove or update her.

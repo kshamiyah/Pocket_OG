@@ -8,6 +8,7 @@ import OxySheet from "./OxySheet";
 import ObsSheet from "./ObsSheet";
 import DeliverySheet from "./DeliverySheet";
 import AdmitSheet from "./AdmitSheet";
+import QuickHandover from "./QuickHandover";
 import BoardRound from "./BoardRound";
 import HandoverSheet from "./HandoverSheet";
 import IOLQueue, { IOLEntrySheet } from "./IOLQueue";
@@ -162,6 +163,13 @@ export default function WardPage({ shift, onEndShift }) {
   const fix = (bedId, alertId, kind) => {
     const bed = beds[bedId];
     // Stopping oxytocin is logged in the oxytocin sheet, with the reason.
+    // Gaps left at handover: a missing VE opens the VE form, anything else Edit.
+    if (alertId === "details-missing") {
+      const missing = triage[bedId]?.alerts?.find(a => a.id === alertId)?.missing ?? [];
+      const from = sheet?.bedId === bedId ? "bed" : undefined;
+      setSheet(missing.length === 1 && missing[0] === "VE" ? { type: "ve", bedId, from } : { type: "edit", bedId, back: from });
+      return;
+    }
     if (ACTION_ALERTS[alertId]) { setSheet({ type: "oxy", bedId, from: sheet?.bedId === bedId ? "bed" : undefined, stop: true }); return; }
     // "Not here": open her full record, where she can be removed or updated.
     if (kind === "decline" && alertId === STILL_HERE) { closeSheet(); setRecordId(bedId); return; }
@@ -222,6 +230,11 @@ export default function WardPage({ shift, onEndShift }) {
     setTab("board");
     closeSheet();
   };
+  // Quick handover: each woman goes on the board as soon as she is saved,
+  // and the card stays open for the next.
+  const quickSave = (bed, correcting) => {
+    commit(`Bed ${bed.bedNumber} ${correcting ? "corrected" : "added"}`, { ...beds, [bed.id]: bed }, null, bed.id);
+  };
   const editDetails = (bedId, updates, back) => {
     updateBed(bedId, updates, `Bed ${updates.bedNumber} details saved`);
     // Opened from the bed card: go back to it, so the change is visible.
@@ -264,6 +277,7 @@ export default function WardPage({ shift, onEndShift }) {
         iolQueue={iolQueue} tab={tab} onTab={setTab}
         onOpenBed={id => setSheet({ type: "bed", bedId: id })}
         onAdmit={() => setSheet({ type: "admit" })}
+        onQuick={() => setSheet({ type: "quick" })}
         onRound={startRound}
         onHandover={() => setSheet({ type: "handover" })}
         onToggleTheme={toggleTheme}
@@ -329,8 +343,10 @@ export default function WardPage({ shift, onEndShift }) {
       )}
       {sheet?.type === "admit" && (
         <AdmitSheet mode={sheet.entry ? "iol" : "new"} iolEntry={sheet.entry ?? null}
-          existingNumbers={Object.values(beds).map(b => b.bedNumber)} onClose={closeSheet} onSave={bed => admit(bed, sheet.entry)} />
+          existingNumbers={Object.values(beds).map(b => b.bedNumber)} onClose={closeSheet} onSave={bed => admit(bed, sheet.entry)}
+          onQuick={sheet.entry ? null : () => setSheet({ type: "quick" })} />
       )}
+      {sheet?.type === "quick" && <QuickHandover beds={beds} onSave={quickSave} onClose={() => { closeSheet(); setTab("board"); }} />}
       {sheet?.type === "handover" && <HandoverSheet beds={beds} shift={shift} now={now} removed={removed} iolQueue={iolQueue} onClose={closeSheet} />}
       {sheet?.type === "iol" && (
         <IOLEntrySheet entry={sheet.entry ?? null} onClose={closeSheet} onSave={entry => {

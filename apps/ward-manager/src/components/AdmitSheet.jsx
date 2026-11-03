@@ -57,7 +57,7 @@ function parseGest(g) {
  * mode "new": quick admit. mode "iol": admit from the IOL queue (pre-filled).
  * mode "edit": change an existing woman's details.
  */
-export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, existingNumbers = [], onSave, onClose }) {
+export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, existingNumbers = [], onSave, onClose, onQuick = null }) {
   const edit = mode === "edit";
   const g0 = edit ? parseGest(bed.gestation) : iolEntry ? { w: iolEntry.gestWeeks, d: iolEntry.gestDays ?? 0 } : { w: null, d: 0 };
 
@@ -76,6 +76,9 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
   const [iolReasons, setIolReasons] = useState(edit ? bed.iolReasons ?? [] : iolEntry ? iolEntry.indications ?? [] : []);
   const [iolWhen, setIolWhen] = useState(
     edit && bed.inductionStartTime ? whenFromISO(bed.inductionStartTime)
+      // Not known (left blank at handover): stays blank until a time is chosen,
+      // rather than quietly becoming "now".
+      : edit && bed.modeOfOnset === "Induced" ? null
       : iolEntry?.addedAt ? whenFromISO(iolEntry.addedAt) : { minsAgo: 0 });
   const [memb, setMemb] = useState("Intact");
   const [liquor, setLiquor] = useState("Clear");
@@ -135,7 +138,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
     if (!ready) return;
     const gestation = `${weeks}+${days}`;
     const induced = onset === "Induced";
-    const iolISO = induced ? resolveWhen(iolWhen) : null;
+    const iolISO = induced && iolWhen ? resolveWhen(iolWhen) : null;
     if (edit) {
       onSave({
         bedNumber: trimmed, parity, prevBirths: births, gestation, modeOfOnset: onset, analgesia, riskFlags: flags,
@@ -192,6 +195,12 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
             : edit ? "Save changes" : `Add Bed ${trimmed} · ${parityShort(parity)} · ${weeks}+${days}`}
         </button>
       }>
+      {onQuick && (
+        <button type="button" onClick={onQuick}
+          className="w-full min-h-10 px-3 rounded-lg border border-dashed border-claude-300 dark:border-claude-800 text-left text-sm text-claude-800 dark:text-claude-300">
+          <b>Taking handover?</b><span className="text-gray-600 dark:text-gray-400"> Add several women quickly, one card each.</span>
+        </button>
+      )}
       <div>
         <Label tight hint={free.length ? "free beds" : undefined}>Bed</Label>
         <div className="grid grid-cols-[repeat(5,minmax(0,1fr))_auto] gap-1.5">
@@ -300,7 +309,7 @@ export default function AdmitSheet({ mode = "new", bed = null, iolEntry = null, 
         <div className="space-y-1.5">
           {onset === "Induced" && (
             <SummaryLine label="IOL" onClick={() => detail.open("iol")}
-              text={[indMethod, `started ${whenText(iolWhen)}`, iolReasons.length ? `${iolReasons.length} reason${iolReasons.length > 1 ? "s" : ""}` : null].filter(Boolean).join(" · ")} />
+              text={[indMethod, iolWhen ? `started ${whenText(iolWhen)}` : "start time not set", iolReasons.length ? `${iolReasons.length} reason${iolReasons.length > 1 ? "s" : ""}` : null].filter(Boolean).join(" · ")} />
           )}
           {ruptured && (
             <SummaryLine label={effMemb} onClick={() => detail.open("rom")} warn={!romISO}
