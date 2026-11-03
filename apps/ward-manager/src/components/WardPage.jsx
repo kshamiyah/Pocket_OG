@@ -87,6 +87,7 @@ export default function WardPage({ shift, onEndShift }) {
   // a sheet, the record, a full page) instead of leaving the app and losing a
   // half-filled form. One history entry is kept in hand for this.
   const layers = useRef({});
+  const quickBack = useRef(null);
   useEffect(() => { layers.current = { ruleAlert, sourceKey, rulesOpen, settingsOpen, sheet, recordId, round }; });
   useEffect(() => {
     window.history.pushState({ pocketsuite: true }, "");
@@ -99,6 +100,7 @@ export default function WardPage({ shift, onEndShift }) {
       else if (l.ruleAlert) setRuleAlert(null);
       else if (l.rulesOpen) setRulesOpen(false);
       else if (l.settingsOpen) setSettingsOpen(false);
+      else if (l.sheet?.type === "quick" && quickBack.current) quickBack.current();
       else if (l.sheet) setSheet(null);
       else if (l.recordId) setRecordId(null);
       else setRound(null);
@@ -346,7 +348,7 @@ export default function WardPage({ shift, onEndShift }) {
           existingNumbers={Object.values(beds).map(b => b.bedNumber)} onClose={closeSheet} onSave={bed => admit(bed, sheet.entry)}
           onQuick={sheet.entry ? null : () => setSheet({ type: "quick" })} />
       )}
-      {sheet?.type === "quick" && <QuickHandover beds={beds} onSave={quickSave} onClose={() => { closeSheet(); setTab("board"); }} />}
+      {sheet?.type === "quick" && <QuickHandover beds={beds} onSave={quickSave} onBackHandler={fn => { quickBack.current = fn; }} onClose={() => { closeSheet(); setTab("board"); }} />}
       {sheet?.type === "handover" && <HandoverSheet beds={beds} shift={shift} now={now} removed={removed} iolQueue={iolQueue} onClose={closeSheet} />}
       {sheet?.type === "iol" && (
         <IOLEntrySheet entry={sheet.entry ?? null} onClose={closeSheet} onSave={entry => {

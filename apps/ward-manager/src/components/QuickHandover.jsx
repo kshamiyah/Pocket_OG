@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Sheet from "../ui/Sheet";
 import RiskPicker from "./RiskPicker";
 import { Chip, Label } from "../ui/atoms";
@@ -77,7 +77,7 @@ function TimeEntry({ label, onTime, allowNow = false, now }) {
  * Each "Next bed" puts her on the board at once, so nothing is lost if the
  * phone locks; gaps show on the board as "Add details".
  */
-export default function QuickHandover({ beds, onSave, onClose }) {
+export default function QuickHandover({ beds, onSave, onClose, onBackHandler = null }) {
   const [now] = useState(() => Date.now());
   const [card, setCard] = useState(emptyCard);
   const [step, setStep] = useState("bed");
@@ -131,6 +131,13 @@ export default function QuickHandover({ beds, onSave, onClose }) {
     setCard(a.card); setEditingId(a.id); setStep("bed"); setHist([]);
   };
   const close = () => (card.bed && !confirmClose ? setConfirmClose(true) : onClose());
+  // The phone's back gesture asks the same question as the close button, so a
+  // half-filled card is never thrown away by a stray swipe.
+  useEffect(() => {
+    if (!onBackHandler) return;
+    onBackHandler(() => (card.bed ? setConfirmClose(c => c || true) : onClose()));
+    return () => onBackHandler(null);
+  });
 
   // ── The current question ─────────────────────────────────────────────
   const head = (title, canSkip = true, right = null) => (
