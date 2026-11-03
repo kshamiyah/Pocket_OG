@@ -22,7 +22,7 @@ export default function HandoverIn({ beds, doctorName, onTakeOver, onClear }) {
               <div key={bed.id} className={`${CARD} px-3 py-2.5 flex items-center justify-between gap-3`}>
                 <div className="min-w-0">
                   <span className="text-base font-semibold text-gray-900 dark:text-white">Bed {bed.bedNumber}</span>
-                  <span className={`${TYPE_META} ml-2`}>{parityShort(bed.parity)} · {bed.gestation}</span>
+                  <span className={`${TYPE_META} ml-2`}>{parityShort(bed.parity)} · {bed.gestation ?? "gest ?"}</span>
                 </div>
                 <span className={`text-xs font-semibold px-2 py-1 rounded ${bed.delivery ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400" : "bg-gray-200/70 dark:bg-gray-800 text-gray-600 dark:text-gray-300"}`}>
                   {stageLabel(bed)}{!bed.delivery && ve ? ` · ${ve.dilation} cm` : ""}

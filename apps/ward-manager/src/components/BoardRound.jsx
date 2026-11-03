@@ -43,7 +43,7 @@ export default function BoardRound({ ids, index, beds, triage, updated, now, onI
             <div className={`${CARD} flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-3`}>
               <div className="flex items-baseline gap-2 flex-wrap">
                 <span className="text-3xl font-semibold text-gray-900 dark:text-white">Bed {bed.bedNumber}</span>
-                <span className="text-base text-gray-500 dark:text-gray-400">{parityWithHistory(bed)} · {bed.gestation}</span>
+                <span className="text-base text-gray-500 dark:text-gray-400">{parityWithHistory(bed)} · {bed.gestation ?? "gest ?"}</span>
               </div>
               <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
                 <dt className="text-gray-500 dark:text-gray-400">Stage</dt>

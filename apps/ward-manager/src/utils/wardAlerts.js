@@ -963,6 +963,30 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     });
   }
 
+  // ─── Saved at handover with gaps (app design) ────────────────────────
+  // The quick handover card lets details be left for later. Rules that need a
+  // missing detail (preterm, nulliparous timings, stage clocks, VE timing)
+  // cannot run, so the gap is shown until it is filled in, never hidden.
+  if (!delivered) {
+    const missing = [];
+    if (!bed.parity) missing.push("parity");
+    if (!bed.gestation) missing.push("gestation");
+    if (!bed.labourStage) missing.push("stage");
+    if ((bed.pendingDetails ?? []).includes("VE") && !(bed.ves ?? []).length) missing.push("VE");
+    if (bed.modeOfOnset === "Induced" && !bed.inductionStartTime) missing.push("induction start time");
+    if (missing.length) {
+      alerts.push({
+        id: "details-missing",
+        severity: "warning",
+        short: "Add details",
+        missing,
+        title: `Add ${missing.join(", ")}`,
+        body: "Saved at handover with gaps. Rules that depend on these details (for example preterm prompts, timings that differ for a first labour, stage and VE clocks) cannot run until they are added.",
+        citation: "App design",
+      });
+    }
+  }
+
   // ─── Is she still here? (unit setting) ───────────────────────────────
   // Nothing entered for hours usually means the board is out of date: she has
   // delivered, moved or gone home. Any change to her record restarts the clock.

@@ -64,7 +64,7 @@ export function AlertList({ alerts, onFix, limit = null, compact = false }) {
             {fix && onFix && (
               <div className="shrink-0 flex flex-col gap-1">
                 <button type="button" onClick={() => onFix(a.id)}
-                  className={`min-h-9 px-3 rounded-lg border text-xs font-bold active:scale-95 ${ACTION_ALERTS[a.id] ? "bg-red-600 border-red-600 text-white" : "bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-200"}`}>
+                  className={`min-h-9 px-3 rounded-lg border text-xs font-bold active:scale-95 ${ACTION_ALERTS[a.id] && a.severity === "urgent" ? "bg-red-600 border-red-600 text-white" : "bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-200"}`}>
                   {fix}
                 </button>
                 {(DECLINABLE.has(a.id) || a.id === STILL_HERE) && (
@@ -145,7 +145,7 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, o
   const m0 = membraneStatus(bed);
   const membText = !m0.status || bed.delivery ? null : m0.status === "Intact" ? "Membranes intact"
     : [`${m0.status}${m0.time ? ` ${fmtAge(now - new Date(m0.time).getTime())}` : ""}`, m0.liquor ? (LIQUOR_SHORT[m0.liquor] ?? m0.liquor) : null].filter(Boolean).join(", ");
-  const sub = [parityWithHistory(bed), bed.gestation, stageLabel(bed), iol, membText, ...(bed.riskFlags ?? []).map(riskShort), bed.analgesia !== "None" ? bed.analgesia : null]
+  const sub = [parityWithHistory(bed), bed.gestation ?? "gest ?", stageLabel(bed), iol, membText, ...(bed.riskFlags ?? []).map(riskShort), bed.analgesia !== "None" ? bed.analgesia : null]
     .filter(Boolean).join(" · ");
 
   const editBtn = onEdit && (
