@@ -435,10 +435,10 @@ export const PERSISTENT_FLAGS = {
   "pprom-antibiotics": { field: "ppromAntibioticsStarted", label: "Antibiotics given" },
 };
 export const OBS_STAMP = {
-  "pulse-never": "lastPulse", "pulse-due": "lastPulse",
+  "pulse-due": "lastPulse",
   "bp-never": "lastBP", "bp-due": "lastBP",
-  "temp-never": "lastTemp", "temp-due": "lastTemp",
-  "rr-never": "lastRR", "rr-due": "lastRR",
+  "temp-due": "lastTemp",
+  "rr-due": "lastRR",
 };
 
 /**
@@ -484,6 +484,22 @@ export const declinedField = alertId => DECLINABLE.has(alertId) ? `${PERSISTENT_
 export function declineAlert(alertId, iso, by = null) {
   const f = declinedField(alertId);
   return f ? { [f]: true, [`${f}At`]: iso, ...(by ? { [`${f}By`]: by } : {}) } : {};
+}
+
+// Ignore: for alerts that crowd the screen. Urgent ones qualify only if the unit
+// allows it, and never these two: a gap means rules cannot run, and "still here?"
+// keeps the board true. An ignored alert returns after the unit's time, or sooner
+// if it gets worse.
+const NEVER_IGNORE = new Set(["details-missing", STILL_HERE]);
+export const canIgnore = (alert, unit = getUnitSettings()) =>
+  (alert.severity !== "urgent" || unit.ignoreUrgentOn) && !alert.reviewed && !NEVER_IGNORE.has(alert.id);
+export function ignoreAlert(bed, alert, iso, by = null) {
+  return { ignored: { ...(bed.ignored ?? {}), [alert.id]: { at: iso, by, severity: alert.severity, short: alert.short ?? null } } };
+}
+export function unignoreAlert(bed, alertId) {
+  const ignored = { ...(bed.ignored ?? {}) };
+  delete ignored[alertId];
+  return { ignored };
 }
 
 export function fixLabel(alertId) {

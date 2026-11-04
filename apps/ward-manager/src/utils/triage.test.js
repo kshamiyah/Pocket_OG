@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { triageBed, triageWard, wardSummary, nextDue, tidy, shortLabel } from "./triage.js"
+import { splitIgnored, triageBed, triageWard, wardSummary, nextDue, tidy, shortLabel } from "./triage.js"
 import { addVE, suggestedStage, fixAlert, stampObs, obsStatus, setStage } from "./bedModel.js"
 import { resolveWhen } from "./time.js"
 
@@ -46,10 +46,10 @@ describe("triageBed", () => {
     expect(r.tier).toBe("ok")
   })
 
-  it("a pulse never recorded in established labour is due, not on track", () => {
+  it("obs never recorded raise no alert, and leave her on track", () => {
     const r = triageBed(activeBed({ observations: {} }), NOW)
-    expect(r.shown.some(a => a.id === "pulse-never")).toBe(true)
-    expect(r.tier).toBe("warning")
+    expect(r.shown.filter(a => /not recorded/.test(a.title))).toEqual([])
+    expect(r.tier).toBe("ok")
   })
 
   it("no CTG ever logged in established labour is due, not on track", () => {
@@ -160,5 +160,56 @@ describe("time and copy", () => {
 
   it("replaces em dashes in engine titles", () => {
     expect(tidy("Preterm 33+2 — alert neonatal team")).toBe("Preterm 33+2: alert neonatal team")
+  })
+})
+
+describe("ignoring alerts", () => {
+  const ctgBed = p => activeBed({ ctgLog: [], ...p })
+  const ignoredAt = (id, ago, extra = {}) => ({ [id]: { at: t(ago), by: "Dr S", severity: "warning", short: null, ...extra } })
+  it("takes the alert off the board and bed card, and keeps it listed", () => {
+    const r = triageBed(ctgBed({ ignored: ignoredAt("ctg-not-documented", 10 * MIN) }), NOW)
+    expect(r.shown.some(a => a.id === "ctg-not-documented")).toBe(false)
+    expect(r.ignored.map(a => a.id)).toEqual(["ctg-not-documented"])
+    expect(r.tier).toBe("ok")
+  })
+  it("comes back after the ignore window", () => {
+    const r = triageBed(ctgBed({ ignored: ignoredAt("ctg-not-documented", 241 * MIN) }), NOW)
+    expect(r.shown.some(a => a.id === "ctg-not-documented")).toBe(true)
+    expect(r.ignored).toEqual([])
+  })
+  const unit = (p = {}) => ({ ignoreMin: 240, ignoreUrgentOn: true, ignoreUrgentMin: 30, ...p })
+  it("an urgent alert can be ignored, for the shorter urgent time", () => {
+    const a = { id: "x", severity: "urgent", title: "X" }
+    const urgentAt = ago => ({ ignored: ignoredAt("x", ago, { severity: "urgent" }) })
+    expect(splitIgnored([a], urgentAt(29 * MIN), NOW, unit()).ignored).toHaveLength(1)
+    expect(splitIgnored([a], urgentAt(31 * MIN), NOW, unit()).active).toEqual([a])
+  })
+  it("a warning that turns urgent comes back at once", () => {
+    const a = { id: "x", severity: "urgent", title: "X" }
+    expect(splitIgnored([a], { ignored: ignoredAt("x", 5 * MIN) }, NOW, unit()).active).toEqual([a])
+  })
+  it("the unit can turn off ignoring urgent alerts, and set the times", () => {
+    const a = { id: "x", severity: "urgent", title: "X" }
+    const b = { ignored: ignoredAt("x", 5 * MIN, { severity: "urgent" }) }
+    expect(splitIgnored([a], b, NOW, unit({ ignoreUrgentOn: false })).active).toEqual([a])
+    const w = { id: "y", severity: "warning", title: "Y" }
+    const c = { ignored: ignoredAt("y", 61 * MIN) }
+    expect(splitIgnored([w], c, NOW, unit({ ignoreMin: 60 })).active).toEqual([w])
+    expect(splitIgnored([w], c, NOW, unit({ ignoreMin: 90 })).ignored).toHaveLength(1)
+  })
+  it("comes back when it changes or has a newer cause", () => {
+    const b = { ignored: ignoredAt("x", 30 * MIN, { short: "Suspected" }) }
+    expect(splitIgnored([{ id: "x", severity: "warning", short: "Diagnosed" }], b, NOW).active).toHaveLength(1)
+    expect(splitIgnored([{ id: "x", severity: "warning", short: "Suspected", since: t(5 * MIN) }], b, NOW).active).toHaveLength(1)
+    expect(splitIgnored([{ id: "x", severity: "warning", short: "Suspected" }], b, NOW).ignored).toHaveLength(1)
+  })
+  it("gaps and still here? cannot be ignored", () => {
+    for (const id of ["details-missing", "bed-stale"]) {
+      expect(splitIgnored([{ id, severity: "warning" }], { ignored: ignoredAt(id, 5 * MIN) }, NOW).active).toHaveLength(1)
+    }
+  })
+  it("an ignored alert is not forecast as next due", () => {
+    const r = triageBed(ctgBed({ ignored: ignoredAt("ctg-not-documented", 10 * MIN) }), NOW)
+    expect(r.next?.id).not.toBe("ctg-not-documented")
   })
 })

@@ -127,6 +127,24 @@ export const UNIT_SETTINGS = [
     label: "Returns after: long first stage, latent phase, membranes, meconium, liquor",
     nice: "App default.",
   },
+  {
+    key: "ignoreMin", type: "number", default: 240, min: 30, max: 720, step: 30, unit: "min", group: "Ignored alerts",
+    label: "Ignored alert returns after",
+    help: "For non-urgent alerts. It returns sooner if it turns urgent or changes.",
+    nice: "App default.",
+  },
+  {
+    key: "ignoreUrgentOn", type: "bool", default: true, group: "Ignored alerts",
+    label: "Allow Ignore on urgent alerts",
+    help: "On: urgent alerts have the X too. Off: urgent alerts can only be marked Reviewed, where allowed.",
+    nice: "App design choice.",
+  },
+  {
+    key: "ignoreUrgentMin", type: "number", default: 30, min: 5, max: 240, step: 5, unit: "min", group: "Ignored alerts",
+    label: "Ignored urgent alert returns after",
+    help: "It returns sooner if it changes.",
+    nice: "App default.",
+  },
 ];
 
 export const UNIT_DEFAULTS = Object.fromEntries(UNIT_SETTINGS.map(s => [s.key, s.default]));

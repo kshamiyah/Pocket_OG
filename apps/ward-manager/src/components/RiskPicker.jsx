@@ -44,7 +44,7 @@ function Row({ label, effect, on, onToggle }) {
   );
 }
 
-/** Risks page, pushed in over the Admit or Edit sheet like a tab. */
+/** Risks page, pushed in over the Admit card or Edit sheet like a tab. */
 function RisksPage({ values, onChange, onClose, closing, onClosed, backLabel }) {
   const [q, setQ] = useState("");
   const toggle = v => onChange(values.includes(v) ? values.filter(x => x !== v) : [...values, v]);
@@ -94,7 +94,7 @@ function RisksPage({ values, onChange, onClose, closing, onClosed, backLabel }) 
   );
 }
 
-/** Risks row on the Admit sheet: one tap opens the risks page. With `line`,
+/** Risks row on the Admit card and Edit sheet: one tap opens the risks page. With `line`,
  *  it is a one-line summary like the other Admit details (Risk factors · …). */
 export default function RiskPicker({ values, onChange, backLabel = "Admit", line = false }) {
   const sp = useSubPage();

@@ -4,7 +4,8 @@
 
 import { alertTier, computeAlerts } from "./wardAlerts";
 import { MIN, HOUR } from "./time";
-import { OBS_STAMP, reviewMinutes } from "./bedModel";
+import { OBS_STAMP, canIgnore, reviewMinutes } from "./bedModel";
+import { getUnitSettings } from "../data/unitSettings";
 
 // Routine obs reminders are shown as P/B/T dots instead of alerts.
 const OBS_IDS = new Set(Object.keys(OBS_STAMP));
@@ -157,8 +158,31 @@ export function applyReviews(alerts, bed, now = Date.now()) {
   return out.sort((x, y) => order[x.severity] - order[y.severity] || alertTier(x.id) - alertTier(y.id));
 }
 
+/**
+ * Separates alerts the clinician chose to ignore. One comes back at once if it
+ * turns urgent, gets worse or changes, has a newer cause, or the unit's time passes.
+ */
+export function splitIgnored(alerts, bed, now = Date.now(), unit = getUnitSettings()) {
+  const stored = bed.ignored ?? {};
+  const RANK = { urgent: 0, warning: 1, info: 2 };
+  const active = [], ignored = [];
+  for (const a of alerts) {
+    const r = stored[a.id];
+    const at = r ? new Date(r.at).getTime() : 0;
+    const quiet = r && canIgnore(a, unit)
+      && now < at + (a.severity === "urgent" ? unit.ignoreUrgentMin : unit.ignoreMin) * MIN
+      && !(a.since && new Date(a.since).getTime() > at)
+      && !(r.severity && RANK[a.severity] < RANK[r.severity])
+      && !(r.short != null && a.short && a.short !== r.short);
+    if (quiet) ignored.push({ ...a, ignoredAt: r.at, ignoredBy: r.by ?? null }); else active.push(a);
+  }
+  return { active, ignored };
+}
+
 export function triageBed(bed, now = Date.now()) {
-  const alerts = applyReviews(computeAlerts(bed, now), bed, now);
+  const raw = computeAlerts(bed, now);
+  const { active, ignored } = splitIgnored(raw, bed, now);
+  const alerts = applyReviews(active, bed, now);
   const shown = alerts.filter(a => !(OBS_IDS.has(a.id) && a.severity === "info"));
   const urgent = shown.filter(a => a.severity === "urgent").length;
   const warning = shown.filter(a => a.severity === "warning").length;
@@ -167,7 +191,8 @@ export function triageBed(bed, now = Date.now()) {
   const watching = shown.filter(a => a.reviewed).length;
   const tier = urgent ? "urgent" : warning ? "warning" : watching ? "watching" : bed.delivery ? "delivered" : "ok";
   const top = tier === "watching" ? shown.find(a => a.reviewed) : shown[0] ?? null;
-  return { tier, alerts, shown, top, next: nextDue(bed, now, alerts), urgent, warning, watching };
+  // Forecast from every alert showing now, so an ignored one is not "next due".
+  return { tier, alerts, shown, ignored, top, next: nextDue(bed, now, raw), urgent, warning, watching };
 }
 
 const TIER_RANK = { urgent: 0, warning: 1, watching: 2, ok: 3, delivered: 4 };

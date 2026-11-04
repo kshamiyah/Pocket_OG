@@ -7,7 +7,7 @@ import CTGSheet from "./CTGSheet";
 import OxySheet from "./OxySheet";
 import ObsSheet from "./ObsSheet";
 import DeliverySheet from "./DeliverySheet";
-import AdmitSheet from "./AdmitSheet";
+import EditSheet from "./EditSheet";
 import QuickHandover from "./QuickHandover";
 import BoardRound from "./BoardRound";
 import HandoverSheet from "./HandoverSheet";
@@ -20,7 +20,7 @@ import { RulesContext } from "../ui/rulesContext";
 import UndoToast from "../ui/UndoToast";
 import { ChipRow, Label } from "../ui/atoms";
 import { BTN, BTN_DANGER, BTN_SECONDARY, TYPE_META } from "../ui/styles";
-import { ACTION_ALERTS, STILL_HERE, addVE, declineAlert, doctorLabel, editVE as applyEditVE, fixAlert, fixLabel, setStage, STAGE_SHORT } from "../utils/bedModel";
+import { ACTION_ALERTS, STILL_HERE, addVE, declineAlert, doctorLabel, editVE as applyEditVE, fixAlert, fixLabel, setStage, STAGE_SHORT, ignoreAlert, unignoreAlert } from "../utils/bedModel";
 import { triageWard, wardSummary } from "../utils/triage";
 import { clock } from "../utils/time";
 
@@ -164,6 +164,15 @@ export default function WardPage({ shift, onEndShift }) {
   // ── Actions ──────────────────────────────────────────────────────────
   const fix = (bedId, alertId, kind) => {
     const bed = beds[bedId];
+    // Ignoring is about the screen, not the woman, so it does not count as an
+    // entry for "is she still here?" (updateBed would stamp that).
+    if (kind === "ignore" || kind === "unignore") {
+      const shown = triage[bedId]?.alerts?.find(a => a.id === alertId);
+      if (kind === "ignore" && !shown) return;
+      const updates = kind === "ignore" ? ignoreAlert(bed, shown, iso(), doctorLabel(shift?.doctorName)) : unignoreAlert(bed, alertId);
+      commit(`${kind === "ignore" ? "Alert ignored" : "Alert back"} · Bed ${bed.bedNumber}`, { ...beds, [bedId]: { ...bed, ...updates } }, null, bedId);
+      return;
+    }
     // Stopping oxytocin is logged in the oxytocin sheet, with the reason.
     // Gaps left at handover: a missing VE opens the VE form, anything else Edit.
     if (alertId === "details-missing") {
@@ -278,8 +287,7 @@ export default function WardPage({ shift, onEndShift }) {
         rows={rows} summary={summary} now={now} shift={shift} dark={dark} flashId={flashId}
         iolQueue={iolQueue} tab={tab} onTab={setTab}
         onOpenBed={id => setSheet({ type: "bed", bedId: id })}
-        onAdmit={() => setSheet({ type: "admit" })}
-        onQuick={() => setSheet({ type: "quick" })}
+        onAdmit={() => setSheet({ type: "quick" })}
         onRound={startRound}
         onHandover={() => setSheet({ type: "handover" })}
         onToggleTheme={toggleTheme}
@@ -288,7 +296,7 @@ export default function WardPage({ shift, onEndShift }) {
           <IOLQueue queue={iolQueue} now={now}
             onAdd={() => setSheet({ type: "iol" })}
             onEdit={entry => setSheet({ type: "iol", entry })}
-            onAdmit={entry => setSheet({ type: "admit", entry })}
+            onAdmit={entry => setSheet({ type: "quick", entry })}
             onRemove={entry => commit(`${entry.initials} removed from IOL queue`, beds, iolQueue.filter(e => e.id !== entry.id))} />
         }
       />
@@ -339,16 +347,15 @@ export default function WardPage({ shift, onEndShift }) {
         <ObsSheet bed={sb} onClose={finish} onSave={(u, msg) => { updateBed(sb.id, u, `${msg} · Bed ${sb.bedNumber}`); finish(); }} />
       )}
       {sheet?.type === "edit" && sb && (
-        <AdmitSheet mode="edit" bed={sb} existingNumbers={Object.values(beds).map(b => b.bedNumber)}
+        <EditSheet bed={sb} existingNumbers={Object.values(beds).map(b => b.bedNumber)}
           onClose={sheet.back === "bed" ? () => setSheet({ type: "bed", bedId: sb.id }) : closeSheet}
           onSave={u => editDetails(sb.id, u, sheet.back)} />
       )}
-      {sheet?.type === "admit" && (
-        <AdmitSheet mode={sheet.entry ? "iol" : "new"} iolEntry={sheet.entry ?? null}
-          existingNumbers={Object.values(beds).map(b => b.bedNumber)} onClose={closeSheet} onSave={bed => admit(bed, sheet.entry)}
-          onQuick={sheet.entry ? null : () => setSheet({ type: "quick" })} />
+      {sheet?.type === "quick" && (
+        <QuickHandover key={sheet.entry?.id ?? "new"} beds={beds} iolEntry={sheet.entry ?? null}
+          onSave={sheet.entry ? bed => admit(bed, sheet.entry) : quickSave}
+          onBackHandler={fn => { quickBack.current = fn; }} onClose={() => { closeSheet(); setTab("board"); }} />
       )}
-      {sheet?.type === "quick" && <QuickHandover beds={beds} onSave={quickSave} onBackHandler={fn => { quickBack.current = fn; }} onClose={() => { closeSheet(); setTab("board"); }} />}
       {sheet?.type === "handover" && <HandoverSheet beds={beds} shift={shift} now={now} removed={removed} iolQueue={iolQueue} onClose={closeSheet} />}
       {sheet?.type === "iol" && (
         <IOLEntrySheet entry={sheet.entry ?? null} onClose={closeSheet} onSave={entry => {

@@ -8,7 +8,7 @@
 import { computeAlerts } from "./wardAlerts";
 import { clock, fmtAge } from "./time";
 import { DONE_LABEL, PERSISTENT_FLAGS, currentOxytocin, doctorLabel, lastVE, malpresentation, membraneStatus, obsStatus, obsTracked, parityWithHistory, riskLabel, riskShort, sortedVEs, stageLabel, veFindings } from "./bedModel";
-import { applyReviews, nextOf, shortLabel, tidy, triageWard } from "./triage";
+import { applyReviews, nextOf, shortLabel, splitIgnored, tidy, triageWard } from "./triage";
 import { sortIOLQueue } from "./iolPriority";
 
 const DONE_FIELDS = [...new Set(Object.values(PERSISTENT_FLAGS).map(f => f.field))];
@@ -23,11 +23,16 @@ function isPreterm(g) {
 // Urgent and due alerts, plus ones reviewed this shift (so the next doctor
 // knows they were seen, and when they come back).
 function alertLines(bed, now) {
-  return applyReviews(computeAlerts(bed, now), bed, now)
-    .filter(a => a.severity === "urgent" || a.severity === "warning" || a.reviewed)
-    .map(a => a.reviewed
-      ? `~ ${tidy(a.title)} (reviewed ${clock(a.reviewed.at, now)}${a.reviewed.by ? ` by ${a.reviewed.by}` : ""})`
-      : `${a.severity === "urgent" ? "!!" : "!"} ${tidy(a.title)}`);
+  const { active, ignored } = splitIgnored(computeAlerts(bed, now), bed, now);
+  return [
+    ...applyReviews(active, bed, now)
+      .filter(a => a.severity === "urgent" || a.severity === "warning" || a.reviewed)
+      .map(a => a.reviewed
+        ? `~ ${tidy(a.title)} (reviewed ${clock(a.reviewed.at, now)}${a.reviewed.by ? ` by ${a.reviewed.by}` : ""})`
+        : `${a.severity === "urgent" ? "!!" : "!"} ${tidy(a.title)}`),
+    // The next doctor is told, so an ignored alert is never lost at handover.
+    ...ignored.map(a => `${a.severity === "urgent" ? "!!" : "~"} ${tidy(a.title)} (ignored ${clock(a.ignoredAt, now)}${a.ignoredBy ? ` by ${a.ignoredBy}` : ""})`),
+  ];
 }
 
 // Latest values, each with the time it was taken, plus the highest BP, pulse
@@ -179,7 +184,8 @@ function opener(bed, t, now) {
  */
 function shortBlock(bed, t, now, since) {
   const lines = [opener(bed, t, now)];
-  const all = applyReviews(computeAlerts(bed, now), bed, now);
+  const { active: notIgnored, ignored } = splitIgnored(computeAlerts(bed, now), bed, now);
+  const all = applyReviews(notIgnored, bed, now);
   const open = all.filter(a => a.severity === "urgent" || a.severity === "warning");
 
   // Important events this shift, oldest first, treatments included.
@@ -213,6 +219,7 @@ function shortBlock(bed, t, now, since) {
     ...open.map(x => `${x.severity === "urgent" ? "!!" : "!"} ${shortLabel(x)}`),
     ...all.filter(x => x.reviewed)
       .map(x => `~ ${shortLabel(x)} (reviewed ${clock(x.reviewed.at, now)}${x.reviewed.by ? ` by ${x.reviewed.by}` : ""})`),
+    ...ignored.map(x => `${x.severity === "urgent" ? "!!" : "~"} ${shortLabel(x)} (ignored ${clock(x.ignoredAt, now)}${x.ignoredBy ? ` by ${x.ignoredBy}` : ""})`),
     // The next VE is always given in labour; the next other item too if sooner.
     nextVE ? `next VE ${clock(nextVE.at, now)}` : null,
     t?.next && !(nextVE && t.next.label.startsWith("VE")) ? `next ${t.next.label} ${clock(t.next.at, now)}` : null,

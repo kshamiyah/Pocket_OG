@@ -1,21 +1,60 @@
 // Quick handover card: one woman at a time, tap-only, in the order handover is
-// spoken (bed, parity, gestation, stage, VEs, extras). Anything not heard can
+// spoken (bed, parity, gestation, stage, onset, VEs, extras). Anything not heard can
 // be left for later; the board then shows "Add details" until it is filled in.
 
 import { gestFromDigits, newId } from "./bedModel";
 import { resolveWhen } from "./time";
 
-export const QUICK_STEPS = ["bed", "parity", "gest", "stage", "ve", "extras"];
+export const PUSHING = "Active second stage";
+
+export const QUICK_STEPS = ["bed", "parity", "gest", "stage", "onset", "ve", "extras"];
 
 export function emptyCard() {
   return {
-    bed: null, parity: null, gestDigits: "", stage: null,
+    bed: null, parity: null, gestDigits: "", stage: null, pushHHMM: null, onset: null, iolReasons: [],
     ves: [], noVE: false, skipped: [],
     iol: { on: false, method: null, hhmm: null },
     rom: { on: false, type: "SROM", liquor: "Clear", hhmm: null },
     oxy: { on: false, dose: null, hhmm: null },
     epidural: false, flags: [],
   };
+}
+
+// IOL queue indications that carry a risk flag onto the board. Pre-eclampsia must
+// arrive as Pre-eclampsia (not plain hypertension) so the MgSO4 rules run.
+const IOL_FLAG = { "GDM": "Diabetic-GDM", "Pre-eclampsia": "Pre-eclampsia", "Severe pre-eclampsia": "Pre-eclampsia" };
+
+/** The card for a woman admitted from the IOL queue, with what the queue knows. */
+export function cardFromIOLEntry(entry, now = Date.now()) {
+  const added = entry.addedAt ? new Date(entry.addedAt) : null;
+  // A typed time can only mean the last 24 hours. Added earlier than that, the
+  // start time stays blank (and is listed) rather than landing on the wrong day.
+  const recent = added && now - added.getTime() < 24 * 3600000 && added.getTime() <= now;
+  const hhmm = recent ? `${String(added.getHours()).padStart(2, "0")}${String(added.getMinutes()).padStart(2, "0")}` : null;
+  const empty = emptyCard();
+  return {
+    ...empty,
+    gestDigits: entry.gestWeeks != null ? `${entry.gestWeeks}${entry.gestDays ?? 0}` : "",
+    stage: "Latent", onset: "Induced",
+    iol: { on: true, method: null, hhmm },
+    iolReasons: entry.indications ?? [],
+    flags: [...new Set((entry.indications ?? []).map(i => IOL_FLAG[i]).filter(Boolean))],
+  };
+}
+
+/** How labour started, as the card holds it: null until it has been answered. */
+export const cardOnset = c => (c.iol.on ? "Induced" : c.onset ?? null);
+
+/**
+ * The card changes for an onset choice. PPROM means her waters have gone, so ROM
+ * turns on and asks for its time; moving away from PPROM turns off a ROM with no
+ * time yet, so it cannot block the save.
+ */
+export function onsetPatch(c, onset) {
+  const rom = onset === "PPROM"
+    ? { ...c.rom, on: true, type: "SROM" }
+    : c.onset === "PPROM" && !c.rom.hhmm ? { ...c.rom, on: false } : c.rom;
+  return { onset, iol: { ...c.iol, on: onset === "Induced" }, rom };
 }
 
 /**
@@ -60,20 +99,22 @@ export function cardMissing(c) {
   if (!c.parity) m.push("parity");
   if (!cardGestation(c)) m.push("gestation");
   if (!c.stage) m.push("stage");
+  if (!cardOnset(c)) m.push("onset");
   if (!c.noVE && !c.ves.length) m.push("VE");
   if (c.iol.on && !c.iol.hhmm) m.push("induction start time");
   return m;
 }
 
 /**
- * Why "Next bed" cannot save yet, or null. Ruptured membranes and oxytocin
+ * Why "Next bed" cannot save yet, or null. Pushing, ruptured membranes and oxytocin
  * start clocks that drive alerts, so they are saved only with their times
  * (or turned off), never with a made-up one.
  */
 export function cardBlocker(c) {
   if (!c.bed) return "Pick a bed to start";
-  if (c.rom.on && !c.rom.hhmm) return "Add the ROM time, or turn ROM off";
-  if (c.oxy.on && (!c.oxy.dose || !c.oxy.hhmm)) return "Add the oxytocin dose and start time, or turn Synto off";
+  if (c.stage === PUSHING && !c.pushHHMM) return "Add the pushing time first";
+  if (c.rom.on && !c.rom.hhmm) return "Add the ROM time first";
+  if (c.oxy.on && (!c.oxy.dose || !c.oxy.hhmm)) return "Add the oxytocin dose and time first";
   return null;
 }
 
@@ -97,12 +138,15 @@ export function bedFromCard(c, now = Date.now(), id = null) {
   return {
     id: id ?? newId("bed"), bedNumber: c.bed, admissionTime: at,
     parity: c.parity, prevBirths: [], gestation: cardGestation(c),
-    modeOfOnset: c.iol.on ? "Induced" : "Spontaneous",
-    inductionMethod: c.iol.on ? c.iol.method : null, iolReasons: [], inductionStartTime: iolISO,
+    modeOfOnset: cardOnset(c),
+    inductionMethod: c.iol.on ? c.iol.method : null, iolReasons: c.iol.on ? c.iolReasons ?? [] : [], inductionStartTime: iolISO,
     analgesia: c.epidural ? "Epidural" : "None", riskFlags: c.flags, labourStage: c.stage,
     activeFirstStageStartTime: c.stage === "Active first stage" ? stageTime : null,
-    passiveStartTime: c.stage === "Passive second stage" ? stageTime : null,
-    pushingStartTime: c.stage === "Active second stage" ? stageTime : null,
+    // Pushing runs from when she started, which the VE cannot tell us; a 10 cm VE
+    // is when she was found fully dilated.
+    passiveStartTime: c.stage === "Passive second stage" ? stageTime
+      : c.stage === PUSHING ? ves.find(v => v.dilation >= 10)?.time ?? null : null,
+    pushingStartTime: c.stage === PUSHING ? hhmmToISO(c.pushHHMM, now) : null,
     armTime: membranes === "AROM" ? romISO : null,
     membranes, membranesTime: romISO, liquor: romISO ? c.rom.liquor : null,
     // The dose is as handed over now; its start time counts towards the hours
@@ -110,8 +154,8 @@ export function bedFromCard(c, now = Date.now(), id = null) {
     oxytocinStartTime: oxyISO,
     oxytocinLog: oxyISO ? [{ id: newId("ox"), startTime: oxyISO, dose: c.oxy.dose, lastIncrementTime: at }] : [],
     ves, ctgLog: [], observations: {},
-    // A VE left for later is listed until one is recorded.
-    pendingDetails: !c.noVE && !ves.length ? ["VE"] : [],
+    // A VE or onset left for later is listed until it is recorded.
+    pendingDetails: [...(!c.noVE && !ves.length ? ["VE"] : []), ...(!cardOnset(c) ? ["onset"] : [])],
     addedBy: "quick-handover",
   };
 }

@@ -41,6 +41,14 @@ export const RULES = [
     local: "App design choice: whether Reviewed is allowed, and the return times, are unit settings.",
   },
   {
+    id: "scope-ignored", group: "Scope", title: "Ignoring an alert",
+    when: "A clinician taps the X on an alert. Details left for later and \"is she still here?\" cannot be ignored, and urgent alerts only if the unit allows it.",
+    then: "It leaves the board and bed card, is listed under \"ignored\" on the bed card, and stays in the handover with who ignored it and when. It returns after the unit's time (default 4 hours, or 30 minutes if urgent), or sooner if it turns urgent, changes or has a newer cause.",
+    severity: "n/a", alertIds: [], sources: [],
+    settings: ["ignoreMin", "ignoreUrgentOn", "ignoreUrgentMin"],
+    local: "App design choice: whether urgent alerts can be ignored, and the return times, are unit settings.",
+  },
+  {
     id: "scope-details-missing", group: "Scope", title: "Details left for later at handover",
     when: "A woman added on the quick handover card without her parity, gestation, stage, a VE (left for later rather than \"No VE yet\"), or her induction start time.",
     then: "Shows \"Add details\" naming what is missing until it is entered. Add details opens Edit, or the VE form when only the VE is missing. Rules that need the missing detail cannot run until then. Ruptured membranes and oxytocin can only be saved with their start times, because those times drive the membranes and oxytocin rules.",
@@ -290,7 +298,7 @@ export const RULES = [
     id: "obs-due", group: "Maternal observations", title: "Routine observations",
     when: "Established labour: pulse hourly; BP, temperature and respiratory rate 4-hourly (BP hourly if hypertensive). After birth with pre-eclampsia: BP at least 4 times a day (due 6 hours after the last).",
     then: "Shown as \"Obs due\" on the board. Recorded values stay on the board, with their age, until a newer value replaces them; marking obs done never erases a value.",
-    severity: "Info; due (warning) if pulse never recorded in established labour; BP urgent if hypertensive", alertIds: ["pulse-due", "pulse-never", "bp-due", "bp-never", "temp-due", "temp-never", "rr-due", "rr-never"],
+    severity: "Info; BP urgent if hypertensive, including when it has not been recorded", alertIds: ["pulse-due", "bp-due", "bp-never", "temp-due", "rr-due"],
     sources: ["NG235 1.8.19", "NG133 1.7.3", "NG133 1.5.15", "NG133 1.5.16"],
   },
   {
