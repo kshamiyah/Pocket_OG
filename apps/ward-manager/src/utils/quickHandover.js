@@ -112,9 +112,9 @@ export function cardMissing(c) {
  */
 export function cardBlocker(c) {
   if (!c.bed) return "Pick a bed to start";
-  if (c.stage === PUSHING && !c.pushHHMM) return "Add when pushing started, or change the stage";
-  if (c.rom.on && !c.rom.hhmm) return "Add the ROM time, or turn ROM off";
-  if (c.oxy.on && (!c.oxy.dose || !c.oxy.hhmm)) return "Add the oxytocin dose and start time, or turn Synto off";
+  if (c.stage === PUSHING && !c.pushHHMM) return "Add the pushing time first";
+  if (c.rom.on && !c.rom.hhmm) return "Add the ROM time first";
+  if (c.oxy.on && (!c.oxy.dose || !c.oxy.hhmm)) return "Add the oxytocin dose and time first";
   return null;
 }
 

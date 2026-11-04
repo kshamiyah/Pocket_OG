@@ -33,10 +33,12 @@ export function AlertList({ alerts, onFix, limit = null, compact = false }) {
       {visible.map(a => {
         const fix = a.reviewed ? null : fixLabel(a.id);
         return (
-          <div key={a.id} className={`rounded-xl border px-3 ${compact ? "py-2" : "py-2.5"} flex items-center gap-2.5 ${ALERT_BOX[a.severity]}`}>
-            <div className="flex-1 min-w-0">
+          <div key={a.id} className={`rounded-xl border px-3 ${compact ? "py-2" : "py-2.5"} flex items-center gap-2.5 ${ALERT_BOX[a.severity]} ${openId === a.id && a.body ? "flex-wrap justify-end" : ""}`}>
+            {/* Open: the text takes the full width and the actions sit underneath,
+                so long advice is not squeezed into a thin column beside them. */}
+            <div className={`flex-1 min-w-0 ${openId === a.id && a.body ? "basis-full" : ""}`}>
               <button type="button" onClick={() => setOpenId(o => (o === a.id ? null : a.id))} aria-expanded={openId === a.id}
-                className="w-full text-left flex items-start gap-1 active:opacity-70">
+                className="w-full py-2 -my-2 text-left flex items-start gap-1 active:opacity-70">
                 <span className={`flex-1 text-sm font-semibold leading-snug ${SEV_TEXT[a.severity]}`}>{tidy(a.title)}</span>
                 {a.body && <span aria-hidden="true" className={`shrink-0 text-xs mt-0.5 text-gray-400 transition-transform ${openId === a.id ? "rotate-90" : ""}`}>›</span>}
               </button>
@@ -57,7 +59,7 @@ export function AlertList({ alerts, onFix, limit = null, compact = false }) {
             </div>
             {compact && openRule && RULE_FOR_ALERT[a.id] && (
               <button type="button" onClick={() => openRule(a.id)} aria-label={`Why: ${a.citation}`}
-                className="shrink-0 w-8 h-8 -mr-1 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 active:scale-95">
+                className="shrink-0 w-10 h-10 -my-1 -mr-1 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 active:scale-95">
                 <IconInfo className="w-4 h-4" />
               </button>
             )}
@@ -121,14 +123,14 @@ function toneFor(kind, alerts) {
 function Tile({ label, value, meta, tone, onClick, ariaLabel }) {
   return (
     <button type="button" onClick={onClick} aria-label={ariaLabel}
-      className={`min-w-0 min-h-[4.75rem] rounded-xl border border-b-[3px] shadow-sm px-2.5 py-2 flex flex-col items-start justify-between text-left active:scale-[0.97] active:border-b transition-transform ${TONE[tone]}`}>
+      className={`min-w-0 min-h-[4.75rem] rounded-xl border border-b-[3px] shadow-sm px-2 py-2 flex flex-col items-start justify-between text-left active:scale-[0.97] active:border-b transition-transform ${TONE[tone]}`}>
       {/* A raised edge and a "+" mark say "tap me": each tile is the button for its action. */}
-      <span className="w-full flex items-center justify-between gap-1">
-        <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{label}</span>
-        <span aria-hidden="true" className="w-4 h-4 rounded-full flex items-center justify-center text-[12px] font-bold leading-none bg-current/10 opacity-80">+</span>
+      <span className="w-full flex items-center justify-between gap-0.5">
+        <span className="min-w-0 truncate text-[10px] font-semibold uppercase opacity-70">{label}</span>
+        <span aria-hidden="true" className="shrink-0 max-[380px]:hidden w-3.5 h-3.5 rounded-full flex items-center justify-center text-[12px] font-bold leading-none bg-current/10 opacity-80">+</span>
       </span>
-      <span className="text-base font-semibold leading-tight tabular-nums truncate w-full">{value}</span>
-      <span className="text-[11px] leading-tight opacity-80 truncate w-full">{meta}</span>
+      <span className="text-base font-semibold leading-tight tabular-nums line-clamp-2 w-full">{value}</span>
+      <span className="text-[11px] leading-tight opacity-80 line-clamp-2 w-full">{meta}</span>
     </button>
   );
 }
@@ -177,7 +179,7 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, o
             <div className="grid">
               <Tile label="Obs" tone={toneFor("obs", t.alerts)} onClick={onObs} ariaLabel="Record obs"
                 value={obsAbnormal ? "Check" : lastAt ? `Last ${fmtAge(now - lastAt)} ago` : "None recorded"}
-                meta={obsAbnormal ? shortLabel(obsAbnormal) : "tap to record"} />
+                meta={obsAbnormal ? shortLabel(obsAbnormal) : "tap to log"} />
             </div>
           );
         })()}
@@ -194,14 +196,14 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, o
   return (
     <Sheet open onClose={onClose} title={`Bed ${bed.bedNumber}`} sub={sub} action={editBtn}>
       {/* Status at a glance; each tile is the button for its action. */}
-      <div className="grid grid-cols-4 gap-1.5">
+      <div className="grid grid-cols-[1fr_1fr_1fr_1.2fr] gap-1.5">
         <Tile label="VE" tone={toneFor("ve", t.alerts)} onClick={onVE} ariaLabel="Log a VE"
           value={ve ? `${ve.dilation} cm` : "None"} meta={ve ? `${ago(ve.time)} ago` : "tap to log"} />
         <Tile label="CTG" tone={toneFor("ctg", t.alerts)} onClick={onCTGConcern} ariaLabel="CTG review"
           value={ctg ? CTG_WORD[ctg.classification] ?? capitalise(ctg.classification) : "None"} meta={ctg ? `${ago(ctg.time)} ago` : "not logged"} />
         <Tile label="Obs" tone={toneFor("obs", t.alerts)} onClick={onObs} ariaLabel="Record obs"
           value={obsAbnormal ? "Check" : !obsTracked(bed) ? (obsLastAt ? `${fmtAge(now - obsLastAt)} ago` : "None") : obsDue.length ? `${obsDue.length} due` : "Done"}
-          meta={obsAbnormal ? shortLabel(obsAbnormal) : obsTracked(bed) ? obs.map(o => `${o.letter}${o.done ? "✓" : "·"}`).join(" ") : obsLastAt ? "last obs, tap to record" : "tap to record"} />
+          meta={obsAbnormal ? shortLabel(obsAbnormal) : obsTracked(bed) ? obs.map(o => `${o.letter}${o.done ? "✓" : "·"}`).join(" ") : obsLastAt ? "last obs, tap to log" : "tap to log"} />
         {/* Always oxytocin, so starting it is always in the same place. */}
         <Tile label="Oxytocin" tone={toneFor("oxy", t.alerts)} onClick={onOxy} ariaLabel={oxy ? "Oxytocin" : "Start oxytocin"}
           value={oxy ? `${oxy.dose} mU` : "Off"}

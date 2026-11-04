@@ -213,7 +213,7 @@ export default function QuickHandover({ beds, iolEntry = null, onSave, onClose, 
   } else if (step === "stage") {
     question = timeFor === "push" ? (
       <>
-        {head("Pushing: what time did she start?", false, <span />)}
+        {head("Pushing since when?", false, <span />)}
         <TimeEntry label="When active pushing started." allowNow now={now} onTime={t => { setTimeFor(null); answer({ pushHHMM: t }); }} />
       </>
     ) : (
@@ -254,7 +254,7 @@ export default function QuickHandover({ beds, iolEntry = null, onSave, onClose, 
           <div key={v.hhmm} className="flex items-center justify-between gap-2 rounded-lg bg-gray-100 dark:bg-gray-900 px-3 py-2">
             <span className="text-sm font-semibold tabular-nums text-gray-900 dark:text-white">{v.dil} cm at {clock(v.iso, now)}{i === list.length - 1 ? " · latest" : ""}</span>
             <button type="button" onClick={() => patch({ ves: card.ves.filter(x => x.hhmm !== v.hhmm) })}
-              className="min-h-8 px-2 text-xs font-semibold text-red-600 dark:text-red-400">Remove</button>
+              className="min-h-10 px-2 text-xs font-semibold text-red-600 dark:text-red-400">Remove</button>
           </div>
         ))}
       </div>
@@ -379,7 +379,7 @@ export default function QuickHandover({ beds, iolEntry = null, onSave, onClose, 
 
   return (
     <Sheet open onClose={close} title={editingId ? `Correcting bed ${editingBed}` : iolEntry ? `Admit ${iolEntry.initials} from IOL queue` : "Admit"}
-      sub={iolEntry ? "Details pre-filled from the queue. No names or identifiers." : `${added.length} added · tap a chip to go back to it · more details under Edit on her card`}
+      sub={iolEntry ? "Pre-filled from the queue" : `${added.length} added · tap a chip to go back`}
       footer={confirmClose ? (
         <div className="space-y-2">
           <p className={`${TYPE_META} text-center`}>{confirmClose === "busy" ? `Save or discard bed ${card.bed} first.` : `Bed ${card.bed} is not saved yet.`}</p>
@@ -393,7 +393,7 @@ export default function QuickHandover({ beds, iolEntry = null, onSave, onClose, 
           <button type="button" onClick={close} className={`${BTN} ${BTN_SECONDARY}`}>Done</button>
           <button type="button" onClick={save} disabled={!!blocker} className={`${BTN} ${BTN_PRIMARY} flex-col !gap-0 min-h-[3.25rem]`}>
             <span className="text-base">{blocker ?? (editingId ? "Save correction" : iolEntry ? "Admit" : "Next bed")}</span>
-            {!blocker && <span className="text-[11px] font-medium opacity-90">{missing.length ? `Saves bed ${card.bed} with gaps: ${missing.join(", ")}` : `Saves bed ${card.bed}, complete`}</span>}
+            {!blocker && <span className="text-[11px] font-medium opacity-90">{missing.length ? `Saves with gaps: ${missing.join(", ")}` : `Saves bed ${card.bed}, complete`}</span>}
           </button>
         </div>
       )}>

@@ -137,7 +137,7 @@ describe("admit from the IOL queue", () => {
 describe("pushing on the card", () => {
   const pushing = p => full({ parity: "Para 0", stage: "Active second stage", ves: [{ dil: 10, hhmm: "1210" }], ...p })
   it("will not save without when pushing started", () => {
-    expect(cardBlocker(pushing())).toMatch(/pushing started/)
+    expect(cardBlocker(pushing())).toMatch(/pushing time/)
     expect(cardBlocker(pushing({ pushHHMM: "1335" }))).toBeNull()
     expect(cardBlocker(full({ pushHHMM: null }))).toBeNull()
   })

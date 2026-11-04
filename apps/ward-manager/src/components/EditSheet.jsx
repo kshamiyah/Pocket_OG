@@ -13,7 +13,7 @@ import {
 } from "../utils/bedModel";
 
 // Shorter stage names so the four fit one row.
-const EDIT_STAGE = { "Latent": "Latent", "Active first stage": "Active", "Passive second stage": "Passive 2nd", "Active second stage": "Pushing" };
+const EDIT_STAGE = { "Latent": "Latent", "Active first stage": "Active", "Passive second stage": "Passive", "Active second stage": "Pushing" };
 
 const ONSET_SHORT = { Spontaneous: "Spont", Induced: "IOL", PPROM: "PPROM" };
 const ANALGESIA_SHORT = { "Remifentanil PCA": "Remi PCA" };
@@ -207,14 +207,14 @@ export default function EditSheet({ bed, existingNumbers = [], onSave, onClose }
       </div>
       {onset === "Induced" && (
         <SummaryLine label="IOL" onClick={() => detail.open("iol")}
-          text={[indMethod, iolWhen ? `started ${whenText(iolWhen)}` : "start time not set", iolReasons.length ? `${iolReasons.length} reason${iolReasons.length > 1 ? "s" : ""}` : null].filter(Boolean).join(" · ")} />
+          text={[indMethod, iolWhen ? whenText(iolWhen).replace(/^at /, "") : "start time not set", iolReasons.length ? `${iolReasons.length} reason${iolReasons.length > 1 ? "s" : ""}` : null].filter(Boolean).join(" · ")} />
       )}
       {/* Analgesia on the main screen: an epidural changes the passive second
           stage timing and is a CTG indication, so it should not be hidden. */}
       <div>
         <Label tight>Analgesia</Label>
-        <div className="grid grid-cols-5 gap-1">
-          {ANALGESIA.map(a => <Chip key={a} small className="px-0 whitespace-nowrap !text-[11px]" on={analgesia === a} onClick={() => setAnalgesia(a)}>{ANALGESIA_SHORT[a] ?? a}</Chip>)}
+        <div className="flex flex-wrap gap-1">
+          {ANALGESIA.map(a => <Chip key={a} small className="whitespace-nowrap !text-[11px]" on={analgesia === a} onClick={() => setAnalgesia(a)}>{ANALGESIA_SHORT[a] ?? a}</Chip>)}
         </div>
       </div>
       {detail.page === "iol" && (
