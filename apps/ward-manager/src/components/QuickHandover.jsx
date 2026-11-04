@@ -3,17 +3,18 @@ import Sheet from "../ui/Sheet";
 import RiskPicker from "./RiskPicker";
 import { Chip, Label } from "../ui/atoms";
 import { BTN, BTN_PRIMARY, BTN_SECONDARY, TYPE_META } from "../ui/styles";
-import { IND_METHODS, LIQUORS, LIQUOR_SHORT, STAGES, parityShort } from "../utils/bedModel";
+import { IND_METHODS, LIQUORS, LIQUOR_SHORT, ONSETS, STAGES, parityShort } from "../utils/bedModel";
 import { getUnitSettings } from "../data/unitSettings";
 import { clock } from "../utils/time";
 import {
-  QUICK_STEPS, bedFromCard, cardBlocker, cardGestation, cardMissing, cardVEs, emptyCard, hhmmToISO, typeTimeDigit, vesGoDown,
+  PUSHING, QUICK_STEPS, bedFromCard, cardBlocker, cardFromIOLEntry, cardGestation, cardMissing, cardOnset, cardVEs, emptyCard, hhmmToISO, onsetPatch, typeTimeDigit, vesGoDown,
 } from "../utils/quickHandover";
 
 const ROOMS = ["Pool", "HDU", "Triage", "Theatre", "Recovery"];
 const PARITY = [["Para 0", "P0"], ["Para 1", "P1"], ["Para 2", "P2"], ["Para 3", "P3"], ["Para 4+", "P4+"]];
 const STAGE_BTN = { "Latent": "Latent", "Active first stage": "Active", "Passive second stage": "Passive 2nd", "Active second stage": "Pushing" };
-const STEP_LABEL = { bed: "Bed", parity: "Parity", gest: "Gestation", stage: "Stage", ve: "VEs", extras: "Extras" };
+const ONSET_BTN = { Spontaneous: "Spont", Induced: "IOL", PPROM: "PPROM" };
+const STEP_LABEL = { bed: "Bed", parity: "Parity", gest: "Gestation", stage: "Stage", onset: "Onset", ve: "VEs", extras: "Extras" };
 // Common flags as one-tap toggles; the full list is under "More risk factors".
 const QUICK_FLAGS = [["GBS+", "GBS+"], ["Pre-eclampsia", "PET"], ["Previous LSCS", "Prev CS"]];
 
@@ -73,13 +74,17 @@ function TimeEntry({ label, onTime, allowNow = false, now }) {
 }
 
 /**
- * Quick handover: one card per woman, tap-only, in the order handover is said.
+ * Every admission: one card per woman, tap-only, in the order handover is said.
  * Each "Next bed" puts her on the board at once, so nothing is lost if the
- * phone locks; gaps show on the board as "Add details".
+ * phone locks; gaps show on the board as "Add details", and the rest is added
+ * later from her Edit screen. With an IOL queue entry it admits that one woman,
+ * pre-filled, and closes on save.
  */
-export default function QuickHandover({ beds, onSave, onClose, onBackHandler = null }) {
-  const [now] = useState(() => Date.now());
-  const [card, setCard] = useState(emptyCard);
+export default function QuickHandover({ beds, iolEntry = null, onSave, onClose, onBackHandler = null }) {
+  // Read fresh each render: a VE timed a minute ago must not read as yesterday
+  // because the card has been open for a while.
+  const now = Date.now();
+  const [card, setCard] = useState(() => (iolEntry ? cardFromIOLEntry(iolEntry) : emptyCard()));
   const [step, setStep] = useState("bed");
   const [hist, setHist] = useState([]);
   const [veDil, setVeDil] = useState(null);     // dilation picked, waiting for its time
@@ -93,7 +98,7 @@ export default function QuickHandover({ beds, onSave, onClose, onBackHandler = n
   const patch = p => { setCard(c => ({ ...c, ...p })); setConfirmClose(false); };
   const patchIn = (key, p) => setCard(c => ({ ...c, [key]: { ...c[key], ...p } }));
   const done = (c, s) => s === "bed" ? !!c.bed : s === "parity" ? !!c.parity : s === "gest" ? !!cardGestation(c)
-    : s === "stage" ? !!c.stage : s === "ve" ? c.noVE || c.ves.length > 0 : true;
+    : s === "stage" ? !!c.stage : s === "onset" ? !!cardOnset(c) : s === "ve" ? c.noVE || c.ves.length > 0 : true;
   const goTo = s => { setVeDil(null); setTimeFor(null); if (s !== step) { setHist(h => [...h, step]); setStep(s); } };
   // Move to the next question not yet answered or left for later.
   const advance = (c, from = step) => {
@@ -122,6 +127,7 @@ export default function QuickHandover({ beds, onSave, onClose, onBackHandler = n
     if (blocker) return;
     const bed = bedFromCard(card, Date.now(), editingId);
     onSave(bed, !!editingId);
+    if (iolEntry) return; // The queue admit closes the sheet itself.
     setAdded(list => [...list.filter(a => a.id !== bed.id), { id: bed.id, bed: bed.bedNumber, card }]);
     reset();
   };
@@ -205,11 +211,38 @@ export default function QuickHandover({ beds, onSave, onClose, onBackHandler = n
       </>
     );
   } else if (step === "stage") {
-    question = (
+    question = timeFor === "push" ? (
+      <>
+        {head("Pushing: what time did she start?", false, <span />)}
+        <TimeEntry label="When active pushing started." allowNow now={now} onTime={t => { setTimeFor(null); answer({ pushHHMM: t }); }} />
+      </>
+    ) : (
       <>
         {head("Stage")}
         <div className="grid grid-cols-2 gap-2">
-          {STAGES.map(s => <Key key={s} on={card.stage === s} onClick={() => answer({ stage: s })}>{STAGE_BTN[s]}</Key>)}
+          {STAGES.map(s => (
+            <Key key={s} on={card.stage === s} onClick={() => {
+              // Pushing asks for its start time first: the alerts run from it.
+              if (s === PUSHING && !card.pushHHMM) { patch({ stage: s }); setTimeFor("push"); }
+              else answer({ stage: s });
+            }}>{STAGE_BTN[s]}</Key>
+          ))}
+        </div>
+        {card.stage === PUSHING && (
+          <button type="button" onClick={() => setTimeFor("push")}
+            className={`w-full min-h-10 px-3 rounded-lg border text-left text-sm ${card.pushHHMM ? "border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300" : "border-red-300 dark:border-red-900 text-red-700 dark:text-red-400"}`}>
+            <b>Pushing since:</b> {card.pushHHMM ? hmText(card.pushHHMM, now) : "needed, tap to type"}
+          </button>
+        )}
+      </>
+    );
+  } else if (step === "onset") {
+    const current = cardOnset(card);
+    question = (
+      <>
+        {head("Onset")}
+        <div className="grid grid-cols-3 gap-2">
+          {ONSETS.map(o => <Key key={o} on={current === o} onClick={() => answer(onsetPatch(card, o))}>{ONSET_BTN[o]}</Key>)}
         </div>
       </>
     );
@@ -234,20 +267,20 @@ export default function QuickHandover({ beds, onSave, onClose, onBackHandler = n
         <>
           {head(`${veDil} cm: what time?`, false, <span />)}
           {rows}
-          <TimeEntry label="Time of this VE." allowNow={!card.ves.length} now={now} onTime={hhmm => {
-            if (card.ves.some(v => v.hhmm === hhmm)) { setVeDil(null); return; }
-            const c = { ...card, noVE: false, ves: [...card.ves, { dil: veDil, hhmm }], skipped: card.skipped.filter(x => x !== "ve") };
-            setCard(c); setVeDil(null);
-            // The first VE moves straight on; earlier ones are added from here.
-            if (!card.ves.length) advance(c);
+          <TimeEntry label="Time of this VE." allowNow now={now} onTime={hhmm => {
+            // Stays on this page, so the next VE heard can be added in any order.
+            // A second VE at the same time replaces the first (a correction).
+            setCard(c => ({ ...c, noVE: false, ves: [...c.ves.filter(v => v.hhmm !== hhmm), { dil: veDil, hhmm }], skipped: c.skipped.filter(x => x !== "ve") }));
+            setVeDil(null);
           }} />
         </>
       );
     } else {
       question = (
         <>
-          {head(list.length ? "Add an earlier VE?" : "Latest VE", !list.length)}
+          {head(list.length ? "Add another VE" : "VEs", !list.length)}
           {rows}{warn}
+          <p className={TYPE_META}>Add them in any order. The times put them in order.</p>
           <div className="grid grid-cols-5 gap-2">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => <Key key={n} onClick={() => setVeDil(n)}>{n}</Key>)}
           </div>
@@ -260,6 +293,8 @@ export default function QuickHandover({ beds, onSave, onClose, onBackHandler = n
   } else {
     const toggle = (key, on) => {
       patchIn(key, { on });
+      // Turning ROM off means she is no longer PPROM; the onset is asked again.
+      if (key === "rom" && !on && card.onset === "PPROM") patch({ onset: null });
       // ROM opens its time pad at once; oxytocin waits for the dose, so the
       // dose buttons and the time keypad are never on screen together.
       setTimeFor(on && key === "rom" ? key : null);
@@ -281,10 +316,9 @@ export default function QuickHandover({ beds, onSave, onClose, onBackHandler = n
       <>
         {head("Anything else?", false, <span className={TYPE_META}>Optional</span>)}
         {card.ves.length > 0 && (
-          <Key className="w-full text-sm" onClick={() => goTo("ve")}>+ Add an earlier VE ({card.ves.length} so far)</Key>
+          <Key className="w-full text-sm" onClick={() => goTo("ve")}>+ Add another VE ({card.ves.length} so far)</Key>
         )}
-        <div className="grid grid-cols-4 gap-2">
-          <Key className="text-sm" on={card.iol.on} onClick={() => toggle("iol", !card.iol.on)}>IOL</Key>
+        <div className="grid grid-cols-3 gap-2">
           <Key className="text-sm" on={card.rom.on} onClick={() => toggle("rom", !card.rom.on)}>ROM</Key>
           <Key className="text-sm" on={card.oxy.on} onClick={() => toggle("oxy", !card.oxy.on)}>Synto</Key>
           <Key className="text-sm" on={card.epidural} onClick={() => patch({ epidural: !card.epidural })}>Epidural</Key>
@@ -326,7 +360,7 @@ export default function QuickHandover({ beds, onSave, onClose, onBackHandler = n
             {timeLine("oxy", "Oxytocin started", true)}
           </div>
         )}
-        <RiskPicker line values={card.flags} onChange={flags => patch({ flags })} backLabel="Quick handover" />
+        <RiskPicker line values={card.flags} onChange={flags => patch({ flags })} backLabel="Admit" />
       </>
     );
   }
@@ -337,14 +371,15 @@ export default function QuickHandover({ beds, onSave, onClose, onBackHandler = n
     bed: card.bed ? `Bed ${card.bed}` : null,
     parity: card.parity ? parityShort(card.parity) : null,
     gest: cardGestation(card),
-    stage: card.stage ? STAGE_BTN[card.stage] : null,
+    stage: !card.stage ? null : card.stage === PUSHING && card.pushHHMM ? `Pushing ${hmText(card.pushHHMM, now)}` : STAGE_BTN[card.stage],
+    onset: cardOnset(card) ? ONSET_BTN[cardOnset(card)] : null,
     ve: card.noVE ? "No VE yet" : latest ? `${latest.dil} cm ${clock(latest.iso, now)}${card.ves.length > 1 ? ` (+${card.ves.length - 1})` : ""}` : null,
-    extras: [card.iol.on && "IOL", card.rom.on && card.rom.type, card.oxy.on && "Synto", card.epidural && "Epidural", ...card.flags].filter(Boolean).join(" · ") || null,
+    extras: [card.rom.on && card.rom.type, card.oxy.on && "Synto", card.epidural && "Epidural", ...card.flags].filter(Boolean).join(" · ") || null,
   };
 
   return (
-    <Sheet open onClose={close} title={editingId ? `Correcting bed ${editingBed}` : "Quick handover"}
-      sub={`${added.length} added this handover · tap a chip to go back to it`}
+    <Sheet open onClose={close} title={editingId ? `Correcting bed ${editingBed}` : iolEntry ? `Admit ${iolEntry.initials} from IOL queue` : "Admit"}
+      sub={iolEntry ? "Details pre-filled from the queue. No names or identifiers." : `${added.length} added · tap a chip to go back to it · more details under Edit on her card`}
       footer={confirmClose ? (
         <div className="space-y-2">
           <p className={`${TYPE_META} text-center`}>{confirmClose === "busy" ? `Save or discard bed ${card.bed} first.` : `Bed ${card.bed} is not saved yet.`}</p>
@@ -357,7 +392,7 @@ export default function QuickHandover({ beds, onSave, onClose, onBackHandler = n
         <div className="grid grid-cols-[auto_1fr] gap-2">
           <button type="button" onClick={close} className={`${BTN} ${BTN_SECONDARY}`}>Done</button>
           <button type="button" onClick={save} disabled={!!blocker} className={`${BTN} ${BTN_PRIMARY} flex-col !gap-0 min-h-[3.25rem]`}>
-            <span className="text-base">{blocker ?? (editingId ? "Save correction" : "Next bed")}</span>
+            <span className="text-base">{blocker ?? (editingId ? "Save correction" : iolEntry ? "Admit" : "Next bed")}</span>
             {!blocker && <span className="text-[11px] font-medium opacity-90">{missing.length ? `Saves bed ${card.bed} with gaps: ${missing.join(", ")}` : `Saves bed ${card.bed}, complete`}</span>}
           </button>
         </div>
@@ -379,7 +414,7 @@ export default function QuickHandover({ beds, onSave, onClose, onBackHandler = n
       <div className="space-y-3">{question}</div>
       {added.length > 0 && (
         <div className="space-y-1.5 pt-2">
-          <Label tight hint="tap to correct">Added this handover</Label>
+          <Label tight hint="tap to correct">Added</Label>
           {[...added].reverse().map(a => {
             const b = beds[a.id];
             if (!b) return null;

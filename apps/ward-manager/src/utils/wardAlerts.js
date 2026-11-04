@@ -972,6 +972,7 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
     if (!bed.parity) missing.push("parity");
     if (!bed.gestation) missing.push("gestation");
     if (!bed.labourStage) missing.push("stage");
+    if ((bed.pendingDetails ?? []).includes("onset") && !bed.modeOfOnset) missing.push("onset");
     if ((bed.pendingDetails ?? []).includes("VE") && !(bed.ves ?? []).length) missing.push("VE");
     if (bed.modeOfOnset === "Induced" && !bed.inductionStartTime) missing.push("induction start time");
     if (missing.length) {

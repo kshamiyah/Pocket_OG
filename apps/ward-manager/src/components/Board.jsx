@@ -129,7 +129,7 @@ function Section({ title, count, tone = "ok", children }) {
 
 export default function Board({
   rows, summary, now, shift, dark, flashId, iolQueue, tab, onTab,
-  onOpenBed, onAdmit, onQuick, onRound, onHandover, onToggleTheme, onMenu, iolView,
+  onOpenBed, onAdmit, onRound, onHandover, onToggleTheme, onMenu, iolView,
 }) {
   const [showDelivered, setShowDelivered] = useState(false);
   const urgent = rows.filter(r => r.t.tier === "urgent");
@@ -206,11 +206,8 @@ export default function Board({
             {rows.length === 0 ? (
               <div className="pt-16 text-center space-y-4">
                 <p className="text-sm text-gray-500 dark:text-gray-400">No women on the board yet.</p>
-                <button type="button" onClick={onQuick} className={`${BTN} ${BTN_PRIMARY} mx-auto px-6`}>
-                  <IconPlus /> Quick handover: add several women
-                </button>
-                <button type="button" onClick={onAdmit} className={`${BTN} ${BTN_SECONDARY} mx-auto px-6`}>
-                  Admit one woman (full form)
+                <button type="button" onClick={onAdmit} className={`${BTN} ${BTN_PRIMARY} mx-auto px-6`}>
+                  <IconPlus /> Admit
                 </button>
               </div>
             ) : (

@@ -7,7 +7,7 @@ import CTGSheet from "./CTGSheet";
 import OxySheet from "./OxySheet";
 import ObsSheet from "./ObsSheet";
 import DeliverySheet from "./DeliverySheet";
-import AdmitSheet from "./AdmitSheet";
+import EditSheet from "./EditSheet";
 import QuickHandover from "./QuickHandover";
 import BoardRound from "./BoardRound";
 import HandoverSheet from "./HandoverSheet";
@@ -278,8 +278,7 @@ export default function WardPage({ shift, onEndShift }) {
         rows={rows} summary={summary} now={now} shift={shift} dark={dark} flashId={flashId}
         iolQueue={iolQueue} tab={tab} onTab={setTab}
         onOpenBed={id => setSheet({ type: "bed", bedId: id })}
-        onAdmit={() => setSheet({ type: "admit" })}
-        onQuick={() => setSheet({ type: "quick" })}
+        onAdmit={() => setSheet({ type: "quick" })}
         onRound={startRound}
         onHandover={() => setSheet({ type: "handover" })}
         onToggleTheme={toggleTheme}
@@ -288,7 +287,7 @@ export default function WardPage({ shift, onEndShift }) {
           <IOLQueue queue={iolQueue} now={now}
             onAdd={() => setSheet({ type: "iol" })}
             onEdit={entry => setSheet({ type: "iol", entry })}
-            onAdmit={entry => setSheet({ type: "admit", entry })}
+            onAdmit={entry => setSheet({ type: "quick", entry })}
             onRemove={entry => commit(`${entry.initials} removed from IOL queue`, beds, iolQueue.filter(e => e.id !== entry.id))} />
         }
       />
@@ -339,16 +338,15 @@ export default function WardPage({ shift, onEndShift }) {
         <ObsSheet bed={sb} onClose={finish} onSave={(u, msg) => { updateBed(sb.id, u, `${msg} · Bed ${sb.bedNumber}`); finish(); }} />
       )}
       {sheet?.type === "edit" && sb && (
-        <AdmitSheet mode="edit" bed={sb} existingNumbers={Object.values(beds).map(b => b.bedNumber)}
+        <EditSheet bed={sb} existingNumbers={Object.values(beds).map(b => b.bedNumber)}
           onClose={sheet.back === "bed" ? () => setSheet({ type: "bed", bedId: sb.id }) : closeSheet}
           onSave={u => editDetails(sb.id, u, sheet.back)} />
       )}
-      {sheet?.type === "admit" && (
-        <AdmitSheet mode={sheet.entry ? "iol" : "new"} iolEntry={sheet.entry ?? null}
-          existingNumbers={Object.values(beds).map(b => b.bedNumber)} onClose={closeSheet} onSave={bed => admit(bed, sheet.entry)}
-          onQuick={sheet.entry ? null : () => setSheet({ type: "quick" })} />
+      {sheet?.type === "quick" && (
+        <QuickHandover key={sheet.entry?.id ?? "new"} beds={beds} iolEntry={sheet.entry ?? null}
+          onSave={sheet.entry ? bed => admit(bed, sheet.entry) : quickSave}
+          onBackHandler={fn => { quickBack.current = fn; }} onClose={() => { closeSheet(); setTab("board"); }} />
       )}
-      {sheet?.type === "quick" && <QuickHandover beds={beds} onSave={quickSave} onBackHandler={fn => { quickBack.current = fn; }} onClose={() => { closeSheet(); setTab("board"); }} />}
       {sheet?.type === "handover" && <HandoverSheet beds={beds} shift={shift} now={now} removed={removed} iolQueue={iolQueue} onClose={closeSheet} />}
       {sheet?.type === "iol" && (
         <IOLEntrySheet entry={sheet.entry ?? null} onClose={closeSheet} onSave={entry => {

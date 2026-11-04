@@ -14,7 +14,7 @@ The look (colours, type, sheets, undo toast) matches the Handover app so the two
    - **On track**: everything else, with the next thing due (for example "VE 01:28, in 3h 30m").
    Routine pulse, BP and temperature reminders are P/B/T dots on the row instead of alerts.
 4. **Tap a woman** for big actions: **CTG normal** (1 tap), **CTG concern** (full NG229 review), **VE** (dilation and save; membranes, station and contractions carry over from the last VE), **Obs done** (1 tap), stage chips, delivered, oxytocin (start, change, hold or stop). Alerts such as GBS antibiotics or neonatal team have a Given or Done button.
-5. **Admit**: bed, parity, gestation and stage on one screen (about 6 taps). Onset, membranes, analgesia, risk flags and the handover VE are optional.
+5. **Admit**: one card per woman in the order handover is said: bed, parity, gestation, stage, onset, VEs in any order, then ROM, oxytocin, epidural and risks. Anything not heard can be left for later and shows on the board as "Add details". Further details are under Edit on her card.
 6. **Handover**: plain-text handover sorted by bed, ready to copy or share.
 
 Every change shows an undo toast for a few seconds instead of an "Are you sure?" dialog. Times are "Now", "10 / 20 / 30 / 60 min ago" or an exact time today or earlier; future times are refused.
