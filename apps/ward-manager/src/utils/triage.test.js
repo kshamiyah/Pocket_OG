@@ -46,10 +46,10 @@ describe("triageBed", () => {
     expect(r.tier).toBe("ok")
   })
 
-  it("a pulse never recorded in established labour is due, not on track", () => {
+  it("obs never recorded raise no alert, and leave her on track", () => {
     const r = triageBed(activeBed({ observations: {} }), NOW)
-    expect(r.shown.some(a => a.id === "pulse-never")).toBe(true)
-    expect(r.tier).toBe("warning")
+    expect(r.shown.filter(a => /not recorded/.test(a.title))).toEqual([])
+    expect(r.tier).toBe("ok")
   })
 
   it("no CTG ever logged in established labour is due, not on track", () => {

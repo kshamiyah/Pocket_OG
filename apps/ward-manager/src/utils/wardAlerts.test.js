@@ -597,9 +597,9 @@ describe("Diabetic BGL monitoring", () => {
 // ─── Observation monitoring frequencies (NICE NG235 §1.4.5) ──────────────────
 
 describe("Observation monitoring in active labour", () => {
-  it("fires pulse-never when no pulse recorded", () => {
-    const bed = activeBed({ observations: { lastBP: t(30*MIN), lastTemp: t(30*MIN) } })
-    expect(has(computeAlerts(bed, NOW), "pulse-never")).toBe(true)
+  it("raises no alert for pulse, BP, temperature or RR never recorded", () => {
+    const titles = computeAlerts(activeBed({ observations: {} }), NOW).map(a => a.title)
+    expect(titles.filter(x => /not recorded/.test(x))).toEqual([])
   })
 
   it("fires pulse-due when pulse > 1h ago", () => {
@@ -609,9 +609,9 @@ describe("Observation monitoring in active labour", () => {
     expect(has(computeAlerts(bed, NOW), "pulse-due")).toBe(true)
   })
 
-  it("fires bp-never when no BP recorded", () => {
-    const bed = activeBed({ observations: { lastPulse: t(30*MIN), lastTemp: t(30*MIN) } })
-    expect(has(computeAlerts(bed, NOW), "bp-never")).toBe(true)
+  it("still fires an urgent bp-never for a hypertensive woman", () => {
+    const bed = activeBed({ riskFlags: ["Hypertensive"], observations: { lastPulse: t(30*MIN), lastTemp: t(30*MIN) } })
+    expect(computeAlerts(bed, NOW).find(a => a.id === "bp-never")?.severity).toBe("urgent")
   })
 
   it("fires bp-due (info) when BP > 4h ago (non-hypertensive)", () => {
@@ -646,7 +646,7 @@ describe("Observation monitoring in active labour", () => {
       parity: "Para 0", gestation: "39+2", labourStage: "Latent",
       analgesia: "None", riskFlags: [], ves: [], oxytocinLog: [], observations: {},
     }
-    const monitoringIds = ["pulse-never", "pulse-due", "bp-never", "bp-due", "temp-never", "temp-due"]
+    const monitoringIds = ["pulse-due", "bp-never", "bp-due", "temp-due"]
     const fired = ids(computeAlerts(bed, NOW)).filter(id => monitoringIds.includes(id))
     expect(fired).toHaveLength(0)
   })

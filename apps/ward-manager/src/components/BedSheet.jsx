@@ -108,7 +108,7 @@ const TONE = {
 const TILE_ALERTS = {
   ve: { red: ["ve-overdue", "ve-never", "slow-progress", "oxytocin-poor-progress"], amber: ["ve-due", "arm-reassess", "active-phase-limit"] },
   ctg: { red: ["ctg-pathological", "ctg-suspicious-overdue", "oxytocin-stop-pathological"], amber: ["ctg-suspicious", "ctg-review-due", "ctg-not-documented"] },
-  obs: { red: ["bp-severe", "bp-low", "temp-38", "rr-low", "bgl-low", "bgl-high", "bgl-due", "bgl-never"], amber: ["tachycardia", "oliguria", "bp-elevated", "temp-375", "temp-low", "rr-high", "pulse-due", "pulse-never", "bp-due", "bp-never", "temp-due", "temp-never", "rr-due", "rr-never"] },
+  obs: { red: ["bp-severe", "bp-low", "temp-38", "rr-low", "bgl-low", "bgl-high", "bgl-due", "bgl-never"], amber: ["tachycardia", "oliguria", "bp-elevated", "temp-375", "temp-low", "rr-high", "pulse-due", "bp-due", "bp-never", "temp-due", "rr-due"] },
   oxy: { red: ["hyperstim", "oxytocin-max", "oxytocin-stop-pathological"], amber: ["oxytocin-increment"] },
   memb: { red: ["mec-thick", "liquor-blood", "prom-48h", "prom-24h", "pprom-antibiotics"], amber: ["mec-thin"] },
 };

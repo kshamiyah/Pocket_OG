@@ -290,7 +290,7 @@ export const RULES = [
     id: "obs-due", group: "Maternal observations", title: "Routine observations",
     when: "Established labour: pulse hourly; BP, temperature and respiratory rate 4-hourly (BP hourly if hypertensive). After birth with pre-eclampsia: BP at least 4 times a day (due 6 hours after the last).",
     then: "Shown as \"Obs due\" on the board. Recorded values stay on the board, with their age, until a newer value replaces them; marking obs done never erases a value.",
-    severity: "Info; due (warning) if pulse never recorded in established labour; BP urgent if hypertensive", alertIds: ["pulse-due", "pulse-never", "bp-due", "bp-never", "temp-due", "temp-never", "rr-due", "rr-never"],
+    severity: "Info; BP urgent if hypertensive, including when it has not been recorded", alertIds: ["pulse-due", "bp-due", "bp-never", "temp-due", "rr-due"],
     sources: ["NG235 1.8.19", "NG133 1.7.3", "NG133 1.5.15", "NG133 1.5.16"],
   },
   {

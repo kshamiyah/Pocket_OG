@@ -1018,15 +1018,15 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
   }
 
   // ─── Maternal observations due (NICE NG235 1.8.19; NG133 1.7.3) ──────
+  // Obs never recorded are not alerts: they show as "Obs due" on the board, so a
+  // handover does not fill every card with them. A hypertensive woman's BP is
+  // the exception, because her hourly BP is a safety check of its own.
   if (!delivered && bed.labourStage !== "Latent") {
     if (obs.lastPulse) {
       const ms = now - new Date(obs.lastPulse).getTime();
       if (ms >= HOUR) {
         alerts.push({ id: "pulse-due", severity: "info", title: "Maternal pulse check due", body: `Last recorded ${formatAge(ms)} ago. Hourly pulse in active labour.`, citation: "NICE NG235 1.8.19 [2007]" });
       }
-    } else {
-      // Never recorded is not "on track": it is due now.
-      alerts.push({ id: "pulse-never", severity: "warning", title: "Pulse not recorded", body: "Hourly maternal pulse required in active labour.", citation: "NICE NG235 1.8.19 [2007]" });
     }
 
     if (obs.lastBP) {
@@ -1041,8 +1041,8 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
           citation: isHypertensive ? "NICE NG133 1.7.3 [2019]" : "NICE NG235 1.8.19 [2007]",
         });
       }
-    } else {
-      alerts.push({ id: "bp-never", severity: isHypertensive ? "urgent" : "info", title: "BP not recorded", body: isHypertensive ? "Hourly BP required (hypertensive patient)." : "4-hourly BP required in active labour.", citation: "NICE NG235 1.8.19 [2007]" });
+    } else if (isHypertensive) {
+      alerts.push({ id: "bp-never", severity: "urgent", title: "BP not recorded", body: "Hourly BP required (hypertensive patient).", citation: "NICE NG133 1.7.3 [2019]" });
     }
 
     if (obs.lastTemp) {
@@ -1050,8 +1050,6 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       if (ms >= 4 * HOUR) {
         alerts.push({ id: "temp-due", severity: "info", title: "Temperature check due", body: `4-hourly temperature in active labour. Last ${formatAge(ms)} ago.`, citation: "NICE NG235 1.8.19 [2007]" });
       }
-    } else {
-      alerts.push({ id: "temp-never", severity: "info", title: "Temperature not recorded", body: "4-hourly temperature required in active labour.", citation: "NICE NG235 1.8.19 [2007]" });
     }
 
     if (obs.lastRR) {
@@ -1059,8 +1057,6 @@ export function computeAlerts(bed, now = Date.now(), unit = getUnitSettings()) {
       if (ms >= 4 * HOUR) {
         alerts.push({ id: "rr-due", severity: "info", title: "Respiratory rate due", body: `4-hourly respiratory rate in active labour. Last ${formatAge(ms)} ago.`, citation: "NICE NG235 1.8.19 [2007]" });
       }
-    } else {
-      alerts.push({ id: "rr-never", severity: "info", title: "Respiratory rate not recorded", body: "4-hourly respiratory rate required in active labour.", citation: "NICE NG235 1.8.19 [2007]" });
     }
   }
 
@@ -1263,8 +1259,8 @@ const TIER_0 = [
   "infection-suspected", "temp-38", "rr-high", "tachycardia", "hyperstim", "bgl-low", "mec-thick", "liquor-blood",
 ];
 const TIER_2 = new Set([
-  "ve-overdue", "ve-never", "ve-due", "bp-due", "bp-never", "pulse-due", "pulse-never", "temp-due", "temp-never",
-  "rr-due", "rr-never", "bgl-due", "bgl-never", "latent-reassess", "ctg-review-due",
+  "ve-overdue", "ve-never", "ve-due", "bp-due", "bp-never", "pulse-due", "temp-due",
+  "rr-due", "bgl-due", "bgl-never", "latent-reassess", "ctg-review-due",
   "ctg-not-documented", "oxytocin-increment", "active-phase-limit", "under-28",
 ]);
 export function alertTier(id) {

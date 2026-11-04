@@ -435,10 +435,10 @@ export const PERSISTENT_FLAGS = {
   "pprom-antibiotics": { field: "ppromAntibioticsStarted", label: "Antibiotics given" },
 };
 export const OBS_STAMP = {
-  "pulse-never": "lastPulse", "pulse-due": "lastPulse",
+  "pulse-due": "lastPulse",
   "bp-never": "lastBP", "bp-due": "lastBP",
-  "temp-never": "lastTemp", "temp-due": "lastTemp",
-  "rr-never": "lastRR", "rr-due": "lastRR",
+  "temp-due": "lastTemp",
+  "rr-due": "lastRR",
 };
 
 /**
