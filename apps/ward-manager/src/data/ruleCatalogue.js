@@ -41,6 +41,14 @@ export const RULES = [
     local: "App design choice: whether Reviewed is allowed, and the return times, are unit settings.",
   },
   {
+    id: "scope-ignored", group: "Scope", title: "Ignoring an alert",
+    when: "A clinician taps the X on an alert. Details left for later and \"is she still here?\" cannot be ignored, and urgent alerts only if the unit allows it.",
+    then: "It leaves the board and bed card, is listed under \"ignored\" on the bed card, and stays in the handover with who ignored it and when. It returns after the unit's time (default 4 hours, or 30 minutes if urgent), or sooner if it turns urgent, changes or has a newer cause.",
+    severity: "n/a", alertIds: [], sources: [],
+    settings: ["ignoreMin", "ignoreUrgentOn", "ignoreUrgentMin"],
+    local: "App design choice: whether urgent alerts can be ignored, and the return times, are unit settings.",
+  },
+  {
     id: "scope-details-missing", group: "Scope", title: "Details left for later at handover",
     when: "A woman added on the quick handover card without her parity, gestation, stage, a VE (left for later rather than \"No VE yet\"), or her induction start time.",
     then: "Shows \"Add details\" naming what is missing until it is entered. Add details opens Edit, or the VE form when only the VE is missing. Rules that need the missing detail cannot run until then. Ruptured membranes and oxytocin can only be saved with their start times, because those times drive the membranes and oxytocin rules.",

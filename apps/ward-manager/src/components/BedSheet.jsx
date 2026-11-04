@@ -2,11 +2,11 @@ import { useState } from "react";
 import Sheet from "../ui/Sheet";
 import { Label } from "../ui/atoms";
 import { ALERT_BOX, BTN, BTN_SECONDARY, SEV_TEXT } from "../ui/styles";
-import { IconChevron, IconInfo } from "../ui/icons";
+import { IconChevron, IconInfo, IconX } from "../ui/icons";
 import { fmtAge, clock } from "../utils/time";
 import {
   ACTION_ALERTS, DECLINABLE, STILL_HERE, STAGES, STAGE_SHORT, LIQUOR_SHORT, capitalise, currentOxytocin, fixLabel, lastCTG, lastVE, obsStatus, obsTracked,
-  parityWithHistory, riskShort, stageLabel, membraneStatus,
+  parityWithHistory, riskShort, stageLabel, membraneStatus, canIgnore,
 } from "../utils/bedModel";
 import { shortLabel, tidy } from "../utils/triage";
 import { useRules } from "../ui/rulesContext";
@@ -17,13 +17,14 @@ import { RULE_FOR_ALERT } from "../data/ruleCatalogue";
  * full when the sheet opens; the rest are named on one line that expands, so
  * nothing is hidden without a trace.
  */
-export function AlertList({ alerts, onFix, limit = null, compact = false }) {
+export function AlertList({ alerts, ignored = [], onFix, limit = null, compact = false }) {
   const { openRule } = useRules();
   const [expanded, setExpanded] = useState(false);
+  const [showIgnored, setShowIgnored] = useState(false);
   // Tap an alert to read its details (with this woman's numbers); the top
   // unreviewed one starts open.
   const [openId, setOpenId] = useState(() => alerts.find(a => !a.reviewed)?.id ?? null);
-  if (!alerts.length) return null;
+  if (!alerts.length && !ignored.length) return null;
   const collapsed = limit != null && !expanded && alerts.length > limit + 1;
   const visible = collapsed ? alerts.slice(0, limit) : alerts;
   const rest = alerts.slice(limit ?? alerts.length);
@@ -77,9 +78,30 @@ export function AlertList({ alerts, onFix, limit = null, compact = false }) {
                 )}
               </div>
             )}
+            {onFix && canIgnore(a) && (
+              <button type="button" onClick={() => onFix(a.id, "ignore")} aria-label={`Ignore: ${tidy(a.title)}`}
+                className="shrink-0 w-10 h-10 -my-1 -mr-1 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 active:scale-95">
+                <IconX className="w-4 h-4" />
+              </button>
+            )}
           </div>
         );
       })}
+      {ignored.length > 0 && (
+        <div className="px-1">
+          <button type="button" onClick={() => setShowIgnored(v => !v)} aria-expanded={showIgnored}
+            className="min-h-10 text-xs font-semibold text-gray-500 dark:text-gray-400 underline underline-offset-4">
+            {ignored.length} ignored
+          </button>
+          {showIgnored && ignored.map(a => (
+            <div key={a.id} className="flex items-center gap-2 py-1">
+              <span className="flex-1 min-w-0 text-xs text-gray-600 dark:text-gray-300">{tidy(a.title)}</span>
+              <button type="button" onClick={() => onFix(a.id, "unignore")}
+                className="shrink-0 min-h-10 px-2 text-xs font-semibold text-claude-700 dark:text-claude-400">Bring back</button>
+            </div>
+          ))}
+        </div>
+      )}
       {collapsed && (
         <button type="button" onClick={() => setExpanded(true)} aria-expanded="false"
           className="w-full min-h-10 px-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/60 flex items-center gap-2 text-left">
@@ -167,7 +189,7 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, o
     const d = bed.delivery;
     return (
       <Sheet open onClose={onClose} title={`Bed ${bed.bedNumber}`} sub={sub} action={editBtn}>
-        {t.shown.length > 0 && <AlertList alerts={t.shown} onFix={onFix} limit={2} compact />}
+        {(t.shown.length > 0 || t.ignored.length > 0) && <AlertList alerts={t.shown} ignored={t.ignored} onFix={onFix} limit={2} compact />}
         <div className="rounded-xl border px-3 py-2.5 bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800">
           <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400">{d.mode} at {clock(d.time)}</p>
           <p className="text-xs text-emerald-700 dark:text-emerald-400/80">{d.ebl != null ? `EBL ${d.ebl} mL` : "EBL not recorded"}{d.notes ? ` · ${d.notes}` : ""}</p>
@@ -214,7 +236,7 @@ export default function BedSheet({ bed, t, now, onClose, onEdit, onCTGConcern, o
         <p className="text-xs text-gray-600 dark:text-gray-400 px-1 -mt-1 truncate"><span className="font-semibold">CTG {clock(ctg.time)}:</span> {ctg.comment}</p>
       )}
 
-      {t.shown.length ? <AlertList alerts={t.shown} onFix={onFix} limit={2} compact /> : (
+      {t.shown.length || t.ignored.length ? <AlertList alerts={t.shown} ignored={t.ignored} onFix={onFix} limit={2} compact /> : (
         <p className="text-sm text-gray-600 dark:text-gray-400 px-1">
           Nothing due.{t.next ? <> Next: <span className="font-semibold text-gray-900 dark:text-gray-100">{t.next.label} {clock(t.next.at)}</span> (in {fmtAge(t.next.at - now)})</> : null}
         </p>

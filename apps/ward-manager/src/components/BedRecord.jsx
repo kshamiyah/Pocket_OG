@@ -179,7 +179,7 @@ export default function BedRecord({ bed, t, now, onBack, onUpdate, onFix, onStag
       <div className="max-w-lg mx-auto px-5 py-4 space-y-5" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 2rem)" }}>
         {tab === "overview" && (
           <>
-            {t.alerts.length ? <AlertList alerts={t.alerts} onFix={onFix} /> : (
+            {t.alerts.length || t.ignored.length ? <AlertList alerts={t.alerts} ignored={t.ignored} onFix={onFix} /> : (
               <p className="rounded-xl border px-3 py-2.5 text-sm bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-400">All clear. No active alerts.</p>
             )}
             {DONE_FIELDS.some(f => bed[`${f}Declined`]) && (

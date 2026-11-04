@@ -486,6 +486,22 @@ export function declineAlert(alertId, iso, by = null) {
   return f ? { [f]: true, [`${f}At`]: iso, ...(by ? { [`${f}By`]: by } : {}) } : {};
 }
 
+// Ignore: for alerts that crowd the screen. Urgent ones qualify only if the unit
+// allows it, and never these two: a gap means rules cannot run, and "still here?"
+// keeps the board true. An ignored alert returns after the unit's time, or sooner
+// if it gets worse.
+const NEVER_IGNORE = new Set(["details-missing", STILL_HERE]);
+export const canIgnore = (alert, unit = getUnitSettings()) =>
+  (alert.severity !== "urgent" || unit.ignoreUrgentOn) && !alert.reviewed && !NEVER_IGNORE.has(alert.id);
+export function ignoreAlert(bed, alert, iso, by = null) {
+  return { ignored: { ...(bed.ignored ?? {}), [alert.id]: { at: iso, by, severity: alert.severity, short: alert.short ?? null } } };
+}
+export function unignoreAlert(bed, alertId) {
+  const ignored = { ...(bed.ignored ?? {}) };
+  delete ignored[alertId];
+  return { ignored };
+}
+
 export function fixLabel(alertId) {
   if (alertId === STILL_HERE) return "Still here";
   if (ACTION_ALERTS[alertId]) return ACTION_ALERTS[alertId];

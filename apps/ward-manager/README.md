@@ -21,6 +21,8 @@ Every change shows an undo toast for a few seconds instead of an "Are you sure?"
 
 The **full record** for each woman keeps the detail: VE and CTG history (edit or delete), obs values and urine output, oxytocin log, per-woman tasks, induction details, delivery, and edit details.
 
+**Ignore** (the X on an alert) takes it off the board and bed card. It returns after the unit's time (default 4 hours, or 30 minutes if urgent), or sooner if it turns urgent or changes. Ignored alerts stay listed on the bed card and in the handover. "Add details" and "still here?" cannot be ignored, and a unit can turn off Ignore for urgent alerts in Unit settings.
+
 The **IOL queue** (NICE NG207 priority order) sits in its own tab, with admit-to-ward pre-filling the admission.
 
 **Rules and sources** (menu, or the footer under the board) lists every alert rule in plain language. Tap a source to read the guideline's exact wording and open the page it came from. Every alert's citation is tappable too, so you can check why an alert fired from the bed itself.

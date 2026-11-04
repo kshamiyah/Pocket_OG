@@ -20,7 +20,7 @@ import { RulesContext } from "../ui/rulesContext";
 import UndoToast from "../ui/UndoToast";
 import { ChipRow, Label } from "../ui/atoms";
 import { BTN, BTN_DANGER, BTN_SECONDARY, TYPE_META } from "../ui/styles";
-import { ACTION_ALERTS, STILL_HERE, addVE, declineAlert, doctorLabel, editVE as applyEditVE, fixAlert, fixLabel, setStage, STAGE_SHORT } from "../utils/bedModel";
+import { ACTION_ALERTS, STILL_HERE, addVE, declineAlert, doctorLabel, editVE as applyEditVE, fixAlert, fixLabel, setStage, STAGE_SHORT, ignoreAlert, unignoreAlert } from "../utils/bedModel";
 import { triageWard, wardSummary } from "../utils/triage";
 import { clock } from "../utils/time";
 
@@ -164,6 +164,15 @@ export default function WardPage({ shift, onEndShift }) {
   // ── Actions ──────────────────────────────────────────────────────────
   const fix = (bedId, alertId, kind) => {
     const bed = beds[bedId];
+    // Ignoring is about the screen, not the woman, so it does not count as an
+    // entry for "is she still here?" (updateBed would stamp that).
+    if (kind === "ignore" || kind === "unignore") {
+      const shown = triage[bedId]?.alerts?.find(a => a.id === alertId);
+      if (kind === "ignore" && !shown) return;
+      const updates = kind === "ignore" ? ignoreAlert(bed, shown, iso(), doctorLabel(shift?.doctorName)) : unignoreAlert(bed, alertId);
+      commit(`${kind === "ignore" ? "Alert ignored" : "Alert back"} · Bed ${bed.bedNumber}`, { ...beds, [bedId]: { ...bed, ...updates } }, null, bedId);
+      return;
+    }
     // Stopping oxytocin is logged in the oxytocin sheet, with the reason.
     // Gaps left at handover: a missing VE opens the VE form, anything else Edit.
     if (alertId === "details-missing") {
